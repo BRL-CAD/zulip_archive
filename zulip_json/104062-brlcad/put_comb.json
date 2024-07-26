@@ -1,0 +1,368 @@
+[
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , is there any chance that there is some uncommitted work from the comb dialog refactor?  src/tclscripts/mged/comb.tcl@970 has a put_comb call with 10 args, but it looks like the libged/put_comb/put_comb.c code doesn't have a case for that...</p>",
+        "id": 209131481,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599247077
+    },
+    {
+        "content": "<p>let me look</p>",
+        "id": 209131542,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247100
+    },
+    {
+        "content": "<p>I'm only seeing 9 args, or are you counting the command name as an arg also?</p>",
+        "id": 209131736,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247217
+    },
+    {
+        "content": "<p>put_comb<br>\n $comb_control($id,name)<br>\n $color<br>\n $comb_control($id,shader) <br>\n $comb_control($id,inherit)<br>\n $comb_control($id,comb)<br>\n $comb_control($id,isRegion)<br>\n $comb_control($id,id)<br>\n $comb_control($id,air)<br>\n $comb_control($id,material)<br>\n $comb_control($id,los)</p>",
+        "id": 209131851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599247315
+    },
+    {
+        "content": "<p>yeah, I just caught that -- missed color</p>",
+        "id": 209131899,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247326
+    },
+    {
+        "content": "<p>usage on put_comb says that's supposed to be correct</p>",
+        "id": 209131929,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247350
+    },
+    {
+        "content": "<p>Hmm... Wonder if I messed something up in the refactor - put_comb.c code doesn't seem to cover it...</p>",
+        "id": 209131976,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599247388
+    },
+    {
+        "content": "<p>still refreshing my memory on this.  I know I swapped one of the args around.</p>",
+        "id": 209132078,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247444
+    },
+    {
+        "content": "<p>yeah, so it was calling put_comb with 10 args before the swap in r76299 too, checking the impl..</p>",
+        "id": 209132456,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247702
+    },
+    {
+        "content": "<p>woah, what happened to the history?  how did you move the files into subdirs?</p>",
+        "id": 209132487,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247724
+    },
+    {
+        "content": "<p>oh, there we go.. <em>whew</em> that was weird.</p>",
+        "id": 209132540,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247771
+    },
+    {
+        "content": "<p>I thought svn log on a dir showed history on all contents, but apparently not.  had to history the file itself.</p>",
+        "id": 209132615,
+        "sender_full_name": "Sean",
+        "timestamp": 1599247806
+    },
+    {
+        "content": "<p>/me has actually started using the git conversion for history lookups</p>",
+        "id": 209132637,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599247828
+    },
+    {
+        "content": "<p>/me is liking gitk, on the whole</p>",
+        "id": 209132732,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599247906
+    },
+    {
+        "content": "<p>(I've been periodically updating the conv10 repo on github (not final form, haven't been regenerating the account mappings) so it's current-ish on the history if it's helpful.)</p>",
+        "id": 209133044,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599248107
+    },
+    {
+        "content": "<p>yeah, totally hoping to get back to that as soon as these reviews are done.  nearly there.</p>",
+        "id": 209133393,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248345
+    },
+    {
+        "content": "<p>okay, refreshed on the change and it's what I recalled -- the last four args moved to before the region flag, but not args were added or removed, so all that updated were indicies</p>",
+        "id": 209133433,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248384
+    },
+    {
+        "content": "<p>I see all 10 args getting accessed in the implementation</p>",
+        "id": 209133529,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248437
+    },
+    {
+        "content": "<p>so maybe a step back -- what's the problem?</p>",
+        "id": 209133534,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248443
+    },
+    {
+        "content": "<p>they all end up getting exercised when put_tree_into_comb_and_export() is called</p>",
+        "id": 209133711,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248535
+    },
+    {
+        "content": "<p>notably, the 'comb' structure had most of them directly saved prior to export</p>",
+        "id": 209133771,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248571
+    },
+    {
+        "content": "<p>Josh reported an issue with the comb dialog in mged, which I can can confirm</p>",
+        "id": 209133919,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599248681
+    },
+    {
+        "content": "<p>If I open all.g in mged, don't do anything, and hit apply - I get an error from put_comb and the ged_tmp shape is left in the .g file</p>",
+        "id": 209133968,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599248720
+    },
+    {
+        "content": "<p>There was an issue before too -- at least one bug was fixed, maybe another introduced?</p>",
+        "id": 209133982,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248727
+    },
+    {
+        "content": "<p>that was a test case I specifically worked on...</p>",
+        "id": 209134030,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248762
+    },
+    {
+        "content": "<p>/me tests</p>",
+        "id": 209134065,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248777
+    },
+    {
+        "content": "<p>is it a tcl error or a libged error or can't tell?</p>",
+        "id": 209134089,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248810
+    },
+    {
+        "content": "<p>okay there is something fishy in the commit history.  if I do a log on put_comb.c, it's not listing some of the commits that were made to it before it  moved (including the arg reordering)</p>",
+        "id": 209134311,
+        "sender_full_name": "Sean",
+        "timestamp": 1599248968
+    },
+    {
+        "content": "<p>I see now.  Subversion apparently has a new git-like feature where its hiding commits that get incorporated via merging.  So despite changes that happened <em>on trunk</em> in the r75719-76352 range,  those commits were merged to a branch that was merged back to trunk in 76352, so svn is hiding them (-g option shows them).  That's messed up...</p>",
+        "id": 209134861,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249381
+    },
+    {
+        "content": "<p>It's a libged error - put_comb.c:565</p>",
+        "id": 209135095,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599249554
+    },
+    {
+        "content": "<p>I can't reproduce your steps -- can you be more specific?</p>",
+        "id": 209135125,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249585
+    },
+    {
+        "content": "<p>I'll video it - once sec.</p>",
+        "id": 209135197,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599249612
+    },
+    {
+        "content": "<p>how are you getting to the combination editor?  are you typing in all.g into the object list?</p>",
+        "id": 209135203,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249621
+    },
+    {
+        "content": "<p>Ooooh, I see what's wrong</p>",
+        "id": 209135349,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249713
+    },
+    {
+        "content": "<p>just looking at the code.  that argc7 check is the issue.</p>",
+        "id": 209135426,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249738
+    },
+    {
+        "content": "<p>Do you still want the video?</p>",
+        "id": 209135555,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599249835
+    },
+    {
+        "content": "<p>if you want, but I got it fixed</p>",
+        "id": 209135638,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249874
+    },
+    {
+        "content": "<p>I know why my test didn't match yours.  I fed a region, so is_region flag was true, didn't get to that else clause.</p>",
+        "id": 209135669,
+        "sender_full_name": "Sean",
+        "timestamp": 1599249903
+    },
+    {
+        "content": "<p>FWIW:<br>\n<a href=\"/user_uploads/1549/lP7GlBd8l78NfJtbbGy_7Jx-/mged_comb_editor_error.gif\">mged_comb_editor_error.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/lP7GlBd8l78NfJtbbGy_7Jx-/mged_comb_editor_error.gif\" title=\"mged_comb_editor_error.gif\"><img src=\"/user_uploads/1549/lP7GlBd8l78NfJtbbGy_7Jx-/mged_comb_editor_error.gif\"></a></div>",
+        "id": 209135729,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599249958
+    },
+    {
+        "content": "<p>Ah, got it.</p>",
+        "id": 209135778,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599249973
+    },
+    {
+        "content": "<p>commited</p>",
+        "id": 209135942,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250102
+    },
+    {
+        "content": "<p>Awesome, thanks!  I'll roll another Windows build.</p>",
+        "id": 209136032,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250186
+    },
+    {
+        "content": "<p>your mged dialogs are displaying wrong...</p>",
+        "id": 209136040,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250192
+    },
+    {
+        "content": "<p>is that new?</p>",
+        "id": 209136044,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250194
+    },
+    {
+        "content": "<p>You mean popping under?  Not sure</p>",
+        "id": 209136095,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250206
+    },
+    {
+        "content": "<p>yeah, the comb editor and the Apply confirm dialog both failed to raise</p>",
+        "id": 209136118,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250227
+    },
+    {
+        "content": "<p>they raise on mac</p>",
+        "id": 209136170,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250272
+    },
+    {
+        "content": "<p>pretty sure there is/was an explicit raise call in their construction</p>",
+        "id": 209136195,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250297
+    },
+    {
+        "content": "<p>worth checking back a few releases on linux...</p>",
+        "id": 209136214,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250313
+    },
+    {
+        "content": "<p>They pop up in 7.30.10 on Linux.  Hang on, rebuilding trunk...</p>",
+        "id": 209136273,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250338
+    },
+    {
+        "content": "<p>ooh, fun.  maybe a 8.6 issue</p>",
+        "id": 209136314,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250374
+    },
+    {
+        "content": "<p>Yeah, works with trunk too.  I think it had to do with the gif recorder I was using.</p>",
+        "id": 209136321,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250377
+    },
+    {
+        "content": "<p>ahh, hm</p>",
+        "id": 209136331,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250386
+    },
+    {
+        "content": "<p>Once sec - let me try that again...</p>",
+        "id": 209136338,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250391
+    },
+    {
+        "content": "<p>okay, that excuse works for me :)</p>",
+        "id": 209136345,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250398
+    },
+    {
+        "content": "<p>it's probably forcibly holding focus and tk just says okay whatever</p>",
+        "id": 209136367,
+        "sender_full_name": "Sean",
+        "timestamp": 1599250425
+    },
+    {
+        "content": "<p>Yeah, with that up I'm getting Gnome messages:<br>\n Toplevel<br>\n\"Combination Editor (id_0)\" is ready</p>",
+        "id": 209136449,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250469
+    },
+    {
+        "content": "<p>Those pop to the top, the window does not.</p>",
+        "id": 209136459,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250481
+    },
+    {
+        "content": "<p>Only happens when I have Peek running.</p>",
+        "id": 209136494,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250508
+    },
+    {
+        "content": "<p>Gnome desktop is kinda a hostile place to be an old school X11 Tk app...</p>",
+        "id": 209136531,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599250558
+    },
+    {
+        "content": "<p>Tempted to move back to fluxbox in some ways, but on the other hand this environment is what new users are likely to use...</p>",
+        "id": 209137149,
+        "sender_full_name": "starseeker",
+        "timestamp": 1599251004
+    }
+]

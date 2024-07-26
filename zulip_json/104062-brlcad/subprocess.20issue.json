@@ -1,0 +1,50 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ran into a new bug on mac.  did an rt, closed the window, and then went to quit mged... got:<br>\n<a href=\"/user_uploads/1549/MEd6F9p5VqPiBiKpzF0-cLyr/Screen-Shot-2020-12-27-at-1.01.30-AM.png\">Screen-Shot-2020-12-27-at-1.01.30-AM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/MEd6F9p5VqPiBiKpzF0-cLyr/Screen-Shot-2020-12-27-at-1.01.30-AM.png\" title=\"Screen-Shot-2020-12-27-at-1.01.30-AM.png\"><img src=\"/user_uploads/1549/MEd6F9p5VqPiBiKpzF0-cLyr/Screen-Shot-2020-12-27-at-1.01.30-AM.png\"></a></div>",
+        "id": 220997098,
+        "sender_full_name": "Sean",
+        "timestamp": 1609052135
+    },
+    {
+        "content": "<p>Details: <a href=\"/user_uploads/1549/y6xDwhYw87Ss00q9VBXkv8b9/Screen-Shot-2020-12-27-at-1.01.41-AM.png\">Screen-Shot-2020-12-27-at-1.01.41-AM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/y6xDwhYw87Ss00q9VBXkv8b9/Screen-Shot-2020-12-27-at-1.01.41-AM.png\" title=\"Screen-Shot-2020-12-27-at-1.01.41-AM.png\"><img src=\"/user_uploads/1549/y6xDwhYw87Ss00q9VBXkv8b9/Screen-Shot-2020-12-27-at-1.01.41-AM.png\"></a></div>",
+        "id": 220997101,
+        "sender_full_name": "Sean",
+        "timestamp": 1609052152
+    },
+    {
+        "content": "<p>investigating on command line: <a href=\"/user_uploads/1549/Gz4s_IZ5VvYstSuR2tLFtPG_/Screen-Shot-2020-12-27-at-1.02.10-AM.png\">Screen-Shot-2020-12-27-at-1.02.10-AM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Gz4s_IZ5VvYstSuR2tLFtPG_/Screen-Shot-2020-12-27-at-1.02.10-AM.png\" title=\"Screen-Shot-2020-12-27-at-1.02.10-AM.png\"><img src=\"/user_uploads/1549/Gz4s_IZ5VvYstSuR2tLFtPG_/Screen-Shot-2020-12-27-at-1.02.10-AM.png\"></a></div>",
+        "id": 220997144,
+        "sender_full_name": "Sean",
+        "timestamp": 1609052213
+    },
+    {
+        "content": "<p>I didn't check if the process exited, but the window had been closed, so it certainly should have exited.  I ran \"rtabort\" and then was able to exit.</p>",
+        "id": 220997152,
+        "sender_full_name": "Sean",
+        "timestamp": 1609052256
+    },
+    {
+        "content": "<p>So couple critical issues there.  1) the obvious one, that rt probably didn't exit cleanly when the framebuffer was closed, and 2) that that prevented exiting mged (imho <em>nothing</em> should prevent exiting as mged doesn't have a concept of unsaved changes).</p>",
+        "id": 220997266,
+        "sender_full_name": "Sean",
+        "timestamp": 1609052453
+    },
+    {
+        "content": "<p>OK.  The refusal to quit is r77990, and it actually functioned exactly as intended.  I'm OK to revert ahead of release while we discuss, but that behavior was/is intended to avoid users accidentally aborting long running background jobs (say, for example, we get facetize running as a subprocess.)</p>",
+        "id": 221010078,
+        "sender_full_name": "starseeker",
+        "timestamp": 1609078266
+    },
+    {
+        "content": "<p>Or even the MGED rt being run with output directed to a .png file - if launched from MGED the user might forget it is running, and may accidentally quit and lose the render.</p>",
+        "id": 221010131,
+        "sender_full_name": "starseeker",
+        "timestamp": 1609078327
+    },
+    {
+        "content": "<p>I added the -f option to allow users to force quitting anyway, but at least that way they're knowingly wiping out anything running unseen in the background.</p>",
+        "id": 221010193,
+        "sender_full_name": "starseeker",
+        "timestamp": 1609078446
+    }
+]

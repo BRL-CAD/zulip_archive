@@ -1,0 +1,91 @@
+<html>
+<head><meta charset="utf-8"><title>librt timer · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html">librt timer</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="220372477"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220372477" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220372477">(Dec 18 2020 at 13:37)</a>:</h4>
+<p>Oh - a second pair of eyeballs on the librt timer update would be appreciated.  If I have time I'm going to try to complete moving that down to libbu as well, but before I add that layer of change it would be good to make sure I didn't miss anything silly in the approach.</p>
+
+
+
+<a name="220372665"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220372665" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220372665">(Dec 18 2020 at 13:39)</a>:</h4>
+<p>In a technical sense that might be user visible, since I think the old timing routines weren't always measuring what the API documentation indicated they should be measuring.  Don't know if it's worth calling out.</p>
+
+
+
+<a name="220410103"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410103" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410103">(Dec 18 2020 at 18:23)</a>:</h4>
+<p>Yeah, they were implemented on Windows way back when they didn't have great timing facilities, was a known issue (to me at least)</p>
+
+
+
+<a name="220410255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410255">(Dec 18 2020 at 18:24)</a>:</h4>
+<p>there's a todo to push it to libbu, but we'll want to reconcile it with the timers already in there.  Definitely don't want to migrate that global state into libbu.. that's gotta go, and that means updating the caller sites.</p>
+
+
+
+<a name="220410312"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410312" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410312">(Dec 18 2020 at 18:25)</a>:</h4>
+<p>Do we put a bu timer in the rt application struct?</p>
+
+
+
+<a name="220410338"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410338" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410338">(Dec 18 2020 at 18:25)</a>:</h4>
+<p>could make bu's timer just start/record both clocks, and have calling applications request one or the other</p>
+
+
+
+<a name="220410402"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410402" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410402">(Dec 18 2020 at 18:26)</a>:</h4>
+<p>ehm, I dunno -- could belong in the rtip</p>
+
+
+
+<a name="220410412"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410412" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410412">(Dec 18 2020 at 18:26)</a>:</h4>
+<p>maybe the app</p>
+
+
+
+<a name="220410461"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410461" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410461">(Dec 18 2020 at 18:26)</a>:</h4>
+<p>/me nods.  OK, got enough other fish to fry I'll not worry about the libbu move this round - not urgent</p>
+
+
+
+<a name="220410901"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410901" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410901">(Dec 18 2020 at 18:30)</a>:</h4>
+<p>wow, hate to say it ... but looking at the structs, it looks like struct resource may be the most appropriate</p>
+
+
+
+<a name="220410964"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220410964" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220410964">(Dec 18 2020 at 18:30)</a>:</h4>
+<p>it's already tracking counts, just not time</p>
+
+
+
+<a name="220411220"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220411220" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220411220">(Dec 18 2020 at 18:33)</a>:</h4>
+<p>that would allow for proper timing if we split work across cores too.  struct rt_i says it's its job to track statistics, but it tracks via struct resource.</p>
+
+
+
+<a name="220411394"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt%20timer/near/220411394" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.20timer.html#220411394">(Dec 18 2020 at 18:34)</a>:</h4>
+<p>/me nods - sounds reasonable</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

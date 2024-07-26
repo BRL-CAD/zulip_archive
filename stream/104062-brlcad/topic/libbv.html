@@ -1,0 +1,113 @@
+<html>
+<head><meta charset="utf-8"><title>libbv · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html">libbv</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="309233931"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309233931" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309233931">(Nov 11 2022 at 17:28)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> can you provide an example how to get at ged_exec(gqa..) plot data using libbv (or otherwise)?</p>
+
+
+
+<a name="309234066"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309234066" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309234066">(Nov 11 2022 at 17:29)</a>:</h4>
+<p>The -Ap option appears to fill in some data structures but I'm not seeing how that's supposed to get back to the caller or if there's a way to register a callback so I can do something else with the vlist data.</p>
+
+
+
+<a name="309250323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309250323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309250323">(Nov 11 2022 at 19:29)</a>:</h4>
+<p>In the main gqa command, the logic flow for getting the data into the scene is _ged_cvt_vlblock_to_solids on gqa.cpp:2725</p>
+
+
+
+<a name="309250471"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309250471" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309250471">(Nov 11 2022 at 19:30)</a>:</h4>
+<p>_ged_cvt_vlblock_to_solids in turn calls invent_solid</p>
+
+
+
+<a name="309250878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309250878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309250878">(Nov 11 2022 at 19:33)</a>:</h4>
+<p>The actual vlist data ends up in gedp-&gt;ged_gdp-&gt;gd_headDisplay</p>
+
+
+
+<a name="309251125"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309251125" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309251125">(Nov 11 2022 at 19:35)</a>:</h4>
+<p>I think in the current setup you'd have to iterate through gd_headDisplay's dl_head_scene_obj list to find it</p>
+
+
+
+<a name="309251217"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309251217" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309251217">(Nov 11 2022 at 19:36)</a>:</h4>
+<p>There should be a bv_scene_obj with the data in question</p>
+
+
+
+<a name="309252533"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309252533" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309252533">(Nov 11 2022 at 19:48)</a>:</h4>
+<p>Unfortunately I don't think the current drawing code path stores the name in the scene object - invent_solid uses a phony db_diradd to handle the name</p>
+
+
+
+<a name="309253417"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309253417" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309253417">(Nov 11 2022 at 19:57)</a>:</h4>
+<p>I don't think they need the name, or at least I think that can probably be managed by re-shooting with just the overlapping pair.</p>
+
+
+
+<a name="309253449"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309253449" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309253449">(Nov 11 2022 at 19:57)</a>:</h4>
+<p>Do you think you could whip up a main() for them showing how to access it?</p>
+
+
+
+<a name="309284909"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309284909" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309284909">(Nov 12 2022 at 02:32)</a>:</h4>
+<p><a href="https://github.com/BRL-CAD/brlcad/commit/9fa7d464d5e5a0d7802cb652de2b0c54c18771b9">https://github.com/BRL-CAD/brlcad/commit/9fa7d464d5e5a0d7802cb652de2b0c54c18771b9</a></p>
+
+
+
+<a name="309284911"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309284911" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309284911">(Nov 12 2022 at 02:32)</a>:</h4>
+<p>Is that what you had in mind?</p>
+
+
+
+<a name="309288828"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/309288828" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#309288828">(Nov 12 2022 at 03:48)</a>:</h4>
+<p>(btw, to run it after a build to generate the plot file,  it's src/libged/tests/ged_test_gqa ../src/libged/tests/ged_tests.g)</p>
+
+
+
+<a name="310137482"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/310137482" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#310137482">(Nov 15 2022 at 06:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/libbv/near/309284911">said</a>:</p>
+<blockquote>
+<p>Is that what you had in mind?</p>
+</blockquote>
+<p>Indeed!  I'll see if this does the trick.</p>
+
+
+
+<a name="310137777"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/310137777" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#310137777">(Nov 15 2022 at 07:00)</a>:</h4>
+<p>On a related note -- how feasible would it be to use bu_process to invoke "mged -c gqa" (for example), and then call bu_terminate to stop it mid-processing?  Would that work?  I'm not looking to do that but was curious if it should work.  Would be an interesting use case.</p>
+
+
+
+<a name="310248255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbv/near/310248255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbv.html#310248255">(Nov 15 2022 at 17:14)</a>:</h4>
+<p>Hmm.  Good question - in principle that might be possible.  It'd essentially be a variation on what we'll probably end up doing eventually for GED plugins we can stop.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

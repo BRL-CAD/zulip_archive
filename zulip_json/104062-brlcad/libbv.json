@@ -1,0 +1,98 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> can you provide an example how to get at ged_exec(gqa..) plot data using libbv (or otherwise)?</p>",
+        "id": 309233931,
+        "sender_full_name": "Sean",
+        "timestamp": 1668187719
+    },
+    {
+        "content": "<p>The -Ap option appears to fill in some data structures but I'm not seeing how that's supposed to get back to the caller or if there's a way to register a callback so I can do something else with the vlist data.</p>",
+        "id": 309234066,
+        "sender_full_name": "Sean",
+        "timestamp": 1668187795
+    },
+    {
+        "content": "<p>In the main gqa command, the logic flow for getting the data into the scene is _ged_cvt_vlblock_to_solids on gqa.cpp:2725</p>",
+        "id": 309250323,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668194961
+    },
+    {
+        "content": "<p>_ged_cvt_vlblock_to_solids in turn calls invent_solid</p>",
+        "id": 309250471,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668195018
+    },
+    {
+        "content": "<p>The actual vlist data ends up in gedp-&gt;ged_gdp-&gt;gd_headDisplay</p>",
+        "id": 309250878,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668195191
+    },
+    {
+        "content": "<p>I think in the current setup you'd have to iterate through gd_headDisplay's dl_head_scene_obj list to find it</p>",
+        "id": 309251125,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668195344
+    },
+    {
+        "content": "<p>There should be a bv_scene_obj with the data in question</p>",
+        "id": 309251217,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668195379
+    },
+    {
+        "content": "<p>Unfortunately I don't think the current drawing code path stores the name in the scene object - invent_solid uses a phony db_diradd to handle the name</p>",
+        "id": 309252533,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668196124
+    },
+    {
+        "content": "<p>I don't think they need the name, or at least I think that can probably be managed by re-shooting with just the overlapping pair.</p>",
+        "id": 309253417,
+        "sender_full_name": "Sean",
+        "timestamp": 1668196649
+    },
+    {
+        "content": "<p>Do you think you could whip up a main() for them showing how to access it?</p>",
+        "id": 309253449,
+        "sender_full_name": "Sean",
+        "timestamp": 1668196663
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/brlcad/commit/9fa7d464d5e5a0d7802cb652de2b0c54c18771b9\">https://github.com/BRL-CAD/brlcad/commit/9fa7d464d5e5a0d7802cb652de2b0c54c18771b9</a></p>",
+        "id": 309284909,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668220335
+    },
+    {
+        "content": "<p>Is that what you had in mind?</p>",
+        "id": 309284911,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668220344
+    },
+    {
+        "content": "<p>(btw, to run it after a build to generate the plot file,  it's src/libged/tests/ged_test_gqa ../src/libged/tests/ged_tests.g)</p>",
+        "id": 309288828,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668224931
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libbv/near/309284911\">said</a>:</p>\n<blockquote>\n<p>Is that what you had in mind?</p>\n</blockquote>\n<p>Indeed!  I'll see if this does the trick.</p>",
+        "id": 310137482,
+        "sender_full_name": "Sean",
+        "timestamp": 1668495469
+    },
+    {
+        "content": "<p>On a related note -- how feasible would it be to use bu_process to invoke \"mged -c gqa\" (for example), and then call bu_terminate to stop it mid-processing?  Would that work?  I'm not looking to do that but was curious if it should work.  Would be an interesting use case.</p>",
+        "id": 310137777,
+        "sender_full_name": "Sean",
+        "timestamp": 1668495651
+    },
+    {
+        "content": "<p>Hmm.  Good question - in principle that might be possible.  It'd essentially be a variation on what we'll probably end up doing eventually for GED plugins we can stop.</p>",
+        "id": 310248255,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668532440
+    }
+]

@@ -1,0 +1,254 @@
+[
+    {
+        "content": "<p>How can I create a submodel? I have tried <code>in &lt;name&gt; submodel</code> but I'm not sure what is a space partitioning method and treetop that is later requested.</p>",
+        "id": 119597651,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1512966504
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"jeffsy00@gmail.com\" data-user-id=\"104481\">@Jeff Sieu</span> a \"treetop\" is just poorly worded -- it refers to an object that you want to reference.  space partitioning method shouldn't matter...</p>",
+        "id": 119601260,
+        "sender_full_name": "Sean",
+        "timestamp": 1512974448
+    },
+    {
+        "content": "<p>I've tried <code>in bishop.g submodel bishop.r / bishop.g</code> while having <code>chessscene.g</code> opened. I have <code>chessscene.g</code> and <code>bishop.g</code> in the same folder. But it gave me <code>Cannot open geometry database file (bishop.g) to store plot\nbishop.g: plot failure\n_db_walk_subtree() FAIL on '/bishop.g'</code></p>",
+        "id": 119601421,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1512974756
+    },
+    {
+        "content": "<p>so, what is the correct way to use the submodel command?</p>",
+        "id": 119616515,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1513000810
+    },
+    {
+        "content": "<p>Ok, turns out that the path that this command takes it in is not relative to the .g file that is currently open. I've only got it to work when I input the absolute path of the .g I want to import the model from.</p>",
+        "id": 119618755,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1513002353
+    },
+    {
+        "content": "<p>Are you talking about the task i am working on i.e appleseed#2?</p>",
+        "id": 119618877,
+        "sender_full_name": "Mitesh",
+        "timestamp": 1513002484
+    },
+    {
+        "content": "<p>No, I'm talking about the command <code>in &lt;name&gt; submodel</code> in MGED.</p>",
+        "id": 119618978,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1513002629
+    },
+    {
+        "content": "<p>okk sorry to interupt</p>",
+        "id": 119618985,
+        "sender_full_name": "Mitesh",
+        "timestamp": 1513002657
+    },
+    {
+        "content": "<p>Also trying to do that task, but I get some weird error 0xc0000007b when I run it.</p>",
+        "id": 119618991,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1513002666
+    },
+    {
+        "content": "<p>Is there a way to translate submodels? Using Primitive Selection does not seem to work.</p>",
+        "id": 119622642,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1513007526
+    },
+    {
+        "content": "<p>Update on the path thing: relative path <em>sort of</em> works but the console is cd-ed into the BRL-CAD installation folder instead of the folder containing the opened database, so anything relative has to be placed inside the installation folder, which is quite weird</p>",
+        "id": 119624894,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1513011098
+    },
+    {
+        "content": "<p>yes, it's simply relative to the current working directory, which isn't right</p>",
+        "id": 119625508,
+        "sender_full_name": "Sean",
+        "timestamp": 1513011983
+    },
+    {
+        "content": "<p>that directory can be changed by a user (try just typing \"cd /some/new/path\" for example)</p>",
+        "id": 119625519,
+        "sender_full_name": "Sean",
+        "timestamp": 1513012014
+    },
+    {
+        "content": "<p>pwd will tell you where you're at</p>",
+        "id": 119625522,
+        "sender_full_name": "Sean",
+        "timestamp": 1513012022
+    },
+    {
+        "content": "<p>that's why the task added is to implement a function that will do the right thing</p>",
+        "id": 119625540,
+        "sender_full_name": "Sean",
+        "timestamp": 1513012055
+    },
+    {
+        "content": "<p>given the current database path (which will be a full or relative path), you'll use bu_basename and/or bu_dirname or other path/subpath functions and figure out what to do with the submodel path (which will also be a full or relative path).</p>",
+        "id": 119625611,
+        "sender_full_name": "Sean",
+        "timestamp": 1513012131
+    },
+    {
+        "content": "<p>probably something like these four cases:  dbfull+smfull =&gt; smfull  ;  dbfull+smrelative =&gt; dbfull/smrelative  ; dbrelative+smfull=&gt;smfull ; dbrelative+smrelative =&gt; dbrelative/smrelative</p>",
+        "id": 119625698,
+        "sender_full_name": "Sean",
+        "timestamp": 1513012251
+    },
+    {
+        "content": "<p>(i guess that's technically just two cases)</p>",
+        "id": 119625715,
+        "sender_full_name": "Sean",
+        "timestamp": 1513012273
+    },
+    {
+        "content": "<p>Hi, how do I get the directory of the currently opened database in <code>submodel.c</code>, I thought it was <code>struct db_i *sub_dbip;</code> but this seems to be a pointer to the database that the submodel references, not the database of the instanced submodel.</p>",
+        "id": 120143253,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514027488
+    },
+    {
+        "content": "<blockquote>\n<p>Is there a way to translate submodels? Using Primitive Selection does not seem to work.</p>\n</blockquote>\n<p>And also, how may I translate submodels?</p>",
+        "id": 120144429,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514030422
+    },
+    {
+        "content": "<blockquote>\n<blockquote>\n<p>Is there a way to translate submodels? Using Primitive Selection does not seem to work.</p>\n</blockquote>\n<p>And also, how may I translate submodels?</p>\n</blockquote>\n<p>Honestly, we're not even sure if it works or not -- but the raw way about be to \"sed\" the submodel and run \"tra\" command or put the submodel into a combination and \"oed\" the comb (there's an entire guide on the oed command on the website) to tra the submodel.</p>",
+        "id": 120189439,
+        "sender_full_name": "Sean",
+        "timestamp": 1514141599
+    },
+    {
+        "content": "<p>Yeah, I had resorted to that, but it seems like it doesn't work. When I sed it then translate it, it simply doesn't move, even when I \"accept\". When I oed it on its own, it moves correctly when translated, but once I accept it, it snaps back into its original position which is centered at around x=0 and y=0. Or do I have to enclose every submodel in a comb, then oed the submodel via the comb? I've not tried that yet, but since I'll have to translate the submodel individually for the 20 chess pieces, I think it may not be so great to create 20 combinations, then nesting one submodel in each combination, then translating.<br>\nWhat are your opinions?</p>",
+        "id": 120198311,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514163589
+    },
+    {
+        "content": "<p>I'd see first if embedding in a comb, edited via oed works at all.  if it doesn't, then there's no way to set up the scene as submodels.  if there is, then that's the way to go for now until some change is made.</p>",
+        "id": 120207585,
+        "sender_full_name": "Sean",
+        "timestamp": 1514186476
+    },
+    {
+        "content": "<p>hi!<br>\nParth Pandya here...!<br>\nParticipating in GCI.</p>",
+        "id": 120210150,
+        "sender_full_name": "Parth Pandya",
+        "timestamp": 1514193088
+    },
+    {
+        "content": "<p>Welcome <span class=\"user-mention\" data-user-email=\"parthpandyappp@gmail.com\" data-user-id=\"105201\">@Parth Pandya</span></p>",
+        "id": 120216487,
+        "sender_full_name": "Siddharth",
+        "timestamp": 1514209262
+    },
+    {
+        "content": "<p>Hey, I'm on the submodel absolute/relative path task now, I am able to get the paths to work fine when using the submodel on its own (like when running <code>draw &lt;submodel&gt;</code> then <code>rt</code>. <br>\nHowever, it now fails when I try to use it within a combination: <br>\n<code>comb &lt;combination&gt; u &lt;submodel&gt;</code> then <code>draw &lt;combination&gt;</code> does display the wireframe of the submodel like it should, but running <code>rt</code> causes <code>db_walk_subtree</code> to fail. <a href=\"/user_uploads/1549/bsssCFc_Qw_wzsJ9fey4wQiz/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">error image</a> </p>\n<p>I've attempted to go through the many files involved in this, like <code>tree.c</code>, but couldn't seem to pinpoint the problem. Is there another place where something similar to <code>&amp;sip-&gt;file</code> is called, but except it's done generally for all db objects (maybe rt_db_internal?), which may be retrieving the submodel file from the wrong directory still?</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bsssCFc_Qw_wzsJ9fey4wQiz/pasted_image.png\" target=\"_blank\" title=\"error image\"><img src=\"/user_uploads/1549/bsssCFc_Qw_wzsJ9fey4wQiz/pasted_image.png\"></a></div>",
+        "id": 120457061,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514745095
+    },
+    {
+        "content": "<p>Okay, I've since solved the problem.</p>",
+        "id": 120479200,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514798657
+    },
+    {
+        "content": "<p>But now a new problem arises: When I try to raytrace submodels, they seem to be fine, but as I keep adding and adding submodels to be drawn by executing more <code>draw</code>s, eventually it stops working and displays the previous version of the raytrace instead of with the new object.</p>",
+        "id": 120479251,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514798874
+    },
+    {
+        "content": "<blockquote>\n<p>Hey, I'm on the submodel absolute/relative path task now, I am able to get the paths to work fine when using the submodel on its own (like when running <code>draw &lt;submodel&gt;</code> then <code>rt</code>. <br>\nHowever, it now fails when I try to use it within a combination: </p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-email=\"jeffsy00@gmail.com\" data-user-id=\"104481\">@Jeff Sieu</span> belated reply, but I presume from  your later message that you figured out the submodel-in-comb issue.  if a primitive fails to prep (which means it's *_prep() function returned an error code), then you'll see it listed in the text output like in your log where it said \"_rt_gettree_leaf(a1_rook_white): prep failure\".  Since a1_rook_white failed, there was nothing left to raytrace, so it stopped.</p>",
+        "id": 120523018,
+        "sender_full_name": "Sean",
+        "timestamp": 1514903413
+    },
+    {
+        "content": "<blockquote>\n<p>But now a new problem arises: When I try to raytrace submodels, they seem to be fine, but as I keep adding and adding submodels to be drawn by executing more <code>draw</code>s, eventually it stops working and displays the previous version of the raytrace instead of with the new object.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-email=\"jeffsy00@gmail.com\" data-user-id=\"104481\">@Jeff Sieu</span> when you run rt, try rt -F/dev/Xl</p>",
+        "id": 120523153,
+        "sender_full_name": "Sean",
+        "timestamp": 1514903692
+    },
+    {
+        "content": "<p>From some other testing, I think there's a bug in the default ogl framebuffer on some platforms that makes it not draw an updated rendering -- /dev/X doesn't draw the same</p>",
+        "id": 120523170,
+        "sender_full_name": "Sean",
+        "timestamp": 1514903744
+    },
+    {
+        "content": "<p>another trick can be to add -W every other time to flip the background from black to white</p>",
+        "id": 120523209,
+        "sender_full_name": "Sean",
+        "timestamp": 1514903765
+    },
+    {
+        "content": "<p>yeah, it was so. i started by searching for the file displaying the prep failure, then slowly discovered the rt_db_internals, functabs and all that, thinking there was some kinda function that does &amp;sip-&gt;file but in general for all object -- just for it to lead me straight back to submodel.c. Then I simply did make install and it just updated. what a journey</p>",
+        "id": 120523218,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514903818
+    },
+    {
+        "content": "<blockquote>\n<blockquote>\n<p>But now a new problem arises: When I try to raytrace submodels, they seem to be fine, but as I keep adding and adding submodels to be drawn by executing more <code>draw</code>s, eventually it stops working and displays the previous version of the raytrace instead of with the new object.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-email=\"jeffsy00@gmail.com\" data-user-id=\"104481\">@Jeff Sieu</span> when you run rt, try rt -F/dev/Xl</p>\n</blockquote>\n<p>Okay thanks, i'll try it out. Regarding this, I discovered there were commands like debug&lt;x&gt; (for example debuglib). I tried <code>debuglib 1</code>, then the next thing I knew 10 lines of text appears in the console per second. What is the proper way to use these commands? And how are they turned off? Tried <code>debuglib 0</code> and didn't work...</p>",
+        "id": 120523309,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514904000
+    },
+    {
+        "content": "<p>nearly all of the primitives lead back to the base callback functions up in src/librt/primitives/* ... except for the non-leaf and non-geometric entities like comb and binunif, which are currently still in their own directories in src/librt/subdir</p>",
+        "id": 120523716,
+        "sender_full_name": "Sean",
+        "timestamp": 1514904642
+    },
+    {
+        "content": "<p>for the debugging flags, there are a set of bit flags that can be set with one set for libbu, another for librt, and yet another for the rt binary itself</p>",
+        "id": 120523746,
+        "sender_full_name": "Sean",
+        "timestamp": 1514904711
+    },
+    {
+        "content": "<p>all three sets of flags can be directly set when you run rt using the -x -X and -! command line options. as these are developer options, they aren't documented well but you can see them used throughout the code.  so here's a relevant example -- say you're reading src/librt/primitives/submodel/submodel.c and in rt_submodel_prep() you notice a block of debug code starting with:</p>",
+        "id": 120523890,
+        "sender_full_name": "Sean",
+        "timestamp": 1514904922
+    },
+    {
+        "content": "<p>if (RT_G_DEBUG &amp; (DEBUG_DB|DEBUG_SOLIDS)) {</p>",
+        "id": 120523892,
+        "sender_full_name": "Sean",
+        "timestamp": 1514904925
+    },
+    {
+        "content": "<p>so the flag there is DEBUG_SOLIDS, if we search the headers, we can find its value:</p>",
+        "id": 120523906,
+        "sender_full_name": "Sean",
+        "timestamp": 1514904960
+    },
+    {
+        "content": "<p>agua:brlcad.trunk morrison$ grep DEBUG_SOLIDS include/<em>/</em><br>\ngrep: include/ged/view: Is a directory<br>\ninclude/rt/debug.h:#define DEBUG_SOLIDS 0x00000020  /**&lt; @brief 6 Print prep'ed solids */</p>",
+        "id": 120523910,
+        "sender_full_name": "Sean",
+        "timestamp": 1514904962
+    },
+    {
+        "content": "<p>so it's 0x20 and a librt debug flag, so I can run \"rt -x20\" and it'll run rt with DEBUG_SOLIDS set</p>",
+        "id": 120523971,
+        "sender_full_name": "Sean",
+        "timestamp": 1514905027
+    },
+    {
+        "content": "<p>some flags will result in LOTS of output, especially if it's per-ray debugging, so you may want a smaller raytrace (e.g., rt -x20 -s10) or even just reshoot one ray (e.g., rt -x20 -Q 132,317)</p>",
+        "id": 120524053,
+        "sender_full_name": "Sean",
+        "timestamp": 1514905147
+    }
+]

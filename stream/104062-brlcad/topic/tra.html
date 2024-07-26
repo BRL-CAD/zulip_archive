@@ -1,0 +1,87 @@
+<html>
+<head><meta charset="utf-8"><title>tra · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html">tra</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="242279602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242279602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242279602">(Jun 10 2021 at 22:30)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="102902">@Sean</span> , are these the expected results for the "tra" command in MGED?  I'm seeing this as far back as 7.28.2...</p>
+<div class="codehilite"><pre><span></span><code>mged&gt; center 0 0 0
+mged&gt; ae 90 0
+mged&gt; center
+0 0 0
+mged&gt; tra 0 0 50
+mged&gt; center
+0 50 -0
+mged&gt; center 0 0 0
+mged&gt; tra 0 50 0
+mged&gt; center
+0 0 50
+mged&gt;
+</code></pre></div>
+<p>I may be thinking about tra wrong, but it's surprising to me that the y value changes when I specify a z delta and vice versa...</p>
+
+
+
+<a name="242297764"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297764" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297764">(Jun 11 2021 at 03:36)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> Yes, that is expected results.</p>
+
+
+
+<a name="242297776"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297776" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297776">(Jun 11 2021 at 03:36)</a>:</h4>
+<p>It's awkward because of the specific azel choice and what you think tra is doing isn't what it's doing</p>
+
+
+
+<a name="242297786"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297786" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297786">(Jun 11 2021 at 03:37)</a>:</h4>
+<p>in view edit mode, tra manipulates the viewport</p>
+
+
+
+<a name="242297791"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297791" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297791">(Jun 11 2021 at 03:37)</a>:</h4>
+<p>with X being the horizontal, Y being the vertical</p>
+
+
+
+<a name="242297836"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297836" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297836">(Jun 11 2021 at 03:38)</a>:</h4>
+<p>Z is consequently in and out of the screen, which does nothing visible to an orthogonal view (you'd notice it move in perspective)</p>
+
+
+
+<a name="242297902"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297902" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297902">(Jun 11 2021 at 03:40)</a>:</h4>
+<p>so tra 0 0 50 moves the viewport back 50 units ... and moving back along an ae 90 0 side view happens to be the Y axis in model space</p>
+
+
+
+<a name="242297929"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242297929" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242297929">(Jun 11 2021 at 03:41)</a>:</h4>
+<p>it should make a lot more sense if you just think of  it as "pan X Y [ignore]" to pan the viewport horizontally and vertically</p>
+
+
+
+<a name="242298002"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242298002" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242298002">(Jun 11 2021 at 03:43)</a>:</h4>
+<p>then it should make sense what the Z value does, especially if you set perspective 70 or something</p>
+
+
+
+<a name="242337126"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tra/near/242337126" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tra.html#242337126">(Jun 11 2021 at 12:24)</a>:</h4>
+<p>/me nods.  Phew, thanks - saw that in qged and had visions of having introduced some obscure low level bug somewhere...</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

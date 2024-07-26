@@ -1,0 +1,740 @@
+<html>
+<head><meta charset="utf-8"><title>mesh reconstruction · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html">mesh reconstruction</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="405596786"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405596786" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405596786">(Dec 03 2023 at 03:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> I'll let <span class="user-mention" data-user-id="102902">@Sean</span> chime in, but I can give you some background on the SPSR bit... it's an older version of  <a href="https://github.com/mkazhdan/PoissonRecon">https://github.com/mkazhdan/PoissonRecon</a> reworked for embedding in our library:  </p>
+<p>As far as the results being satisfactory... not always, unfortunately.  It has trouble with sharp edges and doesn't always give us a usable output.  It's possible the newer version of the code might do somewhat better, but where it's most useful in practice is when a case fails for some reason but doesn't have a "weird" volume.  We're basically using it in place of ball pivot from the original pipeline you worked on - raytrace a whole lot of points to try to sample "dense enough", assemble an initial huge mesh (ball pivot originally, SPSR for us) and then use your decimation code to step the result down to something sane size wise.  It doesn't always work, but there are cases where it <em>does</em> work and that's a win for users trying to get conversions to go  through.</p>
+
+
+
+<a name="405596946"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405596946" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405596946">(Dec 03 2023 at 03:18)</a>:</h4>
+<p>Damn, that sounds awful. So you don't have any robust solution at all, to that some old problem of converting CSG to closed watertight triangle meshes.</p>
+
+
+
+<a name="405597151"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597151" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597151">(Dec 03 2023 at 03:21)</a>:</h4>
+<p>Thinking about my planned algorithm here. When you extract a point cloud from CSG geometry, can you get points exactly on the edges? Imagine a cube, will you get points exactly over the edges and corners? Or do I get only points on the faces, and I should project the planes to reconstruct that sharp edge?</p>
+
+
+
+<a name="405597595"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597595" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597595">(Dec 03 2023 at 03:28)</a>:</h4>
+<p>There's no way to guarantee sampling on the edges, since the edges themselves can be implicit - think about one sphere being subtracted from another, for example.</p>
+
+
+
+<a name="405597631"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597631" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597631">(Dec 03 2023 at 03:29)</a>:</h4>
+<p>Got it. Okay.</p>
+
+
+
+<a name="405597651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597651">(Dec 03 2023 at 03:29)</a>:</h4>
+<p>We could probably do something partial like making sure sample rays go through individual primitive verts and edges, but that won't help when the sharp edge is completely implicit so it's probably best not to depend on that sort of thing</p>
+
+
+
+<a name="405597728"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597728" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597728">(Dec 03 2023 at 03:30)</a>:</h4>
+<p>Yeah, right. I'm thinking about needing a third pass in the algorithm, comparing the triangle mesh with the point cloud to "repair" where normals meet...</p>
+
+
+
+<a name="405597740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597740">(Dec 03 2023 at 03:30)</a>:</h4>
+<p>To your earlier point - we're not faced with any particular deadlines.  This whole thing came up due to a combination of improvements triggered by using <a href="https://github.com/elalish/manifold">https://github.com/elalish/manifold</a> and some cleanup of the third party codes we include in BRL-CAD.</p>
+
+
+
+<a name="405597915"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405597915" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405597915">(Dec 03 2023 at 03:33)</a>:</h4>
+<p>To give you some more context - most of the time, especially in the newer pipeline I'm working on, the point sampling fallback will hopefully be rare and applied to individual primitives NMG can't handle.  If Manifold continues to perform as well as it has in early testing, I'm hopeful that we can focus the meshing problem itself solely at the primitive level (essentially, as alternatives to the libnmg ft_tessellate routines) and just feed the resulting meshes into the same evaluation from there.</p>
+
+
+
+<a name="405598000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598000">(Dec 03 2023 at 03:34)</a>:</h4>
+<p>Previously, we were raytracing whole regions to point sample as a means of bypassing the NMG booleval, if it was failing - a point sample of a region could let us jump "straight to the final mesh" and let the CSG raytracing deal with the booleans.</p>
+
+
+
+<a name="405598159"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598159" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598159">(Dec 03 2023 at 03:36)</a>:</h4>
+<p>Well, I'm certainly hoping it will handle any primitive. The effort will be a little intense (I'm not sure why my first impression was of an "easy" problem), but it's a nice problem, it's a nice challenge</p>
+
+
+
+<a name="405598214"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598214" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598214">(Dec 03 2023 at 03:36)</a>:</h4>
+<p>We probably still want to be able to try that as a last resort, but if we can produce inputs that satisfy Manifold's requirements from our primitives (and, barring bad BoTs, we should be able to do that since our primitives are supposed to define closed volumes) I want to push the meshing problem as far down the tree as possible.</p>
+
+
+
+<a name="405598375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598375">(Dec 03 2023 at 03:38)</a>:</h4>
+<p>Since a lot of our "bad" meshes are very close to solid volumes and ought to be amenable to some form of automatic repair, I'd like to incorporate that capability into our BoT processing as well.  A couple of the mesh libraries out there have hole filling algorithms which might be useful, although I'm not far enough along yet to have tried any of them.</p>
+
+
+
+<a name="405598429"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598429" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598429">(Dec 03 2023 at 03:39)</a>:</h4>
+<p>Another alternative to SPSR and ball pivot that I was planning to look into is geogram's Co3Ne <a href="https://github.com/BrunoLevy/geogram/wiki/Reconstruction#co3ne-reconstruction-concurrent-co-cones">https://github.com/BrunoLevy/geogram/wiki/Reconstruction#co3ne-reconstruction-concurrent-co-cones</a></p>
+
+
+
+<a name="405598432"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598432" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598432">(Dec 03 2023 at 03:39)</a>:</h4>
+<p>I tried hole repair in ball pivoting a decade ago, and it was a disaster. I'm planning an algorithm that would iteratively deform a closed watertight mesh, maintaining proper topology all the way until the output</p>
+
+
+
+<a name="405598558"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598558" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598558">(Dec 03 2023 at 03:41)</a>:</h4>
+<p>&lt;nod&gt;  I wasn't planning to use hole repair for that case - the problem I'm thinking about is when someone brings in an stl or something that wasn't watertight to begin with (but is ALMOST watertight).  If we can deal with even some of those automatically it would save trouble for users otherwise having to do manual repair for a lot of very tiny little problems.</p>
+
+
+
+<a name="405598690"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598690" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598690">(Dec 03 2023 at 03:43)</a>:</h4>
+<p>I think you could feed the vertices and normals of that STL file into the algorithm I'm planning, and it would just repair the holes as well</p>
+
+
+
+<a name="405598693"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598693" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598693">(Dec 03 2023 at 03:43)</a>:</h4>
+<p>I'm also wondering if <a href="https://github.com/wjakob/instant-meshes">https://github.com/wjakob/instant-meshes</a> might be useful, but I've not dug into it enough to have a sense of whether it's applicable to our particular "rebuilding an almost manifold mesh into a manifold" case</p>
+
+
+
+<a name="405598762"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598762" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598762">(Dec 03 2023 at 03:44)</a>:</h4>
+<p>I was wondering if that might be possible, but I didn't know if the points and normals from a mesh would be too sparse for those types of algorithms to work.</p>
+
+
+
+<a name="405598813"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598813" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598813">(Dec 03 2023 at 03:45)</a>:</h4>
+<p>Yeah, that's my concern, I can see cases where the algorithm would get confused while trying to go "in" the hole. But you could generate a ton of extra coplanar points everywhere, and, in theory, the final geometry wouldn't be any more complex</p>
+
+
+
+<a name="405598942"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405598942" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405598942">(Dec 03 2023 at 03:46)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> don't sink too much of your free time into it if it looks to be too hard - past a certain point, it would probably be more of a win to fix the mesh generating routines for the individual primitives rather than trying to solve a super-hard general problem (at least, if Manifold really can handle the load for the booleval piece)</p>
+
+
+
+<a name="405599035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599035">(Dec 03 2023 at 03:48)</a>:</h4>
+<p>It's a fun problem and I have had a ton of experience with 2D/3D geometry problems over the years. I was a bit hoping that Mark (from SURVICE) would say "Oh, we need that algorithm too, you can charge the hours"... but that didn't happen <span aria-label="grinning face with smiling eyes" class="emoji emoji-1f601" role="img" title="grinning face with smiling eyes">:grinning_face_with_smiling_eyes:</span></p>
+
+
+
+<a name="405599086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599086">(Dec 03 2023 at 03:49)</a>:</h4>
+<p>Am I wrong in thinking of your proposed algorithm as sort of a "shrink wrap" process?</p>
+
+
+
+<a name="405599230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599230">(Dec 03 2023 at 03:51)</a>:</h4>
+<p>Yes, kind of. The algorithm:</p>
+<ul>
+<li>I start with a big box, and I collapse it over the mesh, like a convex hull</li>
+<li>I collapse the triangles further to capture concave details, whenever the points and normals agree</li>
+<li>I evaluate the final triangle mesh, I move vertices to reconstruct sharp edges where the normals indicate it would be appropriate</li>
+</ul>
+
+
+
+<a name="405599272"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599272" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599272">(Dec 03 2023 at 03:51)</a>:</h4>
+<p>I have no idea what other algorithms are used out there, or how they are named. Checking what others are doing takes the fun out of solving problems. The name "shrink wrap" sounds close enough</p>
+
+
+
+<a name="405599361"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599361" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599361">(Dec 03 2023 at 03:52)</a>:</h4>
+<p>OK, so this probably isn't relevant then:  <a href="https://www.sciencedirect.com/science/article/pii/S0010448523001409">https://www.sciencedirect.com/science/article/pii/S0010448523001409</a></p>
+
+
+
+<a name="405599386"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599386" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599386">(Dec 03 2023 at 03:53)</a>:</h4>
+<p>Currently, the one point that bothers me a bit is how the collapsing box should reconnect with itself as it goes through holes, on both sides. Meeting with itself, how to best detect that case and get a proper surface out of that step before continuing the process. In case you have ideas</p>
+
+
+
+<a name="405599392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599392">(Dec 03 2023 at 03:53)</a>:</h4>
+<p>Heh - nevermind, if you're not looking for other algorithms that's pointless anyway</p>
+
+
+
+<a name="405599511"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599511" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599511">(Dec 03 2023 at 03:55)</a>:</h4>
+<p>If it meets itself, shouldn't it "collapse" and form a torus topology?  If I'm understanding correctly, the boxes would only meet if they found a path without any volume along it?</p>
+
+
+
+<a name="405599518"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599518" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599518">(Dec 03 2023 at 03:55)</a>:</h4>
+<p>For moving vertices to reconstruct sharp edges, I'm thinking summing up squared planed equations and solving the quadrics, like I do in mesh decimation. Finding the best vertex placement to recover the lost sharp edges</p>
+
+
+
+<a name="405599588"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599588" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599588">(Dec 03 2023 at 03:56)</a>:</h4>
+<p>Since I believe you have googled everything already, does that algorithm already exist? Is it "shrink wrap"?</p>
+
+
+
+<a name="405599647"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599647" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599647">(Dec 03 2023 at 03:57)</a>:</h4>
+<p>Actually, Sean's the one who is more up on the shrink wrap problem - let's wait for him to weigh in.  I have only a casual knowledge</p>
+
+
+
+<a name="405599717"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599717" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599717">(Dec 03 2023 at 03:58)</a>:</h4>
+<p>I lost your torus example. The collapsing box would wrap around a torus (step #0), then the next step would be to collapse further through the holes. Both sides of the collapsing box will meet in the hole, before collapsing further to properly capture all the inner sides of the torus</p>
+
+
+
+<a name="405599763"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599763" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599763">(Dec 03 2023 at 03:59)</a>:</h4>
+<p>It's the "collapsing box meeting itself" I'm a bit stuck on, how to best detect and resolve it, how to rebuild the box's surface (which is really no longer a box at this point) with a... tunnel in it</p>
+
+
+
+<a name="405599781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599781">(Dec 03 2023 at 03:59)</a>:</h4>
+<p>Right - so wouldn't the center of the torus be where the two sides of the original box would connect?  I.e. the box would intersect itself?  Or am I misunderstanding?</p>
+
+
+
+<a name="405599861"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599861" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599861">(Dec 03 2023 at 04:00)</a>:</h4>
+<p>Or are you asking how to detect when the self-intersection occurs?</p>
+
+
+
+<a name="405599867"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599867" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599867">(Dec 03 2023 at 04:00)</a>:</h4>
+<p>Yes, somewhere in the hole. Might not be the exact center really, but they will meet</p>
+
+
+
+<a name="405599958"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405599958" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405599958">(Dec 03 2023 at 04:01)</a>:</h4>
+<p>Detecting self-intersection fast is part of it, in an extremely robust manner, without any floating point precision concerns. How to resolve that intersection is the other part</p>
+
+
+
+<a name="405600428"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600428" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600428">(Dec 03 2023 at 04:05)</a>:</h4>
+<p>I'm afraid compared to your expertise Alexis my ideas would be on the naive side.  For collision detection, the only thing that comes to mind is trying to use something like an RTree to identify potential intersecting faces and then doing the triangle/triangle intersect calculation.</p>
+
+
+
+<a name="405600501"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600501" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600501">(Dec 03 2023 at 04:06)</a>:</h4>
+<p>I'm aware generally of collision detection research for things like cloth simulation, but I don't know the details of the algorithms they use.</p>
+
+
+
+<a name="405600568"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600568" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600568">(Dec 03 2023 at 04:07)</a>:</h4>
+<p>Yeah... but collisions will be rare, the vast majority of the iterative steps won't collide, and I want to have 64 threads working on that in parallel. So I want that to be really fast, with minimal spatial locking</p>
+
+
+
+<a name="405600672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600672">(Dec 03 2023 at 04:08)</a>:</h4>
+<p>Collision resolution will imply some kind of local boolean operation on triangle meshes. Which I have never done, doesn't seem excessively hard, but it's the kind of details that made me realize "oh, perhaps it's not that simple in the end..." <span aria-label="laughing" class="emoji emoji-1f606" role="img" title="laughing">:laughing:</span></p>
+
+
+
+<a name="405600706"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600706" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600706">(Dec 03 2023 at 04:09)</a>:</h4>
+<p>Yes - "local boolean operation on triangle meshes" has caused a world of hurt for lots of computer graphics folks over the years :-P</p>
+
+
+
+<a name="405600809"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600809" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600809">(Dec 03 2023 at 04:10)</a>:</h4>
+<p>Yes, really, I'm not surprised... This one small detail, fast self-collision and resolution by boolean thing, is what is currently bothering me. Everything else has been planned on paper</p>
+
+
+
+<a name="405600835"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600835" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600835">(Dec 03 2023 at 04:11)</a>:</h4>
+<p>I think, if I'm following correctly, it's not really the mesh collision problem so much as it is detecting and resolving self-intersection</p>
+
+
+
+<a name="405600914"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600914" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600914">(Dec 03 2023 at 04:12)</a>:</h4>
+<p>Yes, it's the box colliding with itself. But the box is the mesh, it's the only mesh, the one slowly deforming to capture the point cloud's surface</p>
+
+
+
+<a name="405600931"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600931" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600931">(Dec 03 2023 at 04:12)</a>:</h4>
+<p>I realize naming it "box" is getting terribly inappropriate. It made sense at the time</p>
+
+
+
+<a name="405600957"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600957" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600957">(Dec 03 2023 at 04:13)</a>:</h4>
+<p>Subdivided box might work</p>
+
+
+
+<a name="405600969"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405600969" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405600969">(Dec 03 2023 at 04:13)</a>:</h4>
+<p>Which can break into multiple boxes and with tunnels... but it's still a box to me! <span aria-label="rolling on the floor laughing" class="emoji emoji-1f923" role="img" title="rolling on the floor laughing">:rolling_on_the_floor_laughing:</span></p>
+
+
+
+<a name="405601076"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405601076" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405601076">(Dec 03 2023 at 04:15)</a>:</h4>
+<p>Well, that's the problem that's stopping me from getting started, it would be great if one of us could come up with a good solution</p>
+
+
+
+<a name="405601642"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405601642" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405601642">(Dec 03 2023 at 04:23)</a>:</h4>
+<p>This might be worth a read:  <a href="https://dl.acm.org/doi/pdf/10.1145/3592136">https://dl.acm.org/doi/pdf/10.1145/3592136</a></p>
+
+
+
+<a name="405601751"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405601751" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405601751">(Dec 03 2023 at 04:25)</a>:</h4>
+<p>Thanks, reading.<br>
+Just to clarify a point, instead of having to do boolean operations on the triangle mesh (box), I was leaning towards the possibility of detecting a potential collision (if I perform the step), and then just meet the other colliding surface and joining vertices, creating the tunnel. It's less a hassle and more robust numerically than boolean operations</p>
+
+
+
+<a name="405601833"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405601833" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405601833">(Dec 03 2023 at 04:26)</a>:</h4>
+<p>As soon as the tunnel exists with a proper surface topology, then the box will go on collapsing and capturing the hole's walls properly</p>
+
+
+
+<a name="405601892"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405601892" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405601892">(Dec 03 2023 at 04:27)</a>:</h4>
+<p>Ah, so rather than a geometric calculation on the mesh to find an intersection, you would simply recognize the collision and locally alter the mesh topology to allow for further correct refinement?</p>
+
+
+
+<a name="405602044"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602044" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602044">(Dec 03 2023 at 04:30)</a>:</h4>
+<p>Yes. Just detect if a step X would cause a self-intersection, instead create a tiny tunnel connecting the two surfaces, and let that tunnel grow with the future iterative steps</p>
+
+
+
+<a name="405602427"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602427" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602427">(Dec 03 2023 at 04:37)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> I should probably mention something - before we fall back to SPSR based reconstruction, we first try the "Continuation" method based on Bloomenthal's polygonizer.  That basically marches a mesh around the boundary of a volume using our raytracer for the inside/outside part of Bloomenthal's algorithm.  Like SPSR it doesn't always work, but it tends to do better that SPSR at preserving our shapes.  We also use the decimator on its output, IIRC, so it has that in common with SPSR.</p>
+
+
+
+<a name="405602555"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602555" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602555">(Dec 03 2023 at 04:39)</a>:</h4>
+<p>Hm. I'm not sure I understand how that "marching a mesh around the boundary of a volume" works with complex shapes and holes... but I get the idea that you have multiple solutions, and none of them is guaranteed to work</p>
+
+
+
+<a name="405602687"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602687" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602687">(Dec 03 2023 at 04:41)</a>:</h4>
+<p>I'm probably not describing it very well - <a href="https://people.eecs.berkeley.edu/~jrs/meshpapers/Bloomenthal.pdf">https://people.eecs.berkeley.edu/~jrs/meshpapers/Bloomenthal.pdf</a> is the writeup</p>
+
+
+
+<a name="405602776"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602776" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602776">(Dec 03 2023 at 04:42)</a>:</h4>
+<p>It's actually our best option at the moment for the dsp height field primitive, and it does fairly well when we don't have super-thin shapes (but to be fair SPSR can't handle super-thin volumes well either)</p>
+
+
+
+<a name="405602878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602878">(Dec 03 2023 at 04:44)</a>:</h4>
+<p>I figured I should mention it because there's a chance a more intelligent implementation of that approach than the one I hacked together might have overall better behavior than doing an initial sampling with a point cloud</p>
+
+
+
+<a name="405602880"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602880" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602880">(Dec 03 2023 at 04:44)</a>:</h4>
+<p>It's looking a bit like marching cubes?</p>
+
+
+
+<a name="405602889"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602889" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602889">(Dec 03 2023 at 04:44)</a>:</h4>
+<p>It's related, I believe</p>
+
+
+
+<a name="405602972"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602972" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602972">(Dec 03 2023 at 04:45)</a>:</h4>
+<p>I remember Doug from SURVICE had written a marching cubes implementation for Lee Butler, while I did ball pivoting. Also consuming raytraced point clouds</p>
+
+
+
+<a name="405602987"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405602987" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405602987">(Dec 03 2023 at 04:45)</a>:</h4>
+<p>A straight up marching cubes has been tried before by Sean as well (IIRC) and the results are pretty bad - this does somewhat better, although we do tend to get some artifacts around sharp edges (typically less so than SPSR though.)</p>
+
+
+
+<a name="405603087"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603087" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603087">(Dec 03 2023 at 04:47)</a>:</h4>
+<p>I'm not too concerned about sharp edges... Sum up squared planes (using point cloud normals) of near vertices in a quadric, invert and solve the matrix, get the best placement for edge vertices. It really should reconstruct the edges nicely</p>
+
+
+
+<a name="405603198"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603198" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603198">(Dec 03 2023 at 04:49)</a>:</h4>
+<p>That'd be pretty cool.  I'd be thrilled to ditch the polygonizer and SPSR codes if we had something that was reliable and produced better output - those fall squarely into the "it's ugly but currently useful enough we can't ditch 'em" category</p>
+
+
+
+<a name="405603288"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603288" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603288">(Dec 03 2023 at 04:50)</a>:</h4>
+<p>Oh - I doubt you'll want or need it, but we do have Eigen available at compile time if that's a help.</p>
+
+
+
+<a name="405603298"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603298" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603298">(Dec 03 2023 at 04:51)</a>:</h4>
+<p>Yes, I can imagine. It's a nice problem, it's a fun problem. And most of all, I like being able to correct "mistakes" of the past, when I have once written code that I'm absolutely not proud of</p>
+
+
+
+<a name="405603564"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603564" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603564">(Dec 03 2023 at 04:54)</a>:</h4>
+<p>(Eons ago, SURVICE also put me on fluid dynamics, my math wasn't up to the task so I went brute force CUDA with tiny time steps, raw numerical turbulence, no shortcuts... A decade later, I had my revenge: <a href="http://www.rayforce.net/newcfd002.html">http://www.rayforce.net/newcfd002.html</a> )</p>
+
+
+
+<a name="405603697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603697">(Dec 03 2023 at 04:57)</a>:</h4>
+<p>Wow!</p>
+
+
+
+<a name="405603760"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603760" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603760">(Dec 03 2023 at 04:58)</a>:</h4>
+<p>Is Rayforce still a thing, by the way?  I can't find much of anything about it online these days</p>
+
+
+
+<a name="405603798"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603798" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603798">(Dec 03 2023 at 04:59)</a>:</h4>
+<p>I don't think so... It was the fastest raytracer in the world for a while, but the "graph construction" was intense. It was taking a while. It was useless for games or any kind of dynamic geometry</p>
+
+
+
+<a name="405603809"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405603809" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405603809">(Dec 03 2023 at 04:59)</a>:</h4>
+<p>It made sense if you were going to shoot a billion rays at the same model</p>
+
+
+
+<a name="405604017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604017">(Dec 03 2023 at 05:01)</a>:</h4>
+<p>Ah - yeah, I can see where that wouldn't be ideal for games or movies.</p>
+
+
+
+<a name="405604139"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604139" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604139">(Dec 03 2023 at 05:02)</a>:</h4>
+<p>Some SURVICE guy wrote a paper or two about some novel techniques in it. He put me as co-author. I guess that was it</p>
+
+
+
+<a name="405604184"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604184" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604184">(Dec 03 2023 at 05:02)</a>:</h4>
+<p>I can find the announcement SURVICE put about about releasing it as open source, but I can't find the source itself.</p>
+
+
+
+<a name="405604250"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604250" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604250">(Dec 03 2023 at 05:03)</a>:</h4>
+<p>Oh. I have no idea really, I have moved on to other problems long ago <span aria-label="grinning" class="emoji emoji-1f600" role="img" title="grinning">:grinning:</span></p>
+
+
+
+<a name="405604261"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604261" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604261">(Dec 03 2023 at 05:03)</a>:</h4>
+<p>No worries, just curious.</p>
+
+
+
+<a name="405604324"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604324" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604324">(Dec 03 2023 at 05:04)</a>:</h4>
+<p>I've got 200 other holes to dig out of before I start trying to optimize our triangle raytracing more :-P</p>
+
+
+
+<a name="405604345"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405604345" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405604345">(Dec 03 2023 at 05:05)</a>:</h4>
+<p>Eheh. Yeah, that makes sense. Let's make that 199!</p>
+
+
+
+<a name="405611809"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405611809" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405611809">(Dec 03 2023 at 06:53)</a>:</h4>
+<p>Instead of simply collapsing the box to reconstruct the surface, I'm considering that the box could actually be full of tetrahedra, which becomes subdivided as I continuously create vertices over the box's surface. Then detecting a collision is just a matter of detecting when a tetrahedra gets totally squished. It's perfectly robust, no numerical issues with floating point. It also sounds a bit slow. And messy</p>
+
+
+
+<a name="405636995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405636995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405636995">(Dec 03 2023 at 10:36)</a>:</h4>
+<p>(nevermind that, it's awful, all the processing time will be spent rebuilding the internal tetrahedra as the surface continuously gets deformed and tetrahedra are being punched in, it's complicated code too)</p>
+
+
+
+<a name="405948423"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/405948423" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#405948423">(Dec 05 2023 at 01:26)</a>:</h4>
+<p>On-paper planning complete, now beginning to write code. Might take a few weeks, some parts are a bit complicated</p>
+
+
+
+<a name="406591076"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406591076" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406591076">(Dec 07 2023 at 17:37)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> here's another fun point cloud:  <a href="https://brlcad.org/~starseeker/ztec.pnts">https://brlcad.org/~starseeker/ztec.pnts</a></p>
+
+
+
+<a name="406591131"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406591131" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406591131">(Dec 07 2023 at 17:37)</a>:</h4>
+<p>I think the point of the cone is causing problems for all our current methods</p>
+
+
+
+<a name="406618792"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406618792" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406618792">(Dec 07 2023 at 20:52)</a>:</h4>
+<p>Cool, thanks. I have only written the code for the first step #0, creating a convex hull. Seems to run okay but I need to write a quick visualization, I'm sure the next steps will have bugs to fix</p>
+
+
+
+<a name="406618920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406618920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406618920">(Dec 07 2023 at 20:53)</a>:</h4>
+<p>If it's easy for you, could you generate point clouds for simple/easy test cases? Like a bolt or something. And something without holes. I'm sure I could use simple shapes to investigate future bugs</p>
+
+
+
+<a name="406657789"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406657789" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406657789">(Dec 08 2023 at 02:09)</a>:</h4>
+<p>Sure - it'll be a little bit, but its no problem</p>
+
+
+
+<a name="406658155"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406658155" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406658155">(Dec 08 2023 at 02:12)</a>:</h4>
+<p>I think we're using <a href="https://github.com/akuukka/quickhull">https://github.com/akuukka/quickhull</a> right now - if you've got a better one perhaps we can switch to it and remove that code too :-).  IIRC, there are some slim/small cases where that implementation doesn't quite work</p>
+
+
+
+<a name="406682309"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406682309" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406682309">(Dec 08 2023 at 05:17)</a>:</h4>
+<p>At first glance, that code has epsilon values and comments like "This may fail due to numerical instability in which case we give up trying to solve horizon edge for this point and accept a minor degeneration"</p>
+
+
+
+<a name="406682400"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406682400" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406682400">(Dec 08 2023 at 05:18)</a>:</h4>
+<p>And that sounds pretty bad. I have added checks so that everything is robust by design, no matter the numerical accuracy... now I just need examples that would stress these very rare paths</p>
+
+
+
+<a name="406682453"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406682453" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406682453">(Dec 08 2023 at 05:19)</a>:</h4>
+<p>You actually need a convex hull code, that does only that, convex hull? It was only the first step of 3 for my planned code</p>
+
+
+
+<a name="406683211"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406683211" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406683211">(Dec 08 2023 at 05:27)</a>:</h4>
+<p>Wow... when a point from the point cloud is giving trouble to their code, they just delete the point. Nice thinking there. Problem solved</p>
+
+
+
+<a name="406683303"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406683303" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406683303">(Dec 08 2023 at 05:28)</a>:</h4>
+<p>And they call deleting points a "minor degeneration"</p>
+
+
+
+<a name="406790400"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406790400" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406790400">(Dec 08 2023 at 16:09)</a>:</h4>
+<p>convex hull is exposed as a feature of the bot command - it's more of a "nice to have" but it's one option to produce a simple stand-in for a more complex shape</p>
+
+
+
+<a name="406792072"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406792072" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406792072">(Dec 08 2023 at 16:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> <a href="https://brlcad.org/~starseeker/pnts/">https://brlcad.org/~starseeker/pnts/</a></p>
+
+
+
+<a name="406792147"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406792147" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406792147">(Dec 08 2023 at 16:16)</a>:</h4>
+<p>the new ones should be pretty basic</p>
+
+
+
+<a name="406822314"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406822314" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406822314">(Dec 08 2023 at 19:08)</a>:</h4>
+<p>Cool, thanks. I'll refine my question though... would it be possible to get a couple examples with fewer points? <span aria-label="grimacing" class="emoji emoji-1f62c" role="img" title="grimacing">:grimacing:</span> I expect to go step-by-step to visually recognize any glitches, while inspecting a verbose log. And that gets harder above 1k points</p>
+
+
+
+<a name="406822534"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406822534" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406822534">(Dec 08 2023 at 19:10)</a>:</h4>
+<p>Heh - sure <span aria-label="laughing" class="emoji emoji-1f606" role="img" title="laughing">:laughing:</span>   I was thinking in terms of dense sampling to represent the shape, but you're quite right that large sizes are a debugging problem.</p>
+
+
+
+<a name="406822607"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406822607" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406822607">(Dec 08 2023 at 19:10)</a>:</h4>
+<p>I can actually control the number of points sampled - any specific requests?</p>
+
+
+
+<a name="406822627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406822627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406822627">(Dec 08 2023 at 19:10)</a>:</h4>
+<p>Oh, 500 or so is perfect</p>
+
+
+
+<a name="406823106"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406823106" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406823106">(Dec 08 2023 at 19:14)</a>:</h4>
+<p>OK, the *_500.pnts files in the same directory have the smaller samples</p>
+
+
+
+<a name="406823154"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406823154" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406823154">(Dec 08 2023 at 19:14)</a>:</h4>
+<p>Did you want sparse samples for the "problem" cases as well?</p>
+
+
+
+<a name="406823263"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406823263" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406823263">(Dec 08 2023 at 19:15)</a>:</h4>
+<p>I certainly want all the point clouds that are giving you trouble with other codes!</p>
+
+
+
+<a name="406823315"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406823315" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406823315">(Dec 08 2023 at 19:16)</a>:</h4>
+<p>Oh nevermind, I misunderstood. I don't need low res of these</p>
+
+
+
+<a name="406823965"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/406823965" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#406823965">(Dec 08 2023 at 19:20)</a>:</h4>
+<p>Thanks</p>
+
+
+
+<a name="409213026"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/409213026" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#409213026">(Dec 20 2023 at 15:49)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> Did those examples end up being what you need?</p>
+
+
+
+<a name="409250828"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/409250828" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#409250828">(Dec 20 2023 at 19:54)</a>:</h4>
+<p>Hey yes, I think so. SURVICE keeps dragging me to do a bunch of things, I'm hoping to have the free time I requested shortly</p>
+
+
+
+<a name="409250964"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/409250964" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#409250964">(Dec 20 2023 at 19:55)</a>:</h4>
+<p>I thought the chat was quite dead until your notification, it needed a Ctrl+R to see the new messages. Is Erik still around? He was on the user list on the right when I arrived, he isn't anymore. It would be fun to reconnect after all those years</p>
+
+
+
+<a name="409252742"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/409252742" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#409252742">(Dec 20 2023 at 20:07)</a>:</h4>
+<p>He's on occasionally.</p>
+
+
+
+<a name="409261162"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/409261162" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#409261162">(Dec 20 2023 at 21:12)</a>:</h4>
+<p>All right, cool. Sean, have you seen the previous discussion about the proposed mesh reconstruction algorithm? I know you are a great programmer so I'm interested in any thoughts you might have</p>
+
+
+
+<a name="416789267"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/416789267" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#416789267">(Jan 19 2024 at 14:30)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="671298">@Alexis Naveros</span>, you had mentioned having gotten as far as having a convex hull implementation - do you think it's to the point where it's stable enough to add to the mmesh repository?</p>
+
+
+
+<a name="416789526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/416789526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#416789526">(Jan 19 2024 at 14:31)</a>:</h4>
+<p>If <span class="user-mention" data-user-id="680928">@pca006132</span> or one of the other Manifold devs is going to look at their quickhull, it might be helpful to know what your implementation looks like...</p>
+
+
+
+<a name="416985806"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/416985806" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> pca006132 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#416985806">(Jan 20 2024 at 12:03)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> what problem did you find with the point cloud? I tried both ztec.pnts and box_500.pnts and did not trigger the akuukka/quickhull problem (deleting a point)</p>
+
+
+
+<a name="416985834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/416985834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> pca006132 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#416985834">(Jan 20 2024 at 12:03)</a>:</h4>
+<p>If my understanding of the pnts format is correct... I treat it as x y z nx ny nz (and just discard the normals when thrown into the convex hull)</p>
+
+
+
+<a name="417123122"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/417123122" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#417123122">(Jan 21 2024 at 21:27)</a>:</h4>
+<p><span class="user-mention" data-user-id="680928">@pca006132</span> Those inputs weren't problematic for quickhull - they're intended for a different algorithm Alexis wants to work on, a pseudo-shrinkwrap method to replace our Screened Poisson and polygonalizer fallback methods for facetization.</p>
+
+
+
+<a name="417123228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/417123228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#417123228">(Jan 21 2024 at 21:28)</a>:</h4>
+<p>The problem I believe we've encountered with the QuickHull implementation (although I don't have a test case handy) was a super thin mesh -  it didn't end up producing a manifold convex hull</p>
+
+
+
+<a name="417123427"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/417123427" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#417123427">(Jan 21 2024 at 21:31)</a>:</h4>
+<p>It's a rarely used feature in BRL-CAD proper, so it hasn't been a priority to fix - it would be interesting to see what Manifold does with that particular mesh as an input.</p>
+
+
+
+<a name="417125263"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/417125263" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> pca006132 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#417125263">(Jan 21 2024 at 21:56)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> sure, I remember I got this previously when I was doing some crazy minkowski sum, can probably try to reproduce that and extract a few test cases later.</p>
+
+
+
+<a name="428136227"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20reconstruction/near/428136227" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20reconstruction.html#428136227">(Mar 21 2024 at 14:02)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> Any update on the reconstruction code?</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

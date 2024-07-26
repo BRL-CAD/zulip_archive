@@ -1,0 +1,121 @@
+<html>
+<head><meta charset="utf-8"><title>archer · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html">archer</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="383696344"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/383696344" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#383696344">(Aug 10 2023 at 16:51)</a>:</h4>
+<p>What does this error message mean?</p>
+<div class="codehilite"><pre><span></span><code>cannot find component access command &quot;V-1&quot; for component &quot;ul&quot;
+
+Unexpected error encountered while running Archer.
+Aborting.
+</code></pre></div>
+
+
+
+<a name="383715965"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/383715965" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#383715965">(Aug 10 2023 at 17:58)</a>:</h4>
+<p>I think the tcl backtrace is needed for that.. that's an Itk error so there's some graphical widget that is trying to access some object field (object=ul, field=V-1) which aren't named terribly usefully.  There's quite a few things that use ul.</p>
+
+
+
+<a name="383716160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/383716160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#383716160">(Aug 10 2023 at 17:58)</a>:</h4>
+<p>I would guess something like editing of a vertex in the upper-left window (i.e., the default window)</p>
+
+
+
+<a name="384113792"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/384113792" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#384113792">(Aug 11 2023 at 23:52)</a>:</h4>
+<p>Thank you git bisect.  It's a side effect of a change I made to create unique view names when running bv_init:  2af2030752121ac168ee20488dbc636b63a71367</p>
+
+
+
+<a name="384116487"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/384116487" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#384116487">(Aug 12 2023 at 00:16)</a>:</h4>
+<p>OK.  Commit c5dcd0ba131 should bring Archer back to life.  I'm not at all happy about Archer being sensitive to what bv_init was doing, but it's not the first time I've run into unpleasant fragility with Archer and the supporting libraries so however annoying it may be I can't really say it surprises me.</p>
+
+
+
+<a name="384532428"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/384532428" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#384532428">(Aug 13 2023 at 16:01)</a>:</h4>
+<p>Thanks, Archer starts now. Unfortunately, it has several other issues. For example, the command <code>make test.s arb8</code> crashes the program.</p>
+
+
+
+<a name="385858671"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/385858671" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#385858671">(Aug 18 2023 at 08:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> I'm also seeing that badness.  Backtrace indicates it's related to your view changes:</p>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="n">Process</span><span class="w"> </span><span class="mi">63842</span><span class="w"> </span><span class="n">stopped</span>
+<span class="o">*</span><span class="w"> </span><span class="kr">thread</span><span class="w"> </span><span class="err">#</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">'</span><span class="n">com</span><span class="p">.</span><span class="n">apple</span><span class="p">.</span><span class="n">main</span><span class="o">-</span><span class="kr">thread</span><span class="err">'</span><span class="p">,</span><span class="w"> </span><span class="n">stop</span><span class="w"> </span><span class="n">reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EXC_BAD_ACCESS</span><span class="w"> </span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="o">=</span><span class="mh">0x0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">frame</span><span class="w"> </span><span class="err">#</span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="mh">0x0000000100168b40</span><span class="w"> </span><span class="n">libtclcad</span><span class="mf">.20</span><span class="p">.</span><span class="n">dylib</span><span class="err">`</span><span class="n">to_autoview_view</span><span class="p">(</span><span class="n">gdvp</span><span class="o">=</span><span class="mh">0x0000000113a9c600</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="o">=</span><span class="mh">0x0000000000000000</span><span class="p">)</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">autoview</span><span class="p">.</span><span class="n">c</span><span class="o">:</span><span class="mi">43</span><span class="o">:</span><span class="mi">10</span>
+<span class="w">   </span><span class="mi">40</span><span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">av</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+<span class="w">   </span><span class="mi">41</span>
+<span class="w">   </span><span class="mi">42</span><span class="w">       </span><span class="k">struct</span><span class="w"> </span><span class="nc">tclcad_view_data</span><span class="w"> </span><span class="o">*</span><span class="n">tvd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">tclcad_view_data</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">gdvp</span><span class="o">-&gt;</span><span class="n">u_data</span><span class="p">;</span>
+<span class="o">-&gt;</span><span class="w"> </span><span class="mi">43</span><span class="w">       </span><span class="n">tvd</span><span class="o">-&gt;</span><span class="n">gedp</span><span class="o">-&gt;</span><span class="n">ged_gvp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gdvp</span><span class="p">;</span>
+<span class="w">   </span><span class="mi">44</span><span class="w">       </span><span class="n">av</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"autoview"</span><span class="p">;</span>
+<span class="w">   </span><span class="mi">45</span><span class="w">       </span><span class="n">av</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scale</span><span class="p">;</span>
+<span class="w">   </span><span class="mi">46</span><span class="w">       </span><span class="n">av</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="n">Target</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">archer</span><span class="p">)</span><span class="w"> </span><span class="n">stopped</span><span class="p">.</span>
+<span class="p">(</span><span class="n">lldb</span><span class="p">)</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="n">tvd</span>
+<span class="p">(</span><span class="n">tclcad_view_data</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">$0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span>
+<span class="p">(</span><span class="n">lldb</span><span class="p">)</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="n">gdvp</span>
+<span class="p">(</span><span class="n">bview</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">$1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000113a9c600</span>
+<span class="p">(</span><span class="n">lldb</span><span class="p">)</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="n">gdvp</span><span class="o">-&gt;</span><span class="n">u_data</span>
+<span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">$2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0000000000000000</span>
+<span class="p">(</span><span class="n">lldb</span><span class="p">)</span>
+</code></pre></div>
+<p>I consequently also get this error in archer immediately on startup if I don't have a full build but have run "make archer" to completion, possibly implying a dependency is wrong or unlisted:</p>
+<div class="codehilite" data-code-language="Tcl"><pre><span></span><code><span class="nv">bad</span><span class="w"> </span>option<span class="w"> </span><span class="s2">"identify"</span><span class="o">:</span><span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>one<span class="w"> </span>of...
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>add<span class="w"> </span>tag<span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>cget<span class="w"> </span>option
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>childsite<span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>component<span class="w"> </span><span class="o">?</span>name<span class="o">?</span><span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>config<span class="w"> </span><span class="o">?</span>option<span class="o">?</span><span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>configure<span class="w"> </span><span class="o">?</span>option<span class="o">?</span><span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>delete<span class="w"> </span>index
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>fraction<span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>hide<span class="w"> </span>index
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>index<span class="w"> </span>index
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>insert<span class="w"> </span>index<span class="w"> </span>tag<span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>isa<span class="w"> </span>className
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>paneconfigure<span class="w"> </span>index<span class="w"> </span><span class="o">?</span>arg<span class="w"> </span>arg<span class="w"> </span>...<span class="o">?</span>
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>reset
+<span class="w">  </span><span class="nv">.archer0.hpane.pane0.childsite.vpane</span><span class="w"> </span>show<span class="w"> </span>index
+<span class="w">    </span><span class="k">while</span><span class="w"> </span>executing
+<span class="s2">"$w identify $x $y"</span>
+<span class="w">    </span><span class="k">(</span><span class="nv">procedure</span><span class="w"> </span><span class="s2">"::tk::panedwindow::Motion"</span><span class="w"> </span>line<span class="w"> </span><span class="mi">3</span><span class="k">)</span>
+<span class="w">    </span><span class="nv">invoked</span><span class="w"> </span>from<span class="w"> </span>within
+<span class="s2">"::tk::panedwindow::Motion .archer0.hpane.pane0.childsite.vpane 399 612 "</span>
+<span class="w">    </span><span class="k">(</span><span class="nv">command</span><span class="w"> </span>bound<span class="w"> </span>to<span class="w"> </span>event<span class="k">)</span>
+</code></pre></div>
+
+
+
+<a name="386021916"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/386021916" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#386021916">(Aug 19 2023 at 01:31)</a>:</h4>
+<p>Confirmed. I'll try to run it down in the next few days.</p>
+
+
+
+<a name="387753850"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/387753850" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#387753850">(Aug 28 2023 at 20:45)</a>:</h4>
+<p>OK, I think I got it - looks like adding a default bview to ged's view list on ged_open upsets libtclcad...</p>
+
+
+
+<a name="387753945"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/archer/near/387753945" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/archer.html#387753945">(Aug 28 2023 at 20:46)</a>:</h4>
+<p>Let me know if anything else is still broken</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,2414 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> did you happen to look at \"Primitive select (mouse behavior) causes drawn solids to disappear instead of being highlighted. When hitting escape (return to normal mouse behavior) all solids reappear.\" ?</p>",
+        "id": 204511466,
+        "sender_full_name": "Sean",
+        "timestamp": 1595305622
+    },
+    {
+        "content": "<p>That rings a bell with a change Nick made a while back - I'll have to check the history, something about transparency support in MGED.  Don't know if it was that specifically, but there was some sort of drawing problem...</p>",
+        "id": 204536582,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595331205
+    },
+    {
+        "content": "<p>yeah, I thought it was nick's change, but I couldn't confirm it and there was no NEWS entry.  probably a set of commits deep down in my inbox I haven't gotten to reviewing yet.</p>",
+        "id": 204600612,
+        "sender_full_name": "Sean",
+        "timestamp": 1595364169
+    },
+    {
+        "content": "<p>@<code>starseeker</code>: sorry I should have tested the process I/O change more carefully.</p>",
+        "id": 205982956,
+        "sender_full_name": "Sean",
+        "timestamp": 1596595604
+    },
+    {
+        "content": "<p>that is a little unsettling that it broke rt in archer on windows... do you have any more info on why?  presumably fileno() is not returning 0/1/2 for stdin/err/out, which should imply something else is seriously wrong.</p>",
+        "id": 205983052,
+        "sender_full_name": "Sean",
+        "timestamp": 1596595748
+    },
+    {
+        "content": "<p>it is mildly concerning that the api is assuming 0/1/2 are in/err/out.  not just being pedantic.  it's going to be terribly difficult to debug out of context, particularly any code that happens to do perfectly normal pipe operations on 0/1/2.  likely result in i/o just not working right mysteriously, things failing inconsistently.</p>",
+        "id": 205983853,
+        "sender_full_name": "Sean",
+        "timestamp": 1596596616
+    },
+    {
+        "content": "<p>I wouldn't be surprised if the rt-archer breakage wasn't a reverse assumption elsewhere in the code...</p>",
+        "id": 205983923,
+        "sender_full_name": "Sean",
+        "timestamp": 1596596689
+    },
+    {
+        "content": "<p>on a mildly related note to your commit comment yesterday, how about just jumping to what we talked about last year -- using capnproto for commands to talk back?  the protocol could be just simple err/out log messages for now, set up and handled internal to the bu_process api.   then you'd only need on descriptor (e.g., stdout) which could transmit both out+err log messages from the process.</p>",
+        "id": 205984163,
+        "sender_full_name": "Sean",
+        "timestamp": 1596597010
+    },
+    {
+        "content": "<p>When I spot checked, fileno(stdin) returned -2 on Windows.</p>",
+        "id": 206017100,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596631438
+    },
+    {
+        "content": "<p>I switched to using an enum to specify which channel we're intending to use, so hopefully that will alleviate the issue?</p>",
+        "id": 206017190,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596631492
+    },
+    {
+        "content": "<p>The rt-archer breakage (when I debugged) was the code testing fileno on Windows never getting an expected value for any of the three inputs (stdin/stdout/stderr) and simply giving up - that put us in an anomalous position because to archer it looked like the subprocess wasn't returning any info at all on any valid channel.</p>",
+        "id": 206017361,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596631593
+    },
+    {
+        "content": "<p>I'd like to try the capnproto approach, but I'm not sure how easy/hard that will be to get working - it's not an area of programming I'm terribly familiar with, so there'd likely be a significant spin-up cost.</p>",
+        "id": 206017450,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596631673
+    },
+    {
+        "content": "<p>I'm trying to excise bu_list from as much as possible of the libged drawing layer, both to make it easier to understand what the various pieces are doing and as a step towards being able to more easily use the bu_magic mechanism to validate things getting passed around as void *.  That leads of course to the vlist and solid containers... another learning experience, but one I can no longer avoid if I'm going to really be able to following what libtclcad/archer are doing about drawing.</p>",
+        "id": 206017740,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596631840
+    },
+    {
+        "content": "<p>The gsh bits hooking up callbacks were simply trying to set up so I could get a simpler-to-debug (i.e. non-Tcl) method of executing subprocess commands for testing.</p>",
+        "id": 206017842,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596631909
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'm sure you've got quite a bit more expertise than I do, so I'd appreciate any insights, but what it's looking like to me so far:</p>\n<ol>\n<li>\n<p>capnproto will allow us to serialize/de-serialize information being sent over the stdin/stdout/stderr channels, allowing for richer communication, but it doesn't itself solve the Inter-Process Communication problem.</p>\n</li>\n<li>\n<p>Since we've done well over the years with stdin/stdout/stderr piped IPC (which is what allows the MGED/rt connections to work cross platform) that seems like a good way to keep going, with capnproto being used to structure the I/O so we can easily/safely move much more than we currently do over those channels (right now the most complex communication I know of is rtcheck, which uses stdout and stderr for text/vlist drawing information and simply assumes what is coming back over each channel.)</p>\n</li>\n<li>\n<p>If we're going to use stdin/stdout/stderr, we don't actually want the parent process to do what I've currently got gsh doing, which is to periodically check in a thread whether any new input has arrived for processing.  Rather, we would want to do an event based setup where action is triggered when the subprocess sends something down the pipe.  I went with the simplest thing that got what I needed working for gsh, but that's not what we want/need to do long term.</p>\n</li>\n<li>\n<p>Setting up events based on activity in the I/O channels appears to be very very platform specific.  I've been hunting around trying to find a small encapsulation of the necessary logic, and so far have come up pretty dry.</p>\n</li>\n</ol>",
+        "id": 206019252,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596632722
+    },
+    {
+        "content": "<p>ASIO (<a href=\"https://think-async.com/Asio/asio-1.16.1/doc/asio/overview.html\">https://think-async.com/Asio/asio-1.16.1/doc/asio/overview.html</a>) has support for file descriptors and HANDLEs, but doesn't (so far as I can tell) wrap both mechanisms under one API we could use.  (That by the way also appears to be what happens in Tcl, which is why we have the file-descriptor/Tcl_Channel ifdef for the tclcad I/O callbacks.  I tried once to consolidate that into just Tcl_Channel, but it didn't work on Linux...)</p>\n<p>Chromium's IPC solves a similar problem (<a href=\"https://www.chromium.org/developers/design-documents/inter-process-communication\">https://www.chromium.org/developers/design-documents/inter-process-communication</a>) but it's not stand-alone and it's not clear to me if it would adapt easily to what we need.</p>",
+        "id": 206020581,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596633500
+    },
+    {
+        "content": "<p><a href=\"https://source.chromium.org/chromium/chromium/src/+/master:ipc/\">https://source.chromium.org/chromium/chromium/src/+/master:ipc/</a></p>",
+        "id": 206020779,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596633613
+    },
+    {
+        "content": "<p>In some ways I'm actually tempted to see what it would take to extract the Tcl bits for defining these particular events and I/O management into libbu - it's proven to work, and so far I've not come across any simple, stand-alone drop-in alternative...</p>",
+        "id": 206021266,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596633898
+    },
+    {
+        "content": "<p>Hmm...  looking again I see the capnproto code does seem to have IPC logic, but I can't tell if they can work without the socket APIs...</p>",
+        "id": 206023575,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596635226
+    },
+    {
+        "content": "<p>Ah, there it is... looks like we use pipe if we go with \"kj::newOneWayPipe()\"</p>",
+        "id": 206024736,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596635849
+    },
+    {
+        "content": "<p>/me 's brain hurts when bending it in purely C++ directions... oof.</p>",
+        "id": 206024879,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596635925
+    },
+    {
+        "content": "<p>OK, so the question is - can gsh be made to work using capnproto for IPC, events and content?</p>",
+        "id": 206025122,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596636043
+    },
+    {
+        "content": "<p>Or does this need to be wired in at the libbu subprocess management level for things like reading and writing?</p>",
+        "id": 206025415,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596636179
+    },
+    {
+        "content": "<p>We need to be able to allow the Tcl_Even t loop to manage the callback invocation for MGED/Archer to allow current behavior...</p>",
+        "id": 206026331,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596636643
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/206017100\">said</a>:</p>\n<blockquote>\n<p>When I spot checked, fileno(stdin) returned -2 on Windows.</p>\n</blockquote>\n<p>That's interesting.  It makes sense on Window because there isn't a standard input descriptor set up by default for GUI apps on Windows unless it's a console application.</p>",
+        "id": 206028379,
+        "sender_full_name": "Sean",
+        "timestamp": 1596637677
+    },
+    {
+        "content": "<p>That probably means something else opened up an input pipe -- and that code wherever it is didn't register it as stdin.  Probably is the same bug for out/err too.</p>",
+        "id": 206028567,
+        "sender_full_name": "Sean",
+        "timestamp": 1596637757
+    },
+    {
+        "content": "<p>you're right that capnproto doesn't solve IPC by itself because it turns it into an RPC solution.  I actually wouldn't recommend going down that route until you're ready to abandon IPC because of the obvious performance implications.  from a technique perspective, though, RPC is quite a bit simpler than dealing with cross-platform IPC.</p>",
+        "id": 206029837,
+        "sender_full_name": "Sean",
+        "timestamp": 1596638367
+    },
+    {
+        "content": "<p>alternative to capn might be worth trying instead is zeromq -- it supports in-process (inter-thread communication) and inter-process (IPC, ports) communication in addition to capn-style benefits for the data being exchanged.</p>",
+        "id": 206030099,
+        "sender_full_name": "Sean",
+        "timestamp": 1596638479
+    },
+    {
+        "content": "<p>Used asio a while back and wouldn't recommend it -- it's really meant for async client/server communication (e.g., pkg alternative) aside from it pulling in the boost ecosystem.</p>",
+        "id": 206031418,
+        "sender_full_name": "Sean",
+        "timestamp": 1596639086
+    },
+    {
+        "content": "<p>Boost.interprocess (<a href=\"https://www.boost.org/doc/libs/1_63_0/doc/html/interprocess.html\">https://www.boost.org/doc/libs/1_63_0/doc/html/interprocess.html</a>) would be the one that does what you're needing for ports, but I'd still try 10 other things before pulling in boost myself... :)</p>",
+        "id": 206031889,
+        "sender_full_name": "Sean",
+        "timestamp": 1596639307
+    },
+    {
+        "content": "<p>there are a bunch of ways to do IPC and lots have wrapped it, so I'm sure you can find one that works.  some of them may just rely on a particular IPC method and that'll require changing code a little bit.  for example, this one (<a href=\"https://github.com/jarikomppa/ipc/\">https://github.com/jarikomppa/ipc/</a>) uses shared memory.  so instead of using fwrite, calls get changed to sprintf since shared memory works like a malloc'd buffer with both sides of the pipe able to read/write that memory.</p>",
+        "id": 206032443,
+        "sender_full_name": "Sean",
+        "timestamp": 1596639582
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/206021266\">said</a>:</p>\n<blockquote>\n<p>In some ways I'm actually tempted to see what it would take to extract the Tcl bits for defining these particular events and I/O management into libbu - it's proven to work, and so far I've not come across any simple, stand-alone drop-in alternative...</p>\n</blockquote>\n<p>I'd be cool with that!  It really isn't much code that we're talking about.  Only issue would be that  it's essentially the same problem of consolidating to Tcl_Channel.  From what I saw in the code, there's no reason it shouldn't work on linux, so there's almost certainly some other mistaken assumption going on somewhere in the code and until that assumption is found and eliminated, none of these solutions are going to work.</p>",
+        "id": 206034757,
+        "sender_full_name": "Sean",
+        "timestamp": 1596640542
+    },
+    {
+        "content": "<p>It's very much related to the concern I have with using 0/1/2 integers and assuming they are a particular port.  I don't know if it's related to this specific problem, but this is the kind of problem that causes.  Really hard to debug without unwinding the port from creation to destruction on both sides of  the port.</p>",
+        "id": 206035065,
+        "sender_full_name": "Sean",
+        "timestamp": 1596640664
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/206025122\">said</a>:</p>\n<blockquote>\n<p>OK, so the question is - can gsh be made to work using capnproto for IPC, events and content?</p>\n</blockquote>\n<p>No, it'd be the other way around -- you would adapt gsh to capnproto rpc approach instead of events and ipc.  It'd look different, but it can work (just not as performant as IPC).</p>",
+        "id": 206035335,
+        "sender_full_name": "Sean",
+        "timestamp": 1596640767
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/206025415\">said</a>:</p>\n<blockquote>\n<p>Or does this need to be wired in at the libbu subprocess management level for things like reading and writing?</p>\n</blockquote>\n<p>and when I say \"adapt gsh\" that doesn't preclude this belonging in libbu.  libbu would ideally provide a call like subprocess_write and subprocess_read or something similar to abstract from the method underneath.  The benefit of file descriptors is trying to avoid needing to do that so you can just use read/write or sprintf/sscanf.</p>",
+        "id": 206035684,
+        "sender_full_name": "Sean",
+        "timestamp": 1596640901
+    },
+    {
+        "content": "<p>FWIW, there is a stand-alone ASIO that doesn't need boost...</p>",
+        "id": 206036100,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596641047
+    },
+    {
+        "content": "<p>The Tcl refactor is on some ways the most incremental change, assuming it doesn't turn gnarly - even if we eventually opt for another solution, that has the advantage of knowing exactly what it should do if the migration is successful (since it's already working in place.)</p>",
+        "id": 206036392,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596641164
+    },
+    {
+        "content": "<p>This is probably an embarrassing question, but what are the implications of abandoning IPC for RPC?  I thought RPC was just one form of IPC?</p>",
+        "id": 206036978,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596641438
+    },
+    {
+        "content": "<p>So I know that's a lot and probably talking through too many issues to make sense of it all.  In summary, I would recommend 1) trying again to consolidate to Tcl_Channel again as whatever is making that not work likely will affect other solutions until the assumption is inadvertently ripped out, 2) try one of the many wrapped options like shared memory or named pipes.. starting with zeromq or a simpler header-only one, and finally 3) switching to RPC for libged with Capnproto after you've abandoned hope on IPC. ;)</p>",
+        "id": 206037464,
+        "sender_full_name": "Sean",
+        "timestamp": 1596641649
+    },
+    {
+        "content": "<p>/me nods - the Tcl_Channel thing bothered me last time, and if I take it far enough apart to digest it for extraction I should be able to run it to ground one way or the other.</p>",
+        "id": 206037837,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596641808
+    },
+    {
+        "content": "<p>Not to mention squashing another WIN32 ifdef... those are getting hard to remove these days...</p>",
+        "id": 206037888,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596641836
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/206036978\">said</a>:</p>\n<blockquote>\n<p>This is probably an embarrassing question, but what are the implications of abandoning IPC for RPC?  I thought RPC was just one form of IPC?</p>\n</blockquote>\n<p>Only embarrassing questions are the ones not asked.  IPC uses a specific operating system method for allowing two processes to exchange data.  typical examples are files (and file descriptors), named pipes, shared memory, message passing, and sockets.   each method has significant implications on how you set up communication and how data is exchanged which is to say it's not generally possible to create a generic IPC interface that uses different methods.</p>",
+        "id": 206038082,
+        "sender_full_name": "Sean",
+        "timestamp": 1596641937
+    },
+    {
+        "content": "<p>you typically find one method that is implemented on different platforms similarly wrapped  by a library</p>",
+        "id": 206038147,
+        "sender_full_name": "Sean",
+        "timestamp": 1596641974
+    },
+    {
+        "content": "<p>RPC for example is typically associated with the message passing form of IPC and message passing typically relies on the socket method of IPC data exchange</p>",
+        "id": 206038278,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642035
+    },
+    {
+        "content": "<p>MPI is the elephant example of RPC/IPC</p>",
+        "id": 206038331,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642065
+    },
+    {
+        "content": "<p>So capnproto's RPC API won't guarantee a specific method of communication (say, pipes vs. sockets) even if it sometimes uses pipes under the hood?</p>",
+        "id": 206038525,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642165
+    },
+    {
+        "content": "<p>RPC is an IPC method, but it's more strongly associated with sockets and that's what I was referring to when I mentioned \"abandoning IPC\" .. which really was\"abandon file/pipe method of IPC\"</p>",
+        "id": 206038559,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642190
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/206038525\">said</a>:</p>\n<blockquote>\n<p>So capnproto's RPC API won't guarantee a specific method of communication (say, pipes vs. sockets) even if it sometimes uses pipes under the hood?</p>\n</blockquote>\n<p>I don't know for sure, but when I was reading their docs, I didn't see any support for file/pipe-based methods, only socket-based methods</p>",
+        "id": 206038704,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642252
+    },
+    {
+        "content": "<p><a href=\"https://github.com/capnproto/capnproto/blob/master/c%2B%2B/src/kj/async-io-unix.c%2B%2B#L1700\">https://github.com/capnproto/capnproto/blob/master/c%2B%2B/src/kj/async-io-unix.c%2B%2B#L1700</a></p>",
+        "id": 206038718,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642258
+    },
+    {
+        "content": "<p>whereas zeromq explicitly calls them all out</p>",
+        "id": 206038755,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642264
+    },
+    {
+        "content": "<p>yeah, that code would lead me to believe capnproto may also support pipes</p>",
+        "id": 206038873,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642323
+    },
+    {
+        "content": "<p>I just didn't see any examples (didn't look very hard either though)</p>",
+        "id": 206038905,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642340
+    },
+    {
+        "content": "<p>(maybe?)  <a href=\"https://github.com/capnproto/capnproto/blob/master/c%2B%2B/src/kj/async-io-test.c%2B%2B#L311\">https://github.com/capnproto/capnproto/blob/master/c%2B%2B/src/kj/async-io-test.c%2B%2B#L311</a></p>",
+        "id": 206039099,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642424
+    },
+    {
+        "content": "<p>again, though, nearly every method is going to require adopting a data exchange method, whether that's reading/writing on pipes/files (this is your closest fit currently) or reading/writing on sockets (this is typical in client+server apps) or reading/writing buffers of memory</p>",
+        "id": 206039128,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642437
+    },
+    {
+        "content": "<p>The capnproto docs leave a bit to be desired, IMHO... at least for newbies</p>",
+        "id": 206039148,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642447
+    },
+    {
+        "content": "<p>/me nods</p>",
+        "id": 206039254,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642488
+    },
+    {
+        "content": "<p>Hmm... ZeroMQ is LGPLv3 and looks like they're working towards an MPL2 relicense.  OK, that's workable...</p>",
+        "id": 206039402,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642582
+    },
+    {
+        "content": "<p>So yeah, looks like capn can -- \"As of version 0.4, the only supported way to communicate between threads is over pipes or socketpairs.\"</p>",
+        "id": 206039429,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642597
+    },
+    {
+        "content": "<p>/me would ideally prefer to avoid getting user bug reports that parts of the application can't talk to each other...</p>",
+        "id": 206039578,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596642669
+    },
+    {
+        "content": "<p>capn notes in <a href=\"https://capnproto.org/encoding.html\">https://capnproto.org/encoding.html</a> that he adopted streaming as the data exchange method (implying file/pipe or socket method, not message passing or shared memory)</p>",
+        "id": 206039645,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642709
+    },
+    {
+        "content": "<p>looks like <a href=\"https://capnproto.org/cxx.html\">https://capnproto.org/cxx.html</a> has more specific detail, under Messages and I/O</p>",
+        "id": 206040106,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642921
+    },
+    {
+        "content": "<p>still unclear if he has helpers that wrap the communication pipe setup</p>",
+        "id": 206040270,
+        "sender_full_name": "Sean",
+        "timestamp": 1596642999
+    },
+    {
+        "content": "<p>if he doesn't, that might be a case for something like that header only lib that used a shared memory method -- looks like you can just point capn to it</p>",
+        "id": 206040351,
+        "sender_full_name": "Sean",
+        "timestamp": 1596643046
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> one other note about capnproto - if we do adopt it, it bumps our minimum required C++ to C++14.  Personally I'm OK with that, but I wanted to raise it in case it's of concern to you.</p>",
+        "id": 206080018,
+        "sender_full_name": "starseeker",
+        "timestamp": 1596662538
+    },
+    {
+        "content": "<p>I’m okay with it for this, if it solves the need of communication with her commands.  I would probably hesitate elsewhere but capnproto has compelling capability.</p>",
+        "id": 206080476,
+        "sender_full_name": "Sean",
+        "timestamp": 1596662809
+    },
+    {
+        "content": "<p>User reported a bug launching MGED on Windows 7 64-bit.  They found an article mentioning a KB update, but that didn't fix it apparently.  Any ideas?   <br>\n<a href=\"/user_uploads/1549/2yybKO3K5iOs1jxIXZQ54r1F/147093015_10160483351802542_1761671887773690017_n.jpg\">147093015_10160483351802542_1761671887773690017_n.jpg</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/2yybKO3K5iOs1jxIXZQ54r1F/147093015_10160483351802542_1761671887773690017_n.jpg\" title=\"147093015_10160483351802542_1761671887773690017_n.jpg\"><img src=\"/user_uploads/1549/2yybKO3K5iOs1jxIXZQ54r1F/147093015_10160483351802542_1761671887773690017_n.jpg\"></a></div>",
+        "id": 225796828,
+        "sender_full_name": "Sean",
+        "timestamp": 1612935927
+    },
+    {
+        "content": "<p>Windows 7 is too old for that function:  <a href=\"https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemtimepreciseasfiletime\">https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemtimepreciseasfiletime</a></p>",
+        "id": 225829946,
+        "sender_full_name": "starseeker",
+        "timestamp": 1612961022
+    },
+    {
+        "content": "<p>src/libbu/datetime.c</p>",
+        "id": 225830101,
+        "sender_full_name": "starseeker",
+        "timestamp": 1612961094
+    },
+    {
+        "content": "<p>Maybe we could use <a href=\"https://stackoverflow.com/a/27856440\">https://stackoverflow.com/a/27856440</a> to implement this?</p>",
+        "id": 225830318,
+        "sender_full_name": "starseeker",
+        "timestamp": 1612961202
+    },
+    {
+        "content": "<p>I didn't realize there were still any users on Windows 7.  If <a href=\"https://en.wikipedia.org/wiki/Windows_7\">https://en.wikipedia.org/wiki/Windows_7</a> has it right even extended support ended January 2020.</p>",
+        "id": 225830501,
+        "sender_full_name": "starseeker",
+        "timestamp": 1612961288
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> related to earlier discussion, this appears to be a consistent hard crasher:  mged&gt; search ./ebm.r /pnts.r</p>\n<p>ERROR: bad pointer 0x7ffe677688f8: s/b db_full_path(x64626670), was librt directory(x5551212), file /Users/morrison/brlcad.trunk/src/librt/db_fullpath.c, line 264</p>\n<p>ERROR: bad pointer 0x7ffe677688f8: s/b db_full_path(x64626670), was librt directory(x5551212), file /Users/morrison/brlcad.trunk/src/librt/db_fullpath.c, line 264</p>",
+        "id": 227633574,
+        "sender_full_name": "Sean",
+        "timestamp": 1614186106
+    },
+    {
+        "content": "<p>mixing relative and full path terms apparently makes it unhappy</p>",
+        "id": 227633727,
+        "sender_full_name": "Sean",
+        "timestamp": 1614186141
+    },
+    {
+        "content": "<p>r78317 should fix it.</p>",
+        "id": 227645539,
+        "sender_full_name": "starseeker",
+        "timestamp": 1614190335
+    },
+    {
+        "content": "<p>Cool.  Now if only could figure out why that resulted in zombie processes ... haven't seen them in ages!</p>",
+        "id": 227807579,
+        "sender_full_name": "Sean",
+        "timestamp": 1614275116
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> any ideas: <a href=\"https://sourceforge.net/p/brlcad/bugs/394/\">https://sourceforge.net/p/brlcad/bugs/394/</a></p>",
+        "id": 235230164,
+        "sender_full_name": "Sean",
+        "timestamp": 1618858415
+    },
+    {
+        "content": "<p>Whoa.  Those are wacky looking.</p>",
+        "id": 235230504,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618858556
+    },
+    {
+        "content": "<p>Almost looks like they're trying to move a binary from one system to another incompatible system, but if I'm reading that correctly it's the result of building and running on the same machine?</p>",
+        "id": 235230781,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618858667
+    },
+    {
+        "content": "<p>it's a power8, not an x86, if that means anything</p>",
+        "id": 235233150,
+        "sender_full_name": "Erik",
+        "timestamp": 1618859547
+    },
+    {
+        "content": "<p>Those errors look like it's not finding system libs correctly</p>",
+        "id": 235233287,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618859630
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/235230781\">said</a>:</p>\n<blockquote>\n<p>Almost looks like they're trying to move a binary from one system to another incompatible system, but if I'm reading that correctly it's the result of building and running on the same machine?</p>\n</blockquote>\n<p>Yes, they appear to have compiled it themselves with BRLCAD_BUNDLED_LIBS=ON.. any response we can give them?  The archer error looks like a tcl/tk 8.6 error...</p>",
+        "id": 235370858,
+        "sender_full_name": "Sean",
+        "timestamp": 1618935054
+    },
+    {
+        "content": "<p>/me shakes head - for the OpenGL bit all I could suggest is they try different drivers (maybe the modern Mesa gallium software rasterizing setup) and for the Archer bit I guess my first thought would be to see if bwish can run.</p>",
+        "id": 235373335,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618936000
+    },
+    {
+        "content": "<p>From the backtrace, it looks like they're already using Mesa.  Being on Power9, their options are probably limited to Mesa or straight X.  MGED did work with OpenGL disabled.</p>\n<p>The archer failure is a little more concerning... as \"hv3::formmanager\" is from us.  Main reason I can think for an \"invalid command name\" on it would be because the tclIndex or pkgIndex.tcl didn't get created/loaded.. which might imply something is wrong in our tcl/tk build system.</p>",
+        "id": 235387144,
+        "sender_full_name": "Sean",
+        "timestamp": 1618941548
+    },
+    {
+        "content": "<p>That's why I was wondering what bwish does - it will pull in most of the packages but not hv3 (which is the web viewer, iirc) so that might help scope what's wrong.</p>",
+        "id": 235390266,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618942728
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Getting: </p>\n<div class=\"codehilite\"><pre><span></span><code>CMake Error: The following variables are used in this project, but they are set to NOTFOUND.\nPlease set them or make sure they are set and tested correctly in the CMake files:\nXOPENGL_glu_LIBRARY (ADVANCED)\n    linked by target &quot;dm-ogl&quot; in directory /home/sean/brlcad.main/src/libdm/glx\n</code></pre></div>\n<p>Is that new?  This is a default build on a remote Linux system (that may or may not have glu, but I presume it doesn't and the logic isn't taking that into account correctly to disable X).</p>",
+        "id": 246681793,
+        "sender_full_name": "Sean",
+        "timestamp": 1626846497
+    },
+    {
+        "content": "<p>It may be a side effect of my refactor a while back to contain the X OpenGL logic.  Does 320af5adad96f fix it?</p>",
+        "id": 246717000,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626873203
+    },
+    {
+        "content": "<p>checking, I just yanked the glu line and it worked for me, but suspected a better fix.</p>",
+        "id": 246727799,
+        "sender_full_name": "Sean",
+        "timestamp": 1626877901
+    },
+    {
+        "content": "<p>Hi everyone! So I have been learning BRL-CAD for the past couple of weeks, but I have encountered a bug in archer that I was unable to solve. I use Linux Mint 20.2. I have downloaded the source from main and built it. All the tests passed with no error, but when using snap grid in archer I get an error. I tried to look at the code, but I don't know tcl and can't solve it. I tried also to built BRL-CAD on FreeBSD 13.0, but I get the same error in archer. Snap grid works in MGED though. Has anyone else got this error? <a href=\"/user_uploads/1549/RhmZ1P1wymYG246qIkBEqXdY/archer_error.png\">archer_error.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RhmZ1P1wymYG246qIkBEqXdY/archer_error.png\" title=\"archer_error.png\"><img src=\"/user_uploads/1549/RhmZ1P1wymYG246qIkBEqXdY/archer_error.png\"></a></div>",
+        "id": 246737175,
+        "sender_full_name": "starkaiser",
+        "timestamp": 1626881921
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"427492\">@starkaiser</span> is this simple for you to reproduce?</p>",
+        "id": 246762174,
+        "sender_full_name": "bch",
+        "timestamp": 1626893262
+    },
+    {
+        "content": "<p>I’d do a couple things:<br>\n1) find out what $v and $c are, for curiousity sake; before the first if in the vscale proc, put something like:<br>\nset fh [ open ~/starkaiser_debug.log a]; puts “$v // $c”; chan close $fh</p>",
+        "id": 246763137,
+        "sender_full_name": "bch",
+        "timestamp": 1626893742
+    },
+    {
+        "content": "<p>This will (not surprisingly) open a log file in your homedir w the contents of v and c. The last line (which will have caused the crash) are the most interesting</p>",
+        "id": 246763496,
+        "sender_full_name": "bch",
+        "timestamp": 1626893938
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/p_5KSkajjPu23Ghx_5cRYk80/Peek-2021-07-21-22-19.gif\">Peek-2021-07-21-22-19.gif</a>  The error appears for both edges and faces for all arbs. I have added those lines and the values in the log file are:<br>\n0 0 0 // 1.000000<br>\n-nan -nan -nan // 1.000000</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/p_5KSkajjPu23Ghx_5cRYk80/Peek-2021-07-21-22-19.gif\" title=\"Peek-2021-07-21-22-19.gif\"><img src=\"/user_uploads/1549/p_5KSkajjPu23Ghx_5cRYk80/Peek-2021-07-21-22-19.gif\"></a></div>",
+        "id": 246769287,
+        "sender_full_name": "starkaiser",
+        "timestamp": 1626896801
+    },
+    {
+        "content": "<p>The “-nan” gives us a specific clue. I’ve got a general patch candidate I’ll work on later that may be useful. Hopefully this isn’t a show-stopper for you…</p>",
+        "id": 246774752,
+        "sender_full_name": "bch",
+        "timestamp": 1626899661
+    },
+    {
+        "content": "<p>Thank you! I have tried to solve it myself, but I have only managed to hop around different files, trying to understand the code. Mged works fine, so I'm using it to learn the basics</p>",
+        "id": 246775311,
+        "sender_full_name": "starkaiser",
+        "timestamp": 1626899965
+    },
+    {
+        "content": "<p>I personally really like mged. Hopefully you come to enjoy it too. Definitely a “learning wall” associated with it, but it pays off</p>",
+        "id": 246775696,
+        "sender_full_name": "bch",
+        "timestamp": 1626900149
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"427492\">@starkaiser</span>  - which version of brl-cad are you running?</p>",
+        "id": 246776653,
+        "sender_full_name": "bch",
+        "timestamp": 1626900636
+    },
+    {
+        "content": "<p>7.32.3 I think. I compiled the latest versions from the main repository on github because older stable versions were giving me other errors, more serious. I compiled the version that I am currently using two days ago</p>",
+        "id": 246779150,
+        "sender_full_name": "starkaiser",
+        "timestamp": 1626901538
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"427492\">@starkaiser</span> Just so you're aware - you're well into the \"not-well-tested\" aspects of the software interacting with Archer for geometry creation.  MGED will usually be the more stable of the interfaces, since Archer doesn't currently get as much use/attention.</p>",
+        "id": 246780110,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626901846
+    },
+    {
+        "content": "<p>Cool that you're digging into it - Archer's also got some of our most advanced GUI features (File-&gt;Open can trigger some of the converters to open other file types, for example.)</p>",
+        "id": 246780368,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626902016
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"427492\">@starkaiser</span>  - ok, so you’re working w the tip of main, then. I can do same</p>",
+        "id": 246781170,
+        "sender_full_name": "bch",
+        "timestamp": 1626902386
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  - I’m looking at some general fixes that may have knock-on effects. We’ll see how it turns out 🧐</p>",
+        "id": 246781340,
+        "sender_full_name": "bch",
+        "timestamp": 1626902472
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246717000\">said</a>:</p>\n<blockquote>\n<p>It may be a side effect of my refactor a while back to contain the X OpenGL logic.  Does 320af5adad96f fix it?</p>\n</blockquote>\n<p>That did the trick for libdm, but now there's another error from libpng being built wrong: undefined reference to `brl_png_init_filter_functions_vsx'</p>\n<p>Looking at the png source code, it looks like we're missing all the platform-specific subdirs where that function comes from.</p>",
+        "id": 246818133,
+        "sender_full_name": "Sean",
+        "timestamp": 1626940343
+    },
+    {
+        "content": "<p>Can you fix that?</p>",
+        "id": 246818213,
+        "sender_full_name": "Sean",
+        "timestamp": 1626940424
+    },
+    {
+        "content": "<p>What platform triggers the failure? Surprisingly,  I've not encountered that error before...</p>",
+        "id": 246856580,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626965000
+    },
+    {
+        "content": "<p>It looks like the POWERPC platform is defining PNG_FILTER_OPTIMIZATIONS.  Unless we need that defined, my inclination would be to simply not define it.</p>",
+        "id": 246861306,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626966854
+    },
+    {
+        "content": "<p>If I'm interpreting this correctly, PNG_FILTER_OPTIMIZATIONS is for platform specific optimization logic and there is a generic fallback we can use.</p>",
+        "id": 246861575,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626966989
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> does d4ecd86137fa fix it?</p>",
+        "id": 246863936,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626968158
+    },
+    {
+        "content": "<p>how does one clear out the src/other/ext builds??  make clean isn't working...</p>",
+        "id": 246940814,
+        "sender_full_name": "Sean",
+        "timestamp": 1627017375
+    },
+    {
+        "content": "<p>Can we get make clean fixed?.. if make builds it, make clean should still clear it.</p>",
+        "id": 246940830,
+        "sender_full_name": "Sean",
+        "timestamp": 1627017426
+    },
+    {
+        "content": "<p>curiously distclean appears to have deleted files I would have thought it had no business deleting , and still left bin/osdemo and src/other/libosmesa</p>",
+        "id": 246940977,
+        "sender_full_name": "Sean",
+        "timestamp": 1627017661
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246861306\">said</a>:</p>\n<blockquote>\n<p>It looks like the POWERPC platform is defining PNG_FILTER_OPTIMIZATIONS.  Unless we need that defined, my inclination would be to simply not define it.</p>\n</blockquote>\n<p>But why is it customized?  I would think it's far less complexity and risk to drop in as vanilla as strictly possible.  It seems to be just a few files, so I can't see an argument for space/complexity/savings.  No idea what the runtime implications are.</p>\n<p>Plus, it's an impedence to upgrades and there's a real risk of cost... which it now incurred.    I mean, between all the builds, rebuilding, inspecting, having to shift what I was doing elsewhere, trying again, I've now spent at least 4 hours unproductively because of it. :(</p>\n<p>I have to hope there was some need or benefit beyond tidying up files.?  A benefit that saves us time and effort?</p>",
+        "id": 246942072,
+        "sender_full_name": "Sean",
+        "timestamp": 1627019065
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246863936\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> does d4ecd86137fa fix it?</p>\n</blockquote>\n<p>That does seem to have fixed it.  Thank you.</p>",
+        "id": 246942098,
+        "sender_full_name": "Sean",
+        "timestamp": 1627019127
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246940830\">said</a>:</p>\n<blockquote>\n<p>Can we get make clean fixed?.. if make builds it, make clean should still clear it.</p>\n</blockquote>\n<p>My understanding of how ExternalProject_Add works suggests that this will be difficult.  ExternalProject builds are decoupled from the primary CMake logic internally, and each individual project's logic isn't even guaranteed to define a clean target at all.  CMake doesn't provide a lot of good options for customizing the \"make clean\" target as far as I know...</p>",
+        "id": 246975588,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627046208
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246940977\">said</a>:</p>\n<blockquote>\n<p>curiously distclean appears to have deleted files I would have thought it had no business deleting , and still left bin/osdemo and src/other/libosmesa</p>\n</blockquote>\n<p>That is curious - latest main doesn't do that for me using a build folder.  Are you doing a build from the src dir?  It doesn't reproduce for me there either...</p>",
+        "id": 246975956,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627046398
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246942072\">said</a>:</p>\n<blockquote>\n<p>I have to hope there was some need or benefit beyond tidying up files.?  A benefit that saves us time and effort?</p>\n</blockquote>\n<p>Looks like I did that back in 2016 (r68360) when was trying to scrub everything we don't need out of src/other to reduce our overall tarball size.</p>",
+        "id": 246976996,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627046884
+    },
+    {
+        "content": "<p>For src/other/ext, the obvious thing to try would be to define some custom logic to be executed by the ExternalProject_Add build steps that generates a list of all files added by the build step that the parent build could then remove, but I don't know of a way to customize the clean target in the parent CMake build to that degree.</p>",
+        "id": 246978076,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627047432
+    },
+    {
+        "content": "<p>I think these folks have a similar issue:  <a href=\"https://github.com/klee/klee/issues/718\">https://github.com/klee/klee/issues/718</a></p>",
+        "id": 246978870,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627047849
+    },
+    {
+        "content": "<p>We could probably produce a clean-ext target that would invoke the needed steps...</p>",
+        "id": 246978941,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627047894
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246975588\">said</a>:</p>\n<blockquote>\n<p>My understanding of how ExternalProject_Add works suggests that this will be difficult.  ExternalProject builds are decoupled from the primary CMake logic internally, and each individual project's logic isn't even guaranteed to define a clean target at all.  CMake doesn't provide a lot of good options for customizing the \"make clean\" target as far as I know...</p>\n</blockquote>\n<p>From my reading, e.g., <a href=\"https://cmake.org/pipermail/cmake/2012-February/049208.html\">https://cmake.org/pipermail/cmake/2012-February/049208.html</a> it looks like cmake is supposed to run clean on ExternalProjects.  That person is trying to stop the behavior I'm expecting.</p>\n<p>It didn't look like any of them cleaned, even if they had a cmake build..</p>",
+        "id": 247059272,
+        "sender_full_name": "Sean",
+        "timestamp": 1627108308
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246975956\">said</a>:</p>\n<blockquote>\n<p>That is curious - latest main doesn't do that for me using a build folder.  Are you doing a build from the src dir?  It doesn't reproduce for me there either...</p>\n</blockquote>\n<p>Nope, I'm using a build folder.  I don't know what it'd do in a src tree.  It was a straight up fresh cloning, cmake in build, and make calls, then make distclean when clean didn't clear out libpng.  I was testing your libpng change, but couldn't get it to recompile again even with the file edited, so tried to make clean which failed, then distclean -- which left turds.</p>",
+        "id": 247059407,
+        "sender_full_name": "Sean",
+        "timestamp": 1627108546
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246976996\">said</a>:</p>\n<blockquote>\n<p>Looks like I did that back in 2016 (r68360) when was trying to scrub everything we don't need out of src/other to reduce our overall tarball size.</p>\n</blockquote>\n<p>Oof.   :(</p>\n<p>Yeah, I don't think we should keep that then, long term, especially as upgrades happen.  That was a really expensive impact.. </p>\n<p>Also, that edit requires a human in the loop at all future upgrade points (i.e., more time) and docs/knowledge of the edits complicating upgrades.   That in turn puts us in a position where upgrades are resisted (e.g., gdal, opennurbs, stepcode, ...).  Not a healthy pattern.</p>",
+        "id": 247059944,
+        "sender_full_name": "Sean",
+        "timestamp": 1627109499
+    },
+    {
+        "content": "<p>Of course, opennurbs has other reasons, so that one's not entirely equivalent, but it is a bit involved to upgrade in part because of cullings (in addition to our code edits).</p>",
+        "id": 247060073,
+        "sender_full_name": "Sean",
+        "timestamp": 1627109690
+    },
+    {
+        "content": "<p>I saw those emails, but I'm wondering if the behavior they describe is out of date - I don't think I've ever seen the ExternalProject_Add builds follow a make clean...<br>\n<a href=\"/user_uploads/1549/4phYYesR4wPpu5fW91tur0JB/exttest.tar.gz\">exttest.tar.gz</a><br>\nI made a small test (attached) and the behavior I'm seeing here on a make clean is that p1 is removed,  but bin/p2 is intact.</p>",
+        "id": 247074890,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627133531
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/247059407\">said</a>:</p>\n<div class=\"codehilite\"><pre><span></span><code> tried to make clean which failed, then distclean -- which left turds.\n</code></pre></div>\n<p>Which files were left after the distclean?  One possibility is that if there are files left from older build states, distclean based on updated CMakeLists.txt files won't know it needs to remove them...</p>",
+        "id": 247074982,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627133695
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/247059944\">said</a>:</p>\n<blockquote>\n<p>Also, that edit requires a human in the loop at all future upgrade points (i.e., more time) and docs/knowledge of the edits complicating upgrades.   That in turn puts us in a position where upgrades are resisted (e.g., gdal, opennurbs, stepcode, ...).  Not a healthy pattern.</p>\n</blockquote>\n<p>My hope is that once it is properly matured, the new src/other/ext approach to building will make vanilla upstreams more practical.  Since the new logic (so far at least) is capable of replicating the CMake RPath magic without needing all up build system replacements, the incentive to clean up the third party directories goes down.</p>\n<p>When I'm having to write and/or maintain the build systems myself, those messy directories are a problem - that was the other reason I was stripping them down, to make it easier to understand what I had to write build logic for.  When I had to do major build system work on third party deps, all future upgrades needed a human in the loop anyway, so the simplification was an overall win.  I'm trying to let the dust settle on the src/other/ext system before I introduce the additional complication of swapping in things like the upstream GDAL build, and I also wanted as much in the way of automated cross platform testing in place as possible before trying that step.  (I haven't had bandwidth to do it anyway, but even if I had I would have been hesitant to pile the native build systems on top of everything else.)</p>\n<p>Even if we get to completely vanilla src/other/ext, there's still going to be some disincentive to disrupt things by upgrading those deps.  I'm thinking it might be helpful if we go ahead and break ext into its own git repo and add it as a submodule.  If git will support this, we could set it up as follows:</p>\n<ol>\n<li>\n<p>Point the src/other/ext submodule in the main repo to an equivalent of \"STABLE\" in the ext repo by default.  (I.e., an out of the box recursive checkout of brlcad will pull a known working ext configuration.)</p>\n</li>\n<li>\n<p>In the ext repo, we can then upgrade third party deps without impinging on brlcad itself.  We can then test both the ext build and its integration with the parent brlcad build by checking out different versions of ext within the brlcad checkout.</p>\n</li>\n<li>\n<p>If the above works (and I'm not 100% sure if it can, I need to do some experimenting with submodules) we might even be able to set up CI on the ext repo to do continual, ongoing merge and integration testing with upstream repos like GDAL that are also on github.  We might define branches like ACTIVE (used by brlcad), STABLE (holds the latest released version of each of the deps, should match ACTIVE in most situations unless we need to patch a stable release for a CVE or some such), TESTING (used to keep an eye on the latest development versions of all the deps, expected to break regularly), and STAGING (similar to testing but where we can adjust problematic upstream versions back a bit if we need to to keep everything else going.)</p>\n</li>\n</ol>",
+        "id": 247076209,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627135359
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/247074982\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/247059407\">said</a>:</p>\n<div class=\"codehilite\"><pre><span></span><code> tried to make clean which failed, then distclean -- which left turds.\n</code></pre></div>\n<p>Which files were left after the distclean?  One possibility is that if there are files left from older build states, distclean based on updated CMakeLists.txt files won't know it needs to remove them...</p>\n</blockquote>\n<p>Like I said, that was the entirety of its existence, so no prior build states, no git pulls besides the edit you made to fix the png issue.  It was a clean checkout, cmake + make + cmake + make (tried diff compiler), and eventually make clean, then make distclean, which then left bin/osdemo and src/other/libosmesa with a few files in there.</p>",
+        "id": 247455547,
+        "sender_full_name": "Sean",
+        "timestamp": 1627477563
+    },
+    {
+        "content": "<p>The plan you describe sounds good except I would suggest we keep ext branching simpler.  Having to hunt for which branch has the deps that works would be a bit .. frustrating to say the least.</p>\n<p>I'd think we just have main track ext main and STABLE tract ext STABLE and leave it at that for starters.  I.e., what worked for the last release, and whatever is currently needed for main.  This would make main be your ACTIVE+TESTING+STAGING branches and it'd be on us to make branches while testing risky efforts, but without any reuqired formality beyone main and STABLE.  I like the idea of possibly having main track ext STABLE for some added stability, but I could go either way.  I'd hope any instability is very short lived.</p>",
+        "id": 247457156,
+        "sender_full_name": "Sean",
+        "timestamp": 1627478381
+    },
+    {
+        "content": "<p>vanilla ? :)</p>",
+        "id": 247544411,
+        "sender_full_name": "scorp08",
+        "timestamp": 1627534323
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"427492\">starkaiser</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/246769287\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/p_5KSkajjPu23Ghx_5cRYk80/Peek-2021-07-21-22-19.gif\">Peek-2021-07-21-22-19.gif</a>  The error appears for both edges and faces for all arbs. I have added those lines and the values in the log file are:<br>\n0 0 0 // 1.000000<br>\n-nan -nan -nan // 1.000000</p>\n</blockquote>\n<p>I just downloaded and compiled the 7.32.4 release and now the snap to grid mode in Archer works great!</p>",
+        "id": 247731652,
+        "sender_full_name": "starkaiser",
+        "timestamp": 1627662905
+    },
+    {
+        "content": "<p>The 7.32.4 release is based on older code, and doesn't incorporate most of the changes in main</p>",
+        "id": 247739578,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627666866
+    },
+    {
+        "content": "<p>The most likely problem for issues in main is refactoring work I was doing to shift logic down the library stacks (primarily out of libtclcad, but also some out of libged into lower layers.)</p>",
+        "id": 247739729,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627666929
+    },
+    {
+        "content": "<p>I may have missed a step when moving the snapping functions.</p>",
+        "id": 247739795,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627666976
+    },
+    {
+        "content": "<p>I haven't gotten to the editing modes yet - they'll be one of the very last things to shift to the Qt GUI, because of the amount of work involved - and so the snapping behaviors haven't yet been tested post refactor (or rather, your Archer test has served as an inadvertent test).</p>",
+        "id": 247740020,
+        "sender_full_name": "starseeker",
+        "timestamp": 1627667080
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> do we have a standard way to get SSIZE_MAX on Windows?  limits.h doesn't seem to have it...</p>",
+        "id": 250628520,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629901956
+    },
+    {
+        "content": "<p>Hmm.  The only other use in our code is an ifndef test in common.h...</p>",
+        "id": 250650200,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629911749
+    },
+    {
+        "content": "<p>belated sorry about that, but I saw your fix and seems good enough.  there's not a standard way other than including limits.h which we already do.</p>",
+        "id": 251490474,
+        "sender_full_name": "Sean",
+        "timestamp": 1630463293
+    },
+    {
+        "content": "<p>I could probably key off some other limit as it just needs to be some imposed limit to satisfy the cert/stig issue, tainted input sanitization</p>",
+        "id": 251490530,
+        "sender_full_name": "Sean",
+        "timestamp": 1630463370
+    },
+    {
+        "content": "<p>Both ogl and X framebuffer appear to be non-functional (on Mac) ... not sure since when as I've been in a different section of the code, but ogl fails and X crashes.</p>",
+        "id": 263111779,
+        "sender_full_name": "Sean",
+        "timestamp": 1638260067
+    },
+    {
+        "content": "<p>Looks like it's bcc41b5798 that's causing the fb issues, at least for X.</p>",
+        "id": 263196293,
+        "sender_full_name": "starseeker",
+        "timestamp": 1638300683
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Not sure about ogl, but I think I addressed the X issue.  I don't see an ogl failure on Linux...</p>",
+        "id": 263236624,
+        "sender_full_name": "starseeker",
+        "timestamp": 1638324980
+    },
+    {
+        "content": "<p>oh, didn't report back on this until now, but the ogl issue never went away... still a hard failure on mac, no archer, no /dev/ogl</p>",
+        "id": 267279973,
+        "sender_full_name": "Sean",
+        "timestamp": 1641623855
+    },
+    {
+        "content": "<p>fbhelp reports:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>=============== Current Selection ================\nbu_shmget failed, errno=22\nbu_shmget: Invalid argument\nogl_getmem:  Unable to attach to shared memory, using private\nfb_ogl_open: double buffering not available. Using single buffer.\nAssertion failed: (glx_dpy), function __glXSendError, file ../src/glx/glx_error.c, line 44.\n</code></pre></div>\n<p>Should look like this:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>=============== Current Selection ================\nogl_getmem: shmget failed, errno=22\nogl_getmem:  Unable to attach to shared memory.\nDescription: Silicon Graphics OpenGL\nDevice: /dev/ogl\nMax width height: 16384 16384\nDefault width height: 512 512\nUsage: /dev/ogl[option letters]\n   p   Private memory - else shared\n   l   Lingering window\n   t   Transient window\n   d   Suppress dithering - else dither if not 24-bit buffer\n   c   Perform software colormap - else use hardware colormap if possible\n   s   Single buffer -  else double buffer if possible\n   b   Fast pan and zoom using backbuffer copy -  else normal\n   D   Don't update screen until fb_flush() is called.  (Double buffer sim)\n   z   Zap (free) shared memory.  Can also be done with fbfree command\n\nCurrent internal state:\n    mi_doublebuffer=1\n    mi_cmap_flag=0\n    ogl_nwindows=1\nX11 Visual:\n    TrueColor: Fixed RGB maps, pixel RGB subfield indices\n    RGB Masks: 0xff0000 0xff00 0xff\n    Colormap Size: 256\n    Bits per RGB: 8\n    screen: 0\n    depth (total bits per pixel): 24\n</code></pre></div>",
+        "id": 267280075,
+        "sender_full_name": "Sean",
+        "timestamp": 1641624018
+    },
+    {
+        "content": "<p>also, definitely seeing some regression in the conversion code.  was doing an obj-g conversion, was giving me some new errors -- checked against a rando prior release (7.30 I think) and prior succeeded where current main does not (completes, but results in bad/flipped faces).</p>",
+        "id": 267280155,
+        "sender_full_name": "Sean",
+        "timestamp": 1641624193
+    },
+    {
+        "content": "<p>Here's a visual example, left is prev, right is curr:  <a href=\"/user_uploads/1549/yWAgbE2zxei55o2QWVG3n6pb/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/yWAgbE2zxei55o2QWVG3n6pb/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/yWAgbE2zxei55o2QWVG3n6pb/image.png\"></a></div>",
+        "id": 267280209,
+        "sender_full_name": "Sean",
+        "timestamp": 1641624296
+    },
+    {
+        "content": "<p>Here's that geometry if you want to see if you can track it down.. <a href=\"/user_uploads/1549/IHAACWuN0Q7ZlDGv_jaFLyih/PoliceLifterSpeed.obj\">PoliceLifterSpeed.obj</a></p>",
+        "id": 267280260,
+        "sender_full_name": "Sean",
+        "timestamp": 1641624372
+    },
+    {
+        "content": "<p>Shouldn't need this but just in case: <a href=\"/user_uploads/1549/6tAbc0O7WhVqW2a2Dbydi9dN/PoliceLifterSpeed.mtl\">PoliceLifterSpeed.mtl</a></p>",
+        "id": 267280261,
+        "sender_full_name": "Sean",
+        "timestamp": 1641624398
+    },
+    {
+        "content": "<p>Can you double check what version succeeded?  I've tried a number of 7.30 obj-g conversions, and so far they all produce the bad geometry here.</p>",
+        "id": 267590842,
+        "sender_full_name": "starseeker",
+        "timestamp": 1641912247
+    },
+    {
+        "content": "<p>7.28.2 shows bad as well</p>",
+        "id": 267591682,
+        "sender_full_name": "starseeker",
+        "timestamp": 1641912599
+    },
+    {
+        "content": "<p>Oof, I thought I grabbed 7.30, but it's looking like if I just opened the .g file, then it would have fired up a 7.24 release.</p>",
+        "id": 267979301,
+        "sender_full_name": "Sean",
+        "timestamp": 1642144973
+    },
+    {
+        "content": "<p>looks like it might have been 7.26 actually</p>",
+        "id": 267979334,
+        "sender_full_name": "Sean",
+        "timestamp": 1642145040
+    },
+    {
+        "content": "<p>So I guess the good news is it's not a release blocker, thanks for checking it</p>",
+        "id": 267979453,
+        "sender_full_name": "Sean",
+        "timestamp": 1642145122
+    },
+    {
+        "content": "<p>@starseeker not sure if it’s recent but cmake summary has a blank entry for Iwidgets.  I took a look but couldn’t follow the logic, appeared to be handled differently from the other _BUILD vars.  Would you take a look?  TCL is ON, Tk is Disabled, Itcl/Itk is ON (Itcl only), and Iwidgets is blank.</p>\n<p>This is a server / no-X build on Ubuntu.</p>",
+        "id": 269527766,
+        "sender_full_name": "Sean",
+        "timestamp": 1643261339
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> got it, thanks - was missing an else case in the iwidgets.cmake flow</p>",
+        "id": 269569165,
+        "sender_full_name": "starseeker",
+        "timestamp": 1643289017
+    },
+    {
+        "content": "<p>(my real motivator for the Qt work - get rid of all the Tcl/Tk build logic ;-) )</p>",
+        "id": 269569236,
+        "sender_full_name": "starseeker",
+        "timestamp": 1643289060
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  Here's one of the errors that a couple of them got: <br>\nwarning: error while sourcing archer_launch.tcl: couldn't read file \"tclscripts/archer/itk_redefines.tcl\": no such file or directory</p>",
+        "id": 271854089,
+        "sender_full_name": "Sean",
+        "timestamp": 1644857287
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I've run into that particular itk_defines.tcl error before as well, if that helps.  I'm not sure the conditions but it doesn't seem to interfere with the build as much as it was on Windows</p>",
+        "id": 271922705,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896358
+    },
+    {
+        "content": "<p>I did get a trace on the all-apps-crashing again bug -- it appears to be something inside libdm during application shutdown.  Valgrind is pointing at some unknown symbols in that library:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>--11359-- Discarding syms at 0x107420000-0x107474000 in /Users/morrison/brlcad.main/.build/lib/libdm.20.0.1.dylib (have_dinfo 1)\n--11359-- Discarding syms at 0x1074cc000-0x1074d4000 in /Users/morrison/brlcad.main/.build/lib/libpkg.20.0.1.dylib (have_dinfo 1)\n--11359-- Discarding syms at 0x1092e4000-0x1092f0000 in /Users/morrison/brlcad.main/.build/libexec/dm/libdm-ps.dylib (have_dinfo 1)\n==11359== Jump to the invalid address stated on the next line\n==11359==    at 0x107446636: ???\n==11359==    by 0x10744657E: ???\n==11359==    by 0x10743CA42: ???\n==11359==    by 0x7FFF2071ED24: ??? (in /dev/ttys000)\n==11359==    by 0x7FFF2071F00F: ??? (in /dev/ttys000)\n==11359==    by 0x7FFF2080AF43: ??? (in /dev/ttys000)\n==11359==  Address 0x107446636 is not stack'd, malloc'd or (recently) free'd\n</code></pre></div>",
+        "id": 271922813,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896441
+    },
+    {
+        "content": "<p>Actually, if that output is strictly ordered, that may be the issue.  It's unloaded libdm, but then goes to unload dm/libdm-ps.dylib and a call is made into libdm...</p>",
+        "id": 271922850,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896509
+    },
+    {
+        "content": "<p>Um.  How do we control that ordering?</p>",
+        "id": 271922902,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896538
+    },
+    {
+        "content": "<p>I could be wrong on that interpretation, but it def appears to be something libdm plugin-related</p>",
+        "id": 271923005,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896666
+    },
+    {
+        "content": "<p>For the itk_defines.tcl error, the question I have is whether share/tclscripts/archer/itk_redefines.tcl is present - if not, it may be a missing dependency on the cp target for that file, if it is then it's something about the paths in the Tcl environment.</p>",
+        "id": 271923034,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896707
+    },
+    {
+        "content": "<p>Can we check if there are any undefined symbols inthe so files?</p>",
+        "id": 271923049,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896727
+    },
+    {
+        "content": "<p>Let me see if I can make the target for copying that file an explicit dependency of archer...</p>",
+        "id": 271923124,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896775
+    },
+    {
+        "content": "<p>I'll see if I can trigger the itk_redefines.tcl error, and check -- it was pretty consistent for me for a while, but I'd been ignoring it</p>",
+        "id": 271923131,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896790
+    },
+    {
+        "content": "<p>which so files?  libdm-plot or libdm or ?</p>",
+        "id": 271923146,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896823
+    },
+    {
+        "content": "<p>the libdm-ps.dylib file, if that's the one factoring into the crash above</p>",
+        "id": 271923163,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896848
+    },
+    {
+        "content": "<p>I'm not seeing where/why in the code the plugins have any code that would be getting called</p>",
+        "id": 271923166,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896852
+    },
+    {
+        "content": "<p>there's no apparent atexit handler.  oh, maybe dlopen registers one.. that might be.</p>",
+        "id": 271923252,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896893
+    },
+    {
+        "content": "<p>If it's the unloading code, a quick check would be to comment out the unloading bits in libdm_clear</p>",
+        "id": 271923304,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896939
+    },
+    {
+        "content": "<p>in dm_init.cpp</p>",
+        "id": 271923321,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644896955
+    },
+    {
+        "content": "<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>(base) morrison@agua .build % nm libexec/dm/libdm-ps.dylib\n                 U _Tcl_AppendStringsToObj\n                 U _Tcl_DuplicateObj\n                 U _Tcl_GetObjResult\n                 U _Tcl_SetObjResult\n                 U ___stack_chk_fail\n                 U ___stack_chk_guard\n00000000000100d0 d __dyld_private\n                 U _bu_calloc\n                 U _bu_free\n                 U _bu_log\n                 U _bu_vls_addr\n                 U _bu_vls_free\n                 U _bu_vls_init\n                 U _bu_vls_printf\n                 U _bu_vls_sprintf\n                 U _bu_vls_strcpy\n0000000000010550 b _disp_mat\n000000000000b770 T _dm_plugin_info\n0000000000010138 d _dm_ps\n0000000000010150 d _dm_ps_impl\n                 U _draw_Line3D\n                 U _fclose\n                 U _fflush\n                 U _fopen\n                 U _fprintf\n                 U _fputs\n00000000000106a8 s _head_ps_vars\n                 U _memcpy\n                 U _memset\n00000000000104d0 b _mod_mat\n                 U _null_String2DBBox\n                 U _null_SwapBuffers\n                 U _null_beginDList\n                 U _null_configureWin\n                 U _null_doevent\n                 U _null_drawDList\n                 U _null_drawPoint3D\n                 U _null_drawPoints3D\n                 U _null_endDList\n                 U _null_freeDLists\n                 U _null_genDLists\n                 U _null_getDisplayImage\n                 U _null_loadPMatrix\n                 U _null_makeCurrent\n                 U _null_openFb\n                 U _null_reshape\n                 U _null_setDepthMask\n                 U _null_setLight\n                 U _null_setTransparency\n                 U _null_setZBuffer\n000000000000c010 s _pinfo\n0000000000009120 t _ps_close\n000000000000b6a0 t _ps_debug\n000000000000b290 t _ps_draw\n00000000000092f0 t _ps_drawBegin\n0000000000009360 t _ps_drawEnd\n0000000000009af0 t _ps_drawLine2D\n0000000000009c00 t _ps_drawLine3D\n0000000000009c60 t _ps_drawLines3D\n0000000000009cf0 t _ps_drawPoint2D\n0000000000009940 t _ps_drawString2D\n0000000000009d60 t _ps_drawVList\n0000000000010690 b _ps_drawVList.fin\n0000000000010650 b _ps_drawVList.last\n0000000000010670 b _ps_drawVList.start\n0000000000009430 t _ps_hud_begin\n00000000000094a0 t _ps_hud_end\n0000000000009510 t _ps_loadMatrix\n000000000000b700 t _ps_logfile\n0000000000008310 t _ps_open\n00000000000104c0 b _ps_open.count\n000000000000b3f0 t _ps_setBGColor\n000000000000b340 t _ps_setFGColor\n000000000000b480 t _ps_setLineAttr\n000000000000b540 t _ps_setWinBounds\n00000000000100e0 d _ps_usage\n00000000000092a0 t _ps_viable\n00000000000105d0 b _psmat\n                 U _setbuf\n                 U _sscanf\n                 U _vclip\n                 U dyld_stub_binder\n</code></pre></div>",
+        "id": 271923341,
+        "sender_full_name": "Sean",
+        "timestamp": 1644896974
+    },
+    {
+        "content": "<p>U is undefined?</p>",
+        "id": 271923419,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644897027
+    },
+    {
+        "content": "<p>oh, there it is!  I was looking for whatever was triggering the unloading... plain as day in dm_init.cpp</p>",
+        "id": 271923454,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897076
+    },
+    {
+        "content": "<p>yep</p>",
+        "id": 271923456,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897087
+    },
+    {
+        "content": "<p>oh, I wonder if this is that age-old STL issue...</p>",
+        "id": 271923507,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897129
+    },
+    {
+        "content": "<p>0a1de42aee may help with the Archer bit</p>",
+        "id": 271923879,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644897494
+    },
+    {
+        "content": "<p>testing a fix for dlclosure issue, and I'm coincidentally getting the itk_defines issue so I'll update here when I can and test</p>",
+        "id": 271924105,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897649
+    },
+    {
+        "content": "<p>may be related to this huge blather:  WARNING - bu_dir's bin value is set to ., but binary being run is located in /Users/morrison/brlcad.main/.build.  This probably means you are running btclsh from a non-install directory with BRL-CAD already present in . - be aware that .tcl files from . will be loaded INSTEAD OF local files. Tcl script changes made to source files for testing purposes will not be loaded, even though btclsh will most likely 'work'.  To test local changes, either clear ., specify a different install prefix (i.e. a directory <em>without</em> BRL-CAD installed) while building, or manually set the BRLCAD_ROOT environment variable.</p>",
+        "id": 271924134,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897684
+    },
+    {
+        "content": "<p>Urm.  I've seen that too, but didn't seem to trigger the issue for me.  However, that shouldn't be happening, so I'll see if I can take  a quick look...</p>",
+        "id": 271924232,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644897750
+    },
+    {
+        "content": "<p>my change appears to have fixed the dynamic unloading crashes</p>",
+        "id": 271924241,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897760
+    },
+    {
+        "content": "<p>I'll push that up here in a sec</p>",
+        "id": 271924251,
+        "sender_full_name": "Sean",
+        "timestamp": 1644897770
+    },
+    {
+        "content": "<p>okay pushed.. I think what was going on is because the iterator was registering ABC and then closing ABC .. and badness was happening.  now unloads in reverse order, so ABC-&gt;CBA, and that appears to have resolved whatever dependency tracking badness was going on.  I suspect it's either plugins that refer to other plugins (thus needing to be in order) or the dynamic linker doing recursive reference counting and thinking it was done with libdm as the dlclose() plugins were unloaded and references got updated.</p>",
+        "id": 271924971,
+        "sender_full_name": "Sean",
+        "timestamp": 1644898532
+    },
+    {
+        "content": "<p>on an unrelated note, we're probably going to need to set up code signing before our next major release.  that's apparently the solution to all the firewall triggers that go off every build.  Looks like these guys have a module: <a href=\"https://github.com/Monetra/libmonetra/blob/master/CMakeModules/CodeSign.cmake\">https://github.com/Monetra/libmonetra/blob/master/CMakeModules/CodeSign.cmake</a></p>",
+        "id": 271925158,
+        "sender_full_name": "Sean",
+        "timestamp": 1644898753
+    },
+    {
+        "content": "<p>cpack appears to have some built-in stuff too for what it produces, though that doesn't address the build tree like that module seems to</p>",
+        "id": 271925234,
+        "sender_full_name": "Sean",
+        "timestamp": 1644898822
+    },
+    {
+        "content": "<p>Where do we get a certificate?</p>",
+        "id": 271925768,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644899443
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> c7cd672c8 appears to break Linux:</p>\n<div class=\"codehilite\"><pre><span></span><code>Program received signal SIGSEGV, Segmentation fault.\n0x00007ffff7fe6ea5 in ?? () from /lib64/ld-linux-x86-64.so.2\n(gdb) bt\n#0  0x00007ffff7fe6ea5 in ?? () from /lib64/ld-linux-x86-64.so.2\n#1  0x00007ffff74e98b8 in __GI__dl_catch_exception (exception=exception@entry=0x7fffffffd300, operate=&lt;optimized out&gt;,\n    args=&lt;optimized out&gt;) at dl-error-skeleton.c:208\n#2  0x00007ffff74e9983 in __GI__dl_catch_error (objname=0x55555558b830, errstring=0x55555558b838,\n    mallocedp=0x55555558b828, operate=&lt;optimized out&gt;, args=&lt;optimized out&gt;) at dl-error-skeleton.c:227\n#3  0x00007ffff39dab59 in _dlerror_run (operate=operate@entry=0x7ffff39da420 &lt;dlclose_doit&gt;, args=0x6) at dlerror.c:170\n#4  0x00007ffff39da468 in __dlclose (handle=&lt;optimized out&gt;) at dlclose.c:46\n#5  0x00007ffff4bd8a9a in bu_dlclose (handle=0x6) at /home/cyapp/brlcad/src/libbu/dylib.c:66\n#6  0x00007ffff48ad034 in libdm_clear () at /home/cyapp/brlcad/src/libdm/dm_init.cpp:201\n#7  0x00007ffff48ad654 in libdm_initializer::~libdm_initializer (this=0x7ffff48e8590 &lt;LIBDM&gt;,\n    __in_chrg=&lt;optimized out&gt;) at /home/cyapp/brlcad/src/libdm/dm_init.cpp:217\n#8  0x00007ffff73d015e in __cxa_finalize (d=0x7ffff48e6c20) at cxa_finalize.c:83\n#9  0x00007ffff48970f7 in __do_global_dtors_aux () from /home/cyapp/brlcad-build/lib/libdm.so.20\n#10 0x00007fffffffdd90 in ?? ()\n</code></pre></div>",
+        "id": 271926187,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644899889
+    },
+    {
+        "content": "<p>Don't tell me Mac wants it one way and Linux the other...</p>",
+        "id": 271926263,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644899984
+    },
+    {
+        "content": "<p>it indeed is working much better for me, but  that 0x6 handle in your stack there is suspicious.  I think I may have been careless with the iterator.</p>",
+        "id": 271927565,
+        "sender_full_name": "Sean",
+        "timestamp": 1644901280
+    },
+    {
+        "content": "<p>yeah, end() shouldn't be valid and that's where I made it start.  surprisingly works...</p>",
+        "id": 271927626,
+        "sender_full_name": "Sean",
+        "timestamp": 1644901322
+    },
+    {
+        "content": "<p>fixing.</p>",
+        "id": 271927811,
+        "sender_full_name": "Sean",
+        "timestamp": 1644901514
+    },
+    {
+        "content": "<p>you're good enough to catch mistakes like that!  heh.  it was an invalid loop!  bogus handle was a dead give-away..</p>",
+        "id": 271928434,
+        "sender_full_name": "Sean",
+        "timestamp": 1644902262
+    },
+    {
+        "content": "<p>I feel first response should never be to inject platform identifiers... revert if needed, or at least give me a chance to fix it... see if latest is any better.</p>",
+        "id": 271928957,
+        "sender_full_name": "Sean",
+        "timestamp": 1644902794
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> confirmed, that's got it</p>",
+        "id": 271974799,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644932620
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  bad news is that the crash isn't gone... declared victory too soon.  there's still something very distinctly wrong in the loading/unloading..</p>",
+        "id": 271979343,
+        "sender_full_name": "Sean",
+        "timestamp": 1644934522
+    },
+    {
+        "content": "<p>That's weird.  As I recall that code is pretty straightfoward - load on initialize, unload on exit.  Not sure where to go hunting for trouble...</p>",
+        "id": 271979612,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644934631
+    },
+    {
+        "content": "<p>unless the bu_dlopen/bu_dlclose wrappers are missing something maybe?</p>",
+        "id": 271979751,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644934689
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I don't know if it helps any, but src/libbu/tests/dylib is intended to be a small, self-contained testing of that mechanism...</p>",
+        "id": 271980508,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644934995
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> do you know when this started?  (i.e. has it been doing it ever since the dm/ged plugin work, or did some more recent change kick it off?)</p>",
+        "id": 271980958,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644935153
+    },
+    {
+        "content": "<p>To me the strangest thing is that neither the local mac here nor the CI runners seem to be exhibiting it.  And the CI build for the mac indicates it's running the ASCII to .g conversions, which (at least on the Linux box here) did trigger crashing when the unloading wasn't working.</p>",
+        "id": 271981500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644935353
+    },
+    {
+        "content": "<p>It's the same behavior I've been seeing for months, I think since the dm/ged plugin work.  It doesn't appear to be 100% deterministic as it seems to depend what symbols are in use, implying it's involving the dynamic linker and when a particular symbol or set of symbols are encountered.</p>",
+        "id": 271987111,
+        "sender_full_name": "Sean",
+        "timestamp": 1644937576
+    },
+    {
+        "content": "<p>It doesn't appear to affect more complicated apps that call lots of symbols (e.g., mged or gcv, etc) as much (or at least as visibly).  Seems to be most noticeable on a handful of smaller simpler apps that essentially do nothing (but still load and unload nearly everything), and every now and then on something more complicated.</p>",
+        "id": 271987574,
+        "sender_full_name": "Sean",
+        "timestamp": 1644937794
+    },
+    {
+        "content": "<p>I think there's possibly something fundamental in play here (like the ordering) and Mac happens to be provoking.  When I watch the binary's DYLD loading/unloading, there is some strangeness going on.  The libged plugins are loading, and then it loads dm and it's dependency libraries.  It appears to be choking up when it goes to unload dm and friends.</p>",
+        "id": 271987988,
+        "sender_full_name": "Sean",
+        "timestamp": 1644937989
+    },
+    {
+        "content": "<p>Anything I can do to help?</p>",
+        "id": 271989269,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644938519
+    },
+    {
+        "content": "<p>Honestly, I'm not sure..  I just got a clue that it may be related to dm-X and dm-ogl, and that latter is still fully busted on Mac for me -- so that might be something you could check on -- if mged, archer, and such work for you on mac from a build dir.  If it works, we can maybe trace backwards to figure out where things diverge.</p>",
+        "id": 271992898,
+        "sender_full_name": "Sean",
+        "timestamp": 1644940122
+    },
+    {
+        "content": "<p>OK, I'll check on that.  I know qged worked with Qt6 on mac, but I didn't try archer and I'm not sure if qged was doing its swrast fallback or not...</p>",
+        "id": 271993165,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644940232
+    },
+    {
+        "content": "<p>From what I think I'm seeing is that apps that already link libdm and/or X11 have no problem.  It's when an app doesn't use either, but then libged loads libged-dm.dylib, that loads libdm and all it's deps.  It's when libdm's deps get unloaded that it segfaults.</p>",
+        "id": 271993171,
+        "sender_full_name": "Sean",
+        "timestamp": 1644940235
+    },
+    {
+        "content": "<p>which makes sense since an app using libdm is not going to unload it</p>",
+        "id": 271993232,
+        "sender_full_name": "Sean",
+        "timestamp": 1644940251
+    },
+    {
+        "content": "<p>I don't have a qt build.  I've been living in mged -c land for a while once ogl stopped working.</p>",
+        "id": 271993375,
+        "sender_full_name": "Sean",
+        "timestamp": 1644940305
+    },
+    {
+        "content": "<p>I haven't tried an opengl-disabled build to see if non-classic mode will fire up X correctly</p>",
+        "id": 271993488,
+        "sender_full_name": "Sean",
+        "timestamp": 1644940331
+    },
+    {
+        "content": "<p>OH!  Yeah, I had to refactor some code for a libgcv plugin because of that - apparently a dynamically loaded lib can't go and load another dynamically loaded lib.</p>",
+        "id": 271993619,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644940379
+    },
+    {
+        "content": "<p>Hmm.  I'd hate to give up the libged dm command...</p>",
+        "id": 271993831,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644940447
+    },
+    {
+        "content": "<p>Archer does work from the build dir</p>",
+        "id": 271995734,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644941107
+    },
+    {
+        "content": "<p>Okay, I think I just ruled out X11/ogl -- if I remove libdm-X and libdm-ogl, it still segfaults</p>",
+        "id": 271996634,
+        "sender_full_name": "Sean",
+        "timestamp": 1644941431
+    },
+    {
+        "content": "<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>dyld: unloaded: &lt;970A62D7-21A7-3363-92AC-41D3E3ED2AF5&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-autoview.dylib\n!!! REMOVING 0x7fd514c08d00 unknown\ndyld: unloaded: &lt;D8509635-B237-3585-B70C-823C95F4B5CB&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-attr.dylib\n!!! REMOVING 0x7fd514c08ba0 unknown\ndyld: unloaded: &lt;F4435FE5-243C-3286-B0D3-CEDC50774EEE&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-arot.dylib\n!!! REMOVING 0x7fd514e05d90 unknown\ndyld: unloaded: &lt;B9E74045-8CE7-3438-B699-54645171BFC3&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-swrast.dylib\ndyld: unloaded: &lt;21900CBB-094E-349C-A1B2-BAD779BDCF15&gt; /Users/morrison/brlcad.main/.build/lib/libosmesa.dylib\n!!! REMOVING 0x7fd514e059b0 unknown\ndyld: unloaded: &lt;C363B743-FE6B-3D4A-8513-953A5F6FAF28&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-ps.dylib\n!!! REMOVING 0x7fd514e054c0 unknown\ndyld: unloaded: &lt;E8A365D0-5923-386F-A9BD-7DA434D46324&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-plot.dylib\n!!! REMOVING 0x7fd514d069b0 unknown\ndyld: unloaded: &lt;DE144727-5E38-36CE-BFDD-A11CB151703E&gt; /Users/morrison/brlcad.main/.build/lib/libdm.20.dylib\ndyld: unloaded: &lt;219AC144-E743-3037-8F1C-9B313D82BB1A&gt; /Users/morrison/brlcad.main/.build/lib/libpkg.20.dylib\ndyld: unloaded: &lt;0AC2C158-06D9-3273-962E-FD0F51813D60&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-txt.dylib\nzsh: segmentation fault  DYLD_PRINT_LIBRARIES=1 bin/cad_user 2&gt;&amp;1\n</code></pre></div>",
+        "id": 271996718,
+        "sender_full_name": "Sean",
+        "timestamp": 1644941465
+    },
+    {
+        "content": "<p>So the \"REMOVING &lt;address&gt; unknown\" warnings are the problem?</p>",
+        "id": 271996890,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644941530
+    },
+    {
+        "content": "<p>so what's going on there is it's unloading everything, is unloading the last libdm-*.dylib (libdm-plot.dylib in this example) and it unloads libdm itself since reference-counting-wise, nothing else is using it.</p>",
+        "id": 271997047,
+        "sender_full_name": "Sean",
+        "timestamp": 1644941587
+    },
+    {
+        "content": "<p>Ah, so it's getting to libdm before libdm-txt, which is a no-no?</p>",
+        "id": 271997142,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644941630
+    },
+    {
+        "content": "<p>no, that's my manual debug printing, I'm printing out all the library pointers on load and unload.  You put them in a std::set, we the name is unknown, but it's basically the lines that follow -- and in the full log, the pointer address can be matched to the load statement where the name was known</p>",
+        "id": 271997274,
+        "sender_full_name": "Sean",
+        "timestamp": 1644941670
+    },
+    {
+        "content": "<p>Oh, OK.</p>",
+        "id": 271997335,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644941691
+    },
+    {
+        "content": "<p>I think I see what's wrong, but I'm not sure what to do about it.</p>",
+        "id": 271997378,
+        "sender_full_name": "Sean",
+        "timestamp": 1644941706
+    },
+    {
+        "content": "<p>Do I need to redesign or back off the plugin approach?</p>",
+        "id": 271999128,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644942420
+    },
+    {
+        "content": "<p>1) libged static initializer runs and plugins get dlopened, each one getting resolved by the dynamic linker which loads its dependent libraries, among those being..<br>\n2) libged-dm loads, which dynamic loads libdm, which static initializer runs and plugins get dlopened, each one getting... yada yada, and then<br>\n3) app runs, does it's thing, returns from main<br>\n4) libged destructor runs, starts unloading ged plugins, libged-dm unloads for example but dependencies are not yet unloaded<br>\n5) libdm destructor runs, starts unloading dm plugins and dependencies (perhaps asynchronously), and when it gets to the last plugin ...<br>\n6) dynamic linker unloads libdm itself, and this appears to happen while libdm's destructor is still running<br>\n7) seg faults, presumably on next iteration of the loop or on return from the destructor</p>",
+        "id": 272000118,
+        "sender_full_name": "Sean",
+        "timestamp": 1644942828
+    },
+    {
+        "content": "<p>please don't go shotgunning the plugins just yet! -- I have a swath of unpushed commits rebased on main, hundreds of changes to eliminate the per-command API</p>",
+        "id": 272000521,
+        "sender_full_name": "Sean",
+        "timestamp": 1644942982
+    },
+    {
+        "content": "<p>Don't worry, I'm not going to do anything drastic.  Just trying to get a sense of what we're facing</p>",
+        "id": 272000601,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943017
+    },
+    {
+        "content": "<p>it'll conflict for sure if you go ripping on it too much<br>\nI think what is needed is to either ensure destruction is deferred, or order is somehow guaranteed by symbols</p>",
+        "id": 272000646,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943041
+    },
+    {
+        "content": "<p>If I absolutely have to I can ditch the dm command as a libged command and make it available some other way, but it's still a potential issue if anyone else happens to set up a similar conundrum for the unloaders...</p>",
+        "id": 272000819,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943108
+    },
+    {
+        "content": "<p>I mean there is one possibility of simply not auto-loading everything.  Only load as called.</p>",
+        "id": 272000824,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943111
+    },
+    {
+        "content": "<p>Would that help in the unloading calls though?  Or do you mean immediately unloading after execution as well?</p>",
+        "id": 272000904,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943155
+    },
+    {
+        "content": "<p>yeah, I think the dm plugin just provokes the issue, and isn't the issue itself.  seems reasonable/likely that future plugin will require some lib.  only issue might be like you said -- a dylib with a static initializer that loaded another dylib with a static initializer, and trying to avoid that</p>",
+        "id": 272000983,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943191
+    },
+    {
+        "content": "<p>oh gosh, no, not unloading after execution.  only loading what is used, and unloading everything that was loaded on shutdown.  that would handle this specific case (because very little uses the dm plugin)</p>",
+        "id": 272001139,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943258
+    },
+    {
+        "content": "<p>and apps that DO use the dm plugin appear to be gui and link dm, so it's never unloaded</p>",
+        "id": 272001170,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943273
+    },
+    {
+        "content": "<p>Ah.  So the gsh tool should provoke the issue then, if the dm command is used.</p>",
+        "id": 272001249,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943306
+    },
+    {
+        "content": "<p>Oh, nope - I added libdm to that lib list</p>",
+        "id": 272001334,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943333
+    },
+    {
+        "content": "<p>the test would be to run something that dynamically loads libdm, run the dm command, and see if it behaves on exit</p>",
+        "id": 272001344,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943339
+    },
+    {
+        "content": "<p>yeah, it'd require removing libdm from gsh's lib list, run dm command, and see if exit behaves</p>",
+        "id": 272001445,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943391
+    },
+    {
+        "content": "<p>I'll try that here... one sec.  Looks like I've got some actual dm library calls in there, so I'll have to turn off a couple things.</p>",
+        "id": 272001711,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943510
+    },
+    {
+        "content": "<p>interesting.  so if I remove all dm plugins, it still loads libdm dynamic, and eventually unloads it some time after libged-dm is unloaded seemingly without issue.  valgrind is clean.</p>",
+        "id": 272001969,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943613
+    },
+    {
+        "content": "<p>which is to say it's not simply returning from libdm's destructor that's causing the seg fault. it's that it is in the plugin unloading loop and it unloads a plugin that the corruption happens</p>",
+        "id": 272002324,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943772
+    },
+    {
+        "content": "<p>happens even with just the txt plugin and no others..</p>",
+        "id": 272002372,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943794
+    },
+    {
+        "content": "<p>Is there anything different about the libdm plugins compared to the libged plugins?</p>",
+        "id": 272002492,
+        "sender_full_name": "Sean",
+        "timestamp": 1644943833
+    },
+    {
+        "content": "<p>Not intentionally...</p>",
+        "id": 272002788,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943942
+    },
+    {
+        "content": "<p>OK, confirm - if I take out the libdm explicit library calls from gsh, it crashes on exit after running \"dm types\"</p>",
+        "id": 272002877,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644943978
+    },
+    {
+        "content": "<p>I'll go ahead and commit that turned off so we have a simple test case - will be easy to turn back on later.</p>",
+        "id": 272002944,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644944011
+    },
+    {
+        "content": "<p>so this all centers around the c++ trick of using static initialization with a class we're using to ensure constructor/destructor code is called when a library is loaded/unloaded, and that's what is not playing -- it's unloading the library before the destructor is done</p>",
+        "id": 272003470,
+        "sender_full_name": "Sean",
+        "timestamp": 1644944190
+    },
+    {
+        "content": "<p>Options I think are....<br>\n1) make libdm not plugin-based, as that would avoid a dynamic lib loading other dynamic-loading/unloading libs, <br>\n2) make libged only load plugins on-demand and hope any plugins like dm that load other dynamic-loading libs will already be loaded,<br>\n3) defer unloading to libbu unloading -- basically make bu_dlclose schedule something for closure and wait,<br>\n4) find a different mechanism (avoid using constructor/destructor since that's at the heart of why this fails)</p>",
+        "id": 272004540,
+        "sender_full_name": "Sean",
+        "timestamp": 1644944592
+    },
+    {
+        "content": "<p>1) is possible - it was done primarily to keep Tcl out of the core libs, but I can also just put those backends requiring it behind an ENABLE_TCL check like that one shader in liboptical.</p>",
+        "id": 272004937,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644944732
+    },
+    {
+        "content": "<p>My bigger concern is what happens if we start supporting 3rd party GED commands and someone else adds a command that does their own libdm-esque magic behind the scenes.</p>",
+        "id": 272005096,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644944781
+    },
+    {
+        "content": "<p>3) appeals, but I don't know how practical it is</p>",
+        "id": 272005152,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644944804
+    },
+    {
+        "content": "<p>1) is probably the shortest path back to working reliably, and realistically it's pretty unlikely we're going to get a lot of custom libdm backend implementations anytime soon to take advantage of the modularity.</p>",
+        "id": 272005578,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644944931
+    },
+    {
+        "content": "<p>I also wonder what will happen if we expose libgcv through any of the GED commands - mightn't there be a similar issue?</p>",
+        "id": 272005854,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644945020
+    },
+    {
+        "content": "<p>Would 4) involve (say) making ged_init and ged_free be responsible for plugin loading and unloading?</p>",
+        "id": 272007887,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644945766
+    },
+    {
+        "content": "<p>yeah, something like that - making the loading and unloading a little more explicit.  I suspect just having the loop that does destruction be explicitly called would avoid the segfault because the dynamic loader would know that it can't unload the parent dm/ged/gcv library</p>",
+        "id": 272008370,
+        "sender_full_name": "Sean",
+        "timestamp": 1644945949
+    },
+    {
+        "content": "<p>I think I can try #3 pretty quickly, and see if it does the trick.  I suspect it will.  The downside is memory use until libbu is unloaded.  Probably could have API forcibly unload on demand if that becomes an issue, but unlikely an issue in our case until we're talking about thousands of plugins.</p>",
+        "id": 272009447,
+        "sender_full_name": "Sean",
+        "timestamp": 1644946312
+    },
+    {
+        "content": "<p>Sounds good.  If that doesn't work let me know if you want me to do either 1) or 4)</p>",
+        "id": 272009706,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644946393
+    },
+    {
+        "content": "<p>may still be a benefit to doing #2 (faster load times) -- there is some occasional huge pause on certain (usually infrequent) runs that I assume is something the dynamic loader is doing.  seem the pause especially on Windows, 30-60+sec before mged displays.</p>",
+        "id": 272010230,
+        "sender_full_name": "Sean",
+        "timestamp": 1644946627
+    },
+    {
+        "content": "<p>Deferred appears to work nicely:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>...\n!!! REMOVING 0x7fdd55c0a030 unknown\n!!! REMOVING 0x7fdd55c09dc0 unknown\n!!! REMOVING 0x7fdd55c09b50 unknown\n!!! REMOVING 0x7fdd55c098e0 unknown\n!!! REMOVING 0x7fdd55c09670 unknown\n!!! REMOVING 0x7fdd55c09330 unknown\n!!! REMOVING 0x7fdd55c09130 unknown\n!!! REMOVING 0x7fdd55c08ef0 unknown\n!!! REMOVING 0x7fdd55c08d90 unknown\n!!! LIBDM DESTRUCTOR\n!!! REMOVING 0x7fdd579054c0 unknown\n!!! REMOVING 0x7fdd57905140 unknown\n!!! REMOVING 0x7fdd57904a50 unknown\n!!! REMOVING 0x7fdd5780ecc0 unknown\n!!! REMOVING 0x7fdd55e06400 unknown\n!!! REMOVING 0x7fdd55d07010 unknown\ndyld: unloaded: &lt;484BDA57-EC5C-3533-8271-1213BE720173&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-ogl.dylib\ndyld: unloaded: &lt;7CD794FB-07E7-3E51-B7CE-CB9585477278&gt; /usr/local/opt/libxrender/lib/libXrender.1.dylib\ndyld: unloaded: &lt;466439D8-1576-33B8-AE38-F4AD4CBCDC3F&gt; /opt/X11/lib/libGLU.1.dylib\ndyld: unloaded: &lt;0AC2C158-06D9-3273-962E-FD0F51813D60&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-txt.dylib\ndyld: unloaded: &lt;E8A365D0-5923-386F-A9BD-7DA434D46324&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-plot.dylib\ndyld: unloaded: &lt;C363B743-FE6B-3D4A-8513-953A5F6FAF28&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-ps.dylib\ndyld: unloaded: &lt;B9E74045-8CE7-3438-B699-54645171BFC3&gt; /Users/morrison/brlcad.main/.build/libexec/dm/libdm-swrast.dylib\ndyld: unloaded: &lt;21900CBB-094E-349C-A1B2-BAD779BDCF15&gt; /Users/morrison/brlcad.main/.build/lib/libosmesa.dylib\ndyld: unloaded: &lt;6461ED77-30C4-3D90-8FFE-224EF5B8365F&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-dsp.dylib\ndyld: unloaded: &lt;1536E3E1-0B02-3F94-92A2-00D48E37B256&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-edmater.dylib\ndyld: unloaded: &lt;F0DAA927-CCFA-3F6D-B79B-BC27BDB6A3A8&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-env.dylib\ndyld: unloaded: &lt;74AF84F3-50D3-398F-9470-8C0F4DC17813&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-erase.dylib\ndyld: unloaded: &lt;52AACC7B-7DD1-3EA6-BF05-7D1073E5ADC1&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-exists.dylib\ndyld: unloaded: &lt;35739FC4-A62C-3F93-8E41-B355D7E4D5A2&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-expand.dylib\ndyld: unloaded: &lt;C079326A-9961-3C29-9CB0-18D9CCA48C32&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-eye_pos.dylib\ndyld: unloaded: &lt;F40B173E-8839-3244-A200-C1BEAC11EB7E&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-facetize.dylib\ndyld: unloaded: &lt;47715816-3B66-3BDF-85E8-915D193BDDD4&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-fb2pix.dylib\ndyld: unloaded: &lt;CA5B33DE-CF2C-3D33-95D8-CDCD86B4C109&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-fbclear.dylib\ndyld: unloaded: &lt;479418C5-FF5B-3D14-BEEB-D095AD4D4C55&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-find.dylib\ndyld: unloaded: &lt;7F8475E5-81F6-3032-9465-72E7D321179A&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-form.dylib\ndyld: unloaded: &lt;0DABEEDD-2EBE-327A-8B17-6C9FFEDA693B&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-fracture.dylib\ndyld: unloaded: &lt;5E8181FA-7584-37BF-96BE-7E9819B89D52&gt; /Users/morrison/brlcad.main/.build/libexec/ged/libged-gdiff.dylib\n...\n</code></pre></div>",
+        "id": 272019805,
+        "sender_full_name": "Sean",
+        "timestamp": 1644950807
+    },
+    {
+        "content": "<p>FYA, I'm trying to get set up with Visual Studio 2022 now - I think the Github CI system made the upgrade.</p>",
+        "id": 272023831,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644952538
+    },
+    {
+        "content": "<p>Rather worrisome in that the openNURBS build appears to be failing with an internal compiler error...</p>",
+        "id": 272024020,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644952615
+    },
+    {
+        "content": "<p>basically it cruises through the destructor and schedules all the dylibs for closing.  then when libbu is unloaded or an explicit dlunload() is called, it actually closes them all.</p>",
+        "id": 272024514,
+        "sender_full_name": "Sean",
+        "timestamp": 1644952833
+    },
+    {
+        "content": "<p>alrighty.. all tests back to passing.  still no ogl, but progress!</p>",
+        "id": 272024578,
+        "sender_full_name": "Sean",
+        "timestamp": 1644952875
+    },
+    {
+        "content": "<p>I'm still sorting through compiler errors with the tamu students.. almost all ran into issues.    any idea why CHECK_CXX_FLAG(fsanitize=fuzzer) would be passing on Windows???  It did, and then proceeded to fail during compile because of the flag.</p>",
+        "id": 272024792,
+        "sender_full_name": "Sean",
+        "timestamp": 1644952978
+    },
+    {
+        "content": "<p>Not yet - it's something about Visual Studio 2022</p>",
+        "id": 272024844,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644953006
+    },
+    {
+        "content": "<p>another tried in WSL, which I've done myself, but their build ended up unable to find Tcl's configure for some reason</p>",
+        "id": 272024861,
+        "sender_full_name": "Sean",
+        "timestamp": 1644953016
+    },
+    {
+        "content": "<p>I'm seeing it myself here, but I don't know yet why that test would pass</p>",
+        "id": 272024869,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644953020
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>CHECK_START: Performing Test FSANITIZE_FUZZER_CXX_FLAG_FOUND\nCHECK_PASS: Success\nPerforming C++ SOURCE FILE Test FSANITIZE_FUZZER_CXX_FLAG_FOUND succeeded with the following output:\nChange Dir: C:/brlcad-build/CMakeFiles/CMakeTmp\n\nRun Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_30228.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:m &amp;&amp; Microsoft (R) Build Engine version 17.1.0+ae57d105c for .NETFramework^M\nCopyright (C) Microsoft Corporation. All rights reserved.^M\n^M\n  Microsoft (R) C/C++ Optimizing Compiler Version 19.31.31104 for x64^M\n  Copyright (C) Microsoft Corporation.  All rights reserved.^M\n  cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _POSIX_C_SOURCE=200809L /D _XOPEN_SOURCE=700 /D FSANITIZE_FUZZER_CXX_FLAG_FOUND /D &quot;CMAKE_INTDIR=\\&quot;Debug\\&quot;&quot; /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo&quot;cmTC_30228.dir\\Debug\\\\&quot; /Fd&quot;cmTC_30228.dir\\Debug\\vc143.pdb&quot; /external:W3 /Gd /TP /errorReport:queue  -fsanitize=fuzzer &quot;C:\\brlcad-build\\CMakeFiles\\CMakeTmp\\src.cxx&quot;^M\n  src.cxx^M\n  cmTC_30228.vcxproj -&gt; C:\\brlcad-build\\CMakeFiles\\CMakeTmp\\Debug\\cmTC_30228.exe^M\n\n\nSource file was:\nint main() { return 0; }\n</code></pre></div>",
+        "id": 272025974,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644953482
+    },
+    {
+        "content": "<p>ahh, <a href=\"https://www.google.com/search?client=safari&amp;rls=en&amp;q=visual+studio+2022+fsanitize%3Dfuzzer&amp;ie=UTF-8&amp;oe=UTF-8\">https://www.google.com/search?client=safari&amp;rls=en&amp;q=visual+studio+2022+fsanitize%3Dfuzzer&amp;ie=UTF-8&amp;oe=UTF-8</a></p>",
+        "id": 272025991,
+        "sender_full_name": "Sean",
+        "timestamp": 1644953491
+    },
+    {
+        "content": "<p>they actually added it</p>",
+        "id": 272026030,
+        "sender_full_name": "Sean",
+        "timestamp": 1644953505
+    },
+    {
+        "content": "<p>so then the question is why does it fail later...</p>",
+        "id": 272026056,
+        "sender_full_name": "Sean",
+        "timestamp": 1644953519
+    },
+    {
+        "content": "<p>looks like the top-level unprotected one is stray.  we have a fuzz regression test that does a direct test and links proper</p>",
+        "id": 272026505,
+        "sender_full_name": "Sean",
+        "timestamp": 1644953701
+    },
+    {
+        "content": "<p>I removed it, doesn't appear to be used</p>",
+        "id": 272026816,
+        "sender_full_name": "Sean",
+        "timestamp": 1644953827
+    },
+    {
+        "content": "<p><a href=\"https://discourse.mcneel.com/t/building-opennurbs-public-with-visualstudio2022-results-in-compiler-error/137817\">https://discourse.mcneel.com/t/building-opennurbs-public-with-visualstudio2022-results-in-compiler-error/137817</a></p>",
+        "id": 272039002,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644959625
+    },
+    {
+        "content": "<p><a href=\"https://github.com/microsoft/vcpkg/issues/19561\">https://github.com/microsoft/vcpkg/issues/19561</a></p>",
+        "id": 272040050,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644960147
+    },
+    {
+        "content": "<p>It narrows down fairly quickly to trying to call methods on the const_cast&lt;ON_SerialNumberMap*&gt;(this) pointer.  Not sure yet how to work around it.</p>",
+        "id": 272042306,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644961283
+    },
+    {
+        "content": "<p>Grr.  I don't have access to the Microsoft compiler bug page referenced in the vcpkg discussion.</p>",
+        "id": 272043944,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644962225
+    },
+    {
+        "content": "<p>Looks like all we can tell students until a workaround is found or Microsoft pushes a fix is to use VS2019</p>",
+        "id": 272044023,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644962269
+    },
+    {
+        "content": "<p>removing the consts and the casts doesn't seem to help</p>",
+        "id": 272044120,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644962312
+    },
+    {
+        "content": "<p>OK... from the \"cheap but functional\" school...  It looks like that particular class method isn't actually used anywhere, so we can just turn it off completely.</p>",
+        "id": 272045791,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644963231
+    },
+    {
+        "content": "<p>Blast, typoed the summary line.  It's unused</p>",
+        "id": 272046249,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644963475
+    },
+    {
+        "content": "<p>I wonder if their build system works, implying it being something we're passing in that's untested.  I don't see reference to that error in their tracker.  If it uniquely affects us, it's probably our combination of flags..</p>",
+        "id": 272046677,
+        "sender_full_name": "Sean",
+        "timestamp": 1644963657
+    },
+    {
+        "content": "<p>looks like cmake guys encountered an issue with the /FS flag recently that they addressed, maybe related</p>",
+        "id": 272046747,
+        "sender_full_name": "Sean",
+        "timestamp": 1644963701
+    },
+    {
+        "content": "<p>confirmed on the mac here that gsh now shuts down clean.  That was some nice work <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 272047337,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644964013
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> as far as OpenGL is concerned - I think I may have asked you this already, but does glxgears or one of the other X11 OpenGL demos run successfully on your Mac?</p>",
+        "id": 272051804,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644966866
+    },
+    {
+        "content": "<p>Just got a successful build with Visual Studio 2022 (needed a clean build dir)</p>",
+        "id": 272058080,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644970787
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> yep, no problems with glxgears or previous mgeds for that matter</p>",
+        "id": 272322583,
+        "sender_full_name": "Sean",
+        "timestamp": 1645132019
+    },
+    {
+        "content": "<p>any idea what this is about?  <a href=\"/user_uploads/1549/iKD9_ZRvmkA609uM1p3eruyc/MicrosoftTeams-image.png\">MicrosoftTeams-image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/iKD9_ZRvmkA609uM1p3eruyc/MicrosoftTeams-image.png\" title=\"MicrosoftTeams-image.png\"><img src=\"/user_uploads/1549/iKD9_ZRvmkA609uM1p3eruyc/MicrosoftTeams-image.png\"></a></div>",
+        "id": 272322604,
+        "sender_full_name": "Sean",
+        "timestamp": 1645132036
+    },
+    {
+        "content": "<p>Yeah, I was going to say, I have a clean 2022 from two students now .. but one has those errors in the external project builds (maybe all of them)</p>",
+        "id": 272322758,
+        "sender_full_name": "Sean",
+        "timestamp": 1645132109
+    },
+    {
+        "content": "<p>maddening... why doesn't it fail with the mac here???</p>",
+        "id": 272329755,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645134907
+    },
+    {
+        "content": "<p>That's one of those rather unhelpful Visual Studio errors you get when a custom target fails.</p>",
+        "id": 272329779,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645134932
+    },
+    {
+        "content": "<p>First question - what version of CMake are they using?</p>",
+        "id": 272329802,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645134949
+    },
+    {
+        "content": "<p>For libdm+opengl, what does running ./src/libdm/tests/dm_test from the build directory show?</p>",
+        "id": 272330242,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645135193
+    },
+    {
+        "content": "<p>@starseeker I figured that one out.  The full log had better detail.  Turns out MSVC automatically updated/updates itself, so the compiler that CMake had originally detected no longer existed.</p>",
+        "id": 272432216,
+        "sender_full_name": "Sean",
+        "timestamp": 1645205952
+    },
+    {
+        "content": "<p>I think that may explain a couple build failures commonly encountered by people who have recently installed MSVC.  I'm not sure if we can detect that situation as that error is absolutely inscrutible, or maybe put some advice into the Compiling page instructions to ensure MSVC is completely updated before proceeding with CMake (but then MSVC could update at any time).</p>",
+        "id": 272432480,
+        "sender_full_name": "Sean",
+        "timestamp": 1645206065
+    },
+    {
+        "content": "<p>I suppose it's not as common on Mac/Linux/BSD simply because the compiler isn't sitting in a versioned directory like msvc's compiler is.</p>",
+        "id": 272432528,
+        "sender_full_name": "Sean",
+        "timestamp": 1645206097
+    },
+    {
+        "content": "<p>Also figured out one of the other common build errors some of them ran into.  If you do a Git for Windows clone of the code, the build will fail in WSL (Ubuntu) because some of the build logic appears to require unix line endings (e.g., libpng seems to be running awk).</p>",
+        "id": 272432940,
+        "sender_full_name": "Sean",
+        "timestamp": 1645206289
+    },
+    {
+        "content": "<p>Not sure that can be detected either, but can put a note in Compiling that one must fully start in WSL if you're going that route.</p>",
+        "id": 272433145,
+        "sender_full_name": "Sean",
+        "timestamp": 1645206386
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/272329802\">said</a>:</p>\n<blockquote>\n<p>First question - what version of CMake are they using?</p>\n</blockquote>\n<p>Always the latest.</p>",
+        "id": 272433187,
+        "sender_full_name": "Sean",
+        "timestamp": 1645206403
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/272330242\">said</a>:</p>\n<blockquote>\n<p>For libdm+opengl, what does running ./src/libdm/tests/dm_test from the build directory show?</p>\n</blockquote>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>(base) morrison@agua .build % src/libdm/tests/dm_test\nload msgs: dlsym(0x7f80706048d0, fb_plugin_info): symbol not found\nUnable to load symbols from './libexec/dm/libdm-plot.dylib' (skipping)\nCould not find 'fb_plugin_info' symbol in plugin\ndlsym(0x7f807040bf60, fb_plugin_info): symbol not found\nUnable to load symbols from './libexec/dm/libdm-ps.dylib' (skipping)\nCould not find 'fb_plugin_info' symbol in plugin\n\nAvailable types:\n    ogl\n    X\n    plot\n    ps\n    swrast\n    txt\n    nu\nnu valid: 1\nplot valid: 1\nX valid: 1\nogl valid: 1\nosgl valid: 0\nwgl valid: 0\ndmp name: nu\nopen called\ndmp name: txt\nclose called\nrecommended type: ogl\n</code></pre></div>",
+        "id": 272433320,
+        "sender_full_name": "Sean",
+        "timestamp": 1645206474
+    },
+    {
+        "content": "<p>anything else to check <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ?</p>",
+        "id": 273556351,
+        "sender_full_name": "Sean",
+        "timestamp": 1646083574
+    },
+    {
+        "content": "<p>Maybe check whether the older (working) versions are linking to any libraries that are different from the newer version?</p>\n<p>I don't know how much trouble it would be, but it would be interesting to know if qged works on that platform or not (the qged setup shouldn't require X11 opengl, so I'm curious as to whether the problem also manifests if we take X out of the equation...)</p>",
+        "id": 273556707,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646083747
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I think the bzflag reboot must have introduced a new default compiler - libbu's sort.c is suddenly making it unhappy...</p>",
+        "id": 273706885,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646167257
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> yes, see announcement -- major OS upgrade happened</p>",
+        "id": 273706927,
+        "sender_full_name": "Sean",
+        "timestamp": 1646167286
+    },
+    {
+        "content": "<p>Ah, OK.  I can see where the error is coming from, but I'm not sure what the \"correct\" thing to do instead is...</p>",
+        "id": 273706948,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646167305
+    },
+    {
+        "content": "<p>I'll can take a look at it, I hadn't gotten to compiling there yet.   Been chasing fires, reviewing PR commits, and answering questions all day.</p>",
+        "id": 273707121,
+        "sender_full_name": "Sean",
+        "timestamp": 1646167399
+    },
+    {
+        "content": "<p>speaking of which... I'll create another thread for an e-mail that came in</p>",
+        "id": 273707145,
+        "sender_full_name": "Sean",
+        "timestamp": 1646167415
+    },
+    {
+        "content": "<p>@starseeker sorry, that was me bashing around. Clang 13 now, gcc 10.3 is also installed, so -DCMAKE_C_COMPILER=gcc</p>",
+        "id": 273742914,
+        "sender_full_name": "Erik",
+        "timestamp": 1646187160
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> no worries - we just need to fix the issue.  I'm not confident I know what the \"right\" answer should be yet...</p>",
+        "id": 273744321,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646187960
+    },
+    {
+        "content": "<p>the subtracting a null ptr thing is buried in a macro from what I saw, could take a bit of doing to tease out. Using gcc pulls a sysinfo bridge header that mucks up libbu linking, that test should be moved from 'have the header' to 'can link the symbol' I think</p>",
+        "id": 273744468,
+        "sender_full_name": "Erik",
+        "timestamp": 1646188084
+    },
+    {
+        "content": "<p>I just did a build on the latest Fedora, compiled clean, mgen runs, but then abruptly closes after drawing anything and running rt…. Rt window displays the rendering.  Terminal output says mged was Killed.</p>",
+        "id": 274564433,
+        "sender_full_name": "Sean",
+        "timestamp": 1646756434
+    },
+    {
+        "content": "<p>ran in gdb and there’s nothing to break on as there indeed appears to be something in the system that send mged the kill signal after forking off the rt process.</p>",
+        "id": 274564673,
+        "sender_full_name": "Sean",
+        "timestamp": 1646756532
+    },
+    {
+        "content": "<p>I’ve only seen that before when a process attempts to allocate too much memory, but haven’t yet seen evidence that’s what’s going on here</p>",
+        "id": 274564796,
+        "sender_full_name": "Sean",
+        "timestamp": 1646756578
+    },
+    {
+        "content": "<p>Oof, okay I found the evidence.  It is getting killed by the Out of memory monitor.  Not seeing why as it only appears to be using 1mb…</p>",
+        "id": 274566149,
+        "sender_full_name": "Sean",
+        "timestamp": 1646757082
+    },
+    {
+        "content": "<p>Ah, so turns out mged is using 5.4GB just with mged open… and that laptop is my low-resource test box, only has 4GB + 4GB swap.  It is running out of memory.  Seems a bit nuts that mged is using that much with essentially nothing open.</p>",
+        "id": 274570015,
+        "sender_full_name": "Sean",
+        "timestamp": 1646758673
+    },
+    {
+        "content": "<p>Looks like it’s something in DM.  Every attach X is adding 1.5GB usage.  Kicking off the tcltk gui adds over 4GB (presumably from the dm+fb).</p>",
+        "id": 274574145,
+        "sender_full_name": "Sean",
+        "timestamp": 1646760216
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  can you see what mged does for you if you run mged -c share/db/moss.g. , attach nu, attach X , close the window, attach X again, then draw all.g. ?</p>",
+        "id": 274576128,
+        "sender_full_name": "Sean",
+        "timestamp": 1646761042
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Wipes out with the following error:</p>\n<div class=\"codehilite\"><pre><span></span><code>X Error of failed request:  BadDrawable (invalid Pixmap or Window parameter)\n  Major opcode of failed request:  62 (X_CopyArea)\n  Resource id in failed request:  0x460000a\n  Serial number of failed request:  3473\n  Current serial number in output stream:  3474\n</code></pre></div>",
+        "id": 274602373,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646771546
+    },
+    {
+        "content": "<p>I'm also seeing a memory bump here.  Not sure why yet.</p>",
+        "id": 274604054,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646772329
+    },
+    {
+        "content": "<p>(As an aside, here's something a little weird from valgrind when I run attach X):</p>\n<div class=\"codehilite\"><pre><span></span><code>==1409798== Invalid read of size 1\n==1409798==    at 0x483FEF0: strcmp (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)\n==1409798==    by 0x90A999E: _XimUnRegisterIMInstantiateCallback (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x9090892: XUnregisterIMInstantiateCallback (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x90A9866: _XimRegisterIMInstantiateCallback (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x909080C: XRegisterIMInstantiateCallback (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x5A392F2: TkpOpenDisplay (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0701: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0567: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0F4E: TkCreateMainWindow (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59ABA1D: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59AB40C: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A349C: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==  Address 0xf205dc1 is 1 bytes inside a block of size 9 free&#39;d\n==1409798==    at 0x483CA3F: free (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)\n==1409798==    by 0x909FB3F: XSetLocaleModifiers (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x5A39ACA: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x5A39A4F: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x90A9866: _XimRegisterIMInstantiateCallback (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x909080C: XRegisterIMInstantiateCallback (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x5A392F2: TkpOpenDisplay (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0701: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0567: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0F4E: TkCreateMainWindow (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59ABA1D: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59AB40C: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==  Block was alloc&#39;d at\n==1409798==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)\n==1409798==    by 0x909F756: _XlcDefaultMapModifiers (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x909FB2A: XSetLocaleModifiers (in /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0)\n==1409798==    by 0x5A39ACA: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x5A392D9: TkpOpenDisplay (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0701: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0567: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A0F4E: TkCreateMainWindow (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59ABA1D: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59AB40C: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x59A349C: ??? (in /usr/lib/x86_64-linux-gnu/libtk8.6.so)\n==1409798==    by 0x129B98: gui_setup (attach.c:333)\n</code></pre></div>",
+        "id": 274604215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646772400
+    },
+    {
+        "content": "<p>Memory is being allocated at if_X24.c:2065, from a size calculation at if_X24.c:1997</p>",
+        "id": 274605634,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646773040
+    },
+    {
+        "content": "<p>both ifp-&gt;i-&gt;if_max_height and  ifp-&gt;i-&gt;if_max_width are set to 20480</p>",
+        "id": 274605843,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646773129
+    },
+    {
+        "content": "<p>I think that's coming from src/libdm/include/private.h:129</p>",
+        "id": 274606177,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646773240
+    },
+    {
+        "content": "<p>However, that doesn't explain what's going on when the window is closed...</p>",
+        "id": 274606749,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646773455
+    },
+    {
+        "content": "<p>Interestingly, the same general problem happens with ogl:</p>\n<div class=\"codehilite\"><pre><span></span><code>ATTACHING ogl (X Windows with OpenGL graphics)\nmged&gt; X Error of failed request:  GLXBadDrawable\n  Major opcode of failed request:  151 (GLX)\n  Minor opcode of failed request:  5 (X_GLXMakeCurrent)\n  Serial number of failed request:  1252\n  Current serial number in output stream:  1252\n</code></pre></div>",
+        "id": 274607028,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646773573
+    },
+    {
+        "content": "<p>Also seems to be specific to the first attach - if I attach multiple windows and close the second, I can attach a new one successfully.</p>",
+        "id": 274609505,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646774815
+    },
+    {
+        "content": "<p>Clearly memory is not being freed when the window is closed...</p>",
+        "id": 274609571,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646774841
+    },
+    {
+        "content": "<p>None of dm_close,  fb_close nor fb_close_existing gets triggered when the window closes.</p>",
+        "id": 274610032,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646775049
+    },
+    {
+        "content": "<p>Oof.  The first thing that comes to mind is to have the dm_open command bind a some Tcl command that will call dm_close  to the Tk &lt;Destroy&gt; event....</p>",
+        "id": 274610986,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646775523
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 274695414,
+        "sender_full_name": "Erik",
+        "timestamp": 1646836360
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/274609571\">said</a>:</p>\n<blockquote>\n<p>Clearly memory is not being freed when the window is closed...</p>\n</blockquote>\n<p>yeah, I noticed that too.  I think that's may also be new, but more concerning is the crash.  The 20480x20480 change was made back in 7.16.0 and just testing a 7.24 version, it doesn't appear to explode memory use and seems to release when windows are closed.  I reduced the number down to 8096x8096 anyways, but some other change is likely involved, and I think the crash is definitely new.</p>",
+        "id": 274698004,
+        "sender_full_name": "Sean",
+        "timestamp": 1646837447
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/274602373\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  Wipes out with the following error:</p>\n<p><div class=\"codehilite\"><pre><span></span><code>X Error of failed request:  BadDrawable (invalid Pixmap or Window parameter)\n  Major opcode of failed request:  62 (X_CopyArea)\n  Resource id in failed request:  0x460000a\n  Serial number of failed request:  3473\n  Current serial number in output stream:  3474\n</code></pre></div><br>\n</p>\n</blockquote>\n<p>I think this is at the heart of the issue, but I'm not yet groking that stack trace..  will try to catch it on Mac to see if it gives a different path or at least more complete symbols -- looks like your build isn't enable-all'd.</p>",
+        "id": 274698921,
+        "sender_full_name": "Sean",
+        "timestamp": 1646837806
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I may have messed up the dm bookkeeping in MGED at some point - my recollection of MGED's management of those can be summed up as \"messy\", so it's actually quite likely I messed up somewhere.  I'll see if I can tease a 7.24 build into working and try to figure out how the fb memory got freed...</p>",
+        "id": 274724989,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646847916
+    },
+    {
+        "content": "<p>One likely culprit of the increased memory usage may be my attempt to set up things so each dm has a built-in embedded fb by default.  Don't know if that's behind the window crash but it's likely why the dm's are suddenly taking up memory they didn't previously</p>",
+        "id": 274726269,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646848371
+    },
+    {
+        "content": "<p>OK, got 7.24.4 building - here's what I'm seeing so far (I'm getting X11 windows and the first ogl window, but the second wipes out):</p>\n<div class=\"codehilite\"><pre><span></span><code>BRL-CAD Release 7.24.4  Geometry Editor (MGED)\n    Wed, 09 Mar 2022 13:25:05 -0500, Compilation 0\n    cyapp@ubuntu2019\n\nattach (nu|txt|X|ogl)[nu]?\nmged&gt; attach X\nATTACHING X (X Window System (X11))\nmged&gt; attach X\nATTACHING X (X Window System (X11))\nmged&gt; attach ogl\nATTACHING ogl (X Windows with OpenGL graphics)\nmged&gt; attach ogl\nATTACHING ogl (X Windows with OpenGL graphics)\nmged&gt; X Error of failed request:  GLXBadDrawable\n  Major opcode of failed request:  151 (GLX)\n  Minor opcode of failed request:  5 (X_GLXMakeCurrent)\n  Serial number of failed request:  1181\n  Current serial number in output stream:  1181\n</code></pre></div>",
+        "id": 274731600,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646850558
+    },
+    {
+        "content": "<p>Huh - now I'm seeing the exact same thing with latest main, fwiw.  I can't get 7.22.0 to build easily - will probably need to set up a VM if I need to go that far back.</p>",
+        "id": 274733351,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646851394
+    },
+    {
+        "content": "<p>(Oh - should make clear I'm closing each window above before proceeding to the next attach)</p>",
+        "id": 274734073,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646851703
+    },
+    {
+        "content": "<p>Aaaaand now I can't get the X attach to reproduce the failure, even with the fb memory set large... what on earth...</p>",
+        "id": 274734720,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646852023
+    },
+    {
+        "content": "<p>OK, per recent discussion, drawing in the second \"attach X\" does indeed crash in latest main.</p>",
+        "id": 274758896,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646863432
+    },
+    {
+        "content": "<p>Also crashes in 69b1b1bed2 (Tcl/Tk 8.5, just before the 8.6 switch)</p>",
+        "id": 274760355,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646864169
+    },
+    {
+        "content": "<p>Same thing with rel-7-24-4</p>",
+        "id": 274760828,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646864339
+    },
+    {
+        "content": "<p>7.24.0 is too old to readily build on this machine...</p>",
+        "id": 274761571,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646864674
+    },
+    {
+        "content": "<p>Okay, I swear I'd tested 7.24 and it worked, but it's bombing for me too.   I documented it.</p>",
+        "id": 275117024,
+        "sender_full_name": "Sean",
+        "timestamp": 1647118868
+    },
+    {
+        "content": "<p>I believe you <span aria-label=\"smile\" class=\"emoji emoji-1f642\" role=\"img\" title=\"smile\">:smile:</span>   Interesting problem, in a hair-pulling sort of way...</p>",
+        "id": 275282321,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647284065
+    },
+    {
+        "content": "<p>Just FYI, I'm working on the build Action testing issues from the recent materials merge.</p>",
+        "id": 276074374,
+        "sender_full_name": "Sean",
+        "timestamp": 1647878739
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/276074374\">said</a>:</p>\n<blockquote>\n<p>Just FYI, I'm working on the build Action testing issues from the recent materials merge.</p>\n</blockquote>\n<p>Latest commit failing in Windows.</p>",
+        "id": 276143871,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1647925143
+    },
+    {
+        "content": "<p>/me thinks sometimes why msvc shows weird message that file not found but file is still there. Now builds fine.</p>",
+        "id": 276181446,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1647952634
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"252475\">@Himanshu Sekhar Nayak</span> hm, don't know what to say about that other than it helps to turn up the compilation verbosity (under Options -&gt; Project and Solutions -&gt; Build and Run).  I typically set output to Normal and log to Detailed.  That way, I can get to what exactly happened if needed.</p>",
+        "id": 276263137,
+        "sender_full_name": "Sean",
+        "timestamp": 1647987974
+    },
+    {
+        "content": "<p>One of the unexpected side effects of the plugin changes is frequently running into runtime crashes now whenever something changes outside the plugin dll/so/dylib that is incompatible with whatever's going on inside the plugin (as it does not appear to automatically recompile).  At least that seems to be what's going on.  For example, just pulled latest view changes, compiled, and then all tools exhibit hard corruption, assert failures, bu_bombing, etc.   Cleaning and recompiling is apparently more often than not necessary now.  Rather unexpected and unintuitive that it's not updating/recompiling the plugins.  Maybe some dependencies aren't listed correctly?</p>",
+        "id": 277929446,
+        "sender_full_name": "Sean",
+        "timestamp": 1649185662
+    },
+    {
+        "content": "<p>Also working with a student on a hard database I/O corruption situation that seems to be new.  Any database creation on his system is resulting in corrupted .g files.  Others with the same setup, same msvc, etc. are not experiencing the corruption.  It appears to have just started in the past two weeks.</p>",
+        "id": 277929702,
+        "sender_full_name": "Sean",
+        "timestamp": 1649185786
+    },
+    {
+        "content": "<p>That is unexpected - I would have figured the logic would rebuild anything that would result in such  a pronounced failure.</p>",
+        "id": 277930926,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649186367
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'll switch to working in a branch for this, so I don't keep disrupting everyone else.</p>",
+        "id": 277930970,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649186398
+    },
+    {
+        "content": "<p>It's probable I wouldn't see that breakage mode myself, as my normal MO is to clear and rebuild.</p>",
+        "id": 277931259,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649186533
+    },
+    {
+        "content": "<p>@starseeker I’m away from a computer to test, but getting multiple reports that mged is busted and recent updates, draw not working.  Can you or someone else check?</p>",
+        "id": 278999084,
+        "sender_full_name": "Sean",
+        "timestamp": 1649958750
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I just pushed a reversion that should put it back.</p>",
+        "id": 279001493,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649959900
+    },
+    {
+        "content": "<p>so, uh, 'sup with <em>make test</em> failing with asc and weight? :D is that just me?</p>",
+        "id": 282032009,
+        "sender_full_name": "Erik",
+        "timestamp": 1652305400
+    },
+    {
+        "content": "<p>No that’s my doing.  The test is detecting a change due to new material object management and I need to resolve it.</p>",
+        "id": 282032129,
+        "sender_full_name": "Sean",
+        "timestamp": 1652305457
+    },
+    {
+        "content": "<p>Probably will yank the attribute sync code but needs a bit of testing</p>",
+        "id": 282032193,
+        "sender_full_name": "Sean",
+        "timestamp": 1652305490
+    },
+    {
+        "content": "<p>and that durn kryptonite slips in... :) I was mucking with converting jenkins to a pipeline (can be dropped into the repo as /Jenkinsfile and revision controlled)</p>",
+        "id": 282034101,
+        "sender_full_name": "Erik",
+        "timestamp": 1652306612
+    },
+    {
+        "content": "<p>That's cool.  I've been wanting to do that myself too.   IaC FTW.</p>",
+        "id": 282140959,
+        "sender_full_name": "Sean",
+        "timestamp": 1652375972
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> any chance we could wire up your cubes examples as unit/regression tests to make sure the gqa behavior stays correct in the future?</p>",
+        "id": 282149509,
+        "sender_full_name": "starseeker",
+        "timestamp": 1652379185
+    },
+    {
+        "content": "<p>I was just looking at that PR too.  Very interesting!  Does it still interleave as resolution doubles?  That is one of the current features, no ray is shot twice -- it (is supposed to) refines the gaps in-between recursively without ever reshooting the same ray.</p>",
+        "id": 282149914,
+        "sender_full_name": "Sean",
+        "timestamp": 1652379364
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/282149914\">said</a>:</p>\n<blockquote>\n<p>I was just looking at that PR too.  Very interesting!  Does it still interleave as resolution doubles?  That is one of the current features, no ray is shot twice -- it (is supposed to) refines the gaps in-between recursively without ever reshooting the same ray.</p>\n</blockquote>\n<p>You may have a point here. I'll review it.</p>\n<p>BTW, that's why I made a PR and didn't committed it directly: To give it a better review and discuss it first.</p>",
+        "id": 282235206,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1652442401
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/282149509\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> any chance we could wire up your cubes examples as unit/regression tests to make sure the gqa behavior stays correct in the future?</p>\n</blockquote>\n<p>I'll look for this ans see, how much effort this would be. Unfortunately, the result of gqa is aprint-out, which had to interpreted first.</p>",
+        "id": 282235382,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1652442546
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> even if it reshoots, correct is obviously more important than performance.  I was just more wondering if that behavior changed (and the potential effect as the grid size continues to double, if half the rays are repeat work each level)</p>",
+        "id": 282270594,
+        "sender_full_name": "Sean",
+        "timestamp": 1652458724
+    },
+    {
+        "content": "<p>It hadn't reshot, but also not reused the old ray-traces. Changed back to the old grid generation.</p>\n<p>The main fault was that in lines 1003-1005 the grid sizes were recomputed with the wrong number of steps (state-&gt;steps instead of state-&gt;steps-1).</p>\n<p>The next improvement was to use gridSpacing there too. With every refinement the \"old\" moments have to be reduced, and its a problem if they were computed with on value and readjusted based on a different one.</p>\n<p>state.steps+1 in lines 2619-2661 ensures that the rays reach mdl_max.</p>",
+        "id": 282283442,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1652464810
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> thank you for that detail!  really helps to understand what's going on there.  that's awesome that you caught that off-by-one bug...  would take me quite a while to fully re-understand what is going on in there, so glad you figured out what was wrong.  :)</p>",
+        "id": 284771954,
+        "sender_full_name": "Sean",
+        "timestamp": 1654188341
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Looks like the recent MSVC warning changes broke gcc linux building</p>",
+        "id": 289137760,
+        "sender_full_name": "starseeker",
+        "timestamp": 1657508621
+    },
+    {
+        "content": "<p>Thanks <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> and sorry, should be fixed now!  I hadn't cycled back to mac or linux yet as I was really trying to immerse in a windows dev workflow as much as possible last week so I could address categoric issues from that side I'm seeing in our stig listings.  Took a heck of a lot longer than expected to get things off the ground (still not done, but putting a thumbtack in it for now).</p>",
+        "id": 289150630,
+        "sender_full_name": "Sean",
+        "timestamp": 1657522121
+    },
+    {
+        "content": "<p>thanks for clearing the last two.  was waiting for the scan to see what else was left and you'd fixed it before I got to see the next (as it's building for me locally clean)</p>",
+        "id": 289191137,
+        "sender_full_name": "Sean",
+        "timestamp": 1657546653
+    },
+    {
+        "content": "<p>let me know if bio.h causes a problem; might get away with these vanilla environments, but I suspect that'll need to be handled differently to be fully portable</p>",
+        "id": 289191389,
+        "sender_full_name": "Sean",
+        "timestamp": 1657546760
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> gcc errors with latest changes:</p>\n<div class=\"codehilite\"><pre><span></span><code>/brlcad/src/conv/off/off-g.c: In function ‘off2nmg’:\n/brlcad/src/conv/off/off-g.c:208:39: error: ‘%s’ directive output may be truncated writing up to 63 bytes into a region of size 62 [-Werror=format-truncation=]\n  208 |     snprintf(sname, sizeof(sname), &quot;s.%s&quot;, title);\n      |                                       ^~   ~~~~~\n/brlcad/src/conv/off/off-g.c:208:5: note: ‘snprintf’ output between 3 and 66 bytes into a destination of size 64\n  208 |     snprintf(sname, sizeof(sname), &quot;s.%s&quot;, title);\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/brlcad/src/conv/off/off-g.c:209:39: error: ‘%s’ directive output may be truncated writing up to 63 bytes into a region of size 62 [-Werror=format-truncation=]\n  209 |     snprintf(rname, sizeof(sname), &quot;r.%s&quot;, title);\n      |                                       ^~   ~~~~~\n/brlcad/src/conv/off/off-g.c:209:5: note: ‘snprintf’ output between 3 and 66 bytes into a destination of size 64\n  209 |     snprintf(rname, sizeof(sname), &quot;r.%s&quot;, title);\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\ncc1: all warnings being treated as errors\n</code></pre></div>",
+        "id": 291705248,
+        "sender_full_name": "starseeker",
+        "timestamp": 1659445238
+    },
+    {
+        "content": "<p>Thank you!  Home stretch here with musl ...  hopefully one of the last issues.</p>",
+        "id": 291708307,
+        "sender_full_name": "Sean",
+        "timestamp": 1659446803
+    },
+    {
+        "content": "<p>That's a fun one .. fixing one issue let it detect another underlying.  Commit fix pushed.</p>",
+        "id": 291709080,
+        "sender_full_name": "Sean",
+        "timestamp": 1659447199
+    },
+    {
+        "content": "<p>I now appear to have a full build, so I'm going to let the gitlab folks know we're good to go.  Hopefully we can stay stable until the end of this week for their demo.</p>",
+        "id": 291709188,
+        "sender_full_name": "Sean",
+        "timestamp": 1659447255
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Hint taken - I'll shift to a branch (sorry, didn't see this until now)</p>",
+        "id": 291775354,
+        "sender_full_name": "starseeker",
+        "timestamp": 1659478126
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> do you want me to merge to RELEASE so we can start 7.34.0 shakedown?</p>",
+        "id": 291779865,
+        "sender_full_name": "starseeker",
+        "timestamp": 1659480963
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> - FYI, CheckCompilerFlag is 3.19 and newer: <a href=\"https://cmake.org/cmake/help/latest/module/CheckCompilerFlag.html\">https://cmake.org/cmake/help/latest/module/CheckCompilerFlag.html</a></p>",
+        "id": 291946815,
+        "sender_full_name": "starseeker",
+        "timestamp": 1659570966
+    },
+    {
+        "content": "<p>Yeah I just discovered that earlier today..  I fixed it but didn’t push yet.</p>",
+        "id": 291952165,
+        "sender_full_name": "Sean",
+        "timestamp": 1659576733
+    },
+    {
+        "content": "<p>Files known to Git are not accounted for in build logic: <br>\ndoc/docbook/resources/brlcad/CMakeLists.txt<br>\ndoc/docbook/resources/brlcad/brlcad-article-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-article-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-book-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-book-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-common.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-fonts.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-gendata.xsl<br>\ndoc/docbook/resources/brlcad/brlcad-lesson-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-lesson-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-man-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-man-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-man-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-presentation-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-presentation-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-specification-fo-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-specification-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/brlcad-xhtml-header-navigation.xsl<br>\ndoc/docbook/resources/brlcad/brlcad-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resources/brlcad/center-table-print.xsl<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-669966.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-6699cc.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-blue.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-cc6666.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-cc9966.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-green.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-limegreen.svg<br>\ndoc/docbook/resources/brlcad/images/brlcad-logo-red.svg<br>\ndoc/docbook/resources/brlcad/images/logo-vm-gears.png<br>\ndoc/docbook/resources/brlcad/images/logo-vm-gears.svg<br>\ndoc/docbook/resources/brlcad/presentation.xsl.in<br>\ndoc/docbook/resources/brlcad/tutorial-cover-template.xsl.in<br>\ndoc/docbook/resources/brlcad/tutorial-template.xsl.in<br>\ndoc/docbook/resources/brlcad/wordpress.xsl.in</p>\n<p>Files mentioned in build logic are not checked into the repository: <br>\ndoc/docbook/resourcesCMakeLists.txt<br>\ndoc/docbook/resourcesbrlcad-article-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-article-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-book-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-book-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-common.xsl.in<br>\ndoc/docbook/resourcesbrlcad-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-fonts.xsl.in<br>\ndoc/docbook/resourcesbrlcad-gendata.xsl<br>\ndoc/docbook/resourcesbrlcad-lesson-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-lesson-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-man-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-man-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-man-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-presentation-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-presentation-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-specification-fo-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-specification-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcesbrlcad-xhtml-header-navigation.xsl<br>\ndoc/docbook/resourcesbrlcad-xhtml-stylesheet.xsl.in<br>\ndoc/docbook/resourcescenter-table-print.xsl<br>\ndoc/docbook/resourcesimages/brlcad-logo-669966.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-6699cc.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-blue.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-cc6666.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-cc9966.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-green.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-limegreen.svg<br>\ndoc/docbook/resourcesimages/brlcad-logo-red.svg<br>\ndoc/docbook/resourcesimages/logo-vm-gears.png<br>\ndoc/docbook/resourcesimages/logo-vm-gears.svg<br>\ndoc/docbook/resourcespresentation.xsl.in<br>\ndoc/docbook/resourcestutorial-cover-template.xsl.in<br>\ndoc/docbook/resourcestutorial-template.xsl.in<br>\ndoc/docbook/resourceswordpress.xsl.in</p>\n<p>CMake Error at CMakeTmp/distcheck_repo_verify.cmake:228 (message):<br>\n  ERROR: Distcheck cannot proceed until build files and repo are in sync (set<br>\n  -DFORCE_DISTCHECK=ON to override)</p>",
+        "id": 292015754,
+        "sender_full_name": "Sean",
+        "timestamp": 1659623611
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/291952165\">said</a>:</p>\n<blockquote>\n<p>Yeah I just discovered that earlier today..  I fixed it but didn’t push yet.</p>\n</blockquote>\n<p>pushed the fix last night, should be good to go.  Possibly related, I'm seeing two \"Attempt to add a custom rule to output\" cmake error rmessages on libnetpbm.a.rule and libgdal.a.rule<br>\nAny ideas?</p>",
+        "id": 292058403,
+        "sender_full_name": "Sean",
+        "timestamp": 1659641470
+    },
+    {
+        "content": "<p>Not offhand - the logic doing that management is src/other/ext/CMake/ExternalProject_Target.cmake:442 - it in turn uses the fcfgcpy function which defines custom rules</p>",
+        "id": 292152897,
+        "sender_full_name": "starseeker",
+        "timestamp": 1659705803
+    },
+    {
+        "content": "<p>You could try some message statements in those functions to see if you can bracket where that error is being generated</p>",
+        "id": 292153283,
+        "sender_full_name": "starseeker",
+        "timestamp": 1659706011
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> appears to be a recent regression on draw -m2 ...</p>",
+        "id": 298895350,
+        "sender_full_name": "Sean",
+        "timestamp": 1663211623
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/-toq-cMF78Rn5qe1VQemMPWH/unknown-1.png\">unknown-1.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-toq-cMF78Rn5qe1VQemMPWH/unknown-1.png\" title=\"unknown-1.png\"><img src=\"/user_uploads/1549/-toq-cMF78Rn5qe1VQemMPWH/unknown-1.png\"></a></div>",
+        "id": 298895356,
+        "sender_full_name": "Sean",
+        "timestamp": 1663211628
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/bCIKsgOElS-CLpZ5AENvgF6v/unknown.png\">unknown.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bCIKsgOElS-CLpZ5AENvgF6v/unknown.png\" title=\"unknown.png\"><img src=\"/user_uploads/1549/bCIKsgOElS-CLpZ5AENvgF6v/unknown.png\"></a></div>",
+        "id": 298895362,
+        "sender_full_name": "Sean",
+        "timestamp": 1663211634
+    },
+    {
+        "content": "<p>Your recent fix appears to have fixed it, nice!  Thank you.</p>",
+        "id": 299074010,
+        "sender_full_name": "Sean",
+        "timestamp": 1663289951
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"484201\">@Christopher</span> looks like a few dirs are missing from the latest commit?  (fbx, dxf, pbrt in regress/gcv)</p>",
+        "id": 352310722,
+        "sender_full_name": "Sean",
+        "timestamp": 1682349830
+    },
+    {
+        "content": "<p>Forgot some cleanup. Fix pushed</p>",
+        "id": 352312183,
+        "sender_full_name": "Christopher",
+        "timestamp": 1682350096
+    },
+    {
+        "content": "<p>It seems we have some problems with <code>brep</code> command. <code>ged_brep_core</code>will receive four arguments before. Now we only get two.<br>\n<a href=\"/user_uploads/1549/CA6JGmf27mgfB2PDpqi6fT7B/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/CA6JGmf27mgfB2PDpqi6fT7B/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/CA6JGmf27mgfB2PDpqi6fT7B/image.png\"></a></div>",
+        "id": 359336414,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1684400148
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/2PQC5kcILC9ZCOCJvP2Rnujm/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/2PQC5kcILC9ZCOCJvP2Rnujm/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/2PQC5kcILC9ZCOCJvP2Rnujm/image.png\"></a></div>",
+        "id": 359336570,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1684400192
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/359336414\">said</a>:</p>\n<blockquote>\n<p>It seems we have some problems with <code>brep</code> command. <code>ged_brep_core</code>will receive four arguments before. Now we only get two.</p>\n</blockquote>\n<p>Just tests with a clean build of current brlcad on Linux. I got <code>arb8.s.brep is made.</code>. Can you repeat your test with a clean build from scratch?</p>",
+        "id": 359411615,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1684419902
+    },
+    {
+        "content": "<p>Sorry, a clean build works well. <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span></p>",
+        "id": 359538243,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1684468046
+    },
+    {
+        "content": "<p>libged commands are loaded dynamically (as dynamic libs) and for some reason they don't always rebuild when a file has been edited despite having dependencies set in cmake (or perhaps one is missing).</p>",
+        "id": 359761977,
+        "sender_full_name": "Sean",
+        "timestamp": 1684528249
+    },
+    {
+        "content": "<p>so if anyone edits a header, especially a structure, they all need to be rebuilt and that doesn't always happen automatically.  would be great if someone could make that not be a problem, but currently I make sure to delete the libged and libdm libs at a minimum so they're rebuilt.</p>",
+        "id": 359762194,
+        "sender_full_name": "Sean",
+        "timestamp": 1684528329
+    },
+    {
+        "content": "<p>Hi, I just pulled the newest codes and found I can't open .g database.<br>\n<a href=\"/user_uploads/1549/3f6uZIbjZowxTnD8Ywy7qLWO/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/3f6uZIbjZowxTnD8Ywy7qLWO/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/3f6uZIbjZowxTnD8Ywy7qLWO/image.png\"></a></div>",
+        "id": 394589209,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1696323467
+    },
+    {
+        "content": "<p>I'm working on Ubuntu 20.04 at commit 753ca33.</p>",
+        "id": 394589367,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1696323513
+    },
+    {
+        "content": "<p>It's quite strange... For me, the problem existed many commit ago (before Sep 13 the problem exists). And it worked well on Aug 27. Does anyone else have this problem? Do I need to use the <code>git bisect</code> command to determine the location?</p>",
+        "id": 394592519,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1696324698
+    },
+    {
+        "content": "<p>That might need a bisect - it's probably related to the work I did with the open/opendb GED command work.</p>",
+        "id": 394659284,
+        "sender_full_name": "starseeker",
+        "timestamp": 1696347064
+    },
+    {
+        "content": "<p>A naive guess is that I didn't change something from open to opendb, but it could be something else.</p>",
+        "id": 394659503,
+        "sender_full_name": "starseeker",
+        "timestamp": 1696347126
+    },
+    {
+        "content": "<p>I just located the error using bisect. a7bba28a948a1939e53ab224fdc4e4a381cddb23 is the first bad commit.</p>",
+        "id": 394737920,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1696382758
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> OK, that' confirms somewhere in the Archer startup stack we're calling \"open\" where we should be calling \"opendb\"</p>",
+        "id": 394743676,
+        "sender_full_name": "starseeker",
+        "timestamp": 1696386037
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> Can you check if things are working again in the latest?</p>",
+        "id": 395474928,
+        "sender_full_name": "starseeker",
+        "timestamp": 1696729824
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/recent.20bugs/near/395474928\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> Can you check if things are working again in the latest?</p>\n</blockquote>\n<p>Yeah, it works well now. <span aria-label=\"smile\" class=\"emoji emoji-1f642\" role=\"img\" title=\"smile\">:smile:</span></p>",
+        "id": 395588446,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1696811342
+    },
+    {
+        "content": "<p>Bah - bu_vls_vprintf tests 22 and 32 fail on Alpine Linux.</p>",
+        "id": 400312496,
+        "sender_full_name": "starseeker",
+        "timestamp": 1699115884
+    },
+    {
+        "content": "<p>I don't believe this - facetizing tor with a tolerance of r=0.0001 is causing an nmg_mdl_to_bot failure just on the mac, which seems to be why the lod drawing test is failing.</p>",
+        "id": 400330913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1699136781
+    }
+]

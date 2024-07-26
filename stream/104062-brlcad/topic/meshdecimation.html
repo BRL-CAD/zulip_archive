@@ -1,0 +1,536 @@
+<html>
+<head><meta charset="utf-8"><title>meshdecimation · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html">meshdecimation</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="405378475"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405378475" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405378475">(Dec 01 2023 at 14:48)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> Am I correct that if we were going to set up a "make install" rule for the meshdecimation code as a library, only the meshdecimation.h header would need to be installed?  (I.e. the rest are needed only at compile time?)</p>
+
+
+
+<a name="405416844"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405416844" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405416844">(Dec 01 2023 at 18:26)</a>:</h4>
+<p>Hey. Yes, that's correct. Although I'm reusing many of these extra files in about everything I write, so you could either strip the symbols or handle reuse (box collapse algorithm will use them)</p>
+
+
+
+<a name="405417336"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417336" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417336">(Dec 01 2023 at 18:30)</a>:</h4>
+<p>Oh by the way, something that might perhaps be of general interest: the included cchash.h<br>
+The story is that I needed hash tables for billions of items, my hash functions were performing... poorly. So I wrote some very exhaustive statistical analysis, in order to find the "best" hash functions.<br>
+Surprising twist of the story: every hash function I could find failed my statistical analysis, including the built-in hash functions for many popular languages (for their dictionaries or whatever)</p>
+
+
+
+<a name="405417428"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417428" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417428">(Dec 01 2023 at 18:31)</a>:</h4>
+<p>My initial thought was to create a "mmesh" library that could supply both algorithms - then we can just reuse the common files for building both.</p>
+<p>Oh - did you see my question about the mmthread.c file?</p>
+
+
+
+<a name="405417514"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417514" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417514">(Dec 01 2023 at 18:32)</a>:</h4>
+<p>So... I wrote some genetic algorithm that would converge on functions that would maximize the statistical analysis score, while being the cheapest possible for CPUs to run. cchash.h is the result, to me they are the "perfect" hash functions. Maybe you want to reuse them somewhere</p>
+
+
+
+<a name="405417591"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417591" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417591">(Dec 01 2023 at 18:32)</a>:</h4>
+<p>Sweet!</p>
+
+
+
+<a name="405417602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417602">(Dec 01 2023 at 18:32)</a>:</h4>
+<p>Yes, mmthread.c wasn't necessary, it's only using the static inline functions in mmthread.h</p>
+
+
+
+<a name="405417696"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417696" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417696">(Dec 01 2023 at 18:33)</a>:</h4>
+<p>OK, I'll set up a BRL-CAD/mmesh github project and get the CMake and DLL import/export foo going.</p>
+
+
+
+<a name="405417779"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417779" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417779">(Dec 01 2023 at 18:33)</a>:</h4>
+<p>All right, cool</p>
+
+
+
+<a name="405417952"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405417952" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405417952">(Dec 01 2023 at 18:34)</a>:</h4>
+<p>Will be basic initially - compiler flags for optimization can come once the basic setup is in place.  Any recommendations for what might constitute good functionality/regression testing, beyond just tossing in a mesh and running the algorithm?</p>
+
+
+
+<a name="405418192"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405418192" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405418192">(Dec 01 2023 at 18:36)</a>:</h4>
+<p>The best benchmark would be evaluating the change of "shape" for the object, comparing before and after. I have that somewhere but it's heavy. I would just toss a mesh ;)</p>
+
+
+
+<a name="405419050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405419050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405419050">(Dec 01 2023 at 18:43)</a>:</h4>
+<p>Oh, and give cchash.h a try, it really made a nice difference for me in a bunch of projects. If I were in academia, it would be worth a paper or something, but I'm not</p>
+
+
+
+<a name="405419168"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405419168" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405419168">(Dec 01 2023 at 18:44)</a>:</h4>
+<p>I've been using xxhash, but it sounds like your cchash would be a step up</p>
+
+
+
+<a name="405420140"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405420140" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405420140">(Dec 01 2023 at 18:51)</a>:</h4>
+<p><a href="https://github.com/BRL-CAD/mmesh">https://github.com/BRL-CAD/mmesh</a> is up</p>
+
+
+
+<a name="405420290"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405420290" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405420290">(Dec 01 2023 at 18:52)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> Would you like to throw together a README for it?  I can rough in something basic, but if you're interested it seems more fitting for you to create it</p>
+
+
+
+<a name="405420837"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405420837" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405420837">(Dec 01 2023 at 18:56)</a>:</h4>
+<p>Hrm. I guess that would be a good idea. I usually just document the .h</p>
+
+
+
+<a name="405422633"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405422633" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405422633">(Dec 01 2023 at 19:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> are you able to see build results here?  <a href="https://github.com/BRL-CAD/mmesh/actions">https://github.com/BRL-CAD/mmesh/actions</a></p>
+
+
+
+<a name="405423230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405423230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405423230">(Dec 01 2023 at 19:09)</a>:</h4>
+<p>Looks like MSVC and Mac are unhappy out of the gate</p>
+
+
+
+<a name="405423529"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405423529" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405423529">(Dec 01 2023 at 19:11)</a>:</h4>
+<p>I never cared much about either, but yes, it would be good to fix that. Can that emit compiler output error messages?</p>
+
+
+
+<a name="405423630"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405423630" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405423630">(Dec 01 2023 at 19:12)</a>:</h4>
+<p>Yes - the logs are generated.  If you can't see them I can post them</p>
+
+
+
+<a name="405423835"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405423835" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405423835">(Dec 01 2023 at 19:13)</a>:</h4>
+<p>First MSVC error in various files:<br>
+src\meshdecimation.c(1431,3): error C2059: syntax error: '{' [D:\a\mmesh\mmesh\build\src\mmesh.vcxproj]<br>
+src\mmhashinternal.h(52,28): error C2054: expected '(' to follow 'mmHashPage' [D:\a\mmesh\mmesh\build\src\mmesh.vcxproj]</p>
+
+
+
+<a name="405424205"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405424205" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405424205">(Dec 01 2023 at 19:16)</a>:</h4>
+<p>OSX:<br>
+In file included from /Users/runner/work/mmesh/mmesh/src/meshdecimation.c:298:<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:46:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>
+static inline CC_STRICT_MATH void mathShewchukInit( mathShewchukSum *sum )<br>
+              ^~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>
+  #define CC_STRICT_MATH __attribute__((__optimize__("no-associative-math", "no-unsafe-math-optimizations", "no-fast-math")))<br>
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:53:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>
+static inline CC_STRICT_MATH void mathShewchukAdd( mathShewchukSum *sum, double x )<br>
+              ^~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>
+  #define CC_STRICT_MATH __attribute__((__optimize__("no-associative-math", "no-unsafe-math-optimizations", "no-fast-math")))<br>
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:84:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>
+static inline CC_STRICT_MATH void mathShewchukMultiply( mathShewchukSum *sum, double x )<br>
+              ^~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>
+  #define CC_STRICT_MATH __attribute__((__optimize__("no-associative-math", "no-unsafe-math-optimizations", "no-fast-math")))<br>
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:92:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>
+static inline CC_STRICT_MATH double mathShewchukTotal( mathShewchukSum *sum )<br>
+              ^~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>
+  #define CC_STRICT_MATH __attribute__((__optimize__("no-associative-math", "no-unsafe-math-optimizations", "no-fast-math")))<br>
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+/Users/runner/work/mmesh/mmesh/src/meshdecimation.c:4366:5: warning: array index 3 is past the end of the array (which contains 3 elements) [-Warray-bounds]<br>
+    vertex-&gt;point[3] = 0.0;<br>
+    ^             ~<br>
+/Users/runner/work/mmesh/mmesh/src/meshdecimation.c:805:3: note: array 'point' declared here<br>
+  mdf point[3];</p>
+
+
+
+<a name="405424316"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405424316" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405424316">(Dec 01 2023 at 19:17)</a>:</h4>
+<p>Oh hrm, I guess __declspec(align(64)) needs to be placed somewhere else in the declaration. That's me trying to be portable to MSVC without ever touching the thing</p>
+
+
+
+<a name="405424319"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405424319" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405424319">(Dec 01 2023 at 19:17)</a>:</h4>
+<p>/Users/runner/work/mmesh/mmesh/src/mm.c:3017:49: error: use of undeclared identifier 'MAP_LOCKED'<br>
+2023-12-01T19:04:32.8918770Z       mmapflags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED;</p>
+
+
+
+<a name="405424451"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405424451" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405424451">(Dec 01 2023 at 19:18)</a>:</h4>
+<p>I thought clang supported GCC's __attribute__ syntax, but clearly not all of it. No MAP_LOCKED on OSX? Okay</p>
+
+
+
+<a name="405424545"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405424545" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405424545">(Dec 01 2023 at 19:18)</a>:</h4>
+<p>mathshewchuk.h will be GCC only then. All other compilers will produce less accurate results</p>
+
+
+
+<a name="405424722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405424722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405424722">(Dec 01 2023 at 19:20)</a>:</h4>
+<p>We might be able to ping some clang experts later and ask them how to do it there</p>
+
+
+
+<a name="405426151"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405426151" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405426151">(Dec 01 2023 at 19:31)</a>:</h4>
+<p>So MSVC doesn't like this for some reason<br>
+#define MD_VectorCrossProduct(x,y,z) ({(x)[0]=((y)[1]<em>(z)[2])-((y)[2]</em>(z)[1]);(x)[1]=((y)[2]<em>(z)[0])-((y)[0]</em>(z)[2]);(x)[2]=((y)[0]<em>(z)[1])-((y)[1]</em>(z)[0]);})<br>
+I guess I'll convert everything to static inline. <em>sigh</em></p>
+
+
+
+<a name="405430982"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405430982" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405430982">(Dec 01 2023 at 20:07)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span>  OSX built, MSVC is failing with:<br>
+D:\a\mmesh\mmesh\src\meshdecimation.c(3324): error C2059: syntax error: '{'<br>
+D:\a\mmesh\mmesh\src\meshdecimation.c(3324): error C2143: syntax error: missing ';' before ')'</p>
+
+
+
+<a name="405444920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405444920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405444920">(Dec 01 2023 at 22:03)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> Yep, that got it!</p>
+
+
+
+<a name="405445017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405445017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405445017">(Dec 01 2023 at 22:03)</a>:</h4>
+<p>Noticed a warning from MSVC:  src\mmhash.c(2340) : warning C4700: uninitialized local variable 'accumscore' used</p>
+
+
+
+<a name="405445241"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405445241" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405445241">(Dec 01 2023 at 22:05)</a>:</h4>
+<p>Hey, that's a real warning, will fix that. You can just initialize to zero on your end. Nothing important, it's just in a debugging function (asking a hash table how healthy it's feeling today)</p>
+
+
+
+<a name="405445471"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405445471" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405445471">(Dec 01 2023 at 22:07)</a>:</h4>
+<p>Done.  Compile also succeed on FreeBSD.</p>
+
+
+
+<a name="405445556"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405445556" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405445556">(Dec 01 2023 at 22:08)</a>:</h4>
+<p>(That health function can be used to check how well the hash function is working, it's the function that launched the long quest that ended up with cchash.h)</p>
+
+
+
+<a name="405445569"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405445569" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405445569">(Dec 01 2023 at 22:08)</a>:</h4>
+<p>Cool, glad to hear it</p>
+
+
+
+<a name="405445870"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405445870" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405445870">(Dec 01 2023 at 22:11)</a>:</h4>
+<p>Alpine Linux builds too.  OpenBSD and HaikuOS are the other traditionally iffy platforms, but I'll have to check those next week.</p>
+
+
+
+<a name="405446026"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405446026" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405446026">(Dec 01 2023 at 22:13)</a>:</h4>
+<p>Also will be time to hook it up under facetize and see how it does &lt;grin&gt;  Looking forward to that.</p>
+
+
+
+<a name="405450389"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405450389" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405450389">(Dec 01 2023 at 22:56)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> Looking at the code we are using in librt, there's also a "moOptimizeMesh" function that is run after the main decimation is complete.  Is that still something we would want for the modern decimation implementation?</p>
+
+
+
+<a name="405455620"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405455620" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405455620">(Dec 01 2023 at 23:49)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> It's unrelated to mesh decimation.<br>
+Mesh optimization is mostly optimizing the order of vertex indices to maximize the use of the GPU post-transform vertex caches. You can get a significant performance boost for rendering optimized meshes, when the GPU is a bit strained. Although note I have reused that same code in various non-GPU contexts, such as optimizing the vertex storage order in a graph for CPU pathfinding, boosting performance by 5% (better use of the CPU caches).</p>
+
+
+
+<a name="405455777"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405455777" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405455777">(Dec 01 2023 at 23:51)</a>:</h4>
+<p>This is good code, I have had significant performance boosts by applying it on game-like models</p>
+
+
+
+<a name="405489965"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405489965" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405489965">(Dec 02 2023 at 04:24)</a>:</h4>
+<p>Is there a version of moOptimizeMesh that we could include with the mmesh repo?  I can try to refactor the one we have in librt to work with the modern support files if need be, but I'm not sure how tricky that would be - it probably dates to the same era as the ball-pivot code</p>
+
+
+
+<a name="405489986"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405489986" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405489986">(Dec 02 2023 at 04:25)</a>:</h4>
+<p>Sure, sending that</p>
+
+
+
+<a name="405492167"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405492167" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405492167">(Dec 02 2023 at 04:42)</a>:</h4>
+<p>On the topic of mesh manipulation, I have other algorithms... There's one to convert an indexed mesh into an indexed triangle strip, but highly optimized to minimize the count of swaps/jumps (it beats the numbers I found in some paper). Too bad no one cares about triangle strips anymore (in modern GPUs with large post-transform vertex caches, heavy vertex data, and expensive shaders, cache optimized indexed meshes are better than indexed strips in most cases).</p>
+
+
+
+<a name="405492462"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405492462" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405492462">(Dec 02 2023 at 04:44)</a>:</h4>
+<p>I'm touching that topic because I have a question that only old timers who have played with IRIS GL 30 years ago could answer. ;) That code can generate GL/VK strips, but also "IRIS GL strips" where swaps are encoded in the top bit (handy when you <em>really</em> want to minimize memory usage for a 3D mesh, not necessarily draw the stuff)</p>
+
+
+
+<a name="405492483"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405492483" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405492483">(Dec 02 2023 at 04:44)</a>:</h4>
+<p>Hmm.  Our software fallback for OpenGL rendering is an old version of Mesa's swrast - I wonder if the CPU software rendering of that code would benefit from that sort of optimization.</p>
+
+
+
+<a name="405492495"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405492495" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405492495">(Dec 02 2023 at 04:44)</a>:</h4>
+<p>My question is: was that actually how IRIS GL strips worked? I couldn't find the documentation, just some very indirect hints scattered over the place. I should change how it's called in the API if these are actually not IRIS GL strips</p>
+
+
+
+<a name="405492556"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405492556" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405492556">(Dec 02 2023 at 04:45)</a>:</h4>
+<p>Mesh optimization for GPU post-transform vertex caches works best for gaming-like models, where you have heavy vertex data and complicated shaders. The gain will be small otherwise, but it's always something</p>
+
+
+
+<a name="405493073"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493073" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493073">(Dec 02 2023 at 04:49)</a>:</h4>
+<p>Got a failure of the optimizer code on OSX:<br>
+Undefined symbols for architecture x86_64:<br>
+  "_mtSleepBarrierDestroy", referenced from:<br>
+      _moMeshOptimizationEnd in meshoptimizer.c.o<br>
+  "_mtSleepBarrierInit", referenced from:<br>
+      _moMeshOptimizationInit in meshoptimizer.c.o<br>
+  "_mtSleepBarrierSync", referenced from:<br>
+      _moMeshOptimizationThread in meshoptimizer.c.o</p>
+
+
+
+<a name="405493213"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493213" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493213">(Dec 02 2023 at 04:50)</a>:</h4>
+<p>Oh. That's the mmthread.c I told you wasn't needed</p>
+
+
+
+<a name="405493271"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493271" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493271">(Dec 02 2023 at 04:50)</a>:</h4>
+<p>heh :-)</p>
+
+
+
+<a name="405493392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493392">(Dec 02 2023 at 04:50)</a>:</h4>
+<p>MSVC is unhappy as well, but for a different reason:<br>
+D:\a\mmesh\mmesh\src\meshoptimizer.c(513): error C2059: syntax error: '{'</p>
+
+
+
+<a name="405493557"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493557" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493557">(Dec 02 2023 at 04:52)</a>:</h4>
+<p>Once again it's the #define FOO ({...}) thing, fixing.</p>
+
+
+
+<a name="405493898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493898">(Dec 02 2023 at 04:55)</a>:</h4>
+<p>As far as IRIS GL is concerned, I'm afraid I'm not enough of an old-timer to have played with it myself.  I don't know if anybody involved with the original implementation of our GL code would still be active online to ask.</p>
+
+
+
+<a name="405493990"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405493990" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405493990">(Dec 02 2023 at 04:56)</a>:</h4>
+<p>Eh, I figured... It's not important, I just would like to get my terminology right, as a tiny homage to the SGI legacy</p>
+
+
+
+<a name="405494115"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494115" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494115">(Dec 02 2023 at 04:58)</a>:</h4>
+<p>(I'm actually using these "IRIS GL" strips internally, I have had to reduce memory usage for meshes with billions of triangles... I'm running out of RAM with 256gb)</p>
+
+
+
+<a name="405494224"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494224" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494224">(Dec 02 2023 at 05:00)</a>:</h4>
+<p>Looks like that got the compiler error on MSVC - now it's failing to link the same way OSX does.</p>
+
+
+
+<a name="405494374"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494374" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494374">(Dec 02 2023 at 05:00)</a>:</h4>
+<p>Just bring back that mmthread.c, it's still in the first tarball I sent by email</p>
+
+
+
+<a name="405494553"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494553" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494553">(Dec 02 2023 at 05:01)</a>:</h4>
+<p>OK.  Should  I use the same license statement as in the other files?  (IIRC it was one of the ones that had the "don't distribute" statement.)</p>
+
+
+
+<a name="405494716"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494716" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494716">(Dec 02 2023 at 05:01)</a>:</h4>
+<p>Yes. Sorry about that.</p>
+
+
+
+<a name="405494792"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494792" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494792">(Dec 02 2023 at 05:02)</a>:</h4>
+<p>I would love to keep one copy for all these files I'm reusing everywhere, with symbolic links, but every project needs a different header. It's a mess</p>
+
+
+
+<a name="405494829"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405494829" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405494829">(Dec 02 2023 at 05:02)</a>:</h4>
+<p>No worries - I just wanted to be sure, I'm twitchy about changing license statements myself without an explicit OK</p>
+
+
+
+<a name="405495392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405495392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405495392">(Dec 02 2023 at 05:06)</a>:</h4>
+<p>OSX is now good.  Windows is cranky about mmthread.c:<br>
+D:\a\mmesh\mmesh\src\mmthread.h(575): error C2037: left of 'tv_sec' specifies undefined struct/union 'timeval'<br>
+D:\a\mmesh\mmesh\src\mmthread.h(576): error C2037: left of 'tv_usec' specifies undefined struct/union 'timeval'<br>
+D:\a\mmesh\mmesh\src\mmthread.h(584): error C2079: 'lntime' uses undefined struct 'timeval'<br>
+D:\a\mmesh\mmesh\src\mmthread.h(585): warning C4133: 'function': incompatible types - from 'int *' to 'timeval *'<br>
+D:\a\mmesh\mmesh\src\mmthread.h(586): error C2224: left of '.tv_sec' must have struct/union type<br>
+D:\a\mmesh\mmesh\src\mmthread.h(586): error C2224: left of '.tv_usec' must have struct/union type<br>
+D:\a\mmesh\mmesh\src\mmthread.h(594): error C2079: 'lntime' uses undefined struct 'timeval'<br>
+D:\a\mmesh\mmesh\src\mmthread.h(595): warning C4133: 'function': incompatible types - from 'int *' to 'timeval *'<br>
+D:\a\mmesh\mmesh\src\mmthread.h(596): error C2224: left of '.tv_sec' must have struct/union type<br>
+D:\a\mmesh\mmesh\src\mmthread.h(596): error C2224: left of '.tv_usec' must have struct/union type</p>
+
+
+
+<a name="405495528"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405495528" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405495528">(Dec 02 2023 at 05:08)</a>:</h4>
+<p>Urgh. But wait, that header was fine when #included for mesh decimation? Perhaps it's missing a Windows header</p>
+
+
+
+<a name="405495554"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405495554" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405495554">(Dec 02 2023 at 05:09)</a>:</h4>
+<p>Maybe winsock.h?  <a href="https://learn.microsoft.com/en-us/windows/win32/api/winsock/ns-winsock-timeval">https://learn.microsoft.com/en-us/windows/win32/api/winsock/ns-winsock-timeval</a>  </p>
+<p>I'll give that a shot</p>
+
+
+
+<a name="405495569"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405495569" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405495569">(Dec 02 2023 at 05:09)</a>:</h4>
+<p>cc.h: #include &lt;winsock2.h&gt; /* For struct timeval, don't ask me how that makes any sense */<br>
+I love my old comments</p>
+
+
+
+<a name="405495774"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405495774" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405495774">(Dec 02 2023 at 05:10)</a>:</h4>
+<p>Just #include mm.h before mmthread.h in mmthread.c and it's all good</p>
+
+
+
+<a name="405496136"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496136" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496136">(Dec 02 2023 at 05:13)</a>:</h4>
+<p>That did the trick - we're clean on Windows, OSX and Linux again.</p>
+
+
+
+<a name="405496143"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496143" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496143">(Dec 02 2023 at 05:13)</a>:</h4>
+<p>Checking BSD...</p>
+
+
+
+<a name="405496203"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496203" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496203">(Dec 02 2023 at 05:14)</a>:</h4>
+<p>Yep, good there.</p>
+
+
+
+<a name="405496269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496269">(Dec 02 2023 at 05:15)</a>:</h4>
+<p>Cool. (Also fixed here, I'm all for writing portable code, it's just not frequently a concern)</p>
+
+
+
+<a name="405496357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496357">(Dec 02 2023 at 05:16)</a>:</h4>
+<p>I'll take a look next week (getting too tired to trust myself now) but I think that should be everything we need to allow for a straight up switch from the  old embedded librt version to mmesh.</p>
+
+
+
+<a name="405496444"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496444" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496444">(Dec 02 2023 at 05:18)</a>:</h4>
+<p>Great. And it's good you are making that code public somewhere. Frankly, I have a ton of code that I think is worth sharing, but I just don't want to maintain a github and do customer support</p>
+
+
+
+<a name="405496493"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496493" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496493">(Dec 02 2023 at 05:19)</a>:</h4>
+<p>Oh - if you want to incorporate the define stuff for dll import/export, probably want to wait until I've done functionality testing with BRL-CAD to make sure all the linking bits work as expected.  When I'm shooting blind on that stuff it's not uncommon for me to mess up the first time.</p>
+
+
+
+<a name="405496511"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405496511" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405496511">(Dec 02 2023 at 05:19)</a>:</h4>
+<p>Our pleasure - thank you for sharing the improvements you've been making!</p>
+
+
+
+<a name="405544579"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405544579" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405544579">(Dec 02 2023 at 15:43)</a>:</h4>
+<p><span class="user-mention" data-user-id="671298">@Alexis Naveros</span> question - a quick experiment suggests that it might not be all that hard to make mmesh compile as C++, in addition to C - looks like mostly needing to specify explicit type casts for void * -&gt; something else assignments and fixing some cases where C++ doesn't allow static strings to be passed to things wanting (char *).  Would there be any objections to doing that?  (Might be interesting to see if there's any performance difference between a C and C++ build...)</p>
+
+
+
+<a name="405544706"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405544706" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405544706">(Dec 02 2023 at 15:45)</a>:</h4>
+<p>Microsoft tends to put a lot more work into their C++ compiler, so one of BRL-CAD's longer term goals is to try and get our code to the point where everything can compile as C++ if we want to.</p>
+
+
+
+<a name="405563868"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/meshdecimation/near/405563868" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/meshdecimation.html#405563868">(Dec 02 2023 at 20:21)</a>:</h4>
+<p>You are free to do so but, personally, I have no interest whatsoever in C++. I profoundly dislike the language. I hate how the code isn't explicit, it can be doing a bunch of things everywhere that you don't even see just by looking at the code. I hate how bloated the C++ standard library is (did you know they added garbage collection, then removed it because no one was using it?). C++ doesn't offer me anything that I want over my beloved C</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

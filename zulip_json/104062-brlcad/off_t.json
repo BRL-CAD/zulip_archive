@@ -1,0 +1,224 @@
+[
+    {
+        "content": "<p>Sean, you around to discuss the off_t issue?</p>",
+        "id": 191286281,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584730097
+    },
+    {
+        "content": "<p>in a lil bit, yes, but not just this sec</p>",
+        "id": 191286313,
+        "sender_full_name": "Sean",
+        "timestamp": 1584730116
+    },
+    {
+        "content": "<p>k</p>",
+        "id": 191286335,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584730125
+    },
+    {
+        "content": "<p>That took longer than expected!  So for the off_t thing, we do already have a regression test that breaks when it's wrong I think.</p>",
+        "id": 191293518,
+        "sender_full_name": "Sean",
+        "timestamp": 1584733705
+    },
+    {
+        "content": "<p>But the more immediate is simply compiling correctly/cleanly</p>",
+        "id": 191293552,
+        "sender_full_name": "Sean",
+        "timestamp": 1584733724
+    },
+    {
+        "content": "<p>If I'm understand what <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> reported, we can't reliably redefine off_t as 64 bit without breaking things.</p>",
+        "id": 191293797,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584733851
+    },
+    {
+        "content": "<p>Which is not good - I counted a number of places in our own API were we expose off_t:</p>\n<p>bu_fseek<br>\nbu_ftell<br>\nbu_vls_nibble<br>\nstruct directory<br>\nstruct db_i<br>\na number of functions in rt/db_io.h<br>\nstruct mem_map<br>\nstruct mater<br>\nrt_color_addrec<br>\ndb_dup_path_tail</p>",
+        "id": 191293935,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584733922
+    },
+    {
+        "content": "<p>If we can't safely redefine off_t some of those variables probably won't be large enough, and if we do redefine it we're breaking (at least) the fstat call.</p>",
+        "id": 191294008,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584733943
+    },
+    {
+        "content": "<p>well our stuff is easy, we can make them use whatever we want.  I think the issue is we were trying to not introduce a symbol if we didn't need to.</p>",
+        "id": 191294277,
+        "sender_full_name": "Sean",
+        "timestamp": 1584734055
+    },
+    {
+        "content": "<p>but it sounds like we may need to.  I don't know -- would need to see an error log or see the issue Daniel described myself.</p>",
+        "id": 191294328,
+        "sender_full_name": "Sean",
+        "timestamp": 1584734084
+    },
+    {
+        "content": "<p>I count seven uses of fstat in our code - if that's the only problem child we might conceivably do something at the point of those fstat calls, but now that this has happened I'm concerned that the off_t redefinition trick might start subtly breaking other things as well...</p>",
+        "id": 191294349,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584734094
+    },
+    {
+        "content": "<p>Apparently this is one of those \"WONTFIX\" issues for Microsoft:  <a href=\"https://developercommunity.visualstudio.com/content/problem/308714/in-c-header-systypesh-off-t-is-defined-as-32-bit-s.html\" target=\"_blank\" title=\"https://developercommunity.visualstudio.com/content/problem/308714/in-c-header-systypesh-off-t-is-defined-as-32-bit-s.html\">https://developercommunity.visualstudio.com/content/problem/308714/in-c-header-systypesh-off-t-is-defined-as-32-bit-s.html</a></p>",
+        "id": 191294600,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584734223
+    },
+    {
+        "content": "<p>We should be popping these symbols out of config_win.h as they're encountered and detected/fixed instead of the #define trickery we're trying to get away with.</p>",
+        "id": 191294623,
+        "sender_full_name": "Sean",
+        "timestamp": 1584734233
+    },
+    {
+        "content": "<p>probably best to introduce our own wrapper for this concept given this issue, bu_off_t</p>",
+        "id": 191294856,
+        "sender_full_name": "Sean",
+        "timestamp": 1584734357
+    },
+    {
+        "content": "<p>OK.  I can probably rough in some of it, but I'm not really set up for proper MSVC testing at the moment.</p>",
+        "id": 191295015,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584734437
+    },
+    {
+        "content": "<p>doesn't need to be complicated, probably can just test if off64_t is available, and if it is then bu_off_t is typedef'd to it, otherwise define to off_t</p>",
+        "id": 191295405,
+        "sender_full_name": "Sean",
+        "timestamp": 1584734641
+    },
+    {
+        "content": "<p>Right.  I think for MSVC we need _off64_t as well.  I remember vaguely some fun when I last tried this - a long while back I attempted to shift as much as possible of config_win.h into CMakeLists.txt and many things exploded.  Fingers crossed...</p>",
+        "id": 191295831,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584734878
+    },
+    {
+        "content": "<p>Do we want to care about _FILE_OFFSET_BITS ?</p>",
+        "id": 191295962,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584734940
+    },
+    {
+        "content": "<p>We don't do anything with that</p>",
+        "id": 191296151,
+        "sender_full_name": "Sean",
+        "timestamp": 1584735042
+    },
+    {
+        "content": "<p>It might be an issue if we don't on 32 bit systems - if we detect off64_t and go with it,  but don't define _FILE_OFFSET_BITS=64, we might get some unexpected results..</p>",
+        "id": 191296365,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584735146
+    },
+    {
+        "content": "<p>I think it's availability is unreliable, but would be an alternative to a cmakelist.txt test</p>",
+        "id": 191296376,
+        "sender_full_name": "Sean",
+        "timestamp": 1584735158
+    },
+    {
+        "content": "<p>Oh well - start small, build up as needed.</p>",
+        "id": 191296389,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584735167
+    },
+    {
+        "content": "<p>Hmmm</p>",
+        "id": 191296394,
+        "sender_full_name": "Sean",
+        "timestamp": 1584735170
+    },
+    {
+        "content": "<p>/me goes digging for ancient <a href=\"http://config_win.h.in\" target=\"_blank\" title=\"http://config_win.h.in\">config_win.h.in</a> rework attempts...</p>",
+        "id": 191296453,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584735216
+    },
+    {
+        "content": "<p>refreshing my memory on _FILE_OFFSET_BITS</p>",
+        "id": 191296458,
+        "sender_full_name": "Sean",
+        "timestamp": 1584735218
+    },
+    {
+        "content": "<p>I have vague memories of the stat/fstat/fseek/etc. functions having all sorts of 64 bit versions and needing to be careful to match all them up to get decent behavior, but it's been a while since I tangled with any of this...  almost wonder if it's worth checking for a wrapper header on github or somewhere to see if someone's already wrapped all this...</p>",
+        "id": 191296659,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584735324
+    },
+    {
+        "content": "<p>I'm certain there are solutions and we can craft something easily enough.. just will take some iterations probably.</p>",
+        "id": 191297002,
+        "sender_full_name": "Sean",
+        "timestamp": 1584735496
+    },
+    {
+        "content": "<p>this looks like a non-windows start, for exampl:  <br>\n<a href=\"https://github.com/the-tcpdump-group/libpcap/blob/master/cmake/Modules/FindLFS.cmake\" target=\"_blank\" title=\"https://github.com/the-tcpdump-group/libpcap/blob/master/cmake/Modules/FindLFS.cmake\">https://github.com/the-tcpdump-group/libpcap/blob/master/cmake/Modules/FindLFS.cmake</a></p>",
+        "id": 191297014,
+        "sender_full_name": "Sean",
+        "timestamp": 1584735507
+    },
+    {
+        "content": "<p>Hmm - might be worth inquiring on the CMake list (or discourse now, I guess...)</p>",
+        "id": 191297367,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584735723
+    },
+    {
+        "content": "<p><a href=\"https://github.com/zlib-ng/zlib-ng\" target=\"_blank\" title=\"https://github.com/zlib-ng/zlib-ng\">https://github.com/zlib-ng/zlib-ng</a> actually has a fair bit of logic related to this issue, from the looks of things...</p>",
+        "id": 191319163,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584750695
+    },
+    {
+        "content": "<p>OK, I think a defined type instead of off_t may have greatly simplified a lot of things.  I had forgotten the antics needed to make the off_t trick work - I think that was actually the root cause of needing bu_fseek and bu_ftell.  r75063 is a stab at switching everything over - untested on Windows.</p>",
+        "id": 191323690,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584757000
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I'd be curious if the latest trunk clears the issues for you -  I'm not able to test the Windows code right  now, so I may have missed some pieces...</p>",
+        "id": 191324116,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584757885
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/off_t/near/191324116\" title=\"#narrow/stream/104062-general/topic/off_t/near/191324116\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> I'd be curious if the latest trunk clears the issues for you -  I'm not able to test the Windows code right  now, so I may have missed some pieces...</p>\n</blockquote>\n<p>Okay, I'll test it next week.</p>",
+        "id": 191338039,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1584784730
+    },
+    {
+        "content": "<p>I can test windows if needed, though I'll need to install the latest msvc (I think I'm on 17)</p>",
+        "id": 191352802,
+        "sender_full_name": "Sean",
+        "timestamp": 1584806867
+    },
+    {
+        "content": "<p>You could do the test with VS2017, I'll test it with VS2019 anyway.<br>\nI plan a new release of the brlcad.dll because I experienced some bugs with the current one.</p>",
+        "id": 191405747,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1584896962
+    },
+    {
+        "content": "<p>I needed to fix some compilation issues, but now the VS2019 x64 release build works. I plan to test the other builds in the next days.</p>",
+        "id": 191504182,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1584982889
+    },
+    {
+        "content": "<p>Excellent!</p>",
+        "id": 191511889,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584986128
+    }
+]

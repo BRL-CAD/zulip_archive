@@ -1,0 +1,68 @@
+<html>
+<head><meta charset="utf-8"><title>parallel computing · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html">parallel computing</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="166534041"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/166534041" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Florian <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#166534041">(May 25 2019 at 16:24)</a>:</h4>
+<p>Hi guys, my name is Florian and I'm new in using BRL. Can some of tell me if it's possible to execute MGED in particular the nirt command in parallel computing mode. I want to use more than one CPU to reduce the time for raytracing. Thank you! Cheers!</p>
+
+
+
+<a name="166994302"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/166994302" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#166994302">(May 31 2019 at 12:58)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="218858">@Florian</span> -- it is outside of mged with parallel scripting but it's a little advanced to set it up.  it's not possible inside mged with nirt, but it may be possible to do what you need with 'rt' or one of the other tracers that do have built-in support for parallel.  Can you describe more specifically what it is you're trying to achieve?</p>
+
+
+
+<a name="167064961"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167064961" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Florian <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167064961">(Jun 01 2019 at 09:40)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102902">@Sean</span>  -- Basically, I want to run a tcl script which raytraces my model with around 1000 nirt commands in a loop. This takes superlong on my computer so I decided to run it on a cluster of 8 CPUs. But ressource monitoring shows that only on of the cores is used during the execution of the script. I want to use the full capabilities of the cluster to shorten the computition.</p>
+
+
+
+<a name="167077030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167077030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167077030">(Jun 01 2019 at 15:32)</a>:</h4>
+<p><span class="user-mention" data-user-id="218858">@Florian</span> but I mean what are you doing with those nirt rays?  Depending on what you're doing with the result, you might be able to use a different tool like rt (which is about 10 orders of magnitude faster).</p>
+
+
+
+<a name="167077052"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167077052" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167077052">(Jun 01 2019 at 15:33)</a>:</h4>
+<p>1000 rays is a sub-second task on all but the most complex scenes (talking 10's of GBs or huge nurbs)</p>
+
+
+
+<a name="167077201"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167077201" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167077201">(Jun 01 2019 at 15:37)</a>:</h4>
+<p>If it's not something that can be handled by rt, then I'll see if I can work our a recipe for faster nirt invocation.</p>
+
+
+
+<a name="167078393"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167078393" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Florian <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167078393">(Jun 01 2019 at 16:09)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I need the output for an xml file describing a model I want use for radiation analysis. So I'm not using nirt for a classic raytracing. Does rt also provide line of sight thicknesses for each model component the ray traverses? If yes, then I could probably use rt.<br>
+BTW disc space is not a problem,  I have 800Gb SSD.</p>
+
+
+
+<a name="167131746"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167131746" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167131746">(Jun 02 2019 at 17:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="218858">@Florian</span> here's some code that might inspire you to get started <a href="https://github.com/nmz787/python-brlcad-tcl/blob/master/python_brlcad_tcl/brlcad_tcl.py#L281" target="_blank" title="https://github.com/nmz787/python-brlcad-tcl/blob/master/python_brlcad_tcl/brlcad_tcl.py#L281">https://github.com/nmz787/python-brlcad-tcl/blob/master/python_brlcad_tcl/brlcad_tcl.py#L281</a></p>
+
+
+
+<a name="167131762"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/parallel%20computing/near/167131762" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/parallel.20computing.html#167131762">(Jun 02 2019 at 17:59)</a>:</h4>
+<p>It would not be too hard to partition the model space into 8 chunks and start a subprocess for each</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

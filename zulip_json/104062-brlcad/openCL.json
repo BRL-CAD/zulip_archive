@@ -1,0 +1,164 @@
+[
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/GSoC.20ideas/near/237438658\">said</a>:</p>\n<blockquote>\n<p>Assuming that doesn't fix everything, next I'd suggest you delete your cmake cache, and run cmake again -- and then post a log of the entire output.  There is a lot of relevant info on whether opencl was detected properly or not in the output.  Would also help to post the CMakeOutput.txt and CMakeError.txt log files.</p>\n</blockquote>\n<p>Here <a href=\"/user_uploads/1549/W9Vo1FNtCuzuU1AxiYH1F2Rp/CMakeError.log\">CMakeError.log</a> <a href=\"/user_uploads/1549/sB55-BXJvb0STBzYaNnlQOnT/CMakeOutput.log\">CMakeOutput.log</a> <br>\nI am using brl-cad 7.28 for now. Returned clLinkProgram access violation error @clt_get_program. ALLBUILD and INSTALL is done. <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 237558363,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620245719
+    },
+    {
+        "content": "<p>Okay, those logs do seem to indicate that it found the intel opencl sdk successfully</p>",
+        "id": 237567711,
+        "sender_full_name": "Sean",
+        "timestamp": 1620249109
+    },
+    {
+        "content": "<p>access violation is way too vague...  but it implies the sdk runtime components aren't getting found or linked correctly.  Can you run any sample opencl programs that came with the sdk?</p>",
+        "id": 237568102,
+        "sender_full_name": "Sean",
+        "timestamp": 1620249220
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237568102\">said</a>:</p>\n<blockquote>\n<p>access violation is way too vague...  but it implies the sdk runtime components aren't getting found or linked correctly.  Can you run any sample opencl programs that came with the sdk?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  ok , done :) I installed latest intel graphic cards drivers, but I have to say that It was a bit messy because SDK has included a run time cpu driver but when I tried to install, It raised an error about uninstalling the GPU driver first.  I did some installations and updated GPU also. I do not know  the codes are designed for which device type in BRL-CAD.</p>",
+        "id": 237618699,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620286972
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237618699\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237568102\">said</a>:</p>\n<blockquote>\n<p>access violation is way too vague...  but it implies the sdk runtime components aren't getting found or linked correctly.  Can you run any sample opencl programs that came with the sdk?</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  ok , done :) I installed latest intel graphic cards drivers, but I have to say that It was a bit messy because SDK has included a run time cpu driver but when I tried to install, It raised an error about uninstalling the GPU driver first.  I did some installations and updated GPU also. I do not know  the codes are designed for which device type in BRL-CAD.</p>\n</blockquote>\n<p>But now stuck at BU_ASSERT((counts[i-1] % 2) == 0) @primitive_util.c. My geometry is complicated, contains BoTs , ARBS not a small one. Is count  == number of shoots?</p>",
+        "id": 237619249,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620287296
+    },
+    {
+        "content": "<p>I am very much enjoying while exploring BRL-cad. Like solving puzzle <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span>  , I do not know if there are any other CAD community like here. There is definitely very much to do and fastest  raytrace  among other CADs?? <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span></p>",
+        "id": 237624040,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620290022
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237618699\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237568102\">said</a>:<br>\n<span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  ok , done :) I installed latest intel graphic cards drivers, but I have to say that It was a bit messy because SDK has included a run time cpu driver but when I tried to install, It raised an error about uninstalling the GPU driver first.  I did some installations and updated GPU also. I do not know  the codes are designed for which device type in BRL-CAD.</p>\n</blockquote>\n<p>Are there any samples programs that came with the intel sdk that you can run to confirm opencl runtime is installed and working correctly?</p>",
+        "id": 237660347,
+        "sender_full_name": "Sean",
+        "timestamp": 1620308843
+    },
+    {
+        "content": "<p>The good news is the BU_ASSERT is clear proof that you compiled with OpenCL enabled, so yay!</p>",
+        "id": 237661480,
+        "sender_full_name": "Sean",
+        "timestamp": 1620309315
+    },
+    {
+        "content": "<p>That assert failure  I believe indicates that the geometry you are ray tracing has a solidity issue which hasn't been implemented yet.  Some pixels have an odd number of hits instead of even, which it's not expecting.  Perhaps try something less complicated geometry first.</p>",
+        "id": 237661670,
+        "sender_full_name": "Sean",
+        "timestamp": 1620309372
+    },
+    {
+        "content": "<p>detect&amp;paint would be neat. Definitely help 'close up' geometry if the rt is interactive :D</p>",
+        "id": 237662784,
+        "sender_full_name": "Erik",
+        "timestamp": 1620309780
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237624040\">said</a>:</p>\n<blockquote>\n<p>I am very much enjoying while exploring BRL-cad. Like solving puzzle <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span>  , I do not know if there are any other CAD community like here. There is definitely very much to do and fastest  raytrace  among other CADs?? <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span></p>\n</blockquote>\n<p>That's great to hear <span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> and glad you're having fun exploring!  That matters more than anything.</p>\n<p>BRL-CAD is by far the fastest solid geometry ray tracer.  There are faster non-solid (e.g., triangle) tracers and academic demos, but nothing in the class of solid geometry and nothing as verified for analytic use that I'm aware of.</p>\n<p>In all my comparisons against commercial CAD ray tracing (e.g., Creo, NX, CATIA, etc), BRL-CAD's ray tracer has been orders of magnitude faster.  Getting a truly apples-to-apples comparison is really hard, but it's usually not even in the ballpark.  Depending on the format and complexity of the geometry and hardware capabilities, LIBRT is typically 10k-100M rays per sec per CPU core.  The commercial options I've seen are usually in the 100-10k rays per sec per CPU core range.</p>",
+        "id": 237664018,
+        "sender_full_name": "Sean",
+        "timestamp": 1620310260
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237662784\">said</a>:</p>\n<blockquote>\n<p>detect&amp;paint would be neat. Definitely help 'close up' geometry if the rt is interactive :D</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> you got to see the interactive ray tracing GUI I worked on a couple years ago.  It's pretty amazing to open any geometry and spin it around seamlessly with real-time ray tracing.  It's like isst was but with any geometry and much higher quality rendering (thx to intel).  ... I really need to get that committed, recompiled, and demo'd again.</p>",
+        "id": 237664398,
+        "sender_full_name": "Sean",
+        "timestamp": 1620310408
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237661670\">said</a>:</p>\n<blockquote>\n<p>That assert failure  I believe indicates that the geometry you are ray tracing has a solidity issue which hasn't been implemented yet.  Some pixels have an odd number of hits instead of even, which it's not expecting.  Perhaps try something less complicated geometry first.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>",
+        "id": 237689327,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620318818
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237661670\">said</a>:</p>\n<blockquote>\n<p>That assert failure  I believe indicates that the geometry you are ray tracing has a solidity issue which hasn't been implemented yet.  Some pixels have an odd number of hits instead of even, which it's not expecting.  Perhaps try something less complicated geometry first.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>no error, no bomb output. Why did not fire any ray, am I the choosen one <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span> <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span></p>",
+        "id": 237933417,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620458125
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>If it froze, you should be able to attach to the process using gdb to see where/why it's frozen.  Get the PID of the rt process, then run gdb, and run the command \"attach [pid]\" where [pid] is the rt process ID (e.g., 12345).</p>\n<p>You shouldn't need to run cpu only.  It will try gpu and if that fails, it will fall back to cpu.</p>",
+        "id": 238242135,
+        "sender_full_name": "Sean",
+        "timestamp": 1620700116
+    },
+    {
+        "content": "<p>then you should be able to ctrl-c and run \"bt\" in gdb to get the backtrace -- post that.</p>",
+        "id": 238242257,
+        "sender_full_name": "Sean",
+        "timestamp": 1620700224
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237933417\">said</a>:</p>\n<blockquote>\n<p>no error, no bomb output. Why did not fire any ray, am I the choosen one <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span> <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span></p>\n</blockquote>\n<p>Sorry, there's simply not yet enough information to answer or even determine what's really going on yet.  The attach backtraces would be informative.  You also might simply try to run rt within gdb from the beginning and step through it to understand what's happening.</p>",
+        "id": 238242335,
+        "sender_full_name": "Sean",
+        "timestamp": 1620700317
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238242135\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>If it froze, you should be able to attach to the process using gdb to see where/why it's frozen.  Get the PID of the rt process, then run gdb, and run the command \"attach [pid]\" where [pid] is the rt process ID (e.g., 12345).</p>\n<p>You shouldn't need to run cpu only.  It will try gpu and if that fails, it will fall back to cpu.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I tried run rt with windbg . It did not find BRLCAD_ROOT env when begin debugging . But when I run rt with cmd   it finds, <span aria-label=\"unamused\" class=\"emoji emoji-1f612\" role=\"img\" title=\"unamused\">:unamused:</span></p>",
+        "id": 238255891,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620712722
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238255891\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238242135\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>If it froze, you should be able to attach to the process using gdb to see where/why it's frozen.  Get the PID of the rt process, then run gdb, and run the command \"attach [pid]\" where [pid] is the rt process ID (e.g., 12345).</p>\n<p>You shouldn't need to run cpu only.  It will try gpu and if that fails, it will fall back to cpu.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried run rt with windbg . It did not find BRLCAD_ROOT env when begin debugging . But when I run rt with cmd   it finds, <span aria-label=\"unamused\" class=\"emoji emoji-1f612\" role=\"img\" title=\"unamused\">:unamused:</span></p>\n</blockquote>\n<p>I set curdir , then rt found. When compiling windbg shows \"Unable to deliver callback, Unable to deliver callback, 3131\" . I tihnk its a driver problem</p>",
+        "id": 238318425,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620743842
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238318425\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238255891\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238242135\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>If it froze, you should be able to attach to the process using gdb to see where/why it's frozen.  Get the PID of the rt process, then run gdb, and run the command \"attach [pid]\" where [pid] is the rt process ID (e.g., 12345).</p>\n<p>You shouldn't need to run cpu only.  It will try gpu and if that fails, it will fall back to cpu.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried run rt with windbg . It did not find BRLCAD_ROOT env when begin debugging . But when I run rt with cmd   it finds, <span aria-label=\"unamused\" class=\"emoji emoji-1f612\" role=\"img\" title=\"unamused\">:unamused:</span></p>\n</blockquote>\n<p>I set curdir , then rt found. When compiling windbg shows \"Unable to deliver callback, Unable to deliver callback, 3131\" . I tihnk its a driver problem</p>\n</blockquote>\n<p>I tried with  a different gpu driver and uninstalled cpu_runtimes. Here is the call stack <a href=\"/user_uploads/1549/4yUAcLCpO_xrZoT9IIR0Qcyx/stack_trace.dat\">stack_trace.dat</a></p>",
+        "id": 238426892,
+        "sender_full_name": "scorp08",
+        "timestamp": 1620800638
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238426892\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238318425\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238255891\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238242135\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>If it froze, you should be able to attach to the process using gdb to see where/why it's frozen.  Get the PID of the rt process, then run gdb, and run the command \"attach [pid]\" where [pid] is the rt process ID (e.g., 12345).</p>\n<p>You shouldn't need to run cpu only.  It will try gpu and if that fails, it will fall back to cpu.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried run rt with windbg . It did not find BRLCAD_ROOT env when begin debugging . But when I run rt with cmd   it finds, <span aria-label=\"unamused\" class=\"emoji emoji-1f612\" role=\"img\" title=\"unamused\">:unamused:</span></p>\n</blockquote>\n<p>I set curdir , then rt found. When compiling windbg shows \"Unable to deliver callback, Unable to deliver callback, 3131\" . I tihnk its a driver problem</p>\n</blockquote>\n<p>I tried with  a different gpu driver and uninstalled cpu_runtimes. Here is the call stack <a href=\"/user_uploads/1549/4yUAcLCpO_xrZoT9IIR0Qcyx/stack_trace.dat\">stack_trace.dat</a></p>\n</blockquote>\n<p>This time , I tried with CUDA. Same simple arb8.  from windbg , no driver problem is occured but here is the stack trace <a href=\"/user_uploads/1549/NryXR4uM2QCb2D812vf3_Ydy/stack_trace.dat\">stack_trace.dat</a> I do n ot know  about \"clt_shade_segs_kernel\"</p>",
+        "id": 238994745,
+        "sender_full_name": "scorp08",
+        "timestamp": 1621187096
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238994745\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238426892\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238318425\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238255891\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/238242135\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/237689327\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried with simple geom (1 arb8.r) It produced no error but did not fired any ray :)).  And It frozing in raytraced resulted window. material assigned and it was a region.It raytraced without opencl , no problem. I could not see any sample programs but I tried a couple of code to get deviceinfo, It was working.Do I need to run cpu only (without gpu)</p>\n</blockquote>\n<p>If it froze, you should be able to attach to the process using gdb to see where/why it's frozen.  Get the PID of the rt process, then run gdb, and run the command \"attach [pid]\" where [pid] is the rt process ID (e.g., 12345).</p>\n<p>You shouldn't need to run cpu only.  It will try gpu and if that fails, it will fall back to cpu.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I tried run rt with windbg . It did not find BRLCAD_ROOT env when begin debugging . But when I run rt with cmd   it finds, <span aria-label=\"unamused\" class=\"emoji emoji-1f612\" role=\"img\" title=\"unamused\">:unamused:</span></p>\n</blockquote>\n<p>I set curdir , then rt found. When compiling windbg shows \"Unable to deliver callback, Unable to deliver callback, 3131\" . I tihnk its a driver problem</p>\n</blockquote>\n<p>I tried with  a different gpu driver and uninstalled cpu_runtimes. Here is the call stack <a href=\"/user_uploads/1549/4yUAcLCpO_xrZoT9IIR0Qcyx/stack_trace.dat\">stack_trace.dat</a></p>\n</blockquote>\n<p>This time , I tried with CUDA. Same simple arb8.  from windbg , no driver problem is occured but here is the stack trace <a href=\"/user_uploads/1549/NryXR4uM2QCb2D812vf3_Ydy/stack_trace.dat\">stack_trace.dat</a> I do n ot know  about \"clt_shade_segs_kernel\"</p>\n</blockquote>\n<p>Does anyone had a chance to look ? <span aria-label=\"sweat smile\" class=\"emoji emoji-1f605\" role=\"img\" title=\"sweat smile\">:sweat_smile:</span></p>",
+        "id": 241684630,
+        "sender_full_name": "scorp08",
+        "timestamp": 1622974875
+    },
+    {
+        "content": "<p>I still did not solve clEnqueueNDRangeKernel (primitive_util.c @ 1134)  problem when I tried with CUDA. Can it be a driver problem?</p>",
+        "id": 242645031,
+        "sender_full_name": "scorp08",
+        "timestamp": 1623697700
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/242645031\">said</a>:</p>\n<blockquote>\n<p>I still did not solve clEnqueueNDRangeKernel (primitive_util.c @ 1134)  problem when I tried with CUDA. Can it be a driver problem?</p>\n</blockquote>\n<p>Is there an example of  run only  rt_shootray with opencl  ? <span aria-label=\"dizzy\" class=\"emoji emoji-1f635\" role=\"img\" title=\"dizzy\">:dizzy:</span></p>",
+        "id": 242684457,
+        "sender_full_name": "scorp08",
+        "timestamp": 1623728712
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/242645031\">said</a>:</p>\n<blockquote>\n<p>I still did not solve clEnqueueNDRangeKernel (primitive_util.c @ 1134)  problem when I tried with CUDA. Can it be a driver problem?</p>\n</blockquote>\n<p>I'm not much help with that without spending a lot of time in a debugger.  I'm just not sure.  On the surface, it sounds like a driver problem.  It certainly was working before and (as far as I know) the code hasn't changed, so there's that too.</p>",
+        "id": 243221777,
+        "sender_full_name": "Sean",
+        "timestamp": 1624067571
+    },
+    {
+        "content": "<p>Have you tried compiling a simple opencl \"hello world\" program to make sure opencl is working (make sure you try both gpu and cpu mode).</p>",
+        "id": 243221809,
+        "sender_full_name": "Sean",
+        "timestamp": 1624067638
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/243221777\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/openCL/near/242645031\">said</a>:</p>\n<blockquote>\n<p>I still did not solve clEnqueueNDRangeKernel (primitive_util.c @ 1134)  problem when I tried with CUDA. Can it be a driver problem?</p>\n</blockquote>\n<p>I'm not much help with that without spending a lot of time in a debugger.  I'm just not sure.  On the surface, it sounds like a driver problem.  It certainly was working before and (as far as I know) the code hasn't changed, so there's that too.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  ok thanks. I looked for an example of run rt_shootray with opencl but could not find .</p>",
+        "id": 243552179,
+        "sender_full_name": "scorp08",
+        "timestamp": 1624383501
+    }
+]

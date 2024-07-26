@@ -1,0 +1,1208 @@
+[
+    {
+        "content": "<p>@Cezar the overarching goal is to speed up ray tracing performance which has lots of potential sub-projects including conversion to opencl, optimization of specific routines, and developing a new interactive GUI based on ray tracing</p>",
+        "id": 121763112,
+        "sender_full_name": "Sean",
+        "timestamp": 1517280379
+    },
+    {
+        "content": "<p>there's also performance of libged commands, which completely span the gamut, and performance of our lowest utility containers in libbu (which will likely involve profiling and replacement with C++ containers)</p>\n<p>specific performance hot spots (priorities) include A) the raytrace pipeline needing to dispatch sets of rays (64x64 postage stamps that subdivide into packets of 8 rays), B) boolean evaluation conversion to spmd/simd, C) optimization/elimination of libbu pointer tables (bu_pbtl_* calls) and bit vectors, and D) elimination of libbu container aliasing (primarily elimination of struct bu_list iteration)</p>",
+        "id": 121763114,
+        "sender_full_name": "Sean",
+        "timestamp": 1517280404
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cezar.elnazli2@gmail.com\" data-user-id=\"106398\">@Cezar</span> there's definitely faster ways to search for a pointer (or we could try and eliminate the need to search for a pointer in the first place) -- even a std::ordered_hash may be faster.  what was meant about the bu_list elimination in D was a more efficient implementation, a different way that doesn't involve pointer aliasing.  for B, not so much parallelism (though that would be a fine project for some specific commands) as commands that quickly fall apart (e.g., a database with 1M items).  postage stamps are simply rendering subsections of an image, e.g., in 64x64 pixel tiles, instead of pixel or line at a time.</p>",
+        "id": 122330699,
+        "sender_full_name": "Sean",
+        "timestamp": 1518406415
+    },
+    {
+        "content": "<p>Hi,I am a gsoc aspirant interested in CAD design.Please guide me how to contribute to this project.</p>",
+        "id": 122397332,
+        "sender_full_name": "Rahul Saxena",
+        "timestamp": 1518527206
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"codeiitrahul@gmail.com\" data-user-id=\"109238\">@Rahul Saxena</span> welcome, your best guide is yourself, demonstrating independent productivity and interest ;)</p>",
+        "id": 122399321,
+        "sender_full_name": "Sean",
+        "timestamp": 1518530932
+    },
+    {
+        "content": "<p>regarding B, i was wondering what you meant by conversion to SIMD/SPMD, if not parallelism. also, i'm wondering why it's called boolean evaluation, to me it looks more like set theory, at least the operations. i've also tried to find the code doing the evaluation, it seems to be in <code>libnmg/nmg_bool/bool.c:nmg_bool</code>, and i think the expression tree is constructed in <code>libged/comb.c</code>. do i get this right?</p>",
+        "id": 122401115,
+        "sender_full_name": "Cezar",
+        "timestamp": 1518534088
+    },
+    {
+        "content": "<p>also, for large dbs, is evaluation too slow because of an inefficient algorithm, or does it just not happen?</p>",
+        "id": 122401196,
+        "sender_full_name": "Cezar",
+        "timestamp": 1518534234
+    },
+    {
+        "content": "<p>i think i could try creating a large db to test that, unless one already exists</p>",
+        "id": 122401238,
+        "sender_full_name": "Cezar",
+        "timestamp": 1518534259
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cezar.elnazli2@gmail.com\" data-user-id=\"106398\">@Cezar</span> conversion to simd/spmd is using vector units to do some things 4 at a time for the price of 1</p>",
+        "id": 122430114,
+        "sender_full_name": "Sean",
+        "timestamp": 1518586726
+    },
+    {
+        "content": "<p>boolean evaluation is not libnmg (that's a specific subset of polygonal geometry) -- boolean evaluation is in librt/bool.c (more specifically rt_boolweave() and rt_boolfinal()).</p>",
+        "id": 122430137,
+        "sender_full_name": "Sean",
+        "timestamp": 1518586802
+    },
+    {
+        "content": "<p>for large db's, it's not that <em>evaluation</em> is slow -- it's that some algorithms are O(N^2), that is they get exponentially slower as there are more items.  so for example if some command (e.g., facetize) takes 20 seconds with 20 booleans, how long will it take with 40 booleans?  you'd hope it'd take 40 seconds or better, but some algorithms don't work that way and 20 seconds might become 400 seconds.  so a good project would be identifying which commands slow down exponentially and then working to fix them.</p>",
+        "id": 122430340,
+        "sender_full_name": "Sean",
+        "timestamp": 1518587207
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 122755244,
+        "sender_full_name": "Naseef",
+        "timestamp": 1519157507
+    },
+    {
+        "content": "<p>i've run <code>rt -B -s512 -H127 -J0 -o h.p havoc.g havoc</code> under a profiler, it took 6.12 min with most of that spent in <code>bool_eval</code> (1.76 min, and 1/5 of that iterating through a bu_list) and <code>bu_ptbl_cat_uniq</code> (17.68 sec)</p>",
+        "id": 124055833,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521716359
+    },
+    {
+        "content": "<p>i was wondering if there is anything else i should benchmark?</p>",
+        "id": 124055839,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521716373
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> you found three priority performance areas right there (bu_pbtl, bu_list, and boolean evaluation) -- perhaps some of the earlier comments will make more sense to you now.  just addressing all three of those is a lot to tackle for gsoc, but definitely all priority.  things to think about when optimizing should generally go top-down like can some of the boolean evals be eliminated, for those that can't can they be made more efficient like eliminating bu_list traversals, for those that can't maybe the container can be changed (e.g., from a list to an array), or maybe changing it so we don't need to store pointers, and finally changing the way pointers are being stored (e.g., using a c++ hash or map container)</p>",
+        "id": 124062344,
+        "sender_full_name": "Sean",
+        "timestamp": 1521728156
+    },
+    {
+        "content": "<p>is it fine using c++? HACKING says that it's \"no prohibited\", but also that the projects aims to be C89-compliant?</p>",
+        "id": 124070437,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521739642
+    },
+    {
+        "content": "<p>also, i was looking at set data structures (for bool eval), and union-find looks like a good choice. has it been considered and discarded before?</p>",
+        "id": 124070488,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521739701
+    },
+    {
+        "content": "<p>i think i've asked about this before, but \"bool eval\" seems like a misnomer, but maybe i'm missing something? it looks more like sets to me than boolean anything</p>",
+        "id": 124070614,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521739876
+    },
+    {
+        "content": "<p>C++ is fine except for in public API of C libraries</p>",
+        "id": 124072966,
+        "sender_full_name": "Sean",
+        "timestamp": 1521743603
+    },
+    {
+        "content": "<p>It's looking like we'll be doing our last c89-compliant release here soon (in the next couple weeks hopefully) after which we will be requiring c++11, so that can be part of a gsoc plan</p>",
+        "id": 124072974,
+        "sender_full_name": "Sean",
+        "timestamp": 1521743625
+    },
+    {
+        "content": "<p>as for union-find, the results of boolean evaluation are not necessarily disjoint sets</p>",
+        "id": 124073058,
+        "sender_full_name": "Sean",
+        "timestamp": 1521743751
+    },
+    {
+        "content": "<blockquote>\n<p>i think i've asked about this before, but \"bool eval\" seems like a misnomer, but maybe i'm missing something? it looks more like sets to me than boolean anything</p>\n</blockquote>\n<p>CSG combines elements of set theory and boolean algebra, read <a href=\"https://en.wikipedia.org/wiki/Constructive_solid_geometry\" target=\"_blank\" title=\"https://en.wikipedia.org/wiki/Constructive_solid_geometry\">https://en.wikipedia.org/wiki/Constructive_solid_geometry</a></p>",
+        "id": 124073128,
+        "sender_full_name": "Sean",
+        "timestamp": 1521743844
+    },
+    {
+        "content": "<p>thanks for the answers. i have another question :D previously, you mentioned pointer aliasing in bu_list, but looking through <code>src/libbu/list.c</code>, i can't find any function where pointer aliasing is involved. i was wondering where i could find an example of PA</p>",
+        "id": 124105272,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521807290
+    },
+    {
+        "content": "<p>this is a somewhat advanced topic.  you should read up more on what exactly pointer aliasing is.  it's not something you'd find in a list.c function -- you find it in all the places the struct is used</p>",
+        "id": 124136061,
+        "sender_full_name": "Sean",
+        "timestamp": 1521858841
+    },
+    {
+        "content": "<p>i did read up on it, but i misunderstood and thought that it could only occur with function arguments (i see why that's not true now)</p>",
+        "id": 124144489,
+        "sender_full_name": "Cezar",
+        "timestamp": 1521880145
+    },
+    {
+        "content": "<p>i created two plots of calls to bool_eval during the raytracing of havoc.g. <a href=\"https://cezarelnazli.github.io/plots/seg.svg\" target=\"_blank\" title=\"https://cezarelnazli.github.io/plots/seg.svg\">the first one</a> has the number of segments in the partition given as argument (which is iterated when looking for seek_stp) and <a href=\"https://cezarelnazli.github.io/plots/sol.svg\" target=\"_blank\" title=\"https://cezarelnazli.github.io/plots/sol.svg\">the second one</a> is the number of times the OP_SOLID case is taken in the switch</p>",
+        "id": 126305486,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525855326
+    },
+    {
+        "content": "<p>it seems that iterating through the list of segments isn't <em>that</em> expensive since there are usually 2 or 4 segments in the list, but the search happens a lot of times so it adds up</p>",
+        "id": 126305540,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525855458
+    },
+    {
+        "content": "<p>it also tells me that a replacement data structure should have low constant factor, else it will likely perform worse despite having better asymptotic complexity (N is very small in this case)</p>",
+        "id": 126305596,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525855593
+    },
+    {
+        "content": "<p>it might also be that havoc isn't really representative of cases where the list of segments is huge :-? i used it because it's the largest example geometry, but if other examples are better, i'll look at those as well</p>",
+        "id": 126305656,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525855780
+    },
+    {
+        "content": "<blockquote>\n<p>i created two plots of calls to bool_eval during the raytracing of havoc.g. <a href=\"https://cezarelnazli.github.io/plots/seg.svg\" target=\"_blank\" title=\"https://cezarelnazli.github.io/plots/seg.svg\">the first one</a> has the number of segments in the partition given as argument (which is iterated when looking for seek_stp) and <a href=\"https://cezarelnazli.github.io/plots/sol.svg\" target=\"_blank\" title=\"https://cezarelnazli.github.io/plots/sol.svg\">the second one</a> is the number of times the OP_SOLID case is taken in the switch</p>\n</blockquote>\n<p>Very cool graphs!  <span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> if you keep these images somewhere, you could probably publish a formal report later into the project.  Glad to help you submit it somewhere if that's something interesting to you. </p>\n<p>Another insight from usually having 2 or 4 segments in the list is that there's probably a structure that could be devised that treats them in pairs that would do better (or be more vectorizable potentially).  It's also significant that there are \"relatively few\" in each partition, though we do have to be wary that the number of segments could be unlimited in the worst case.</p>",
+        "id": 126311562,
+        "sender_full_name": "Sean",
+        "timestamp": 1525867725
+    },
+    {
+        "content": "<p>havoc is fairly representative of a traditionally constructed csg model.  other common types are imported geometries which will typically be mostly BoT meshes or NURBS, often with just a few (expensive) csg operations sprinkled throughout (e.g., a handful of subtractions to fix overlaps).</p>",
+        "id": 126311686,
+        "sender_full_name": "Sean",
+        "timestamp": 1525867930
+    },
+    {
+        "content": "<p>With the list of elements being as low as they are, one of the things I've thought would probably help is setting up a sorting network for the &lt; N case</p>",
+        "id": 126313131,
+        "sender_full_name": "Sean",
+        "timestamp": 1525870353
+    },
+    {
+        "content": "<p>didn't think about vectorization. i haven't written any vectorized code before, but i'll write some this week, since it seems to pop up rather often around this project</p>",
+        "id": 126326312,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525888773
+    },
+    {
+        "content": "<p>regarding \"setting up a sorting network for the &lt; N case\", i suppose you mean determining a certain number N, and if there are less than N segments, set up a sorting network?</p>",
+        "id": 126326372,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525888811
+    },
+    {
+        "content": "<p>you shouldn't need to worry about vectorization too much directly as there is some compiler support (for automatic vectorization) and several good abstractions available.  we're more interested in OpenCL and TBB right now</p>",
+        "id": 126326674,
+        "sender_full_name": "Sean",
+        "timestamp": 1525889170
+    },
+    {
+        "content": "<blockquote>\n<p>regarding \"setting up a sorting network for the &lt; N case\", i suppose you mean determining a certain number N, and if there are less than N segments, set up a sorting network?</p>\n</blockquote>\n<p>yes, using a sorting network when the number of items to be sorted is small, falling back to something more general when it's larger</p>",
+        "id": 126326691,
+        "sender_full_name": "Sean",
+        "timestamp": 1525889223
+    },
+    {
+        "content": "<p>and having a sorting network in place, i would be able to find seek_stp in O(1)  using the comparators?</p>",
+        "id": 126326877,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525889447
+    },
+    {
+        "content": "<p>actually i think at least O(log N)</p>",
+        "id": 126326967,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525889603
+    },
+    {
+        "content": "<p>and i suppose it would not work for (very) large N because of the space complexity?</p>",
+        "id": 126327014,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525889646
+    },
+    {
+        "content": "<p>you could definitely get to O(logN) just by using a std::unordered_map for ptbl</p>",
+        "id": 126327375,
+        "sender_full_name": "Sean",
+        "timestamp": 1525890187
+    },
+    {
+        "content": "<p>I'm not sure what exactly the bool_eval() logic is doing for OP_SOLID, would have to study the code more to understand why it's scanning for that tree solid in partition list</p>",
+        "id": 126327451,
+        "sender_full_name": "Sean",
+        "timestamp": 1525890276
+    },
+    {
+        "content": "<p>i'm not familiar with sorting networks. i read about them now, and i don't get where they fit in, if not for the logN search :-?</p>",
+        "id": 126329474,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525893079
+    },
+    {
+        "content": "<p>i was looking at a profile and noticed that bu_bitv_clear took a lot of time (Debug build). BU_BITV_ZEROALL is a macro that zeroes the bytes in the bit vector using a while loop. i replaced the loop with a call to memset and one call to the macro in rt_shootray went from 5.21 s to 248 ms. i was wondering what the reason for the loop was initially</p>",
+        "id": 126360157,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525950722
+    },
+    {
+        "content": "<p>although i expect that the improvements would be smaller on a release build, i think they would still exist</p>",
+        "id": 126360291,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525950971
+    },
+    {
+        "content": "<p>looks like on release, the compiler makes this change itself, so it's useless</p>",
+        "id": 126362780,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525955656
+    },
+    {
+        "content": "<p>regarding what you said before, that bitv functions shouldn't show up in profiles, i think it's fine. the only one i'm seeing is bitv_clear, and for 1 M bits, you still have to write 125,000 zeroes to memory</p>",
+        "id": 126362914,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525955934
+    },
+    {
+        "content": "<p>assuming you can't remove the bitv altogether</p>",
+        "id": 126362978,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525956024
+    },
+    {
+        "content": "<p>i'm thinking of pre-alloc'ing a large number of bytes for rt_shootray itself, and whenever a bitv is needed, just return a position within this buffer with enough bytes to fulfil the request. only zero it when a request can't be satisfied</p>",
+        "id": 126363239,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525956565
+    },
+    {
+        "content": "<p>although bitv_clear amounts to very little, i'm not sure it's worth doing this</p>",
+        "id": 126363381,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525956838
+    },
+    {
+        "content": "<p>although for large number of bitv_clear's with large number of elements, it would most likely matter</p>",
+        "id": 126388315,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525992248
+    },
+    {
+        "content": "<p>i did some comparisons with std::unordered_set, it's way faster</p>",
+        "id": 126388330,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525992297
+    },
+    {
+        "content": "<p>if i start with replacing bu_ptbl, i still think testing existence in O(1) using bit vectors or stl is where i should begin</p>",
+        "id": 126388462,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525992587
+    },
+    {
+        "content": "<blockquote>\n<p>if i start with replacing bu_ptbl, i still think testing existence in O(1) using bit vectors or stl is where i should begin</p>\n</blockquote>\n<p>sounds reasonable to me too!</p>",
+        "id": 126644755,
+        "sender_full_name": "Sean",
+        "timestamp": 1526476949
+    },
+    {
+        "content": "<p>as i've written in my dev log, i replaced the bu_ptbl iteration inside bool_eval with bu_bitv. now rt_boolfinal is slower because of bit vector initialisation, but bool_final went from 14 seconds to 12 seconds. a lot of time is still spent checking if the solid is inside the partition (as expected from previous graphs), but each check is faster.</p>",
+        "id": 126735221,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526625506
+    },
+    {
+        "content": "<p>i guess the next step would be to replace bu_bitv with std::bitset in this specific instance and see what happens then</p>",
+        "id": 126736008,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526627044
+    },
+    {
+        "content": "<p>but i don't think it's worth it. the main problem with bool_eval is that there are lots of nodes in the tree, and each operation is already o(1),  except the bu_ptbl iteration, in which there are few elements (most of the time just 1, in the worst case ~60; but even then, i would trade iterating over 60 elements for initialising a huge bit vector a lot of the time; even if i use std::bitset, i don't see it being worth it)</p>",
+        "id": 126736455,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526627878
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 126739498,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526633660
+    },
+    {
+        "content": "<p>i tried with std::bitset. it seems to be consistently 2 seconds faster on Debug, which is what i would expect :-?</p>",
+        "id": 126740381,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526635259
+    },
+    {
+        "content": "<p>if you think it's enough for a patch, i'll submit one</p>",
+        "id": 126740703,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526635852
+    },
+    {
+        "content": "<p>on Release, it's more like 0.5–1 seconds faster. it's consistently faster, but the impact is smaller</p>",
+        "id": 126741605,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526637410
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> Go ahead and submit the std::bitset patch, since you've done the work - if it's consistently faster I don't see any particular reason not to use it, and even if we don't end up doing so it will be available to others for future testing.</p>",
+        "id": 126744313,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526642525
+    },
+    {
+        "content": "<p>i submitted the patch <a href=\"https://sourceforge.net/p/brlcad/patches/486/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/patches/486/\">https://sourceforge.net/p/brlcad/patches/486/</a>. i used vector&lt;bool&gt; instead of bitset because bitset requires specifying the size at compile time.</p>",
+        "id": 126747722,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526648289
+    },
+    {
+        "content": "<blockquote>\n<p>as i've written in my dev log, i replaced the bu_ptbl iteration inside bool_eval with bu_bitv. now rt_boolfinal is slower because of bit vector initialisation, but bool_final went from 14 seconds to 12 seconds. a lot of time is still spent checking if the solid is inside the partition (as expected from previous graphs), but each check is faster.</p>\n</blockquote>\n<p>how much slower? how did you measure?</p>",
+        "id": 126781502,
+        "sender_full_name": "Sean",
+        "timestamp": 1526701174
+    },
+    {
+        "content": "<blockquote>\n<p>i tried with std::bitset. it seems to be consistently 2 seconds faster on Debug, which is what i would expect :-?</p>\n</blockquote>\n<p>What's it look like in Release?  Debug is fairly insignificant for performance testing... lots of things we have intentionally run slower when compiled as Debug so that they will be accessible within a debugger.</p>",
+        "id": 126781556,
+        "sender_full_name": "Sean",
+        "timestamp": 1526701267
+    },
+    {
+        "content": "<p>I'd make sure it is consistently faster in Release mode before applying the change -- <span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span>  your intuition about initializing repeatedly being more expensive than short list iterations could be true when optimized.  it's worth being more certain across models on both ends of the spectrum.</p>",
+        "id": 126781836,
+        "sender_full_name": "Sean",
+        "timestamp": 1526701983
+    },
+    {
+        "content": "<blockquote>\n<p>[...]  it's worth being more certain across models on both ends of the spectrum.</p>\n</blockquote>\n<p>i'm currently running <code>bench/run.sh</code> with my changes, on release. after that i'll run it with trunk and post the results</p>",
+        "id": 126828662,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526814658
+    },
+    {
+        "content": "<p>i ran the benchmarks and they actually display a slowdown across all models. <a href=\"https://cezarelnazli.github.io/run-trunk.log\" target=\"_blank\" title=\"https://cezarelnazli.github.io/run-trunk.log\">here is trunk</a> and <a href=\"https://cezarelnazli.github.io/run-vector.log\" target=\"_blank\" title=\"https://cezarelnazli.github.io/run-vector.log\">here are my changes</a>. i ran a debug build inside a profiler, and the destructor for <code>vector</code> shows up in there, which isn't salutary</p>",
+        "id": 126838129,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526836382
+    },
+    {
+        "content": "<p>one mistake i think i'm making is that i'm initialising (and then destroying, too) an <code>ap-&gt;a_rt_i-&gt;nsolids</code>-long bit vector for each partition, and i could do that once outside the loop, and then just set the bits at each iteration.</p>",
+        "id": 126838312,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526836792
+    },
+    {
+        "content": "<p>actually, i don't think there's any way around it. basically what i'm doing is introducing <code>nsolids</code> operations for each partition, which previously did not exist.</p>",
+        "id": 126838761,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526837766
+    },
+    {
+        "content": "<p>i think a smarter approach is to store the results of the search in OP_SOLID in <code>bool_eval</code>. first time through the list, it would be just as expensive, but subsequent searches would become o(1)</p>",
+        "id": 126838818,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526837933
+    },
+    {
+        "content": "<p>i've tried things with <code>std::map</code> and <code>std::unordered_map</code> these days, they seem to slow down raytracing significantly. i think this is because the containers need to be constructed/destructed;  there are few elements in the bu_ptbl; accessing an element in a map is more expensive than in an array; and locality (maps are trees, unordered_maps use linked lists for buckets, elements in bu_ptbls are contiguous)</p>",
+        "id": 126894007,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526938833
+    },
+    {
+        "content": "<p>another thing i found out is that there are a lot of partitions (&gt; 100k). previously, i imagined there were ~100 partitions with huge trees</p>",
+        "id": 126894139,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526938987
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> Is there any way you can re-use the map/unordered_map rather than creating/destroying it? (no idea if that makes sense or is practical in this context, just a thought...)</p>",
+        "id": 126904852,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526960174
+    },
+    {
+        "content": "<p>That won't help the locality problem, of course...</p>",
+        "id": 126904860,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526960263
+    },
+    {
+        "content": "<p>i ran it under a profiler and it looked like most of the time was spent accessing elements (inside operator[])</p>",
+        "id": 126918118,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526987963
+    },
+    {
+        "content": "<p>in the case of map, i also saw the recursive calls made when walking the tree</p>",
+        "id": 126918171,
+        "sender_full_name": "Cezar",
+        "timestamp": 1526988035
+    },
+    {
+        "content": "<p>i tried using hashes when the number of segments in a partition is bigger than a threshold. performance degraded now as well, probably because of all the conditionals in addition to the previous logic</p>",
+        "id": 126929631,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527003744
+    },
+    {
+        "content": "<p>i'm not sure how the \"space\" is split into partitions (if that's what those partitions mean), but it seems like the bu_ptbl iteration was written to work well with it. in ~30 M calls to bool_eval when tracing havoc, there are &lt; 10 segments in a partition. so it seems to have lots of partitions with few segments, and in this case, i don't think whatever data structure i use will pay off, since at the very least, i'll have to initialise it for each partition (for example zeroing the array)</p>",
+        "id": 126929905,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527004128
+    },
+    {
+        "content": "<p>i tried a simple array hash, with a dumb/fast function (address of soltab mod 67), and it was still 3 seconds slower</p>",
+        "id": 126930008,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527004269
+    },
+    {
+        "content": "<p>i tested using <code>rt -B -H31 -P1 -o havoc.png havoc.g havoc</code>, and got ~18 sec on trunk and ~21 sec with my changes</p>",
+        "id": 126930188,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527004468
+    },
+    {
+        "content": "<p>so i think the next step would be to replace the bu_ptbl of struct soltabs altogether, instead of augmenting it. there is little work done when calling bool_eval once, and i think adding work there for bookkeeping will only make it slower no matter what</p>",
+        "id": 126966194,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527063842
+    },
+    {
+        "content": "<p>Sounds reasonable</p>",
+        "id": 126969452,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527069310
+    },
+    {
+        "content": "<p>by the way, i guess i should have asked this sooner, but do you have a (measurable) performance goal in mind? i'm currently running <code>bench/run.sh</code> and comparing rays/sec between runs to determine if it's improving, but i was wondering if there is a goal like \"at least 5.5 M rays/sec when benchmarking moss\"</p>",
+        "id": 126971922,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527074022
+    },
+    {
+        "content": "<p>we haven't quantified the goals, and a naive attempt would likely be unusefully arbitrary (e.g., 2x faster).</p>",
+        "id": 127173544,
+        "sender_full_name": "Sean",
+        "timestamp": 1527446926
+    },
+    {
+        "content": "<p>it would be good if we could figure out an objective metric, like having a render targets for an implicit object, triangle, and nurbs/brep version that have sufficient quality that they converge to the same image (within some specified pixel deviation tolerance).</p>",
+        "id": 127173640,
+        "sender_full_name": "Sean",
+        "timestamp": 1527447124
+    },
+    {
+        "content": "<p>then we could at least talk about relative costs in a more meaningful manner.  it might be the start of defining on OCH (similar to SAR used by kd-tree, but not misnomered)</p>",
+        "id": 127173649,
+        "sender_full_name": "Sean",
+        "timestamp": 1527447192
+    },
+    {
+        "content": "<p>realistically, we know there's a solid order of magnitude possible through data coherency alone, simd should give a similar order of magnitude boost -- so something that is currently 1M rays/s might attain 100M rays/s</p>",
+        "id": 127173689,
+        "sender_full_name": "Sean",
+        "timestamp": 1527447263
+    },
+    {
+        "content": "<p>so i've finished fixing my build errors and ran benchmarks using <code>std::vector</code>. they're better on all models, but not by much. however, i am now able to more easily test other stl containers. what i did was 1) change the <code>struct bu_ptbl pt_seglist</code> member of <code>struct partition</code> to <code>std::vector&lt;struct seg *&gt; pt_seglist</code> (and implemented the operations used in <code>bool.cpp</code> with the new structure); 2) split <code>rt/ray_partition.h</code> from <code>raytrace.h</code> and included it separately where it's needed; and 3) converted the files where the header is needed to C++ (with C linkage). what this means though is that you can no longer iterate the segments list from C, and i've also had to change a lot of files. the performance improvements so far are a bit underwhelming maybe, so i'm wondering if the trade offs are worth it</p>",
+        "id": 127174854,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527450185
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>gsoc/bench % cat summary-trunk-*\nAbs  rmbp 4041636.94    1714565.15  1734933.19  1348127.28  1830646.00  2287836.14  2159624.11  Thu May 24 01:01:31 EEST 2018\n*vgr rmbp 29498.84  25567.62    30942.27    25264.75    25896.81    154.35  22887.44\nAbs  rmbp 4168024.50    1761264.50  1715300.76  1403866.97  1816805.40  2308539.52  2195633.60  Thu May 24 01:17:52 EEST 2018\n*vgr rmbp 30421.31  26264.00    30592.13    26309.35    25701.02    155.75  23240.59\nAbs  rmbp 4191027.14    1735223.93  1774402.02  1391472.34  1786512.82  2302579.43  2196869.61  Thu May 24 01:37:09 EEST 2018\n*vgr rmbp 30589.20  25875.69    31646.19    26077.06    25272.49    155.35  23269.33\nAbs  rmbp 4194157.90    1708366.28  1768637.50  1422026.54  1912957.40  2312326.89  2219745.41  Thu May 24 01:56:24 EEST 2018\n*vgr rmbp 30612.05  25475.19    31543.38    26649.67    27061.21    156.01  23582.91\nAbs  rmbp 4252770.44    1786723.23  1836428.96  1419499.54  1919978.36  2304439.92  2253306.74  Thu May 24 02:14:48 EEST 2018\n*vgr rmbp 31039.85  26643.65    32752.43    26602.31    27160.53    155.47  24059.04\ngsoc/bench % cat summary-vector-*\nAbs  rmbp 4684937.42    2031225.42  2025885.21  1557917.44  2090030.01  2569718.32  2493285.63  Sun May 27 21:15:55 EEST 2018\n*vgr rmbp 34194.12  30289.67    36131.35    29196.35    29566.13    173.37  26591.83\nAbs  rmbp 4638519.22    1932765.21  1975258.83  1554311.46  2033613.46  2507226.39  2440282.42  Sun May 27 21:33:41 EEST 2018\n*vgr rmbp 33855.33  28821.43    35228.44    29128.77    28768.05    169.16  25995.19\nAbs  rmbp 4605819.18    1986518.42  2022192.86  1557950.64  2083347.79  2540601.93  2466071.80  Sun May 27 21:49:56 EEST 2018\n*vgr rmbp 33616.66  29623.00    36065.50    29196.97    29471.60    171.41  26357.52\nAbs  rmbp 4681758.44    2003582.74  2061324.01  1560023.33  2034590.59  2532082.09  2478893.53  Sun May 27 22:05:59 EEST 2018\n*vgr rmbp 34170.92  29877.46    36763.40    29235.81    28781.87    170.83  26500.04\nAbs  rmbp 4581822.58    2019161.52  2035468.56  1575925.77  2070459.65  2589455.33  2478715.56  Sun May 27 22:22:35 EEST 2018\n*vgr rmbp 33441.51  30109.77    36302.27    29533.84    29289.28    174.70  26475.22\n</pre></div>",
+        "id": 127174858,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527450193
+    },
+    {
+        "content": "<p>here are the numbers, hopefully the formatting is fine</p>",
+        "id": 127174860,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527450211
+    },
+    {
+        "content": "<blockquote>\n<p>[...] like having a render targets for an implicit object, triangle, and nurbs/brep version that have sufficient quality that they converge to the same image (within some specified pixel deviation tolerance).</p>\n</blockquote>\n<p>hmm... i'm not familiar with what a render target and an implicit object are</p>",
+        "id": 127174995,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527450510
+    },
+    {
+        "content": "<p>nice... that's about a 10% improvement...</p>",
+        "id": 127175000,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450574
+    },
+    {
+        "content": "<blockquote>\n<p>[...] it might be the start of defining on OCH (similar to SAR used by kd-tree, but not misnomered)</p>\n</blockquote>\n<p>i'm not familiar with those terms either :D i found this (<a href=\"http://pl887.pairlitesite.com/papers/rt06-fast-kd/fast-kd-construction-RT06.pdf\" target=\"_blank\" title=\"http://pl887.pairlitesite.com/papers/rt06-fast-kd/fast-kd-construction-RT06.pdf\">http://pl887.pairlitesite.com/papers/rt06-fast-kd/fast-kd-construction-RT06.pdf</a>) searching for \"SAR kd-tree\", but i'll have to read up</p>",
+        "id": 127175052,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527450619
+    },
+    {
+        "content": "<p>considering ptbl's were only amounting to about 20-30% of the overall time, you cut it way down</p>",
+        "id": 127175053,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450630
+    },
+    {
+        "content": "<p>sar is surface area heuristic</p>",
+        "id": 127175055,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450656
+    },
+    {
+        "content": "<p>it's a way to split up geometry (whether with a kd-tree or bsp or other spatial partition method) where you want to try and balance the amount of work on both sides of a split so they're roughly even</p>",
+        "id": 127175061,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450693
+    },
+    {
+        "content": "<p>if everything is a triangle, then surface area tends to be a reasonable metric for that ... the amount of geometry surface over here equals the amount over there, so this is a good split point</p>",
+        "id": 127175101,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450733
+    },
+    {
+        "content": "<p>when you don't have triangles, SAH is just stupid and the wrong term</p>",
+        "id": 127175103,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450754
+    },
+    {
+        "content": "<p>the generalization is some form of an object complexity or object cost metric / heuristic</p>",
+        "id": 127175106,
+        "sender_full_name": "Sean",
+        "timestamp": 1527450783
+    },
+    {
+        "content": "<p>ok, i think i understand what that means. i'm also curious what a render target is. something like \"a target number of operations\", or something else? and regarding data coherency, is that cache coherency, or something else/more?</p>",
+        "id": 127175357,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527451360
+    },
+    {
+        "content": "<p>in what context?  a render target is typically an image being made or a particular type of image</p>",
+        "id": 127176678,
+        "sender_full_name": "Sean",
+        "timestamp": 1527454598
+    },
+    {
+        "content": "<p>oh, you said previously \"it would be good if we could figure out an objective metric, like having a render targets for an implicit object\"</p>",
+        "id": 127176686,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527454669
+    },
+    {
+        "content": "<p>data coherence does refer to cache coherency or more generally to coherency in memory and across memory boundaries -- for example, if something is on disk, you obviously want to only read from disk once and do all your processing on it (as opposed to reading it from disk repeatedly)</p>",
+        "id": 127176727,
+        "sender_full_name": "Sean",
+        "timestamp": 1527454693
+    },
+    {
+        "content": "<p>same thing applies for things read into main memory that end up on the cpu or gpu memory, like if on the cpu, keep things in l3 as long as possible, in l2 as long as possible, etc</p>",
+        "id": 127176737,
+        "sender_full_name": "Sean",
+        "timestamp": 1527454753
+    },
+    {
+        "content": "<p>oh, i see. is reading repeatedly from disk a problem that exists right now in the codebase, or was it a hypothetical example?</p>",
+        "id": 127176789,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527454877
+    },
+    {
+        "content": "<p>yeah, previous comment about render target was to have a desired image (e.g., a 1024x1024 rendering of a sphere) that you would get when you run (for example) rt on a sph object, or on a sph.bot object or a sph.brep object -- the \"target\" aka desired image would be the same for all three</p>",
+        "id": 127176790,
+        "sender_full_name": "Sean",
+        "timestamp": 1527454885
+    },
+    {
+        "content": "<p>hypothetical example</p>",
+        "id": 127176792,
+        "sender_full_name": "Sean",
+        "timestamp": 1527454897
+    },
+    {
+        "content": "<p>typically, coherency is disk &lt; net &lt; main memory &lt; l3 cache &lt; l2 cache &lt; l1 cache || gpu cache</p>",
+        "id": 127176839,
+        "sender_full_name": "Sean",
+        "timestamp": 1527454998
+    },
+    {
+        "content": "<p>i'm aware, although i refer to it as memory hierarchy</p>",
+        "id": 127176888,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527455110
+    },
+    {
+        "content": "<p>yes!  it is also memory hierarchy, coherency is simply a data-centric view (as opposed to a memory architecture perspective) where you keep related memory items together, so you can do what you need on the data without reaching down the hierarchy for more data (thus incurring a stall)</p>",
+        "id": 127177058,
+        "sender_full_name": "Sean",
+        "timestamp": 1527455513
+    },
+    {
+        "content": "<p>here's an interesting gist on someone rewriting a simple algorithm with l1/l2 in mind: <a href=\"https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0\" target=\"_blank\" title=\"https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0\">https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0</a></p>",
+        "id": 127177349,
+        "sender_full_name": "Sean",
+        "timestamp": 1527456187
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> was the winner std::vector then?</p>",
+        "id": 127208988,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527519005
+    },
+    {
+        "content": "<p>i didn't get to test the others. i'll start today</p>",
+        "id": 127211740,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527523163
+    },
+    {
+        "content": "<p>so while modifying the code to use <code>std::set</code>, i noticed that i can't actually remove the iteration in <code>bool_eval</code> because in there, it's searching for a <code>soltab</code>, while the container holds  <code>seg</code>s, so i have to access <code>seg_stp</code>. i also can't change it to hold <code>soltab</code>s because somewhere else in the code, it requires a seg's other members and there's no pointer from a soltab to a seg</p>",
+        "id": 127214291,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527528135
+    },
+    {
+        "content": "<p>i tried <code>unordered_set</code>, but stopped quickly. after a few seconds, it was still not done with the first item in the benchmark (which takes 0.06 sec with bu_ptbl). i profiled it and most (all?) of the time is spent in the container's <code>rehash</code> method, so i don't think there's much to do here</p>",
+        "id": 127219565,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527537879
+    },
+    {
+        "content": "<p>also related to my previous message, i can't use bit vectors either. and since maps are similar to sets (buckets and rehashing), i don't think they'll yield good results</p>",
+        "id": 127220230,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527539328
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> Out of curiosity, what do you think about maybe trying a C implementation of red black trees?  We've got one in libbu, and if it has problems there are a few others out there we could replace it with.</p>",
+        "id": 127226583,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527553087
+    },
+    {
+        "content": "<p>i think std::set and std::map use rb trees. i didn't get to test them yesterday because i kept getting seg faults and postponed fixing them, but i'll get to it today. after that, i'll try the libbu implementation as well. also, i think i can test for membership in O(log N) in bool_eval with std::map</p>",
+        "id": 127239636,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527581141
+    },
+    {
+        "content": "<p>i got set to work, but it's worse than trunk (moss, frame 8, 3.3 M rays/sec vs 4.5 and 5.2). i'll try map next, and then the rb tree in libbu</p>",
+        "id": 127244172,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527588807
+    },
+    {
+        "content": "<p>tried map, it's still slow. profiled it, spends 9 seconds (out of 1.25 minutes on Debug) in bool_eval finding the soltab with .count(). i think it's because of locality + expensive operations. it's log N, but when searching for &lt; 5 elements, the constant factors matter</p>",
+        "id": 127248747,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527596532
+    },
+    {
+        "content": "<p>i'll try libbu's implementation as well. as for other implementations, i remember the linux kernel having one. maybe there are a few tricks there. there's also the matter of licensing :-?</p>",
+        "id": 127249013,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527596908
+    },
+    {
+        "content": "<p>although if i’m trying other implementations, i can try different packages for hashes, too</p>",
+        "id": 127255130,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527605002
+    },
+    {
+        "content": "<p>Shouldn’t need to worry about licensing.  Typically only problems are with gpl and academic codes that have a discriminatory clause like cc-by-nc making it not Open Source.</p>",
+        "id": 127290877,
+        "sender_full_name": "Sean",
+        "timestamp": 1527657715
+    },
+    {
+        "content": "<p>I think you are seeing a clear pattern that init constant is dominant on the O(logN) methods so either need a diff init or change the algorithm...</p>",
+        "id": 127291050,
+        "sender_full_name": "Sean",
+        "timestamp": 1527658024
+    },
+    {
+        "content": "<p>Can you briefly summarize everything you’ve tried and the timings into a table?  If the data is handy....</p>",
+        "id": 127291104,
+        "sender_full_name": "Sean",
+        "timestamp": 1527658113
+    },
+    {
+        "content": "<blockquote>\n<p>Can you briefly summarize everything you’ve tried and the timings into a table?  If the data is handy....</p>\n</blockquote>\n<p>That was my initial plan, but after seeing the poor performance of other containers, I stopped the benchmarking suite before completing. For example, using <code>map</code>, it went from ~2.2 M for world to ~1.2 M, so I figured it's not worth running further.</p>",
+        "id": 127296791,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527668942
+    },
+    {
+        "content": "<p>But I'm curious why <code>vector</code> is faster than <code>bu_ptbl</code>. I want to try adjusting the initial capacity and see if this improves performance.</p>",
+        "id": 127296936,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527669143
+    },
+    {
+        "content": "<p>i set bu_ptbl's initial capacity to 16 (down from 64) and the numbers are actually close to <code>vector</code>. it still has a slight edge, but the upside is that there's no need to switch to C++</p>",
+        "id": 127302576,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527678883
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>gsoc/bench % cat summary-trunk-*\nAbs  rmbp 4041636.94    1714565.15  1734933.19  1348127.28  1830646.00  2287836.14  2159624.11  Thu May 24 01:01:31 EEST 2018\n*vgr rmbp 29498.84  25567.62    30942.27    25264.75    25896.81    154.35  22887.44\nAbs  rmbp 4168024.50    1761264.50  1715300.76  1403866.97  1816805.40  2308539.52  2195633.60  Thu May 24 01:17:52 EEST 2018\n*vgr rmbp 30421.31  26264.00    30592.13    26309.35    25701.02    155.75  23240.59\nAbs  rmbp 4191027.14    1735223.93  1774402.02  1391472.34  1786512.82  2302579.43  2196869.61  Thu May 24 01:37:09 EEST 2018\n*vgr rmbp 30589.20  25875.69    31646.19    26077.06    25272.49    155.35  23269.33\nAbs  rmbp 4194157.90    1708366.28  1768637.50  1422026.54  1912957.40  2312326.89  2219745.41  Thu May 24 01:56:24 EEST 2018\n*vgr rmbp 30612.05  25475.19    31543.38    26649.67    27061.21    156.01  23582.91\nAbs  rmbp 4252770.44    1786723.23  1836428.96  1419499.54  1919978.36  2304439.92  2253306.74  Thu May 24 02:14:48 EEST 2018\n*vgr rmbp 31039.85  26643.65    32752.43    26602.31    27160.53    155.47  24059.04\ngsoc/bench % cat summary-ptbl16-*\nAbs  rmbp 4680155.95    1927090.59  1999106.16  1550430.99  2071242.81  2599398.72  2471237.53  Wed May 30 12:53:31 EEST 2018\n*vgr rmbp 34159.22  28736.81    35653.75    29056.05    29300.36    175.38  26180.26\nAbs  rmbp 4662057.95    1932794.89  1932672.45  1539780.22  2089337.31  2568054.50  2454116.22  Wed May 30 13:11:15 EEST 2018\n*vgr rmbp 34027.13  28821.87    34468.92    28856.45    29556.33    173.26  25983.99\nAbs  rmbp 4483025.56    1959477.52  1968239.40  1534994.64  2065281.19  2589953.44  2433495.29  Wed May 30 13:29:25 EEST 2018\n*vgr rmbp 32720.42  29219.76    35103.25    28766.76    29216.03    174.74  25866.82\nAbs  rmbp 4582552.38    1887762.28  2002007.33  1554848.10  2082253.88  2560400.25  2444970.70  Wed May 30 13:46:10 EEST 2018\n*vgr rmbp 33446.84  28150.34    35705.49    29138.83    29456.13    172.74  26011.72\nAbs  rmbp 4602999.06    1911004.39  1992763.36  1525482.72  2079252.77  2585297.14  2449466.57  Wed May 30 14:02:18 EEST 2018\n*vgr rmbp 33596.08  28496.93    35540.63    28588.50    29413.67    174.42  25968.37\ngsoc/bench % cat summary-vector-*\nAbs  rmbp 4684937.42    2031225.42  2025885.21  1557917.44  2090030.01  2569718.32  2493285.63  Sun May 27 21:15:55 EEST 2018\n*vgr rmbp 34194.12  30289.67    36131.35    29196.35    29566.13    173.37  26591.83\nAbs  rmbp 4638519.22    1932765.21  1975258.83  1554311.46  2033613.46  2507226.39  2440282.42  Sun May 27 21:33:41 EEST 2018\n*vgr rmbp 33855.33  28821.43    35228.44    29128.77    28768.05    169.16  25995.19\nAbs  rmbp 4605819.18    1986518.42  2022192.86  1557950.64  2083347.79  2540601.93  2466071.80  Sun May 27 21:49:56 EEST 2018\n*vgr rmbp 33616.66  29623.00    36065.50    29196.97    29471.60    171.41  26357.52\nAbs  rmbp 4681758.44    2003582.74  2061324.01  1560023.33  2034590.59  2532082.09  2478893.53  Sun May 27 22:05:59 EEST 2018\n*vgr rmbp 34170.92  29877.46    36763.40    29235.81    28781.87    170.83  26500.04\nAbs  rmbp 4581822.58    2019161.52  2035468.56  1575925.77  2070459.65  2589455.33  2478715.56  Sun May 27 22:22:35 EEST 2018\n*vgr rmbp 33441.51  30109.77    36302.27    29533.84    29289.28    174.70  26475.22\n</pre></div>",
+        "id": 127302577,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527678887
+    },
+    {
+        "content": "<p>is there any way to run the benchmark on windows?</p>",
+        "id": 127304541,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527682451
+    },
+    {
+        "content": "<p>i <a href=\"https://cezarelnazli.github.io/plots/ds_diff.svg\" target=\"_blank\" title=\"https://cezarelnazli.github.io/plots/ds_diff.svg\">plotted the data here</a> and <a href=\"https://cezarelnazli.github.io/ds_diff_results.txt\" target=\"_blank\" title=\"https://cezarelnazli.github.io/ds_diff_results.txt\">dumped the results here</a></p>",
+        "id": 127329737,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527714911
+    },
+    {
+        "content": "<p>i tried running with the rb tree implementation in libbu. it's super slow (tens of seconds where trunk takes 0.06) and that's because of acquiring and releasing semaphores. running with <code>-P 1</code> makes it faster. it could be an implementation problem, maybe locking isn't required. i still think it has worse locality and initialisation, which should matter for small lists. but if you want me to try other implementations, i will do so. if you want to see my code (maybe i'm doing it wrong), i'll submit a patch</p>",
+        "id": 127431679,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527879206
+    },
+    {
+        "content": "<p>i've spammed <a href=\"https://sourceforge.net/p/brlcad/patches/493/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/patches/493/\">some patches here</a></p>",
+        "id": 127432853,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527880589
+    },
+    {
+        "content": "<p>libbu semaphores are used because of <code>MALLOC_NOT_MP_SAFE</code>, which i think is not needed nowadays (?). i undefined it and performance increased significantly, but it's still ~3x slower than bu_ptbl. insertions (due to allocating new nodes) and the <code>OP_SOLID</code> case in <code>bool_eval</code> are the hotspots. i could try to keep a pool of nodes and allocate from that</p>",
+        "id": 127441049,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527891709
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> I'd be curious about <a href=\"https://github.com/jstimpfle/sil/tree/master/rb3ptr\" target=\"_blank\" title=\"https://github.com/jstimpfle/sil/tree/master/rb3ptr\">https://github.com/jstimpfle/sil/tree/master/rb3ptr</a> but I have no idea how much work that would be, or even if it makes sense for this case...</p>",
+        "id": 127446992,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527901908
+    },
+    {
+        "content": "<p>the \"memory allocation done by client\" bit intrigues me, since your testing is indicating initialization costs are an issue...  makes me wonder if we could pre-allocate...</p>",
+        "id": 127447059,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527902021
+    },
+    {
+        "content": "<p>I'm not surprised our redblack tree in libbu has issues - to the best of my knowledge its not been stressed much</p>",
+        "id": 127447138,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527902156
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> might also try a few other containers like a splay tree and see if they do anything interesting...</p>",
+        "id": 127447545,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527902882
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> any sense of whether something like a memory pool might be helpful?</p>",
+        "id": 127447656,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527903040
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> I'd be curious about <a href=\"https://github.com/jstimpfle/sil/tree/master/rb3ptr\" target=\"_blank\" title=\"https://github.com/jstimpfle/sil/tree/master/rb3ptr\">https://github.com/jstimpfle/sil/tree/master/rb3ptr</a> but I have no idea how much work that would be, or even if it makes sense for this case...</p>\n</blockquote>\n<p>i could try it, but looking at the readme, i see that it's \"Not thread safe\". this seems like a big problem :-?</p>",
+        "id": 127455844,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527921379
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> any sense of whether something like a memory pool might be helpful?</p>\n</blockquote>\n<p>since most of the time is spent allocating nodes during insertions, i think a memory pool would be helpful. i was considering it, but my thinking is that i would still need a list to manage the pool, i'd still iterate over it, and it would be bigger still than the current lists (of segments). so it might harm performance in the end</p>",
+        "id": 127455896,
+        "sender_full_name": "Cezar",
+        "timestamp": 1527921571
+    },
+    {
+        "content": "<p>Hmm.  Is bu_ptbl insertion currently thread safe?</p>",
+        "id": 127477761,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527972912
+    },
+    {
+        "content": "<p>i think so, since it doesn't hold any global state, and the way it's used is contained to a single thread. so if thread A creates a bu_ptbl, only thread A will read/modify it</p>",
+        "id": 127534224,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528100121
+    },
+    {
+        "content": "<p>but rb3ptr looks to be the same, i hadn't thought about it before pasting the \"not thread safe\" comment</p>",
+        "id": 127534354,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528100307
+    },
+    {
+        "content": "<blockquote>\n<p>i set bu_ptbl's initial capacity to 16 (down from 64) and the numbers are actually close to <code>vector</code>. it still has a slight edge, but the upside is that there's no need to switch to C++</p>\n</blockquote>\n<p>On the surface, that was a shocking discovery but in retrospect it makes complete sense if static init is dominating the timing.  Did you test any other sizes like 8 or 0 or 24?</p>",
+        "id": 127580962,
+        "sender_full_name": "Sean",
+        "timestamp": 1528171522
+    },
+    {
+        "content": "<p>I think you've just about killed all the ptbl replacement options.  you found a way to make it considerably faster, great -- I suggest moving on to the next profile hot point.  if ptbl is still high on the profile for specific cases, it might make sense to use a hybrid strategy (like plain array for first 8 entries, then some logN method for additional).</p>",
+        "id": 127581228,
+        "sender_full_name": "Sean",
+        "timestamp": 1528172072
+    },
+    {
+        "content": "<p>otherwise, diminishing returns ... lots of other room for improvement ;)</p>",
+        "id": 127581252,
+        "sender_full_name": "Sean",
+        "timestamp": 1528172162
+    },
+    {
+        "content": "<blockquote>\n<p>On the surface, that was a shocking discovery but in retrospect it makes complete sense if static init is dominating the timing.  Did you test any other sizes like 8 or 0 or 24?</p>\n</blockquote>\n<p>I tried 8 and that's better than trunk as well, but worse than 16. I think 16 is a sweet spot because there are usually between 8 and 16 segments in a partition, so no resizing is needed and no time is wasted zeroing unused elements</p>",
+        "id": 127586176,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528182480
+    },
+    {
+        "content": "<blockquote>\n<p>I think you've just about killed all the ptbl replacement options.  you found a way to make it considerably faster, great -- I suggest moving on to the next profile hot point.  if ptbl is still high on the profile for specific cases, it might make sense to use a hybrid strategy (like plain array for first 8 entries, then some logN method for additional).</p>\n</blockquote>\n<p>you previously mentioned data coherency, bu_list pointer aliasing and simd offering big performance improvements. i would like to look at those next, but i'm not sure where to begin</p>",
+        "id": 127586340,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528182730
+    },
+    {
+        "content": "<p>also, i asked if there is a way to run the benchmark suite on windows (i don't see any). if there isn't, would it be worth it if i ported the <code>run.sh</code> script to python?</p>",
+        "id": 127586352,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528182785
+    },
+    {
+        "content": "<p>i was looking at vectorization, and what i want to try next is to compile with clang's vectorization reports, see what couldn't be vectorized and why, and try to rewrite the code. does this sound good?</p>",
+        "id": 127673885,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528314085
+    },
+    {
+        "content": "<p>also, while going through cmakelists, i noticed <a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720\">some SSE flags commented out</a> due to invalid instructions. is there more context around it?</p>",
+        "id": 127674233,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528314453
+    },
+    {
+        "content": "<blockquote>\n<p>also, i asked if there is a way to run the benchmark suite on windows (i don't see any). if there isn't, would it be worth it if i ported the <code>run.sh</code> script to python?</p>\n</blockquote>\n<p>there's not, but not worth porting to python at this time -- there are other plans for it already in the works</p>",
+        "id": 127692880,
+        "sender_full_name": "Sean",
+        "timestamp": 1528344470
+    },
+    {
+        "content": "<blockquote>\n<p>you previously mentioned data coherency, bu_list pointer aliasing and simd offering big performance improvements. i would like to look at those next, but i'm not sure where to begin</p>\n</blockquote>\n<p>I suggest finding something relatively simple and isolated.  see what it takes to change it.  the most egregious cases are functions that take/pass bu_list as a function parameter.  looking quickly at public headers, wdb.h stands out as just having a couple and it's a fairly isolated library -- maybe start there as a test.</p>",
+        "id": 127693159,
+        "sender_full_name": "Sean",
+        "timestamp": 1528345028
+    },
+    {
+        "content": "<blockquote>\n<p>also, while going through cmakelists, i noticed <a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720\">some SSE flags commented out</a> due to invalid instructions. is there more context around it?</p>\n</blockquote>\n<p>It's hard to test for SSE without causing a runtime crash.   We need both build-time and (if not more importantly) runtime sse detection that doesn't crash when you don't have sse.</p>",
+        "id": 127695546,
+        "sender_full_name": "Sean",
+        "timestamp": 1528348958
+    },
+    {
+        "content": "<blockquote>\n<p>there's not, but not worth porting to python at this time -- there are other plans for it already in the works</p>\n</blockquote>\n<p>oh, ok :D is there anything i can read on the plans? the reason i wanted to test on windows is that it is the most downloaded version on sf, and figured it is important to benchmark there as well</p>",
+        "id": 127697514,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528352053
+    },
+    {
+        "content": "<blockquote>\n<p>It's hard to test for SSE without causing a runtime crash.   We need both build-time and (if not more importantly) runtime sse detection that doesn't crash when you don't have sse.</p>\n</blockquote>\n<p>i think <code>cpuid</code> would be enough here, at least on intel/amd</p>",
+        "id": 127697586,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528352172
+    },
+    {
+        "content": "<blockquote>\n<p>I suggest finding something relatively simple and isolated.  see what it takes to change it.  the most egregious cases are functions that take/pass bu_list as a function parameter.  looking quickly at public headers, wdb.h stands out as just having a couple and it's a fairly isolated library -- maybe start there as a test.</p>\n</blockquote>\n<p>ok, i'll do this today</p>",
+        "id": 127697591,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528352194
+    },
+    {
+        "content": "<p>i want to see if i get this right. in <code>int mk_pipe(struct rt_wdb *fp, const char *name, struct bu_list *headp)</code>, is the reason for pointer aliasing that <code>struct rt_wdb</code>'s first member is a <code>struct bu_list</code>, and the compiler can't be sure that <code>fp</code> and <code>headp</code> point to disjoint memory?</p>",
+        "id": 127714803,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528373173
+    },
+    {
+        "content": "<p><a href=\"https://docs.oracle.com/cd/E24457_01/html/E21990/bjafa.html#bjafb\" target=\"_blank\" title=\"https://docs.oracle.com/cd/E24457_01/html/E21990/bjafa.html#bjafb\">i'm using this</a> as the definition of pointer aliasing</p>",
+        "id": 127714811,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528373251
+    },
+    {
+        "content": "<p>i thought that if the parameters have different types, they're assumed to not be aliases of one another, so i guess that's why i don't understand why aliasing takes place in the example i gave</p>",
+        "id": 127714868,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528373321
+    },
+    {
+        "content": "<blockquote>\n<p>oh, ok :D is there anything i can read on the plans? the reason i wanted to test on windows is that it is the most downloaded version on sf, and figured it is important to benchmark there as well</p>\n</blockquote>\n<p>There's nothing to read up on, nothing fancy.  It's just being reworked in another way and being used as a testing framework for another performance code (i.e., being slightly generalized).  I can let you know if there's bits you can tackle since it is performance related, but don't want to spread you out too thin!</p>",
+        "id": 127717018,
+        "sender_full_name": "Sean",
+        "timestamp": 1528376821
+    },
+    {
+        "content": "<blockquote>\n<p>i think <code>cpuid</code> would be enough here, at least on intel/amd</p>\n</blockquote>\n<p>it should be and that's essentially what we have now (see src/libbu/simd.c) but then there are outliers doing different things (e.g., include/bn/dvec.h)</p>",
+        "id": 127717251,
+        "sender_full_name": "Sean",
+        "timestamp": 1528377160
+    },
+    {
+        "content": "<blockquote>\n<p>i want to see if i get this right. in <code>int mk_pipe(struct rt_wdb *fp, const char *name, struct bu_list *headp)</code>, is the reason for pointer aliasing that <code>struct rt_wdb</code>'s first member is a <code>struct bu_list</code>, and the compiler can't be sure that <code>fp</code> and <code>headp</code> point to disjoint memory?</p>\n</blockquote>\n<p>So this is a little complicated to explain because the aliasing typically happens in non-obvious and in unlocalized places.  There's no problem with fp in that function signature.  There's technically (not yet) a problem with headp either except that it's a generic bu_list -- meaning \"it's a list of something\".  </p>\n<p>If you look in src/libwdb/pipe.c, you'll find that function and sure enough mk_pipe() doesn't really do anything other than add that headp bu_list to another bu_list (i.e., pipe_segs_head).  But if we look at the places pipe_segs_head is used, we start to find aliasing in action that screws with performance.  Consider the destructor function for example: mk_pipe_free() </p>\n<p>In there, it's iterating over a generic \"list of something\" headp, but casting each list element to a struct wdb_pipept, unlinking it from the list (i.e., dequeue wp-&gt;l), and releasing the memory.  That only worked because wdb_pipept has a bu_list as the first byte in its structure.</p>\n<p>With <em>strict</em> pointer aliasing, the compiler could know that the next element in the bu_list is += sizeof(struct bu_list) bytes ahead... but it's not in our case because it's really += sizeof(struct wdb_pipept) bytes ahead.  And if the compiler assumes wrongly, trying to optimize aggressively, it will end up prefetching the wrong bytes, and it'll typically crash eventually.  When we turn strict aliasing off, it tells the compiler to not do any lookahead optimization, use the manual cast sizes that switch from one thing to another depending on which function we are in.</p>\n<p>Make sense?? :)</p>",
+        "id": 127718082,
+        "sender_full_name": "Sean",
+        "timestamp": 1528378416
+    },
+    {
+        "content": "<p>So the issue really is bu_list's entire existence because it was implemented specifically to take advantage of non-strict aliasing, for code simplicity, brevity.  The \"fix\" requires re-evaluating the container being used, and figuring out a different container -- like A) passing a struct wdb_pipept with traditional forw/next pointers in it (so that structure is a list), B) passing a plain NULL-terminated array of wdb_pipept structures, C) using some other generic C container (akin to using a std::vector&lt;struct wdb_pipept&gt;), D) ...</p>",
+        "id": 127718347,
+        "sender_full_name": "Sean",
+        "timestamp": 1528378739
+    },
+    {
+        "content": "<p>yep, it makes sense now. what i was missing was the part about prefetching the wrong bytes</p>",
+        "id": 127718505,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528378960
+    },
+    {
+        "content": "<p>Great!</p>",
+        "id": 127719060,
+        "sender_full_name": "Sean",
+        "timestamp": 1528379743
+    },
+    {
+        "content": "<p>For what it’s worth, the answer should be to convert a bu_list to either an array of structs or a struct with array(s) in it.  If you read up and see terms like AoS or SoA or AoSoA, that’s what the typical performance pattern is.  Linked lists should basically never be used any more except underpinning more complex containers like std::map</p>",
+        "id": 127719366,
+        "sender_full_name": "Sean",
+        "timestamp": 1528380197
+    },
+    {
+        "content": "<p>because of locality, right?</p>",
+        "id": 127719633,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528380565
+    },
+    {
+        "content": "<p>oh, i just looked up SoA and AoS, i've done similar things when implementing graphs, but didn't know they had a name, or their performance implications :D</p>",
+        "id": 127720948,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528382029
+    },
+    {
+        "content": "<p>Yes, memory locality dominates.  When a page of memory is loaded and you access a structure, it’s very likely that the next structure you’ll need is on that same page of memory, so you avoid having to refetch if it’s an array.  With linked list pointers, it’s possible for every structure to live on different pages and always or frequently incur a page fault.</p>",
+        "id": 127721782,
+        "sender_full_name": "Sean",
+        "timestamp": 1528382972
+    },
+    {
+        "content": "<p>i got two questions :D 1) i profiled rt(1) again, and i can't find hotspots involving bu_list. i understand what the problem is conceptually, but is there anything i can do to convince myself that it is a problem in practice? am i missing something in the rt profile, or do i have to profile something else?; 2) if i do have to replace bu_list with an array-based structure, i'll have to implement (or find something already done — i see that bu/list.h mentions some candidates for replacement) something similar to bu_ptbl, but which holds elements of arbitrary size, and change the entire code base to use this new structure. or are there specific libraries which i should focus on (but if there are, i suppose this ties into my first question — how do i identify them?)?</p>",
+        "id": 127782996,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528478640
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> did you run rt with -F/dev/null to avoid overhead generated by image writing?</p>",
+        "id": 127803396,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528510276
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> I don't know if you'll have to completely replace bu_list everywhere, but any substantial change to bu_list's use in librt I would expect to touch a lot of code.  My advice would be to set up \"parallel\" implementation files and API calls which replicate functionality using the new replacement for bu_list.  That way, you can instrument things up to do an apples to apples comparison on output accuracy in the old code vs. the rewritten code.  And if (as I suspect) we would have to leave the old code in place while deprecating it in favor of a de-bu_list-ified API, that would position the code well to handle/manage that process.</p>",
+        "id": 127803494,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528510516
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> an unrelated point, but something I am curious about - are there any places in the code where our use of bu_ptbl_ins_uniq show up as any sort of performance bottleneck?  The uniqueness guarantee of bu_ptbl_ins_uniq I would expect to get expensive quickly as table sizes grow...  Or, if it doesn't immediately show up in our code, could you try setting up some sort of unit test to get a sense of when bu_ptbl_ins_uniq starts to get problematic performance wise for both random and worst-case uniqueness searching?</p>",
+        "id": 127803590,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528510747
+    },
+    {
+        "content": "<p>It may not matter greatly for raytracing (based on your work to date) but since bu_ptbl seems to perform well enough to keep around I'd like to at least have some sense of what we might do (and when we might need/want to do it) to avoid very high performance penalties for uniq insertion into large bu_ptbl arrays, if it's a test you can do easily and quickly...</p>",
+        "id": 127803679,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528510929
+    },
+    {
+        "content": "<p>e.g. could we \"switch\" the backend container to a red-black tree implementation or something similar when the bu_ptbl size gets past some size threshold, and keep the current fast behavior at smaller array sizes when the uniq test is cheap enough to not be a concern?</p>",
+        "id": 127803729,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528511081
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> did you run rt with -F/dev/null to avoid overhead generated by image writing?</p>\n</blockquote>\n<p>no, i was doing <code>-o file.png</code>. i was looking for something like -F when profiling, but i missed it when skimming through the man pages</p>",
+        "id": 127811446,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528529299
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> I don't know if you'll have to completely replace bu_list everywhere, but any substantial change to bu_list's use in librt I would expect to touch a lot of code.  My advice would be to set up \"parallel\" implementation files and API calls which replicate functionality using the new replacement for bu_list.  That way, you can instrument things up to do an apples to apples comparison on output accuracy in the old code vs. the rewritten code.  And if (as I suspect) we would have to leave the old code in place while deprecating it in favor of a de-bu_list-ified API, that would position the code well to handle/manage that process.</p>\n</blockquote>\n<p>sounds good</p>",
+        "id": 127811451,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528529346
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> an unrelated point, but something I am curious about - are there any places in the code where our use of bu_ptbl_ins_uniq show up as any sort of performance bottleneck?  The uniqueness guarantee of bu_ptbl_ins_uniq I would expect to get expensive quickly as table sizes grow...  Or, if it doesn't immediately show up in our code, could you try setting up some sort of unit test to get a sense of when bu_ptbl_ins_uniq starts to get problematic performance wise for both random and worst-case uniqueness searching?</p>\n</blockquote>\n<p><code>bu_ptbl_ins/cat_uniq</code> do show up when profiling, but i can't tell if it's a bottleneck. they show up in <code>rt_boolfinal</code> when iterating over the ~150k partitions, so i think it's because they're called a lot of times, not because the calls themselves are expensive. i drew some graphs a few weeks back showing that the number of segments in the list is &lt;= 12</p>",
+        "id": 127811596,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528529703
+    },
+    {
+        "content": "<blockquote>\n<p>It may not matter greatly for raytracing (based on your work to date) but since bu_ptbl seems to perform well enough to keep around I'd like to at least have some sense of what we might do (and when we might need/want to do it) to avoid very high performance penalties for uniq insertion into large bu_ptbl arrays, if it's a test you can do easily and quickly...</p>\n</blockquote>\n<p>that should be easy to test, but i'm wondering if it's not \"premature optimisation\", since large bu_ptbls don't seem to show up anywhere. theoretically they can get huge, and i think even for ~10k elements a rb tree would be faster in the worst case, but if that's never exhibited, what's the point? also, i'm not familiar with the particulars of the raytracer, but i think it's splitting the space into lots (~150k) of small (~16 segments) partitions, which works well with the bu_ptbl implementation. or maybe it's a coincidence i've noticed</p>",
+        "id": 127811795,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528530132
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> fair enough.  libged's search command uses bu_ptbl, and that was actually the use case I had in mind where bu_ptbl_ins_uniq might end up expensive, but you're correct that that's not the focus for this project.</p>",
+        "id": 127819322,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528547382
+    },
+    {
+        "content": "<p>I can always throw it together later if needed, and if you're going to tackle the bu_list question that's going to demand full attention ;-)</p>",
+        "id": 127819377,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528547481
+    },
+    {
+        "content": "<p>i started working on moving <code>struct region</code> to SoA. i should look at the code and see how the structure is used and see if AoSoA is worth trying as well (for example, i've seen loops where only the <code>reg_name</code>member is used, but there are also places where two or more members are used)</p>",
+        "id": 128010220,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528898827
+    },
+    {
+        "content": "<p>i'm also thinking of using xxhash when inserting/updating an element for fast equality check (is this region equal to this other region?). but this should make working with these structs a bit more complicated</p>",
+        "id": 128010279,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528898887
+    },
+    {
+        "content": "<p>a problem i'm currently having is that when inserting/updating, i have to update a lot of arrays (15 in this case). this means at least 30 lines of code (15 if the array needs to be realloc'd and 15 for updating the data), and i'm looking for ways of making this shorter. i was thinking of making the struct a void * array of arrays, where each outer line is a member. then i need to <code>#define</code> the names of the members like <code>#define reg_name el[0]</code> (like tree.h does, i think). but then i think that when using the structure, the members will have to be casted to their actual type. this seems cumbersome. if i can't find a proper solution, i'll just write the code to update each element (maybe generate it with python, outside trunk)</p>",
+        "id": 128010416,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528899055
+    },
+    {
+        "content": "<p>i also still don't know how to measure the impact the data organisation has on the cache. using PMCs, i've determined there are ~1.7x as many \"no execute\" cycles (waiting for memory) as execute cycles. but i don't know how to measure the impact of each line of code (i think it should be possible). i think this is important because there is a lot of code to change when moving to SoA, and i would prefer to have a way to measure this at the onset</p>",
+        "id": 128010673,
+        "sender_full_name": "Cezar",
+        "timestamp": 1528899337
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  any thoughts on the above? :D i also ran cachegrind on <code>rt</code> inside a debian VM and <a href=\"https://cezarelnazli.github.io/cg_bool.html\" target=\"_blank\" title=\"https://cezarelnazli.github.io/cg_bool.html\">created a table</a> with the results, sorted by L1d misses</p>",
+        "id": 128637055,
+        "sender_full_name": "Cezar",
+        "timestamp": 1529984103
+    },
+    {
+        "content": "<p>the tree structure is responsible for quite a lot of those misses, so i think it's worth looking into? i remember looking at it a few weeks back and it seemed like the addresses of the nodes were close together in memory</p>",
+        "id": 128637110,
+        "sender_full_name": "Cezar",
+        "timestamp": 1529984240
+    },
+    {
+        "content": "<blockquote>\n<p>a problem i'm currently having is that when inserting/updating, i have to update a lot of arrays (15 in this case). this means at least 30 lines of code (15 if the array needs to be realloc'd and 15 for updating the data), and i'm looking for ways of making this shorter. </p>\n</blockquote>\n<p>Why?  Lines of code isn't really a relevant measure.</p>\n<blockquote>\n<p>i was thinking of making the struct a void * array of arrays</p>\n</blockquote>\n<p>If you're type punning, automatic vectorization will not be possible.  Anything getting converted to arrays needs to be non-void, non-pointer arrays.</p>\n<blockquote>\n<p>then i need to <code>#define</code> the names of the members like <code>#define reg_name el[0]</code> (like tree.h does, i think).</p>\n</blockquote>\n<p>Existing #defines are indirections that are no longer best practice and should be avoided.</p>\n<p>In general, I think you jumped on one that is WAY too complicated with struct region... there are tons of considerations, problems, and really hard complexities with most of the core structures.  that's why the original suggestion was to simply pick a bu_list somewhere/anywhere, and convert it to an array (or some other container).  experience with doing a few of those will greatly help solve the harder problems down the road (and much will be learned along the way).  Have you looked at any of the lists?</p>",
+        "id": 128685164,
+        "sender_full_name": "Sean",
+        "timestamp": 1530053534
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  any thoughts on the above? :D i also ran cachegrind on <code>rt</code> inside a debian VM and <a href=\"https://cezarelnazli.github.io/cg_bool.html\" target=\"_blank\" title=\"https://cezarelnazli.github.io/cg_bool.html\">created a table</a> with the results, sorted by L1d misses</p>\n</blockquote>\n<p>These results are amplified by incoherent pointer chasing.  Even doing something as simple as shooting rays in bundles should have a major impact on L1/L2 hits.</p>\n<p>Note from an optimization strategy perspective, you want to first look at main memory access stalls, then L3 stalls, then L2, then L1.  If you jump straight to L1, you'll end up injecting complexity that will likely get thrown away (completely) when you then look at other stalls (that are orders of magnitude bigger).</p>",
+        "id": 128685364,
+        "sender_full_name": "Sean",
+        "timestamp": 1530053843
+    },
+    {
+        "content": "<p>ok, i see what you mean. i've found struct temp_file_list inside libbu/temp.c, that looks self-contained. i'll start working on that one</p>",
+        "id": 128767642,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530186093
+    },
+    {
+        "content": "<p>is this any good?</p>\n<div class=\"codehilite\"><pre><span></span>#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#\nBenchmark results indicate an approximate VGR performance metric of 134454\nLogarithmic VGR metric is 5.13  (natural logarithm is 11.81)\n#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#\n</pre></div>",
+        "id": 189403908,
+        "sender_full_name": "Erik",
+        "timestamp": 1583007491
+    },
+    {
+        "content": "<p>woah.  yeah, that's good.</p>",
+        "id": 189410344,
+        "sender_full_name": "Sean",
+        "timestamp": 1583019753
+    },
+    {
+        "content": "<p>24 core machine?</p>",
+        "id": 189410345,
+        "sender_full_name": "Sean",
+        "timestamp": 1583019758
+    },
+    {
+        "content": "<p>40 xeon 4114's @ 2.2, 92g ram, just a ti2080 right now... office workstation...</p>",
+        "id": 189410598,
+        "sender_full_name": "Erik",
+        "timestamp": 1583020242
+    },
+    {
+        "content": "<p>40? nice!  might be able to get a higher number then, but that's still pretty outstanding.</p>",
+        "id": 189410627,
+        "sender_full_name": "Sean",
+        "timestamp": 1583020310
+    },
+    {
+        "content": "<p>I'm sure, I only did =Release, probably lots of other fun flags and minor tweaks to do... mebbe I'll hit it with 'vtune' to learn vtune :D</p>",
+        "id": 189410681,
+        "sender_full_name": "Erik",
+        "timestamp": 1583020420
+    },
+    {
+        "content": "<p>used vtune for the first time a couple years ago, it's nice and intuitive, bit of a learning curve.</p>",
+        "id": 189423633,
+        "sender_full_name": "Sean",
+        "timestamp": 1583048030
+    },
+    {
+        "content": "<p>perf works great in a pinch though, super easy and just as good metrics (just without the nice gui)</p>",
+        "id": 189423672,
+        "sender_full_name": "Sean",
+        "timestamp": 1583048054
+    },
+    {
+        "content": "<p>Abs  <strong>*</strong>*** 3402463.46        1380366.82      1359886.60      1030002.51      1221374.29      1546660.32      1656792.33      Fri May 15 22:28:48 EDT 2020</p>\n<p>brand new ryzen 3 running minimal ubuntu.<br>\nryzen 3 3200G 4core 3.6ghz<br>\n16gb ddr4 2400<br>\n'asus tuff b450-plus' motherboard and a slow assed wd spinning platter<br>\n(odd duck, ainnit? it's an anti-gaming desktop that can be turned into a gaming rig, for my oldest. Homework first.)</p>",
+        "id": 197792565,
+        "sender_full_name": "Erik",
+        "timestamp": 1589630743
+    }
+]

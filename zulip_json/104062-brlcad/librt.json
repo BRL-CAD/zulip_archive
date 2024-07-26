@@ -1,0 +1,716 @@
+[
+    {
+        "content": "<p>i'm wondering if the <code>struct bu_list l</code> member of <code>struct seg</code> is still used, or if it is deprecated. and if it is still used, what's the difference between the list of segments in a partition and the list in <code>struct seg</code>? :-?</p>",
+        "id": 126119079,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525475910
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> I'm not really an expert on bu_list, but my understanding is that the \"l\" member of a bu_list is always pretty much essential, and if I'm remembering correctly structures whose first element is a bu_list \"l\" can function as bu_lists for some purposes</p>",
+        "id": 126121911,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525481070
+    },
+    {
+        "content": "<p>thanks for replying :D what i don't get is why <code>struct seg</code> functions as a bu_list as well. comments say that if a ray intersects geometry in multiple places (for example shooting through a torus), the <code>bu_list l</code> member points to the next intersection. but a partition is described as containing \"information about intervals of the ray which pass through geometry\". so aren't they doing the same thing?</p>",
+        "id": 126133170,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525507898
+    },
+    {
+        "content": "<p>well, i don't think it's that important, and so far i haven't seen <code>struct seg</code> used as a linked list in code, but i was afraid i might have a wrong understanding of what segments and partitions are</p>",
+        "id": 126133215,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525507997
+    },
+    {
+        "content": "<blockquote>\n<p>thanks for replying :D what i don't get is why <code>struct seg</code> functions as a bu_list as well. comments say that if a ray intersects geometry in multiple places (for example shooting through a torus), the <code>bu_list l</code> member points to the next intersection. but a partition is described as containing \"information about intervals of the ray which pass through geometry\". so aren't they doing the same thing?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> Understanding how bu_lists work takes a bit of in-depth understanding of C, how memory is managed, how structures are accessed (typewise).  Putting a bu_list struct into ANY other structure (e.g., struct seg) turns it into a doubly linked list because of old C trick called pointer aliasing.</p>",
+        "id": 126225390,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715117
+    },
+    {
+        "content": "<p>you can read up on that, but the gist is if you have struct A {struct B; int C;}, I can pretend A is B and vice versa because the first byte of A is also the first byte of B, so it all happens to work if I simply cast</p>",
+        "id": 126225461,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715207
+    },
+    {
+        "content": "<p>i understand that and i understand how it works</p>",
+        "id": 126225526,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715290
+    },
+    {
+        "content": "<p>later versions of C came along and said you should only be able to alias if A and B are the same size, which resulted in the addition of the -fno-strict-aliasing flag, but the trick remains because of how the memory is arranged</p>",
+        "id": 126225532,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715302
+    },
+    {
+        "content": "<p>okay, so then did I misunderstand the question?</p>",
+        "id": 126225549,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715328
+    },
+    {
+        "content": "<p>my question was, if <code>struct seg</code> is a list of segments, and a partition is a list of segments as well, what's the difference between them?</p>",
+        "id": 126225560,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715356
+    },
+    {
+        "content": "<p>ah, so that difference is struct seg \"IS A\" list of segments and struct partition \"HAS A\" list of segments and \"IS A\" list of partitions</p>",
+        "id": 126225699,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715523
+    },
+    {
+        "content": "<p>a partition has a lot more information about an intersection event</p>",
+        "id": 126225712,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715547
+    },
+    {
+        "content": "<p>a segment is a simple slice of a primitive</p>",
+        "id": 126225726,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715569
+    },
+    {
+        "content": "<p>and is struct seg used anywhere as a list of segments?</p>",
+        "id": 126225757,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715636
+    },
+    {
+        "content": "<p>because in a partition, the list of segments is stored as <code>struct bu_ptbl      pt_seglist;</code>, for example</p>",
+        "id": 126225808,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715660
+    },
+    {
+        "content": "<blockquote>\n<p>and is struct seg used anywhere as a list of segments?</p>\n</blockquote>\n<p>oof, now that's a broad question ... and the answer is \"probably\" :)</p>\n<p>finding them might be tricky because it could be something operating on bu_list or on struct seg's</p>",
+        "id": 126225854,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715738
+    },
+    {
+        "content": "<p>yeah, i was about to say that \"anywhere\" is a bit much :D</p>",
+        "id": 126225917,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715807
+    },
+    {
+        "content": "<p>segments are not typically accessed that way, so the answer very well could be no</p>",
+        "id": 126226004,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715916
+    },
+    {
+        "content": "<p>but what prompted the question was a comment in <code>rt/seg.h</code>. it says that <code>struct seg</code> \"Contains forward link to additional intersection segments if the intersection spans multiple segments (e.g., shooting a ray through a torus).\"</p>",
+        "id": 126226008,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715921
+    },
+    {
+        "content": "<p>typically, callers iterate over partitions that have been woven and ordered, or they iterate over the bu_ptbl set</p>",
+        "id": 126226022,
+        "sender_full_name": "Sean",
+        "timestamp": 1525715948
+    },
+    {
+        "content": "<p>but my understanding was that if i shoot a ray through a torus, i should have a partition containing the two segments, not a struct seg with a link to the the other segment</p>",
+        "id": 126226038,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525715989
+    },
+    {
+        "content": "<p>right, they are definitely stored as a list -- lots of primitives can result in a list of segs</p>",
+        "id": 126226092,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716007
+    },
+    {
+        "content": "<p>triangle meshes in particular</p>",
+        "id": 126226098,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716018
+    },
+    {
+        "content": "<p>you can test that understanding easily enough, but basically I think you'll end up with the rt_tor_shot() routine giving back a seg list with two segments that are returned to the caller as a partition with in_seg on the first seg and out_seg on the latter seg and the ptbl containing them both</p>",
+        "id": 126226183,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716132
+    },
+    {
+        "content": "<p>oh, ok, that makes sense</p>",
+        "id": 126226186,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716165
+    },
+    {
+        "content": "<p>so you could iterate from in_seg to the next (which is equal to out_seg), or access out_seg, or access via the hash</p>",
+        "id": 126226187,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716166
+    },
+    {
+        "content": "<p>for something simple like a torus, it's overkill, but there are obviously much more complex primitives that could return an infinite number of segments during shot()</p>",
+        "id": 126226207,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716220
+    },
+    {
+        "content": "<p>so the primitives work with lists of segments, and a partition is more of a user-facing structure?</p>",
+        "id": 126226257,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716259
+    },
+    {
+        "content": "<p>almost, yes</p>",
+        "id": 126226269,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716293
+    },
+    {
+        "content": "<p>evaluating a ray against primitives gives segments (basically sets of <br>\nin-out hit points)</p>",
+        "id": 126226288,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716324
+    },
+    {
+        "content": "<p>great, then this pretty much answers the original question</p>",
+        "id": 126226326,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716363
+    },
+    {
+        "content": "<p>depending on the geometry definition (you could call this \"user-facing\" I suppose) determines how those segments are processed</p>",
+        "id": 126226331,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716364
+    },
+    {
+        "content": "<p>if I have a region R1 that is \"A union B\", then it'll return a partition for R1 that is the segments of A merged with the segments of B, which might end up being just 1 segment -- consider A is [0,1] and B is [0.5,2] then it could return a partition with segment C [0,2] because they overlapped and were the same region (they're the same material)</p>",
+        "id": 126226446,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716561
+    },
+    {
+        "content": "<p>i was looking at the code in <code>bool_eval</code>, and a lot of the time there is spent checking if a solid in a region is in the partition to evaluate, because it scans the list of segments linearly. i think that can be sped up with a bit vector of solids present in the partition, since solids already have a bits assigned to them and i see bit vectors are already present in a few places</p>",
+        "id": 126226525,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716673
+    },
+    {
+        "content": "<p>that's where you 'll see, mentioned throughout the code, \"bool_weave\" and \"bool_final\" making themselves relevant</p>",
+        "id": 126226526,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716675
+    },
+    {
+        "content": "<p>oh, also, i started reading parts of the librt code last week, and i wrote here some of the things i learned <a href=\"https://cezarelnazli.github.io/librt.txt\" target=\"_blank\" title=\"https://cezarelnazli.github.io/librt.txt\">https://cezarelnazli.github.io/librt.txt</a></p>",
+        "id": 126226610,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716790
+    },
+    {
+        "content": "<p>yeah, there's definitely a few places like that where you could eliminate an O(n)</p>",
+        "id": 126226611,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716792
+    },
+    {
+        "content": "<p>regarding the bitvectors, i reread the messages in the performance topic and i saw that one of the areas was \"optimization/elimination of libbu pointer tables (bu_pbtl_* calls) and bit vectors\"</p>",
+        "id": 126226679,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716914
+    },
+    {
+        "content": "<p>regarding the terminology, the hardest part to understand is usually what regions are and why we need them</p>",
+        "id": 126226693,
+        "sender_full_name": "Sean",
+        "timestamp": 1525716947
+    },
+    {
+        "content": "<p>i was wondering why bit vectors would have to be eliminated :-? and i thought that using bitvectors for the solids in a partition might not be ok if bitvectors should be eliminated</p>",
+        "id": 126226744,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525716990
+    },
+    {
+        "content": "<p>it's visualized slightly in <a href=\"http://brlcad.org/w/images/5/52/MGED_Quick_Reference_Card.pdf\" target=\"_blank\" title=\"http://brlcad.org/w/images/5/52/MGED_Quick_Reference_Card.pdf\">http://brlcad.org/w/images/5/52/MGED_Quick_Reference_Card.pdf</a> but it basically comes down to having a means for knowing the difference between a when something represents some space/volume/area vs something physically occupying space/volume/area</p>",
+        "id": 126226764,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717036
+    },
+    {
+        "content": "<p>and a solid represents some space and a region is physically occupying that space?</p>",
+        "id": 126226814,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525717102
+    },
+    {
+        "content": "<p>bitvectors is merely a book-keeping optimization, right? so consider why they are needed at all, and whether we could speed things up if we didn't have them</p>",
+        "id": 126226837,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717180
+    },
+    {
+        "content": "<p>specifically to performance, bitv's currently pop up on a profile where they should not, taking too much time where they should take zero</p>",
+        "id": 126226887,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717207
+    },
+    {
+        "content": "<p>a solid or combination can represent some space</p>",
+        "id": 126226898,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717231
+    },
+    {
+        "content": "<blockquote>\n<p>and a solid represents some space and a region is physically occupying that space?</p>\n</blockquote>\n<p>a solid or combination can represent some space ... marking it as a \"region\" is you saying that it physically occupies space</p>",
+        "id": 126226904,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717263
+    },
+    {
+        "content": "<p>so having a solid A and B overlapping represent some volume .. and if you union them, you have a new volume (say C) or you have an error (e.g., if you had a region A' and region B' overlapping)</p>",
+        "id": 126226977,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717345
+    },
+    {
+        "content": "<p>it's a little more evident if you apply material properties, say A is a 100mm sphere and B is a 1000mm sphere, both at the origin; if you union A and B, you obviously get a 1000mm sphere and no problems.  If, however, you have an  A' region that is \"water\" and a B' that is steel .. then you have an error because the 100mm inner space cannot be both water and steel simultaneously.</p>",
+        "id": 126227100,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717522
+    },
+    {
+        "content": "<p>so i suppose this means that you can apply union/intersection/diff to primitives, but not to regions?</p>",
+        "id": 126227298,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525717789
+    },
+    {
+        "content": "<p>no, you can</p>",
+        "id": 126227305,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717802
+    },
+    {
+        "content": "<p>but they just have to not overlap?</p>",
+        "id": 126227357,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525717832
+    },
+    {
+        "content": "<p>if A' and B' don't overlap, you could certainly \"union\" aka group them together and there's no problem</p>",
+        "id": 126227359,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717835
+    },
+    {
+        "content": "<p>right</p>",
+        "id": 126227360,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717842
+    },
+    {
+        "content": "<p>technically even if they were the same material, it probably shouldn't be an error, but currently is treated as one (if you have two water volumes overlapping, what is a \"double\" water??)</p>",
+        "id": 126227375,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717894
+    },
+    {
+        "content": "<p>subtractions are far more common</p>",
+        "id": 126227409,
+        "sender_full_name": "Sean",
+        "timestamp": 1525717923
+    },
+    {
+        "content": "<p>one could conceptually argue that \"subtracting a steel volume from a water volume\" doesn't make sense, but it's such a common user operation that it's allowed and presumed they meant to subtract the shape, not the object itself</p>",
+        "id": 126227513,
+        "sender_full_name": "Sean",
+        "timestamp": 1525718118
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> per your notes, rays do appear in code -- see the a_ray entry in struct application in rtexample.c for example</p>",
+        "id": 126227593,
+        "sender_full_name": "Sean",
+        "timestamp": 1525718245
+    },
+    {
+        "content": "<p>you can also have regions with just one solid</p>",
+        "id": 126227601,
+        "sender_full_name": "Sean",
+        "timestamp": 1525718277
+    },
+    {
+        "content": "<p>oh, right. i actually modified rtexample to shoot along X instead of Z, but i didn't notice that a_ray was a field. i misread that as a_ray_r_dir</p>",
+        "id": 126227878,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525718635
+    },
+    {
+        "content": "<p>coming back to the bitvector discussion, i suppose they are needed in order to check if something (like a solid or a region) is present in a set. so was your point about eliminating the need to check in the first place?</p>",
+        "id": 126228113,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525718907
+    },
+    {
+        "content": "<p>right, eliminate the need or use a different method or speed up the existing method</p>",
+        "id": 126228586,
+        "sender_full_name": "Sean",
+        "timestamp": 1525719645
+    },
+    {
+        "content": "<p>one problem I distinctly noted a few months back was bu_bitv_shift() came up in a profile ... and that should never happen -- implies CHAR_BIT wasn't defined or something else was wrong in build logic  (see include/bu/bitv.h)</p>",
+        "id": 126228675,
+        "sender_full_name": "Sean",
+        "timestamp": 1525719740
+    },
+    {
+        "content": "<p>means a couple things went wrong like CHAR_BIT not defined and the cmake 'inline' test failing</p>",
+        "id": 126228688,
+        "sender_full_name": "Sean",
+        "timestamp": 1525719772
+    },
+    {
+        "content": "<p>ok, another question would be, is rt_boolweave really in need of speeding up? i profiled raytracing havoc.g, and it took 25 minutes, and rt_boolweave was only 27 seconds. is there a case that was not highlighted by this database where rt_boolweave takes a lot of time?</p>",
+        "id": 126230335,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525722490
+    },
+    {
+        "content": "<p>also in that same profile, i didn't see bu_list showing up. heaviest stack traces were BU_PTBL_FOR and bu_ptbl_cat_uniq</p>",
+        "id": 126230404,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525722620
+    },
+    {
+        "content": "<p>you're not going to see bu_list in a profile -- the performance impact there is that they fully prevent automatic vectorization by the compiler</p>",
+        "id": 126230422,
+        "sender_full_name": "Sean",
+        "timestamp": 1525722688
+    },
+    {
+        "content": "<p>boolweave can take anywhere from 0 to 50% of the ray trace time, depending on the model and view.  on havoc, zoom into the space where the rotor blades all come togheter -- profile that</p>",
+        "id": 126230483,
+        "sender_full_name": "Sean",
+        "timestamp": 1525722770
+    },
+    {
+        "content": "<p>i'm sure you could contrive a model that exacerbates boolean evaluation even more than 50% too, but typical performance is in the 10-30% range for a traditional detailed csg model</p>",
+        "id": 126230546,
+        "sender_full_name": "Sean",
+        "timestamp": 1525722862
+    },
+    {
+        "content": "<p>that said ... 25 minutes.... what were you doing?  that's a LOT of time for havoc</p>",
+        "id": 126230560,
+        "sender_full_name": "Sean",
+        "timestamp": 1525722898
+    },
+    {
+        "content": "<p>i was running with -H127 -J0 -B :-?</p>",
+        "id": 126230590,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525722954
+    },
+    {
+        "content": "<p>aha, heh</p>",
+        "id": 126230641,
+        "sender_full_name": "Sean",
+        "timestamp": 1525722974
+    },
+    {
+        "content": "<p>-H511* actually</p>",
+        "id": 126230652,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525722999
+    },
+    {
+        "content": "<p>oh, i'm also curious what the effect of shooting multiple rays is. is there some randomness with each, which is then aggregated for better results?</p>",
+        "id": 126230668,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525723043
+    },
+    {
+        "content": "<p>with -B there is no effect, you just increased the work by the -H count</p>",
+        "id": 126230683,
+        "sender_full_name": "Sean",
+        "timestamp": 1525723078
+    },
+    {
+        "content": "<p>without -B, there is randomness within each cell with results averaged together</p>",
+        "id": 126230749,
+        "sender_full_name": "Sean",
+        "timestamp": 1525723141
+    },
+    {
+        "content": "<p>thanks for answering all these questions, i think i have a clearer picture now</p>",
+        "id": 126230852,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525723269
+    },
+    {
+        "content": "<p>it's important work, so keep the questions flowing and ping me/others again if you don't get an answer or don't get a  satisfactory answer</p>",
+        "id": 126231075,
+        "sender_full_name": "Sean",
+        "timestamp": 1525723615
+    },
+    {
+        "content": "<p>it's an optimized system, but there's ALWAYS room for improvement and gains to be made, especially as you start to see the bigger picture</p>",
+        "id": 126231146,
+        "sender_full_name": "Sean",
+        "timestamp": 1525723709
+    },
+    {
+        "content": "<p>I imagine this was already hashed out, but would it be worthwhile/practical to start with replacing bu_ptbl with something else and see what that does, rather than deep diving into the boolean eval workflow?  (serious question, not a hint to try something else...)</p>",
+        "id": 126241697,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525740880
+    },
+    {
+        "content": "<p>yeah, I agree. my understanding is that <span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> already has several good leads from some profiles and is just exploring the landscape, but tackling one of them like ptbls is as good a place as any to start with</p>",
+        "id": 126247816,
+        "sender_full_name": "Sean",
+        "timestamp": 1525753516
+    },
+    {
+        "content": "<p>the bu_ptbl work is where i'll most likely start. these past two weeks i've been trying to get more familiar with the code</p>",
+        "id": 126253955,
+        "sender_full_name": "Cezar",
+        "timestamp": 1525766570
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> No problem, that's a good thing - I just didn't want you to feel obligated to untangle all the yarn before doing any knitting ;-).   We do need to deal with bu_list and its implications, but as you're learning that one will take a fair bit of digesting.</p>",
+        "id": 126259720,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525777539
+    },
+    {
+        "content": "<p>Are the shorthand # defines in search.h really necessary? It looks like a holdover from OpenBSD and they have caused me at least one hard to debug error. I'm tempted to remove them.</p>",
+        "id": 126271509,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1525796242
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> I'm sure they're there from the BSD code - I've no objection to making them explicit and removing the defines</p>",
+        "id": 126294890,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525832368
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> There are a number of things about search that aren't really optimal - for example, right now it builds an array of all paths in a database and applies the filters to that.  I ended up doing that because it was simpler than debugging problems with properly terminating tree walking (ended up with missing items that should have been found in the search but weren't, if I recall correctly) but for large databases that initial list build and processing all the extra paths when a condition might have terminated searching whole subtrees is quite expensive.</p>",
+        "id": 126294999,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525832574
+    },
+    {
+        "content": "<p>Generally speaking with search, the importance ordering is 1) accuracy 2) features 3) performance</p>",
+        "id": 126295074,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525832720
+    },
+    {
+        "content": "<blockquote>\n<p>Are the shorthand # defines in search.h really necessary? It looks like a holdover from OpenBSD and they have caused me at least one hard to debug error. I'm tempted to remove them.</p>\n</blockquote>\n<p>shorthand?  which defines are you referring too?</p>",
+        "id": 126297069,
+        "sender_full_name": "Sean",
+        "timestamp": 1525836960
+    },
+    {
+        "content": "<p>I think he's talking about src/librt/search.h starting around line 132</p>",
+        "id": 126309353,
+        "sender_full_name": "starseeker",
+        "timestamp": 1525863390
+    },
+    {
+        "content": "<p>I have a patch that removes them, could you take a look? <a href=\"https://sourceforge.net/p/brlcad/patches/485/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/patches/485/\">https://sourceforge.net/p/brlcad/patches/485/</a><br>\nI just wrote a simple Lua script that expanded the macros in search.c, everything built fine afterwards so I it should be fine</p>",
+        "id": 126554747,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526327523
+    },
+    {
+        "content": "<p>I updated the patch that removes the shorthand definitions</p>",
+        "id": 126706120,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526575100
+    },
+    {
+        "content": "<p>it _should_ work with SVN now</p>",
+        "id": 126706128,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526575113
+    },
+    {
+        "content": "<blockquote>\n<p>I updated the patch that removes the shorthand definitions</p>\n</blockquote>\n<p>Well done Peter!  Now just one more patch ....</p>",
+        "id": 126730603,
+        "sender_full_name": "Sean",
+        "timestamp": 1526615434
+    },
+    {
+        "content": "<p>if I asked \"parallel tessellation?\", how hard would everyone laugh? <span aria-label=\"big smile\" class=\"emoji emoji-1f604\" role=\"img\" title=\"big smile\">:big_smile:</span></p>",
+        "id": 179425196,
+        "sender_full_name": "Erik",
+        "timestamp": 1572437752
+    },
+    {
+        "content": "<p>&lt;snort&gt; depends on what you mean by parallel</p>",
+        "id": 179750516,
+        "sender_full_name": "starseeker",
+        "timestamp": 1572793052
+    },
+    {
+        "content": "<p>Processing multiple objects in parallel - eventually yes.  Parallel tessellation of a single NURBS brep object - not anytime soon, and for some stages of the watertight processing that would be quite difficult.</p>",
+        "id": 179752213,
+        "sender_full_name": "starseeker",
+        "timestamp": 1572796190
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> you mean parallel boolean evaluation (e.g., 'facetize' in parallel)?  There's nothing really preventing it.  It's actually imminently doable at the NMG layers but nobody has even tried as far as I know.</p>",
+        "id": 179880083,
+        "sender_full_name": "Sean",
+        "timestamp": 1572903940
+    },
+    {
+        "content": "<p>I'm thinking nmg(bot), single region facetize for stl-&gt;gcode. I vaguely recall it was a bit of a hot topic a decade ago and my computers seem to have more cores instead of faster ones lately :)</p>",
+        "id": 179880920,
+        "sender_full_name": "Erik",
+        "timestamp": 1572904454
+    },
+    {
+        "content": "<p>Yep, still an issue.</p>",
+        "id": 179880945,
+        "sender_full_name": "Sean",
+        "timestamp": 1572904478
+    },
+    {
+        "content": "<p>Nobody has even tried afaik.</p>",
+        "id": 179880962,
+        "sender_full_name": "Sean",
+        "timestamp": 1572904493
+    },
+    {
+        "content": "<p>Hello. have a question about central_ray in bundle. I will shoot bunch of rays which r_pt and r_dir  taken from a .txt and actually there is no central ray among them.  Do I have to add  a central_ray to application inside bundle struct, can I  add as NULL vect_t ?<br>\nThnks for all your answers</p>",
+        "id": 180110587,
+        "sender_full_name": "scorp08",
+        "timestamp": 1573114040
+    },
+    {
+        "content": "<p>Hello<br>\nhave a question about central_ray in bundle. I will shoot bunch of rays which r_pt and r_dir taken from a .txt and actually there is no central ray among them. Do I have to add a central_ray to application inside bundle struct, can I add as NULL vect_t ?<br>\nThnks for all your answers</p>",
+        "id": 180400688,
+        "sender_full_name": "scorp08",
+        "timestamp": 1573453182
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> Where do you see a central_ray reference?  I'm not familiar with that or seeing anything named that in the bundle interface</p>",
+        "id": 180419789,
+        "sender_full_name": "Sean",
+        "timestamp": 1573476307
+    },
+    {
+        "content": "<p>Also, are you using the rt_shootrays() interface or the rt_shootray_bundle() interface?</p>",
+        "id": 180419824,
+        "sender_full_name": "Sean",
+        "timestamp": 1573476361
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  rt_shootrays(). Filled the xrays structure and list. But I could not decide what to give to struct application.a_ray inside the struct application_bundle. I do not need it actually. xrays is enough for me</p>",
+        "id": 180425795,
+        "sender_full_name": "scorp08",
+        "timestamp": 1573481175
+    },
+    {
+        "content": "<p>Hello <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I want to change global coordinate system in  the model space by code  such that after changing, GUI and model space for example, can show new \"x \"axis  as rotated by 60 degrees of the default x axis . In which file can I define my own global coordinate system  ??</p>",
+        "id": 180740751,
+        "sender_full_name": "scorp08",
+        "timestamp": 1573745137
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> Matrix transformations are applied to combinations,  and you can have arbitrary nestings of combinations, so the typical way to do that would be a top-level transformation combination that applies the desired rotation.</p>",
+        "id": 180760917,
+        "sender_full_name": "Sean",
+        "timestamp": 1573757384
+    },
+    {
+        "content": "<p>By large, we've avoided implementing arbitrary coordinate systems as a generic non-combination construct as a matter of consistency and compatibility (it's dealt with better on import/export), but there's actually not been a user feature request for such a thing -- you're welcome to submit something if you can formalize what all your requirements would entail.</p>",
+        "id": 180761307,
+        "sender_full_name": "Sean",
+        "timestamp": 1573757610
+    },
+    {
+        "content": "<blockquote>\n<p>By large, we've avoided implementing arbitrary coordinate systems as a generic non-combination construct as a matter of consistency and compatibility (it's dealt with better on import/export), but there's actually not been a user feature request for such a thing -- you're welcome to submit something if you can formalize what all your requirements would entail.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  as first step I would like to test by changing axis and rotate with trial and error to see .  Is brlcad coord. system  based on opennurbs-rhino (same) ?</p>",
+        "id": 180822370,
+        "sender_full_name": "scorp08",
+        "timestamp": 1573816480
+    },
+    {
+        "content": "<p>Yes, I believe so -- both are a typical right-hand Z-up coordinate system that is typical among CAD software.  It's those crazy content modeling systems that use Y-up that are typically rotated on import/export. :)</p>",
+        "id": 180841352,
+        "sender_full_name": "Sean",
+        "timestamp": 1573831062
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  thanks. I checked the fun bu_parallel and could not understand one thing. max_psw is defined as 1024 and table [max_psw] is initialized. while  calling with npu=0, it returns \"bu_avail_cpus\" (eg: npu=4). Does it meant that only table[4] is working parallel or 4*table[1024] is working parallel. like 4 cores each has 1024 proccess ?</p>",
+        "id": 180990537,
+        "sender_full_name": "scorp08",
+        "timestamp": 1574056678
+    },
+    {
+        "content": "<p>I did some tests to see time difference for  rtshootrays. generate 2 exe, one is defined  SHOOTRAYS_IN_PARALLEL and one is not. Checked time using chrono and used 18k shoots. Run in 2 machines (4 cores and 48 cores) Some times parallel run - exe return shorter time than the other but sometimes vice versa. But results are quite similar. Why could not get a speed increase (even not-parallel exe return shorter times)</p>",
+        "id": 181014716,
+        "sender_full_name": "scorp08",
+        "timestamp": 1574083442
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> max_psw is simply the maximum amount of concurrent parallelism that libbu will support, no matter what your hardware will support.  You generally should not need to think about that limit as it's rare to find a supercomputer with more parallelism per node.</p>",
+        "id": 181031478,
+        "sender_full_name": "Sean",
+        "timestamp": 1574094957
+    },
+    {
+        "content": "<p>the ncpu value that you specify to bu_parallel is how many concurrent threads of execution you are requesting.  in general, this will be equal to the number of cores, so the default '0' for whatever your hardware has available is usually adequate.</p>",
+        "id": 181031619,
+        "sender_full_name": "Sean",
+        "timestamp": 1574095025
+    },
+    {
+        "content": "<p>as for testing performance, I would first make sure you have enough work -- 19k shots will be nearly instantaneous on most non-nurbs geometry models.  literally sub-second.  so that means your program time is going to be dominated by OS initialization, process startup time, model loading, and other factors.</p>",
+        "id": 181031828,
+        "sender_full_name": "Sean",
+        "timestamp": 1574095174
+    },
+    {
+        "content": "<p>For most models, especially in parallel, you want to profile with somewhere between 100k to 10M rays.  That still might only be 1s of work because ray tracing is that fast.  If you're not sure, run rt and look at the summary at the end to get an idea of the upper-bound (rt does rt_shootray() plus calls into liboptical, so the timings are an upper bound for rt_shootray()).</p>",
+        "id": 181032058,
+        "sender_full_name": "Sean",
+        "timestamp": 1574095303
+    },
+    {
+        "content": "<p>If you don't have that many rays, then you'll want to run a profiler like 'perf' on linux to see where your performance bottleneck is at.</p>",
+        "id": 181032184,
+        "sender_full_name": "Sean",
+        "timestamp": 1574095398
+    },
+    {
+        "content": "<blockquote>\n<p>For most models, especially in parallel, you want to profile with somewhere between 100k to 10M rays.  That still might only be 1s of work because ray tracing is that fast.  If you're not sure, run rt and look at the summary at the end to get an idea of the upper-bound (rt does rt_shootray() plus calls into liboptical, so the timings are an upper bound for rt_shootray()).</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  defined SHOOTRAYS_IN_PARALLEL macro in bundle.c and run but noticed that \"while (rays-&gt;ap[i].a_magic != RT_AP_MAGIC)\" is not working since I initialize  ap with rt_ap_init in my codes and magic num is rt_ap_magic . Instead of \"while\" , I did a for loop iterating over nrays which is 18k. But this time did not hit anything with again longer time . if ap not have magic num as RT_AP_MAGIC, returning with errors naturally.<br>\nCould not solve , feeling that missing a small detail ?</p>",
+        "id": 181187018,
+        "sender_full_name": "scorp08",
+        "timestamp": 1574237407
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  , should  db_apply_state_from_one_member be a public function?  At a glance, that looks like part of the librt tree internal implementation...</p>",
+        "id": 284671652,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654118721
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  There's a bunch of functions in db_tree.c that shouldn't be public -- looks like nobody has really given it consideration in there.  db_apply_state_from_one_member() def looks like an implementation detail to db_follow_path().</p>",
+        "id": 284771492,
+        "sender_full_name": "Sean",
+        "timestamp": 1654188104
+    }
+]

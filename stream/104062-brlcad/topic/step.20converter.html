@@ -1,0 +1,1043 @@
+<html>
+<head><meta charset="utf-8"><title>step converter · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html">step converter</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="219181519"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219181519" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219181519">(Dec 08 2020 at 08:23)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> did you happen to test  77843+ to make see if our step converter still works on some real world (non-nist) step files?  I seem to remember there being some issue the last time we tried to merge upstream.</p>
+
+
+
+<a name="219181661"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219181661" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219181661">(Dec 08 2020 at 08:25)</a>:</h4>
+<p>probably shouldn't be on that branch since it's a significant and unrelated change.  that's probably an update that could be made on trunk but it'll need it's own testing regardless.</p>
+
+
+
+<a name="219184782"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219184782" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219184782">(Dec 08 2020 at 09:07)</a>:</h4>
+<p>and upon further inspection, I see it's not only a major update of the dependency, but you also made edits to the dep that cascaded edits to our converter code... please -- you know  that <em>really</em> makes it terribly hard to review and even harder to test with any sort of isolation or assurance.  I get how one change led to another.</p>
+<p>Example critique unrelated to extbuild but complicating the review, you added a Raw() accessor to stepcode.. why?  the union 'ptr' field looks like it is/was already public, Raw() is public.  If I were reviewing that commit by itself, I'd reject it as unnecessary/unfounded complexity.</p>
+
+
+
+<a name="219210756"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219210756" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219210756">(Dec 08 2020 at 14:14)</a>:</h4>
+<p>So here was the thinking, fwiw:  the extbuild stepcode controlling logic and stepcode build logic were causing problems in testing - faced with needing to change them, it made more sense (to me) to see if I could invest the time in getting the upstream stepcode to behave as we needed rather than (further) changing our own copy.</p>
+<p>In the course of testing with the upstream stepcode, I identified a few cases (like the Raw case) where upstream had made previously public class members protected.  Most of the upstream stepcode compatibility changes to the converter code could easily be added back into trunk and help keep the extbuild branch closer to trunk, if we just made the minor adjustments to our bundled stepcode to supply the accessor methods the upstream code has migrated to.  I didn't make ptr protected in our bundled stepcode, because that might have had other implications for changing things in stepcode itself.  Since the point is to get off of our fork eventually, I only wanted to make the minimal changes necessary for the purpose.</p>
+
+
+
+<a name="219210913"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219210913" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219210913">(Dec 08 2020 at 14:15)</a>:</h4>
+<p>Having identified the necessary changes for the upstream stepcode, I can probably make similar changes to our bundled stepcode and avoid upgrading the stepcode dependency in the extbuild branch.</p>
+
+
+
+<a name="219211317"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219211317" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219211317">(Dec 08 2020 at 14:19)</a>:</h4>
+<p>That raises a question, as to whether stepcode should be synced with upstream first or the build system rework should go in before doing so.  If the former I'd need to do the update to src/other/stepcode in trunk and test the converter, if the latter I can try to put the non-upstream back in extbuild and make the changes needed to support the extbuild style of building.</p>
+
+
+
+<a name="219215197"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219215197" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219215197">(Dec 08 2020 at 14:52)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Just for future reference, how should I have made 77837's commit message clearer?   (That's the one that added the Raw() accessor to trunk's stepcode)</p>
+
+
+
+<a name="219218581"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219218581" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219218581">(Dec 08 2020 at 15:18)</a>:</h4>
+<p>I think merging with upstream is great, and totally worthwhile.  The example was just that -- an example.  It's discussion-provoking all on it's own with rippling changes, potential issues and considerations... that don't really belong on that branch.</p>
+
+
+
+<a name="219218712"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219218712" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219218712">(Dec 08 2020 at 15:19)</a>:</h4>
+<p>maybe it would be better to undo the move of ptr from private to protected -- begs the question what that motivation was, or what alternative was being provided</p>
+
+
+
+<a name="219218883"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219218883" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219218883">(Dec 08 2020 at 15:20)</a>:</h4>
+<p>adding an accessor violates the scope encapsulation of making something protected, so even on the upstream, I can't imagine that being a solution more desirable than just move the ptr back to public.</p>
+
+
+
+<a name="219219000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219000">(Dec 08 2020 at 15:21)</a>:</h4>
+<p>it's not about having a clear commit message -- it's that it's updating a dep <em>and</em> changing a dep, which doesn't really have anything to do with the "extbuild" restructuring</p>
+
+
+
+<a name="219219137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219137">(Dec 08 2020 at 15:22)</a>:</h4>
+<p>/me winces.  Alright, I'll revert and try to do the minimal mods to src/other/stepcode to make extbuild work - just so it's understood  that that moves our stepcode further from upstream.</p>
+
+
+
+<a name="219219209"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219209" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219209">(Dec 08 2020 at 15:23)</a>:</h4>
+<p>NOOoooo...</p>
+
+
+
+<a name="219219323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219323">(Dec 08 2020 at 15:24)</a>:</h4>
+<p>it's mixing the two that's the problem -- can just make the step code changes on trunk and then merge that to extbuild</p>
+
+
+
+<a name="219219340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219340">(Dec 08 2020 at 15:24)</a>:</h4>
+<p>That's what I ment</p>
+
+
+
+<a name="219219351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219351">(Dec 08 2020 at 15:24)</a>:</h4>
+<p>(sorry, wasn't clear)</p>
+
+
+
+<a name="219219400"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219400" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219400">(Dec 08 2020 at 15:25)</a>:</h4>
+<p>i'm not talking about minimal mods, i'm saying you could do the upstream merge on trunk or on a branch</p>
+
+
+
+<a name="219219425"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219425" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219425">(Dec 08 2020 at 15:25)</a>:</h4>
+<p>something that can be tested in isolation from the branch work</p>
+
+
+
+<a name="219219448"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219448" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219448">(Dec 08 2020 at 15:25)</a>:</h4>
+<p>then that could be merged to the extbuild branch</p>
+
+
+
+<a name="219219540"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219540" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219540">(Dec 08 2020 at 15:26)</a>:</h4>
+<p>Oh.  I know it probably doesn't seem like it, but I've been trying not to disturb trunk too much  lately...</p>
+
+
+
+<a name="219219571"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219571" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219571">(Dec 08 2020 at 15:26)</a>:</h4>
+<p>I noticed and have appreciated that :)</p>
+
+
+
+<a name="219219590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219590">(Dec 08 2020 at 15:26)</a>:</h4>
+<p>I think we should release ...</p>
+
+
+
+<a name="219219699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219699">(Dec 08 2020 at 15:27)</a>:</h4>
+<p>A stepcode upstream merge will be disruptive, most likely - I can probably revert the wrappers in upstream, although I don't yet know how much work it will be and that may dislocate whoever added them in the first place...</p>
+
+
+
+<a name="219219710"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219710" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219710">(Dec 08 2020 at 15:27)</a>:</h4>
+<p>so maybe on a branch, and then merge that to extbuild<br>
+that'll still make it hard to test the extbuild branch if anything is wrong, but it will make the stepcode update separate and easier to test at least</p>
+
+
+
+<a name="219219839"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219839" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219839">(Dec 08 2020 at 15:28)</a>:</h4>
+<p>Do we have enough changes for a release?</p>
+
+
+
+<a name="219219850"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219850" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219850">(Dec 08 2020 at 15:28)</a>:</h4>
+<p>can ask or check the history, but I doubt it's a big deal if we need to make ptr public again.  I'd be more concerned that there's some other intended access method.</p>
+
+
+
+<a name="219219860"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219860" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219860">(Dec 08 2020 at 15:28)</a>:</h4>
+<p>/me looks...</p>
+
+
+
+<a name="219219883"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219883" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219883">(Dec 08 2020 at 15:28)</a>:</h4>
+<p>sure, there's like 30 items there</p>
+
+
+
+<a name="219219961"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219961" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219961">(Dec 08 2020 at 15:29)</a>:</h4>
+<p>There's at least one showstopper MGED bug not run to ground I'll have to prioritize if we do that, IIRC</p>
+
+
+
+<a name="219219990"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219219990" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219219990">(Dec 08 2020 at 15:29)</a>:</h4>
+<p>the subprocess bug?</p>
+
+
+
+<a name="219220059"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220059" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220059">(Dec 08 2020 at 15:30)</a>:</h4>
+<p>I was thinking of the dm window not closing properly</p>
+
+
+
+<a name="219220110"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220110" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220110">(Dec 08 2020 at 15:30)</a>:</h4>
+<p>What's subprocess up to?  I addressed the Windows issue, IIRC...</p>
+
+
+
+<a name="219220214"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220214" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220214">(Dec 08 2020 at 15:31)</a>:</h4>
+<p>I haven't retested it lately but it's in the todo -- locking up mged after running an rt until you close the framebuffer window</p>
+
+
+
+<a name="219220265"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220265" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220265">(Dec 08 2020 at 15:31)</a>:</h4>
+<p>Ah, right - that one was platform specific, IIRC.  I don't know if I can reproduce it...</p>
+
+
+
+<a name="219220351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220351">(Dec 08 2020 at 15:32)</a>:</h4>
+<p>OK, so two showstoppers</p>
+
+
+
+<a name="219220668"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220668" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220668">(Dec 08 2020 at 15:34)</a>:</h4>
+<p>as for stepcode, I'm 75% sure making ptr protected was just part of general cleanup.  if there's no indication in the log that was done for any reason other than good modularity and code updating, I don't think it's an issue to re-expose it.  I can ask on the stepcode list tomorrow, or you can, but I'd definitely do that before injecting a workaround accessor (getters/setters are often frowned upon these days, especially if the alternative is a straight pass-through that has no type encapsulation benefit).</p>
+
+
+
+<a name="219220762"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220762" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220762">(Dec 08 2020 at 15:35)</a>:</h4>
+<p>would be curious to see if exppp accesses that field, if/how it was changed</p>
+
+
+
+<a name="219220924"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219220924" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219220924">(Dec 08 2020 at 15:36)</a>:</h4>
+<p>OK, so gameplan:</p>
+<ol>
+<li>revert the trunk step changes</li>
+<li>make a branch for the step upgrade</li>
+<li>do the upstream sync in the branch</li>
+<li>adjust extbuild's version to match whatever the step upgrade branch has</li>
+<li>fix key bugs for release</li>
+<li>do release</li>
+<li>wait for window when trunk can be unstable/dislocated</li>
+<li>merge stepcode, then extbuild to trunk.</li>
+</ol>
+
+
+
+<a name="219221064"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219221064" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219221064">(Dec 08 2020 at 15:37)</a>:</h4>
+<p>that sounds like a solid to me!</p>
+
+
+
+<a name="219221078"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219221078" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219221078">(Dec 08 2020 at 15:37)</a>:</h4>
+<p>damn, that's clarity there</p>
+
+
+
+<a name="219221169"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219221169" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219221169">(Dec 08 2020 at 15:38)</a>:</h4>
+<p>could even do a 3.5 merge step upgrade to extbuild so 4 is minimal/nothing</p>
+
+
+
+<a name="219221639"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219221639" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219221639">(Dec 08 2020 at 15:42)</a>:</h4>
+<p>I know it's probably not practical, but in principle I'd like to try and establish some time limit/cutoff where the "OK to merge" window is declared - these large branches are very difficult to keep current for long timeframes - lots of conflicting merges - and I'd like to put an upper limit on how long that will be necessary.</p>
+
+
+
+<a name="219222382"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219222382" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219222382">(Dec 08 2020 at 15:48)</a>:</h4>
+<p>that's sounds reasonable.</p>
+
+
+
+<a name="219222392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219222392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219222392">(Dec 08 2020 at 15:48)</a>:</h4>
+<p>what'd you have in mind?</p>
+
+
+
+<a name="219222437"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219222437" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219222437">(Dec 08 2020 at 15:48)</a>:</h4>
+<p>I wanted to ask you how things stood with the work that's motivating a stable trunk.</p>
+
+
+
+<a name="219222470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219222470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219222470">(Dec 08 2020 at 15:49)</a>:</h4>
+<p>I think the time-table is centered around releasability and testability.  so I'd think the natural way to force closure of a time window is to release, then make a destabilizing merge, then test+dev+fix and then release again, then another destabilizing change, then test+dev+fix etc.  like ships going through the panama canal, the big ships line up one at a time to go through.  trunk's just already had a big change that's not yet stable.</p>
+
+
+
+<a name="219222677"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219222677" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219222677">(Dec 08 2020 at 15:50)</a>:</h4>
+<p>Um.  I've had the impression you were doing some significant work on the threading subsystem and needed stability for that?</p>
+
+
+
+<a name="219223269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223269">(Dec 08 2020 at 15:54)</a>:</h4>
+<p>Personally I'd like an upper limit on the order of 3 months or so for the stepcode and extbuild branches, starting from when I get them both working cleanly (distcheck pass).</p>
+
+
+
+<a name="219223365"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223365" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223365">(Dec 08 2020 at 15:55)</a>:</h4>
+<p>yes, I was/am but it's going slow due to a certain project taking / stealing priority.  every time trunk had some big destabilize, I'd have to start over.  it was happening so frequently that I literally have/had 4 debugging sessions on pause at one point and even lost a couple sessions.  that's not on you, that's on me for not figuring out the bugs fast enough.  but then there'd be another change, and I'd have to start over (again) on the big one.</p>
+
+
+
+<a name="219223569"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223569" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223569">(Dec 08 2020 at 15:56)</a>:</h4>
+<p>nobody can guarantee how fast bugs are found - if it were deterministic we could just replace ourselves with shell scripts ;-)  That's why I wanted to ask you though, since the cost/benefit tradeoff is branch maintenance costs vs debugging dislocation costs.</p>
+
+
+
+<a name="219223599"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223599" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223599">(Dec 08 2020 at 15:57)</a>:</h4>
+<p>might make sense to move the debugging to a branch at this point, but it's still an issue of having an instability change on trunk followed by more changes that destabilize.  I'm not sure what can be done about that better honestly as you're obviously unable to reproduce or even see some of these issues.</p>
+
+
+
+<a name="219223803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223803">(Dec 08 2020 at 15:58)</a>:</h4>
+<p>and branch is really only an option for the threading bug.  the 3 other debugging sessions I had were investigating trunk instability, disrupted by other trunk instability after you'd move on</p>
+
+
+
+<a name="219223845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223845">(Dec 08 2020 at 15:58)</a>:</h4>
+<p>That's part of why the extbuild work has gone on so long, to be honest - I've been trying really hard to hammer it on as many platforms as I can reach.  There always seems to be one more thing though, however hard I try...</p>
+
+
+
+<a name="219223968"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219223968" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219223968">(Dec 08 2020 at 15:59)</a>:</h4>
+<p>Once we've migrated to github, might it make more sense to switch to a more branch+merge request style workflow?</p>
+
+
+
+<a name="219224119"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219224119" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219224119">(Dec 08 2020 at 16:00)</a>:</h4>
+<p>Arguably much of the work I've been doing in extbuild and its predecessor would have been better done in my own local branches until ready, but SVN really doesn't work well for that...</p>
+
+
+
+<a name="219224457"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219224457" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219224457">(Dec 08 2020 at 16:02)</a>:</h4>
+<p>nah, I don't think that would have been better.  that's exactly the thing I hate about git ... it results in larger branch changes that become even harder to review, so changes either slip in that shouldn't happen or they don't even get seen/reviewed/tested or the patch sits for a long time because it's really hard to give it due diligence.</p>
+
+
+
+<a name="219224614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219224614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219224614">(Dec 08 2020 at 16:03)</a>:</h4>
+<p>this is a perfect example -- you'd have gone down the stepcode rabbit hole on extbuild and faced with the extbuild merge it'd basically be a huge wad of take-it-or-leave it, which is a really sucky situation to get into for the code's health</p>
+
+
+
+<a name="219224625"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219224625" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219224625">(Dec 08 2020 at 16:03)</a>:</h4>
+<p>I can't deny though that trying to review all of the changes in thirdparty_rework and extbuild would be a waste, since at least half of it is me following blind alleys until I find out why something won't work.  That's just useless noise for anyone else...</p>
+
+
+
+<a name="219224895"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219224895" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219224895">(Dec 08 2020 at 16:05)</a>:</h4>
+<p>There is an option though in the extbuild situation - in a sense, it's exactly the one we will pursue.  The change is too big, so break it up into smaller pieces and feed them in one at a time.</p>
+
+
+
+<a name="219224900"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219224900" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219224900">(Dec 08 2020 at 16:05)</a>:</h4>
+<p>I don't know if you get the S2 commits, but they do this on the regular and it's why they don't have pleasant interactions and why there will be a dozen unrelated thing with each scr merge.  I really don't want us to get into that situation if we can avoid it.</p>
+
+
+
+<a name="219225086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225086">(Dec 08 2020 at 16:06)</a>:</h4>
+<p>my bigger concern right now is this feels like a fire sale...</p>
+
+
+
+<a name="219225092"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225092" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225092">(Dec 08 2020 at 16:06)</a>:</h4>
+<p>The risk is that whoever made the change won't be willing to do the work to break it up - in my case we know darn well I'm too stubborn to give up, so it's fairly safe</p>
+
+
+
+<a name="219225117"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225117" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225117">(Dec 08 2020 at 16:06)</a>:</h4>
+<p>?</p>
+
+
+
+<a name="219225221"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225221" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225221">(Dec 08 2020 at 16:07)</a>:</h4>
+<p>I'd rather have the conversation while we're doing the work instead of weeks/months later when it becomes harder and more time consuming to change</p>
+
+
+
+<a name="219225249"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225249" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225249">(Dec 08 2020 at 16:07)</a>:</h4>
+<p>something gets intertwined inevitably</p>
+
+
+
+<a name="219225556"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225556" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225556">(Dec 08 2020 at 16:10)</a>:</h4>
+<p>Fair enough, but the countervailing consideration is getting overwhelmed.  The last couple review processes have been painful for you, and it would be nice to find an approach that's not quite so rough...</p>
+
+
+
+<a name="219225715"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225715" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225715">(Dec 08 2020 at 16:11)</a>:</h4>
+<p>I've been doing better to keep up since the last release.</p>
+
+
+
+<a name="219225736"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225736" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225736">(Dec 08 2020 at 16:11)</a>:</h4>
+<p>(Still not following the "fire sale"...)</p>
+
+
+
+<a name="219225752"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219225752" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219225752">(Dec 08 2020 at 16:11)</a>:</h4>
+<p>aside from the debugging session issues, 2 of which are nominally on me</p>
+
+
+
+<a name="219226024"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226024" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226024">(Dec 08 2020 at 16:12)</a>:</h4>
+<p>oh the fire sale aspect is this surge of relatively major changes that feel like they have to all happen at once right now with some urgency because we're under an unusual situation with fewer eyes on us and other distracting demands on our time.</p>
+
+
+
+<a name="219226432"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226432" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226432">(Dec 08 2020 at 16:14)</a>:</h4>
+<p>Ah.  I suppose that's part of it, but (for me personally) I guess it's also an attempt to create the project I want to be working on/in...</p>
+
+
+
+<a name="219226470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226470">(Dec 08 2020 at 16:15)</a>:</h4>
+<p>complete restructuring of libged, major rewiring of tcl/tk, fundamental rewiring of command invocations, major build system rewrite,  display management rewrite/merging, hard dependency decoupling (libpng, libz, libregex), repo migration, ... did I forget any? :)</p>
+
+
+
+<a name="219226628"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226628" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226628">(Dec 08 2020 at 16:16)</a>:</h4>
+<p>I think those are all the ones you've seen :-P</p>
+
+
+
+<a name="219226649"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226649" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226649">(Dec 08 2020 at 16:16)</a>:</h4>
+<p>I can probably point at unresolved issues with each of those, when in any other context we probably wouldn't have moved on to more than one or two simultaneously without investigating and doing something to get closures</p>
+
+
+
+<a name="219226900"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226900" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226900">(Dec 08 2020 at 16:18)</a>:</h4>
+<p>honestly, what have I missed? haha</p>
+
+
+
+<a name="219226993"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219226993" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219226993">(Dec 08 2020 at 16:18)</a>:</h4>
+<p>Some out-of-repo work on software rasterization to try and create a platform-agnostic software fallback for 3D rendering</p>
+
+
+
+<a name="219227073"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219227073" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219227073">(Dec 08 2020 at 16:19)</a>:</h4>
+<p>ah, I knew about that one but yeah you're right, out of sight out of mind</p>
+
+
+
+<a name="219227278"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219227278" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219227278">(Dec 08 2020 at 16:21)</a>:</h4>
+<p>That one doesn't matter unless/until it becomes viable anyway</p>
+
+
+
+<a name="219227284"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219227284" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219227284">(Dec 08 2020 at 16:21)</a>:</h4>
+<p>to me that one is up there with my incomplete but significant progress side projects (openvdb, ospray, appleseed, libcsg, benchmark, ...).  the instability affects nobody else yet. :)</p>
+
+
+
+<a name="219227427"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219227427" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219227427">(Dec 08 2020 at 16:22)</a>:</h4>
+<p>okay, gotta run.. I have a couple dozen renders to kick off here asap... to be continued</p>
+
+
+
+<a name="219227451"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219227451" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219227451">(Dec 08 2020 at 16:22)</a>:</h4>
+<p>Roger.  over and out.</p>
+
+
+
+<a name="219405675"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219405675" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219405675">(Dec 09 2020 at 22:05)</a>:</h4>
+<p>@Sean - any suggestions for a known working step file to try with the new stepcode?</p>
+
+
+
+<a name="219405954"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219405954" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219405954">(Dec 09 2020 at 22:07)</a>:</h4>
+<p>I'd have to go back to a prior release to confirm, but I just downloaded random stuff from grabcad and typically had good success (9/10 would succeed if it was a 203).  I'm may have a few tucked away that I saved, I'll check.</p>
+
+
+
+<a name="219406237"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219406237" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219406237">(Dec 09 2020 at 22:09)</a>:</h4>
+<p>wonder how hard it would be to add the 214 entities.  the current parsing seems to almost work even with the wrong schema.  ran into this problem just a month ago with a model tim needed.  he had vrml1 (we only do vrml2 and x3d), got step but then it was 214.  had to pull it into commercial to work with it. #fail</p>
+
+
+
+<a name="219507362"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219507362" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219507362">(Dec 10 2020 at 17:40)</a>:</h4>
+<p>Looks like <a href="https://grabcad.com/library/planetary-gearbox">https://grabcad.com/library/planetary-gearbox</a> works as well with stepsync as it does with trunk.</p>
+
+
+
+<a name="219508440"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219508440" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219508440">(Dec 10 2020 at 17:48)</a>:</h4>
+<p>The brep generator isn't up to handling all the pieces, but the stepcode portion of the parsing for this file went fine in both trunk and stepsync:  <a href="https://grabcad.com/library/xs-650-flat-track-1">https://grabcad.com/library/xs-650-flat-track-1</a></p>
+
+
+
+<a name="219508758"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219508758" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219508758">(Dec 10 2020 at 17:51)</a>:</h4>
+<p>Woo hoo!  The stepcode upgrade fixed the ninja build on github (old step-g wouldn't run on the Windows runner, but the stepsync test just passed on all three platforms.)</p>
+
+
+
+<a name="219510500"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219510500" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219510500">(Dec 10 2020 at 18:03)</a>:</h4>
+<p>Finally, progress... that github windows runner has been driving me nuts for weeks.</p>
+
+
+
+<a name="219528269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219528269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219528269">(Dec 10 2020 at 20:18)</a>:</h4>
+<p>cool, any idea what fixed it?</p>
+
+
+
+<a name="219528298"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219528298" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219528298">(Dec 10 2020 at 20:19)</a>:</h4>
+<p>rather different cmake logic in stepcode upstream, right?</p>
+
+
+
+<a name="219562472"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219562472" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219562472">(Dec 11 2020 at 03:34)</a>:</h4>
+<p>A bit, not enormously - I actually spoke too soon.  stepsync branch works across the board, but extbuild doesn't - I'm guessing it's probably the std::string exposure and stepcode getting built slightly differently in extbuild.  I'll have a look and see if I can get std::string out of the public facing APIs - we're probably not the only codebase that'll have issues with that at some point.</p>
+
+
+
+<a name="219562576"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219562576" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219562576">(Dec 11 2020 at 03:36)</a>:</h4>
+<p>Been getting away with it by building stepcode as part of the primary build all along, but if we're going to treat stepcode as a properly independent 3rd party code the time has probably come to bite the bullet and deal with it.</p>
+
+
+
+<a name="219643470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643470">(Dec 11 2020 at 18:32)</a>:</h4>
+<p>Yep, applying WinDBG to the ninja build zeros in on std::string, on a part of stepcode where #pragma warning( disable: 4251 ) is applied... which looks like exactly what I'm seeing:  <a href="https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4251?view=msvc-160">https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4251?view=msvc-160</a></p>
+<p>Looks like ignoring that warning is no longer an option...  doing a quick count of those pragmas... 24 of them in stepcode headers.</p>
+<p>/me rolls up sleeves...</p>
+
+
+
+<a name="219643645"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643645" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643645">(Dec 11 2020 at 18:33)</a>:</h4>
+<p>That's stuff really hard to get right, either using std or plain c-strings.  It's very difficult memory management for something recursive like step.</p>
+
+
+
+<a name="219643720"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643720" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643720">(Dec 11 2020 at 18:34)</a>:</h4>
+<p>even your c-string changes may not hold up...</p>
+
+
+
+<a name="219643798"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643798" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643798">(Dec 11 2020 at 18:34)</a>:</h4>
+<p>OK... so what's the recommended path forward?</p>
+
+
+
+<a name="219643845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643845">(Dec 11 2020 at 18:35)</a>:</h4>
+<p>I'm not saying it's wrong,... don't get me wrong!  I'm saying it's super hard to get right...</p>
+
+
+
+<a name="219643856"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643856" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643856">(Dec 11 2020 at 18:35)</a>:</h4>
+<p>it's a huge "it depends"</p>
+
+
+
+<a name="219643911"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643911" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643911">(Dec 11 2020 at 18:35)</a>:</h4>
+<p>like is char *str = std::string("foo") ... when is that char * that was likely dynamically allocated invalid?</p>
+
+
+
+<a name="219643978"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219643978" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219643978">(Dec 11 2020 at 18:36)</a>:</h4>
+<p>it's clearly valid for a scope</p>
+
+
+
+<a name="219644001"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644001" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644001">(Dec 11 2020 at 18:36)</a>:</h4>
+<p>once it goes out of scope, it depends</p>
+
+
+
+<a name="219644041"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644041" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644041">(Dec 11 2020 at 18:36)</a>:</h4>
+<p>I think what likely is wrong in the current code is that it's passing a reference around everywhere</p>
+
+
+
+<a name="219644051"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644051" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644051">(Dec 11 2020 at 18:36)</a>:</h4>
+<p>that's done for performance, avoids a copy constructor</p>
+
+
+
+<a name="219644069"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644069" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644069">(Dec 11 2020 at 18:36)</a>:</h4>
+<p>but it also means it's subject to the original allocation scope</p>
+
+
+
+<a name="219644083"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644083" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644083">(Dec 11 2020 at 18:37)</a>:</h4>
+<p>and will be invalid if/when it leaves that scope</p>
+
+
+
+<a name="219644096"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644096" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644096">(Dec 11 2020 at 18:37)</a>:</h4>
+<p>I'm open to suggestions on how to proceed - got to do <em>something</em> unless we want to just keep building stepcode as part of our own build.  (Which is the easy punt, but ignores the issue...)</p>
+
+
+
+<a name="219644185"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644185" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644185">(Dec 11 2020 at 18:38)</a>:</h4>
+<p>No no, you're good, this is just food for thought -- things to keep an eye on as you go.  Because this is subtle corruption territory.</p>
+
+
+
+<a name="219644290"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644290" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644290">(Dec 11 2020 at 18:38)</a>:</h4>
+<p>(As an aside, WinDBG is very handy working with a Ninja Windows build - don't need all of Visual Studio up, but let me backtrace to the issue quickly.)</p>
+
+
+
+<a name="219644340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644340">(Dec 11 2020 at 18:39)</a>:</h4>
+<p>one easy change that "should" be safe but will be wasteful is to convert those references to non-references, which will cause the strings to get copied</p>
+
+
+
+<a name="219644373"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644373" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644373">(Dec 11 2020 at 18:39)</a>:</h4>
+<p>I wouldn't convert them all, but if you see a problem/corruption, that's a possible solution in isolation</p>
+
+
+
+<a name="219644413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644413">(Dec 11 2020 at 18:39)</a>:</h4>
+<p>Hmm.  Worth a try...</p>
+
+
+
+<a name="219644555"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644555" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644555">(Dec 11 2020 at 18:41)</a>:</h4>
+<p>my c++ is actually getting rusty on the basics.  I'd need to write a snippet to see if char *foo = std::string("foo"); is same as std::string s("foo"); char <em>foop = s.c_str(); return foop; /</em>bad */</p>
+
+
+
+<a name="219644626"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644626" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644626">(Dec 11 2020 at 18:41)</a>:</h4>
+<p>the latter is definitely bad juju because s is on the stack and only lives in that scope, so they c_str() we're returning is invalidated once the scope is left.</p>
+
+
+
+<a name="219644644"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644644" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644644">(Dec 11 2020 at 18:41)</a>:</h4>
+<p>I don't know the prior for sure, I should</p>
+
+
+
+<a name="219644823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644823">(Dec 11 2020 at 18:43)</a>:</h4>
+<p>it's this issue: <a href="https://stackoverflow.com/questions/6456359/what-is-stdstringc-str-lifetime">https://stackoverflow.com/questions/6456359/what-is-stdstringc-str-lifetime</a></p>
+
+
+
+<a name="219644869"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644869" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644869">(Dec 11 2020 at 18:43)</a>:</h4>
+<p>Would the former even work at all?  Assigning a std::string constructor to a C string pointer?</p>
+
+
+
+<a name="219644907"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219644907" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219644907">(Dec 11 2020 at 18:43)</a>:</h4>
+<p>eh, that was a slight typo</p>
+
+
+
+<a name="219645153"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219645153" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219645153">(Dec 11 2020 at 18:45)</a>:</h4>
+<p>it's the general case of the scope on a std::string str();</p>
+
+
+
+<a name="219645386"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219645386" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219645386">(Dec 11 2020 at 18:47)</a>:</h4>
+<p>like your first change, Schema::AddFunction() -- you create a locally scoped std::string fstr(f);<br>
+then push that back.  What's getting pushed?  If it's a copy, then it's all good.  If it's a reference or pointer to fstr, then I think it'll be invalidated when the scope is gone.   It'll happen to work until some other allocation stomps on fstr's memory and something tries to read the _function_list</p>
+
+
+
+<a name="219645498"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219645498" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219645498">(Dec 11 2020 at 18:48)</a>:</h4>
+<p>I thought a push back made a copy, but I guess it depends on the vector/list/map type?</p>
+
+
+
+<a name="219645534"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219645534" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219645534">(Dec 11 2020 at 18:48)</a>:</h4>
+<p>yes</p>
+
+
+
+<a name="219645696"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219645696" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219645696">(Dec 11 2020 at 18:49)</a>:</h4>
+<p>I think you could also wrap it in autoptr to avoid having the destructor called until there's no more references to the data.</p>
+
+
+
+<a name="219645841"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219645841" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219645841">(Dec 11 2020 at 18:50)</a>:</h4>
+<p>this is one of the messier areas of c++ that become obvious after weeks of having one's nose in a debugger.  which I haven't lately, so I'm amazed how much of this I've forgotten... besides  the gist that it's complicated :)</p>
+
+
+
+<a name="219646050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646050">(Dec 11 2020 at 18:52)</a>:</h4>
+<p>Didn't meant to interrupt, carry on -- just might want to try enabling a memory guard library to catch corruption the second it happens in your testing.  Because having a pointer to destructed data is going to work .. at first.  It'll just present as random corruption later if it's wrong.</p>
+
+
+
+<a name="219646171"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646171" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646171">(Dec 11 2020 at 18:52)</a>:</h4>
+<p>/me nods - good advise.  Since I know roughly where I have to go now I'll probably start on Linux - any recommended guard techniques these days?</p>
+
+
+
+<a name="219646358"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646358" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646358">(Dec 11 2020 at 18:54)</a>:</h4>
+<p>valgrind memcheck is a classic, no?</p>
+
+
+
+<a name="219646453"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646453" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646453">(Dec 11 2020 at 18:55)</a>:</h4>
+<p>I believe llvm has something good too.</p>
+
+
+
+<a name="219646494"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646494" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646494">(Dec 11 2020 at 18:55)</a>:</h4>
+<p>right -fsanitize=memory compilation option.  slows everything down, but really helps isolate memory issues.</p>
+
+
+
+<a name="219646495"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646495" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646495">(Dec 11 2020 at 18:55)</a>:</h4>
+<p>It is, although it doesn't see any of our current problems as far as I can tell - the list elements test reports clean</p>
+
+
+
+<a name="219646590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646590">(Dec 11 2020 at 18:56)</a>:</h4>
+<p>it could be all good, I'd have to dig deeper on that container</p>
+
+
+
+<a name="219646660"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646660" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646660">(Dec 11 2020 at 18:56)</a>:</h4>
+<p>AddSupertype_Stmt() looks good for example -- you pass in the char, then allocate a std:;string off it that is stashed in the class (so it stays in scope).</p>
+
+
+
+<a name="219646781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646781">(Dec 11 2020 at 18:57)</a>:</h4>
+<p>Except that didn't fix anything - Windows still had a problem in the same place :-/</p>
+
+
+
+<a name="219646927"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646927" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646927">(Dec 11 2020 at 18:58)</a>:</h4>
+<p>that's the sort of random corruption I would expect if this is wrong anywhere in the code.  you'll hit a problem when something else happens to allocate over a thing that was released.</p>
+
+
+
+<a name="219646947"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646947" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646947">(Dec 11 2020 at 18:58)</a>:</h4>
+<p>The target std::string looked odd in the debugger, but I'm not sure why...</p>
+
+
+
+<a name="219646971"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219646971" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219646971">(Dec 11 2020 at 18:59)</a>:</h4>
+<p>so that could just happen to be where the corruption becomes visible, not necessarily the cause point</p>
+
+
+
+<a name="219647015"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647015" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647015">(Dec 11 2020 at 18:59)</a>:</h4>
+<p>That would explain the quirky failure patterns I was seeing earlier.</p>
+
+
+
+<a name="219647038"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647038" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647038">(Dec 11 2020 at 18:59)</a>:</h4>
+<p>Or lack of patterns, rather.</p>
+
+
+
+<a name="219647137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647137">(Dec 11 2020 at 19:00)</a>:</h4>
+<p>OK, that points to a general cleanup of all the 4251 code as an initial step.</p>
+
+
+
+<a name="219647194"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647194" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647194">(Dec 11 2020 at 19:00)</a>:</h4>
+<p>always a good thing</p>
+
+
+
+<a name="219647249"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647249" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647249">(Dec 11 2020 at 19:01)</a>:</h4>
+<p>Almost wish I could deliberately induce the Windows 4251 behavior in the Linux C++ libs</p>
+
+
+
+<a name="219647256"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647256" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647256">(Dec 11 2020 at 19:01)</a>:</h4>
+<p>if you still see badness, I'd suggest slowly start passing/storing copies</p>
+
+
+
+<a name="219647443"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647443" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647443">(Dec 11 2020 at 19:02)</a>:</h4>
+<p>if you're in the debugger and have a reproducible case, you may be able to set a watch point on specific memory as it's allocated, and watch where it goes, what happens when it's pushed into a container, read from it, etc</p>
+
+
+
+<a name="219647511"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647511" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647511">(Dec 11 2020 at 19:02)</a>:</h4>
+<p>advanced debugging, but should be able to tell if / when the destructor is called</p>
+
+
+
+<a name="219647603"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647603" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647603">(Dec 11 2020 at 19:03)</a>:</h4>
+<p>but will require looking at the context of the current code to determine whether a copy makes sense or if that will screw up the entity management</p>
+
+
+
+<a name="219647749"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219647749" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219647749">(Dec 11 2020 at 19:04)</a>:</h4>
+<p>/me nods.  The hard part is going to be the generated code - that'll be a nightmare to follow around, if it comes to that</p>
+
+
+
+<a name="219648176"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219648176" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219648176">(Dec 11 2020 at 19:09)</a>:</h4>
+<p>Yeah, copy didn't fix it either.  OK, stay tuned - 4251 week coming up.</p>
+
+
+
+<a name="219719413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219719413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219719413">(Dec 12 2020 at 17:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I'd like to simplify the stepcode sources a bit and reorganize - consolidate exppp and base into express, for example.  In a  quick look at the C++ step iso pdf the only thing that jumped out at me with regards to library or file specifics was the "sdai.h" header - am I missing something that dictates the current structure specifically?</p>
+
+
+
+<a name="219719486"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219719486" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219719486">(Dec 12 2020 at 17:59)</a>:</h4>
+<p>I know function names, etc. are generated according to patterns - I'm thinking more about the stepcode libs and headers themselves rather than what they generate.</p>
+
+
+
+<a name="219721701"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219721701" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219721701">(Dec 12 2020 at 18:49)</a>:</h4>
+<p>what do you mean by consolidate?  exppp is a pretty-printing tool.  I know nothing about base.</p>
+
+
+
+<a name="219721852"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219721852" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219721852">(Dec 12 2020 at 18:52)</a>:</h4>
+<p>from what I remember, it's the headers and API that I recall being specified in conformance APs -- i.e., what's must be in the API and how you call into it (e.g., header include names).  probably a good litmus is whether you have to change application logic (esp. our step-g code) or are the changes all internal.</p>
+
+
+
+<a name="219722044"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219722044" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219722044">(Dec 12 2020 at 18:57)</a>:</h4>
+<p>exppp isn't part of anything, it a pretty-printer iirc.  It's just a simple example how to call into libexpress.  exppp's code doesn't belong in libexpress any more than a given proc-db tool belongs in libwdb, for example.  but where the example lives doesn't matter much so long as it's an identifiable example and not lost alongside other code.</p>
+
+
+
+<a name="219722371"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219722371" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219722371">(Dec 12 2020 at 19:05)</a>:</h4>
+<p>looked at base, it looks like it's pretty irrelevant bu-style code that could get absorbed/disappear</p>
+
+
+
+<a name="219722471"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219722471" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219722471">(Dec 12 2020 at 19:07)</a>:</h4>
+<p>looks like sc_getopt() is used by the fedex-linking binaries express</p>
+
+
+
+<a name="219722528"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219722528" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219722528">(Dec 12 2020 at 19:08)</a>:</h4>
+<p>looks like lots use sc_memmgr(), so libexpress works there too</p>
+
+
+
+<a name="219722546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219722546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219722546">(Dec 12 2020 at 19:09)</a>:</h4>
+<p>exp2cxx is the only place that uses sc_trace_printf, so it could move into the exp2cxx processor</p>
+
+
+
+<a name="219722599"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219722599" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219722599">(Dec 12 2020 at 19:10)</a>:</h4>
+<p>sc_benchmark.h appears to be used in cllazyfile test and a p21read test</p>
+
+
+
+<a name="219737111"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219737111" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219737111">(Dec 13 2020 at 01:05)</a>:</h4>
+<p>Sorry, meant libexppp not the exppp executable itself.</p>
+
+
+
+<a name="219737226"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219737226" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219737226">(Dec 13 2020 at 01:08)</a>:</h4>
+<p>Does anything else link it?  I don't think that code belongs in libexpress.  It's not really express API, it's just some arbitrary function separation someone came up with for exppp.  Maybe separated for unit testing or something.  You could eliminate libexpp and just make it part of exppp's sources if nothing else calls into it.</p>
+
+
+
+<a name="219737240"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219737240" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219737240">(Dec 13 2020 at 01:08)</a>:</h4>
+<p>exp2cxx links it</p>
+
+
+
+<a name="219737266"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219737266" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219737266">(Dec 13 2020 at 01:09)</a>:</h4>
+<p>/me figured pretty printing express schemas was a reasonable fit for libexpress... you disagree?</p>
+
+
+
+<a name="219737387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219737387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219737387">(Dec 13 2020 at 01:12)</a>:</h4>
+<p>/me checks to see if exp2cxx is actually using libexppp...</p>
+
+
+
+<a name="219737449"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219737449" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219737449">(Dec 13 2020 at 01:14)</a>:</h4>
+<p>yep, get undefined references in exp2cxx without it</p>
+
+
+
+<a name="219749035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/219749035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#219749035">(Dec 13 2020 at 07:26)</a>:</h4>
+<p>I can see how you'd see it like that, but I think the original author(s) was/were on point keeping them separate from a design perspective.</p>
+<p>Pretty printing is a decorative / stylistic presentation property.  It's model vs view in MVC.  It's css vs html in web.   They certainly can be combined, but it's rarely an improvement (design-wise) unless text presentation is intrinsically required due to the API (which it's not for EXPRESS).</p>
+<p>In this instance, it'd add some 50 symbols to a library that already has 400+.   Combining them becomes a (relatively minor) detriment for both users and non-users of either lib.   Having around 50 highly interrelated symbols in a library is actually rather nice.  Our libs aren't exemplary in that regard.</p>
+<p>That all said, it's also not a big enough detriment to draw a strong opinion from me.  Demodularization is an antipractice in general, but if I were to inspect the libexpp symbols in more depth, I'd likely find some that belong in express and others that don't.</p>
+
+
+
+<a name="220061606"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/220061606" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#220061606">(Dec 16 2020 at 00:02)</a>:</h4>
+<p>There we go - finally.  Success on all three platforms.</p>
+
+
+
+<a name="220061651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/220061651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#220061651">(Dec 16 2020 at 00:03)</a>:</h4>
+<p>/me braces himself and fires up the BSD vms...</p>
+
+
+
+<a name="220129026"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/220129026" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#220129026">(Dec 16 2020 at 15:24)</a>:</h4>
+<p>Woo-hoo!  extbuild distcheck full passing on GhostBSD and Ubuntu, plus a clean github CI run on all three platforms.</p>
+
+
+
+<a name="220135350"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/step%20converter/near/220135350" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/step.20converter.html#220135350">(Dec 16 2020 at 16:12)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>1. CHECK revert the trunk step changes
+2. CHECK make a branch for the step upgrade
+3. CHECK do the upstream sync in the branch
+4. CHECK adjust extbuild&#39;s version to match whatever the step upgrade branch has
+5.  fix key bugs for release
+6.  do release
+7.  wait for window when trunk can be unstable/dislocated
+8. merge stepcode, then extbuild to trunk.
+</code></pre></div>
+<p>OK, on to release bugs.  Time to sample the joys of the MGED dm management system...</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

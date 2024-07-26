@@ -1,0 +1,44 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span>  can I scratch your brain?  I'm looking at the metaballs implementation and am wondering why you \"fluffed\" up the ISO method, why you're squaring the field strength instead of using a simple falloff curve (i.e., it's using f^2/r^2 instead of f/r^2)</p>",
+        "id": 267979170,
+        "sender_full_name": "Sean",
+        "timestamp": 1642144868
+    },
+    {
+        "content": "<p>looks like you changed it mid-development:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>    fluff up the isopotential method a bit... back to the old way, kinda\n\n    svn:revision:30487\n    svn:branch:trunk\n    svn:account:erikgreenwald\n\ndiff --git a/src/librt/g_metaball.c b/src/librt/g_metaball.c\nindex 9649859e7f..4918318cf0 100644\n--- a/src/librt/g_metaball.c\n+++ b/src/librt/g_metaball.c\n@@ -67,6 +67,8 @@\n #define METABALL_ISOPOTENTIAL  1\n #define METABALL_BLOB          2\n\n+#define PLOT_THE_BIG_BOUNDING_SPHERE 0\n+\n const char *metaballnames[] =\n {\n     \"Metaball\",\n@@ -128,7 +130,7 @@ fastf_t rt_metaball_get_bounding_sphere(point_t *center, fastf_t threshold, stru\n                fastf_t additive;\n                VSUB2(d, mbpt2-&gt;coord, mbpt-&gt;coord);\n                mag = MAGNITUDE(d) + dist;\n-               additive = (mbpt2-&gt;fldstr*mbpt2-&gt;fldstr) / mag;\n+               additive = fabs(mbpt2-&gt;fldstr) * mbpt2-&gt;fldstr / mag;\n                dist += additive;\n            }\n        /* then see if this is a 'defining' point */\n@@ -238,7 +240,7 @@ rt_metaball_point_value_iso(point_t *p, struct bu_list *points)\n\n     for (BU_LIST_FOR(mbpt, wdb_metaballpt, points)) {\n        VSUB2(v, mbpt-&gt;coord, *p);\n-       ret += mbpt-&gt;fldstr / MAGSQ(v); /* f/r^2 */\n+       ret += fabs(mbpt-&gt;fldstr) * mbpt-&gt;fldstr / MAGSQ(v);    /* f/r^2 */\n     }\n     return ret;\n }\n@@ -352,7 +354,7 @@ rt_metaball_norm(register struct hit *hitp, struct soltab *stp, register struct\n            for (BU_LIST_FOR(mbpt, wdb_metaballpt, &amp;mb-&gt;metaball_ctrl_head)) {\n                VSUB2(v, hitp-&gt;hit_point, mbpt-&gt;coord);\n                a = MAGSQ(v);\n-               VJOIN1(hitp-&gt;hit_normal, hitp-&gt;hit_normal, mbpt-&gt;fldstr / (a*a), v);    /* f/r^4 */\n+               VJOIN1(hitp-&gt;hit_normal, hitp-&gt;hit_normal, fabs(mbpt-&gt;fldstr)*mbpt-&gt;fldstr / (a*a), v); /* f/r^4 */\n            }\n            break;\n        case METABALL_BLOB:\n</code></pre></div>",
+        "id": 267979547,
+        "sender_full_name": "Sean",
+        "timestamp": 1642145212
+    },
+    {
+        "content": "<p>I was working on an animation with it, and ran into some issues.  trying to get a smooth transition.  method 2 (blob) appears to have a clipping bug:  <a href=\"/user_uploads/1549/u-beVITuzUcqGchZBX_5Kj71/anim.gif\">anim.gif</a>   method 1 works better (iso) but then it's not quite what I'm going for.  method 0 (metaball) appears to be unimplemented.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/u-beVITuzUcqGchZBX_5Kj71/anim.gif\" title=\"anim.gif\"><img src=\"/user_uploads/1549/u-beVITuzUcqGchZBX_5Kj71/anim.gif\"></a></div>",
+        "id": 267979805,
+        "sender_full_name": "Sean",
+        "timestamp": 1642145446
+    },
+    {
+        "content": "<p>iirc, there were a couple different field strength algortithms, I think I stubbed in 3 and impl'd 2? I'd expect your animation to have a bulge that travels along the toroid segment,  it's an odd anim... there was a 'tokyo' one that was the paper one, but the one modelled on electric field charge seemed to fit the requirement better iirc... been a hot minute and I've done a think or two since :)</p>",
+        "id": 268000568,
+        "sender_full_name": "Erik",
+        "timestamp": 1642159144
+    },
+    {
+        "content": "<p>yeah, there they are, 'metaball', 'isopotential', and 'blob', I think blob was more of a visual experimentation thing and I didn't do the tokyo one, heh</p>",
+        "id": 268001176,
+        "sender_full_name": "Erik",
+        "timestamp": 1642159486
+    },
+    {
+        "content": "<p>um, f^2/r^2 ... um... I don't recall. I think there was a weird mathy reason (since we're looking at them in isolation, we 'pair' them to create the delta to eigenvalue off of or something to get the ^2), ir it could be a straight up bug that just happened to look better with my inputs :) \"fix\" it and see what happens? iso should work for visualizing an electrical or gravitational isosurface for a test reference?</p>",
+        "id": 268001626,
+        "sender_full_name": "Erik",
+        "timestamp": 1642159786
+    },
+    {
+        "content": "<p>I don't think the tokyo paper fit the problem domain of the requesting party particularly well, Lee proposed it and we pounded a square peg into a round hole, I think</p>",
+        "id": 268001949,
+        "sender_full_name": "Erik",
+        "timestamp": 1642159989
+    }
+]

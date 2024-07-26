@@ -1,0 +1,38 @@
+[
+    {
+        "content": "<p>I am trying to build OSL shared libs locally for appleseed ( I have built a compatible version of LLVM before this). No matter what I do the OSL is unable to find the built LLVM libs. <br>\nIt gives me this error when I do so,</p>\n<div class=\"spoiler-block\"><div class=\"spoiler-header\">\n<p>Error</p>\n</div><div class=\"spoiler-content\" aria-hidden=\"true\">\n<p>geck@geck:~/Downloads/osl_build$ cmake -DLLVM_VERSION=5.0.1 -DLLVM_DIRECTORY=/usr/local ../OpenShadingLanguage-Release-1.10.3<br>\n-- The CXX compiler identification is GNU 11.4.0<br>\n-- The C compiler identification is GNU 11.4.0<br>\n-- Detecting CXX compiler ABI info<br>\n-- Detecting CXX compiler ABI info - done<br>\n-- Check for working CXX compiler: /usr/bin/c++ - skipped<br>\n-- Detecting CXX compile features<br>\n-- Detecting CXX compile features - done<br>\n-- Detecting C compiler ABI info<br>\n-- Detecting C compiler ABI info - done<br>\n-- Check for working C compiler: /usr/bin/cc - skipped<br>\n-- Detecting C compile features<br>\n-- Detecting C compile features - done<br>\n-- Building OSL 1.10.3<br>\n-- CMake version is 3.22.1<br>\nCMake Deprecation Warning at CMakeLists.txt:20 (cmake_policy):<br>\n  The OLD behavior for policy CMP0046 will be removed from a future version<br>\n  of CMake.</p>\n<p>The cmake-policies(7) manual explains that the OLD behaviors of all<br>\n  policies are deprecated and that a policy should be set to OLD only under<br>\n  specific short-term circumstances.  Projects should be ported to the NEW<br>\n  behavior and not rely on setting a policy to OLD.</p>\n<p>-- Project build dir   = /home/geck/Downloads/osl_build<br>\n-- Project install dir = /usr/local<br>\n-- platform = linux64<br>\n-- CMAKE_CXX_COMPILER is /usr/bin/c++<br>\n-- CMAKE_CXX_COMPILER_ID is GNU<br>\n-- Building for C++11<br>\n-- Setting Namespace to: OSL_v1_10<br>\n-- Using OpenImageIO 2.2.18<br>\nCMake Error at /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):<br>\n  Could NOT find LLVM (missing: LLVM_LIBRARIES) (found suitable version<br>\n  \"5.0.1\", minimum required is \"4.0\")<br>\nCall Stack (most recent call first):<br>\n  /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:594 (_FPHSA_FAILURE_MESSAGE)<br>\n  src/cmake/modules/FindLLVM.cmake:113 (find_package_handle_standard_args)<br>\n  src/cmake/externalpackages.cmake:70 (find_package)<br>\n  CMakeLists.txt:133 (include)</p>\n<p>-- Configuring incomplete, errors occurred!</p>\n</div></div>\n<p>i've been at this for a while now and I am unable to figure out what to do.<br>\nI have tried multiple flags for the CMake command, here is what the <code>make help</code> command for OSL returns</p>\n<div class=\"codehilite\"><pre><span></span><code> LLVM-related options:\n      LLVM_VERSION=4.0         Specify which LLVM version to use\n      LLVM_DIRECTORY=xx        Specify where LLVM lives\n      LLVM_NAMESPACE=xx        Specify custom LLVM namespace\n      LLVM_STATIC=1            Use static LLVM libraries\n      USE_LLVM_BITCODE=0       Don&#39;t generate embedded LLVM bitcode\n      USE_BOOST_WAVE=1         Force boost wave rather than clang preprocessor\n</code></pre></div>",
+        "id": 386930459,
+        "sender_full_name": "Abhiram",
+        "timestamp": 1692815518
+    },
+    {
+        "content": "<p>It's a while ago, since I successfully build OSL. Therefore, I cannot help with a success story. But, did you had a look at the CMake GUI? Do the values make sense there?</p>",
+        "id": 387063741,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1692880655
+    },
+    {
+        "content": "<p>No, I haven't used the CMake GUI  yet. I have been trying to use CMake CLI flags itself. Will try and build it using GUI</p>",
+        "id": 387210291,
+        "sender_full_name": "Abhiram",
+        "timestamp": 1692941053
+    },
+    {
+        "content": "<p>I started from scratch by building LLVM libs again, now I used CMake GUI to set it up. OSL is able to detect LLVM after some modifications!</p>",
+        "id": 387426379,
+        "sender_full_name": "Abhiram",
+        "timestamp": 1693056283
+    },
+    {
+        "content": "<p>The point with using the CMake GUI is not that it generates different makefiles, but it shows you all options with their values. There you can look for suspicious ones.</p>",
+        "id": 387429564,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1693058902
+    },
+    {
+        "content": "<p>Yes got it. Seeing all the options definitely helped me get a clear picture, maybe the re-building fixed the issue because values seemed correct to me in the GUI</p>",
+        "id": 387445726,
+        "sender_full_name": "Abhiram",
+        "timestamp": 1693071846
+    }
+]

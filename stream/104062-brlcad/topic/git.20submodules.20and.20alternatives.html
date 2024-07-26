@@ -1,0 +1,107 @@
+<html>
+<head><meta charset="utf-8"><title>git submodules and alternatives · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html">git submodules and alternatives</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="339369962"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/339369962" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#339369962">(Mar 03 2023 at 15:08)</a>:</h4>
+<p>Not for immediate action, but thought I'd start a thread to accumulate various thoughts and resources about git submodules and other potential solutions to moving src/other/ext out of the primary tree.  Prompted by coming across this:  <a href="https://diziet.dreamwidth.org/14666.html">https://diziet.dreamwidth.org/14666.html</a></p>
+
+
+
+<a name="339371892"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/339371892" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#339371892">(Mar 03 2023 at 15:14)</a>:</h4>
+<p><a href="https://github.com/ingydotnet/git-subrepo">https://github.com/ingydotnet/git-subrepo</a></p>
+
+
+
+<a name="340712853"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/340712853" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#340712853">(Mar 09 2023 at 21:09)</a>:</h4>
+<p>if you don't check out the initial version with submodules enabled, it can be a bit of a pita from what I recall</p>
+
+
+
+<a name="341626265"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/341626265" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#341626265">(Mar 14 2023 at 05:56)</a>:</h4>
+<p>Instead of submodules, my thought was either bit the bullet to get Conan working or more easily, use CMake itself:</p>
+<p>1) have our deps live in another <strong><em>BRL-CAD</em></strong> repo where we manually sync/pull from upstream as they're verified, <br>
+2) write a .cmake module using <a href="https://coderefinery.github.io/cmake-workshop/fetch-content/">FetchContent</a> to pull the other repo(s),<br>
+3) add logic to the module so it can optionally report when a dep is out-of-date (if not already a feature of FetchContent),<br>
+4) modify our CMakeLists.txt to conditionally fetch if it's not been fetched before, and lastly<br>
+5) make sure we have a cmake incantation, script, or other 1-liner to prefetch for offline use. </p>
+<p>Source tarballs  would of course include prefetched and ideally have the out-of-date check disabled/advisory so they just work.  Will also probably want some safeguard from having git blather and avoid accidental check-ins (probably fetch into build tree).   On the upside, that approach should extend nicely and doesn't inject configuration code outside of cmake (error prone, build system modularity weakness).   Think it avoids the downsides of submodules and conan, but will have to see it in practice to know for sure.</p>
+<p>If that's something you think we could try, might be a good idea if someone else took a swing at it if only to increase familiarity with the build system.  Happy to give it a go.</p>
+
+
+
+<a name="341678003"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/341678003" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#341678003">(Mar 14 2023 at 10:35)</a>:</h4>
+<p>Definitely sounds like something to try.  I'm certainly good with you having a crack at it <span class="user-mention" data-user-id="102902">@Sean</span> - I agree expanding familiarity with the build system is a good idea.</p>
+
+
+
+<a name="378632322"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/378632322" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#378632322">(Jul 26 2023 at 00:32)</a>:</h4>
+<p>Looking at the Qt6 build and how find_package(Qt6) works, I'm almost certain I won't be able to spoof find_package(Qt6) the way I do for the other src/other/ext packages in order to integrate them into the main BRL-CAD build.  That brings me back to the question of how we want to go about integrating an extracted src/other/ext into the main BRL-CAD build - with Qt and anything using a similar target-defining approach to find_package, we're going to basically have to have the compiled, installed 3rd party dep to point to before our configure calls find_package.</p>
+
+
+
+<a name="378632603"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/378632603" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#378632603">(Jul 26 2023 at 00:34)</a>:</h4>
+<p>That's what's sometimes referred to as a "superbuild" pattern - a meta build manages the order of project building, and then the "main" project build is the last one triggered by the superbuild.</p>
+
+
+
+<a name="378635405"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/378635405" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#378635405">(Jul 26 2023 at 00:51)</a>:</h4>
+<p>I explored that a little bit early on in the last round of build system fun, but if we go with that route we lose a number of things our current approach is supposed to guarantee:</p>
+<ol>
+<li>
+<p>Being buildable and runnable with no access to the targeted install directory.    The third party builds will have to complete their final install step before we even being configuring.</p>
+</li>
+<li>
+<p>Having our build automatically bundle up the relevant elements of the third party dependencies into our CPack outputs.  Essentially, the problem I'm currently looking at of how to bundle the required elements of Qt for Qt executables would be the same issue we would have with all ext third party deps.</p>
+</li>
+<li>
+<p>Our build system would cease to have explicit origin knowledge of every generated output file that ended up in the final build if we glob in the 3rd party build outputs - that may have implications we want to consider.</p>
+</li>
+<li>
+<p>Relocatability of the binary install tree - our current approach does some work to make sure external libraries are relocatable the way our own are (TLDR - rpath related, can discuss more in detail if necessary.)  I'm not 100% sure what we'd do about creating binary BRL-CAD installers in the "ext build dumped 3rd party outputs into the install tree" scenario, so I can't say yet for certain what the options would be, but it'd most likely be a challenge.</p>
+</li>
+</ol>
+<p>I'm not necessarily against embracing some loss of relocability in order to achieve a different (and hopefully simpler) build setup where the BRL-CAD 'main' build just does find_package(*** REQUIRED) for everything, but before doing any extensive explorations I'd like to have some sense of what constraints we're going to try and satisfy...</p>
+
+
+
+<a name="381061394"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/381061394" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#381061394">(Aug 02 2023 at 14:27)</a>:</h4>
+<p>On a more mundane level, I have a question about system vs. bundled libs and a separate "pre-built" externals repository.  If we (for example) build the bundled libpng in the externals repo using the bundled zlib, it may be impractical for the BRL-CAD build to subsequently want to use a system zlib and the "bundled" libpng, as the latter will be built against the bundled version of zlib.</p>
+
+
+
+<a name="381061806"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/381061806" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#381061806">(Aug 02 2023 at 14:28)</a>:</h4>
+<p>Right now this is handled at BRL-CAD's CMake configure time by specifying what we want to do before both zlib and libpng are built, but if we are pre-building an external repository we will lose the ability to mix and match like that as part of the BRL-CAD configure process - all those decisions will have to be made at the time the external repository is built.</p>
+
+
+
+<a name="381062112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/381062112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#381062112">(Aug 02 2023 at 14:29)</a>:</h4>
+<p>If we go that route, it seems to me like the BRL-CAD logic should first check the targeted bundled directory to see if any given find_package target is present, and always use it if found?</p>
+
+
+
+<a name="381062523"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/git%20submodules%20and%20alternatives/near/381062523" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/git.20submodules.20and.20alternatives.html#381062523">(Aug 02 2023 at 14:30)</a>:</h4>
+<p>That way the system/bundled decision shifts entirely to the ext repository's configure/build cycle, and BRL-CAD either uses what's in bundled or requires the system version, based only on a detection check.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

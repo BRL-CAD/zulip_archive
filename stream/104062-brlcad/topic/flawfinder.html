@@ -1,0 +1,63 @@
+<html>
+<head><meta charset="utf-8"><title>flawfinder · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html">flawfinder</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="198883364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/flawfinder/near/198883364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html#198883364">(May 27 2020 at 12:28)</a>:</h4>
+<p>Well, it's  a "real" flawfinder issue but in this case I've no idea what to do about it - it's complaining about readlink in the realpath implementation we're using to guarantee a working realpath on Linux, but I have no idea how to decode symbolic links for that purpose without using it...</p>
+
+
+
+<a name="199451199"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/flawfinder/near/199451199" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html#199451199">(Jun 02 2020 at 05:12)</a>:</h4>
+<p>aha, interesting.  yep, that's an old syscall flaw</p>
+
+
+
+<a name="199451252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/flawfinder/near/199451252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html#199451252">(Jun 02 2020 at 05:14)</a>:</h4>
+<p>here's what flawfinder says about it:</p>
+<div class="codehilite"><pre><span></span><code>  &quot;readlink&quot;:
+     (normal, 5,
+      &quot;This accepts filename arguments; if an attacker &quot; +
+      &quot;can move those files or change the link content, &quot; +
+      &quot;a race condition results.  &quot; +
+      &quot;Also, it does not terminate with ASCII NUL. (CWE-362, CWE-20)&quot;,
+      # This is often just a bad idea, and it&#39;s hard to suggest a
+      # simple alternative:
+      &quot;Reconsider approach&quot;,
+      &quot;race&quot;, &quot;&quot;, {&#39;input&#39; : 1}),
+</code></pre></div>
+
+
+<p>We can certainly ensure the null-termination is accounted for, but not the first issue.</p>
+
+
+
+<a name="199452585"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/flawfinder/near/199452585" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html#199452585">(Jun 02 2020 at 05:52)</a>:</h4>
+<p>It gets pretty good coverage of the issues in this secure programming book: <a href="https://books.google.com/books?id=GL8AeTCu1WAC&amp;pg=PT218&amp;lpg=PT218&amp;dq=%22readlink%22+%22safe%22&amp;source=bl&amp;ots=igMmAwNZQn&amp;sig=ACfU3U3cjlgBWaD-Z8VElKaoqkMwgQhVTA&amp;hl=en&amp;sa=X&amp;ved=2ahUKEwjnhZPwteLpAhX9lHIEHapBAsAQ6AEwB3oECAoQAQ#v=onepage&amp;q=%22readlink%22%20%22safe%22&amp;f=false">https://books.google.com/books?id=GL8AeTCu1WAC&amp;pg=PT218&amp;lpg=PT218&amp;dq=%22readlink%22+%22safe%22&amp;source=bl&amp;ots=igMmAwNZQn&amp;sig=ACfU3U3cjlgBWaD-Z8VElKaoqkMwgQhVTA&amp;hl=en&amp;sa=X&amp;ved=2ahUKEwjnhZPwteLpAhX9lHIEHapBAsAQ6AEwB3oECAoQAQ#v=onepage&amp;q=%22readlink%22%20%22safe%22&amp;f=false</a></p>
+
+
+
+<a name="199452611"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/flawfinder/near/199452611" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html#199452611">(Jun 02 2020 at 05:53)</a>:</h4>
+<p>looks like realpath_bsd.c is guilty of the 4th issue, but then so are we</p>
+
+
+
+<a name="199453436"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/flawfinder/near/199453436" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/flawfinder.html#199453436">(Jun 02 2020 at 06:14)</a>:</h4>
+<p>looks like flawfinder has categorized this as a level 5 issue, i.e., the highest level of risk possible</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

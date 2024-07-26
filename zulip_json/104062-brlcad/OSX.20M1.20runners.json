@@ -1,0 +1,86 @@
+[
+    {
+        "content": "<p>Cool - looks like there is some progress towards M1 runners for Github Actions with the Mac, although it's not on the free accounts yet:  <a href=\"https://github.com/actions/runner-images/issues/8439#issuecomment-1755601587\">https://github.com/actions/runner-images/issues/8439#issuecomment-1755601587</a></p>",
+        "id": 405684560,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701625927
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Dunno if this is M1/M2-specific, but I'm getting a build error on brlcad_externals in libpng:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>[ 60%] Building C object CMakeFiles/png.dir/png.c.o\n/Library/Developer/CommandLineTools/usr/bin/cc -DPNG_ARM_NEON_OPT=2 -Dpng_EXPORTS -I/Users/morrison/brlcad_ext/install/include -I/Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD-build -I/Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fPIC -MD -MT CMakeFiles/png.dir/png.c.o -MF CMakeFiles/png.dir/png.c.o.d -o CMakeFiles/png.dir/png.c.o -c /Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD/png.c\n\n-- stderr output is:\nIn file included from /Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD/png.c:14:\n/Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD/pngpriv.h:911:4: error: ZLIB_VERNUM != PNG_ZLIB_VERNUM       \"-I (include path) error: see the notes in pngpriv.h\"\n#  error ZLIB_VERNUM != PNG_ZLIB_VERNUM \\\n   ^\n1 error generated.\n</code></pre></div>",
+        "id": 411961365,
+        "sender_full_name": "Sean",
+        "timestamp": 1704815095
+    },
+    {
+        "content": "<p>That's with<br>\ncmake .. -DENABLE_ALL=ON</p>",
+        "id": 411961482,
+        "sender_full_name": "Sean",
+        "timestamp": 1704815138
+    },
+    {
+        "content": "<p>IIRC that may come from getting system zlib and bundled zlib stuff mixed... I've seen it before, but I don't recall offhand what the specific issue was.  I'm still more or less offline for the next few days - I may be able to have a go at it Friday or Monday</p>",
+        "id": 412215612,
+        "sender_full_name": "starseeker",
+        "timestamp": 1704919003
+    },
+    {
+        "content": "<p>Okay, yeah, let me know if you can check it out or point me at a file.  I'm still using src/other elsewhere in the meantime, but couldn't find the delta.</p>",
+        "id": 412407479,
+        "sender_full_name": "Sean",
+        "timestamp": 1705001372
+    },
+    {
+        "content": "<p>Hope you feel better!</p>",
+        "id": 412407503,
+        "sender_full_name": "Sean",
+        "timestamp": 1705001382
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , I just realized something - your directory name is brlcad_externals for this build.  Are you using <a href=\"https://github.com/BRL-CAD/bext\">https://github.com/BRL-CAD/bext</a> for the third party repo?  I've got the brlcad_externals repo archived, since it didn't use the submodule approach.  brlcad_externals shouldn't be used - I just left it up for now in case we needed anything in it for reference.</p>",
+        "id": 416788395,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705674300
+    },
+    {
+        "content": "<p>If you are using bext, can you send me the pnglibconf.h file the build generates?</p>",
+        "id": 416788533,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705674344
+    },
+    {
+        "content": "<p>I have it rebuilding fresh to check current status since it's been a couple weeks.  do you know why the submodules  would report as modified?  I cleared their status by blowing away the build, but I'm guessing some sort of submodule update is needed:</p>\n<p>morrison@Miniagua brlcad.bext % git status<br>\nOn branch main<br>\nYour branch is up to date with 'origin/main'.</p>\n<p>Changes not staged for commit:<br>\n  (use \"git add &lt;file&gt;...\" to update what will be committed)<br>\n  (use \"git restore &lt;file&gt;...\" to discard changes in working directory)<br>\n    modified:   lmdb/lmdb (new commits)<br>\n    modified:   netpbm/netpbm (new commits)<br>\n    modified:   opencv/opencv (new commits)<br>\n    modified:   openmesh/OpenMesh (new commits)<br>\n    modified:   opennurbs/opennurbs (new commits)<br>\n    modified:   patch/patch (new commits)<br>\n    modified:   png/libpng (new commits)<br>\n    modified:   proj/PROJ (new commits)<br>\n    modified:   pugixml/pugixml (new commits)</p>\n<p>no changes added to commit (use \"git add\" and/or \"git commit -a\")</p>",
+        "id": 417472273,
+        "sender_full_name": "Sean",
+        "timestamp": 1706024282
+    },
+    {
+        "content": "<p>probably not related to the prior error, but I did notice that libpng and opencv both throw cmake warnings about \"Argument not separated from previous token by whitespace\"</p>",
+        "id": 417473723,
+        "sender_full_name": "Sean",
+        "timestamp": 1706024650
+    },
+    {
+        "content": "<p>looking at the generated cmake scripts, it looks like a syntax error (quotes within a quoted string) in both</p>\n<p>/Users/morrison/brlcad.bext/.build/png/PNG_BLD-prefix/src/PNG_BLD-stamp/PNG_BLD-configure-.cmake</p>\n<p>and</p>\n<p>/Users/morrison/brlcad.bext/.build/opencv/OPENCV_BLD-prefix/src/OPENCV_BLD-stamp/OPENCV_BLD-configure-.cmake</p>",
+        "id": 417473927,
+        "sender_full_name": "Sean",
+        "timestamp": 1706024715
+    },
+    {
+        "content": "<p>For the submodules, I think this might be the line for updating:</p>\n<p>git submodule update --recursive</p>",
+        "id": 417524967,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706042548
+    },
+    {
+        "content": "<p>Looks like the cmake errors were a quoting problem passing in empty args via \"\" in our files - I've committed what should be a fix.</p>",
+        "id": 417526093,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706043056
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'm curious if the latest bext still has the PNG_ZLIB_VERNUM issue - I'm not quite seeing where it would come from in the code, unless pnglibconf.h.prebuilt is getting used.</p>",
+        "id": 417557127,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706058259
+    }
+]

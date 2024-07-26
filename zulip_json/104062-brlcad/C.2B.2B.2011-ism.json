@@ -1,0 +1,56 @@
+[
+    {
+        "content": "<p>Hmm - clang 6 caught a C++11 bit in reduce_db.cpp, looks like:</p>\n<p>src/librt/reduce_db.cpp:55:43: error: non-type template argument referring to function 'autoptr_wrap_bu_free&lt;directory *&gt;' with internal linkage is a C++11 extension [-Werror,-Wc++11-extensions]<br>\ntemplate &lt;typename T, void free_fn(T *) = autoptr_wrap_bu_free&gt;<br>\n                                          ^~~~~~~~~~~~~~~~~~~~</p>",
+        "id": 126779658,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526696819
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> What do we want to do about that one?</p>",
+        "id": 126779663,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526696853
+    },
+    {
+        "content": "<p>Ugh, there's a few more of them</p>",
+        "id": 126779709,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526696944
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> What do we want to do about that one?</p>\n</blockquote>\n<p>have to read up on that as that's new syntax to me, but at a glance, just looks like an expansion for what was previously just a typename.<br>\nwould become something like: template &lt;typename T,  typename free_fn = autoptr_wrap_bu_free&gt;</p>",
+        "id": 126781786,
+        "sender_full_name": "Sean",
+        "timestamp": 1526701825
+    },
+    {
+        "content": "<p>I'm rusty on my template syntax, so almost certainly butchered that</p>",
+        "id": 126781788,
+        "sender_full_name": "Sean",
+        "timestamp": 1526701849
+    },
+    {
+        "content": "<blockquote>\n<p>Ugh, there's a few more of them</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I'm a bit concerned by the callback function commit solution ... casting them away is just a <em>really</em> verbose way of disabling the warning.  I thought it might have just been a compiler being picky, but then I looked up the standard and they are undefined behavior.  We're in the wrong.  Better would be to fix them, especially now that there's a good way to detect them.</p>",
+        "id": 126782603,
+        "sender_full_name": "Sean",
+        "timestamp": 1526703893
+    },
+    {
+        "content": "<p>yeah, the double cast essentially makes them undetectable again</p>",
+        "id": 126783355,
+        "sender_full_name": "Sean",
+        "timestamp": 1526705857
+    },
+    {
+        "content": "<p>I'm not in my wheelhouse here, but what I'm seeing online suggests it might be more complicated - something about external vs internal linkage and what's allowed to be external before C++11</p>",
+        "id": 126798365,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526742021
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> If you can help me figure out the new pattern I'll propagate it through the other places where we've got something similar, but I'm not sure what the \"right\" C++98 thing to do here is.</p>",
+        "id": 126798938,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526743344
+    }
+]

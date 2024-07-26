@@ -1,0 +1,110 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I have a question about how to approach something from an API perspective.  Generally speaking, our code uses TCP for inter-process data moving.  I'd like to establish a cross-platform option that uses a more strictly local mechanism, along the lines of <a href=\"https://docs.libuv.org/en/v1.x/pipe.html\">https://docs.libuv.org/en/v1.x/pipe.html</a></p>",
+        "id": 304472920,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666016398
+    },
+    {
+        "content": "<p>My first instinct would be to just try using libuv for this purpose since they appear to have done all the necessary messy platform abstractions and are a  straightforward compile to (on Linux) a 291k shared library, but before diving down the rabbit hole I figured it warrants discussion.  My immediate motivation is to set up a reliable regression test for the \"ert\" embedded raytrace rendering, and to do so I need an IPC mechanism that doesn't depend on either Tcl or Qt, since libged doesn't depend on either.</p>",
+        "id": 304473872,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666016662
+    },
+    {
+        "content": "<p>You’re on the right path there.  Pipes are one of the best avail general IPC methods.  Shared memory is another and is higher performing but harder to do cross platform cleanly.  I’ve seen some libs for both.  Libuv is a good one.  Something higher level might actually be better long term though.  Have you looked at cap’n’proto?  I believe it has a path that strictly uses local pipes.</p>",
+        "id": 304473977,
+        "sender_full_name": "Sean",
+        "timestamp": 1666016690
+    },
+    {
+        "content": "<p>I looked at cap'n'proto briefly before - my sense was it was a little more complicated to get working, but that was just a general impression.</p>",
+        "id": 304474191,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666016760
+    },
+    {
+        "content": "<p>With uv , it’s going to be completely ad how what data is sent and received, whereas with capn, it’ll be in a data structure and auto-transmitted.</p>",
+        "id": 304474290,
+        "sender_full_name": "Sean",
+        "timestamp": 1666016776
+    },
+    {
+        "content": "<p>Ad hoc *</p>",
+        "id": 304474335,
+        "sender_full_name": "Sean",
+        "timestamp": 1666016792
+    },
+    {
+        "content": "<p>What I was hoping to do to be \"minimally impacting\" as far as how much logic would have to change was to use <em>exactly</em> what we're doing now for all the raytracing communications, changing only the IPC mechanism itself, without introducing any new communications protocols... maybe that's not practical?</p>",
+        "id": 304474553,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666016851
+    },
+    {
+        "content": "<p>From there, cap'n'proto would essentially be  the \"next step\" that would involve a protocol change (potentially) for a nicer result.</p>",
+        "id": 304474793,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666016904
+    },
+    {
+        "content": "<p>I mean the most minimally impacting would be to put libuv or capn underneath libpkg… not terribly complicated and would have the least app footprint.</p>",
+        "id": 304474985,
+        "sender_full_name": "Sean",
+        "timestamp": 1666016960
+    },
+    {
+        "content": "<p>That said, I think we need to evolve past pkg</p>",
+        "id": 304475042,
+        "sender_full_name": "Sean",
+        "timestamp": 1666016975
+    },
+    {
+        "content": "<p>Hmm.  What about this - see if I can hook libuv under pkg and figure out what the warts are, with the game plan being to replace both pkg and it's use of libuv down the road?  I'm trying not to get sucked too far off course with a distraction, but I'm trying to get enough testing in place with swrast that I can have confidence I'm not breaking features when I rework draw logic and ert is a biggie on the \"easy to break\" list...</p>",
+        "id": 304475471,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666017093
+    },
+    {
+        "content": "<p>That cetainly sounds reasonable to me. It’s also probably the least risky approach. But I’m also not against using a higher level API if we can get something going. ￼ The only issue that comes to mind is that PKG exposes the application to the socket, and intentionally iterates over it with a select loop.  I think that’ll still work as is or almost exactly as it is with ipc ports but there may be some nuance there to sort out.</p>",
+        "id": 304476903,
+        "sender_full_name": "Sean",
+        "timestamp": 1666017448
+    },
+    {
+        "content": "<p>I'll take a look - or if <span class=\"user-mention\" data-user-id=\"484201\">@Christopher</span> is bored this could be a good \"learn libpkg\" experience :-P</p>",
+        "id": 304477137,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666017511
+    },
+    {
+        "content": "<p>There will definitely need to be some sort of trigger/indication of when these ports versus TCP, because the API right now obviously assumes it when you specify something like “-F:0“ as a port number and it assumes you mean /translates that to mean localhost:5669 over tcp.</p>",
+        "id": 304477249,
+        "sender_full_name": "Sean",
+        "timestamp": 1666017546
+    },
+    {
+        "content": "<p>Erm.  You're better on the convention/notation side of things - does anything jump out at you as \"this would be a good way\"?</p>",
+        "id": 304477448,
+        "sender_full_name": "starseeker",
+        "timestamp": 1666017602
+    },
+    {
+        "content": "<p>Libpkg’s api is not immutable if you need to add pathways for IPC.. just fyi</p>",
+        "id": 304477540,
+        "sender_full_name": "Sean",
+        "timestamp": 1666017617
+    },
+    {
+        "content": "<p>I mean the only thing that jumps to mind would be a convention on the named pipes being given a distinct signature so it’d be clear when a client app requests it.  The server end would still need something explicit (eg fbserv —ipc), but then client apps would use it (rt -FNAME…). And NAME would be announced on fbserv’s start like an md5 fingerprint.</p>",
+        "id": 304478682,
+        "sender_full_name": "Sean",
+        "timestamp": 1666017915
+    },
+    {
+        "content": "<p>Might be possible to support user-defined names, or encode them like “fbserv-ipc-1234” when user runs “fbserv —ipc 1234” and then “rt -F1234 could still work.</p>",
+        "id": 304478989,
+        "sender_full_name": "Sean",
+        "timestamp": 1666018002
+    }
+]

@@ -1,0 +1,62 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> seeing a build failure in a clean tree:</p>\n<div class=\"codehilite\"><pre><span></span><code>Generating pkgIndex.tcl in /home/user/brlcad/build/./share/tclscripts/archer\n[snip]\ncan&#39;t read &quot;::ArcherCore::inheritFromToplevel&quot;: no such variable\n\nUnexpected error encountered while running Archer.\nAborting.\n</code></pre></div>",
+        "id": 282352769,
+        "sender_full_name": "starseeker",
+        "timestamp": 1652534600
+    },
+    {
+        "content": "<p>Okay <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> sorry about that!  I’ll be back at a computer in a couple hours and will look at it.  That’s strange.. doesn’t parse into the subdir here.</p>",
+        "id": 282354611,
+        "sender_full_name": "Sean",
+        "timestamp": 1652537331
+    },
+    {
+        "content": "<p>I saw that yesterday, blew away my build dir and started over and it was fine. Just did a ninja clean, rebuilt, not seeing it</p>",
+        "id": 282361897,
+        "sender_full_name": "Erik",
+        "timestamp": 1652547012
+    },
+    {
+        "content": "<p>OK, I'll try again</p>",
+        "id": 282369481,
+        "sender_full_name": "starseeker",
+        "timestamp": 1652558272
+    },
+    {
+        "content": "<p>Yep, worked this time.  I must have cleaned another directory or something.  Sorry for the noise <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 282370929,
+        "sender_full_name": "starseeker",
+        "timestamp": 1652560493
+    },
+    {
+        "content": "<p>ahh, okay -- I was going to say I was having trouble reproducing it, but was working on setting up a linux host to test on</p>",
+        "id": 282372087,
+        "sender_full_name": "Sean",
+        "timestamp": 1652562323
+    },
+    {
+        "content": "<p>its undoubtedly because the build rule was simply copying archer_laucher.tcl into the dir, so when I moved it to a subdir .. it's still sitting there copied into the share/tclscripts/archer folder, so when mk_pkgIndex runs, it still picks it up.</p>",
+        "id": 282372138,
+        "sender_full_name": "Sean",
+        "timestamp": 1652562392
+    },
+    {
+        "content": "<p>Ah, so the stale symlink cleanup we use for most of that sort of thing wouldn't have caught the copy.  Makes sense.</p>",
+        "id": 282379741,
+        "sender_full_name": "starseeker",
+        "timestamp": 1652574134
+    },
+    {
+        "content": "<p>Acting more like a Windows build for that specific case.  I must have done the copy in the early stages of the CMake conversion because I figured that file was unlikely to change enough to warrant the (at the time) added complexity.  Whoops.</p>",
+        "id": 282379837,
+        "sender_full_name": "starseeker",
+        "timestamp": 1652574265
+    },
+    {
+        "content": "<p>that's also why I moved it into a subdir.  it's always been throwing an error into the output.   I addressed the original issue, and a half dozen others, but the the protections for mk_pkgIndex started to get too deep as it's parsing a run script like a package script and that's the underlying issue.  now should be fixed proper though.</p>",
+        "id": 282383853,
+        "sender_full_name": "Sean",
+        "timestamp": 1652580911
+    }
+]

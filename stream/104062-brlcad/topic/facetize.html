@@ -1,0 +1,871 @@
+<html>
+<head><meta charset="utf-8"><title>facetize · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html">facetize</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="219787983"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219787983" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219787983">(Dec 13 2020 at 23:39)</a>:</h4>
+<p>Welp, <span class="user-mention" data-user-id="112516">@starseeker</span> the new facetize logic just saved me some effort.  After nearly 24 hours processing, I got something where I would have gotten nothing:</p>
+<div class="codehilite"><pre><span></span><code>NMG: tessellating my.ebm...
+NMG: failed to generate my.bot
+CM: error at size 0.883902
+CM: retrying with size 0.0883902
+CM: completed in 16 seconds with size 0.0883902
+CM: completed in 20 seconds with size 0.0795512
+CM: completed in 26 seconds with size 0.0715961
+CM: timed out after 30 seconds with size 0.0644365
+CM: unable to polygonize at target size (0.0662927), using last successful BoT with 2064364 faces, feature size 0.0715961
+CM: decimation succeeded, final BoT has 55724 faces
+</code></pre></div>
+<p>Lots of bits missing including important details, but enough succeeded that I think I can make it work.</p>
+
+
+
+<a name="219787991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219787991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219787991">(Dec 13 2020 at 23:39)</a>:</h4>
+<p>24 HOURS processing..... :)</p>
+
+
+
+<a name="219788043"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219788043" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219788043">(Dec 13 2020 at 23:40)</a>:</h4>
+<p>memory usage never skyrocketed.  I think it was just a lot of single-threaded O(N^3) iterations that made it take forever.</p>
+
+
+
+<a name="219792895"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219792895" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219792895">(Dec 14 2020 at 01:53)</a>:</h4>
+<p>Hmm.  Was it 24hrs on the NMG for my.ebm, or is my.ebm part of a larger model?</p>
+
+
+
+<a name="219793008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219793008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219793008">(Dec 14 2020 at 01:56)</a>:</h4>
+<p>Unfortunately a timeout bail on NMG would be quite a lot of work... IIRC I looked at it back when I did the facetize setup.  There's basically a whole lot of individual steps you would need to pass a time limit through.  An alternative might be an environment variable, but the problem there would be checking that a whole lot in internal NMG routines.  I never did id a path forward that didn't involve basically rewriting it...</p>
+
+
+
+<a name="219793015"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219793015" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219793015">(Dec 14 2020 at 01:57)</a>:</h4>
+<p>Best answer I have so far would be a proper subprocess we could terminate, but that needs an over-the-wire communication of geometry to and from the subprocess.</p>
+
+
+
+<a name="219793080"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219793080" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219793080">(Dec 14 2020 at 01:59)</a>:</h4>
+<p>Poor man's answer of keeping input to a tmp file and dbconcating the output back in <em>might</em> work to get up and running, but we would still need a subprocess based facetize command.</p>
+
+
+
+<a name="219800758"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219800758" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219800758">(Dec 14 2020 at 05:01)</a>:</h4>
+<p>I didn't want it to bail out.  If it would have succeeded, it would have been what I wanted.  I apparently lost two orders of magnitude polys.</p>
+
+
+
+<a name="219800824"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219800824" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219800824">(Dec 14 2020 at 05:02)</a>:</h4>
+<p>Which wasn't so bad, but then when I went to combine it with another bot, I again lost two more orders and now it's unusable:</p>
+<div class="codehilite"><pre><span></span><code>mged&gt; facetize tip2.bot tip2.r
+NMG: tessellating tip2.r...
+NMG: failed to generate tip2.bot
+CM: error at size 28.4152
+CM: retrying with size 2.84152
+CM: error at size 2.84152
+CM: retrying with size 1.42076
+CM: error at size 1.42076
+CM: retrying with size 0.710381
+CM: completed in 4 seconds with size 0.710381
+CM: successfully polygonized BoT with 150508 faces at feature size 0.497267
+CM: decimation succeeded, final BoT has 7370 faces
+</code></pre></div>
+
+
+
+<a name="219800937"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219800937" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219800937">(Dec 14 2020 at 05:04)</a>:</h4>
+<p>I was originally just surprised that it worked the first time despite taking 24 hours.   It probably was 24 hours on the nmg part.  Don't know how long the other part took.</p>
+
+
+
+<a name="219800941"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219800941" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219800941">(Dec 14 2020 at 05:04)</a>:</h4>
+<p>Is there any way to control the quality?</p>
+
+
+
+<a name="219801065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/219801065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#219801065">(Dec 14 2020 at 05:06)</a>:</h4>
+<p>trying --feature-size 0.1</p>
+
+
+
+<a name="398779067"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398779067" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398779067">(Oct 26 2023 at 22:54)</a>:</h4>
+<p>Well, I have to say I'm impressed - <a href="https://github.com/elalish/manifold">https://github.com/elalish/manifold</a> managed to "facetize -r" an xpushed tire with tread successfully:</p>
+<p><a href="/user_uploads/1549/LlngSCjEa_o2NM0PJ46io--4/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/LlngSCjEa_o2NM0PJ46io--4/image.png" title="image.png"><img src="/user_uploads/1549/LlngSCjEa_o2NM0PJ46io--4/image.png"></a></div>
+
+
+
+<a name="398779891"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398779891" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398779891">(Oct 26 2023 at 23:02)</a>:</h4>
+<p>And it looks like it handled all the valid m35 truck cases as well.  Neither case needing the fallback methods.</p>
+
+
+
+<a name="398784516"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398784516" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398784516">(Oct 26 2023 at 23:51)</a>:</h4>
+<p>Not sure about havoc yet - it completes, but the results aren't right - first suspect is my tree walking though.</p>
+
+
+
+<a name="398959995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398959995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398959995">(Oct 27 2023 at 19:53)</a>:</h4>
+<p>Ah, the tree walk was faulty.  OK, getting more failure cases now.  Still impressed it handled tire, but not handling all of m35 and crashing on havoc.  Time to isolate some failure inputs.</p>
+
+
+
+<a name="398977384"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398977384" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398977384">(Oct 27 2023 at 22:44)</a>:</h4>
+<p>Heh - forgot to support the trivial case, so a lot of simple things fail.  Duh...</p>
+
+
+
+<a name="398988817"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398988817" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398988817">(Oct 28 2023 at 00:58)</a>:</h4>
+<p>Incredible.  Only 3 failed regions for facetize -r --MANIFOLD havoc h and only one of those regions shows a non-empty rt image.</p>
+
+
+
+<a name="398988886"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398988886" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398988886">(Oct 28 2023 at 00:59)</a>:</h4>
+<p><a href="/user_uploads/1549/VP1aTfaU7PJVG5eNYzHoFFA6/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/VP1aTfaU7PJVG5eNYzHoFFA6/image.png" title="image.png"><img src="/user_uploads/1549/VP1aTfaU7PJVG5eNYzHoFFA6/image.png"></a></div>
+
+
+
+<a name="398989055"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/398989055" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#398989055">(Oct 28 2023 at 01:00)</a>:</h4>
+<p>To the best of my knowledge, this is the best facetization result that has ever been achieved with the havoc model.</p>
+
+
+
+<a name="399171999"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/399171999" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#399171999">(Oct 29 2023 at 17:23)</a>:</h4>
+<p>I want to say I recall Havoc facetizing back in the early 2000's ...   Around v5 days.  Of course that was all pre-richard..  Need that dashboard to see if I'm just wearing rosy-colored history glasses.  We do have an edge-case test set stashed somewhere with all possible combinations of two arbs that was set up for conversion testing.</p>
+
+
+
+<a name="399172054"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/399172054" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#399172054">(Oct 29 2023 at 17:24)</a>:</h4>
+<p>Still that is impressive results.  If there's a way to prevent/catch the crashes, I'd say toss it into the mix of multiple methods to try.</p>
+
+
+
+<a name="399178894"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/399178894" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#399178894">(Oct 29 2023 at 19:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I was able to wrap it in a try/catch, so it looks like it'll work.  I've got it wired in now, and building on Windows as well. CI says it builds on Mac as well but I've not tested it personally there.</p>
+
+
+
+<a name="399179014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/399179014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#399179014">(Oct 29 2023 at 19:16)</a>:</h4>
+<p>You can give it a try with latest main if you like - for me, "facetize -r havoc h" succeeds with 1 NMG fallback (the two failures are both evaluate to empty regions).  Ditto m35, and if I'm not mistaken this is overall quite fast compared to the NMG evaluations.</p>
+
+
+
+<a name="400059672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/400059672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#400059672">(Nov 03 2023 at 03:55)</a>:</h4>
+<p>Hmm.  I noticed an mistake on my part which is probably inflating the success rate of the new boolean logic for more complex cases - if the boolean evaluation fails, my logic was simply reporting an empty result and continuing onward.  That resulted (for example) in havoc reporting a successful facetize at a top level, even though it should have failed on the known difficult region that requires NMG fallback.</p>
+
+
+
+<a name="400059684"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/400059684" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#400059684">(Nov 03 2023 at 03:55)</a>:</h4>
+<p>Need to re-run and get new numbers</p>
+
+
+
+<a name="400063645"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/400063645" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#400063645">(Nov 03 2023 at 04:38)</a>:</h4>
+<p>Wait... now I'm confused.  I corrected the error returns, but the rt_booltree_evaluate accepts the TREE_NULL return from a nested call and keeps going.  Looking at the nmg_booltree_evaluate I refactored that from, as far as I can tell that's also what it is doing... is the intent of this to ignore lower level failures and proceed?</p>
+
+
+
+<a name="400064014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/400064014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#400064014">(Nov 03 2023 at 04:43)</a>:</h4>
+<p>I guess that sorta makes sense, as the facetize treewalk logic can't actually tell the difference between an empty bool eval result and a failure to generate output as long as both cases just return the same TREE_NULL result...</p>
+
+
+
+<a name="401935901"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/401935901" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#401935901">(Nov 14 2023 at 08:48)</a>:</h4>
+<p>I don't know if this is related: I have a lot of geometries, imported from other CAD programs, with plate-mode bots. The tessellation of these objects is however not implemented at all. See rt_bot_tess() in src/librt/primitives/bot/bot.c. The function returns -1 for RT_BOT_PLATE.</p>
+
+
+
+<a name="402223471"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/402223471" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#402223471">(Nov 15 2023 at 12:23)</a>:</h4>
+<p>It's separate from the booltree_evaluate question, but I'm actually working on the plate mode issue right now.  Conversion of plate mode bots to explicit volumes is actually a very difficult problem in general.  I'm trying what amounts to a brute force solution, but it's still a work in progress.</p>
+
+
+
+<a name="417519387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417519387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417519387">(Jan 23 2024 at 20:04)</a>:</h4>
+<p><span class="user-mention" data-user-id="484201">@Christopher</span>   Here's the ged_tessellate line I'm using:</p>
+<p>bin/ged_tessellate --tol-abs 0.00000000000000000 --tol-rel 0.01000000000000000 --tol-norm 0.00000000000000000 --nmg --max-time 15 -O aet.g twisttrc.s</p>
+
+
+
+<a name="417525675"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417525675" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417525675">(Jan 23 2024 at 20:48)</a>:</h4>
+<p>what's with all the trailing zeros...</p>
+
+
+
+<a name="417526010"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417526010" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417526010">(Jan 23 2024 at 20:50)</a>:</h4>
+<p>copy / paste from a "%0.17f" sprintf</p>
+
+
+
+<a name="417526415"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417526415" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417526415">(Jan 23 2024 at 20:53)</a>:</h4>
+<p>and that name could use some work, seems misleading to me as it's not a ged_*() function nor does it correspond with a ged command.  If it's strictly a subprocess helper, it should probably not be installed in bin (libexec material).</p>
+<p>I presume it was added to more gracefully handle facetizations methods that otherwise crash?</p>
+
+
+
+<a name="417526894"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417526894" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417526894">(Jan 23 2024 at 20:56)</a>:</h4>
+<p>Correct.  The command line is generated from the parent facetize command, so those numbers are simply printings of whatever the current tolerance settings are in the current MGED session.  It's not normally meant to be edited by humans - it's a library-to-subprocess command line.</p>
+
+
+
+<a name="417527234"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417527234" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417527234">(Jan 23 2024 at 20:58)</a>:</h4>
+<p>It's a subprocess helper.  I haven't tried putting it in another location to run yet, so we'll have to see if that can work (particularly on Windows).  The naming convention isn't set in stone - I just had to call it something, and the functionality is a) specific to libged and b) intended for internal use in the library's facetize command.</p>
+
+
+
+<a name="417527638"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417527638" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417527638">(Jan 23 2024 at 21:01)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="484201">Christopher</span> <a href="#narrow/stream/104062-general/topic/facetize/near/417526010">said</a>:</p>
+<blockquote>
+<p>copy / paste from a "%0.17f" sprintf</p>
+</blockquote>
+<p>I think the desired specifier was maybe "%.17g" ?</p>
+
+
+
+<a name="417527705"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417527705" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417527705">(Jan 23 2024 at 21:02)</a>:</h4>
+<p>I suppose you could argue for _ged_facetize_tessellate if we wanted to denote it as an internal tool for a specific libged command, but I haven't given that aspect much thought yet - I needed to prove the whole idea could work at all technically before the naming conventions became important.  I think (knock on wood) it's looking like it can work, so it may be time now to think about that.</p>
+
+
+
+<a name="417527910"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417527910" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417527910">(Jan 23 2024 at 21:03)</a>:</h4>
+<p>then yeah, sounds definitely libexec material.  that's defined specifically for binaries/plugins that one might run from library or application code, not by users.</p>
+
+
+
+<a name="417527919"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417527919" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417527919">(Jan 23 2024 at 21:03)</a>:</h4>
+<p>If we wanted to have a shorter string when printf can do something intelligent that'd be correct, but my first concern in that situation was recreating the exact floating point number stored in the parent libged tolerance struct in the child program.  My understanding was the reliable way to do that was to put enough digits into the string to ensure per the standards that it would get read out and in the same way.</p>
+
+
+
+<a name="417528224"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417528224" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417528224">(Jan 23 2024 at 21:05)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/facetize/near/417527705">said</a>:</p>
+<blockquote>
+<p>I suppose you could argue for _ged_facetize_tessellate if we wanted to denote it as an internal tool for a specific libged command, but I haven't given that aspect much thought yet - I needed to prove the whole idea could work at all technically before the naming conventions became important.  I think (knock on wood) it's looking like it can work, so it may be time now to think about that.</p>
+</blockquote>
+<p>If you're at &gt; 99% conversions.. that's not exactly in the realm of "proving the whole idea could work".  That's well past proven.</p>
+
+
+
+<a name="417528459"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417528459" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417528459">(Jan 23 2024 at 21:07)</a>:</h4>
+<p>I think everything in libexec right now is a .so/.dll file - I don't think we've figured out yet how to get an exe in there working portably.</p>
+
+
+
+<a name="417528510"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417528510" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417528510">(Jan 23 2024 at 21:07)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/facetize/near/417527919">said</a>:</p>
+<blockquote>
+<p>If we wanted to have a shorter string when printf can do something intelligent that'd be correct, but my first concern in that situation was recreating the exact floating point number stored in the parent libged tolerance struct in the child program.  My understanding was the reliable way to do that was to put enough digits into the string to ensure per the standards that it would get read out and in the same way.</p>
+</blockquote>
+<p>I got that intent, but that doesn't explain the trailing zeros.. :) </p>
+<p>there's no parsing difference I'm aware of between 0.0 and 0.00000000 in any fathomable situation :)</p>
+
+
+
+<a name="417528581"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417528581" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417528581">(Jan 23 2024 at 21:07)</a>:</h4>
+<p>Well, I'm at &gt;99% on one platform - ubuntu linux.  With the subprocess tricks, I figured I needed to show it working on at least Linux, Windows and Mac before it could be considered a serious candidate</p>
+
+
+
+<a name="417528702"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417528702" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417528702">(Jan 23 2024 at 21:08)</a>:</h4>
+<p>%g trims trailing zeros, which is why I suggested that -- and I think still applies the same precision requested</p>
+
+
+
+<a name="417528851"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417528851" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417528851">(Jan 23 2024 at 21:09)</a>:</h4>
+<p>Does reading in the string "0" into memory always result in an exact floating point zero?  I'm not sure what the exact rules are for that.  My only recollection on that topic from back in the day was there's a whole bunch of ways to get it wrong, and since those command lines aren't for humans anyway I wasn't too worried about it.  If there's no danger we can certainly go with %g.</p>
+
+
+
+<a name="417529845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417529845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417529845">(Jan 23 2024 at 21:15)</a>:</h4>
+<p>The trailing zeros are fine, just a curiosity.  I don't think there's any situation where %.17g won't parse back exactly what you wrote.  It will resort to scientific notation if the number is really big or really small, but that will still parse back in to the precision that was printed.  Not a big deal either way.</p>
+
+
+
+<a name="417530296"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417530296" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417530296">(Jan 23 2024 at 21:18)</a>:</h4>
+<p>Reading in a zero will always be exact floating point zero (i.e., all bits zero) as far as I know and have ever seen.  That absolutely holds for IEEE 754, but also non 754's predating.</p>
+
+
+
+<a name="417530534"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417530534" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417530534">(Jan 23 2024 at 21:20)</a>:</h4>
+<p>OK.  I think I got the %0.17f bit from back when I was exploring the what and why of std::max_digits10:  <a href="https://stackoverflow.com/a/22458961/2037687">https://stackoverflow.com/a/22458961/2037687</a></p>
+
+
+
+<a name="417531300"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417531300" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417531300">(Jan 23 2024 at 21:24)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I'm down with trying to figure out how to get executables into libexec for these purposes, but I do know I tried to figure out something similar on Windows at least once before, many years back, and struck out.  I might have better luck now, but it's basically the "how do you keep a .exe in one place and .dll files in another" problem, and that's one I still don't know the "right" answer for yet.</p>
+
+
+
+<a name="417532151"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417532151" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417532151">(Jan 23 2024 at 21:30)</a>:</h4>
+<p>Guess we would start here:  <a href="https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order">https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order</a></p>
+
+
+
+<a name="417532244"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417532244" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417532244">(Jan 23 2024 at 21:30)</a>:</h4>
+<p>Nothing wrong with the %0.17f, I'd leave it if it's working.  Anything else is potential cleanup later but would probably involve a printing helper function, so not as neat code-wise.</p>
+
+
+
+<a name="417532439"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417532439" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417532439">(Jan 23 2024 at 21:32)</a>:</h4>
+<p>.17g is going to ensure 17 significant digits, so that'll work for tolerances, but not if someone has tol &gt; 1 -- though in that situation printing 17 after isn't accurate either as we traded mantissa with exponent to go bigger.</p>
+
+
+
+<a name="417532950"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417532950" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417532950">(Jan 23 2024 at 21:35)</a>:</h4>
+<p>Hmm - I wonder if this might be our ticket to making lib work on Windows:  <a href="https://learn.microsoft.com/en-us/windows/win32/api/Winbase/nf-winbase-setdlldirectorya">https://learn.microsoft.com/en-us/windows/win32/api/Winbase/nf-winbase-setdlldirectorya</a></p>
+
+
+
+<a name="417533286"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533286" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533286">(Jan 23 2024 at 21:37)</a>:</h4>
+<p>We'd need to do that across the board for all of our executables though.  Wonder if there's a clean way to do that without 400 new function calls in the main()s.  I suppose we could have bu_setprogname do it under the hood since we do need to call that one everywhere already, but that feels like a violation of the API design since load path altering isn't its job.</p>
+
+
+
+<a name="417533426"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533426" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533426">(Jan 23 2024 at 21:38)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/facetize/near/417531300">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> I'm down with trying to figure out how to get executables into libexec for these purposes, but I do know I tried to figure out something similar on Windows at least once before, many years back, and struck out.  I might have better luck now, but it's basically the "how do you keep a .exe in one place and .dll files in another" problem, and that's one I still don't know the "right" answer for yet.</p>
+</blockquote>
+<p>My general understand is that for windows, we'd just put it in the bin dir.  bin=libexec.  The other platforms do the right thing and keep them separate/hidden from prying user eyes.</p>
+
+
+
+<a name="417533433"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533433" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533433">(Jan 23 2024 at 21:38)</a>:</h4>
+<p>Maybe make a bu_init or something that takes the progname as an argument, but has a wider scope than just setting the program name?</p>
+
+
+
+<a name="417533501"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533501" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533501">(Jan 23 2024 at 21:39)</a>:</h4>
+<p>same as we do with bin=lib</p>
+
+
+
+<a name="417533560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533560">(Jan 23 2024 at 21:39)</a>:</h4>
+<p>Ah.  So you don't want to tangle with trying to make Windows act the same as the other platforms?</p>
+
+
+
+<a name="417533639"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533639" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533639">(Jan 23 2024 at 21:40)</a>:</h4>
+<p>Could be wrong, but I think SetDLLDirectoryA() is for the dynamic loader.</p>
+
+
+
+<a name="417533678"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533678" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533678">(Jan 23 2024 at 21:40)</a>:</h4>
+<p>that'd be a way to put all the ged/dm libs into a subdir and have them loaded proper</p>
+
+
+
+<a name="417533747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533747">(Jan 23 2024 at 21:40)</a>:</h4>
+<p>So it wouldn't help with libbu et. al.?  That's a bit surprising...</p>
+
+
+
+<a name="417533761"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533761" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533761">(Jan 23 2024 at 21:40)</a>:</h4>
+<p>I don't think so</p>
+
+
+
+<a name="417533787"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417533787" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417533787">(Jan 23 2024 at 21:41)</a>:</h4>
+<p>their symbols are resolved at load time, before code is run</p>
+
+
+
+<a name="417534136"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534136" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534136">(Jan 23 2024 at 21:43)</a>:</h4>
+<p>now I don't know if the search paths are transitive, though.  You might be on to something if they are.</p>
+
+
+
+<a name="417534235"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534235" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534235">(Jan 23 2024 at 21:44)</a>:</h4>
+<p>Hmm.  Do you happen to know of any documentation that talks about the distinction between the two systems?  All I can find is the "Dynamic-link library search" page - I'm not having any luck with "load time search"</p>
+
+
+
+<a name="417534397"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534397" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534397">(Jan 23 2024 at 21:45)</a>:</h4>
+<p>that is, ged loads, libbu/libged/etc loads, then modify path to include lib/libexec dirs -- then invoke tessellate program.  when it loads, did it inherit the search paths of the parent or does it start fresh.  if it's the prior, that would probably work.</p>
+
+
+
+<a name="417534547"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534547" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534547">(Jan 23 2024 at 21:46)</a>:</h4>
+<p>I think I saw something about the child inheriting the parents.  I guess some testing is in order here.  (Ick, windows experiments.  Time to get the hip waders...)</p>
+
+
+
+<a name="417534586"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534586" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534586">(Jan 23 2024 at 21:46)</a>:</h4>
+<p>only issue would be you couldn't directly run it on the command line without modifying PATH, as the libs would still be in lib/bin at <em>tessellate's</em> load time.</p>
+
+
+
+<a name="417534660"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534660" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534660">(Jan 23 2024 at 21:47)</a>:</h4>
+<p>So modifying PATH is the only way to handle things at load time?  That's messed up..</p>
+
+
+
+<a name="417534703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534703">(Jan 23 2024 at 21:47)</a>:</h4>
+<p>same reason it wouldn't work to put all the libs into 'lib'.  ged still needs to load them before code is called.</p>
+
+
+
+<a name="417534781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534781">(Jan 23 2024 at 21:48)</a>:</h4>
+<p>on windows PATH == PATH+LD_LIBRARY_PATH</p>
+
+
+
+<a name="417534823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534823">(Jan 23 2024 at 21:48)</a>:</h4>
+<p>And there's no equivalent to rpath?</p>
+
+
+
+<a name="417534827"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534827" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534827">(Jan 23 2024 at 21:48)</a>:</h4>
+<p>and there's no rpath on the executables iirc</p>
+
+
+
+<a name="417534921"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417534921" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417534921">(Jan 23 2024 at 21:49)</a>:</h4>
+<p><span aria-label="cry" class="emoji emoji-1f622" role="img" title="cry">:cry:</span></p>
+
+
+
+<a name="417535139"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417535139" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417535139">(Jan 23 2024 at 21:50)</a>:</h4>
+<p>that's an elf / mach-o binary thing</p>
+
+
+
+<a name="417535159"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417535159" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417535159">(Jan 23 2024 at 21:51)</a>:</h4>
+<p>/me stubbornly sets out to prove to himself that SetDllDirectory won't work...</p>
+
+
+
+<a name="417535166"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417535166" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417535166">(Jan 23 2024 at 21:51)</a>:</h4>
+<p>now we could get there with "one simple trick"</p>
+
+
+
+<a name="417535324"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417535324" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417535324">(Jan 23 2024 at 21:52)</a>:</h4>
+<p>if we basically make ged/mged's main be compiled into a library, you could have the "app" just add/set the dll directories, then invoke that main in the compiled lib, and all libs could then live elsewhere.</p>
+
+
+
+<a name="417535577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417535577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417535577">(Jan 23 2024 at 21:54)</a>:</h4>
+<p>not pretty -- I'd still say just shove the plugins into bin on windows, as that is the most common practice.  users are told what to run and/or we install the icons/menus we want them to run.  they don't pay attention to the filesystem the same as on linux/mac/bsd</p>
+
+
+
+<a name="417535799"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417535799" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417535799">(Jan 23 2024 at 21:55)</a>:</h4>
+<p>OK.  So that circles us back to the name of the subprocess program then, since it'll be stuck in bin on Windows.  Thoughts?</p>
+
+
+
+<a name="417536157"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417536157" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417536157">(Jan 23 2024 at 21:58)</a>:</h4>
+<p>If we're going to eventually turn a bunch of ged command functionality into subprocesses so they're interruptible like this, than we definitely do need some sort of convention.  I know I need to consolidate a number of ged commands into fewer plugins, but even so there'll be a number of them.</p>
+
+
+
+<a name="417536506"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417536506" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417536506">(Jan 23 2024 at 22:00)</a>:</h4>
+<p>mixed feelings/ideas.  tessellate is typically implies regular tiling and the result of facetization is anything but that, except for initial primitives.</p>
+
+
+
+<a name="417536580"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417536580" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417536580">(Jan 23 2024 at 22:00)</a>:</h4>
+<p>we could but don't actually do tessellation on the comb level</p>
+
+
+
+<a name="417536642"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417536642" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417536642">(Jan 23 2024 at 22:01)</a>:</h4>
+<p>OK.  Not strongly attached to any of my current names, so happy to adjust to something more appropriate</p>
+
+
+
+<a name="417536726"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417536726" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417536726">(Jan 23 2024 at 22:01)</a>:</h4>
+<p>_ged_facetize_triangulate ?</p>
+
+
+
+<a name="417536980"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417536980" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417536980">(Jan 23 2024 at 22:03)</a>:</h4>
+<p>for interruptibility, I'd hope we can find a general solution instead of per-command, so any ged_whatever() invocation is wrapped by a call through to a binary that invokes ged_whatever()</p>
+
+
+
+<a name="417537191"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537191" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537191">(Jan 23 2024 at 22:04)</a>:</h4>
+<p>Sure - I was figuring there'd be one (ged_exec?) level solution to that part.  The heavy lift in my mind is setting up the subprocess programs themselves and getting the inter-process communication working.</p>
+
+
+
+<a name="417537305"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537305" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537305">(Jan 23 2024 at 22:05)</a>:</h4>
+<p>but yeah, I think iff there's going to be a command-line executable, we make them align as closely as possible, like ged_facetize_triangulate if triangulate is the subcommand to facetize.</p>
+
+
+
+<a name="417537358"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537358" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537358">(Jan 23 2024 at 22:06)</a>:</h4>
+<p>I mean not ending up with hundred's of ged_whatever binaries</p>
+
+
+
+<a name="417537496"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537496" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537496">(Jan 23 2024 at 22:06)</a>:</h4>
+<p>just one like ged_exec, which is invoked as a subprocess that invokes similarly</p>
+
+
+
+<a name="417537587"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537587" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537587">(Jan 23 2024 at 22:07)</a>:</h4>
+<p>Hmm.  I wonder if this might be viable to let us use SetDllDirectory:  <a href="https://stackoverflow.com/a/2003775/2037687">https://stackoverflow.com/a/2003775/2037687</a></p>
+
+
+
+<a name="417537644"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537644" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537644">(Jan 23 2024 at 22:07)</a>:</h4>
+<p><a href="https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170">https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170</a></p>
+
+
+
+<a name="417537813"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417537813" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417537813">(Jan 23 2024 at 22:08)</a>:</h4>
+<p>So you mean have ged_facetize_triangulate be a function called by the ged_exec subprocess main, maybe based on the first arg or something like bu_test?</p>
+
+
+
+<a name="417538380"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417538380" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417538380">(Jan 23 2024 at 22:12)</a>:</h4>
+<p>That's interesting (delayload).  I'd read about that years back.  That might be a way to make it work, but would require a crapton of testing ... especially for things like c/c++ libs with static initialization or complex lib structures like step-g's libs that need things in a particular order.  </p>
+<p>delayed loading would also means possible runtime hiccups as it searches for a particular lib, if that operation is expensive (e.g., running remote, on server, or on an nfs volume, etc)</p>
+
+
+
+<a name="417538492"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417538492" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417538492">(Jan 23 2024 at 22:13)</a>:</h4>
+<p>&lt;nod&gt;  Probably not worth it, in the end, but it's a temptation to try.  Maybe something to have a student try out as an experiment.</p>
+
+
+
+<a name="417538567"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417538567" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417538567">(Jan 23 2024 at 22:14)</a>:</h4>
+<p>they basically create a bunch of function pointers that are initialized to a function that calls LoadLibrary()+GetProcAddress(), so once you actually call it at runtime, it loads and uses it from then on.</p>
+
+
+
+<a name="417538699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417538699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417538699">(Jan 23 2024 at 22:15)</a>:</h4>
+<p>that's done for every symbol, so startup cost will go up by some measure if there are a lot of lookups.</p>
+
+
+
+<a name="417539604"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/417539604" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#417539604">(Jan 23 2024 at 22:22)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/facetize/near/417537813">said</a>:</p>
+<blockquote>
+<p>So you mean have ged_facetize_triangulate be a function called by the ged_exec subprocess main, maybe based on the first arg or something like bu_test?</p>
+</blockquote>
+<p>Maybe?  More like </p>
+<p>mged[main()] -&gt; ged_exec() -&gt; subprocess-exec("ged_exec search . -type region") ;<br>
+ged_exec[main()] -&gt; dlload("ged_search") -&gt; ged_search() ... </p>
+<p>That would be adequate for protecting / interrupting facetize and we'd undo or leave the subprocess stuff it's doing, which just be a second exec if we left it:</p>
+<p>mged[main()] -&gt; ged_exec() -&gt; subprocess-exec("ged_exec facetize triangulate ...") ;<br>
+ged_exec[main()] -&gt; dlload("ged_facetize") -&gt; ged_search() -&gt; subprocess-exec("ged_facetize_triangulate ...") ;</p>
+
+
+
+<a name="418915651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/418915651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#418915651">(Jan 30 2024 at 20:34)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> looks like geogram has three different tetrahedral mesh generators, tetgen was only one of them.</p>
+
+
+
+<a name="419135844"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/419135844" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#419135844">(Jan 31 2024 at 22:36)</a>:</h4>
+<p>This paper reminds me of your DRI... <br>
+<a href="/user_uploads/1549/weLNKJwUiurt_6ZBCUqEwvJ-/wu_sgp18_csg.pdf">wu_sgp18_csg.pdf</a></p>
+
+
+
+<a name="420945799"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/420945799" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#420945799">(Feb 12 2024 at 03:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  General design question for you.  Right now, in libged, ged_exec is getting the names of viable commands to run because we're dynamically loading the shared object plugins at runtime.  If we wanted to have a mixed solution where ged_exec could know about both the dynamic plugins and a set of "pre-baked" commands just compiled directly into libged, is there a way to handle the "pre-baked" listing of the functions that are part of libged?</p>
+
+
+
+<a name="420946497"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/420946497" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#420946497">(Feb 12 2024 at 03:26)</a>:</h4>
+<p>The obvious answer is to generate and build a compile-time generated  list from the source files, sort of like what the env command does for environment variables, but I was wondering if there is a more elegant technical way to have libged's library initialization do some sort of load-time registration of built-in libged library functions that have some sort of indicator they are ged commands.</p>
+
+
+
+<a name="420958419"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/420958419" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#420958419">(Feb 12 2024 at 06:10)</a>:</h4>
+<blockquote>
+<p>...If we wanted to have a mixed solution where ged_exec could know about both the dynamic plugins and a set of "pre-baked" commands just compiled directly into libged,... </p>
+</blockquote>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  Background context?  Why would you want a mixed solution?  Sounds like a path of questioning that can only result in additional complexity.  Depending on the issue, there might be other things to consider changing before doing that route.  That'd seem likely at least, as the primary reason shells have built-ins is for performance.  We've hand-waived performance thus far in the libged call stack.</p>
+<blockquote>
+<p>is there a way to handle the "pre-baked" listing of the functions that are part of libged?</p>
+</blockquote>
+<p>Several ways come to mind...</p>
+
+
+
+<a name="420958911"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/420958911" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#420958911">(Feb 12 2024 at 06:15)</a>:</h4>
+<p>If you recall, we talked about having a core set years back.  It was an optimization (hence why we didn't) to avoid loading all or nothing, just preload a dozen or so used for read-only inspecting and let the rest auto-load.  To do it, the proper way would've been a registration table in libged.</p>
+
+
+
+<a name="420959217"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/420959217" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#420959217">(Feb 12 2024 at 06:18)</a>:</h4>
+<p>Note it would've also likely required some documented criteria so as to avoid ad hoc and/or arbitrary cop-outs and promotions of convenience.  Otherwise, it easily all becomes glorified unencapsulated globals.  We also talked about potentially needing plugin versioning and/or making sure whatever we came up with would be sane in an ecosystem of 3rd party plugins also.</p>
+
+
+
+<a name="421526072"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/421526072" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#421526072">(Feb 14 2024 at 20:22)</a>:</h4>
+<p>Potentially useful.... <a href="https://github.com/Janos95/mantis">https://github.com/Janos95/mantis</a></p>
+
+
+
+<a name="421576852"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/421576852" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#421576852">(Feb 15 2024 at 04:09)</a>:</h4>
+<p>Sweet - between the geogram hole repair and plate-&gt;vol BoT conversion, I was able to generate a completely plate mode free, fully manifold Generic Twin (triangle mottling is due to zfighting on very thin volumentric bots)<br>
+<a href="/user_uploads/1549/Inr0CJi_KUBLQrKOkZQSjrhP/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Inr0CJi_KUBLQrKOkZQSjrhP/image.png" title="image.png"><img src="/user_uploads/1549/Inr0CJi_KUBLQrKOkZQSjrhP/image.png"></a></div>
+
+
+
+<a name="423914827"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/423914827" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#423914827">(Feb 28 2024 at 22:34)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> just fyi, I was test building facetize branch on mac and hit a few snags (hence the commits).  I fixed a couple of them, but left one -- not finding glm headers when compiling facetize.cpp </p>
+<p>I don't see them specified in CMakeLists.txt so looks legit, but thought you'd like to know in case you know the quick fix.</p>
+
+
+
+<a name="423915363"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/423915363" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#423915363">(Feb 28 2024 at 22:39)</a>:</h4>
+<p>I've been building using bext for geogram so a couple of the newer bits probably won't work with the src/other manifold right now</p>
+
+
+
+<a name="423915446"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/423915446" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#423915446">(Feb 28 2024 at 22:40)</a>:</h4>
+<p>I added install logic for the glm headers there</p>
+
+
+
+<a name="424984053"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/424984053" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#424984053">(Mar 06 2024 at 00:37)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>~/brlcad/build (facetize) $ ../sh/conversion.sh --bot MAXTIME=5000 share/db/*.g share/db/*/*.g
+
+[snip]
+
+... Done.
+
+Summary
+=======
+Converted: 100.0%  ( 16230 of 16230 objects, 58 files )
+
+   Passed: 16230   ( 16230 BoT )
+   Failed:   0   ( 0 BoT )
+  Timeout:   0   ( 0 BoT )
+
+ BoT rate: 100.0%  ( 16230 of 16230 )
+
+Prim rate: 100.0%  ( 9928 of 9928 )
+ Reg rate: 100.0%  ( 4023 of 4023 )
+
+  Elapsed: 39803.0 seconds
+  Average: 2.5 seconds per object
+
+Finished running ../sh/conversion.sh on Tue Mar  5 06:27:15 PM EST 2024
+Output was saved to conversion-1542905-run.log from /home/user/brlcad/build
+Conversion testing complete.
+</code></pre></div>
+
+
+
+<a name="424984160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/424984160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#424984160">(Mar 06 2024 at 00:38)</a>:</h4>
+<p>Full log:  <a href="https://brlcad.org/~starseeker/first_100percent_facetize_conversion-1542905-run.log">https://brlcad.org/~starseeker/first_100percent_facetize_conversion-1542905-run.log</a></p>
+
+
+
+<a name="425134776"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425134776" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425134776">(Mar 06 2024 at 16:57)</a>:</h4>
+<p>Two observations.  1) Holy crap that's truly awesome, amazing, almost unbelievable, and 2) Holy crap 11 hours...</p>
+
+
+
+<a name="425135286"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425135286" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425135286">(Mar 06 2024 at 16:59)</a>:</h4>
+<p>Yes, agreed it's slow.  The culprits  are first and foremost the Generic_Twin plate mode evaluations - there's about 500 of them, some of them quite large and slow, and <a href="http://conversion.sh">conversion.sh</a> does them over and over processing all the various levels of the hierarchy.  The fallback NURBS evaluations with SPSR are also nothing to sneeze at.</p>
+
+
+
+<a name="425136163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425136163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425136163">(Mar 06 2024 at 17:04)</a>:</h4>
+<p>What I'll do later today is pre-convert the Generic_Twin plate mode bots as a pre-processing step to take that part out of the timing.  With the exception of parallel processing the lower level boolean problems indivdiually, I'm not really sure how to speed up the plate mode conversion - it's a nasty problem.</p>
+
+
+
+<a name="425148175"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425148175" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425148175">(Mar 06 2024 at 18:07)</a>:</h4>
+<p>I mean, unless they're 90% of the time, it's probably not going to make a huge difference.</p>
+
+
+
+<a name="425149682"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425149682" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425149682">(Mar 06 2024 at 18:16)</a>:</h4>
+<p>Not much difference between 4 and 12 hours expectation-wise or practical use-wise.  That's conveniently about how many minutes per conversion it took and both are over "coffee break" time.</p>
+<p>Order of magnitude would be needed, and that is something SMP would offer if it's not currently parallel.  Full conversion in an hour, any given model in about a minute.  That would change the UX scale.</p>
+<p>Not a priority in the least, just navel-gazing observations..</p>
+
+
+
+<a name="425170261"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425170261" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425170261">(Mar 06 2024 at 20:14)</a>:</h4>
+<p>FWIW pre-converting the plate mode bots in Generic_Twin and running conversion.h on all the top level objects only results in:</p>
+<div class="codehilite" data-code-language="summary"><pre><span></span><code>=======
+Converted: 100.0%  ( 197 of 197 objects, 58 files )
+
+   Passed: 197   ( 197 BoT )
+   Failed:   0   ( 0 BoT )
+  Timeout:   0   ( 0 BoT )
+
+ BoT rate: 100.0%  ( 197 of 197 )
+
+Prim rate: 100.0%  ( 59 of 59 )
+ Reg rate: 100.0%  ( 42 of 42 )
+
+  Elapsed: 4511.0 seconds
+  Average: 22.9 seconds per object
+</code></pre></div>
+
+
+
+<a name="425171247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/425171247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#425171247">(Mar 06 2024 at 20:20)</a>:</h4>
+<p>Of that, 2622s was the NIST and brep_pinewood fallback conversions.  The Generic_Twin all boolean was still rough, at 840.3s, but quite a bit less than the 3911.3s it took without pre-processing.  It'd be interesting to see if Manifold's TBB support could knock the boolean time down on Generic_Twin.</p>
+
+
+
+<a name="437654690"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/facetize/near/437654690" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/facetize.html#437654690">(May 08 2024 at 13:47)</a>:</h4>
+<p>There we go - fixed it so <a href="http://conversion.sh">conversion.sh</a> didn't have to exclude the empty trees.</p>
+<div class="codehilite"><pre><span></span><code>~/brlcad/build (facetize) $ ../sh/conversion.sh --bot MAXTIME=5000 share/db/*.g share/db/*/*.g
+
+[snip]
+
+... Done.
+
+Summary
+=======
+Converted: 100.0%  ( 16278 of 16278 objects, 58 files )
+
+   Passed: 16278   ( 16278 BoT )
+   Failed:   0   ( 0 BoT )
+  Timeout:   0   ( 0 BoT )
+
+ BoT rate: 100.0%  ( 16278 of 16278 )
+
+Prim rate: 100.0%  ( 9930 of 9930 )
+ Reg rate: 100.0%  ( 4061 of 4061 )
+
+  Elapsed: 40258.0 seconds
+  Average: 2.5 seconds per object
+</code></pre></div>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

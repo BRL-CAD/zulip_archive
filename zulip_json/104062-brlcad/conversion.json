@@ -1,0 +1,32 @@
+[
+    {
+        "content": "<p>Interesting, some preliminary results coming in from testing main vs 7.36.0 on Mac.</p>\n<p>Overall, main is definitely succeeding more.  There are some that timeout after 5min and some that throw mtx errors and \"SHOULD NOT HAPPEN\" errors for both old and new at a seemingly similar rate.</p>\n<p>Looks like conversion/facetize is also taking about 2x longer with the new approach.  Most simple objects that succeed seem to do so in about 3s whereas they're 1.5s on average in 7.36.0.  Running the conversion across lots of files, that of course adds up but then is partially offset by slightly more old that hit the 5min timeout limit (I think, still have to verity).</p>",
+        "id": 451646570,
+        "sender_full_name": "Sean",
+        "timestamp": 1721084790
+    },
+    {
+        "content": "<p>For the fully successful run, I had <code>MAXTIME=5000</code> as my upper limit - 300s was definitely much too short, so the timeouts are no surprise.</p>",
+        "id": 451734349,
+        "sender_full_name": "starseeker",
+        "timestamp": 1721127662
+    },
+    {
+        "content": "<p>I noticed the simple cases being slower - I think, at least in my case, what appeared to be happening was the overhead of starting up the subprocess to process a single primitive was adding the extra time (which would explain the 1.5s vs 3s difference - two process startup/teardowns vs 1  for 7.36.0 - the actual primitive facetize in such cases should be virtually instantaneous.)</p>",
+        "id": 451734662,
+        "sender_full_name": "starseeker",
+        "timestamp": 1721127770
+    },
+    {
+        "content": "<p>For the SHOULD NOT HAPPEN errors, one possible approach would be to get the newer mmesh version of that logic working:  <a href=\"https://github.com/BRL-CAD/mmesh\">https://github.com/BRL-CAD/mmesh</a></p>",
+        "id": 451734978,
+        "sender_full_name": "starseeker",
+        "timestamp": 1721127883
+    },
+    {
+        "content": "<p>When I took a quick look it's not quite a 1-1 drop in replacement for the gct calls, so I could use a little help getting it figured out and set up.</p>",
+        "id": 451735092,
+        "sender_full_name": "starseeker",
+        "timestamp": 1721127931
+    }
+]

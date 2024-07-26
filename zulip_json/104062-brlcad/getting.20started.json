@@ -1,0 +1,476 @@
+[
+    {
+        "content": "<blockquote>\n<p>As you told i have started \"playing\" with BRL-CAD and its nice,I am doing on MGED.<br>\nI have also downloaded the BRL-CAD archer.<br>\nActually i am a little confused about about relation of MGED and Archer, can we use same command on archer.<br>\nAnd what coding work is there? on Archer or MGED? I have seen some project ideas here: <a href=\"http://brlcad.org/wiki/Google_Summer_of_Code/Project_Ideas\" target=\"_blank\" title=\"http://brlcad.org/wiki/Google_Summer_of_Code/Project_Ideas\">http://brlcad.org/wiki/Google_Summer_of_Code/Project_Ideas</a><br>\nAnd i have a good control over c/c++ and opengl so where to go?</p>\n</blockquote>\n<p>Archer was designed as \"next generation\" mged application. Both are graphical user interfaces to BRL-CAD, and both are using the same core libraries as back end, including the TCL command interpreter.</p>",
+        "id": 148190760,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1542912972
+    },
+    {
+        "content": "<p>OK, I've an OpenGL issue for you: <br>\nConsider the annotation primitive in BRL-CAD: <a href=\"https://brlcad.org/wiki/Annot\" target=\"_blank\" title=\"https://brlcad.org/wiki/Annot\">https://brlcad.org/wiki/Annot</a><br>\nYou can create an example with the following commands:</p>\n<div class=\"codehilite\"><pre><span></span><span class=\"nv\">units</span> mm\n<span class=\"nv\">in</span> sphere.s sph <span class=\"mi\">0</span> <span class=\"mi\">0</span> <span class=\"mi\">0</span> <span class=\"mi\">1000</span>\n<span class=\"nv\">in</span> annotation.s annot <span class=\"mi\">0</span> <span class=\"mi\">0</span> <span class=\"mi\">0</span> Sphere <span class=\"mi\">5</span> <span class=\"mi\">5</span> <span class=\"mi\">1</span> <span class=\"mi\">3</span>\n<span class=\"nv\">g</span> all.g sphere.s annotation.s\n</pre></div>\n\n\n<p>Start mged with the X-Window backend: <code>mged -c</code> and then <code>X</code>. This shows how it should look like: The line of the annotation is always 5mm on the screen long. Zoom in and out to see the effect.<br>\nNow, start mged with the OpenGL backend: <code>mged -c</code> and then <code>ogl</code>. Here, the line is always 5mm in the model coordinate system long, which isn't correct.</p>\n<p>The OpenGL source code for this can be found in \"src/libdm/dm-ogl.c. Look for BN_VLIST_DISPLAY_MAT there, this shall toggle the used coordinate system to display scale.</p>",
+        "id": 148191435,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1542914213
+    },
+    {
+        "content": "<p>thank you .. Ok i m looking into it.<br>\nAnd yah next time i will text on public stream</p>",
+        "id": 148217619,
+        "sender_full_name": "Kartik kumar",
+        "timestamp": 1542964876
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"138776\">@Kartik kumar</span> </p>\n<blockquote>\n<p>Hello,<br>\nI was going through somes deuces work</p>\n<p><a href=\"http://brlcad.org/wiki/Deuces#Implement_a_primitive_centroid_function\" target=\"_blank\" title=\"http://brlcad.org/wiki/Deuces#Implement_a_primitive_centroid_function\">http://brlcad.org/wiki/Deuces#Implement_a_primitive_centroid_function</a></p>\n<p>Is this code complete?  i don't see any function in this?</p>\n</blockquote>\n<p>As far as I know, not all primitives have a centroid function yet. You could do a <code>grep -R centroid *</code> in the src/librt/primitives directory to find out which primitives have already a rt_~_centroid() function and which do not.</p>",
+        "id": 151185159,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1544290333
+    },
+    {
+        "content": "<blockquote>\n<p>Also i see some primitives to implement here<br>\n<a href=\"http://brlcad.org/~sean/ideas.html\" target=\"_blank\" title=\"http://brlcad.org/~sean/ideas.html\">http://brlcad.org/~sean/ideas.html</a><br>\ndoes it only require c/c++ or opencl also?</p>\n</blockquote>\n<p>For the moment they require C only.<br>\nBTW, the implementation of some of them was already started but not finished.</p>",
+        "id": 151185321,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1544290596
+    },
+    {
+        "content": "<p>I am not getting the code of primitives like arb etc. what to do?  I want to implement some primitives given here <a href=\"http://brlcad.org/~sean/ideas.html\" target=\"_blank\" title=\"http://brlcad.org/~sean/ideas.html\">http://brlcad.org/~sean/ideas.html</a> . Does it require to understand the whole code of primitive?</p>",
+        "id": 151223659,
+        "sender_full_name": "Kartik kumar",
+        "timestamp": 1544365233
+    },
+    {
+        "content": "<p>Maybe not the whole code of all primitives, but which functions the primitives have and why.</p>",
+        "id": 151228524,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1544375230
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"198962\">@Mayank Madan</span> The official BRL-CAD bug tracker is <a href=\"https://sourceforge.net/p/brlcad/bugs/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/bugs/\">https://sourceforge.net/p/brlcad/bugs/</a><br>\nRegarding mged: On which operating system do you run the program?</p>",
+        "id": 157088131,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1548749277
+    },
+    {
+        "content": "<p>I'm on Ubuntu 18.10</p>",
+        "id": 157094085,
+        "sender_full_name": "Mayank Madan",
+        "timestamp": 1548756367
+    },
+    {
+        "content": "<p>Did the latest commit to the repository break the build? Because I cant build even after a fresh checkout</p>",
+        "id": 157170292,
+        "sender_full_name": "Mayank Madan",
+        "timestamp": 1548836598
+    },
+    {
+        "content": "<p>It says it has no rule to make target lemper.c</p>",
+        "id": 157170388,
+        "sender_full_name": "Mayank Madan",
+        "timestamp": 1548836709
+    },
+    {
+        "content": "<p>I'm really sorry but it seems that its building fine. Im not sure why it was happening because i did not mess with CMakeLists or Makefile(s) that were generated(the svn diff command didnt output anything so I'm pretty sure i didnt mess with anything). I decided to just start over by deleting the local copy of the repository and starting fresh and now it works. Sorry for the spam</p>",
+        "id": 157176804,
+        "sender_full_name": "Mayank Madan",
+        "timestamp": 1548845063
+    },
+    {
+        "content": "<p>The BRL-CAD build needs a clean-up from time to time because of tricky changes in the CMake files which cannot be handled automatically in an existing build.</p>",
+        "id": 157184238,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1548852403
+    },
+    {
+        "content": "<p>Therefore, if a build fails and the reason isn't obvious you should try it again from scratch.</p>",
+        "id": 157184335,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1548852500
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"211316\">@Chetan Shinde</span> there's lots of ways you can get started on a project, and \"what\" mostly depends on your interest and abilities.  If you have at least basic programming skills, something we really need is a program that creates all available objects.</p>",
+        "id": 167018009,
+        "sender_full_name": "Sean",
+        "timestamp": 1559324892
+    },
+    {
+        "content": "<p>if that sounds interesting, I can give you some pointers to help you get started.</p>",
+        "id": 167018036,
+        "sender_full_name": "Sean",
+        "timestamp": 1559324916
+    },
+    {
+        "content": "<blockquote>\n<p>if that sounds interesting, I can give you some pointers to help you get started.</p>\n</blockquote>\n<p>Yea, i am excited.</p>",
+        "id": 167336174,
+        "sender_full_name": "Chetan Shinde",
+        "timestamp": 1559682625
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"211316\">Chetan Shinde</span> there's lots of ways you can get started on a project, and \"what\" mostly depends on your interest and abilities.  If you have at least basic programming skills, something we really need is a program that creates all available objects.</p>\n</blockquote>\n<p>Yes, i do have some basic skills.</p>",
+        "id": 167338416,
+        "sender_full_name": "Chetan Shinde",
+        "timestamp": 1559684655
+    },
+    {
+        "content": "<p>Hey, <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  can you please help me with this. Thanks</p>\n<p>CMake Error at misc/CMake/BRLCAD_Util.cmake:553 (string):<br>\n  string sub-command STRIP requires two arguments.<br>\nCall Stack (most recent call first):<br>\n  CMakeLists.txt:154 (set_config_time)</p>",
+        "id": 170924465,
+        "sender_full_name": "Rajesh Kumar",
+        "timestamp": 1563219486
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"216670\">@Rajesh Kumar</span> my first guess would be that you're using an older or newer version of cmake.  Try a newer or older version if you're not comfortable debugging CMake code.</p>",
+        "id": 171263050,
+        "sender_full_name": "Sean",
+        "timestamp": 1563547315
+    },
+    {
+        "content": "<p>Thank you for your response.<br>\nI currently have a CMake version 3.13.4 on my machine (macOS), and cmakelist for BRL-CAD specifies minimum version VERSION 3.1.3, which in my case should not be an issue.<br>\nAdditionally, I am trying to use a cross-compiling toolchain to generate llvm code. All goes very well until I get this error. <br>\nAfter a little look into it, I saw that brl-cad tries to maintain version history and ask for some variables through STRIP command, (CONFIG_DAY...).<br>\nyou can find this in @ brlcad/misc/CMake/BRLCAD_Util.cmake Line: Line 553. which gets called from set_config_time.</p>\n<p>I hope I have provided enough info about my problem. It will be really helpful if you could give me assistance on setting correct build environment.<br>\nThanks</p>",
+        "id": 171368131,
+        "sender_full_name": "Rajesh Kumar",
+        "timestamp": 1563707398
+    },
+    {
+        "content": "<p>The minimum version we currently specify may not be correct.  We don't always go back to those older versions to make sure everything is working right.  Similarly, we don't necessarily check the very latest cmake to see if they broke anything that was working.  That said, 3.13 sounds new enough that I agree it should not be an issue.  I'm using 3.14 at the moment successfully.</p>",
+        "id": 171385890,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739466
+    },
+    {
+        "content": "<p>What I suspect is happening is that \"${CONFIG_DAY}\" on line 553 is empty, so cmake only sees: string(STRIP   CONFIG_DAY)</p>",
+        "id": 171385961,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739582
+    },
+    {
+        "content": "<p>which would happen if the preceding execute_process line fails for some reason</p>",
+        "id": 171385969,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739609
+    },
+    {
+        "content": "<p>what you can try doing is put the rfc2822_src code into a file and just try compiling and running that by hand</p>",
+        "id": 171386023,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739727
+    },
+    {
+        "content": "<p>it's this code:</p>\n<div class=\"codehilite\"><pre><span></span><span class=\"cm\">/* RFC2822 timestamp and individual day, month and year files */</span>\n\n<span class=\"cp\">#include</span> <span class=\"cpf\">&lt;time.h&gt;</span><span class=\"cp\"></span>\n<span class=\"cp\">#include</span> <span class=\"cpf\">&lt;stdio.h&gt;</span><span class=\"cp\"></span>\n<span class=\"cp\">#include</span> <span class=\"cpf\">&lt;string.h&gt;</span><span class=\"cp\"></span>\n\n<span class=\"kt\">int</span> <span class=\"nf\">main</span><span class=\"p\">(</span><span class=\"kt\">int</span> <span class=\"n\">argc</span><span class=\"p\">,</span> <span class=\"k\">const</span> <span class=\"kt\">char</span> <span class=\"o\">**</span><span class=\"n\">argv</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n   <span class=\"kt\">time_t</span> <span class=\"n\">t</span> <span class=\"o\">=</span> <span class=\"n\">time</span><span class=\"p\">(</span><span class=\"nb\">NULL</span><span class=\"p\">);</span>\n   <span class=\"k\">struct</span> <span class=\"n\">tm</span> <span class=\"o\">*</span><span class=\"n\">currenttime</span> <span class=\"o\">=</span> <span class=\"n\">localtime</span><span class=\"p\">(</span><span class=\"o\">&amp;</span><span class=\"n\">t</span><span class=\"p\">);</span>\n   <span class=\"k\">if</span> <span class=\"p\">(</span><span class=\"n\">argc</span> <span class=\"o\">&lt;=</span> <span class=\"mi\">1</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n      <span class=\"kt\">char</span> <span class=\"n\">rfc2822</span><span class=\"p\">[</span><span class=\"mi\">200</span><span class=\"p\">];</span>\n      <span class=\"n\">strftime</span><span class=\"p\">(</span><span class=\"n\">rfc2822</span><span class=\"p\">,</span> <span class=\"k\">sizeof</span><span class=\"p\">(</span><span class=\"n\">rfc2822</span><span class=\"p\">),</span> <span class=\"err\">\\</span><span class=\"s\">&quot;%a, %d %b %Y %H:%M:%S %z</span><span class=\"se\">\\&quot;</span><span class=\"s\">, currenttime);</span>\n      <span class=\"n\">printf</span><span class=\"p\">(</span><span class=\"err\">\\</span><span class=\"s\">&quot;%s</span><span class=\"se\">\\&quot;</span><span class=\"s\">, rfc2822);</span>\n      <span class=\"k\">return</span> <span class=\"mi\">0</span><span class=\"p\">;</span>\n   <span class=\"p\">}</span>\n   <span class=\"k\">if</span> <span class=\"p\">(</span><span class=\"n\">strncmp</span><span class=\"p\">(</span><span class=\"n\">argv</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">],</span> <span class=\"err\">\\</span><span class=\"s\">&quot;day</span><span class=\"se\">\\&quot;</span><span class=\"s\">, 4) == 0) {</span>\n      <span class=\"n\">printf</span><span class=\"p\">(</span><span class=\"err\">\\</span><span class=\"s\">&quot;%02d</span><span class=\"se\">\\&quot;</span><span class=\"s\">, currenttime-&gt;tm_mday);</span>\n   <span class=\"p\">}</span>\n   <span class=\"k\">if</span> <span class=\"p\">(</span><span class=\"n\">strncmp</span><span class=\"p\">(</span><span class=\"n\">argv</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">],</span> <span class=\"err\">\\</span><span class=\"s\">&quot;month</span><span class=\"se\">\\&quot;</span><span class=\"s\">, 5) == 0) {</span>\n      <span class=\"n\">printf</span><span class=\"p\">(</span><span class=\"err\">\\</span><span class=\"s\">&quot;%02d</span><span class=\"se\">\\&quot;</span><span class=\"s\">, currenttime-&gt;tm_mon + 1);</span>\n   <span class=\"p\">}</span>\n   <span class=\"k\">if</span> <span class=\"p\">(</span><span class=\"n\">strncmp</span><span class=\"p\">(</span><span class=\"n\">argv</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">],</span> <span class=\"err\">\\</span><span class=\"s\">&quot;year</span><span class=\"se\">\\&quot;</span><span class=\"s\">, 4) == 0) {</span>\n      <span class=\"n\">printf</span><span class=\"p\">(</span><span class=\"err\">\\</span><span class=\"s\">&quot;%d</span><span class=\"se\">\\&quot;</span><span class=\"s\">, currenttime-&gt;tm_year + 1900);</span>\n   <span class=\"p\">}</span>\n   <span class=\"k\">return</span> <span class=\"mi\">0</span><span class=\"p\">;</span>\n<span class=\"p\">}</span>\n</pre></div>",
+        "id": 171386035,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739764
+    },
+    {
+        "content": "<p>if you can compile that, try running it as \"path/to/the/exe day\"</p>",
+        "id": 171386087,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739812
+    },
+    {
+        "content": "<p>that should shed some light on what's going wrong.</p>",
+        "id": 171386095,
+        "sender_full_name": "Sean",
+        "timestamp": 1563739838
+    },
+    {
+        "content": "<p>BRL-CAD mged tutorial: <a href=\"https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf\" target=\"_blank\" title=\"https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf\">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a></p>",
+        "id": 179334747,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1572359881
+    },
+    {
+        "content": "<p>Welcome newbies! Here an answer to the FAQ \"How to start?\":</p>\n<ul>\n<li>Install BRL-CAD. You can find the necessary installation packages at <a href=\"https://sourceforge.net/projects/brlcad/files/\" target=\"_blank\" title=\"https://sourceforge.net/projects/brlcad/files/\">https://sourceforge.net/projects/brlcad/files/</a></li>\n<li>This will install over 200 programs. Most of them are small command line tools. The most interesting for you are our old but still heavily used GUI <code>mged</code> and the more modern GUI <code>archer</code>.</li>\n<li>Go through the mged tutorial <a href=\"https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf\" target=\"_blank\" title=\"https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf\">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a></li>\n<li>Gain an overview of the existing documentation at <a href=\"https://brlcad.org/wiki/Main_Page\" target=\"_blank\" title=\"https://brlcad.org/wiki/Main_Page\">https://brlcad.org/wiki/Main_Page</a></li>\n</ul>\n<p>To start with programming</p>\n<ul>\n<li>Download the source code (<a href=\"https://brlcad.org/wiki/SVN\" target=\"_blank\" title=\"https://brlcad.org/wiki/SVN\">https://brlcad.org/wiki/SVN</a>)</li>\n<li>Compile and install it (<a href=\"https://brlcad.org/wiki/Compiling\" target=\"_blank\" title=\"https://brlcad.org/wiki/Compiling\">https://brlcad.org/wiki/Compiling</a>)</li>\n<li>You can use <a href=\"https://brlcad.org/wiki/Deuces\" target=\"_blank\" title=\"https://brlcad.org/wiki/Deuces\">https://brlcad.org/wiki/Deuces</a> as a starter for small programming tasks</li>\n</ul>\n<p>BTW, the posts in this Zulip chat are organized in streams and topics. Make sure that you posts are meaningfully categorized there. E.g., this post is in <a class=\"stream-topic\" data-stream-id=\"104062\" href=\"/#narrow/stream/104062-general/topic/getting.20started\">#general &gt; getting started</a></p>",
+        "id": 179411334,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1572424557
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I have been got familiar with mged and rt  (gone through the pdf ) what should be my further approach ?</p>",
+        "id": 179700109,
+        "sender_full_name": "Aniruddha Ghadge",
+        "timestamp": 1572697001
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"247003\">@Aniruddha Ghadge</span> Now that you have some basics, what would you like to do or learn?</p>",
+        "id": 179877449,
+        "sender_full_name": "Sean",
+        "timestamp": 1572902164
+    },
+    {
+        "content": "<p>If you're looking to get into code development, there is literally an endless supply of tasks small and big.</p>",
+        "id": 179877475,
+        "sender_full_name": "Sean",
+        "timestamp": 1572902193
+    },
+    {
+        "content": "<p>If you're looking to become a more proficient 3D modeler, there's nothing quite as effective as measuring and modeling something near you in detail.</p>",
+        "id": 179877531,
+        "sender_full_name": "Sean",
+        "timestamp": 1572902238
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I am looking to get into the code starting with small tasks and further growing step by step , I would like to gain some knowledge about API or UI design as I am interested in those two things. Can u suggest something related to these ?</p>",
+        "id": 179918068,
+        "sender_full_name": "Aniruddha Ghadge",
+        "timestamp": 1572949171
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"247003\">@Aniruddha Ghadge</span> Sure, but it's a really big system so it'll help to focus on something really small.  Looking at our TODO file, there's only a couple hundred to choose from, but I can suggest one to start with. ;)</p>",
+        "id": 179927314,
+        "sender_full_name": "Sean",
+        "timestamp": 1572957376
+    },
+    {
+        "content": "<p>looking at the list in TODO, this one is pretty simple: overlay command needs to accept multiple file arguments</p>",
+        "id": 179927337,
+        "sender_full_name": "Sean",
+        "timestamp": 1572957400
+    },
+    {
+        "content": "<p>To point you in the right direction, \"overlay\" is a command you can run in MGED on the command-line.  Sources for it are in src/libged/overlay.c</p>",
+        "id": 179951050,
+        "sender_full_name": "Sean",
+        "timestamp": 1572972495
+    },
+    {
+        "content": "<p>Yeah I was familiar with that command but I was not getting the sources ...... Thanks !</p>",
+        "id": 179958355,
+        "sender_full_name": "Aniruddha Ghadge",
+        "timestamp": 1572976892
+    },
+    {
+        "content": "<p>nearly all mged commands are in src/libged</p>",
+        "id": 179958430,
+        "sender_full_name": "Sean",
+        "timestamp": 1572976926
+    },
+    {
+        "content": "<p>Okayy</p>",
+        "id": 179958823,
+        "sender_full_name": "Aniruddha Ghadge",
+        "timestamp": 1572977204
+    },
+    {
+        "content": "<p>Hi, I've just compiled the source code on Debian and while I believe it worked successfully, I've been having some trouble working with MGED . When I call the MGED command, my computer becomes extremely slow, and it takes around 15-20 minutes for the graphics window to open while the command window does not open at all. I don't believe that this is simply a hardware issue, so I was wondering if anyone has resolved similar issues before? Any help would be much appreciated.</p>",
+        "id": 180987893,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1574052105
+    },
+    {
+        "content": "<p>What kind of cpu, mem, 3d accel, etc?</p>",
+        "id": 181014236,
+        "sender_full_name": "Erik",
+        "timestamp": 1574082941
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> I've never heard of such an issue happening with mged before!  Try running \"mged -c\" and try the \"nu\" for no-graphics mode.  If that works fine, try running the \"attach X\" command, and then \"attach ogl\" command and see if both work (they should display a graphics window each).</p>",
+        "id": 181032422,
+        "sender_full_name": "Sean",
+        "timestamp": 1574095506
+    },
+    {
+        "content": "<p>I'm experiencing a similar issue with <code>rt</code>. Also Debian, buster latest version: Mged starts normally, but when I load any geometry and run <code>rt</code> (even without selecting an object before), my system freezes for some minutes. After this, half of my swap space is used. A clean shut-down isn't possible either, because the swap device cant be switched off. (The laptop has 4G RAM and 8G swap space).<br>\nSame behavior with the stand alone <code>rt</code> command and <code>-P 1</code>.</p>",
+        "id": 181038084,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574099031
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> seriously??  this is definitely emergency news ... I assume it's latest trunk and not the last release?  Does it happen every time?  Is it using the bundled Tcl/Tk or the system Tcl/Tk?</p>",
+        "id": 181038695,
+        "sender_full_name": "Sean",
+        "timestamp": 1574099513
+    },
+    {
+        "content": "<p>If Rt is doing it too... that implies something lower level, which is even more concerning.  If it reliably has a delay, see if it goes away after: rm -rf ~/.cache/BRL-CAD</p>",
+        "id": 181038869,
+        "sender_full_name": "Sean",
+        "timestamp": 1574099620
+    },
+    {
+        "content": "<p>If that's on Windows, it's in a different location, standard Windows user cache folder.</p>",
+        "id": 181038963,
+        "sender_full_name": "Sean",
+        "timestamp": 1574099662
+    },
+    {
+        "content": "<p>Only other thing I can think of is (on Linux at least) library pre-binding.  It might be prebinding all the libraries and that could be taking an exhaustive amount of time and memory.  Maybe something we could do to pre-bind in the build system, but would need to confirm what's going on first.</p>",
+        "id": 181039247,
+        "sender_full_name": "Sean",
+        "timestamp": 1574099869
+    },
+    {
+        "content": "<p>The bad news is that</p>\n<ul>\n<li>removing the cache doesn't change anything and</li>\n<li>configuring all libs to bundled doesn't change it either.</li>\n</ul>\n<p>But, rendering to a file works well. The difference in the output are the following two lines:</p>\n<div class=\"codehilite\"><pre><span></span>  CACHE  /home/rossberg/.cache/BRL-CAD/.rt\nWARNING: ^ Directory does not exist.  Initializing.\n</pre></div>\n\n\n<p><a href=\"/user_uploads/1549/hRt_q_yuOqidBiWlkW8Lng-g/rt_out.txt\" target=\"_blank\" title=\"rt_out.txt\">rt_out.txt</a> <a href=\"/user_uploads/1549/rSV9yYe4aemrDkWaxtUA74G0/rt-to-file_out.txt\" target=\"_blank\" title=\"rt-to-file_out.txt\">rt-to-file_out.txt</a> <br>\nWhat's the <code>^</code> directory?</p>\n<p>Another idea: Can I use X-Window instead of OpenGL for the output? Maybe with the <code>-F</code> command line parameter? OpenGL doesn't work well anyeway. The framebuffer window is always transparent.</p>",
+        "id": 181067809,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574119980
+    },
+    {
+        "content": "<blockquote>\n<p>Hi, I've just compiled the source code on Debian and while I believe it worked successfully, I've been having some trouble working with MGED . When I call the MGED command, my computer becomes extremely slow, and it takes around 15-20 minutes for the graphics window to open while the command window does not open at all. I don't believe that this is simply a hardware issue, so I was wondering if anyone has resolved similar issues before? Any help would be much appreciated.</p>\n</blockquote>\n<p><span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span> I just reproduced this by starting mged in X-Window mode. It looks like OpenGL isn't the cause in this case <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>",
+        "id": 181068614,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574120809
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , thank you so much for your response! Running \"mged -c\" seems to work fine with both \"nu\" as well as \"X,\" but there doesn't seem to be a valid \"ogl\" option for me.</p>",
+        "id": 181084055,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1574142133
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> I am using an Intel i5-6300HQ CPU with 8 GB of RAM. I do have a GTX950M with drivers installed, but I've been having some trouble enabling it so I believe that integrated graphics is being used at the moment.</p>",
+        "id": 181084367,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1574142680
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> that's fine regarding no ogl.  does it consistently take a long time without -c ?  does it take a long time with \"mged -c\" and then run the \"gui\" command?</p>",
+        "id": 181282027,
+        "sender_full_name": "Sean",
+        "timestamp": 1574321360
+    },
+    {
+        "content": "<blockquote>\n<p>The bad news is that</p>\n<ul>\n<li>removing the cache doesn't change anything and</li>\n</ul>\n</blockquote>\n<p>That's actually really good news.  It's one of the few major changes with potential to affect rt and mged, so it's good to hear it's not involved.</p>\n<blockquote>\n<ul>\n<li>configuring all libs to bundled doesn't change it either.</li>\n</ul>\n</blockquote>\n<p>That helps rule out it being something from a system-installed dep on Linux, like a system Tk.</p>\n<blockquote>\n<p>What's the <code>^</code> directory?</p>\n</blockquote>\n<p>It's pointing at the cache directory on the previous line, similar to a compiler warning marker.</p>\n<blockquote>\n<p>Another idea: Can I use X-Window instead of OpenGL for the output? Maybe with the <code>-F</code> command line parameter? OpenGL doesn't work well anyeway. The framebuffer window is always transparent.</p>\n</blockquote>\n<p>I believe this is possible, though I forget the exact mechanics.  Using -F will set the default for mged -c, but I don't know if that passes through to the gui command which kicks off the Tk gui logic.  I recall there being an internal command that configures the gui to using ogl or X, but I don't recall what it was.  You can manually run \"attach X\" even in gui mode and it will create additional graphics windows using X.</p>",
+        "id": 181282323,
+        "sender_full_name": "Sean",
+        "timestamp": 1574321786
+    },
+    {
+        "content": "<blockquote>\n<p><span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span> I just reproduced this by starting mged in X-Window mode. It looks like OpenGL isn't the cause in this case <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>\n</blockquote>\n<p>That's good bad news.  If you have 'perf' installed, can you run \"perf record -F 99 mged\" followed by \"perf report\" to see if there's indication of what's going on?</p>",
+        "id": 181282469,
+        "sender_full_name": "Sean",
+        "timestamp": 1574322019
+    },
+    {
+        "content": "<p>I traced the malloc() and realloc() functions, with no result. Even <code>ps</code> and <code>top</code> aren't able to determine the process which consumes that much memory. I suppose therefore that the huge memory allocation is not on the heap,  but maybe by the graphics unit instead.</p>\n<p>I'll try the perf command. I just installed it.</p>",
+        "id": 181312357,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574348590
+    },
+    {
+        "content": "<p>Unfortunately, perf didn't helped.</p>\n<p>So, I did it the hard way and stepped trough the program until it hangs again and again, with reboots between the trials. And, I found that the rt command hangs in src/libfb/if_ogl.c line 514.</p>\n<p>There, 4 Gig of memory is allocated and initialized, probable for no good reason. On machines with 8 Gig RAM and more this may not be an issue, on my laptop with only 4 Gig it is however. I don't know why MODE_1MALLOC isn't the default or what's the benefit of allocating always the largest possible frame buffer memory.</p>",
+        "id": 181610602,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574399401
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , the issue occurred every time I ran it without -c, but mged -c and gui took a reasonable amount of time (maybe around 2-3 seconds). I don't quite know what the issue was because everything works fine after I compiled on Windows.</p>",
+        "id": 181691579,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1574470199
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> when you run \"mged -c\" what does it report for display modes you can attach to?</p>",
+        "id": 181692085,
+        "sender_full_name": "Sean",
+        "timestamp": 1574470744
+    },
+    {
+        "content": "<p>and are you saying you recompiled and it worked, but the distributed binaries had the delay?</p>",
+        "id": 181692113,
+        "sender_full_name": "Sean",
+        "timestamp": 1574470799
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> That's a bit disconcerting.  None of that code has changed, but that's still bizarre because that memset size is not very large at all ... unless .... one of the max sizes is unitialized/negative and resulting in a huge number..</p>",
+        "id": 181692692,
+        "sender_full_name": "Sean",
+        "timestamp": 1574471560
+    },
+    {
+        "content": "<p>When I ran \"mged -c\", I believed it offered \"nu|txt|X|tk.\" What I meant was that I was previously trying to compile on Debian Buster, so I suspect that it was most likely a driver or library issue.</p>",
+        "id": 181693338,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1574472704
+    },
+    {
+        "content": "<p>it offered \"tk\"???</p>",
+        "id": 181694708,
+        "sender_full_name": "Sean",
+        "timestamp": 1574474705
+    },
+    {
+        "content": "<p>Yep, I just booted into Debian again and those options are still there. It still opens a graphics window but the top toolbar is a little messed up.</p>",
+        "id": 181695285,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1574475635
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> That's a bit disconcerting.  None of that code has changed, but that's still bizarre because that memset size is not very large at all ... unless .... one of the max sizes is unitialized/negative and resulting in a huge number..</p>\n</blockquote>\n<p>I wouldn't call 4 gigabyte of RAM \"not very large\". This is all this laptop has.</p>",
+        "id": 181695988,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574476969
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> it shouldn't have been 4 gigs.  that sounds like a signed overflow or signed to unsigned mistake.</p>",
+        "id": 181703575,
+        "sender_full_name": "Sean",
+        "timestamp": 1574492379
+    },
+    {
+        "content": "<p>that explains it. </p>\n<p>looks like I made a change last year in r71760 that consolidated the max image size to consistently be 32768<em>32768</em>4 = 4294967296 bytes (i.e., 4GB), which is obviously a major problem for 4GB systems.</p>",
+        "id": 181703862,
+        "sender_full_name": "Sean",
+        "timestamp": 1574492971
+    },
+    {
+        "content": "<p>(to be clear, not an overflow or signed mistake, just a default memory assumption changed with implications not fully expected.</p>",
+        "id": 181703908,
+        "sender_full_name": "Sean",
+        "timestamp": 1574493039
+    },
+    {
+        "content": "<p>applied a change that reduces the usage by more than half -- can you test?</p>",
+        "id": 181704323,
+        "sender_full_name": "Sean",
+        "timestamp": 1574493876
+    },
+    {
+        "content": "<p>I'll see what I can do. I'm the most time in the air this weekend.</p>",
+        "id": 181717702,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574519003
+    },
+    {
+        "content": "<p>The change with revision 71742 seems to have a much bigger impact.</p>",
+        "id": 181717881,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574519313
+    },
+    {
+        "content": "<p>Yes, that general commit timeframe was a refactoring to support larger images.  Hit limits doing large poster-size production rendering.</p>",
+        "id": 181722307,
+        "sender_full_name": "Sean",
+        "timestamp": 1574527208
+    },
+    {
+        "content": "<p>looks like ogl went from 16k^2 to 32^2, so 1GB to 4GB minimum memory implication on context initialization</p>",
+        "id": 181722464,
+        "sender_full_name": "Sean",
+        "timestamp": 1574527463
+    },
+    {
+        "content": "<p>I made some tests. In general, there were okay. I got the best results with OpenGL. With this interface, the memory doesn't need to be actually allocated in the RAM, at least not all of it. (For some reason the 4 Gig was  always fully allocated/placed in the RAM.)</p>\n<p>With the X-Window interface, always the whole 1.6 Gig was placed in the RAM, but it seems to not use shared memory either. If you are in bad luck and it starts swapping (happened to me once), it hangs.</p>",
+        "id": 181727292,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574535869
+    },
+    {
+        "content": "<blockquote>\n<p>Hi, I've just compiled the source code on Debian and while I believe it worked successfully, I've been having some trouble working with MGED . When I call the MGED command, my computer becomes extremely slow, and it takes around 15-20 minutes for the graphics window to open while the command window does not open at all. I don't believe that this is simply a hardware issue, so I was wondering if anyone has resolved similar issues before? Any help would be much appreciated.</p>\n</blockquote>\n<p>With the X-Window interface (for example, if you compiled BRL-CAD without OpenGL support), no extra command window will open. The command line is in the terminal were you started mged instead.</p>",
+        "id": 181727434,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574536106
+    },
+    {
+        "content": "<p>I wonder what are the benefits of using shared memory and allocating more of it than needed <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>",
+        "id": 181727508,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1574536248
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"714250\">@Grant Taylor</span>, welcome at BRL-CAD!</p>\n<p>You can start with BRL-CAD like you did with the other CADs you mentioned: Install the programs (installation packages can be found at <a href=\"https://github.com/BRL-CAD/brlcad/releases\">https://github.com/BRL-CAD/brlcad/releases</a>). This will install over 200 programs. Most of them are small command line tools. The most interesting for you are our old but still heavily used GUI mged and the more modern GUI archer. Try them out! You can use the tutorial <a href=\"https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf\">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a> four guidance.</p>",
+        "id": 436276094,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1714484948
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-brlcad/topic/getting.20started/near/436276094\">said</a>:</p>\n<blockquote>\n<p>Hi <span class=\"user-mention silent\" data-user-id=\"714250\">Grant Taylor</span>, welcome at BRL-CAD!</p>\n<p>You can start with BRL-CAD like you did with the other CADs you mentioned: Install the programs (installation packages can be found at <a href=\"https://github.com/BRL-CAD/brlcad/releases\">https://github.com/BRL-CAD/brlcad/releases</a>). This will install over 200 programs. Most of them are small command line tools. The most interesting for you are our old but still heavily used GUI mged and the more modern GUI archer. Try them out! You can use the tutorial <a href=\"https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf\">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a> four guidance.</p>\n</blockquote>\n<p>Thank you very much Daniel. I think my problem is I was trying to figure out MGED more or less blind, and there was mild confusion as a result. I think I'll try using Archer for a bit. Thanks again!</p>",
+        "id": 436488536,
+        "sender_full_name": "Grant Taylor",
+        "timestamp": 1714564821
+    }
+]

@@ -1,0 +1,206 @@
+[
+    {
+        "content": "<p>Just want to ask a silly question. During push_back operation in vectors, why previous elements that are already in the vectors are rearranged when I am using a move constructor? Sorry I asked a outside topic question.</p>",
+        "id": 244862881,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625410364
+    },
+    {
+        "content": "<p>Can you put a code snippet maybe</p>",
+        "id": 244862927,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1625410419
+    },
+    {
+        "content": "<p><a href=\"https://paste.ofcode.org/?edit=gHRfmaMgbRbYasTEfaykAV\">https://paste.ofcode.org/?edit=gHRfmaMgbRbYasTEfaykAV</a></p>",
+        "id": 244863172,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625410715
+    },
+    {
+        "content": "<div class=\"codehilite\" data-code-language=\"constructor\"><pre><span></span><code>Move Constructor for: 10\nDestructor freeing data for nullptr\nConstructor for: 20\nMove Constructor for: 20\nMove Constructor for: 10\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nConstructor for: 30\nMove Constructor for: 30\nMove Constructor for: 10\nMove Constructor for: 20\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nConstructor for: 40\nMove Constructor for: 40\nDestructor freeing data for nullptr\nConstructor for: 50\nMove Constructor for: 50\nMove Constructor for: 10\nMove Constructor for: 20\nMove Constructor for: 30\nMove Constructor for: 40\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nDestructor freeing data for nullptr\nDestructor freeing data for:10\nDestructor freeing data for:20\nDestructor freeing data for:30\nDestructor freeing data for:40\nDestructor freeing data for:50\n</code></pre></div>",
+        "id": 244863187,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625410760
+    },
+    {
+        "content": "<p>I want to know why after 30 is moved to the vector then previous elements values like 10 and 20 are moved too</p>",
+        "id": 244863329,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625410889
+    },
+    {
+        "content": "<p>also after 40 is moved to the vector then why previous elements like 10, 20, 30 are not rearranged. Am I missing something?</p>",
+        "id": 244863473,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625411098
+    },
+    {
+        "content": "<p>In every <code>push_back()</code> it has to make sure that there is enough memory for the additional element. If the additional memory can be provided in place (i.e., there is enough room after the vector), only the new element needs to be copied. But, this seems to be not the case for the majority of your <code>push_back()</code> calls. Probably because of the new operator in the <code>Move</code> constructor, which clutters the heap. Then, the <code>Move</code> objects have to be copied from the old memory of the vector to the new one.</p>\n<p>BTW, you can reserve memory for a vector to make sure that it has enough memory for a distinct amount of elements.</p>",
+        "id": 244870162,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625421596
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/244870162\">said</a>:</p>\n<blockquote>\n<p>In every <code>push_back()</code> it has to make sure that there is enough memory for the additional element. If the additional memory can be provided in place (i.e., there is enough room after the vector), only the new element needs to be copied. But, this seems to be not the case for the majority of your <code>push_back()</code> calls. Probably because of the new operator in the <code>Move</code> constructor, which clutters the heap. Then, the <code>Move</code> objects have to be copied from the old memory of the vector to the new one.</p>\n<p>BTW, you can reserve memory for a vector to make sure that it has enough memory for a distinct amount of elements.</p>\n</blockquote>\n<p>One more doubt that why destructor is not being called in reversed order but it called destructor from 10 not from 50?</p>",
+        "id": 244903515,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625470776
+    },
+    {
+        "content": "<p>This depends on the kind of iterator used to destruct the objects in the vector. I.e., this looks like a usual forward iterator. You can set a break point in Move::~Move() to investigate the implementation of the std::vector class. The standard template library (STL) is a library written in C++.</p>",
+        "id": 244959011,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625505778
+    },
+    {
+        "content": "<p>Thanks <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span></p>",
+        "id": 244959166,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625505914
+    },
+    {
+        "content": "<p>yeah I debugged it whenever it comes to destructor or move constructor it redirects to some other cpp files where it is implemented in some sort of library.</p>",
+        "id": 244959297,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625506014
+    },
+    {
+        "content": "<p>.cpp or .h?</p>",
+        "id": 244959352,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625506068
+    },
+    {
+        "content": "<p>sorry it's .h</p>",
+        "id": 244959466,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625506172
+    },
+    {
+        "content": "<p>it redirects to stl_vector.h</p>",
+        "id": 244959490,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625506201
+    },
+    {
+        "content": "<p>then something to new_allocator.h</p>",
+        "id": 244959548,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625506227
+    },
+    {
+        "content": "<p>With all the power and flexibility of C++ comes complexity.</p>",
+        "id": 244959613,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625506310
+    },
+    {
+        "content": "<p>Right. I'ts implemented in header files only. I.e., it's enough to write <code>#include &lt;vector&gt;</code>. You don't need to bind to a vector library.</p>",
+        "id": 244959667,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625506337
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/244959667\">said</a>:</p>\n<blockquote>\n<p>Right. I'ts implemented in header files only. I.e., it's enough to write <code>#include &lt;vector&gt;</code>. You don't need to bind to a vector library.</p>\n</blockquote>\n<p>but still idk why vscode redirects me to some sort of .h files and I included vector header file.</p>",
+        "id": 244959781,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625506453
+    },
+    {
+        "content": "<p>What do you mean by \"redirect\"? You included <code>vector</code> and this includes what's needed to implement std::vector, e.g. stl_vector.h, new_allocator.h, ....</p>\n<p>There was once a vector.h header, which was nothing else than the vector without std::. The vector header was something like <code>namespace std; #include &lt;vector.h&gt;</code>.</p>",
+        "id": 244960089,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625506756
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/244960089\">said</a>:</p>\n<blockquote>\n<p>What do you mean by \"redirect\"? You included <code>vector</code> and this includes what's needed to implement std::vector, e.g. stl_vector.h, new_allocator.h, ....</p>\n<p>There was once a vector.h header, which was nothing else than the vector without std::. The vector header was something like <code>namespace std; #include &lt;vector.h&gt;</code>.</p>\n</blockquote>\n<p>I created a breakpoint on move constructor and whenever debugging starts it jumps to another file like move.h</p>",
+        "id": 244960391,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625507051
+    },
+    {
+        "content": "<p>What is it for a move.h file? Where does it belong to? Is there already another Move class in the STL?</p>",
+        "id": 244960599,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625507217
+    },
+    {
+        "content": "<p>BTW, there is an implicit constructor <code>Move::Move(void)</code>, which will be called to initialize the vector elements. When you break in this function, the place may look odd, because you haven't wrote code for this (but the compiler did). The break point's location is often in the declaration then.</p>",
+        "id": 244960993,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625507559
+    },
+    {
+        "content": "<p>However, I'm nor sure how it looks in Visual Studio.</p>",
+        "id": 244961024,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625507609
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/244961024\">said</a>:</p>\n<blockquote>\n<p>However, I'm nor sure how it looks in Visual Studio.</p>\n</blockquote>\n<p><a href=\"/user_uploads/1549/viGQtNY8XuMe-QshPlmDMq9E/redirects.gif\">redirects.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/viGQtNY8XuMe-QshPlmDMq9E/redirects.gif\" title=\"redirects.gif\"><img src=\"/user_uploads/1549/viGQtNY8XuMe-QshPlmDMq9E/redirects.gif\"></a></div>",
+        "id": 245048210,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625582480
+    },
+    {
+        "content": "<p>omg the quality looks cheap after converting to gif lol</p>",
+        "id": 245048346,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625582528
+    },
+    {
+        "content": "<p>For me, the quality looks good. The only issue I saw were the many frames which prevents converting (at least with ImageMagic). But, MPlayer can handle it.</p>",
+        "id": 245198916,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625671874
+    },
+    {
+        "content": "<p>The header files you see there belong all to the STL. You can see the path below the tab (<code>usr &gt; include &gt; c++ &gt;</code>...) E.g., move.h contains the implementation of moving values in STL containers.</p>",
+        "id": 245199815,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625672185
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/245199815\">said</a>:</p>\n<blockquote>\n<p>The header files you see there belong all to the STL. You can see the path below the tab (<code>usr &gt; include &gt; c++ &gt;</code>...) E.g., move.h contains the implementation of moving values in STL containers.</p>\n</blockquote>\n<p>I don't want to see those header files while debugging but I manage it.</p>",
+        "id": 245230590,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625686186
+    },
+    {
+        "content": "<p>Thanks <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> <span aria-label=\"innocent\" class=\"emoji emoji-1f607\" role=\"img\" title=\"innocent\">:innocent:</span></p>",
+        "id": 245230671,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625686211
+    },
+    {
+        "content": "<p><span aria-label=\"laughing\" class=\"emoji emoji-1f606\" role=\"img\" title=\"laughing\">:laughing:</span> You want to use the vector STL container and you got it. It's part of your program now.<br>\nIf you break inside one of your methods and this method was just called from a STL method, the debugger has to show it to you. It would be a bad debugger, if it wouldn't do this <span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>\n<p>However, there is a shortcut through the STL stuff while debugging: Navigate with the Call Stack to the next function which doesn't belong to the STL.</p>",
+        "id": 245275612,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1625724828
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/245275612\">said</a>:</p>\n<blockquote>\n<p><span aria-label=\"laughing\" class=\"emoji emoji-1f606\" role=\"img\" title=\"laughing\">:laughing:</span> You want to use the vector STL container and you got it. It's part of your program now.<br>\nIf you break inside one of your methods and this method was just called from a STL method, the debugger has to show it to you. It would be a bad debugger, if it wouldn't do this <span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>\n<p>However, there is a shortcut through the STL stuff while debugging: Navigate with the Call Stack to the next function which doesn't belong to the STL.</p>\n</blockquote>\n<p><span aria-label=\"neutral\" class=\"emoji emoji-1f610\" role=\"img\" title=\"neutral\">:neutral:</span> <span aria-label=\"grimacing\" class=\"emoji emoji-1f62c\" role=\"img\" title=\"grimacing\">:grimacing:</span> Now I understand why it is switching to other files while debugging.</p>",
+        "id": 245277085,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1625726433
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/C.2B.2B/near/244870162\">said</a>:</p>\n<blockquote>\n<p>In every <code>push_back()</code> it has to make sure that there is enough memory for the additional element. If the additional memory can be provided in place (i.e., there is enough room after the vector), only the new element needs to be copied. But, this seems to be not the case for the majority of your <code>push_back()</code> calls. Probably because of the new operator in the <code>Move</code> constructor, which clutters the heap. Then, the <code>Move</code> objects have to be copied from the old memory of the vector to the new one.</p>\n<p>BTW, you can reserve memory for a vector to make sure that it has enough memory for a distinct amount of elements.</p>\n</blockquote>\n<p>Came to know about <code>.reserve()</code> so it will not expand untill it hits the given range. Now move constructor and assignment will not be copied from old memory of the vector to new one everytime it is being called.</p>",
+        "id": 246989584,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1627052943
+    },
+    {
+        "content": "<p>Here's a great talk that just posted from CPPCON 2022 about design patterns.  Excellent speaker.. <a href=\"https://www.youtube.com/watch?v=PEcy1vYHb8A\">https://www.youtube.com/watch?v=PEcy1vYHb8A</a></p>\n<div class=\"youtube-video message_inline_image\"><a data-id=\"PEcy1vYHb8A\" href=\"https://www.youtube.com/watch?v=PEcy1vYHb8A\"><img src=\"https://uploads.zulipusercontent.net/6f21ade7883207e12168f941b3168ed7475115f1/68747470733a2f2f692e7974696d672e636f6d2f76692f50456379317659486238412f64656661756c742e6a7067\"></a></div>",
+        "id": 340934342,
+        "sender_full_name": "Sean",
+        "timestamp": 1678472478
+    },
+    {
+        "content": "<p>Most of the CPPCON talks are available as of today: <a href=\"https://www.youtube.com/@CppCon\">https://www.youtube.com/@CppCon</a></p>",
+        "id": 340936009,
+        "sender_full_name": "Sean",
+        "timestamp": 1678472902
+    }
+]

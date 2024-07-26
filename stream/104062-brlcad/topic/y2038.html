@@ -1,0 +1,79 @@
+<html>
+<head><meta charset="utf-8"><title>y2038 · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html">y2038</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="378826717"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/378826717" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#378826717">(Jul 26 2023 at 14:35)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I recall back in the day we incorporated y2038 into libbu in order to ensure we could handle 2038+ dates even in a 32 bit environment.  Do we still need to do that, do you think?  I'm wondering if using some of the newer C++ chrono/date functionality under the hood might be better - there doesn't seem to be much activity on the upstream of y2038 and it'd be nice to be able to base that part of libbu on something in a standard...</p>
+
+
+
+<a name="378827415"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/378827415" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#378827415">(Jul 26 2023 at 14:37)</a>:</h4>
+<p>(full disclosure - the immediate pain point with y2038 is my Ubuntu machine's gcc for some reason complaining about mismatched LTO versions with the y2038 .o output when building libbu, but it made me also wonder if it's still necessary to even include y2038 at all...  the LTO error isn't y2038's fault, it's more likely something strange about my machine's compiler setup.)</p>
+
+
+
+<a name="379307057"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/379307057" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#379307057">(Jul 27 2023 at 21:34)</a>:</h4>
+<p>glad my p75 running slackware will still be supported :D <em>duck</em></p>
+
+
+
+<a name="382379015"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382379015" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382379015">(Aug 06 2023 at 14:44)</a>:</h4>
+<p>I guess it depends where all y2038 has its fingers.  If it's isolated or already wrapped behind something, I don't see why it couldn't be converted to STL -- that almost certainly will be compliant.  Just wouldn't want to convert a bunch of libbu files to c++ just for date/time purposes.  Is it encapsulated?  Otherwise, I'd leave it alone until it exhibits a cost more than a few minutes.</p>
+
+
+
+<a name="382379410"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382379410" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382379410">(Aug 06 2023 at 14:46)</a>:</h4>
+<p>That LTO issue sounds like a bigger deal, and y2038 is just the symptom provoking it.?  Why would there be mismatched LTO versions on anything is the question to be answered first it seems to me.</p>
+
+
+
+<a name="382405710"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382405710" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382405710">(Aug 06 2023 at 16:53)</a>:</h4>
+<p>I'm pretty sure the LTO thing is some sort of misconfiguration on my box - it was just the context that prompted me to wonder if we still need y2038.</p>
+
+
+
+<a name="382406381"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382406381" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382406381">(Aug 06 2023 at 16:56)</a>:</h4>
+<p>IIRC y2038 is underneath bu_utctime - I don't think we've used it anywhere else.</p>
+
+
+
+<a name="382406761"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382406761" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382406761">(Aug 06 2023 at 16:58)</a>:</h4>
+<p>Not a big deal either way, just thought it might be worth considering using something in a standard for code cleanup/simplification, if all the necessary pieces are in fact in the C++ standard.</p>
+
+
+
+<a name="382406957"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382406957" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382406957">(Aug 06 2023 at 16:59)</a>:</h4>
+<p>Yeah, then if it's underneath, it's totally fair game and easy to gut with a different implementation.  I got no attachment to it.</p>
+
+
+
+<a name="382407360"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382407360" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382407360">(Aug 06 2023 at 17:01)</a>:</h4>
+<p>IIRC the datetime libbu tests have a few cases intended to trigger the y2038 issue, so I think we're already set up to detect if a replacement solution has a problem.  Frankly, bigger challenge at this point would probably be getting a 32 bit box set up for testing - I'd have to assemble a VM for the purpose.</p>
+
+
+
+<a name="382407543"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/y2038/near/382407543" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/y2038.html#382407543">(Aug 06 2023 at 17:02)</a>:</h4>
+<p>Good project for a lazy Friday afternoon sometime (or maybe a student exercise)</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

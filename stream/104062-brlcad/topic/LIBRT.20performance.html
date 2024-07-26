@@ -1,0 +1,65 @@
+<html>
+<head><meta charset="utf-8"><title>LIBRT performance · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html">LIBRT performance</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="436106694"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/436106694" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#436106694">(Apr 29 2024 at 17:55)</a>:</h4>
+<p>For those of you that haven't been tracking, we've had a team at Texas A&amp;M working on improving the performance of BoT ray tracing the past 4 months.  Their goal was to evaluate and leverage an existing accelerated BVH spatial structure to replace ADRT's slow kd-tree build.  </p>
+<p>Preliminary results show all objectives met which includes <em>vastly</em> faster-than-ADRT prep times (seriously, 2500x improvement in some cases) and <em>vastly</em> faster-than-RT shot times, often faster-than-ADRT just with some exceptions like when the models are very simple and/or already sub-second.  Typical overall reduction depends on the model but is looking like most times are at least cut in half or more.</p>
+<p>TAMU team of five wrapped up their semester work and submitted a PR last week.  Once fully reviewed and validated, this work is expected to replace both the traditional RT ray tracing and the ADRT accelerated ray tracing implementations.  That will not only be a decent code complexity consolidation, it'll make both the "bot_minpieces" and "bot_mintie" controls obsolete (e.g., no longer need to set LIBRT_BOT_MINTIE environment variable). </p>
+<p>The implementation keeps the behavior of RT+ADRT w.r.t. intersection queries, and initial testing on primary ray first hits are already spot-on.  Testing of subsequent hits and secondary rays is in the works.</p>
+<p>If anyone would like more details, I can work to get you a copy of their final user-acceptance test report for review and feedback.</p>
+
+
+
+<a name="436981474"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/436981474" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#436981474">(May 04 2024 at 01:35)</a>:</h4>
+<p>cool! are they going to write a paper? (y'know, almost 30 years ago I knew a guy who graduated from a&amp;m, he said there is only one Aggie joke, the rest are true stories... apparently, they also have an annual bonfire that was often cataclysmic)</p>
+
+
+
+<a name="437108825"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/437108825" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#437108825">(May 05 2024 at 12:49)</a>:</h4>
+<p>They no longer due the cataclysmic bonfire, <span class="user-mention" data-user-id="103542">@Erik</span> ... ever since a bunch of kids died a few years back when there was a structural collapse.</p>
+
+
+
+<a name="437108899"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/437108899" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#437108899">(May 05 2024 at 12:50)</a>:</h4>
+<p>But yes, they did write up a final report, final presentation, and some nice demo videos.</p>
+
+
+
+<a name="437109112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/437109112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#437109112">(May 05 2024 at 12:53)</a>:</h4>
+<p>For example, hairball:  <a href="/user_uploads/1549/f9LFeZwRMWMsM0QBYpgep_kf/Comparison.mov">Comparison.mov</a></p>
+
+
+
+<a name="437109178"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/437109178" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#437109178">(May 05 2024 at 12:54)</a>:</h4>
+<p>Note that's one of the few cases where the ray tracing is technically slightly slower, but the prep time is so drastically different that it's still overall a huge improvement.  Stark difference.</p>
+
+
+
+<a name="437473622"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/437473622" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#437473622">(May 07 2024 at 15:05)</a>:</h4>
+<p>impressive, I'd be interested in reading that report o.O :D</p>
+
+
+
+<a name="437476156"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/LIBRT%20performance/near/437476156" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/LIBRT.20performance.html#437476156">(May 07 2024 at 15:18)</a>:</h4>
+<p>I'll see if I can get it uploaded</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

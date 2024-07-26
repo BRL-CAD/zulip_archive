@@ -1,0 +1,155 @@
+<html>
+<head><meta charset="utf-8"><title>license checking · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html">license checking</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="197444427"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197444427" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197444427">(May 13 2020 at 17:07)</a>:</h4>
+<p>I finally got to looking into the new license checking feature <span class="user-mention" data-user-id="112516">@starseeker</span>.</p>
+
+
+
+<a name="197444542"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197444542" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197444542">(May 13 2020 at 17:07)</a>:</h4>
+<p>It's looking good on the whole, obviously seems to be doing something and if anything, it's a catalog of 3rd party licenses.</p>
+
+
+
+<a name="197445116"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197445116" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197445116">(May 13 2020 at 17:11)</a>:</h4>
+<p>From a code standpoint, I am a little baffled as to why you went with that particular implementation method (invoking a cmake script instead of calling a function)... was there a reason for that?  Necessary?  Seems like a bit of complexity that could be eliminated.</p>
+<p>There's also complexity and maintenance overhead  (non-local undocumented variables in particular) that are concerning.  The only docs appear to be the usage statement, which is understandable given you just got it working, but I think it's needed for this to survive given the way it's implemented is all over the place.</p>
+<p>The whole processing seems to result from non-local assumptions (e.g., took a while to figure out where embedded_licenses.txt came from).  The format of the license files is a mystery too (some unknown format tightly coupled to an undocumented source file.  I honestly don't know what to make of it as that knowledge only exists in your head. :)</p>
+
+
+
+<a name="197445571"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197445571" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197445571">(May 13 2020 at 17:14)</a>:</h4>
+<p>That's all to say that you clearly seem to have gotten it working, which is great, it will have value in the near term.</p>
+
+
+
+<a name="197446691"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197446691" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197446691">(May 13 2020 at 17:21)</a>:</h4>
+<p>For what it's worth, I just came across this today: <a href="https://reuse.software/">https://reuse.software/</a>  </p>
+<p>They have some interesting concepts, most I don't think we should adapt right now, but their file format is standardized.  It might be a good way to document the embedded license description files:   <a href="https://reuse.software/faq/#bulk-license">https://reuse.software/faq/#bulk-license</a></p>
+
+
+
+<a name="197475090"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197475090" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197475090">(May 13 2020 at 20:43)</a>:</h4>
+<p>The invocation of the cmake script is to allow for some pathname cleanup before invoking the final C++ program, manage cross-platform capture of stdout and stderror into log files, and other housekeeping details mostly.</p>
+<p>(A lot of those pieces evolved over time trying to deal with things like robustness to parallel building, odd pathnames tests, and other such fun.  It may be that some of it could be simplified but usually when I try I end up finding obscure breakage in one of the distcheck-full tests a week later...)</p>
+<p>As for the formatting I'm open to suggestions - that was just the shortest/simplest path to associating a doc/license/embedded license file with particular source files.  Could just as well be URIs to the files.</p>
+
+
+
+<a name="197476660"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197476660" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197476660">(May 13 2020 at 20:57)</a>:</h4>
+<p>I liked (and still like) the idea that the license files themselves in doc/legal/embedded  are the ones that assert a particular source file comes under that license.  I'm not currently cross checking the contents themselves (for example, checking that a copyright reference in the src file matches the one in the license file for 3rd party sources) but in principle that's possible if we want to go to the trouble.</p>
+
+
+
+<a name="197479709"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197479709" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197479709">(May 13 2020 at 21:23)</a>:</h4>
+<p>FWIW - I moved the embedded_licenses.txt generation to the regress/licenses CMakeLists.txt file</p>
+
+
+
+<a name="197480958"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197480958" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197480958">(May 13 2020 at 21:36)</a>:</h4>
+<p>(btw - the doc/legal/embedded directory and files weren't created for this - they date back to  2018)</p>
+
+
+
+<a name="197499045"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197499045" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197499045">(May 14 2020 at 01:50)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> which file format were you not liking?  The cmakefiles.cmake input is strictly a list of paths - we use that same file  in a number of places, it's the full list of everything the build system knows about.  The license files themselves I'm just adding file paths at the end of the license files - I updated it so they're valid file:/ URI lines relative to the source tree root, but beyond that there's not really much format involved...</p>
+
+
+
+<a name="197506535"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506535" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506535">(May 14 2020 at 05:04)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  Didn't say I didn't like the format -- I have no idea what it is.   :)  Nobody has a way of knowing beyond knowing that  some code in a distant directory is going to read it, hopefully finding and understanding what it does with it.  Mind you, I was referring to the doc/legal/embedded files containing paths, notes, and license text.  You say there's not much format involved, but unless none of the contents matter at all, there's a format and it matters to something.  that's where the reuse.software link might be a solution.</p>
+<p>as for the "input", it's technically not just a list of paths...  it's a specifically named file.  it's a file generated by somewhere else in the build system (this is discoverable, but that definitely adds to the complexity and understanding for anyone needing to understand what's going on.</p>
+
+
+
+<a name="197506647"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506647" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506647">(May 14 2020 at 05:07)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/license.20checking/near/197475090">said</a>:</p>
+<blockquote>
+<p>The invocation of the cmake script is to allow for some pathname cleanup before invoking the final C++ program, manage cross-platform capture of stdout and stderror into log files, and other housekeeping details mostly.</p>
+</blockquote>
+<p>So is that to say it's not necessary?  as a function, paths could still be cleaned up inside the function just like they are now and the variables wouldn't need to be remarshalled.  avoiding hitting log files would make it better for parallel too.</p>
+
+
+
+<a name="197506650"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506650" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506650">(May 14 2020 at 05:07)</a>:</h4>
+<p>Well, the only contents that matter for processing are the file:/ lines - everything else is ignored.  I was hoping it was self evident - license text/explanation and list of files, mostly for humans, but readable for the scanner because of the file:/ prefix.  I haven't looked at reuse.software yet, but I'm really wary of anything really complicated here...</p>
+
+
+
+<a name="197506708"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506708" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506708">(May 14 2020 at 05:09)</a>:</h4>
+<p>By "a function" are you referring to a C++ function, or a  CMake function?  The latter won't work, and the former needs reliable information to be supplied to it.  That's hard to do as command line args from CMake - configure_file does better, but then all the files are .cpp.in files.</p>
+
+
+
+<a name="197506714"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506714" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506714">(May 14 2020 at 05:09)</a>:</h4>
+<p>I'm not promoting it, just an option.  it definitely didn't look complicated, it's a simple format match like you're doing, but the format is documented and in effect standardized.</p>
+
+
+
+<a name="197506762"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506762" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506762">(May 14 2020 at 05:10)</a>:</h4>
+<p>there's no way for a reader to discern anything self-evident about the format... without reading the thing that parses them.  that's the point. :)</p>
+
+
+
+<a name="197506774"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506774" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506774">(May 14 2020 at 05:11)</a>:</h4>
+<p>The cmakefiles.cmake list was originally written for distcheck internal use, but I've ended up using it elsewhere.  I'm open to suggestions, but it is in effect a "magic" file since it's a product of the extensive bookkeeping we're doing in the CMake logic.  A better name is in order certainly, but beyond that I'm not sure what to do.</p>
+
+
+
+<a name="197506775"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506775" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506775">(May 14 2020 at 05:11)</a>:</h4>
+<p>of course, that could also be fixed with a templatized example file or a readme file</p>
+
+
+
+<a name="197506833"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506833" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506833">(May 14 2020 at 05:13)</a>:</h4>
+<p>I'm not sure we're talking about the same thing...  I've not referred to cmakefiles.cmake</p>
+
+
+
+<a name="197506895"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506895" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506895">(May 14 2020 at 05:14)</a>:</h4>
+<p>You said a specifically named file.  You mean embedded_lists.txt?  I moved the generation of that in with the rest of the logic, if that helps...</p>
+
+
+
+<a name="197506904"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506904" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506904">(May 14 2020 at 05:14)</a>:</h4>
+<p>embedded_licenses.txt rather</p>
+
+
+
+<a name="197506912"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/license%20checking/near/197506912" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/license.20checking.html#197506912">(May 14 2020 at 05:15)</a>:</h4>
+<p>that definitely helps</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

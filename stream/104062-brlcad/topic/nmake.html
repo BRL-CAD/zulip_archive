@@ -1,0 +1,382 @@
+<html>
+<head><meta charset="utf-8"><title>nmake · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html">nmake</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="196651594"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196651594" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196651594">(May 06 2020 at 15:28)</a>:</h4>
+<p>Has anyone been able to build with nmake? This keeps giving an error when "Building RC object src/other/tcl/CMakeFiles/tcl.dir/win/tcl.rc.res".</p>
+<p>It works fine when I build a VS solution and then open it with VS IDE and build. But when I make an NMAKE solution with CMAKE and try to run nmake it gives the error.</p>
+
+
+
+<a name="196652177"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196652177" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196652177">(May 06 2020 at 15:33)</a>:</h4>
+<p>I can continue this with -I flag to nmake. But then everything that depends on TCL are not built</p>
+
+
+
+<a name="196653577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196653577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196653577">(May 06 2020 at 15:43)</a>:</h4>
+<p>No, we've not tried an nmake build for a (very) long time.  Why do you want nmake as opposed to VS?  If you want a command line only build, I'd suggest looking into using ninja build tool on Windows before looking at nmake.</p>
+
+
+
+<a name="196657247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196657247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196657247">(May 06 2020 at 16:06)</a>:</h4>
+<p>On Ubuntu it took only seconds to build when it has already been built once. Compiling only the changed parts is done in a very short time. </p>
+<p>VS is taking a long time for building  even after the first build. I thought I might be able to improve if I ran something closer to Ubuntu's CMAKE, MAKE system.</p>
+
+
+
+<a name="196666604"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196666604" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196666604">(May 06 2020 at 17:13)</a>:</h4>
+<p>Yeah, I'd try ninja - nmake I don't think is terribly fast</p>
+
+
+
+<a name="196677065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196677065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196677065">(May 06 2020 at 18:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="217384">@Sadeep Darshana</span> can you post a more complete build error?  It should still work, might be something trivial you can fix.</p>
+
+
+
+<a name="196680109"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196680109" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196680109">(May 06 2020 at 18:53)</a>:</h4>
+<p>I got it built.<br>
+I had to change several files. <br>
+src/other/tcl/CMakeList.txt, src/other/tk/CMakeList.txt, and a deprecated method in a Windows 10 SDk header file.<br>
+CMake and NMake run without errors. </p>
+<p>I know this is not exactly a fix. Changing Windows 10 SDK headers and outside libraries is not a solution. But would be sufficient for my works. <br>
+Btw Archer seems to be broken (it does not start, not error messages,nothing) likely due to the changes to TCL/TK. MGED is fine. I won't be working with TCL/TK.</p>
+
+
+
+<a name="196683786"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196683786" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196683786">(May 06 2020 at 19:23)</a>:</h4>
+<p>Cool, <span class="user-mention" data-user-id="217384">@Sadeep Darshana</span> that's great.  Can you post a patch of your changes?</p>
+<p>You're right that changing a system header isn't an option.  Maybe you can figure out a different workaround -- or post the full error here, might have some ideas.</p>
+
+
+
+<a name="196683870"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196683870" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196683870">(May 06 2020 at 19:23)</a>:</h4>
+<p>as for archer - check if mged works and if fbhelp works.</p>
+
+
+
+<a name="196690054"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196690054" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196690054">(May 06 2020 at 20:09)</a>:</h4>
+<p>Not sure if I should make a patch because I simply removed and edited some stuff from the files. (I'm sure they were there for a reason)<br>
+By the way here is what I did.</p>
+<p>1) Changed this in tcl CMakeLists file: line 107</p>
+<div class="codehilite"><pre><span></span><code>if (MSVC)
+  add_definitions(-D_UNICODE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEP -Ot -Oi -fp:strict -Gs -GS -GL -MD)
+</code></pre></div>
+
+
+<p>into</p>
+<div class="codehilite"><pre><span></span><code>if (MSVC)
+  add_definitions(-D_UNICODE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEP )
+</code></pre></div>
+
+
+<p>2)  Changed this in tk CMakeLists file: line 101<br>
+I'm building this for x86 to see anything is different. (previously I built for x64)</p>
+<div class="codehilite"><pre><span></span><code>if (MSVC)
+  add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -Ot -Oi -fp:strict -Gs -GS -GL -MD -DSUPPORT_CONFIG_EMBEDDED -DHAVE_UXTHEME_H=1)
+</code></pre></div>
+
+
+<p>into</p>
+<div class="codehilite"><pre><span></span><code>if (MSVC)
+  add_definitions(-DUNICODE -D_UNICODE )
+</code></pre></div>
+
+
+<p>These 2 changes had to be done because Visual Studio's  rc.exe gave an error message saying -Ot is an invalid operator, when I removed -Ot it said -Oi is valid. Then fp:strict was invalid and another error. </p>
+<p>3)VS compilor (CL) gave this error "you cannot overload a function with 'extern "C"' linkage." when compiling corecrt_io.h (a windows 10 header). </p>
+<p>Removing following lines(:502) from the file fixed it.<br>
+        _Check_return_opt_ _CRT_NONSTDC_DEPRECATE(_lseek)<br>
+        _ACRTIMP long __cdecl lseek(<br>
+            _In_ int  _FileHandle,<br>
+            _In_ long _Offset,<br>
+            _In_ int  _Origin<br>
+            );</p>
+<p>Archer does not work either in x86 or x64. MGED works (I could draw a sphere)<br>
+I'm trying to figure out how to operate fbhelp. It displays a Available devices and current selection when run without parameters.</p>
+<p>Will reproduce and post exact error messages if necessary.</p>
+
+
+
+<a name="196690254"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196690254" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196690254">(May 06 2020 at 20:10)</a>:</h4>
+<p>This is with nmake?</p>
+
+
+
+<a name="196720412"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196720412" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196720412">(May 07 2020 at 02:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/nmake/near/196690254" title="#narrow/stream/104062-general/topic/nmake/near/196690254">said</a>:</p>
+<blockquote>
+<p>This is with nmake?</p>
+</blockquote>
+<p>yes</p>
+
+
+
+<a name="196720502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196720502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196720502">(May 07 2020 at 02:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="217384">@Sadeep Darshana</span> can you provide the exact output of the rc.exe ?  that's odd because it should be the same set of supported options.  it's still compiling via msvc</p>
+
+
+
+<a name="196720672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196720672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196720672">(May 07 2020 at 02:18)</a>:</h4>
+<p>the second response at <a href="https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe" title="https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe">https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe</a> might be a hint if you've installed multiple versions of msvc or a mismatched sdk.</p>
+
+
+
+<a name="196720980"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196720980" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196720980">(May 07 2020 at 02:24)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/nmake/near/196720672" title="#narrow/stream/104062-general/topic/nmake/near/196720672">said</a>:</p>
+<blockquote>
+<p>the second response at <a href="https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe" title="https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe">https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe</a> might be a hint if you've installed multiple versions of msvc or a mismatched sdk.</p>
+</blockquote>
+<p>rc.exe runs and exits with a non zero.<br>
+I'm reproducing the error</p>
+
+
+
+<a name="196721847"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196721847" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196721847">(May 07 2020 at 02:44)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> <br>
+C:\gsoc2\brlcad-code\build&gt;nmake<br>
+...<br>
+...</p>
+<div class="codehilite"><pre><span></span><code>[  5%] Building RC object src/other/tcl/CMakeFiles/tcl.dir/win/tcl.rc.res
+fatal error RC1106: invalid option: -Ot
+NMAKE : fatal error U1077: &#39;C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\rc.exe&#39; : return code &#39;0x1&#39;
+Stop.
+NMAKE : fatal error U1077: &#39;&quot;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\bin\HostX64\x64\nmake.exe&quot;&#39; : return code &#39;0x2&#39;
+Stop.
+NMAKE : fatal error U1077: &#39;&quot;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\bin\HostX64\x64\nmake.exe&quot;&#39; : return code &#39;0x2&#39;
+Stop.
+</code></pre></div>
+
+
+
+<a name="196721952"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196721952" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196721952">(May 07 2020 at 02:46)</a>:</h4>
+<p>hm, at a glance, I'd say that's because C++ compiler options are being passed to the resource compiler, which is odd because msvc also calls the resource compiler</p>
+
+
+
+<a name="196721953"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196721953" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196721953">(May 07 2020 at 02:46)</a>:</h4>
+<p>nmake VERBOSE=1</p>
+
+
+
+<a name="196721985"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196721985" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196721985">(May 07 2020 at 02:47)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>[  2%] Building RC object src/other/tcl/CMakeFiles/tcl.dir/win/tcl.rc.res
+        cd C:\gsoc2\brlcad-code\build\src\other\tcl
+        C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\rc.exe -DBUILD_tcl -DGETTOD_NOT_DECLARED=1 -DHAVE_FLOAT_H=1 -DHAVE_GETCWD=1 -DHAVE_INTPTR_T=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_MKTIME=1 -DHAVE_SIGNED_CHAR=1 -DHAVE_SIZE_T=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_UINTPTR_T=1 -DHAVE_ZLIB=1 -DMP_FIXED_CUTOFFS -DMP_NO_STDINT -DMP_PREC=4 -DNO_DIRENT_H=1 -DNO_DLFCN_H=1 -DNO_FSTATFS=1 -DNO_GETTOD=1 -DNO_REALPATH=1 -DNO_UNAME=1 -DNO_WAIT3=1 -DPSAPI_VERSION=1 -DSTDC_HEADERS=1 -DTCL_CFGVAL_ENCODING=\&quot;cp1252\&quot; -DTCL_COMPILE_DEBUG=0 -DTCL_PIPE_DLL=\&quot;tclpip86.dll\&quot; -DTCL_SHLIB_EXT=\&quot;.dll\&quot; -DTCL_THREADS=1 -DTCL_TOMMATH=1 -DTCL_UNLOAD_DLLS=1 -DUSE_COMPAT=1 -DUSE_DIRENT2_H=1 -DUSE_THREAD_ALLOC=1 -DZ_PREFIX -DZ_PREFIX_STR=brl_ -D_CRT_NONSTDC_NO_DEP -D_CRT_SECURE_NO_DEPRECATE -D_REENTRANT=1 -D_THREAD_SAFE=1 -D_UNICODE -D_WIN64 -D__CHAR_UNSIGNED__ -D_stati64=_stat64 -Dinline=__inline -Dtcl_EXPORTS -IC:\gsoc2\brlcad-code\build\include\brlcad -IC:\gsoc2\brlcad-code\build\include -IC:\gsoc2\brlcad-code\include -IC:\gsoc2\brlcad-code\src\other\tcl\win -IC:\gsoc2\brlcad-code\src\other\tcl\generic -IC:\gsoc2\brlcad-code\src\other\tcl\libtommath -IC:\gsoc2\brlcad-code\build\src\other\tcl\include -IC:\gsoc2\brlcad-code\src\other\libz -IC:\gsoc2\brlcad-code\build\src\other\libz -DWIN32 -D_DEBUG   -Ot -Oi -fp:strict -Gs -GS -GL -MD /fo CMakeFiles\tcl.dir\win\tcl.rc.res C:\gsoc2\brlcad-code\src\other\tcl\win\tcl.rc
+fatal error RC1106: invalid option: -Ot
+NMAKE : fatal error U1077: &#39;C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\rc.exe&#39; : return code &#39;0x1&#39;
+Stop.
+NMAKE : fatal error U1077: &#39;&quot;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\bin\HostX64\x64\nmake.exe&quot;&#39; : return code &#39;0x2&#39;
+Stop.
+NMAKE : fatal error U1077: &#39;&quot;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\bin\HostX64\x64\nmake.exe&quot;&#39; : return code &#39;0x2&#39;
+Stop.
+</code></pre></div>
+
+
+<p>with verbose</p>
+
+
+
+<a name="196722219"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196722219" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196722219">(May 07 2020 at 02:53)</a>:</h4>
+<p>C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\rc.exe</p>
+<div class="codehilite"><pre><span></span><code>-DBUILD_tcl
+-DGETTOD_NOT_DECLARED=1
+-DHAVE_FLOAT_H=1
+-DHAVE_GETCWD=1
+-DHAVE_INTPTR_T=1
+-DHAVE_INTTYPES_H=1
+-DHAVE_LIMITS_H=1
+-DHAVE_MEMORY_H=1
+-DHAVE_MKTIME=1
+-DHAVE_SIGNED_CHAR=1
+-DHAVE_SIZE_T=1
+-DHAVE_STDINT_H=1
+-DHAVE_STDLIB_H=1
+-DHAVE_STRING_H=1
+-DHAVE_SYS_STAT_H=1
+-DHAVE_SYS_TYPES_H=1
+-DHAVE_UINTPTR_T=1
+-DHAVE_ZLIB=1
+-DMP_FIXED_CUTOFFS
+-DMP_NO_STDINT
+-DMP_PREC=4
+-DNO_DIRENT_H=1
+-DNO_DLFCN_H=1
+-DNO_FSTATFS=1
+-DNO_GETTOD=1
+-DNO_REALPATH=1
+-DNO_UNAME=1
+-DNO_WAIT3=1
+-DPSAPI_VERSION=1
+-DSTDC_HEADERS=1
+-DTCL_CFGVAL_ENCODING=\&quot;cp1252\&quot;
+-DTCL_COMPILE_DEBUG=0
+-DTCL_PIPE_DLL=\&quot;tclpip86.dll\&quot;
+-DTCL_SHLIB_EXT=\&quot;.dll\&quot;
+-DTCL_THREADS=1
+-DTCL_TOMMATH=1
+-DTCL_UNLOAD_DLLS=1
+-DUSE_COMPAT=1
+-DUSE_DIRENT2_H=1
+-DUSE_THREAD_ALLOC=1
+-DZ_PREFIX
+-DZ_PREFIX_STR=brl_
+-D_CRT_NONSTDC_NO_DEP
+-D_CRT_SECURE_NO_DEPRECATE
+-D_REENTRANT=1
+-D_THREAD_SAFE=1
+-D_UNICODE
+-D_WIN64
+-D__CHAR_UNSIGNED__
+-D_stati64=_stat64
+-Dinline=__inline
+-Dtcl_EXPORTS
+-IC:\gsoc2\brlcad-code\build\include\brlcad
+-IC:\gsoc2\brlcad-code\build\include
+-IC:\gsoc2\brlcad-code\include
+-IC:\gsoc2\brlcad-code\src\other\tcl\win
+-IC:\gsoc2\brlcad-code\src\other\tcl\generic
+-IC:\gsoc2\brlcad-code\src\other\tcl\libtommath
+-IC:\gsoc2\brlcad-code\build\src\other\tcl\include
+-IC:\gsoc2\brlcad-code\src\other\libz
+-IC:\gsoc2\brlcad-code\build\src\other\libz
+-DWIN32
+-D_DEBUG
+
+
+-Ot
+-Oi
+-fp:strict
+-Gs
+-GS
+-GL
+-MD
+/fo
+CMakeFiles\tcl.dir\win\tcl.rc.res
+C:\gsoc2\brlcad-code\src\other\tcl\win\tcl.rc
+</code></pre></div>
+
+
+<p>These are all the parameters passed to rc.exe <span class="user-mention" data-user-id="102902">@Sean</span></p>
+
+
+
+<a name="196723563"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmake/near/196723563" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sadeep Darshana <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmake.html#196723563">(May 07 2020 at 03:19)</a>:</h4>
+<p>I looked at the RC_DEFINES, RC_INCLUDES, RC_FLAGS variables. Here are the results. (I split into lines by space for readability)</p>
+<p>RC_DEFINES</p>
+<div class="codehilite"><pre><span></span><code>-DBUILD_tcl
+-DGETTOD_NOT_DECLARED=1
+-DHAVE_FLOAT_H=1
+-DHAVE_GETCWD=1
+-DHAVE_INTPTR_T=1
+-DHAVE_INTTYPES_H=1
+-DHAVE_LIMITS_H=1
+-DHAVE_MEMORY_H=1
+-DHAVE_MKTIME=1
+-DHAVE_SIGNED_CHAR=1
+-DHAVE_SIZE_T=1
+-DHAVE_STDINT_H=1
+-DHAVE_STDLIB_H=1
+-DHAVE_STRING_H=1
+-DHAVE_SYS_STAT_H=1
+-DHAVE_SYS_TYPES_H=1
+-DHAVE_UINTPTR_T=1
+-DHAVE_ZLIB=1
+-DMP_FIXED_CUTOFFS
+-DMP_NO_STDINT
+-DMP_PREC=4
+-DNO_DIRENT_H=1
+-DNO_DLFCN_H=1
+-DNO_FSTATFS=1
+-DNO_GETTOD=1
+-DNO_REALPATH=1
+-DNO_UNAME=1
+-DNO_WAIT3=1
+-DPSAPI_VERSION=1
+-DSTDC_HEADERS=1
+-DTCL_CFGVAL_ENCODING=\&quot;cp1252\&quot;
+-DTCL_COMPILE_DEBUG=0
+-DTCL_PIPE_DLL=\&quot;tclpip86.dll\&quot;
+-DTCL_SHLIB_EXT=\&quot;.dll\&quot;
+-DTCL_THREADS=1
+-DTCL_TOMMATH=1
+-DTCL_UNLOAD_DLLS=1
+-DUSE_COMPAT=1
+-DUSE_DIRENT2_H=1
+-DUSE_THREAD_ALLOC=1
+-DZ_PREFIX
+-DZ_PREFIX_STR=brl_
+-D_CRT_NONSTDC_NO_DEP
+-D_CRT_SECURE_NO_DEPRECATE
+-D_REENTRANT=1
+-D_THREAD_SAFE=1
+-D_UNICODE
+-D_WIN64
+-D__CHAR_UNSIGNED__
+-D_stati64=_stat64
+-Dinline=__inline
+-Dtcl_EXPORTS
+</code></pre></div>
+
+
+<p>RC_INCLUDES</p>
+<div class="codehilite"><pre><span></span><code>-IC:\gsoc2\brlcad-code\build\include\brlcad
+-IC:\gsoc2\brlcad-code\build\include
+-IC:\gsoc2\brlcad-code\include
+-IC:\gsoc2\brlcad-code\src\other\tcl\win
+-IC:\gsoc2\brlcad-code\src\other\tcl\generic
+-IC:\gsoc2\brlcad-code\src\other\tcl\libtommath
+-IC:\gsoc2\brlcad-code\build\src\other\tcl\include
+-IC:\gsoc2\brlcad-code\src\other\libz
+-IC:\gsoc2\brlcad-code\build\src\other\libz
+</code></pre></div>
+
+
+<p>RC_FLAGS</p>
+<div class="codehilite"><pre><span></span><code>-DWIN32
+-D_DEBUG
+-Ot
+-Oi
+-fp:strict
+-Gs
+-GS
+-GL
+-MD
+</code></pre></div>
+
+
+<p>These are the params passed to rc.exe<br>
+C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\rc.exe $(RC_DEFINES) $(RC_INCLUDES) $(RC_FLAGS) /fo CMakeFiles\tcl.dir\win\tcl.rc.res C:\gsoc2\brlcad-code\src\other\tcl\win\tcl.rc</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,143 @@
+<html>
+<head><meta charset="utf-8"><title>dplot · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html">dplot</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="389811089"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389811089" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389811089">(Sep 08 2023 at 05:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> concerned about removing dplot subcommand... that invalidates huge swaths of the bool_eval_development.xml where Nick documented how to use it and other existing tools to continue the development progress.  Now the guide is out of date and would need to be updated and not clear if one even has the tools at their disposal to do the work.</p>
+
+
+
+<a name="389811248"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389811248" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389811248">(Sep 08 2023 at 05:17)</a>:</h4>
+<p>I'm guessing your motivation was architectural trying to reduce the footprint of lemon/perplex, but this feels like cutting off the nose to spite the face -- when the underlying issue is probably just some cmake issue in perplex.</p>
+
+
+
+<a name="389811602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389811602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389811602">(Sep 08 2023 at 05:20)</a>:</h4>
+<p>I'm perhaps entirely misinterpreting the commit or missing something, of course.  I did see another purporting to implement it without a parser, but have trouble believing that was done so quickly without eliminating capabilities or features described in the bool eval doc.  it seemed non-trivial work.</p>
+
+
+
+<a name="389898662"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389898662" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389898662">(Sep 08 2023 at 15:02)</a>:</h4>
+<p>The goal wasn't to eliminate or change the dplot command, as such.  I tried to translate the perplex/lemon scanner and parser into C++ string processing in the dplot_load_file_data function in dplot.cpp and its child functions.</p>
+
+
+
+<a name="389899797"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389899797" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389899797">(Sep 08 2023 at 15:08)</a>:</h4>
+<p>You're correct that I was looking to eliminate our usage of perplex/lemon in the BRL-CAD tree, but not as an immediate fix to the brlcad_externals problem - until stepcode is able to migrate away from using perplex/lemon it's moot whether BRL-CAD itself needs it.  That issue was just the prompt that made me look at how hard clearing dplot's usage would be.</p>
+
+
+
+<a name="389900181"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389900181" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389900181">(Sep 08 2023 at 15:11)</a>:</h4>
+<p>If <span class="user-mention" data-user-id="273836">@Chris Horler</span> is able to eliminate the need for perplex/lemon from stepcode, we're actually quite close.  Now that we have ASSIMP wired in as a route for OBJ conversion, it may be possible to replace the wfobj library.  That leaves dplot as the only other significant use, and dplot.cpp is an attempt to preserve the functionality without using perplex/lemon.  I may be wrong, but reading the scanner and parser input files the format he was parsing with them was actually quite basic.</p>
+
+
+
+<a name="389900419"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389900419" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389900419">(Sep 08 2023 at 15:12)</a>:</h4>
+<p>If there's any concern I'm fine with reverting it back in for now - VCS has the dplot.cpp file if/when it becomes the only roadblock to completely purging the dependency.</p>
+
+
+
+<a name="389902017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389902017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389902017">(Sep 08 2023 at 15:20)</a>:</h4>
+<p>I'm not as concerned about whether we keep perplex or not as I am with NURBS progress.  Can you check the bool eval guide's usage to see if the dplot usage he describes there still works?  That's really the main concern that we don't regress progress there unnecessarily.</p>
+
+
+
+<a name="389902375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389902375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389902375">(Sep 08 2023 at 15:22)</a>:</h4>
+<p>What's replacing perplex in stepcode??  Would seem strange to replace a formal grammar that captures idiosyncratic and recursive behaviors baked in for free with something hand-rolled.. or is it a conversion to something in C++17 or something?</p>
+
+
+
+<a name="389905908"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389905908" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389905908">(Sep 08 2023 at 15:40)</a>:</h4>
+<p>You'll have to ask <span class="user-mention" data-user-id="273836">@Chris Horler</span> what his plans are - I don't actually know the details</p>
+
+
+
+<a name="389906026"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389906026" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389906026">(Sep 08 2023 at 15:41)</a>:</h4>
+<p>I'll put dplot back where it was for now - the old one wasn't working for me though, just fyi</p>
+
+
+
+<a name="389906225"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389906225" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389906225">(Sep 08 2023 at 15:42)</a>:</h4>
+<p>And a couple simple boolean outputs weren't generating good answers either, so checking its behavior may be a bit problematic right now...</p>
+
+
+
+<a name="389906837"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389906837" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389906837">(Sep 08 2023 at 15:45)</a>:</h4>
+<p>If we're going to keep perplex around long term though I'm going to merge the re2c sources in with it and try to make it simpler to deal with in general - upstream re2c never took our bison-&gt;lemon changes and has since diverged.</p>
+
+
+
+<a name="389911381"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389911381" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389911381">(Sep 08 2023 at 16:14)</a>:</h4>
+<p>Or I suppose we could go the other extreme and see if <a href="https://github.com/lexxmark/winflexbison">https://github.com/lexxmark/winflexbison</a> and the latest re2c could be made to work in brlcad_externals...</p>
+
+
+
+<a name="389938757"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389938757" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Chris Horler <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389938757">(Sep 08 2023 at 19:34)</a>:</h4>
+<p>My branch of stepcode doesn't use perplex, lemon is still used...is there a preferred alternative?  I thought lemon was chosen because it was simple and cross platform...has something changed?</p>
+
+
+
+<a name="389941551"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389941551" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389941551">(Sep 08 2023 at 19:56)</a>:</h4>
+<p>No, lemon is fine - it's the easiest of the components to deal with.</p>
+
+
+
+<a name="389942105"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389942105" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389942105">(Sep 08 2023 at 20:00)</a>:</h4>
+<p>My main unhappiness is that our re2c version is really really old, and there's an  active upstream.  Historically we've tried to exercise all the build steps for the toolchain from the C/C++ compiler up to make sure everything stays working (i.e. we don't want the scanner/parser inputs to no longer be readable by modern versions of the tools because the grammar hasn't changed in 10 years...) but GNU Bison is both GPL and a pain on Windows, so long ago Nick Reed made a version of re2c that could use Lemon.</p>
+
+
+
+<a name="389942634"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/389942634" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#389942634">(Sep 08 2023 at 20:03)</a>:</h4>
+<p>It's still working fine, but that version is on us now as the upstream code never took the Lemon changes and has moved on since.  The pragmatic choice would just be to use the "stanard" re2c build which uses pre-generated sources and let them handle the rest.  Since brlcad_externals is moving us more towards a "let the upstream handle it" posture, perhaps that's ultimately the best option - I sure don't plan to check all of qtbase to see if anything in there is pre-generated :-/</p>
+
+
+
+<a name="392705985"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/392705985" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#392705985">(Sep 23 2023 at 14:41)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/dplot/near/389906225">said</a>:</p>
+<blockquote>
+<p>And a couple simple boolean outputs weren't generating good answers either, so checking its behavior may be a bit problematic right now...</p>
+</blockquote>
+<p>Oof.  Another victim of inadequate CI and testing.  Quite a lot of cases were working just fine so would be good to know what broke and when/why.  My guess would be something in libbrep or libbu a year or so ago when there was some churn.  Really need to get my conversion suite back up and running.</p>
+
+
+
+<a name="392706112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/392706112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#392706112">(Sep 23 2023 at 14:43)</a>:</h4>
+<p>Planning on working on testing a bit here over the next couple months.  That’s one of my personal goals to get some of my backlogged tests integrated before I completely forget about them.</p>
+
+
+
+<a name="392706166"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/dplot/near/392706166" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/dplot.html#392706166">(Sep 23 2023 at 14:44)</a>:</h4>
+<p>Would love to get a dashboard up and running but will see if that’s in the cards..</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

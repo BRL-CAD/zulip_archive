@@ -1,0 +1,278 @@
+[
+    {
+        "content": "<p>To the best of my knowledge, this is the first run of the SH based regression tests on Windows: <a href=\"/user_uploads/1549/ZCVo9QLnzP0v4jCb8R7CFj8_/brlcad_sh_regress_windows.txt\">brlcad_sh_regress_windows.txt</a></p>",
+        "id": 206709058,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597245957
+    },
+    {
+        "content": "<p>Kinda astonished how much of this \"just worked\" or worked with minor tweaking...</p>",
+        "id": 206726563,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597254150
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> So that's great -- can you send the benchmark log to <a href=\"mailto:benchmark@brlcad.org\">benchmark@brlcad.org</a> ?  That may be the first time the benchmark has run successfully on Windows, at least in a really long time.</p>",
+        "id": 206954051,
+        "sender_full_name": "Sean",
+        "timestamp": 1597425519
+    },
+    {
+        "content": "<p>even if it's not a production build, still good to get the log</p>",
+        "id": 206954106,
+        "sender_full_name": "Sean",
+        "timestamp": 1597425556
+    },
+    {
+        "content": "<p>another for production/release build would be great too if it's not alredy</p>",
+        "id": 206954129,
+        "sender_full_name": "Sean",
+        "timestamp": 1597425573
+    },
+    {
+        "content": "<p>Um.  Probably not from the github runner - I'll try to fire it for the Release build on my laptop later today.  Busy chasing down some weird issue with the subprocess commands and MGED -c mode...</p>",
+        "id": 206954163,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597425597
+    },
+    {
+        "content": "<p>aaand backing up pre ged_subprocess doesn't help any because at that point the rtweight command wouldn't run without a view.  Awesome.</p>",
+        "id": 206954459,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597425752
+    },
+    {
+        "content": "<p>Wasn't that because of the libged restructuring the preceded?</p>",
+        "id": 206955384,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426254
+    },
+    {
+        "content": "<p>woah, now that's some new blather... if you just make a sphere and run rtweight, it spews log messages.  Looks like one per ray...</p>",
+        "id": 206955591,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426368
+    },
+    {
+        "content": "<p>Material type 0 used, but has no density file entry.<br>\n  (region /sph)<br>\n  Mass is undefined.</p>",
+        "id": 206955600,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426371
+    },
+    {
+        "content": "<p>The following is currently producing no output for me (crashing on BSD):</p>\n<p>./bin/mged share/db/moss.g rtweight  </p>\n<p>It should be producing a variety of message before giving up, which is what you get if you run rtweight from an interactive mged -c -a nu</p>",
+        "id": 206955766,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597426473
+    },
+    {
+        "content": "<p>I take it you have a .density file defined?</p>",
+        "id": 206955807,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597426507
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> The immediate behavioral fix is to go back to refusing to run rt* commands without a view, but I don't like that behavior difference.</p>",
+        "id": 206955895,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597426561
+    },
+    {
+        "content": "<p>yes, I have one -- not questioning the message.  It's correct, it's the per-ray blather that's an issue.</p>",
+        "id": 206955968,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426590
+    },
+    {
+        "content": "<p>could wrap it in a static so it only prints N times, or suppress and just print a list of undefined at the end</p>",
+        "id": 206956054,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426647
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regression.20tests.20on.20Windows/near/206955766\">said</a>:</p>\n<blockquote>\n<p>The following is currently producing no output for me (crashing on BSD):</p>\n</blockquote>",
+        "id": 206956134,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426693
+    },
+    {
+        "content": "<p>Doesn't crash for me, but does give no output whatsoever with and without -c</p>",
+        "id": 206956149,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426712
+    },
+    {
+        "content": "<p>return code is 0</p>",
+        "id": 206956156,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426718
+    },
+    {
+        "content": "<p>er, that's a build from a couple days ago - rebuilding to test current</p>",
+        "id": 206956180,
+        "sender_full_name": "Sean",
+        "timestamp": 1597426743
+    },
+    {
+        "content": "<p>Er, right - it produces output in interactive mode only - supplying the command doesn't produce output, with or without -c</p>",
+        "id": 206956984,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597427233
+    },
+    {
+        "content": "<p>On BSD I got as far as determining that there is a SIGPIPE being raised in _ged_run_rt at the bu_process_close in ged_util.c:1452</p>",
+        "id": 206957183,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597427355
+    },
+    {
+        "content": "<p>(RELEASE branch - not sure that's the line number in trunk)</p>",
+        "id": 206957222,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597427379
+    },
+    {
+        "content": "<p>I don't doubt I messed up something, but so far not having much luck figuring out what...</p>",
+        "id": 206957303,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597427405
+    },
+    {
+        "content": "<p>When I back up to r72148 it just reports there is no view defined and quits</p>",
+        "id": 206957825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597427686
+    },
+    {
+        "content": "<p>I guess 72170 would be more to the point, actually...</p>",
+        "id": 206958049,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597427815
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regression.20tests.20on.20Windows/near/206957825\">said</a>:</p>\n<blockquote>\n<p>When I back up to r72148 it just reports there is no view defined and quits</p>\n</blockquote>\n<p>Which is not necessarily the wrong thing to do -- there's no view, so nothing to compute a weight on.  Obviously could be a better message but that wasn't intrinsically wrong/bad.</p>",
+        "id": 206968220,
+        "sender_full_name": "Sean",
+        "timestamp": 1597433375
+    },
+    {
+        "content": "<p>I'll note that the simple sph case is working  in 7.24 so there is some change causing the rtweight output to abort.</p>",
+        "id": 206968330,
+        "sender_full_name": "Sean",
+        "timestamp": 1597433433
+    },
+    {
+        "content": "<p>I sent the benchmark results from Windows (Release build)</p>",
+        "id": 206976059,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597435652
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/regression.20tests.20on.20Windows/near/206968330\">said</a>:</p>\n<blockquote>\n<p>I'll note that the simple sph case is working  in 7.24 so there is some change causing the rtweight output to abort.</p>\n</blockquote>\n<p>It looks like c72375 introduced the behavior change in rtweight, though I'm still not seeing where/how exactly.</p>",
+        "id": 206984201,
+        "sender_full_name": "Sean",
+        "timestamp": 1597440480
+    },
+    {
+        "content": "<p>Hmm.  density_factor is controlling that message in viewweight.c, so it must be returning differently</p>",
+        "id": 206986362,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597442029
+    },
+    {
+        "content": "<p>yeah, so far there's two changes -- the excessive blather is added and the report is missing</p>",
+        "id": 206986503,
+        "sender_full_name": "Sean",
+        "timestamp": 1597442134
+    },
+    {
+        "content": "<p>Is the report missing in interactive mode as well?</p>",
+        "id": 206986523,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597442159
+    },
+    {
+        "content": "<p>mind you, the report was mostly empty as it could only report volume, but that's a significant change to not report it at all</p>",
+        "id": 206986525,
+        "sender_full_name": "Sean",
+        "timestamp": 1597442160
+    },
+    {
+        "content": "<p>yes, all the usual output is missing</p>",
+        "id": 206986579,
+        "sender_full_name": "Sean",
+        "timestamp": 1597442182
+    },
+    {
+        "content": "<p>just the blather and performance footer show</p>",
+        "id": 206986585,
+        "sender_full_name": "Sean",
+        "timestamp": 1597442193
+    },
+    {
+        "content": "<p>OK.</p>",
+        "id": 206986586,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597442193
+    },
+    {
+        "content": "<p>What about a 'correct' input, that has entries in the .density file?  Does that work?</p>",
+        "id": 206986796,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597442376
+    },
+    {
+        "content": "<p>I thought the regression tests for rtweight were working...</p>",
+        "id": 206986812,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597442391
+    },
+    {
+        "content": "<p>haven't tested that, but if the tests are passing, I'd expect those cases are working.  this isn't an abnormal case, particularly for a new user.  we could add a test for it if you want something to fail. :)</p>",
+        "id": 206987053,
+        "sender_full_name": "Sean",
+        "timestamp": 1597442561
+    },
+    {
+        "content": "<p>I do - if this is a behavior that's considered an error I want to catch it.</p>",
+        "id": 206987075,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597442588
+    },
+    {
+        "content": "<p>certainly not reporting volume is an error</p>",
+        "id": 206987809,
+        "sender_full_name": "Sean",
+        "timestamp": 1597443158
+    },
+    {
+        "content": "<p>rtweight has always reported volume even when no material information is specified, so you can run it on anything and get a volumetric report</p>",
+        "id": 206987844,
+        "sender_full_name": "Sean",
+        "timestamp": 1597443186
+    },
+    {
+        "content": "<p>the blather is just undesirable.  I'm actually a little baffled as to why it wasn't blathering before so far.  it looks like it initialized the density array to -1 before and nothing is set, so it should be getting density[0] == -1 I think...</p>",
+        "id": 206987938,
+        "sender_full_name": "Sean",
+        "timestamp": 1597443242
+    },
+    {
+        "content": "<p>Um... did you say 72375 introduced the spewage for you?  I'm seeing it in 72374 here...</p>",
+        "id": 206990363,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597445004
+    },
+    {
+        "content": "<p>I only confirmed it didn't appear to be happening in 7.24.  my bad assuming that was the commit. it looked like the only recent significant change.  From the logic, it seems like I very well could have introduced it back in 59k but then 7.24 came later...</p>",
+        "id": 206993085,
+        "sender_full_name": "Sean",
+        "timestamp": 1597447774
+    },
+    {
+        "content": "<p>I think I see a fix regardless, material 0 is supposed to be a special case in the code for unassigned materials, so it could just check against it</p>",
+        "id": 206993149,
+        "sender_full_name": "Sean",
+        "timestamp": 1597447826
+    }
+]

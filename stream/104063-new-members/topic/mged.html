@@ -1,0 +1,32 @@
+<html>
+<head><meta charset="utf-8"><title>mged · new members · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104063-new-members/index.html">new members</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104063-new-members/topic/mged.html">mged</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="162873703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104063-new%20members/topic/mged/near/162873703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104063-new-members/topic/mged.html#162873703">(Apr 09 2019 at 02:26)</a>:</h4>
+<blockquote>
+<p>I'm looking into MGED now<br>
+I have noticed that when you enter a commands in the Command Window, some commands (like rtarea) does the execution by merely running an executable file in the bin directory while some commands (like make) are built into the program.</p>
+</blockquote>
+<p>Yes, a few complex commands invoke an external application, but they are the minority -- rt, rtarea, and rtweight come to mind.  Most commands are invoked directly via a ged_[command]() function.</p>
+<blockquote>
+<p>One thing I did not understand is how do the 2 windows (Command Window(CW) and Graphics window(GW)) communicate?</p>
+</blockquote>
+<p>They communicate with each other via the Tcl interpreter.  The main application is running a Tcl interpreter which receives keyboard inputs in the CW, for example.  When a command is typed in the CW and enter is pressed, Tcl takes that string and calls the corresponding code.  That is typically a function in src/libged which runs, possibly writes messages to the CW or updates to the GW and returns a result back to Tcl. </p>
+<blockquote>
+<p>Is there an actual communication happening within the process ? Or does the GW merely display the latest .g file (in which case CW executes the command changing the state of the .g file, and GW reads the new state and adjusts itself accordingly)?<br>
+Or does the 3d model exists in the memory that is accessible by both GW and CW?</p>
+</blockquote>
+<p>The latter.  The 3d model resides in memory, see src/mged code, and functions in src/libged can cause things int he GW and CW be updated.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

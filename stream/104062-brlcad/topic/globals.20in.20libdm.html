@@ -1,0 +1,795 @@
+<html>
+<head><meta charset="utf-8"><title>globals in libdm · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html">globals in libdm</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="193503095"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503095" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503095">(Apr 09 2020 at 20:10)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  Question - are the globals in the display manager backends (like, for example, ambientColor in dm-ogl.c) intended to be global across all display managers?  I'm trying to figure out why they would have been included in the local variables associated with a given display manager...</p>
+
+
+
+<a name="193503156"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503156" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503156">(Apr 09 2020 at 20:11)</a>:</h4>
+<p>looking</p>
+
+
+
+<a name="193503208"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503208" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503208">(Apr 09 2020 at 20:11)</a>:</h4>
+<p>er - would NOT have been included in the local dm variables, sorry</p>
+
+
+
+<a name="193503386"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503386" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503386">(Apr 09 2020 at 20:13)</a>:</h4>
+<p>No, they're not intended to be global across all.</p>
+
+
+
+<a name="193503480"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503480" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503480">(Apr 09 2020 at 20:14)</a>:</h4>
+<p>OK, thanks - that establishes some degrees of freedom</p>
+
+
+
+<a name="193503491"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503491" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503491">(Apr 09 2020 at 20:14)</a>:</h4>
+<p>they're a rather specific implementation detail of opengl 2</p>
+
+
+
+<a name="193503537"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503537" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503537">(Apr 09 2020 at 20:14)</a>:</h4>
+<p>so you'll probably see them replicated in all the DMs using opengl, and not elsewhere</p>
+
+
+
+<a name="193503546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503546">(Apr 09 2020 at 20:14)</a>:</h4>
+<p>Ah, I wasn't clear - I meant whether they're intended to be global across all instances of display managers of a specific type</p>
+
+
+
+<a name="193503583"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503583" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503583">(Apr 09 2020 at 20:15)</a>:</h4>
+<p>if we made a vulkan or ogl4 interface, some of them would likely disappear or change</p>
+
+
+
+<a name="193503597"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503597" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503597">(Apr 09 2020 at 20:15)</a>:</h4>
+<p>so if you set ambientColor on one ogl dm, is it expected that that setting be reflected across all ogl instances?</p>
+
+
+
+<a name="193503633"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503633" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503633">(Apr 09 2020 at 20:15)</a>:</h4>
+<p>ah, hm</p>
+
+
+
+<a name="193503657"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503657" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503657">(Apr 09 2020 at 20:15)</a>:</h4>
+<p>icky if it does...</p>
+
+
+
+<a name="193503662"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503662" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503662">(Apr 09 2020 at 20:15)</a>:</h4>
+<p>probably yes</p>
+
+
+
+<a name="193503718"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503718" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503718">(Apr 09 2020 at 20:16)</a>:</h4>
+<p>that's the only reason to make them static</p>
+
+
+
+<a name="193503723"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503723" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503723">(Apr 09 2020 at 20:16)</a>:</h4>
+<p>&lt;wince&gt;</p>
+
+
+
+<a name="193503767"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503767" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503767">(Apr 09 2020 at 20:16)</a>:</h4>
+<p>C version of class data</p>
+
+
+
+<a name="193503823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193503823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193503823">(Apr 09 2020 at 20:17)</a>:</h4>
+<p>That's kinda not cool - what if the user application doesn't want the same settings in all windows??</p>
+
+
+
+<a name="193504185"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504185" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504185">(Apr 09 2020 at 20:20)</a>:</h4>
+<p>they don't appear to be settings in the same sense of DM settings, but I don't feel strongly about it</p>
+
+
+
+<a name="193504225"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504225" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504225">(Apr 09 2020 at 20:20)</a>:</h4>
+<p>Oh, well - I guess compared to the rest of this that's a minor pain point...</p>
+
+
+
+<a name="193504244"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504244" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504244">(Apr 09 2020 at 20:20)</a>:</h4>
+<p>they're more "these are values we have to tell opengl for things to display" that could just as well be static inside of functions except that several functions need that value</p>
+
+
+
+<a name="193504308"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504308" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504308">(Apr 09 2020 at 20:21)</a>:</h4>
+<p>like position of the light source -- that's completely arbitrary.  just needs to be defined.</p>
+
+
+
+<a name="193504310"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504310" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504310">(Apr 09 2020 at 20:21)</a>:</h4>
+<p>So rather than pull the values from the private vars struct, they're just stashed in statics?</p>
+
+
+
+<a name="193504424"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504424" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504424">(Apr 09 2020 at 20:22)</a>:</h4>
+<p>I suppose it doesn't really matter,  just a bit odd when reading a function and a variable swoops in from nowhere...</p>
+
+
+
+<a name="193504499"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504499" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504499">(Apr 09 2020 at 20:23)</a>:</h4>
+<p>Just looking through the code, I would say the main distinction looks to be more that the statics are reflective values that just get set and/or updated as needed, whereas the private vars are declarative values that control and modify</p>
+
+
+
+<a name="193504609"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504609" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504609">(Apr 09 2020 at 20:25)</a>:</h4>
+<p>If this were a C++ class, it's the difference between class data and object data</p>
+
+
+
+<a name="193504630"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504630" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504630">(Apr 09 2020 at 20:25)</a>:</h4>
+<p>How they intruded on my radar screen - I was experimenting with moving the *_open calls (which are relatively heavy Tcl/Tk users) up into libtclcad and tripped on the statics.</p>
+
+
+
+<a name="193504661"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504661" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504661">(Apr 09 2020 at 20:25)</a>:</h4>
+<p>class { static int var = val; } vs class { int var = val; }</p>
+
+
+
+<a name="193504670"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193504670" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193504670">(Apr 09 2020 at 20:25)</a>:</h4>
+<p>I suppose that's a fairly hare-brained idea to begin with</p>
+
+
+
+<a name="193505020"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505020" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505020">(Apr 09 2020 at 20:28)</a>:</h4>
+<p>how so?  looks like they only set dm_interp and don't actually do anything with it</p>
+
+
+
+<a name="193505182"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505182" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505182">(Apr 09 2020 at 20:29)</a>:</h4>
+<p>dm_plot at least set the statics in its open call.  I went ahead and stuffed those into the plot_vars, but I haven't audited the more complex globals to see if the _open functions monkey with them or not.</p>
+
+
+
+<a name="193505189"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505189" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505189">(Apr 09 2020 at 20:30)</a>:</h4>
+<p>but yeah, conceptually, that makes no sense... a DM API without a way to open a DM would be broken design-wise..  wouldn't do it just for the sake of moving a type.</p>
+
+
+
+<a name="193505381"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505381" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505381">(Apr 09 2020 at 20:31)</a>:</h4>
+<p>I'm trying to get Tcl/Tk out of libdm and libfb - I'm pretty sure I've gotten libged itself clear now, so the dm and fb layers are the last holdouts.</p>
+
+
+
+<a name="193505387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505387">(Apr 09 2020 at 20:31)</a>:</h4>
+<p>you know you're in super-likely-to-change-behavior territory... ? :)</p>
+
+
+
+<a name="193505425"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505425" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505425">(Apr 09 2020 at 20:31)</a>:</h4>
+<p>and by 'change', I mean introduce a bug ;)</p>
+
+
+
+<a name="193505457"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505457" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505457">(Apr 09 2020 at 20:31)</a>:</h4>
+<p>Yeah, that's why I had to revert my first attempt - worked on Linux, busted on Windows</p>
+
+
+
+<a name="193505467"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505467" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505467">(Apr 09 2020 at 20:31)</a>:</h4>
+<p>it's all good, just beware :)</p>
+
+
+
+<a name="193505551"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505551" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505551">(Apr 09 2020 at 20:32)</a>:</h4>
+<p>There's a lot of really weird black magic going on with X, ogl, wgl, and Tk in this - it's incredibly fragile</p>
+
+
+
+<a name="193505697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505697">(Apr 09 2020 at 20:33)</a>:</h4>
+<p>I'll scrub down the verbose "cast everything at every usage even though the cast is 20 chars long" style to try and make it more readable (THAT at least should be safe enough), but this is one intimidating maze...</p>
+
+
+
+<a name="193505823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505823">(Apr 09 2020 at 20:34)</a>:</h4>
+<p>such as?  they've always looked pretty CG101 to me.  it's not black magic, it's just what one has to do</p>
+
+
+
+<a name="193505877"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505877" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505877">(Apr 09 2020 at 20:34)</a>:</h4>
+<p>like the ogl DM is pretty text book</p>
+
+
+
+<a name="193505952"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505952" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505952">(Apr 09 2020 at 20:35)</a>:</h4>
+<p>most of the ugly is ... the X11 api and that's just how it is</p>
+
+
+
+<a name="193505966"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193505966" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193505966">(Apr 09 2020 at 20:35)</a>:</h4>
+<p>The platform specific voodoo for embedding the Tk window, trying to get it to repaint at the right times, the platform specific differences beyond glx vs wgl despite Tk nominally being cross platform...</p>
+
+
+
+<a name="193506088"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506088" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506088">(Apr 09 2020 at 20:36)</a>:</h4>
+<p>I know a lot of this is Tk's fault for not providing a proper OpenGL widget, but that doesn't make it any less annoying to deal with.</p>
+
+
+
+<a name="193506122"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506122" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506122">(Apr 09 2020 at 20:37)</a>:</h4>
+<p>yeah, that's just an artifact at this level of API.  DM creates the lowest level contexts and needs a handle on them, as does Tk, so the two have to cooperate <em>somehow</em></p>
+
+
+
+<a name="193506276"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506276" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506276">(Apr 09 2020 at 20:38)</a>:</h4>
+<p>From a design standpoint that's what's binding libged et. al. to Tk right now though - that low level connection.  Just conceptually, what should a libged+dm+fb functionality set look like without Tk in the mix?</p>
+
+
+
+<a name="193506288"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506288" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506288">(Apr 09 2020 at 20:38)</a>:</h4>
+<p>as it is, Tk is being rather polite in that we can do the init and hand it our context.  lots of APIs don't make that work, especially higher level apis like game engines.</p>
+
+
+
+<a name="193506370"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506370" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506370">(Apr 09 2020 at 20:39)</a>:</h4>
+<p>&lt;snort&gt; they'd better be polite about it, if they're not going to do the right thing and give us a properly integrated widget to begin with</p>
+
+
+
+<a name="193506471"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506471" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506471">(Apr 09 2020 at 20:40)</a>:</h4>
+<p>right, the alternative is usually fully managed where they don't let you get at the context</p>
+
+
+
+<a name="193506605"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506605" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506605">(Apr 09 2020 at 20:41)</a>:</h4>
+<p>from libged's perspective, it needs the original dm/fb callback API design -- you just open a dm and draw into it.</p>
+
+
+
+<a name="193506669"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506669" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506669">(Apr 09 2020 at 20:42)</a>:</h4>
+<p>if everything is properly defined through the callbacks, ged should be just fine without having any awareness of Tk</p>
+
+
+
+<a name="193506759"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506759" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506759">(Apr 09 2020 at 20:42)</a>:</h4>
+<p>Hmm... I think the explicit linkage right now is with fb, actually...</p>
+
+
+
+<a name="193506893"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506893" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506893">(Apr 09 2020 at 20:44)</a>:</h4>
+<p>So would we define a lightweight/high-level dm/fb API that is what libged uses, and then it's the responsibility of libdm/lifb/whatever else to implement that minimal API?</p>
+
+
+
+<a name="193506958"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193506958" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193506958">(Apr 09 2020 at 20:45)</a>:</h4>
+<p>I was going to say, maybe I've already updated and you've cleared it out, but libdm doesn't really seem to do much at all with Tk or Tcl</p>
+
+
+
+<a name="193507002"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507002" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507002">(Apr 09 2020 at 20:45)</a>:</h4>
+<p>Um.  The details of the dm-ogl and dm-X backends do...</p>
+
+
+
+<a name="193507011"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507011" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507011">(Apr 09 2020 at 20:45)</a>:</h4>
+<p>the biggest issue with fb last time I looked is reconciling what open_existing is doing</p>
+
+
+
+<a name="193507091"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507091" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507091">(Apr 09 2020 at 20:46)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193506893" title="#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193506893">said</a>:</p>
+<blockquote>
+<p>So would we define a lightweight/high-level dm/fb API that is what libged uses, and then it's the responsibility of libdm/lifb/whatever else to implement that minimal API?</p>
+</blockquote>
+<p>Yes, that was the original design of them both too.</p>
+
+
+
+<a name="193507210"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507210" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507210">(Apr 09 2020 at 20:47)</a>:</h4>
+<p>I had to revert my attempt to push Tk out of the backends when it broke on Windows (frustrating, I was actually fairly close, but debugging that sort of problem on Windows could be a long haul).  From what you were saying that probably wasn't the right way to go at it anyway.</p>
+
+
+
+<a name="193507260"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507260" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507260">(Apr 09 2020 at 20:48)</a>:</h4>
+<p>hence all the #define DM_* ... defines that should all generically hook into the dmp callback table for a given dm instance</p>
+
+
+
+<a name="193507347"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507347" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507347">(Apr 09 2020 at 20:49)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193507002" title="#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193507002">said</a>:</p>
+<blockquote>
+<p>Um.  The details of the dm-ogl and dm-X backends do...</p>
+</blockquote>
+<p>example?  line?</p>
+
+
+
+<a name="193507428"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507428" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507428">(Apr 09 2020 at 20:49)</a>:</h4>
+<p>dm_ogl.c:569</p>
+
+
+
+<a name="193507524"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507524" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507524">(Apr 09 2020 at 20:50)</a>:</h4>
+<p>dm_ogl.c:632 - basically just search for Tk_ in the file</p>
+
+
+
+<a name="193507889"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507889" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507889">(Apr 09 2020 at 20:53)</a>:</h4>
+<p>ah, well yeah but that's the actual window.  it needs a window to draw into and one doesn't exist so it creates it, initializes .. but it doesn't really "do" anything with it that results in a back and forth with the Tcl interpreter</p>
+
+
+
+<a name="193507973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507973">(Apr 09 2020 at 20:54)</a>:</h4>
+<p>Sure.  But the necessity of calling all those Tk_ functions binds us to the Tcl/Tk libraries below the libged level.</p>
+
+
+
+<a name="193507998"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193507998" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193507998">(Apr 09 2020 at 20:54)</a>:</h4>
+<p>probably being imprecise with my words, sorry -- dm presently does have the responsibility for create a window</p>
+
+
+
+<a name="193508003"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508003" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508003">(Apr 09 2020 at 20:54)</a>:</h4>
+<p>to date, that has been (and needed to be) a Tk window</p>
+
+
+
+<a name="193508114"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508114" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508114">(Apr 09 2020 at 20:55)</a>:</h4>
+<p>OK.  Then as long as that's true and we need Tk windows, we're stuck unless we switch to a gcv style "load the backend as a plugin" setup and have libtclcad build the backends...</p>
+
+
+
+<a name="193508229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508229">(Apr 09 2020 at 20:56)</a>:</h4>
+<p>In some ways it doesn't look to far away from that,  actually...</p>
+
+
+
+<a name="193508232"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508232" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508232">(Apr 09 2020 at 20:56)</a>:</h4>
+<p>right, you're not going to change that binding moving it without either changing dm responsibility or changing (or perhaps violating) architecture in some manner.</p>
+
+
+
+<a name="193508361"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508361" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508361">(Apr 09 2020 at 20:58)</a>:</h4>
+<p>OK.  So, path forward?</p>
+
+
+
+<a name="193508364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508364">(Apr 09 2020 at 20:58)</a>:</h4>
+<p>I was going to say, a workable solution to avoid symbol linkage would be to either do dynamic loading or change the responsibility</p>
+
+
+
+<a name="193508414"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508414" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508414">(Apr 09 2020 at 20:58)</a>:</h4>
+<p>what exactly is the goal?  to simply remove Tk as a linkage yet still keep creating Tk windows?</p>
+
+
+
+<a name="193508440"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508440" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508440">(Apr 09 2020 at 20:58)</a>:</h4>
+<p>that wouldn't seem incredibly useful to me</p>
+
+
+
+<a name="193508469"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508469" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508469">(Apr 09 2020 at 20:59)</a>:</h4>
+<p>to set the stage for another window mechanism?</p>
+
+
+
+<a name="193508537"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508537" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508537">(Apr 09 2020 at 20:59)</a>:</h4>
+<p>Well, my goal is libged capabilities without the necessity of Tcl/Tk - for example, if I were to define a GLFW based display for gsh I would want to be able do at least do old-style console display managers and frame buffers.</p>
+
+
+
+<a name="193508694"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508694" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508694">(Apr 09 2020 at 21:01)</a>:</h4>
+<p>If I can do that, then the stage should be properly set for a Qt interface</p>
+
+
+
+<a name="193508843"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508843" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508843">(Apr 09 2020 at 21:02)</a>:</h4>
+<p>so devil is definitely in the details to what you just said</p>
+
+
+
+<a name="193508879"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508879" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508879">(Apr 09 2020 at 21:02)</a>:</h4>
+<p>to do what you describe and what I think you're getting at, I think we'll need to separate the concept of window and context creation in the DM api</p>
+
+
+
+<a name="193508902"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193508902" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193508902">(Apr 09 2020 at 21:02)</a>:</h4>
+<p>right now, they are one in the same throughout dm</p>
+
+
+
+<a name="193509138"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509138" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509138">(Apr 09 2020 at 21:04)</a>:</h4>
+<p>the API isn't far off, but it needs to be one layer lower on the open/close calls and a layer higher on everything else</p>
+
+
+
+<a name="193509264"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509264" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509264">(Apr 09 2020 at 21:06)</a>:</h4>
+<p>for example, currently, dm_open does both -- it creates a window and sets up a context.  dm_open_existing avoids both I believe, which is why there is a platform version of each.</p>
+
+
+
+<a name="193509479"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509479" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509479">(Apr 09 2020 at 21:07)</a>:</h4>
+<p>to be able to utilize a window and/or context that someone else creates, things WILL get messy and likely platform-specific in application code but it can work</p>
+
+
+
+<a name="193509544"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509544" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509544">(Apr 09 2020 at 21:08)</a>:</h4>
+<p>Hmm.  So we'll have to basically sketch out a reworked dm/fb API, then identify an implementation/migration path from where we are to it?</p>
+
+
+
+<a name="193509606"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509606" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509606">(Apr 09 2020 at 21:09)</a>:</h4>
+<p>not the only option, but that's a possibility sure</p>
+
+
+
+<a name="193509647"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509647" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509647">(Apr 09 2020 at 21:09)</a>:</h4>
+<p>What if we make the libdm backends into plugins, keeping the window creation where it is, but allowing a program to provide its own custom backend?</p>
+
+
+
+<a name="193509930"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509930" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509930">(Apr 09 2020 at 21:12)</a>:</h4>
+<p>Decorator Pattern: <a href="https://en.wikipedia.org/wiki/Decorator_pattern" title="https://en.wikipedia.org/wiki/Decorator_pattern">https://en.wikipedia.org/wiki/Decorator_pattern</a></p>
+
+
+
+<a name="193509996"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193509996" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193509996">(Apr 09 2020 at 21:13)</a>:</h4>
+<p>Am I correct that's more or less what we envision for libgcv?</p>
+
+
+
+<a name="193510013"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510013" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510013">(Apr 09 2020 at 21:13)</a>:</h4>
+<p>don't need to be plugins per se, they could be, but the important aspect is that you have basically two apis -- a front end and a backend</p>
+
+
+
+<a name="193510170"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510170" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510170">(Apr 09 2020 at 21:14)</a>:</h4>
+<p>I guess I would need to whiteboard it - my brain jumps to the dmp-&gt;dm_* calls as being the front end and the X/ogl/wgl specific implementations being the back end, but I know I'm missing the real point...</p>
+
+
+
+<a name="193510196"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510196" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510196">(Apr 09 2020 at 21:15)</a>:</h4>
+<p>dm is presently concerned with front+back simultaneously, thus dm-ogl.c is really X11 user frontend and OpenGL drawing backend; dm-X.c is X11 user frontend and X11 drawing backend; dm-wgl is WGL frontend and OpenGL drawing backend, etc</p>
+
+
+
+<a name="193510229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510229">(Apr 09 2020 at 21:15)</a>:</h4>
+<p>Oh, by frontend you're referring to the Windowing API?</p>
+
+
+
+<a name="193510255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510255">(Apr 09 2020 at 21:15)</a>:</h4>
+<p>it's like a driver interface, rather it needs to be that</p>
+
+
+
+<a name="193510332"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510332" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510332">(Apr 09 2020 at 21:16)</a>:</h4>
+<p>think of it this way, look at dm-ogl.c and think what it'd take to extricate OpenGL</p>
+
+
+
+<a name="193510498"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510498" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510498">(Apr 09 2020 at 21:18)</a>:</h4>
+<p>similar for the window creation calls (e.g., i.e. the Tk+X11 calls)</p>
+
+
+
+<a name="193510554"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510554" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510554">(Apr 09 2020 at 21:18)</a>:</h4>
+<p>Hmm.  So, create then Window and then use that to inform the creation of the context?</p>
+
+
+
+<a name="193510605"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510605" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510605">(Apr 09 2020 at 21:19)</a>:</h4>
+<p>no, the become separate concepts</p>
+
+
+
+<a name="193510713"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510713" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510713">(Apr 09 2020 at 21:20)</a>:</h4>
+<p>this direction would actually greatly benefit from C++... <em>sigh</em></p>
+
+
+
+<a name="193510816"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510816" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510816">(Apr 09 2020 at 21:21)</a>:</h4>
+<p>it'd be something like dm_create_window(), dm_create_context(), dm_register_context()</p>
+
+
+
+<a name="193510942"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193510942" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193510942">(Apr 09 2020 at 21:22)</a>:</h4>
+<p>Ah, OK - I hadn't succeeded in parsing the code well enough yet to have a sense that you could create the context without the window.</p>
+
+
+
+<a name="193511424"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511424" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511424">(Apr 09 2020 at 21:26)</a>:</h4>
+<p>that all said, I would suggest focusing on just the minimal necessary bits  that simply encapsulate all the Tcl/Tk calls and whatever else is necessary so interp is not part of the public API</p>
+
+
+
+<a name="193511560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511560">(Apr 09 2020 at 21:28)</a>:</h4>
+<p>that's a GREATLY reduced subset of work needed to make that happen.  you can't/shouldn't pull Tk out of DM without surgery, but GED doesn't need to know anything whatsoever about the Tcl/Tk in DM</p>
+
+
+
+<a name="193511635"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511635" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511635">(Apr 09 2020 at 21:28)</a>:</h4>
+<p>that'll be good forward progress even if we later burn it all to the ground</p>
+
+
+
+<a name="193511695"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511695" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511695">(Apr 09 2020 at 21:29)</a>:</h4>
+<p>I'd probably start with interp</p>
+
+
+
+<a name="193511744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511744">(Apr 09 2020 at 21:29)</a>:</h4>
+<p>I think the only instances of Tcl/Tk in the public API (at least, per the headers) are the interp and he dm/dm_xvars.h Tk_Windows.</p>
+
+
+
+<a name="193511768"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511768" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511768">(Apr 09 2020 at 21:29)</a>:</h4>
+<p>yep</p>
+
+
+
+<a name="193511860"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511860" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511860">(Apr 09 2020 at 21:30)</a>:</h4>
+<p>IIRC the only overt use I saw of interp was in wgl - something about deiconifying the window.</p>
+
+
+
+<a name="193511863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511863">(Apr 09 2020 at 21:30)</a>:</h4>
+<p>figure out how to hide interp, and you'll be half done</p>
+
+
+
+<a name="193511913"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511913" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511913">(Apr 09 2020 at 21:30)</a>:</h4>
+<p>interp is used to create tkwin via Tk_MainWindow(interp)</p>
+
+
+
+<a name="193511917"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511917" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511917">(Apr 09 2020 at 21:30)</a>:</h4>
+<p>Oh, the other one was the _init_dm call.</p>
+
+
+
+<a name="193511955"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511955" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511955">(Apr 09 2020 at 21:31)</a>:</h4>
+<p>interp kicks of all the tk calls</p>
+
+
+
+<a name="193511991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193511991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193511991">(Apr 09 2020 at 21:31)</a>:</h4>
+<p>Ah nuts, that's right... forgot about that.</p>
+
+
+
+<a name="193512003"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512003" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512003">(Apr 09 2020 at 21:31)</a>:</h4>
+<p>the way to hide it is to either pass it in opaquely from calling code, which is ugly but can work</p>
+
+
+
+<a name="193512065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512065">(Apr 09 2020 at 21:32)</a>:</h4>
+<p>&lt;nod&gt; - got that to work, actually...</p>
+
+
+
+<a name="193512124"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512124" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512124">(Apr 09 2020 at 21:33)</a>:</h4>
+<p>or register it via decorator pattern as a "dm_decorator" of sorts where the dm's create it but the code is elsewhere</p>
+
+
+
+<a name="193512164"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512164" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512164">(Apr 09 2020 at 21:33)</a>:</h4>
+<p>I don't think the dms create the interp even now - I think the parent application passes it to them?</p>
+
+
+
+<a name="193512172"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512172" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512172">(Apr 09 2020 at 21:33)</a>:</h4>
+<p>yes</p>
+
+
+
+<a name="193512233"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512233" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512233">(Apr 09 2020 at 21:34)</a>:</h4>
+<p>that's how the responsbility is delegated to it</p>
+
+
+
+<a name="193512340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512340">(Apr 09 2020 at 21:35)</a>:</h4>
+<p>it would be something like:  struct dm_window *dm_create_tk_window(interp);</p>
+
+
+
+<a name="193512444"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512444" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512444">(Apr 09 2020 at 21:36)</a>:</h4>
+<p>I'll see what I can do about the public API - sounds like a reasonable starting point.</p>
+
+
+
+<a name="193512536"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512536" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512536">(Apr 09 2020 at 21:37)</a>:</h4>
+<p>so dm_window is where Tk_Window woud hide?</p>
+
+
+
+<a name="193512559"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512559" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512559">(Apr 09 2020 at 21:37)</a>:</h4>
+<p>we don't need to avoid Tcl_Interp being in the API entirely, but you can avoid it being in all the API portions that LIBGED calls and is aware of</p>
+
+
+
+<a name="193512699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512699">(Apr 09 2020 at 21:39)</a>:</h4>
+<p>struct dm_window would probably have a struct dm_window_impl* inside it that is only accessed via whatever source file had dm_create_tk_window()</p>
+
+
+
+<a name="193512728"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512728" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512728">(Apr 09 2020 at 21:39)</a>:</h4>
+<p>that way, the Tk_Window symbol is never exposed in a public header</p>
+
+
+
+<a name="193512754"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512754" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512754">(Apr 09 2020 at 21:39)</a>:</h4>
+<p>Ah, gotcha.</p>
+
+
+
+<a name="193512891"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512891" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512891">(Apr 09 2020 at 21:40)</a>:</h4>
+<p>/me will poke at that for a bit - will probably drive me to go back and finish the license scanner :-P</p>
+
+
+
+<a name="193512902"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193512902" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193512902">(Apr 09 2020 at 21:40)</a>:</h4>
+<p>As the entire entry point hinges on Tcl_Interp, even that would likely be made a dm_create_tk_window(void*interp)</p>
+
+
+
+<a name="193513077"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193513077" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193513077">(Apr 09 2020 at 21:42)</a>:</h4>
+<p>so not even tcl is exposed any more.  the application creating the window would know they have an interp and call it (or in the case of glfw, call a different dm_create_glfw_window(void)</p>
+
+
+
+<a name="193513100"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193513100" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193513100">(Apr 09 2020 at 21:42)</a>:</h4>
+<p>&lt;nod&gt;</p>
+
+
+
+<a name="193513328"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193513328" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193513328">(Apr 09 2020 at 21:45)</a>:</h4>
+<p>OK, I've got to run - thanks Sean for the help, much appreciated.</p>
+
+
+
+<a name="193513444"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/globals%20in%20libdm/near/193513444" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/globals.20in.20libdm.html#193513444">(Apr 09 2020 at 21:46)</a>:</h4>
+<p>sure thing!  enjoy a walk.  Gorgeous day.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

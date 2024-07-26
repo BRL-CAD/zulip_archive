@@ -1,0 +1,1534 @@
+<html>
+<head><meta charset="utf-8"><title>superbuild · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html">superbuild</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="211911991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/211911991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#211911991">(Oct 01 2020 at 13:45)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>   There are several ways I can go with a superbuild pattern, all of which have their tradeoffs:</p>
+<ol>
+<li>
+<p>I can treat BRL-CAD the same way I'm treating the other builds, listing final outputs explicitly for management by the superbuild during final install.</p>
+</li>
+<li>
+<p>I can define a custom install script for the superbuild that reconfigures and recompiles the  BRL-CAD subbuild for its final target location, avoiding any need for the superbuild to explicitly manage BRL-CAD outputs but requiring some recompilation of  BRL-CAD for the install step.</p>
+</li>
+<li>
+<p>I can do the custom install script for all subbuilds, not just BRL-CAD, in lieu of the custom ExternalProject extensions and output listing I'm doing currently.  This is probably the simplest option from the superbuild's standpoint, but we would likely pay a substantial recompilation penalty for the install step as we'd be rebuilding most or all of the src/other projects.</p>
+</li>
+</ol>
+<p>My inclination is to try number 2, but at this juncture a second opinion is probably in order...</p>
+
+
+
+<a name="212125071"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212125071" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212125071">(Oct 02 2020 at 20:30)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> I honestly didn't understand any of those three options. lol.</p>
+
+
+
+<a name="212125082"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212125082" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212125082">(Oct 02 2020 at 20:30)</a>:</h4>
+<p>It was my understanding that cmake has proper sub-build support so one shouldn't need to explicitly list or script things.</p>
+
+
+
+<a name="212125116"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212125116" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212125116">(Oct 02 2020 at 20:31)</a>:</h4>
+<p>what're others doing?</p>
+
+
+
+<a name="212125305"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212125305" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212125305">(Oct 02 2020 at 20:32)</a>:</h4>
+<p>I'm also not sure what's meant by recompiling for final location.  Is that's referring to embedded rpaths, those are also adjustable post-compilation (not sure how strong cmake's support is, but the tooling is pretty straightforward).</p>
+
+
+
+<a name="212125357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212125357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212125357">(Oct 02 2020 at 20:33)</a>:</h4>
+<p>I think I've seem some projects do that on install, just re-run install_tool and ldconfig and such.</p>
+
+
+
+<a name="212125816"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212125816" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212125816">(Oct 02 2020 at 20:37)</a>:</h4>
+<p>I think we don't want to be rebuilding anything in src/other -- they do their thing, they're installed, and they're done.  BRL-CAD's build (or BRL-CAD's superbuild) just detects or is explicitly configured where they exist and uses them in their locations.</p>
+<p>So I guess in the superbuild context, src/other is make+install stage followed by a make stage for BRL-CAD and, optionally, install.</p>
+
+
+
+<a name="212126874"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212126874" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212126874">(Oct 02 2020 at 20:46)</a>:</h4>
+<p>Still would be good to see what others did.  That's just my naive thoughts based on how ar and ld behave, what they need.  I also assume you're sorting through how to run pre-install (including 3rd party deps) and that's certainly appealing too.</p>
+
+
+
+<a name="212144414"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212144414" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212144414">(Oct 03 2020 at 00:41)</a>:</h4>
+<p>Ah, sorry - assumed too much context.</p>
+<p>I'm attempting to create a superbuild that will use ExternalProject_Add for the 3rd party builds where that makes sense, but still preserve the current property where we can create a relocatable bundle (including those 3rd party deps.)</p>
+<p>When using ExternalProject_Add, to ensure proper ordering (3rd party builds complete, then build BRL-CAD using their outputs) it is necessary that BRL-CAD itself be built with ExternalProject_Add.  No other available CMake mechanism  provides the necessary ordering guarantees, since the 3rd party builds must be completed and installed before the BRL-CAD build makes any attempt to compile its source files.  (My first attempt, which didn't do that, got very close to success but finally ran aground on that limitation.)</p>
+<p>If we perform BRL-CAD's "main" build with ExternalProject_Add, the superbuild must take over the responsibility of assembling the final package that will form the BRL-CAD binary (incorporating the 3rd party deps and BRL-CAD into a single install package.)  My three options were various approaches that could be taken to work towards achieving that result.</p>
+
+
+
+<a name="212150444"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212150444" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212150444">(Oct 03 2020 at 03:16)</a>:</h4>
+<p>I'm pretty sure what others are doing is unlikely to be as aggressive as what I'm trying to do, in the sense that I'm trying to preserve the present property of our build that the build directory compilation output is fully functional without requiring write access to the final install location.  ExternalProject_Add complicates that quite a lot - I've solved some of the problems, but </p>
+<p>To allow the creation of a working setup without requiring the user have permissions to write to the final install location, the superbuild sets the "install" location for all subprojects to its own build directory.   Once all of the ExternalProject_Add "install" steps are complete, the superbuild's "build" step can be considered complete and it can then assemble the outputs of all the various subbuilds into the final package.</p>
+<p>For most of the projects I have a series of extensions to ExternalProject that list and process their expected output files to achieve this final assembly - essentially duplicating the RPath magic CMake uses for this process but applying it to the outputs of the ExternalProject_Add builds.  This appears to work, but it's a tall order for BRL-CAD - our output changes too much and too rapidly to want to manually maintain such an output list.  That leaves us with the tradeoffs mentioned before.</p>
+<p>It's probably possible to teach our CMake logic to write out the necessary information to allow the superbuild to process our outputs directly, and that would have the advantage of being consistent with the way other projects are managed, but it's likely to be the most work to set up.</p>
+<p>The "cheating" alternative is to just reconfigure the BRL-CAD subbuild to recompile as much as is needed to support the CPack requirements for creating the final bundle - essentially create a "make install" step for the superbuild that manipulates the BRL-CAD compilation as needed to achieve the desired results.  That's easier to experiment with and less work, but even it if  proves viable it will mean that an "install" step (whether make install or package creation) will also entail a significant amount of recompilation of the BRL-CAD libs/programs.</p>
+
+
+
+<a name="212293873"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/212293873" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#212293873">(Oct 05 2020 at 12:47)</a>:</h4>
+<p>One other possibility might be to invoke the ExternalProject builds from the configure stage of the main build, rather than as part of the build process.  That would guarantee the correct ordering as far as the main build is concerned, and the main price would be a (potentially) very long configure process as the src/other builds were completed to have the correct find_package inputs ready to go...</p>
+
+
+
+<a name="215928163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215928163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215928163">(Nov 07 2020 at 02:59)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="112516">@starseeker</span> just noticed the recent commits and a couple things.. first, have a vague recollection that sdai header names and paths are mandated a particular way for implementations to be conformant.  Might be breaking things hard there.  Other issue, those changes are pushing us farther from upstream, which has a slew of fixes.   I was hoping to update post migration.. and that’d require undoing/redoing everything.</p>
+
+
+
+<a name="215928232"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215928232" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215928232">(Nov 07 2020 at 03:00)</a>:</h4>
+<p>Basically, SDAI isn’t just a bunch of arbitrary design decisions.  That interface is part of STEP spec iirc.</p>
+
+
+
+<a name="215930831"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215930831" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215930831">(Nov 07 2020 at 04:09)</a>:</h4>
+<p>I made a quick try at using the upstream, and for whatever reason it didn't work.  Debugging why has a high probability of being a laborious, time-consuming process, as they've changed a number of things about how the C++ files are generated.</p>
+
+
+
+<a name="215930896"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215930896" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215930896">(Nov 07 2020 at 04:11)</a>:</h4>
+<p>The whole setup badly needs simplification - it's still using a variation on my original CMake build logic, which ended up being way too heavy for the purpose of the libraries in retrospect.  Unfortunately, I don't have any sense at this point of how involved that would be while avoiding breaking the python pieces.</p>
+
+
+
+<a name="215930973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215930973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215930973">(Nov 07 2020 at 04:12)</a>:</h4>
+<p>At this point I'm just trying to zero in on why the Ninja Windows build specifically is failing (while the Visual Studio build on the same machine, same compiler does not.)  I'm getting (I think) some form of memory corruption trying to read a step file in step-g, but only with the Ninja build.</p>
+
+
+
+<a name="215930987"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215930987" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215930987">(Nov 07 2020 at 04:13)</a>:</h4>
+<p>exp2cxx has a separate problem on the Mac, which I've not been able to diagnose at this point, in either case I'm trying to eliminate all the extraneous complexity I can.</p>
+
+
+
+<a name="215930995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215930995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215930995">(Nov 07 2020 at 04:13)</a>:</h4>
+<p>If I need to scrap what I'm doing now once I actually figure out what the problem is that's fine...</p>
+
+
+
+<a name="215931053"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215931053" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215931053">(Nov 07 2020 at 04:15)</a>:</h4>
+<p>I suspect I'm not understanding some of the motivations for the SDAI interface design properly - so far my experiences working with it have been pretty negative.</p>
+
+
+
+<a name="215931203"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/215931203" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#215931203">(Nov 07 2020 at 04:19)</a>:</h4>
+<p>If I had the time (which I acknowledge I don't) I'd probably want to go back to the original plan - grab the express bits, and write a new convertor logic ignoring SDAI that focuses just on what we need for converters.</p>
+
+
+
+<a name="216156440"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216156440" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216156440">(Nov 09 2020 at 23:32)</a>:</h4>
+<p>Growl... best guess at this point is the build flags from the MSBUILD setup happen to produce a working converter, the Ninja generator is generating something different, and the STEPCODE C++ isn't tolerating it...</p>
+
+
+
+<a name="216156463"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216156463" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216156463">(Nov 09 2020 at 23:32)</a>:</h4>
+<p>Main flaw in that theory is the all-in-one build does work with Ninja...</p>
+
+
+
+<a name="216223268"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223268" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223268">(Nov 10 2020 at 14:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> If you want, I can try to track down more specifically whether sdai subdirs violate or are okay with the spec -- that's a case where I'd have to actually go back to the spec and read up on it.  My recollection could be wrong, but I seem to recall it being spelled out in detail for conformance testing of implementations.  Happy to look, it just might take a while to locate and read up on it.  Been a while since I dug through the docs.</p>
+
+
+
+<a name="216223339"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223339" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223339">(Nov 10 2020 at 14:58)</a>:</h4>
+<p>I think that was also a reason we'd have to do some dynamic work to have support for multiple AP's in a single binary.</p>
+
+
+
+<a name="216223514"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223514" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223514">(Nov 10 2020 at 14:59)</a>:</h4>
+<p>No problem, and not terribly urgent - upstream doesn't work, the refactor didn't fix what I'm fighting on the github runners, and even if we waded through it all a correct answer would result in no functional improvements :-/</p>
+
+
+
+<a name="216223593"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223593" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223593">(Nov 10 2020 at 15:00)</a>:</h4>
+<p>I was going to say, that all seems orthogonal to the problem you described with ninja.</p>
+
+
+
+<a name="216223697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223697">(Nov 10 2020 at 15:00)</a>:</h4>
+<p>if a ninja build is different, that should be directly observable -- what's being compiled or linked differently?</p>
+
+
+
+<a name="216223728"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223728" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223728">(Nov 10 2020 at 15:00)</a>:</h4>
+<p>It is - I knew it probably would be, but I was trying to minimize the amount of clutter I had to wade through.  It served its purpose, as far as that goes...</p>
+
+
+
+<a name="216223845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223845">(Nov 10 2020 at 15:01)</a>:</h4>
+<p>fwiw, I don't think you were on the discussion thread, but AP214 support came up just a couple days ago.  matt suggested an scr so we can prioritize it.</p>
+
+
+
+<a name="216223868"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223868" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223868">(Nov 10 2020 at 15:01)</a>:</h4>
+<p>I did finally figure out how to get a look at the comparative build options - msbuild is not friendly, when it comes to that.  It looks like the root issue was that I wasn't passing CMAKE_BUILD_TYPE to the subbuilds, so they were doing the default thing.</p>
+
+
+
+<a name="216223985"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216223985" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216223985">(Nov 10 2020 at 15:02)</a>:</h4>
+<p>(very much hoping that's it, and some preliminary tests succeeded - that's why I reverted)</p>
+
+
+
+<a name="216224085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216224085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216224085">(Nov 10 2020 at 15:03)</a>:</h4>
+<p>I'm surprised that even worked at all... Debug builds aren't typically considered link-compatible with Release builds on Windows.</p>
+
+
+
+<a name="216224164"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216224164" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216224164">(Nov 10 2020 at 15:03)</a>:</h4>
+<p>-Mt vs non-Mt can also make them incompatible iirc</p>
+
+
+
+<a name="216224333"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216224333" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216224333">(Nov 10 2020 at 15:04)</a>:</h4>
+<p>I think it was probably the std::string exposure that actually failed - most of the other libs probably accidentally worked, but I was getting warnings about std::string needing some kind of DLL exporting instructions from the step code.  Was <em>really</em> hoping I wouldn't have to dive that deep... that's a very thorny rabbit hole</p>
+
+
+
+<a name="216224456"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216224456" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216224456">(Nov 10 2020 at 15:05)</a>:</h4>
+<p>I think I'm getting it sorted now - in retrospect it's not surprising we're seeing these sorts of issues, since direct add_subdirectory integration into the build gives us a <em>lot</em> of settings for free...</p>
+
+
+
+<a name="216225038"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216225038" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216225038">(Nov 10 2020 at 15:10)</a>:</h4>
+<p>aha! yes, that'd be an issue with debug and release -- where is std::string exposed in the API?</p>
+
+
+
+<a name="216225188"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216225188" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216225188">(Nov 10 2020 at 15:11)</a>:</h4>
+<p>In some of the classes - hang on, I'll try to pull some of the logs from github</p>
+
+
+
+<a name="216225304"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216225304" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216225304">(Nov 10 2020 at 15:12)</a>:</h4>
+<p>it's typically not recommended to expose STL across DLL boundaries, because it will compile but will result in run-time crashes as the debug vs non-debug versions of c++ template instantiation are different (and in production release will result in runtime crashes where it might locally work just fine).</p>
+
+
+
+<a name="216225318"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216225318" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216225318">(Nov 10 2020 at 15:12)</a>:</h4>
+<p>that's an old time msvc issue.</p>
+
+
+
+<a name="216225420"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216225420" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216225420">(Nov 10 2020 at 15:13)</a>:</h4>
+<p>as far as I know/knew though, STEPcode didn't/doesn't expose STL across a public library boundary</p>
+
+
+
+<a name="216225864"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216225864" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216225864">(Nov 10 2020 at 15:17)</a>:</h4>
+<p>Here's an example:</p>
+<p>2020-11-09T17:43:18.9047539Z D:\a\cadcitest\cadcitest\src\other\ext\stepcode\include\stepcode\utils/errordesc.h(58,29): warning C4251: 'ErrorDescriptor::_userMsg': class 'std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt;&gt;' needs to have dll-interface to be used by clients of class 'ErrorDescriptor' [D:\a\cadcitest\cadcitest\build\src\other\ext\STEPCODE_BLD-prefix\src\STEPCODE_BLD-build\src\dai\stepdai.vcxproj] [D:\a\cadcitest\cadcitest\build\src\other\ext\STEPCODE_BLD.vcxproj]<br>
+2020-11-09T17:43:18.9050908Z   C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.27.29110\include\xstring(4564): message : see declaration of 'std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt;&gt;' [D:\a\cadcitest\cadcitest\build\src\other\ext\STEPCODE_BLD-prefix\src\STEPCODE_BLD-build\src\dai\stepdai.vcxproj]</p>
+
+
+
+<a name="216227785"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216227785" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216227785">(Nov 10 2020 at 15:32)</a>:</h4>
+<p>ahh, I see.</p>
+
+
+
+<a name="216228226"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216228226" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216228226">(Nov 10 2020 at 15:35)</a>:</h4>
+<p>So <span class="user-mention" data-user-id="112516">@starseeker</span> this is a deeper issue (two issues actually)</p>
+
+
+
+<a name="216228395"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216228395" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216228395">(Nov 10 2020 at 15:37)</a>:</h4>
+<p>first, someone apparently exposed STL in an interface there.  that's typically discouraged for truly portable library code, but isn't uncommon and is perfectly fine under static (i.e., non-dll) compilation.</p>
+
+
+
+<a name="216228572"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216228572" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216228572">(Nov 10 2020 at 15:38)</a>:</h4>
+<p>I seem to recall STEPcode originally having an SCLstring class to specifically avoid this issue.  That may be something we pulled from upstream or did to ourselves.</p>
+
+
+
+<a name="216228692"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216228692" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216228692">(Nov 10 2020 at 15:39)</a>:</h4>
+<p>That said, it can be made to work in a DLL (which is undoubtedly how it's working now on trunk) where we just assume we're compiling and linking with the same compiler and same options.</p>
+
+
+
+<a name="216228769"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216228769" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216228769">(Nov 10 2020 at 15:39)</a>:</h4>
+<p>We're obviously using the same compiler, so the error is definitely coming from different compilation options being used.</p>
+
+
+
+<a name="216229033"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216229033" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216229033">(Nov 10 2020 at 15:41)</a>:</h4>
+<p>So fix will be to either make the compilation options consistent which should prevent it from throwing the error about not having a dll-interface, or to re-wrap the STL types behind a class (ugh).</p>
+
+
+
+<a name="216229292"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216229292" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216229292">(Nov 10 2020 at 15:43)</a>:</h4>
+<p>this is an ancient c++ issue, fwiw.  here's some background on the issue as it pertains to msvc, but it's not specific to msvc: <a href="https://stackoverflow.com/questions/5661738/how-can-i-use-standard-library-stl-classes-in-my-dll-interface-or-abi">https://stackoverflow.com/questions/5661738/how-can-i-use-standard-library-stl-classes-in-my-dll-interface-or-abi</a></p>
+
+
+
+<a name="216229987"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216229987" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216229987">(Nov 10 2020 at 15:48)</a>:</h4>
+<p>also worth mentioning that microsoft just open sourced their libc++ just last year and there's a lot of callouts made about c++ stl compatibility, so what was once very bleak and a "don't ever do that" isn't as much a concern going forward fortunately.</p>
+
+
+
+<a name="216233567"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216233567" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216233567">(Nov 10 2020 at 16:10)</a>:</h4>
+<p>/me nods - yeah, it's looking like fixing the build type (which aligns the options properly) is getting buy it.  We originally switched to std::string to get off of the SCL string class, which IIRC had some issues, but it looks like we didn't end up PImpling it well enough.</p>
+
+
+
+<a name="216675540"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/216675540" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#216675540">(Nov 13 2020 at 21:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> did you get a chance to try the extbuild branch on the Mac?</p>
+
+
+
+<a name="217052334"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217052334" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217052334">(Nov 17 2020 at 19:45)</a>:</h4>
+<p>yes, sorry, I thought I'd conveyed that .. it fails in a couple places.  the tclsh8.6 binary is crashing (image not found error, so something is wrong in the linking/pathing) and it throws a compile-time error in itk3 (looks like trunk issue using system Framework headers)</p>
+
+
+
+<a name="217052357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217052357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217052357">(Nov 17 2020 at 19:45)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DBUILD_itk -DHAVE_DLFCN_H=1 -DHAVE_ERRNO_H=1 -DHAVE_FLOAT_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_ITCL_STUBS -DUSE_TCL_STUBS -DUSE_TK_STUBS -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Headers -I/Users/morrison/brlcad.extbuild/.build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic -I/Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/unix -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../itcl3/generic  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14   -o CMakeFiles/itkstub.dir/generic/itkStubLib.c.o   -c /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2765:14: error:
+      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?
+MODULE_SCOPE Tcl_NRPostProc TclNRForIterCallback;
+             ^~~~~~~~~~~~~~
+             Tcl_CloseProc
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:
+      &#39;Tcl_CloseProc&#39; declared here
+typedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));
+              ^
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2766:14: error:
+      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?
+MODULE_SCOPE Tcl_NRPostProc TclNRCoroutineActivateCallback;
+             ^~~~~~~~~~~~~~
+             Tcl_CloseProc
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:
+      &#39;Tcl_CloseProc&#39; declared here
+typedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));
+              ^
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2768:14: error:
+      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?
+MODULE_SCOPE Tcl_NRPostProc TclNRTailcallEval;
+             ^~~~~~~~~~~~~~
+             Tcl_CloseProc
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:
+      &#39;Tcl_CloseProc&#39; declared here
+typedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));
+              ^
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2774:14: error:
+      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?
+MODULE_SCOPE Tcl_NRPostProc TclNRReleaseValues;
+             ^~~~~~~~~~~~~~
+             Tcl_CloseProc
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:
+      &#39;Tcl_CloseProc&#39; declared here
+typedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));
+              ^
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2886:14: error:
+      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?
+MODULE_SCOPE Tcl_NRPostProc TclClearRootEnsemble;
+             ^~~~~~~~~~~~~~
+             Tcl_CloseProc
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:
+      &#39;Tcl_CloseProc&#39; declared here
+typedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));
+              ^
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:4888:5: error:
+      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?
+    Tcl_NRPostProc *procPtr;
+    ^~~~~~~~~~~~~~
+    Tcl_CloseProc
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:
+      &#39;Tcl_CloseProc&#39; declared here
+typedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));
+              ^
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+In file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:4928:
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:153:8: error:
+      unknown type name &#39;CONST86&#39;
+EXTERN CONST86 char *   TclpGetUserHome(const char *name,
+       ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:153:16: error:
+      expected identifier or &#39;(&#39;
+EXTERN CONST86 char *   TclpGetUserHome(const char *name,
+               ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:262:8: error:
+      unknown type name &#39;CONST86&#39;
+EXTERN CONST86 char *   TclSetPreInitScript(const char *string);
+       ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:262:16: error:
+      expected identifier or &#39;(&#39;
+EXTERN CONST86 char *   TclSetPreInitScript(const char *string);
+               ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:691:5: error:
+      unknown type name &#39;CONST86&#39;
+    CONST86 char * (*tclpGetUserHome) (const char *name, Tcl_DString *bu...
+    ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:691:13: error:
+      expected member name or &#39;;&#39; after declaration specifiers
+    CONST86 char * (*tclpGetUserHome) (const char *name, Tcl_DString *bu...
+    ~~~~~~~ ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:691:12: error:
+      expected &#39;;&#39; at end of declaration list
+    CONST86 char * (*tclpGetUserHome) (const char *name, Tcl_DString *bu...
+           ^
+           ;
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:750:5: error:
+      unknown type name &#39;CONST86&#39;
+    CONST86 char * (*tclSetPreInitScript) (const char *string); /* 101 */
+    ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:750:13: error:
+      expected member name or &#39;;&#39; after declaration specifiers
+    CONST86 char * (*tclSetPreInitScript) (const char *string); /* 101 */
+    ~~~~~~~ ^
+/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:750:12: error:
+      expected &#39;;&#39; at end of declaration list
+    CONST86 char * (*tclSetPreInitScript) (const char *string); /* 101 */
+           ^
+           ;
+16 errors generated.
+make[5]: *** [CMakeFiles/itkstub.dir/generic/itkStubLib.c.o] Error 1
+make[4]: *** [CMakeFiles/itkstub.dir/all] Error 2
+make[3]: *** [all] Error 2
+make[2]: *** [src/other/ext/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build] Error 2
+make[1]: *** [src/other/ext/CMakeFiles/ITK_BLD.dir/all] Error 2
+</code></pre></div>
+
+
+
+<a name="217053933"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217053933" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217053933">(Nov 17 2020 at 19:57)</a>:</h4>
+<p>You had mentioned earlier the possibility of my getting a login somewhere on an OSX box - is that practical?  It's looking like I'm going to have to iterate on this to try and run it to ground - especially worried about the linking/path issue, which I know has nuttiness unique to OSX...)</p>
+
+
+
+<a name="217054160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217054160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217054160">(Nov 17 2020 at 19:58)</a>:</h4>
+<p>If I manually change the compile line to this, it works:</p>
+<div class="codehilite"><pre><span></span><code>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DBUILD_itk -DHAVE_DLFCN_H=1 -DHAVE_ERRNO_H=1 -DHAVE_FLOAT_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_ITCL_STUBS -DUSE_TCL_STUBS -DUSE_TK_STUBS -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Headers -I/Users/morrison/brlcad.extbuild/.build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic -I/Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/unix -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../itcl3/generic  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -I/usr/X11/include -mmacosx-version-min=10.14   -o CMakeFiles/itkstub.dir/generic/itkStubLib.c.o   -c /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c
+</code></pre></div>
+
+
+
+<a name="217054221"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217054221" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217054221">(Nov 17 2020 at 19:59)</a>:</h4>
+<p>(namely, changed frameworks to isysroot and added the missing X11 include dirs</p>
+
+
+
+<a name="217054300"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217054300" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217054300">(Nov 17 2020 at 20:00)</a>:</h4>
+<p>let me know if you want me to test a different configuration -- I believe this is default</p>
+
+
+
+<a name="217054349"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217054349" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217054349">(Nov 17 2020 at 20:00)</a>:</h4>
+<p>(cmake ..)</p>
+
+
+
+<a name="217057105"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217057105" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217057105">(Nov 17 2020 at 20:22)</a>:</h4>
+<p>Did we change something in trunk to fix that?  It shouldn't be pulling in framework headers at all, really...</p>
+
+
+
+<a name="217057181"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217057181" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217057181">(Nov 17 2020 at 20:23)</a>:</h4>
+<p>I see I adjusted the extbuild FindTCL on 11/3 but apparently that didn't do the trick.</p>
+
+
+
+<a name="217057194"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217057194" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217057194">(Nov 17 2020 at 20:23)</a>:</h4>
+<p>my last trunk build was enable all so I don't know the current status.  I seem to recall you tweaking the FindTcl file.</p>
+
+
+
+<a name="217057260"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217057260" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217057260">(Nov 17 2020 at 20:23)</a>:</h4>
+<p>i'll try a trunk default build</p>
+
+
+
+<a name="217060383"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217060383" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217060383">(Nov 17 2020 at 20:47)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> If you get a chance, can you confirm <a href="https://github.com/starseeker/citest">https://github.com/starseeker/citest</a> also fails on your machine?</p>
+
+
+
+<a name="217065798"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217065798" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217065798">(Nov 17 2020 at 21:30)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>[ 93%] Built target stepeditor_stage
+Scanning dependencies of target stepdai_stage
+[ 94%] Generating lib/libstepdai.2.0.0.dylib
+[ 95%] Generating lib/libstepdai.dylib
+[ 96%] Generating lib/libstepdai.2.dylib
+[ 96%] Built target stepdai_stage
+Scanning dependencies of target exp2cxx_exe_stage
+[ 97%] Generating bin/exp2cxx
+[ 97%] Built target exp2cxx_exe_stage
+Scanning dependencies of target exptest
+[ 98%] Generating exp.stamp
+dyld: Library not loaded: @rpath/libexppp.2.dylib
+  Referenced from: /Users/morrison/brlcad.trunk/cliff_test/.build/bin/exp2cxx
+  Reason: image not found
+make[2]: *** [exp.stamp] Abort trap: 6
+make[1]: *** [CMakeFiles/exptest.dir/all] Error 2
+</code></pre></div>
+
+
+
+<a name="217067351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217067351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217067351">(Nov 17 2020 at 21:45)</a>:</h4>
+<p>Interesting!  Different message, but same failure point.  Now the question is why...</p>
+
+
+
+<a name="217074973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217074973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217074973">(Nov 17 2020 at 22:57)</a>:</h4>
+<p>For tcl, r77671 and 77674 were the changes I was thinking of - rather surprised we're still picking up a framework with those in place...</p>
+
+
+
+<a name="217081415"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217081415" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217081415">(Nov 18 2020 at 00:18)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I adjusted the RPATH logic for Mac - can you try rebuilding?  And if tclsh or btclsh don't work, can you check what otool says about their rpath settings?</p>
+
+
+
+<a name="217093766"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217093766" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217093766">(Nov 18 2020 at 03:55)</a>:</h4>
+<p>Nevermind, I finally got a useful printout on the runner.  Ick.</p>
+
+
+
+<a name="217133016"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217133016" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217133016">(Nov 18 2020 at 13:21)</a>:</h4>
+<p>My, sourceforge is cranky today...  lots of "svn: E000013: Can't open file '/svn/p/brlcad/code/db/txn-current-lock': Permission denied" errors...</p>
+
+
+
+<a name="217154123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217154123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217154123">(Nov 18 2020 at 15:57)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  If you can try extbuild r77744 and maybe get a debugger on one of the crashing  btclsh runs I'd appreciate it - I'm still getting an abort trap but now I'm not seeing any immediately obvious issues with the rpaths...</p>
+
+
+
+<a name="217154293"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217154293" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217154293">(Nov 18 2020 at 15:58)</a>:</h4>
+<p>Actually, wait - I'm still testing asc2g, let me first check btclsh directly</p>
+
+
+
+<a name="217155224"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217155224" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217155224">(Nov 18 2020 at 16:03)</a>:</h4>
+<p>Grr.  Yeah, Abort trap.  What on earth...</p>
+
+
+
+<a name="217185079"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217185079" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217185079">(Nov 18 2020 at 19:31)</a>:</h4>
+<p>Anybody know any good tricks to get gdb (or is it lldb with clang?)  to spit out a backtrace on a github runner when a scripted program crashes?</p>
+
+
+
+<a name="217218512"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217218512" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217218512">(Nov 19 2020 at 01:10)</a>:</h4>
+<p>Interesting.  We didn't actually need to link libitcl, and Linux figured that out automatically - in the process, it ignored what would have been a lib lookup problem.  OSX went ahead and tried to find it (and failed) which is apparently why btclsh wasn't working.</p>
+
+
+
+<a name="217218525"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217218525" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217218525">(Nov 19 2020 at 01:10)</a>:</h4>
+<p>Now just need to figure out why rpath setting is failing on OSX during package build...</p>
+
+
+
+<a name="217228167"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217228167" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217228167">(Nov 19 2020 at 04:14)</a>:</h4>
+<p>/me is going crazy... I wish Apple would make dev images available for debugging purposes or something</p>
+
+
+
+<a name="217274204"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217274204" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217274204">(Nov 19 2020 at 14:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> If you do a vanilla autotools build of tclsh on the Mac, does otool -l report that LC_RPATH is set in the executable?</p>
+
+
+
+<a name="217369771"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217369771" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217369771">(Nov 20 2020 at 07:37)</a>:</h4>
+<p>still need me to test extbuild?</p>
+
+
+
+<a name="217373005"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217373005" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217373005">(Nov 20 2020 at 08:26)</a>:</h4>
+<p>also, since 77752 doesn't really seem to do what's needed, should it stay in there?  the logic in there looks potentially problematic as I think I saw a separate Darwin case, so that's potentially a no-op or undefined behavior logic.</p>
+
+
+
+<a name="217403470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217403470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217403470">(Nov 20 2020 at 13:57)</a>:</h4>
+<p>No, don't need to test right now (thanks though) - trying your idea to use install_name_tool</p>
+
+
+
+<a name="217403684"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217403684" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217403684">(Nov 20 2020 at 13:58)</a>:</h4>
+<p>Agreed - r77752 should be obe and removed in the next few commits</p>
+
+
+
+<a name="217417205"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217417205" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217417205">(Nov 20 2020 at 15:43)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>   I'm going somewhat cross-eyed.  With r77757 I'm seeing the following:  <a href="https://brlcad.org/~starseeker/osx_runner.log">https://brlcad.org/~starseeker/osx_runner.log</a></p>
+<p>Per otool -l, the install_name_tool command is running but not changing the path:</p>
+<p>Before:</p>
+<div class="codehilite"><pre><span></span><code>2020-11-20T15:13:22.8653280Z OLD_RPATH: /Users/runner/work/cadcitest/cadcitest/build/lib
+2020-11-20T15:13:22.8654490Z NEW_RPATH: /usr/brlcad/rel-7.32.1/bin;@loader_path/../bin
+2020-11-20T15:13:22.8679810Z -rwxr-xr-x  1 runner  staff  49688 Nov 20 14:43 /Users/runner/work/cadcitest/cadcitest/build/_CPack_Packages/Darwin/TBZ2/BRL-CAD_7.32.1_Darwin_x86_64/bin/tclsh8.6
+2020-11-20T15:13:22.8833280Z OTOOL_OUT: /Users/runner/work/cadcitest/cadcitest/build/_CPack_Packages/Darwin/TBZ2/BRL-CAD_7.32.1_Darwin_x86_64/bin/tclsh8.6:
+2020-11-20T15:13:22.8834170Z Mach header
+2020-11-20T15:13:22.8935420Z Load command 19
+2020-11-20T15:13:22.8935770Z           cmd LC_RPATH
+2020-11-20T15:13:22.8936100Z       cmdsize 64
+2020-11-20T15:13:22.8944310Z          path /Users/runner/work/cadcitest/cadcitest/build/lib (offset 12)
+</code></pre></div>
+<p>Command:</p>
+<div class="codehilite"><pre><span></span><code>2020-11-20T15:13:22.8946440Z install_name_tool -change /Users/runner/work/cadcitest/cadcitest/build/lib /usr/brlcad/rel-7.32.1/bin;@loader_path/../bin /Users/runner/work/cadcitest/cadcitest/build/_CPack_Packages/Darwin/TBZ2/BRL-CAD_7.32.1_Darwin_x86_64/bin/tclsh8.6
+</code></pre></div>
+<p>After:</p>
+<div class="codehilite"><pre><span></span><code>2020-11-20T15:13:22.9239390Z Load command 19
+2020-11-20T15:13:22.9240000Z           cmd LC_RPATH
+2020-11-20T15:13:22.9240630Z       cmdsize 64
+2020-11-20T15:13:22.9241520Z          path /Users/runner/work/cadcitest/cadcitest/build/lib (offset 12)
+</code></pre></div>
+<p>Can you see anything wrong with the install_name_tool command?</p>
+
+
+
+<a name="217417419"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217417419" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217417419">(Nov 20 2020 at 15:45)</a>:</h4>
+<p>I'll see if I can capture a binary package off of the runner to allow for direct inspection...</p>
+
+
+
+<a name="217427232"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217427232" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217427232">(Nov 20 2020 at 16:47)</a>:</h4>
+<p><a href="http://brlcad.org/~starseeker/BRLCAD_OSX.zip">brlcad.org/~starseeker/BRLCAD_OSX.zip</a></p>
+
+
+
+<a name="217436180"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217436180" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217436180">(Nov 20 2020 at 17:53)</a>:</h4>
+<p>OK, nevermind -change doesn't work, but successive -delete_rpath and -add_rpath calls do.</p>
+
+
+
+<a name="217436415"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217436415" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217436415">(Nov 20 2020 at 17:55)</a>:</h4>
+<p>Rebuilding with full config enabled  - if that works,  will be ready for build testing on a platform with graphics capability.  (Should know in a few hours if the full build succeeds... - no bets either way at this point.)</p>
+
+
+
+<a name="217451811"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217451811" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217451811">(Nov 20 2020 at 20:00)</a>:</h4>
+<p>/me is reminded of why he disliked dealing with the original Tcl build so much...</p>
+
+
+
+<a name="217451876"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217451876" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217451876">(Nov 20 2020 at 20:00)</a>:</h4>
+<p>Setting LDFLAGS to our build directory's lib directory messes with Tcl's configure.</p>
+
+
+
+<a name="217455478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217455478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217455478">(Nov 20 2020 at 20:33)</a>:</h4>
+<p>Or, more correctly, configure messes with our LDFLAGS setting.  Grr.</p>
+
+
+
+<a name="217508574"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217508574" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217508574">(Nov 21 2020 at 16:38)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> It's probably worth trying a Mac build now (extbuild branch).</p>
+
+
+
+<a name="217572863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217572863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217572863">(Nov 22 2020 at 22:11)</a>:</h4>
+<p>If it works for you I'd like to consider merging back to trunk...</p>
+
+
+
+<a name="217642280"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217642280" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217642280">(Nov 23 2020 at 15:34)</a>:</h4>
+<p>at a glance, I would have questioned whether semi-colon delimited is valid or not.  since you can add multiple rpaths, I would kind of expect that to be not valid syntax unless something explicitly said so</p>
+
+
+
+<a name="217642488"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217642488" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217642488">(Nov 23 2020 at 15:35)</a>:</h4>
+<p>I could also see that semicolon making the install_name_tool command invalid (missing arg), hence no result</p>
+
+
+
+<a name="217642507"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217642507" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217642507">(Nov 23 2020 at 15:35)</a>:</h4>
+<p>I'll give the extbuild a compile today</p>
+
+
+
+<a name="217642711"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217642711" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217642711">(Nov 23 2020 at 15:37)</a>:</h4>
+<p>that's major surgery, it really needs multiple configurations tested before being merged back to trunk -- I really can't have trunk be unstable on me right now</p>
+
+
+
+<a name="217643021"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217643021" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217643021">(Nov 23 2020 at 15:39)</a>:</h4>
+<p>by the way, is 77803 cheating?  ... you're supposed to fix one if you added one, not bump the number :)</p>
+
+
+
+<a name="217656322"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217656322" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217656322">(Nov 23 2020 at 17:16)</a>:</h4>
+<p>Here's log files as of 77804, fresh build dir:<br>
+<a href="/user_uploads/1549/QFNqi6KtCajpN3jCFv4tVPps/cmake.log">cmake.log</a><br>
+<a href="/user_uploads/1549/9fDOlvZrCkWUEsuFppvuf1W5/build.log">build.log</a></p>
+
+
+
+<a name="217683664"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217683664" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217683664">(Nov 23 2020 at 21:15)</a>:</h4>
+<p>Yes, it's cheating, but I couldn't afford the distraction of chasing down a platform symbol in the middle of other testing - jaw is locked on getting this done before I lose it.</p>
+
+
+
+<a name="217683701"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217683701" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217683701">(Nov 23 2020 at 21:15)</a>:</h4>
+<p>Blast it - we're STILL getting the framework headers included???</p>
+
+
+
+<a name="217683869"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217683869" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217683869">(Nov 23 2020 at 21:17)</a>:</h4>
+<p>Alright, I'll leave trunk alone for now.</p>
+
+
+
+<a name="217684117"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217684117" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217684117">(Nov 23 2020 at 21:19)</a>:</h4>
+<p>Oh... it looks like its trying to build against the system Tcl/Tk.  That's not good...</p>
+
+
+
+<a name="217684270"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217684270" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217684270">(Nov 23 2020 at 21:21)</a>:</h4>
+<p>At least, if it's trying to build against the framework.  The Tk graphics test should have caught that and failed it... not too surprised that bit's not working I guess, since it's the one piece I can't test here at all.</p>
+
+
+
+<a name="217684722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217684722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217684722">(Nov 23 2020 at 21:25)</a>:</h4>
+<p>/me shakes head... I'll try to clean up what I've got and make sure someone can pick it up later.  In one sense it probably wouldn't be a bad thing for me to leave it and return to it later with fresh eyes.</p>
+
+
+
+<a name="217684991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217684991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217684991">(Nov 23 2020 at 21:28)</a>:</h4>
+<p>I think at this point I've demonstrated the fundamental practicality of the mechanism itself - it's just cleaning up all the details of the various platforms.</p>
+
+
+
+<a name="217715946"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217715946" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217715946">(Nov 24 2020 at 05:25)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/superbuild/near/217683664">said</a>:</p>
+<blockquote>
+<p>Yes, it's cheating, but I couldn't afford the distraction of chasing down a platform symbol in the middle of other testing - jaw is locked on getting this done before I lose it.</p>
+</blockquote>
+<p>We should delete the test if you're not going to adhere to it, or if you just see it as a distraction.  That's the only / entire point of the test.  Bumping the number is up there with turning off a particular warning because they fail strict build.  Of course, there's a difference if increases are coming from 3rd party being updated vs code we touch/write/modify.</p>
+
+
+
+<a name="217716087"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217716087" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217716087">(Nov 24 2020 at 05:29)</a>:</h4>
+<p>I also can't say I support intentionally degrading or relaxing our code quality measures to reach any goal.  Maybe a pause to come back with fresh energy later would be good.  Otherwise, let me know if there's something else I can test on Mac to figure out what's wrong there with the framework logic.</p>
+
+
+
+<a name="217763035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217763035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217763035">(Nov 24 2020 at 14:47)</a>:</h4>
+<p>I'll try to get the number back down before we merge to trunk - I needed to canvas the regression test behavior across multiple platforms looking for design issues, and it was easier to adjust the number in the branch  for that purpose than to manually change it on each platform.</p>
+
+
+
+<a name="217764044"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217764044" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217764044">(Nov 24 2020 at 14:54)</a>:</h4>
+<p>I'll be pausing on this anyway - the urgency was the need for Thread Building Blocks to address the parallel issues, and from what you were saying the stability of trunk is more critical to that goal unless/until we are actually ready to introduce the new dependency.</p>
+<p>I think the fundamental issues have largely been solved - I know now how to use the imported target mechanism and custom targets to integrate the ExternalProject builds into our main build, and demonstrated that in principle it can work across multiple platforms.  I'll try to cherrypick a few build simplifications back into trunk, but otherwise I'll leave it unless/until we need to make the shift.</p>
+
+
+
+<a name="217765790"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217765790" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217765790">(Nov 24 2020 at 15:07)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/superbuild/near/217763035">said</a>:</p>
+<blockquote>
+<p>I'll try to get the number back down before we merge to trunk - I needed to canvas the regression test behavior across multiple platforms looking for design issues, and it was easier to adjust the number in the branch  for that purpose than to manually change it on each platform.</p>
+</blockquote>
+<p>But that begs the question why it's increasing at all.  If platform-specific code is being introduced as a pattern of problem solving, that's also no good imho, no matter the reason.  If it's coming from other people's code, so be it (but then that begs a question why regression is seeing it).</p>
+
+
+
+<a name="217765979"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217765979" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217765979">(Nov 24 2020 at 15:08)</a>:</h4>
+<p>In that particular case it was because the new 3rd party logic has to accommodate the naming patterns of files produced by 3rd party build systems, and those names are highly platform specific.  OpenBSD is particularly entertaining, because unless the build outputs match their particular naming pattern find_package doesn't see them.</p>
+
+
+
+<a name="217766511"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217766511" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217766511">(Nov 24 2020 at 15:12)</a>:</h4>
+<p>If you don't see how that applies here, coming to agreement / understanding is going to be really hard.</p>
+
+
+
+<a name="217766546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217766546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217766546">(Nov 24 2020 at 15:13)</a>:</h4>
+<p>anything with different behavior can be framed as being platform specific.  there wouldn't be a difference otherwise.</p>
+
+
+
+<a name="217766658"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217766658" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217766658">(Nov 24 2020 at 15:14)</a>:</h4>
+<p>it's like binaries using .exe on windows.  sure that's platform specific, but the point is how to deal with that deviation.</p>
+
+
+
+<a name="217766924"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217766924" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217766924">(Nov 24 2020 at 15:15)</a>:</h4>
+<p>one can always frame that in a platform perspective and type up code that does ifdef _WIN32, do_something(".exe") .. but that is the pattern that costs more in the long-term, particularly to the person that didn't write that code working with other environments.</p>
+
+
+
+<a name="217766941"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217766941" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217766941">(Nov 24 2020 at 15:15)</a>:</h4>
+<p>For me it was an order of operations priority.  IFF this can work, it may be worth trying to figure out a better solution to that particular issue.  Until last week, I wasn't even sure it could work at all.  My take was that I need to prove that it <em>could</em> work before the effort to improve things like the platform file convention name handling were worth the investment.</p>
+
+
+
+<a name="217767277"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217767277" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217767277">(Nov 24 2020 at 15:18)</a>:</h4>
+<p>I'm not immediately sure what a better solution would look like, to be honest - Windows, Apple, *BSD/Unix, and OpenBSD all have different naming conventions, and individual libraries also have their own naming quirks.  I'm certainly open to a better way to generalize that, but I'm not really sure where to start...</p>
+
+
+
+<a name="217767467"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217767467" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217767467">(Nov 24 2020 at 15:19)</a>:</h4>
+<p>but you don't...</p>
+
+
+
+<a name="217767888"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217767888" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217767888">(Nov 24 2020 at 15:22)</a>:</h4>
+<p>You have to see you've used that reasoning before many times.  Either something else steals priority attention, thus not returning to do any "better solution", or you literally run out of time and can't justify spending more effort on it, or you're just tired with it.  All the while, it almost never happens.</p>
+
+
+
+<a name="217768262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217768262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217768262">(Nov 24 2020 at 15:25)</a>:</h4>
+<p>That's not a jab at you as much as it is the avalanche of competing priorities and values.  There's always going to be something else.  If writing "code complete" is not valued while it's being written, it's not likely to happen later as it costs even more then.</p>
+
+
+
+<a name="217768460"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217768460" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217768460">(Nov 24 2020 at 15:26)</a>:</h4>
+<p>Well, for something like this and given my own capabilities and resources, it's the best I can do.  The option is to not attempt these large changes.</p>
+
+
+
+<a name="217768542"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217768542" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217768542">(Nov 24 2020 at 15:27)</a>:</h4>
+<p>I guess I've just also seen you do things differently too (often grumbling, but when you do it turns out well)</p>
+
+
+
+<a name="217768781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217768781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217768781">(Nov 24 2020 at 15:29)</a>:</h4>
+<p>search is a great example.  The code doesn't look like you short-circuited much of anything in there and it's been pretty robust to new development, hasn't felt brittle, has been exemplary of a really hard chunk of code made to work well.</p>
+
+
+
+<a name="217768961"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217768961" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217768961">(Nov 24 2020 at 15:30)</a>:</h4>
+<p>It's also a lot simpler in terms of its interactions - it's almost completely isolated from any platform specific issues.  It's world is the .g file and BRL-CAD APIs - I love it when we can live there, because it's far simpler.</p>
+
+
+
+<a name="217769005"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769005" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769005">(Nov 24 2020 at 15:30)</a>:</h4>
+<p>The build system is a lot more like the compatibility layers we have to put in libbu, IMHO</p>
+
+
+
+<a name="217769115"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769115" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769115">(Nov 24 2020 at 15:31)</a>:</h4>
+<p>I'm not a fan of platform specific stuff - indeed, the whole CMake conversion was an attempt to <em>reduce</em> platform specific build logic - but at some point, somewhere, those differences must be abstracted.</p>
+
+
+
+<a name="217769132"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769132" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769132">(Nov 24 2020 at 15:31)</a>:</h4>
+<p>The question is where and how.</p>
+
+
+
+<a name="217769278"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769278" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769278">(Nov 24 2020 at 15:32)</a>:</h4>
+<p>the plugins is probably a good platform-specific example.  it's had instability, but by large hasn't had platform-specific injection (unless I missed them).  granted, some of that was already refactored into libbu.</p>
+
+
+
+<a name="217769309"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769309" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769309">(Nov 24 2020 at 15:33)</a>:</h4>
+<p>speaking of which, I assume you saw bills messages -- looks like gcv is broken</p>
+
+
+
+<a name="217769338"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769338" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769338">(Nov 24 2020 at 15:33)</a>:</h4>
+<p>or his build was incomplete</p>
+
+
+
+<a name="217769364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769364">(Nov 24 2020 at 15:33)</a>:</h4>
+<p>bu_dlopen and friends are the only reason we were able to get away with that</p>
+
+
+
+<a name="217769382"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769382" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769382">(Nov 24 2020 at 15:33)</a>:</h4>
+<p>I didn't scrutinize his logs to figure out which</p>
+
+
+
+<a name="217769394"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769394" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769394">(Nov 24 2020 at 15:33)</a>:</h4>
+<p>It's broken - I think I know what it is</p>
+
+
+
+<a name="217769519"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769519" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769519">(Nov 24 2020 at 15:34)</a>:</h4>
+<p>I'm on leave this week, but I'll see if I can fix it - short term fix is probably to revert 77777</p>
+
+
+
+<a name="217769781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769781">(Nov 24 2020 at 15:36)</a>:</h4>
+<p>I just guess I really am not approving of giving CMake a pass on these issues because it's build system code.</p>
+
+
+
+<a name="217769821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769821">(Nov 24 2020 at 15:36)</a>:</h4>
+<p>Code is code.  Maybe we need the equivalent of libbu-for-cmake so platform-specific things aren't intermixed with build logic.</p>
+
+
+
+<a name="217769868"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769868" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769868">(Nov 24 2020 at 15:36)</a>:</h4>
+<p>Hmm.  I like that idea, actually</p>
+
+
+
+<a name="217769907"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217769907" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217769907">(Nov 24 2020 at 15:37)</a>:</h4>
+<p>I see the complexity and it takes me ages to figure out what's actually going on, so much spaghetti and side effects</p>
+
+
+
+<a name="217770286"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217770286" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217770286">(Nov 24 2020 at 15:39)</a>:</h4>
+<p>Agreed - I don't like it myself, and I know as the author of most of it it's way easier for me to deal with.  But that also means I'm not going to be the best one to come up with how to solve the problem, since I'm inherently less able to recognize it when it's there.</p>
+
+
+
+<a name="217770309"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217770309" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217770309">(Nov 24 2020 at 15:39)</a>:</h4>
+<p>I see things like the gcv conversion and it's concerning when the build logic goes from being a one-liner in a subdir to being 20 lines.  Other places, it's logic repeated in a half dozen places that seem to all be doing the same thing, the same repetition of code blocks all including the same pattern.</p>
+
+
+
+<a name="217770884"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217770884" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217770884">(Nov 24 2020 at 15:43)</a>:</h4>
+<p>If we want something better than my ad-hoc solutions to a lot of those problems, we should probably take a day or two to examine what the various BRLCAD_ADD* and BRLCAD_MANAGE_* functions are doing, what the plugins need/do that is different, and how best to organize it all.</p>
+
+
+
+<a name="217771072"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771072" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771072">(Nov 24 2020 at 15:44)</a>:</h4>
+<p>heh, i've not even encountered BRLCAD_MANAGE_ yet...</p>
+
+
+
+<a name="217771155"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771155" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771155">(Nov 24 2020 at 15:45)</a>:</h4>
+<p>I think you have and you've forgotten/blocked the memory - you didn't care for it, IIRC</p>
+
+
+
+<a name="217771299"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771299" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771299">(Nov 24 2020 at 15:46)</a>:</h4>
+<p>I would believe that -- I don't remember it at all, but then I don't like what's implied by the name either... :)</p>
+
+
+
+<a name="217771327"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771327" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771327">(Nov 24 2020 at 15:46)</a>:</h4>
+<p>It's the bit responsible for staging data files and the like in the build directory and setting up their install rules.  Has to do one thing for platforms with symlinks and another for platforms without.</p>
+
+
+
+<a name="217771363"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771363" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771363">(Nov 24 2020 at 15:46)</a>:</h4>
+<p>BRLCAD_ADD is all fine/good stuff, reasonable familiar abstraction</p>
+
+
+
+<a name="217771627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771627">(Nov 24 2020 at 15:48)</a>:</h4>
+<p>ahh.  yeah, that sounds like something I wouldn't like implemented as some sort of "management" interface.  it should be patterned after whatever it's doing, not a catch-all.</p>
+
+
+
+<a name="217771788"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771788" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771788">(Nov 24 2020 at 15:49)</a>:</h4>
+<p>in gcv's case, though -- was there a reason the plugin logic couldn't be put behind a function/macro?  there was already one there and it was replaced I think?</p>
+
+
+
+<a name="217771928"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217771928" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217771928">(Nov 24 2020 at 15:50)</a>:</h4>
+<p>Anyway, there's that, the BRLCAD_ADD bits and their attendant functions (of which there are a lot), the plugins, and the doc building, not to mention the various converter running functions for db/ and the tclIndex building stuff.</p>
+
+
+
+<a name="217772125"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217772125" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217772125">(Nov 24 2020 at 15:51)</a>:</h4>
+<p>Um.  Probably not - I was just duplicating the pattern established for libdm/libged, which put the plugins in the correct libexec subdirs.  Undoubtedly all of that should be consolidated into a BRLCAD_PLUGIN function or something along those lines, but that begs the question of what functionality it should share with BRLCAD_ADDLIB</p>
+
+
+
+<a name="217772660"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217772660" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217772660">(Nov 24 2020 at 15:55)</a>:</h4>
+<p>I backed out the gcv plugin change - hopefully that'll get bill working until I figure out what was making Windows unhappy.</p>
+
+
+
+<a name="217772947"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217772947" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217772947">(Nov 24 2020 at 15:56)</a>:</h4>
+<p>I thought a bit about making a "PLUGIN" option to add to BRLCAD_ADDLIB, but I'm not sure if that's ontologically correct.</p>
+
+
+
+<a name="217772973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217772973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217772973">(Nov 24 2020 at 15:56)</a>:</h4>
+<p>I need to write a gcv plugin myself.  For me a lot of this becomes more clear when I go through the motions of adding another and seeing what knowledge is being required of others to extend it.</p>
+
+
+
+<a name="217773525"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217773525" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217773525">(Nov 24 2020 at 16:00)</a>:</h4>
+<p>The whole GCV setup is very add-hoc, or at least the gcv executable itself is - my recollection is that was mostly me trying to figure out how on earth to expose arbitrarily complex options for all the plugins on the command line.  I don't recall being involved too much with the initial GCV plugin design/setup, so I don't know as much about it.</p>
+
+
+
+<a name="217773845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217773845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217773845">(Nov 24 2020 at 16:02)</a>:</h4>
+<p>I am pretty sure though that the gcv plugins predate our support for the libexec directory.</p>
+
+
+
+<a name="217774166"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217774166" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217774166">(Nov 24 2020 at 16:04)</a>:</h4>
+<p>yeah, they do predate it.  how the plugins are set up and managed isn't meant to dominate gcv.  if anything, it just needs to be something simple for authors (hence importance of writing a plugin), which I think we recently failed so I intended to take a look at it all here soon.</p>
+
+
+
+<a name="217774307"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217774307" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217774307">(Nov 24 2020 at 16:05)</a>:</h4>
+<p>/me nods.  Whatever we decide on, we should update libdm and libged to do as well so we're consistent across the board.</p>
+
+
+
+<a name="217774332"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217774332" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217774332">(Nov 24 2020 at 16:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="247135">@Sumagna Das</span> test was pretty much a failure on GCV's part... I spent a day debugging only to realize what we were trying to make it do wasn't possible without fundamentally changing some things (not a good sign for any plugin system).</p>
+
+
+
+<a name="217774645"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217774645" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217774645">(Nov 24 2020 at 16:07)</a>:</h4>
+<p>consistent would be great, but they do serve rather different purposes.  ged and dm's plugins are a means to an end.  for gcv, it's intentional architectural and conceptual design.</p>
+
+
+
+<a name="217774799"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217774799" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217774799">(Nov 24 2020 at 16:08)</a>:</h4>
+<p>they may (or may not) end up being the same as they have slightly different needs, different runtime profiles.</p>
+
+
+
+<a name="217774962"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217774962" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217774962">(Nov 24 2020 at 16:09)</a>:</h4>
+<p>Ah, the mime type thing?  I'd have to go back over the discussions, but my recollection is there were at least one or two fundamental conceptual issues that were unresolved (like how to handle multiple plugins supporting the same format, or plugins that could do multiple different things with the same input - i.e., a converter that can embed a png as an image in a .g fle or generate an extruded solid from that png file... which behavior does the user want, and how do they specify?  Moreover, how do they learn that they <em>can</em> specify such options?)</p>
+
+
+
+<a name="217775747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217775747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217775747">(Nov 24 2020 at 16:13)</a>:</h4>
+<p>the mime type was a symptom -- but no, not it specifically.  it's when facing a new dev with the task of implementing a simple plugin, are they likely independently successful without pulling in another dev or a debugger.  in his case, the simple plugin was riddled with issues including mime types, other plugins seeming taking priority, inconsistent searching rules making it not obvious what his plugin is actually doing, is it even loading and failing or not loading, etc.</p>
+
+
+
+<a name="217775777"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217775777" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217775777">(Nov 24 2020 at 16:13)</a>:</h4>
+<p>point being there wasn't a solution that didn't involve modifying gcv and didn't involve a debugger.</p>
+
+
+
+<a name="217776287"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776287" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776287">(Nov 24 2020 at 16:16)</a>:</h4>
+<p>Ah, gotcha.</p>
+
+
+
+<a name="217776314"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776314" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776314">(Nov 24 2020 at 16:17)</a>:</h4>
+<p>and to be clear, that's not a negative on you or anyone else.  it's just a status check on the state of GCV.</p>
+
+
+
+<a name="217776402"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776402" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776402">(Nov 24 2020 at 16:17)</a>:</h4>
+<p>Agreed.  Have to say it doesn't surprise me, really - I found the problem pretty overwhelming the last time I poked at gcv.</p>
+
+
+
+<a name="217776506"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776506" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776506">(Nov 24 2020 at 16:18)</a>:</h4>
+<p>that's why I was saying I think I need to add a plugin, that will make it real and relatable to me, and should suss out the essential pain points without overarchitecting solutions.</p>
+
+
+
+<a name="217776681"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776681" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776681">(Nov 24 2020 at 16:19)</a>:</h4>
+<p>The png case was actually an interesting one - we didn't consider the possibility of non-geometry to geometry conversions when the mimes were originally set up, so it makes me wonder how we can avoid similar unconscious assumptions</p>
+
+
+
+<a name="217776687"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776687" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776687">(Nov 24 2020 at 16:19)</a>:</h4>
+<p>I think part of the problem can be improved if we eliminate concepts of "auto".  We have to get declarative working, so behavior is deterministic and self-discoverable.</p>
+
+
+
+<a name="217776820"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776820" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776820">(Nov 24 2020 at 16:20)</a>:</h4>
+<p>So make the plugins be explicit about their formats?  GDAL's gonna be a doozy...</p>
+
+
+
+<a name="217776875"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776875" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776875">(Nov 24 2020 at 16:21)</a>:</h4>
+<p>I considered it as creating geometry from images and images from geometry has been on my mind for gcv from the onset, but even still I didn't realize the implications of the mime type groupings at the time it was implemented.</p>
+
+
+
+<a name="217776973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217776973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217776973">(Nov 24 2020 at 16:21)</a>:</h4>
+<p>Hmm.  Does "gcv file.g image.png" become an alias for rt?</p>
+
+
+
+<a name="217777023"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217777023" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217777023">(Nov 24 2020 at 16:22)</a>:</h4>
+<p>gdal is a great example actually</p>
+
+
+
+<a name="217777171"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217777171" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217777171">(Nov 24 2020 at 16:22)</a>:</h4>
+<p>for example, I wouldn't just write out all potential gdal inputs ... they'd need to be tested and we turn on the ones we know work, and then we immediately explicitly are faced with what to do when two things read stl.</p>
+
+
+
+<a name="217777386"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217777386" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217777386">(Nov 24 2020 at 16:24)</a>:</h4>
+<p>that came up with gdal stealing png input and then consequently crashing GCV because of something not getting handled right.  if png weren't explicitly enabled, that wouldn't have happened until someone tested it and made sure it was working.</p>
+
+
+
+<a name="217797830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217797830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sumagna Das <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217797830">(Nov 24 2020 at 18:52)</a>:</h4>
+<p>what happened to GCV exactly?</p>
+
+
+
+<a name="217798536"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217798536" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sumagna Das <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217798536">(Nov 24 2020 at 18:58)</a>:</h4>
+<p>I dont have time to read the whole conversation right now so can anyone give a brief account of it?</p>
+
+
+
+<a name="217798676"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217798676" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217798676">(Nov 24 2020 at 18:59)</a>:</h4>
+<p>Just discussion about what design decisions are needed to correct the current difficulties of working with/adding to it</p>
+
+
+
+<a name="217799890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217799890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217799890">(Nov 24 2020 at 19:09)</a>:</h4>
+<p>yeah, sorry for the ping <span class="user-mention" data-user-id="247135">@Sumagna Das</span> -- that's not something you need to read through.  Summary is just that gcv needs some lovin' and your work making a plugin for it make that obvious.</p>
+
+
+
+<a name="217799943"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217799943" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sumagna Das <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217799943">(Nov 24 2020 at 19:09)</a>:</h4>
+<p>its ok...i just dont have time right now due to my final exams</p>
+
+
+
+<a name="217800036"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217800036" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217800036">(Nov 24 2020 at 19:10)</a>:</h4>
+<p>no problem, maybe I'll have it cleaned up by the time you're done with exams ;)</p>
+
+
+
+<a name="217800049"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/217800049" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#217800049">(Nov 24 2020 at 19:10)</a>:</h4>
+<p>good luck with your exams <span class="user-mention" data-user-id="247135">@Sumagna Das</span> !</p>
+
+
+
+<a name="218510833"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218510833" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218510833">(Dec 02 2020 at 03:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Don't update the platform symbol count yet - the reduction in trunk is targeted to get the count in extbuild below the current specified level in trunk.</p>
+
+
+
+<a name="218510861"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218510861" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218510861">(Dec 02 2020 at 03:16)</a>:</h4>
+<p>(Did it in trunk to keep the merge simpler - let me know if you prefer to keep those changes out of trunk until the merge...)</p>
+
+
+
+<a name="218791881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218791881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218791881">(Dec 04 2020 at 03:57)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> If you've got spare machine cycles, it would be interesting to know if the extbuild's failure mode has changed on the Mac with the latest changes to the branch.</p>
+
+
+
+<a name="218791935"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218791935" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218791935">(Dec 04 2020 at 03:58)</a>:</h4>
+<p>I'll check it.  My cpu fans finally died down just an hour ago (been doing renders for a particular tasker that have been keeping things .. hot)</p>
+
+
+
+<a name="218792030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218792030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218792030">(Dec 04 2020 at 04:00)</a>:</h4>
+<p>urk.  nevermind, then - I'll ping after I've gone another round with the github runners</p>
+
+
+
+<a name="218792050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218792050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218792050">(Dec 04 2020 at 04:01)</a>:</h4>
+<p>I'm saying it's fine, I can</p>
+
+
+
+<a name="218792062"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218792062" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218792062">(Dec 04 2020 at 04:01)</a>:</h4>
+<p>Ah, OK - wasn't sure if you were wanting to cool things down a bit first ;-)</p>
+
+
+
+<a name="218792503"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218792503" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218792503">(Dec 04 2020 at 04:11)</a>:</h4>
+<p>it was a bit anticlimactic... had a single render take nearly 24 hours and it was barely better than the previous at around 30 min.</p>
+
+
+
+<a name="218792550"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218792550" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218792550">(Dec 04 2020 at 04:12)</a>:</h4>
+<p>I miscalculated how much I'd increased the workload, but figured I'd let it complete anyways</p>
+
+
+
+<a name="218792560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218792560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218792560">(Dec 04 2020 at 04:13)</a>:</h4>
+<p>Blegh.  Hate it when that happens...</p>
+
+
+
+<a name="218997975"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/218997975" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#218997975">(Dec 06 2020 at 18:26)</a>:</h4>
+<p>Got extbuild distcheck-full pass on both ubuntu and GhostBSD.</p>
+
+
+
+<a name="219046450"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219046450" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219046450">(Dec 07 2020 at 06:39)</a>:</h4>
+<p>Cool!  What's GhostBSD like?</p>
+
+
+
+<a name="219079762"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219079762" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219079762">(Dec 07 2020 at 13:35)</a>:</h4>
+<p>It's one of the current iteration of the "GUI desktop" BSDs - tends to be very current (I think it was the first distro I hit with clang 10)</p>
+
+
+
+<a name="219080012"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219080012" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219080012">(Dec 07 2020 at 13:37)</a>:</h4>
+<p>FreeBSD based (it's kinda my "FreeBSD stand-in" so I don't have to bother with getting Xorg, etc. set up on FreeBSD.)</p>
+
+
+
+<a name="219080266"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219080266" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219080266">(Dec 07 2020 at 13:40)</a>:</h4>
+<p>As long as I remember to use gmake I can get a successful distcheck-full on it, so I keep it around as my "second platform" for release testing.  bz manifests that threading issue, which means it can build but not run the tests, and OpenBSD has some sort of core dump with MGED that I've so far been unable to debug on that platform (I can't get a version of gdb or egdb to successfully load the dump...)</p>
+
+
+
+<a name="219102475"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219102475" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219102475">(Dec 07 2020 at 16:30)</a>:</h4>
+<p>Sounds interesting.  I've not done much with any of the BSD desktop distros.</p>
+
+
+
+<a name="219102630"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219102630" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219102630">(Dec 07 2020 at 16:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> FYI, common.h provides GCC_PREREQ() and ICC_PREREQ() for detecting minimum versions in our code, doing the right thing for versions that pre-date the new gcc built-ins.</p>
+
+
+
+<a name="219102864"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219102864" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219102864">(Dec 07 2020 at 16:32)</a>:</h4>
+<p>Ah, OK.  I'll shift those over - thanks.</p>
+
+
+
+<a name="219181741"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219181741" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219181741">(Dec 08 2020 at 08:26)</a>:</h4>
+<p>I have a compile of the latest extbuild going now, should have a mac compile-test result for you in the morning.</p>
+
+
+
+<a name="219183751"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219183751" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219183751">(Dec 08 2020 at 08:54)</a>:</h4>
+<p>actually have it now, failed:</p>
+<div class="codehilite"><pre><span></span><code>-- Looking for IceConnectionNumber in ICE - found
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build
+[ 24%] Performing build step for &#39;ITK_BLD&#39;
+Scanning dependencies of target itkstub
+[ 11%] Building C object CMakeFiles/itkstub.dir/generic/itkStubLib.c.o
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+/Users/morrison/Applications/include/itclInt.h:58:10: fatal error: &#39;common.h&#39;
+      file not found
+#include &quot;common.h&quot;
+         ^~~~~~~~~~
+1 error generated.
+make[5]: *** [CMakeFiles/itkstub.dir/generic/itkStubLib.c.o] Error 1
+make[4]: *** [CMakeFiles/itkstub.dir/all] Error 2
+make[3]: *** [all] Error 2
+make[2]: *** [src/other/ext/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build] Error 2
+make[1]: *** [src/other/ext/CMakeFiles/ITK_BLD.dir/all] Error 2
+make: *** [all] Error 2
+</code></pre></div>
+
+
+
+<a name="219185629"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219185629" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219185629">(Dec 08 2020 at 09:17)</a>:</h4>
+<p>More detail:</p>
+<div class="codehilite"><pre><span></span><code>[ 11%] Building C object CMakeFiles/itkstub.dir/generic/itkStubLib.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DBUILD_itk -DHAVE_DLFCN_H=1 -DHAVE_ERRNO_H=1 -DHAVE_FLOAT_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_ITCL_STUBS -DUSE_TCL_STUBS -DUSE_TK_STUBS -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Headers -I/Users/morrison/Applications/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic -I/Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build/include -I/opt/X11/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/unix -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../itcl3/generic  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14   -o CMakeFiles/itkstub.dir/generic/itkStubLib.c.o   -c /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:
+In file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:
+/Users/morrison/Applications/include/itclInt.h:58:10: fatal error: &#39;common.h&#39; file not found
+</code></pre></div>
+
+
+
+<a name="219186921"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219186921" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219186921">(Dec 08 2020 at 09:32)</a>:</h4>
+<p>fwiw, this was the cmd: rm -rf .build &amp;&amp; mkdir .build &amp;&amp; cd .build &amp;&amp; cmake .. &amp;&amp; make</p>
+
+
+
+<a name="219211699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219211699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219211699">(Dec 08 2020 at 14:23)</a>:</h4>
+<p>Interesting.  It's finding an Itcl installation in your Applications directory, which must be one of our installs since it's trying to include common.h.  That must be an old one though, since neither trunk nor extbuild itcl3 has any common.h includes...</p>
+
+
+
+<a name="219212613"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219212613" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219212613">(Dec 08 2020 at 14:31)</a>:</h4>
+<p>Did you do a "system" install of Itcl3 to avoid having to rebuild it for the cad builds?  If so, I'd suggest trying a "vanilla" Itcl3 version without the common.h include as a system install and seeing if that helps.</p>
+
+
+
+<a name="219217920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219217920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219217920">(Dec 08 2020 at 15:13)</a>:</h4>
+<p>I can't dig into it today (deadline), but I'll take a look tomorrow.  There is a full install of brlcad in ~/Applications from 2016 that's occasionally used for testing.  There isn't an itcl3 just for itcl3's sake.</p>
+
+
+
+<a name="219218186"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219218186" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219218186">(Dec 08 2020 at 15:15)</a>:</h4>
+<p>Ah, that makes sense.  The trick will be how to ignore it then.  No hurry - I've got a deadline too.</p>
+
+
+
+<a name="219220912"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219220912" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219220912">(Dec 08 2020 at 15:36)</a>:</h4>
+<p>The question is also how's it picking it up now while it wasn't before (afaik) and isn't on trunk.</p>
+
+
+
+<a name="219220945"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219220945" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219220945">(Dec 08 2020 at 15:36)</a>:</h4>
+<p>their configure script?</p>
+
+
+
+<a name="219220997"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219220997" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219220997">(Dec 08 2020 at 15:37)</a>:</h4>
+<p>Trunk may be picking it up and we just aren't noticing - if itk is built with an include dir that includes common.h, we'd probably never see it.</p>
+
+
+
+<a name="219221034"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219221034" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219221034">(Dec 08 2020 at 15:37)</a>:</h4>
+<p>IIRC there were a couple issues like that I ran into with the extbuild work when builds actually became fully independent...</p>
+
+
+
+<a name="219221090"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219221090" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219221090">(Dec 08 2020 at 15:37)</a>:</h4>
+<p>FindITCL is probably locating it.</p>
+
+
+
+<a name="219221285"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219221285" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219221285">(Dec 08 2020 at 15:39)</a>:</h4>
+<p>I can check that tomorrow, but there's a slew of other stuff in ~/Applcations/include -- that's my own personal system installation directory, might as well be /usr/local</p>
+
+
+
+<a name="219221525"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219221525" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219221525">(Dec 08 2020 at 15:41)</a>:</h4>
+<p>it's not specified anywhere that I know of for it to find it -- the only possible linkage I can think of is that the compiler is coming from there but again, that's been true for years and across branches too.  did I mention that was a 2016 install of BRL-CAD?</p>
+
+
+
+<a name="219221756"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/superbuild/near/219221756" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/superbuild.html#219221756">(Dec 08 2020 at 15:43)</a>:</h4>
+<p>Yes - the difference would be in the itk build logic and (possibly) what the Find packages in extbuild are identifying.  If the trunk itk build includes a common.h directory we'd never notice any issues, and the newer Find modules may be better at locating things on the system.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,404 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> so besides blowing away the entire build dir, how can I A) rebuild all of ext and B) rebuild just one ext ?</p>",
+        "id": 248235211,
+        "sender_full_name": "Sean",
+        "timestamp": 1628003775
+    },
+    {
+        "content": "<p>yikes, well that didn't work... tried blowing away src/other/ext and re-running cmake (okay) + make (nope).  dependency tracking ends up all shot to hell.  ... hm, lesse if cd'ing into src/other/ext will do the trick</p>",
+        "id": 248237852,
+        "sender_full_name": "Sean",
+        "timestamp": 1628004843
+    },
+    {
+        "content": "<p>okay, looks like nuclear option on src/other/ext will work at least on an enable-all build</p>",
+        "id": 248238378,
+        "sender_full_name": "Sean",
+        "timestamp": 1628005053
+    },
+    {
+        "content": "<p>My sense is that they're not really designing the ExternalProject setup to support that very well - if I remember correctly, I usually deal with a single ext dep by (for example) cd-ing into src/other/ext/NETPBM_BLD-prefix/src/NETPBM_BLD-build and working with that individual build (make + make install) directly</p>",
+        "id": 248241464,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628006346
+    },
+    {
+        "content": "<p>That'll work for me if it works.. the structure of the tree was under there wasn't immediately obvious or recognizable to me</p>",
+        "id": 248241722,
+        "sender_full_name": "Sean",
+        "timestamp": 1628006445
+    },
+    {
+        "content": "<p>I think the blowing away build/src/other/ext and redoing cmake + make is the only way I've found to redo all of them.</p>",
+        "id": 248241731,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628006448
+    },
+    {
+        "content": "<p>Yes, I've considered trying to define custom dir structures for that so it's a little less obtuse, but it was fairly low down on the original priority list and I never went back to it</p>",
+        "id": 248241826,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628006492
+    },
+    {
+        "content": "<p>I think it might help just to get rid of the _BLD suffix</p>",
+        "id": 248242966,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007008
+    },
+    {
+        "content": "<p>maybe -prefix too</p>",
+        "id": 248243002,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007036
+    },
+    {
+        "content": "<p>maybe renaming src to root or base</p>",
+        "id": 248243132,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007107
+    },
+    {
+        "content": "<p>anyways, I think I'm honing in on my issue.. looks like I'm back to incrTcl finding system Tcl on Mac despite it being an enable-all build??</p>\n<p>I'm trying to get set up to text/fix the locale_t issue I introduced</p>",
+        "id": 248243326,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007196
+    },
+    {
+        "content": "<p>Hmm.  I must not have defined everything needed for the IncrTcl enable all build correctly...</p>",
+        "id": 248243792,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007376
+    },
+    {
+        "content": "<p>top-level cache correctly says BUNDLED on everything</p>",
+        "id": 248243906,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007444
+    },
+    {
+        "content": "<p>Actually looks like Itcl built successfully, but Itk is the one failing</p>",
+        "id": 248244100,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007518
+    },
+    {
+        "content": "<p>OK.  The src/other/ext/itcl.cmake file's ExternalProject_Add for itcl should be passing in a TCL_ROOT variable that has find_package(TCL) looking in the install directory.</p>",
+        "id": 248244324,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007635
+    },
+    {
+        "content": "<p>ITCL_BLD-cfgcmd.txt is this:</p>\n<div class=\"codehilite\"><pre><span></span><code>cmd=&#39;/usr/local/Cellar/cmake/3.21.1/bin/cmake;-DCMAKE_INSTALL_PREFIX=/Users/morrison/brlcad.main/.build/extinstall/itcl3.4;$&lt;$&lt;NOT:$&lt;BOOL:&gt;&gt;:-DCMAKE_BUILD_TYPE=&gt;;-DBIN_DIR=bin;-DLIB_DIR=lib;-DSHARED_DIR=;-DINCLUDE_DIR=include;-DCMAKE_SKIP_BUILD_RPATH=FALSE;-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE;-DCMAKE_INSTALL_RPATH=/Users/morrison/brlcad.main/.build/lib/itcl3.4;-DTCL_ENABLE_TK=ON;-DTCL_ROOT=$&lt;$&lt;BOOL:ON&gt;:/Users/morrison/brlcad.main/.build&gt;;-DTCL_VERSION=8.6;-GUnix Makefiles;&lt;SOURCE_DIR&gt;&lt;SOURCE_SUBDIR&gt;&#39;\n</code></pre></div>\n<p>Which I think looks okay?  Looks like it's pulling Tcl and tk from the build dir</p>",
+        "id": 248244337,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007644
+    },
+    {
+        "content": "<p>TCL_ROOT looks like it is set</p>",
+        "id": 248244415,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007704
+    },
+    {
+        "content": "<p>Itk is:</p>\n<p>cmd='/usr/local/Cellar/cmake/3.21.1/bin/cmake;-DCMAKE_INSTALL_PREFIX=/Users/morrison/brlcad.main/.build/extinstall/itk3;-DBIN_DIR=bin;-DLIB_DIR=lib;-DSHARED_DIR=;-DINCLUDE_DIR=include;-DCMAKE_SKIP_BUILD_RPATH=FALSE;-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE;-DCMAKE_INSTALL_RPATH=/Users/morrison/brlcad.main/.build/lib/itk3.4;$&lt;$&lt;NOT:$&lt;BOOL:&gt;&gt;:-DCMAKE_BUILD_TYPE=&gt;;-DTCL_ENABLE_TK=ON;-DTCL_ROOT=$&lt;$&lt;BOOL:ON&gt;:/Users/morrison/brlcad.main/.build&gt;;-DITCL_ROOT=$&lt;$&lt;BOOL:ON&gt;:/Users/morrison/brlcad.main/.build&gt;;-DTCL_VERSION=8.6;-GUnix Makefiles;&lt;SOURCE_DIR&gt;&lt;SOURCE_SUBDIR&gt;'</p>",
+        "id": 248244430,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007714
+    },
+    {
+        "content": "<p>And you said itk is the one that's failing?</p>",
+        "id": 248244510,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007742
+    },
+    {
+        "content": "<p>yeah</p>",
+        "id": 248244517,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007748
+    },
+    {
+        "content": "<p>Give me a sec...</p>",
+        "id": 248244616,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007813
+    },
+    {
+        "content": "<p>Here's the cache:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>(base) morrison@agua ITK_BLD-build % pwd\n/Users/morrison/brlcad.main/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build\n(base) morrison@agua ITK_BLD-build % grep TCL CMakeCache.txt\nITCL_INCLUDE_PATH:PATH=/Users/morrison/brlcad.main/.build/include\nITCL_LIBRARY:FILEPATH=/Users/morrison/brlcad.main/.build/lib/itcl3.4/libitcl3.4.dylib\nITCL_ROOT:UNINITIALIZED=/Users/morrison/brlcad.main/.build\nITCL_STUB_LIBRARY:FILEPATH=/Users/morrison/brlcad.main/.build/lib/itcl3.4/libitclstub.a\nTCL_ENABLE_TK:UNINITIALIZED=ON\nTCL_INCLUDE_PATH:PATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tcl.framework/Headers\nTCL_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tcl.framework\nTCL_ROOT:UNINITIALIZED=/Users/morrison/brlcad.main/.build\nTCL_STUB_LIBRARY:FILEPATH=/Applications/Anaconda3/anaconda3/lib/libtclstub8.6.a\nTCL_TCLSH:FILEPATH=/Applications/Anaconda3/anaconda3/bin/tclsh\nTCL_VERSION:UNINITIALIZED=8.6\n//Details about finding ITCL\nFIND_PACKAGE_MESSAGE_DETAILS_ITCL:INTERNAL=[/Users/morrison/brlcad.main/.build/lib/itcl3.4/libitcl3.4.dylib][/Users/morrison/brlcad.main/.build/lib/itcl3.4/libitclstub.a][/Users/morrison/brlcad.main/.build/include][v()]\n//Details about finding TCL\nFIND_PACKAGE_MESSAGE_DETAILS_TCL:INTERNAL=[/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tcl.framework][/Applications/Anaconda3/anaconda3/lib/libtclstub8.6.a][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tcl.framework/Headers][/Applications/Anaconda3/anaconda3/bin/tclsh][v()]\n//Details about finding TCLTK\nFIND_PACKAGE_MESSAGE_DETAILS_TCLTK:INTERNAL=[/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tcl.framework][/Applications/Anaconda3/anaconda3/lib/libtclstub8.6.a][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tcl.framework/Headers][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tk.framework][/Applications/Anaconda3/anaconda3/lib/libtkstub8.6.a][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tk.framework/Headers][v()]\n//ADVANCED property for variable: ITCL_INCLUDE_PATH\nITCL_INCLUDE_PATH-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: ITCL_LIBRARY\nITCL_LIBRARY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: ITCL_STUB_LIBRARY\nITCL_STUB_LIBRARY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_INCLUDE_PATH\nTCL_INCLUDE_PATH-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_LIBRARY\nTCL_LIBRARY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_STUB_LIBRARY\nTCL_STUB_LIBRARY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_TCLSH\nTCL_TCLSH-ADVANCED:INTERNAL=1\n</code></pre></div>",
+        "id": 248244702,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007847
+    },
+    {
+        "content": "<p>AH, so it's got the wrong TCL_INCLUDE_PATH and TCL_LIBRARY</p>",
+        "id": 248244778,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007892
+    },
+    {
+        "content": "<p>Are those variables correct in the itcl cache?</p>",
+        "id": 248244835,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628007928
+    },
+    {
+        "content": "<p>crazy hodge podge there...yeah, those are wrong, and it somehow found a tclsh in an app (Anaconda)</p>",
+        "id": 248244848,
+        "sender_full_name": "Sean",
+        "timestamp": 1628007938
+    },
+    {
+        "content": "<p>Ah yeah, they're wrong for Itcl too, but the build happens to work</p>",
+        "id": 248244995,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008003
+    },
+    {
+        "content": "<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>(base) morrison@agua ITCL_BLD-build % pwd\n/Users/morrison/brlcad.main/.build/src/other/ext/ITCL_BLD-prefix/src/ITCL_BLD-build\n(base) morrison@agua ITCL_BLD-build % grep TCL CMakeCache.txt\n# For build in directory: /Users/morrison/brlcad.main/.build/src/other/ext/ITCL_BLD-prefix/src/ITCL_BLD-build\nCMAKE_PROJECT_NAME:STATIC=ITCL\nITCL_BINARY_DIR:STATIC=/Users/morrison/brlcad.main/.build/src/other/ext/ITCL_BLD-prefix/src/ITCL_BLD-build\nITCL_IS_TOP_LEVEL:STATIC=ON\nITCL_SOURCE_DIR:STATIC=/Users/morrison/brlcad.main/src/other/ext/itcl3\nTCL_ENABLE_TK:UNINITIALIZED=ON\nTCL_INCLUDE_PATH:PATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tcl.framework/Headers\nTCL_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tcl.framework\nTCL_ROOT:UNINITIALIZED=/Users/morrison/brlcad.main/.build\nTCL_STUB_LIBRARY:FILEPATH=/Applications/Anaconda3/anaconda3/lib/libtclstub8.6.a\nTCL_TCLSH:FILEPATH=/Applications/Anaconda3/anaconda3/bin/tclsh\nTCL_VERSION:UNINITIALIZED=8.6\nCMAKE_CACHEFILE_DIR:INTERNAL=/Users/morrison/brlcad.main/.build/src/other/ext/ITCL_BLD-prefix/src/ITCL_BLD-build\n//Details about finding TCL\nFIND_PACKAGE_MESSAGE_DETAILS_TCL:INTERNAL=[/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tcl.framework][/Applications/Anaconda3/anaconda3/lib/libtclstub8.6.a][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tcl.framework/Headers][/Applications/Anaconda3/anaconda3/bin/tclsh][v()]\n//Details about finding TCLTK\nFIND_PACKAGE_MESSAGE_DETAILS_TCLTK:INTERNAL=[/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tcl.framework][/Applications/Anaconda3/anaconda3/lib/libtclstub8.6.a][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tcl.framework/Headers][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/tk.framework][/Applications/Anaconda3/anaconda3/lib/libtkstub8.6.a][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/Library/Frameworks/Tk.framework/Headers][v()]\n//ADVANCED property for variable: TCL_INCLUDE_PATH\nTCL_INCLUDE_PATH-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_LIBRARY\nTCL_LIBRARY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_STUB_LIBRARY\nTCL_STUB_LIBRARY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: TCL_TCLSH\nTCL_TCLSH-ADVANCED:INTERNAL=1\n</code></pre></div>",
+        "id": 248245007,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008010
+    },
+    {
+        "content": "<p>OK, so TCL_ROOT isn't doing what it should</p>",
+        "id": 248245029,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008026
+    },
+    {
+        "content": "<p>At a guess it's probably getting the vanilla CMake FindTCL.cmake - I had to mod it pretty heavily IIRC for it to handle what we need for this</p>",
+        "id": 248245091,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008073
+    },
+    {
+        "content": "<p>Another possibility is the CMakeFindFrameworks may be messing with things...</p>",
+        "id": 248245294,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008166
+    },
+    {
+        "content": "<p>I'd suggest putting a message(\"Loading this file\") or some such in src/other/ext/itcl/CMake/FindTCL.cmake to try and determine if it's actually pulling in that version</p>",
+        "id": 248245412,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008226
+    },
+    {
+        "content": "<p>If it's grabbing that one then we need to figure out why TCL_ROOT isn't working, if it isn't then we need to force the build to use the local FindTCL</p>",
+        "id": 248245534,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008308
+    },
+    {
+        "content": "<p>/me adds this to the \"get all of this converted to Qt\" motivation pile...</p>",
+        "id": 248245647,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008366
+    },
+    {
+        "content": "<p>I can't find where it's discovering Anaconda from, any ideas?</p>",
+        "id": 248245870,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008471
+    },
+    {
+        "content": "<p>it's not mentioned in the output/error logs</p>",
+        "id": 248245914,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008494
+    },
+    {
+        "content": "<p>Is /Applications/Anaconda3/anaconda3/bin/ in your path?</p>",
+        "id": 248245915,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008494
+    },
+    {
+        "content": "<p>ah, why yes, yes it is.  it has a suite of command line tools.</p>",
+        "id": 248245993,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008532
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/ext/near/248245412\">said</a>:</p>\n<blockquote>\n<p>I'd suggest putting a message(\"Loading this file\") or some such in src/other/ext/itcl/CMake/FindTCL.cmake to try and determine if it's actually pulling in that version</p>\n</blockquote>\n<p>Trying this.</p>",
+        "id": 248246168,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008610
+    },
+    {
+        "content": "<p>(Getting an ENABLE_ALL build going so I can diagnose, assuming Linux can reproduce this... - I've not been building that configuration much to keep cycle times shorter.)</p>",
+        "id": 248246491,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008777
+    },
+    {
+        "content": "<p>Do you recall what is/was wrong with the system FindTCL?</p>",
+        "id": 248246671,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008860
+    },
+    {
+        "content": "<p>looks like there's three now.. FindTCL, FindTclstub and FindTclsh</p>",
+        "id": 248246686,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008873
+    },
+    {
+        "content": "<p>at least as of 3.21.1</p>",
+        "id": 248246723,
+        "sender_full_name": "Sean",
+        "timestamp": 1628008899
+    },
+    {
+        "content": "<p>Yeah, that was one problem - keeping those all synced was an issue.  Another was (at least for CMake at the time I was doing the work) the default find_package(TCL) was generating some sort of warnings.  If I'm remember correctly it also didn't respect the TCL_ROOT setting.</p>",
+        "id": 248246821,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008941
+    },
+    {
+        "content": "<p>I tried to use the default versions, but it got really messy really quick.</p>",
+        "id": 248246909,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628008997
+    },
+    {
+        "content": "<p>doesn't respect TCL_ROOT because it doesn't have that at all from what I see</p>",
+        "id": 248247079,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009097
+    },
+    {
+        "content": "<p>FindWish is another</p>",
+        "id": 248247097,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009110
+    },
+    {
+        "content": "<p>Yeah, trying to keep all those in sync was virtually impossible with the third party management and variable passing needed for the local third party copies.</p>",
+        "id": 248247154,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009150
+    },
+    {
+        "content": "<p>Ah, right - no TCL_ROOT support was a deal breaker.</p>",
+        "id": 248247219,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009166
+    },
+    {
+        "content": "<p>what does keeping them in sync mean?</p>",
+        "id": 248247251,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009185
+    },
+    {
+        "content": "<p>we don't keep x11 and other Find things in sync, right?  We just use them</p>",
+        "id": 248247308,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009217
+    },
+    {
+        "content": "<p>I mean making sure FindTcl, FindTclsh, FindWish, etc. are all the same page.  Particularly if I'm needing to pass in variables to override their default search behaviors.</p>",
+        "id": 248247385,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009258
+    },
+    {
+        "content": "<p>I have a vague recollection that they weren't all reliably consistent on what they would find, but it's been a while</p>",
+        "id": 248247426,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009283
+    },
+    {
+        "content": "<p>ah I see we do have a FindX11, but not others like PNG, libz, etc?</p>",
+        "id": 248247464,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009289
+    },
+    {
+        "content": "<p>a while == 5 years? :)</p>",
+        "id": 248247519,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009316
+    },
+    {
+        "content": "<p>Also, having to do multiple find packages for a single ThirdParty build seriously breaks the assumptions used by that function.</p>",
+        "id": 248247524,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009317
+    },
+    {
+        "content": "<p>I tried to remove a bunch of the local copies some time back and use as much of the system included setup as possible.</p>",
+        "id": 248247609,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009355
+    },
+    {
+        "content": "<p>I'd have to check what the deal was/is with FindX11 - I think Mac might have complicated life with that one</p>",
+        "id": 248247730,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009405
+    },
+    {
+        "content": "<p>I'm just wondering if the default system Find's might actually be less work for what we need at this point, given we require 3.12+ and we could bump that up if needed, rather than fight it</p>",
+        "id": 248247752,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009409
+    },
+    {
+        "content": "<p>In general yes, and I did try to do that - the Tcl setup was a no-go though</p>",
+        "id": 248247800,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009443
+    },
+    {
+        "content": "<p>I don't doubt we'll need some of them still, but maybe a few could go</p>",
+        "id": 248247817,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009450
+    },
+    {
+        "content": "<p>yeah, I kind of remember X11 being a mess</p>",
+        "id": 248247844,
+        "sender_full_name": "Sean",
+        "timestamp": 1628009470
+    },
+    {
+        "content": "<p>We'll have to check which of our Find* files are in 3.12 - the majority aren't (too specific) but there may be some.</p>",
+        "id": 248247993,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628009535
+    },
+    {
+        "content": "<p>At least in my testing here, itcl is pulling in FindTCL.cmake from its local CMake</p>",
+        "id": 248249714,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628010345
+    },
+    {
+        "content": "<p>So the question is why would it be finding the wrong thing...</p>",
+        "id": 248249803,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628010371
+    },
+    {
+        "content": "<p>/me is suspicious of CMakeFindFrameworks</p>",
+        "id": 248251161,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628011052
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I can't reproduce that failure locally :-(</p>",
+        "id": 248252557,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628011790
+    },
+    {
+        "content": "<p>Can you try it while commenting out the include(CMakeFindFrameworks) line?</p>",
+        "id": 248253050,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628012036
+    }
+]

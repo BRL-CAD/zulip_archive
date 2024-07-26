@@ -1,0 +1,782 @@
+[
+    {
+        "content": "<p>i've done a first attempt of moving <code>bu_mappedfile</code> to SoA. <a href=\"https://cezarelnazli.github.io/mappedfile_soa.diff\" target=\"_blank\" title=\"https://cezarelnazli.github.io/mappedfile_soa.diff\">here's the diff</a>. i'm looking for feedback</p>",
+        "id": 129095934,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530724704
+    },
+    {
+        "content": "<p>in <code>struct bu_mapped_file</code>, i've added a pointer to the SoA of mapped files and the index of the mapped file in this SoA. i kept the old members so that functions working with a <code>struct bu_mapped_file</code> keep working (so i didn't remove the \"old\" API). however, now, when modifying a member in a <code>struct bu_mapped_file</code>, you also need to update it in the array (<code>tbl[idx]</code>)</p>",
+        "id": 129096089,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530724934
+    },
+    {
+        "content": "<p>i don't know what the correct way of going about this is. new code still needs to be aware of the new API, and old code which writes to the array without using libbu's functions will become incorrect</p>",
+        "id": 129096166,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725081
+    },
+    {
+        "content": "<p>the is_active member is there for \"deleting\" in O(1). on the one hand it doesn't reuse array slots (which consumes a lot of memory), but on the other, deletions are faster (but i don't think there are many deletions of bu_mapped_files, so maybe it's better the other way)</p>",
+        "id": 129096236,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725212
+    },
+    {
+        "content": "<p><code>have_apbuf</code> is there because when realloc'ing the member arrays (e.g., <code>apbuf</code>), the new memory is not zero'd, so the old check <code>if (mp-&gt;apbuf)</code> does not work. so i'm using <code>have_apbuf</code>to keep track of whether the <code>apbuf</code> member is usable or not</p>",
+        "id": 129096328,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725374
+    },
+    {
+        "content": "<p>i think the flags (such as <code>is_active</code> and <code>have_apbuf</code>, and in this case, maybe <code>dont_restat</code> as well) can be put in an int of flags, although in this instance, the single chars occupy less memory</p>",
+        "id": 129096417,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725487
+    },
+    {
+        "content": "<p>when i want to add a new item to the array, that's 14 lines of very similar code doing very little. it's a bit tiresome to write and i think error-prone. don't really know what to do to it though, or if you care about this :-? maybe generate some macros at build time using python?</p>",
+        "id": 129096591,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725781
+    },
+    {
+        "content": "<p>i think the diff also includes changes to <code>bu_temp_file_list</code>. hmm... they're very similar</p>",
+        "id": 129096611,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725854
+    },
+    {
+        "content": "<p>also, indentation/white space is off. i didn't pass it through <code>ws.sh</code> since i'm just looking for feedback at this stage</p>",
+        "id": 129096666,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530725905
+    },
+    {
+        "content": "<blockquote>\n<p>i've done a first attempt of moving <code>bu_mappedfile</code> to SoA. <a href=\"https://cezarelnazli.github.io/mappedfile_soa.diff\" target=\"_blank\" title=\"https://cezarelnazli.github.io/mappedfile_soa.diff\">here's the diff</a>. i'm looking for feedback</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> what's the reason for duplicating the guts of bu_mapped_file in the _tbl instead of embedding an array of bu_mapped_file?</p>",
+        "id": 129287027,
+        "sender_full_name": "Sean",
+        "timestamp": 1531031502
+    },
+    {
+        "content": "<p>we don't need to accommodate callers that directly access struct elements -- that is obviously a problem for backwards-compatibility.  a question to think through is how affected callers will be, whether they could/should be updated to go through accessor functions or if there's some good generalization etc.  another question is whether we can fix memory management while we're at it reworking the struct.  using the PIMPL pattern and accessing only via functions, it would be good to eliminate dynamic allocations (if at all possible).</p>",
+        "id": 129287132,
+        "sender_full_name": "Sean",
+        "timestamp": 1531031731
+    },
+    {
+        "content": "<p>if you were to re-design bu_mappedfile and completely hid the implementation, what might that header file look like?</p>",
+        "id": 129287180,
+        "sender_full_name": "Sean",
+        "timestamp": 1531031872
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> what's the reason for duplicating the guts of bu_mapped_file in the _tbl instead of embedding an array of bu_mapped_file?</p>\n</blockquote>\n<p>i thought this is what moving to a structure of arrays meant, an array for each member of the struct. or do you mean having the member arrays inside bu_mapped_file and an array of bu_mapped_file in _tbl? i think i misunderstood something</p>",
+        "id": 129290246,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531038939
+    },
+    {
+        "content": "<blockquote>\n<p>we don't need to accommodate callers that directly access struct elements -- that is obviously a problem for backwards-compatibility.  a question to think through is how affected callers will be, whether they could/should be updated to go through accessor functions or if there's some good generalization etc.</p>\n</blockquote>\n<p>if i can replace code directly accessing members of bu_mapped_files with accessor functions, that would simplify the structs. i could make one bu_mapped_file be a pair of (pointer to tbl, idx in tbl) and it should be enough to implement the accessor functions. and i think the pair should be enough for all SoAs</p>",
+        "id": 129290345,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531039180
+    },
+    {
+        "content": "<blockquote>\n<p>another question is whether we can fix memory management while we're at it reworking the struct.  using the PIMPL pattern and accessing only via functions, it would be good to eliminate dynamic allocations (if at all possible).</p>\n</blockquote>\n<p>i'm not familiar with PIMPL, but from what i'm reading, it seems to decrease compilation times (since headers aren't modified so users of the header don't need to be recompiled) and help backwards-compatibility (even if we modify the implementation, the definitions the users see are the same). but i don't really see how i could eliminate dynamic allocations with this</p>",
+        "id": 129290493,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531039506
+    },
+    {
+        "content": "<blockquote>\n<p>if you were to re-design bu_mappedfile and completely hid the implementation, what might that header file look like?</p>\n</blockquote>\n<p>to start, i think the pair structure above and PIMPL for backwards-compatibility would be good. and there could be other things specific to bu_mapped_file that might be changed/improved</p>",
+        "id": 129290608,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531039776
+    },
+    {
+        "content": "<p>but i'm still curious about this. seems like i misunderstood something about how to do SoA</p>\n<blockquote>\n<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> what's the reason for duplicating the guts of bu_mapped_file in the _tbl instead of embedding an array of bu_mapped_file?</p>\n</blockquote>\n<p>i thought this is what moving to a structure of arrays meant, an array for each member of the struct. or do you mean having the member arrays inside bu_mapped_file and an array of bu_mapped_file in _tbl? i think i misunderstood something</p>\n</blockquote>",
+        "id": 129290651,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531039804
+    },
+    {
+        "content": "<blockquote>\n<p>i thought this is what moving to a structure of arrays meant, an array for each member of the struct. or do you mean having the member arrays inside bu_mapped_file and an array of bu_mapped_file in _tbl? i think i misunderstood something</p>\n</blockquote>\n<p>It is both/either -- but what caught my eye is the duplication.  Maybe I misread the patch but it looked like there was a bu_mapped_file and a _tbl with pointers/arrays for all the same elements.</p>",
+        "id": 129306879,
+        "sender_full_name": "Sean",
+        "timestamp": 1531068858
+    },
+    {
+        "content": "<p>there are a variety of ways to go about it, but one thing to be aware of is how memory is managed.  ideally, we want to avoid dynamic allocation for at least the typical use cases -- that is nearly always faster.  for something like a mapped file handle/table/list/set/etc where there are typically very few of them, we can avoid it very easily by creating a fixed size array, e.g., of size 8, and then falling back to dynamic allocation when that is exceeded.</p>",
+        "id": 129307000,
+        "sender_full_name": "Sean",
+        "timestamp": 1531069144
+    },
+    {
+        "content": "<p>if you treat the struct as opaque and only access through functions, then we won't need to keep two public structs (one for the handle, one for arrays of them</p>",
+        "id": 129307046,
+        "sender_full_name": "Sean",
+        "timestamp": 1531069206
+    },
+    {
+        "content": "<p>looking at the current mapped file public API, you should notice that it currently relies on some global state (e.g., notice how bu_free_mapped_files() somehow will free something it was not given) -- that's bad in itself but gets at the heart of how to convert bu_mappedfile to AoS or SoA or something else.  for example, there's nowhere in the public API (include/bu/mapped_file.h) that indicates an inherent need for there to be a list or set of bu_mappedfiles -- that is entirely a construct for the backend implementation that iterates over it's list of bu_mappedfiles to look for a match, to free them, etc</p>",
+        "id": 129307393,
+        "sender_full_name": "Sean",
+        "timestamp": 1531069996
+    },
+    {
+        "content": "<p>that means in this specific instance, the \"fix\" for bu_list aliasing can be as simple as elimiate the bu_list in the struct and change the container in the implementation (bu_mapped_file_list in src/libbu/mappedfile.c)</p>",
+        "id": 129307440,
+        "sender_full_name": "Sean",
+        "timestamp": 1531070092
+    },
+    {
+        "content": "<p>at that point, we could just convert it to an std::map (converting impl to c++) or use a plain C array and dynaimcally allocate more bu_mappedfiles as needed, keeping track of how many allocated and how many used.</p>",
+        "id": 129307507,
+        "sender_full_name": "Sean",
+        "timestamp": 1531070191
+    },
+    {
+        "content": "<blockquote>\n<p>i'm not familiar with PIMPL, but from what i'm reading, it seems to decrease compilation times (since headers aren't modified so users of the header don't need to be recompiled) and help backwards-compatibility (even if we modify the implementation, the definitions the users see are the same). but i don't really see how i could eliminate dynamic allocations with this</p>\n</blockquote>\n<p>pimpl doesn't eliminate dynamic allocation by itself, it just hides the implementation so you can change things more easily in the future.  it's not strictly necessary for bu_mappedfile, but would simplify memory management on the backend since the immediate goal really is just to eliminate the bu_list aliasing</p>",
+        "id": 129307616,
+        "sender_full_name": "Sean",
+        "timestamp": 1531070467
+    },
+    {
+        "content": "<blockquote>\n<blockquote>\n<p>if you were to re-design bu_mappedfile and completely hid the implementation, what might that header file look like?</p>\n</blockquote>\n<p>to start, i think the pair structure above and PIMPL for backwards-compatibility would be good. and there could be other things specific to bu_mapped_file that might be changed/improved</p>\n</blockquote>\n<p>do you think you could write that header first? and any \"hidden\" structures that would live in the .c/.cpp implementation file?</p>",
+        "id": 129307670,
+        "sender_full_name": "Sean",
+        "timestamp": 1531070588
+    },
+    {
+        "content": "<blockquote>\n<p>if you treat the struct as opaque and only access through functions, then we won't need to keep two public structs (one for the handle, one for arrays of them</p>\n</blockquote>\n<p>yeah, i disliked the duplication in the structs as well. but i thought that it was ok for bu_mapped_file to bypass the API/functions, so i tried to keep the same members. i see that that's not necessary, i will make the changes</p>",
+        "id": 129391320,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531198715
+    },
+    {
+        "content": "<p>you really can probably get away with just eliminating the bu_list in the public struct and then having a container of them in the implementation file</p>",
+        "id": 129391343,
+        "sender_full_name": "Sean",
+        "timestamp": 1531198766
+    },
+    {
+        "content": "<p>now i also see what you mean about memory allocation and pimpl</p>",
+        "id": 129391347,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531198769
+    },
+    {
+        "content": "<p>that addresses the immediate issue (aliasing of bu_list) ... and there are dozens of other bu_list to tackle next ;)</p>",
+        "id": 129391359,
+        "sender_full_name": "Sean",
+        "timestamp": 1531198799
+    },
+    {
+        "content": "<p>yep :D i'll make the changes after i'm done tracking the rtwizard bug</p>",
+        "id": 129391424,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531198848
+    },
+    {
+        "content": "<p>regarding the api, i was thinking of something similar to getsockopt/setsockopt, so instead of having lots of functions like<br>\n<code>bu_mappedfile_set/get_dont_restat(struct mapped_file *[, int new_val])</code><br>\nfor each member, we could just have two functions<br>\n<code>bu_mappedfile_set/get(struct mapped_file *, member_enum_t which_member[, void *new_val])</code></p>",
+        "id": 129739596,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531733658
+    },
+    {
+        "content": "<p>with something like that, i think it can even be abstracted further, having a generic setter/getter, and enums + callbacks  for specific structs</p>",
+        "id": 129739695,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531733847
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> that'd be great except it's punting on API design and would introduce a runtime crash potential (incorrect void *marshaling) -- they don't necessarily need access to every field we previous had in a struct mappedfile.</p>",
+        "id": 129752923,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751371
+    },
+    {
+        "content": "<p>going down the list, 'l' can simply be eliminated (and thus we're done with this struct from an aliasing perspective) because the .c/.cpp file can simply hold a list/array of them, accessed via 'name'+'appl'.  you'd hide all the implementation fields via pimpl with a backend struct, which is 'buf', 'buflen', 'is_mapped', 'modtime', 'uses', and 'dont_restart'.  that leaves just 'apbuf' and 'abbuflen' which is user data that should be set/got via function.</p>",
+        "id": 129753179,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751635
+    },
+    {
+        "content": "<p>for added measure, I'll note mapped_file doesn't conform with hacking on the LIB_GROUP_...() naming convention -- it's one of the older apis that needs to be cleaned up</p>",
+        "id": 129753265,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751701
+    },
+    {
+        "content": "<p>regardless, I wouldn't get too wrapped around the axel on mapped_file API ... that was supposed to be just a quick one for addressing the bu_list aliasing.  there are literally dozens of these and not time to spend days on each thinking about all the ways they could be improved... :)</p>",
+        "id": 129753361,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751764
+    },
+    {
+        "content": "<p>the fix for struct bu_mapped_file is to just remove the bu_list and make the backend track them differently.  I'd probably just make a plain array that holds N of them and then have a dynamic array that is realloced if we exceed N</p>",
+        "id": 129753403,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751829
+    },
+    {
+        "content": "<p>i think most of what we discuss about mapoed_file can be carried over to the more central structures</p>",
+        "id": 129753419,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531751858
+    },
+    {
+        "content": "<p>i understand what you’re saying about just removing ‘l’, but i don‘t think that would carry over as well to the other structs</p>",
+        "id": 129753504,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531751925
+    },
+    {
+        "content": "<p>that is true</p>",
+        "id": 129753509,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751940
+    },
+    {
+        "content": "<p>but so what? :)</p>",
+        "id": 129753513,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751945
+    },
+    {
+        "content": "<p>we're not necessarily looking for a universal solution, at least if we were -- it would be how to replace bu_list</p>",
+        "id": 129753539,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751983
+    },
+    {
+        "content": "<p>but that's specifically not possible in any meaningful way because of how bu_list was designed -- it's too abstract and used in <em>very</em> different ways throughout the code</p>",
+        "id": 129753620,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752023
+    },
+    {
+        "content": "<p>that's why the original exercise was to just tackle one struct like mapped_file, then do another, and another, to see if there's a common pattern that might warrant API</p>",
+        "id": 129753660,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752064
+    },
+    {
+        "content": "<p>with mapped_file, the best solution is elimination of the bu_list ... that doesn't imply more API</p>",
+        "id": 129753674,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752086
+    },
+    {
+        "content": "<p>the common pattern might just be to eliminate bu_list everywhere and convert all the .c files to .cpp files with std:: containers</p>",
+        "id": 129753749,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752148
+    },
+    {
+        "content": "<p>do you remember what problem is being tackled?</p>",
+        "id": 129753812,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752218
+    },
+    {
+        "content": "<p>well, i thought that the point was eliminating bu_list altogether with the goal of improving cache behaviour</p>",
+        "id": 129754051,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531752439
+    },
+    {
+        "content": "<p>i think i was wrong about the first part though :D</p>",
+        "id": 129754063,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531752460
+    },
+    {
+        "content": "<p>the problem being tackled is automatic vectorization</p>",
+        "id": 129754134,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752495
+    },
+    {
+        "content": "<p>by the compiler</p>",
+        "id": 129754147,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752508
+    },
+    {
+        "content": "<p>automatic vectorization is disabled by certain things -- pointer aliasing is one of them</p>",
+        "id": 129754168,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752526
+    },
+    {
+        "content": "<p>bu_list's are commonly aliased (hence why they are always the first struct element)</p>",
+        "id": 129754190,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752551
+    },
+    {
+        "content": "<p>it's also a very old method that is unfamiliar to most C/C++ programmers coming right out of school, which makes API and code hard to understand</p>",
+        "id": 129754311,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752645
+    },
+    {
+        "content": "<p>AND the code is potentially cache incoherent, but that depends on how bu_list was used</p>",
+        "id": 129754339,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752679
+    },
+    {
+        "content": "<p>oh, ok, i see i did forget the initial goal</p>",
+        "id": 129754556,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531752869
+    },
+    {
+        "content": "<p>by a quick count, there are 139 bu_list instances in our public API...</p>",
+        "id": 129754572,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752887
+    },
+    {
+        "content": "<p>i understand how bu_list aliasing works, and i did use it previously, it’s what happens with some sockets structs too, but i never thought about vectorization and their performance implications</p>",
+        "id": 129754632,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531752949
+    },
+    {
+        "content": "<p>rather, 153,  but only 139 that matter</p>",
+        "id": 129754633,
+        "sender_full_name": "Sean",
+        "timestamp": 1531752950
+    },
+    {
+        "content": "<p>so <span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> ... we're past the second evaluation.  I think it's time for a step back regardless.</p>",
+        "id": 129754744,
+        "sender_full_name": "Sean",
+        "timestamp": 1531753051
+    },
+    {
+        "content": "<p>oh, and before going down that route -- just add that there look to be at least 53 of those 139 in libbu, at least per the original project scope ;)</p>",
+        "id": 129754857,
+        "sender_full_name": "Sean",
+        "timestamp": 1531753119
+    },
+    {
+        "content": "<p>okay, so taking a step back -- if you could do anything, work on anything -- what would that be?</p>",
+        "id": 129754880,
+        "sender_full_name": "Sean",
+        "timestamp": 1531753143
+    },
+    {
+        "content": "<p>forgetting about bu_lists for a moment</p>",
+        "id": 129754907,
+        "sender_full_name": "Sean",
+        "timestamp": 1531753162
+    },
+    {
+        "content": "<p>well, ideally on something that offers the most performance gains</p>",
+        "id": 129755331,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531753450
+    },
+    {
+        "content": "<p>i started on this because you said at some point that it would improve performance by an order of magnitute, so it was appealing</p>",
+        "id": 129755389,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531753525
+    },
+    {
+        "content": "<p>heh, well that's good to hear :)</p>",
+        "id": 129756406,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754397
+    },
+    {
+        "content": "<p>so sticking with performance, the problem with getting that order is the workload</p>",
+        "id": 129756468,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754418
+    },
+    {
+        "content": "<p>the gain cannot happen until some subset of the 139 (the ones involved in ray tracing) have aliasing eliminated</p>",
+        "id": 129756504,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754458
+    },
+    {
+        "content": "<p>but it's undeniably a lot of work.  at this rate, you'd need to do about one bu_list per hour, or at least 5-10 per day to get there before gsoc is over (~17 days)</p>",
+        "id": 129756658,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754575
+    },
+    {
+        "content": "<p>and that seems unlikely given the first one has been about 2+ weeks  :)</p>",
+        "id": 129756697,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754627
+    },
+    {
+        "content": "<p>that's not saying anything negative about you <span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> ... the first ones when going down a new development route will always take the longest.  the question I have for you is whether now that you've learned so much about this is whether to keep running this route or change things up.</p>",
+        "id": 129756779,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754703
+    },
+    {
+        "content": "<p>to stay the path, it's going to be a race against time and you'll probably want to install the Intel compiler (as it has outstanding vectorization/aliasing reporting)</p>",
+        "id": 129756821,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754761
+    },
+    {
+        "content": "<p>alternatively, there is a performance gain to be had in a few other specific places like boolean evaluation, ray dispatching, and perceptively via display presentation</p>",
+        "id": 129757020,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754897
+    },
+    {
+        "content": "<p>there's probably just enough time to make progress in just one area</p>",
+        "id": 129757037,
+        "sender_full_name": "Sean",
+        "timestamp": 1531754920
+    },
+    {
+        "content": "<blockquote>\n<p>that's not saying anything negative about you <span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> ... the first ones when going down a new development route will always take the longest.  the question I have for you is whether now that you've learned so much about this is whether to keep running this route or change things up.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  well, i can't really say i've learnt much. i was aware of most of what i've done, but the reason it took so much was that i hit three bugs (the deadlock, the compilation issue, and the failing tests on the mac) unrelated to the SoA work which have taken a lot of time to fix</p>",
+        "id": 129786229,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531789514
+    },
+    {
+        "content": "<p>it may be my fault because i've managed the time incorrectly (i also spent a week reading something that didn't offer much return), but there wasn't much figuring out with regards to bu_mappedfile</p>",
+        "id": 129786301,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531789658
+    },
+    {
+        "content": "<blockquote>\n<p>to stay the path, it's going to be a race against time and you'll probably want to install the Intel compiler (as it has outstanding vectorization/aliasing reporting)</p>\n</blockquote>\n<p>installing the intel compiler is not a hurdle (i think), but i did not know that it had outstanding vectorization reporting. when i started this part of the work, i did use vectorization reporting, albeit from clang. i recognized it would be useful, but i think i (mis)understood from one of your messages back then that i shouldn't (need to?) do that :-?</p>",
+        "id": 129786431,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531789818
+    },
+    {
+        "content": "<blockquote>\n<p>alternatively, there is a performance gain to be had in a few other specific places like boolean evaluation, ray dispatching, and perceptively via display presentation</p>\n</blockquote>\n<p>if you think it would be better to switch focus, i would be fine. but i think it would be useful for me to have an outline of the work that i should do for these specific places. i can't tell you right now i would like to work on boolean evaluation because i don't know what exactly that would entail (and similarly for the other two areas)</p>",
+        "id": 129786479,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531789919
+    },
+    {
+        "content": "<p>another fault on my part would be that i should've asked for an outline (or how you would see it) when i first started, but i thought i could figure it out as i went along, so i've mostly proceeded without a plan/overview of where i should be heading</p>",
+        "id": 129786556,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531790011
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  well, i can't really say i've learnt much. i was aware of most of what i've done, but the reason it took so much was that i hit three bugs (the deadlock, the compilation issue, and the failing tests on the mac) unrelated to the SoA work which have taken a lot of time to fix</p>\n</blockquote>\n<p>hm, that is true.  there have been a number of annoying issues. several still unresolved to bite another day. :(</p>",
+        "id": 129788012,
+        "sender_full_name": "Sean",
+        "timestamp": 1531792322
+    },
+    {
+        "content": "<p>was the deadlock the gga issue or something else?  I know there's a workaround on the compilation (i.e., leave the turn-off inlining flag for now), and punting on the rtwizard bug until someone else can find the commit that caused it.</p>",
+        "id": 129788044,
+        "sender_full_name": "Sean",
+        "timestamp": 1531792418
+    },
+    {
+        "content": "<blockquote>\n<p>installing the intel compiler is not a hurdle (i think), but i did not know that it had outstanding vectorization reporting. when i started this part of the work, i did use vectorization reporting, albeit from clang. i recognized it would be useful, but i think i (mis)understood from one of your messages back then that i shouldn't (need to?) do that :-?</p>\n</blockquote>\n<p>installing it is easy -- you can just say you're using it with BRL-CAD as open source use gets a free license key.  you don't <em>need</em> to use the vectorization reporting until you've taken care of all the higher level issues OR if you're working on optimizing a very specific piece of code.  In talking about making a major impact on ray tracing performance, you could for example find all of the files with the hotest functions and make sure just those files pass automatic vectorization.  that would be FAR fewer of the 139 bu_list instances, for example -- a prioritization aid that would directly pertain to performance.</p>",
+        "id": 129788209,
+        "sender_full_name": "Sean",
+        "timestamp": 1531792750
+    },
+    {
+        "content": "<p>I don't really think you should switch focus -- I'm just trying to make sure the work stays interesting to you.  could be wrong, but it just felt to me like you were getting tired of the bu_list work.  the fact that you've said you're not learning much reflects that too.  if it's still interesting and something you want to do, then you're still good to go from my perspective.  we need bu_list to go away either way. :)</p>",
+        "id": 129788321,
+        "sender_full_name": "Sean",
+        "timestamp": 1531792958
+    },
+    {
+        "content": "<blockquote>\n<p>another fault on my part would be that i should've asked for an outline (or how you would see it) when i first started, but i thought i could figure it out as i went along, so i've mostly proceeded without a plan/overview of where i should be heading</p>\n</blockquote>\n<p>to be honest, I was (and still am) fine with you proceeding without an outline or specific plan too because I know you're capable and there's so many ways you can make the code better.  that of course is a double-edged sword because some places in the code are FAR more important than others -- for example, bu_mappedfile is completely unimportant in the big scheme of things other than as a learning struct for getting rid of bu_list.  that's why I've been suggesting the shortest route possible -- just remove it and make the backend use a container.  the important structs <em>are</em> going to be hard, which is why they really shouldn't be tackled first.  we must all learn the issues and patterns involved from some of the 138 other instances.</p>",
+        "id": 129788481,
+        "sender_full_name": "Sean",
+        "timestamp": 1531793305
+    },
+    {
+        "content": "<p>you know what might help is seeing ray tracing performance at a much lower level.  i'll send you a link for something you can try running.</p>",
+        "id": 129788894,
+        "sender_full_name": "Sean",
+        "timestamp": 1531794074
+    },
+    {
+        "content": "<blockquote>\n<p>was the deadlock the gga issue or something else?</p>\n</blockquote>\n<p>not sure what a gga issue is :D</p>",
+        "id": 129811930,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531833341
+    },
+    {
+        "content": "<blockquote>\n<p>I don't really think you should switch focus -- I'm just trying to make sure the work stays interesting to you.  could be wrong, but it just felt to me like you were getting tired of the bu_list work.  the fact that you've said you're not learning much reflects that too.  if it's still interesting and something you want to do, then you're still good to go from my perspective.  we need bu_list to go away either way. <span class=\"emoji emoji-1f603\" title=\"smiley\">:smiley:</span></p>\n</blockquote>\n<p>it's not that i got tired of the bu_list work, but debugging those problems was interesting enough to give it a try and i thought it would take less time, so that's why i spent more time there</p>",
+        "id": 129812716,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531834254
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  i generated a report using intel's compiler (<a href=\"/user_uploads/1549/F7Ew3__ugUPoGCp2HKr-uoxD/bool.c.optrpt\" target=\"_blank\" title=\"bool.c.optrpt\">bool.c.optrpt</a>). it seems like a lot of the loops can't be vectorized because of the control flow (from what i gather, it means things like continue/goto/break)</p>",
+        "id": 129866166,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531913433
+    },
+    {
+        "content": "<p>and in terms of structures, i think <code>struct partition</code> is the one involved in most of the report, so should i start looking at getting rid of bu_list there?</p>",
+        "id": 129866194,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531913501
+    },
+    {
+        "content": "<p>also, i had to disable Werror when compiling with icc (it complained about things like <code>assert(a &gt; b &amp;&amp; \"a is not bigger than b\")</code>), and 10+ tests are failing. i don't know if icc is important though</p>",
+        "id": 129866263,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531913601
+    },
+    {
+        "content": "<p>actually, it's not 10+, i misremembered. tried it again, it's 3 (rt_dvec, regress-solids, and the rtwizard D one)</p>",
+        "id": 129868528,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531916678
+    },
+    {
+        "content": "<p>i committed the code eliminating bu_list from libbu/temp.c. if issues arise, i'll fix them, but the changes should be easier to follow this way</p>",
+        "id": 129872981,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531922264
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  i generated a report using intel's compiler (<a href=\"/user_uploads/1549/F7Ew3__ugUPoGCp2HKr-uoxD/bool.c.optrpt\" target=\"_blank\" title=\"bool.c.optrpt\">bool.c.optrpt</a>). it seems like a lot of the loops can't be vectorized because of the control flow (from what i gather, it means things like continue/goto/break)</p>\n</blockquote>\n<p>Yep, there are a handful of other issues also affecting auto-vectorization, not just aliasing.  Aliasing is just one of the more spread out issues that will take time to resolve.  Some of the other issues are being tackled in different ways or require back-porting -- e.g., the control flow issues are already mostly fixed in the OpenCL code path.</p>",
+        "id": 130083529,
+        "sender_full_name": "Sean",
+        "timestamp": 1532237004
+    },
+    {
+        "content": "<blockquote>\n<p>and in terms of structures, i think <code>struct partition</code> is the one involved in most of the report, so should i start looking at getting rid of bu_list there?</p>\n</blockquote>\n<p>I not without experience with a lot more bu_list patterns... partition is one of the ones that is going to be considerably harder for both technical and practical reasons (changing the structure without introducing API will break essentially all critical applications).</p>",
+        "id": 130083580,
+        "sender_full_name": "Sean",
+        "timestamp": 1532237123
+    },
+    {
+        "content": "<blockquote>\n<p>i committed the code eliminating bu_list from libbu/temp.c. if issues arise, i'll fix them, but the changes should be easier to follow this way</p>\n</blockquote>\n<p>this is in my commit-queue to review, so I'll let you know if I see any issues!  saw the other that followed as well.  Keep at them. ;)</p>",
+        "id": 130083629,
+        "sender_full_name": "Sean",
+        "timestamp": 1532237227
+    },
+    {
+        "content": "<p>any modern popular compiler is worth fixing, if you want to tackle the issues.  just beware of red herrings -- issues that seem like one thing but are really another.  example, assert() warnings could very well be just because some other bit of CMake logic is wrong and not because there's anything actually wrong with the assert line.  Be skeptical and confirm the source, not just patch symptoms, is the healthy perspective to have.</p>",
+        "id": 130083680,
+        "sender_full_name": "Sean",
+        "timestamp": 1532237371
+    },
+    {
+        "content": "<p>of course, it's secondary to the other work, so you're welcome to disable warnings and proceed if fixing them is not interesting</p>",
+        "id": 130083733,
+        "sender_full_name": "Sean",
+        "timestamp": 1532237479
+    },
+    {
+        "content": "<blockquote>\n<p>I not without experience with a lot more bu_list patterns... partition is one of the ones that is going to be considerably harder for both technical and practical reasons (changing the structure without introducing API will break essentially all critical applications).</p>\n</blockquote>\n<p>oh, i wasn't sure if you wanted me to focus on the central structures. so should i just keep on eliminating bu_list from the files that are easier? regarding the API, i see what you mean. i'm thinking of maybe getting rid of bu_list in the internal code and exposing the old way to the users, but i don't really have experience with deprecating things (or even designing APIs, but i think i have some overall ideas about that)</p>",
+        "id": 130113349,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532291295
+    },
+    {
+        "content": "<blockquote>\n<p>this is in my commit-queue to review, so I'll let you know if I see any issues!  saw the other that followed as well.  Keep at them. ;)</p>\n</blockquote>\n<p>i'm curious, is there a tool for keeping a commit queue, or do you just take note of them and go over them at a later time?</p>",
+        "id": 130113374,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532291336
+    },
+    {
+        "content": "<blockquote>\n<p>any modern popular compiler is worth fixing, if you want to tackle the issues.  just beware of red herrings -- issues that seem like one thing but are really another.  example, assert() warnings could very well be just because some other bit of CMake logic is wrong and not because there's anything actually wrong with the assert line.  Be skeptical and confirm the source, not just patch symptoms, is the healthy perspective to have.</p>\n</blockquote>\n<p>i see what you mean. i'll keep that in mind when facing issues like that. i think i should've done that with the gcc 6.3 bug as well</p>",
+        "id": 130113463,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532291426
+    },
+    {
+        "content": "<blockquote>\n<p>of course, it's secondary to the other work, so you're welcome to disable warnings and proceed if fixing them is not interesting</p>\n</blockquote>\n<p>disabling Werror is what i've done so far in order to generate the reports</p>",
+        "id": 130113480,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532291456
+    },
+    {
+        "content": "<p>in libbu, i found 6 files exposing an API which uses <code>bu_list</code></p>\n<div class=\"codehilite\"><pre><span></span>include/bu % grep -Rl &quot;bu_list&quot; .\n./observer.h\n./bitv.h\n./hook.h\n./ptbl.h\n./redblack.h\n./list.h\n./cmd.h\n</pre></div>",
+        "id": 130134948,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532332370
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> i was considering removing bu_list from them going forward (and after that moving on to librt), but since they're user-facing structures, what i would do is leave the bu_list member in place, modify existing code to not use the bu_list, and mark it as deprecated somehow</p>",
+        "id": 130135130,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532332723
+    },
+    {
+        "content": "<blockquote>\n<p>i'm curious, is there a tool for keeping a commit queue, or do you just take note of them and go over them at a later time?</p>\n</blockquote>\n<p>I have a tool I use for this, but it's very specific to my workflow needs -- not something generally reusable.  For team review, we've talked about using either Crucible or Phabricator but nobody has gone through the effort to set it up.</p>",
+        "id": 130162068,
+        "sender_full_name": "Sean",
+        "timestamp": 1532367217
+    },
+    {
+        "content": "<p>that plan sounds good -- you can mark them deprecated in a doxygen comment, e.g., /***&lt; DEPRECATED */</p>",
+        "id": 130162496,
+        "sender_full_name": "Sean",
+        "timestamp": 1532367647
+    },
+    {
+        "content": "<p>if there are no places in our code that actually iterate the list, it might even be possible to remove the element without deprecation but that will have to be a case-by-case judgement call -- ask me if you find any like that</p>",
+        "id": 130162526,
+        "sender_full_name": "Sean",
+        "timestamp": 1532367689
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> I looked through that list in libbu and looks like observer, hook, redblack, and cmd.h can easily just be changed/removed.  bitv, ptbl, and list are definitely harder as they are prominently used by applications, but if you can change them such that the places where code calls them is only minimally impacted, then they could be changed too.</p>",
+        "id": 130181273,
+        "sender_full_name": "Sean",
+        "timestamp": 1532391154
+    },
+    {
+        "content": "<p>minimally impacted means you could fix the code that calls them with a simple stateless regular expression (typically fixing calling code with a search-and-replace)</p>",
+        "id": 130181287,
+        "sender_full_name": "Sean",
+        "timestamp": 1532391191
+    },
+    {
+        "content": "<p>that may or may not be doable with the three harder ones.</p>",
+        "id": 130181296,
+        "sender_full_name": "Sean",
+        "timestamp": 1532391207
+    },
+    {
+        "content": "<p>i have something which builds, but i can't run <code>make test</code> because of the <code>result</code> problem i mentioned previously. should i commit? submit a patch?</p>",
+        "id": 130810102,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533257229
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> you have commit, so you no longer need to submit to the patch tracker unless you just really really really want to ...</p>",
+        "id": 130816167,
+        "sender_full_name": "Sean",
+        "timestamp": 1533268059
+    },
+    {
+        "content": "<p>it's just as easy to check it post commit and fix or revert if needed -- if you want me or someone else to check it beforehand, just post up patch</p>",
+        "id": 130816213,
+        "sender_full_name": "Sean",
+        "timestamp": 1533268093
+    },
+    {
+        "content": "<p>i've committed the removal of bu_list from the simpler ones. i tried to be careful since i can't really run all the tests, hope everything is ok. should i look at bitv/ptbl next?</p>",
+        "id": 130908143,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533426512
+    },
+    {
+        "content": "<p>i'm trying to remove the bu_list in bu_ptbl. in some places, a list of <code>bu_ptbl</code>s is still needed. should i implement a dynamically-expanded array like i did for the other replacements, or should i use std::array? the reason i'm asking is because i don't know if the plan is to switch to STL eventually, and if it is, i think i should use it now instead of postponing</p>",
+        "id": 131136263,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533767366
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> before going down that road, we need more unit tests...</p>",
+        "id": 131136434,
+        "sender_full_name": "Sean",
+        "timestamp": 1533767591
+    },
+    {
+        "content": "<p>what should they test for? that the structures using the new list behave the same as with the bu_list?</p>",
+        "id": 131136561,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533767738
+    },
+    {
+        "content": "<p>Found three separate bugs in bu_hook today from its conversion and there’s a couple higher level integration tests failing now, likely from the other conversions (memory corruption)</p>",
+        "id": 131136587,
+        "sender_full_name": "Sean",
+        "timestamp": 1533767762
+    },
+    {
+        "content": "<p>They should ideally test each of the public functions, testing that good inputs do what is expected and bad fails appropriate</p>",
+        "id": 131136740,
+        "sender_full_name": "Sean",
+        "timestamp": 1533767913
+    },
+    {
+        "content": "<p>after making the changes, i ran <code>make test</code> and everything passed, except for the rtwizard ones. how do i run the high level integration tests?</p>",
+        "id": 131136774,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533767984
+    },
+    {
+        "content": "<p>That’s good, though the nature of container bugs can be super hard to trigger</p>",
+        "id": 131136921,
+        "sender_full_name": "Sean",
+        "timestamp": 1533768171
+    },
+    {
+        "content": "<p>With memory corruption, it’ll work fine with one compile and not another</p>",
+        "id": 131136952,
+        "sender_full_name": "Sean",
+        "timestamp": 1533768236
+    },
+    {
+        "content": "<p>That’s where cross platform testing helps, in general, as memory tends to be arranged quite different</p>",
+        "id": 131137027,
+        "sender_full_name": "Sean",
+        "timestamp": 1533768356
+    },
+    {
+        "content": "<p>One thing you can check easily is distcheck-full</p>",
+        "id": 131137113,
+        "sender_full_name": "Sean",
+        "timestamp": 1533768465
+    },
+    {
+        "content": "<p>That will at least check optimized which should disable zero-initialization</p>",
+        "id": 131137165,
+        "sender_full_name": "Sean",
+        "timestamp": 1533768526
+    },
+    {
+        "content": "<p>do you have any suggestions for what files i should write tests for?</p>",
+        "id": 131157596,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533802521
+    },
+    {
+        "content": "<blockquote>\n<p>do you have any suggestions for what files i should write tests for?</p>\n</blockquote>\n<p>er, the ones you modified...</p>",
+        "id": 131157981,
+        "sender_full_name": "Sean",
+        "timestamp": 1533803088
+    },
+    {
+        "content": "<p>I'd suggest starting with bu_hook -- it should be dead easy.  you'll notice a variety of testing patterns in src/libbu/tests -- feel free to pick your preference or come up with something on your own, just try to keep things as simple and obvious as possible.  Clever tests can be a bear to debug.</p>",
+        "id": 131158132,
+        "sender_full_name": "Sean",
+        "timestamp": 1533803335
+    },
+    {
+        "content": "<p>then redblack, observers</p>",
+        "id": 131158332,
+        "sender_full_name": "Sean",
+        "timestamp": 1533803555
+    },
+    {
+        "content": "<p>at a glance, fb_obj looks like it may have a lot of the same problems as bu_hook had ... didn't check the others that closely yet</p>",
+        "id": 131158368,
+        "sender_full_name": "Sean",
+        "timestamp": 1533803615
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> it would also be good to carve out a solid day to write up a summary report of everything you worked on, improved, maybe one last round of profiles  (even if just to comment how all this foundation stuff doesn't affect performance yet until all bu_lists are gone)</p>",
+        "id": 131158452,
+        "sender_full_name": "Sean",
+        "timestamp": 1533803703
+    }
+]

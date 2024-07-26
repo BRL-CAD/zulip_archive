@@ -1,0 +1,32 @@
+[
+    {
+        "content": "<p>With CMAKE_BUILD_TYPE=Release on latest Ubuntu (gcc version 12.2.0 (Ubuntu 12.2.0-3ubuntu1)) I'm seeing the following:</p>\n<div class=\"codehilite\"><pre><span></span><code>brlcad/src/libbu/bitv.c:149:16: error: writing 1 byte into a region of size 0 [-Werror=stringop-overflow=]\n  149 |         *out++ |= *in++;\n      |                ^\nbrlcad/include/bu/bitv.h:111:12: note: at offset [22, 2305843009213693950] into destination object ‘bits’ of size 2\n  111 |     bitv_t bits[2];     /**&lt; variable size array */\n      |            ^\nbrlcad/include/bu/bitv.h:111:12: note: at offset [6, 14] into destination object ‘bits’ of size 2\nbrlcad/include/bu/bitv.h:111:12: note: at offset [22, 2305843009213693950] into destination object ‘bits’ of size 2\n</code></pre></div>",
+        "id": 314315755,
+        "sender_full_name": "starseeker",
+        "timestamp": 1670356927
+    },
+    {
+        "content": "<p>Anybody else seeing the following?</p>\n<div class=\"codehilite\"><pre><span></span><code>src/libbu/progname.c:138:73: error: ‘__builtin___snprintf_chk’ output may be truncated before the last format character [-Werror=format-truncation=]\n  138 |     snprintf(buffer+strlen(buffer), sizeof(buffer)-strlen(buffer), &quot;%c%s&quot;, BU_DIR_SEPARATOR, argv0);\n      |                                                                         ^\nIn file included from /usr/include/stdio.h:906,\n                 from include/bio.h:41,\n                 from src/libbu/progname.c:41:\nIn function ‘snprintf’,\n    inlined from ‘bu_argv0_full_path’ at src/libbu/progname.c:138:5:\n/usr/include/x86_64-linux-gnu/bits/stdio2.h:54:10: note: ‘__builtin___snprintf_chk’ output between 2 and 4097 bytes into a destination of size 4096\n   54 |   return __builtin___snprintf_chk (__s, __n, __USE_FORTIFY_LEVEL - 1,\n      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n   55 |                                    __glibc_objsize (__s), __fmt,\n      |                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n   56 |                                    __va_arg_pack ());\n      |                                    ~~~~~~~~~~~~~~~~~\n</code></pre></div>",
+        "id": 322616734,
+        "sender_full_name": "starseeker",
+        "timestamp": 1674249157
+    },
+    {
+        "content": "<p>OK, main branch doesn't show it.  Must be something I'm doing in a branch.</p>",
+        "id": 323359660,
+        "sender_full_name": "starseeker",
+        "timestamp": 1674596836
+    },
+    {
+        "content": "<p>Ah - one of the bits of code I was shoehorning in on the branch requires C++17 standard - that might be it</p>",
+        "id": 323361450,
+        "sender_full_name": "starseeker",
+        "timestamp": 1674597647
+    },
+    {
+        "content": "<p>No... combination of the O2 flag and something else... hmm...</p>",
+        "id": 323385158,
+        "sender_full_name": "starseeker",
+        "timestamp": 1674608799
+    }
+]

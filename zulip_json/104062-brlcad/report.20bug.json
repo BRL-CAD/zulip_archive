@@ -1,0 +1,62 @@
+[
+    {
+        "content": "<p>where is the best place to report BRL-cad bug.  Tried sending to: <a href=\"mailto:brlcad-devel@lists.sourceforge.net\" title=\"mailto:brlcad-devel@lists.sourceforge.net\">brlcad-devel@lists.sourceforge.net</a>, but email was rejected.</p>",
+        "id": 163762946,
+        "sender_full_name": "Chi Ng",
+        "timestamp": 1555705972
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"217910\">@Chi Ng</span> Are you subscribed to this list? <a href=\"https://sourceforge.net/projects/brlcad/lists/brlcad-devel\" target=\"_blank\" title=\"https://sourceforge.net/projects/brlcad/lists/brlcad-devel\">https://sourceforge.net/projects/brlcad/lists/brlcad-devel</a><br>\nOur official bug tracker is <a href=\"https://sourceforge.net/p/brlcad/bugs\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/bugs\">https://sourceforge.net/p/brlcad/bugs</a>. You need a Sourceforge account to create a ticket there.<br>\nYou can however post your bug report here too.</p>",
+        "id": 163800369,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1555761401
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"217910\">@Chi Ng</span> Your reports were received to the devs@ address, thank you.  At a glance, they are rather involved, complicated, and I'm not sure how much Windows 7 is having an influence.  We're no longer doing testing and development on 7, so hopefully only the datetime issue is limited to that version issue.</p>",
+        "id": 163807047,
+        "sender_full_name": "Sean",
+        "timestamp": 1555773116
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Thank you all for your reply.  No worry about Windows 7.  I did replace GetSystemTimePreciseAsFileTime with GetSystemTimeAsFileTime to get my system to run on Windows 7.  If precise timing is required for the importers, indeed it would be my system.  I will upgrade to Windows 8 and give it run again.  By the way, the 3dm-g importer is quite impressive.  Some  none trivial models I converted to . g database are private so couldn't show publicly, but they look really amazing on archer.</p>",
+        "id": 163808808,
+        "sender_full_name": "Chi Ng",
+        "timestamp": 1555776070
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/VwbyriT4ToO7Lj-7isyNdbua/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a> </p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/VwbyriT4ToO7Lj-7isyNdbua/pasted_image.png\" target=\"_blank\" title=\"pasted image\"><img src=\"/user_uploads/1549/VwbyriT4ToO7Lj-7isyNdbua/pasted_image.png\"></a></div><p>The bug number not getting printed with label is occurring because of this reason.   </p>\n<p>The issue is occurring because of line no 79</p>\n<p>so the issue is as the flag sets to 1 further loop gets skipped and hence the size of the letters which is to be printed cannot be calculated and hence..no cannot be created. like for example... try typing a single 1, it wont print, but try typing eight 1's these 1's get printed as the area required to print them is of certain size.</p>\n<p>A quick fix to it is commenting line 79.</p>",
+        "id": 165701245,
+        "sender_full_name": "Chetan Shinde",
+        "timestamp": 1557914534
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"211316\">@Chetan Shinde</span> I'm not familiar with this particular logic - what is disp_mode supposedly used for?  there's undoubtedly some reason that it's turned on for BN_VLIST_DISPLAY_MAT ... another solution just from a data perspective might be to set disp_mode to 0 elsewhere but you'd have to more completely understand what's going on in that function.</p>",
+        "id": 165707591,
+        "sender_full_name": "Sean",
+        "timestamp": 1557921435
+    },
+    {
+        "content": "<p>at a glance, there clearly seems to be switch settings in two groups -- those that directly cause something to be displayed / drawn (below the attribute comment) and those that do not (above the comment), with that disp_mode possibly keeping track of which.  if unsetting it for line drawing somehow helps, that implies that logic is awry or logic elsewhere is wrong.</p>",
+        "id": 165707693,
+        "sender_full_name": "Sean",
+        "timestamp": 1557921545
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103555\">@Shubham Rathore</span>  can you please help us to understand why the disp_mode flag was added to, the code.</p>\n<p><a href=\"/user_uploads/1549/c1yyOTKg-fLtWrc_Eb5mj0jv/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a> </p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/c1yyOTKg-fLtWrc_Eb5mj0jv/pasted_image.png\" target=\"_blank\" title=\"pasted image\"><img src=\"/user_uploads/1549/c1yyOTKg-fLtWrc_Eb5mj0jv/pasted_image.png\"></a></div><p>thanks.!</p>",
+        "id": 165711056,
+        "sender_full_name": "Chetan Shinde",
+        "timestamp": 1557924472
+    },
+    {
+        "content": "<p>The coordinates in the vlist can be given in the model or display coordinate system, i.e. points in the model space (same as for the geometric primitives) or points on the display window (similar to the texts and lines of mged's face plate). The MODEL_MAT and DISPLAY_MAT flags switches between these two spaces.</p>",
+        "id": 165715277,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1557927746
+    },
+    {
+        "content": "<p>The DISPLAY_MAT flag is followed by a 3D point, which determines the origin of the display coordinate system in the world. Whenever you display an annotation, you display it on the screen in screen coordinates, this means, \"10 mm\" are 10 mm on the screen. The (0, 0) point of this coordinate system is always where the 3D point following the DISPLAY_MAT flag would be displayed as a world coordinate on the screen. This way, you can always see the labels clearly when you move or zoom your model.</p>\n<p>And, it's correct that the annotation lines and texts are ignored for the computation of the bounding box, as they don't \"live\" in the world. The only world point there is the 3D point following the DISPLAY_MAT flag. An annotation will be displayed when this point is visible, otherwise not.</p>",
+        "id": 165719772,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1557931041
+    }
+]

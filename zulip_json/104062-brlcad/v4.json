@@ -1,0 +1,254 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> little surprised by the asc-g comments as that doesn't jive with my recollection..  it just directly reads/writes out structures to disk.  It's an old serialization method (not platform-independent, hence v5).</p>",
+        "id": 203449066,
+        "sender_full_name": "Sean",
+        "timestamp": 1594333305
+    },
+    {
+        "content": "<p>I may be misinterpreting what I'm seeing in the code - it's not even clear to me that g2asc will actually write out a v4 properly... I don't know if that logic is tested by anything we've got running right now</p>",
+        "id": 203449259,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333410
+    },
+    {
+        "content": "<p>Wait - v4 ASC files aren't platform independent?</p>",
+        "id": 203449408,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333485
+    },
+    {
+        "content": "<p>g2asc writes out a v4, unless we introduced a bug</p>",
+        "id": 203449489,
+        "sender_full_name": "Sean",
+        "timestamp": 1594333536
+    },
+    {
+        "content": "<p>it's got two formats, from what I can see - an older asc format, and the \"tcl script\" v5 asc format</p>",
+        "id": 203449590,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333572
+    },
+    {
+        "content": "<p>db/moss.asc is in the older format, from what I can tell</p>",
+        "id": 203449638,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333617
+    },
+    {
+        "content": "<p>No \"title\" or \"puts\" commands, args aren't Tcl lists</p>",
+        "id": 203449680,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333647
+    },
+    {
+        "content": "<p>an asc2g g2asc round trip produces a newer, Tcl script style asc</p>",
+        "id": 203449881,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333754
+    },
+    {
+        "content": "<p>g2asc fails to export a downgraded v4 moss.g - just get the header and a title written out, that's it...</p>",
+        "id": 203450281,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594333978
+    },
+    {
+        "content": "<p>Actually, I'm wrong - looks like it was the downgrade that didn't produce geometry</p>",
+        "id": 203450426,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334059
+    },
+    {
+        "content": "<p>hmm.</p>",
+        "id": 203450441,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334074
+    },
+    {
+        "content": "<p>Well, presumably feeding a proper v4 .g to g2asc would produce a v4 asc file then...</p>",
+        "id": 203450513,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334120
+    },
+    {
+        "content": "<p>yes, most of the old asc files are in v4-asc format, which is a simple DSL</p>",
+        "id": 203450863,
+        "sender_full_name": "Sean",
+        "timestamp": 1594334339
+    },
+    {
+        "content": "<p>v4-asc is platform independent, it's just a text file.  it's v4 binary I was referring to.</p>",
+        "id": 203450899,
+        "sender_full_name": "Sean",
+        "timestamp": 1594334370
+    },
+    {
+        "content": "<p>how are you making a v4?  dbupgrade has an intentionally hidden -r flag to downgrade to v4 for testing</p>",
+        "id": 203451032,
+        "sender_full_name": "Sean",
+        "timestamp": 1594334484
+    },
+    {
+        "content": "<p>yeah, tried that on moss.g - got back a file with no geometry, as far as I can tell - haven't glinted it yet</p>",
+        "id": 203451079,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334518
+    },
+    {
+        "content": "<p>My first look suggested that the v4 asc output requires/assumes v4 .g input, which would make that code a headache to upgrade for libgcv - have to unwire those assumptions and generate v4 asc lines from the modern in-mem data structures we would get from a v5 .g file to do it cleanly...</p>",
+        "id": 203451367,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334682
+    },
+    {
+        "content": "<p>that would be a relatively new bug if it's busted... I used it last year iirc</p>",
+        "id": 203451393,
+        "sender_full_name": "Sean",
+        "timestamp": 1594334699
+    },
+    {
+        "content": "<p>could be - I don't think we regress that feature at all and I've not used it in a long time</p>",
+        "id": 203451459,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334756
+    },
+    {
+        "content": "<p>for gcv, could also do whatever n-steps needed, like export to .g, downgrade to v4, reopen as if it were the input, then export v4 asc ... all within the asc plugin</p>",
+        "id": 203451517,
+        "sender_full_name": "Sean",
+        "timestamp": 1594334776
+    },
+    {
+        "content": "<p>plugins don't need to be pretty if they work :)</p>",
+        "id": 203451538,
+        "sender_full_name": "Sean",
+        "timestamp": 1594334788
+    },
+    {
+        "content": "<p>heh - point.  Since we \"own\" the format I was wanting to be reasonably nice, but I'm also not sure it's worth preserving v4 asc output at all...</p>",
+        "id": 203451582,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334830
+    },
+    {
+        "content": "<p>the bit I want most is to read v4 asc without Tcl, so I can re-enable a lot of the regression tests with BRLCAD_ENABLE_TCL=OFF - the rest just comes along if I want to properly clean up asc2g/g2asc and move them into libgcv, rather than snarfing the minimal bits I need... the later increases code complexity rather than cleaning things up.</p>",
+        "id": 203451794,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334968
+    },
+    {
+        "content": "<p>the former increases headaches</p>",
+        "id": 203451816,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594334990
+    },
+    {
+        "content": "<p>/me supposes we really ought to add a downgrade, upgrade, diff check to dbupgrade to make sure it stays working... can be an important tool under some circumstances.</p>",
+        "id": 203451985,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594335097
+    },
+    {
+        "content": "<p>that's why g2asc / asc2g have been mostly left alone.  it's good to support them, but they're not likely worth the effort to modernize them.</p>",
+        "id": 203452758,
+        "sender_full_name": "Sean",
+        "timestamp": 1594335663
+    },
+    {
+        "content": "<p>Main problem is a lot of the red/ted type commands rely on that format... that has baked it into a lot of users' workflows</p>",
+        "id": 203453327,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336150
+    },
+    {
+        "content": "<p>well, v5 may prove easier to deal with and v4 I only really need reading (and I'm a fair ways towards cleaning up the reading code already, I think...)</p>",
+        "id": 203453444,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336244
+    },
+    {
+        "content": "<p>Can probably reject v4 conversion for non v4 dbip instances, actually, since g2asc doesn't have that ability</p>",
+        "id": 203453574,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336340
+    },
+    {
+        "content": "<p>yeah, I know -- v4 is also baked into a number of 3rd party applications (EF for example, ugh)</p>",
+        "id": 203453902,
+        "sender_full_name": "Sean",
+        "timestamp": 1594336664
+    },
+    {
+        "content": "<p>Ouch.</p>",
+        "id": 203453962,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336689
+    },
+    {
+        "content": "<p>could separate the v4 from v5 and leave it in a v4asc tool</p>",
+        "id": 203453968,
+        "sender_full_name": "Sean",
+        "timestamp": 1594336694
+    },
+    {
+        "content": "<p>I take it back .. EF was using v4 asc direct, but they switched to actually bundling and invoking asc2g</p>",
+        "id": 203454005,
+        "sender_full_name": "Sean",
+        "timestamp": 1594336740
+    },
+    {
+        "content": "<p>I'm going to see if I can cheat a bit - I like your idea about calling the downgrade, but as an interim step I might be able to recognize a v4 dbip, grab the filename from the dbip, and feed it to this logic</p>",
+        "id": 203454021,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336758
+    },
+    {
+        "content": "<p>er, or maybe g2asc, and then parsing the asc?  I forget. it was atrocious however it was, but they seem adamant that it's simpler than a librt linkage</p>",
+        "id": 203454075,
+        "sender_full_name": "Sean",
+        "timestamp": 1594336783
+    },
+    {
+        "content": "<p>O.o</p>",
+        "id": 203454139,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336806
+    },
+    {
+        "content": "<p>or just lazy<br>\nand they weren't the only ones.  I believe the other force folks have asc integrated into a number of low level tools that are in use too,  folks that don't even know because the tools just work and have never changed/needed to change.</p>",
+        "id": 203454229,
+        "sender_full_name": "Sean",
+        "timestamp": 1594336897
+    },
+    {
+        "content": "<p>$DEITY help them if they hit a NURBS database</p>",
+        "id": 203454296,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594336949
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> nevermind, I must have done something weird or run in a half-built state somehow - dbupgrade -r worked when I tried it after building again.</p>",
+        "id": 203492685,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594377825
+    },
+    {
+        "content": "<p>/me is reminded of Tim Daly's mantra... \"There's no such thing as a simple job.\"</p>",
+        "id": 203506913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594388152
+    },
+    {
+        "content": "<p>Need a better test file than moss... ick.</p>",
+        "id": 203507275,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594388357
+    },
+    {
+        "content": "<p>Well, progress - can generate .g files from a couple samples at any rate.</p>",
+        "id": 203851724,
+        "sender_full_name": "starseeker",
+        "timestamp": 1594742533
+    }
+]

@@ -1,0 +1,104 @@
+[
+    {
+        "content": "<p>Well, looks like I was wrong about the gqa multithreaded plotting failure being a recent issue - just confirmed its presence in r73078 (2019-05-17)</p>",
+        "id": 220403214,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608312790
+    },
+    {
+        "content": "<p>It DID work in r71532</p>",
+        "id": 220403791,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608313039
+    },
+    {
+        "content": "<p>r72000 works</p>",
+        "id": 220404074,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608313154
+    },
+    {
+        "content": "<p>r72500 works</p>",
+        "id": 220404350,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608313265
+    },
+    {
+        "content": "<p>r73011 works</p>",
+        "id": 220404837,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608313508
+    },
+    {
+        "content": "<p>r73012 doesn't work</p>",
+        "id": 220405352,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608313744
+    },
+    {
+        "content": "<p>r73053 doesn't work, r73054 does, r73077 does, r73078 doesn't.  So those correspond to:</p>\n<p>r73012 - initial introduction of the new semaphore specification system<br>\nr73054 - revert to previous system due to Windows issues<br>\nr73078 - second introduction of new semaphore specification system</p>",
+        "id": 220407649,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608314548
+    },
+    {
+        "content": "<p>Looks like the GQA multithreaded plotting was a causality of the semaphore changes.  Now the question is why...</p>",
+        "id": 220407721,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608314585
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Am I correct that 2019 semaphore changes are pretty thoroughly out of context?  If so I'll try to dig into this, but I can't claim it's my forte...</p>",
+        "id": 220408236,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608314865
+    },
+    {
+        "content": "<p>No, they're not out of context.  They're entangled with the threaded debugging I was working on.  Let me take a stab at reproducing the issue -- what steps are you taking to observe the failure?</p>",
+        "id": 220411949,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316776
+    },
+    {
+        "content": "<p>I added a test in latest trunk... hang on, let me get the sequence</p>",
+        "id": 220412044,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316819
+    },
+    {
+        "content": "<p>Setup is running a gqa multi threaded plotting example:</p>\n<div class=\"codehilite\"><pre><span></span><code>./bin/gqa -Ao -p ovlp_ ../src/libged/tests/ged_tests.g ovlp\nTrying initial grid spacing: 50 mm\nUsing grid spacing lower limit: 0.005 mm\nPlotting overlaps to ovlp_overlaps.plot3\nProcessing with grid spacing 50 mm 44 x 48 x 39\nSummary (50mm grid spacing):\nlist Overlaps:\n/ovlp/r1 /ovlp/r2 count:2277 dist:1780.3mm @ (-248 350 -903.325)\n</code></pre></div>\n<p>Then the new utility to validate the plot file:</p>\n<div class=\"codehilite\"><pre><span></span><code>./src/libbn/tests/bn_plot3 -b ovlp_overlaps.plot3\nINVALID: ovlp_overlaps.plot3\n</code></pre></div>",
+        "id": 220412267,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316943
+    },
+    {
+        "content": "<p>ok cool, i'll try that</p>",
+        "id": 220412335,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316982
+    },
+    {
+        "content": "<p>As a control, you can do the same thing but add -P 1 to the gqa line - in that mode I get:</p>\n<div class=\"codehilite\"><pre><span></span><code>./src/libbn/tests/bn_plot3 -b ovlp_overlaps.plot3\nVALID:   ovlp_overlaps.plot3\n</code></pre></div>",
+        "id": 220412357,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316997
+    },
+    {
+        "content": "<p>O.o<br>\ngqa test on bz:</p>\n<div class=\"codehilite\"><pre><span></span><code>gqa &quot;-P&quot; &quot;1&quot; &quot;-Ao&quot; &quot;-p&quot; &quot;ovlp_&quot; &quot;/home/user/brlcad/src/gtools/tests/../../libged/tests/ged_tests.g&quot; &quot;ovlp&quot;\n878: Test timeout computed to be: 1500\n878: Trying initial grid spacing: 50 mm\n878: Using grid spacing lower limit: 0.005 mm\n878: Plotting overlaps to ovlp_overlaps.plot3\n878: Processing with grid spacing 50 mm 44 x 48 x 39\n878: bu_semaphore_init(): could not initialize 11106121 semaphores, max is 1024\n1/4 Test #878: gqa_plot .........................***Failed    0.09 sec\n</code></pre></div>",
+        "id": 220450846,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608347709
+    },
+    {
+        "content": "<p>78020 may fix that bit - gets the failure back down to just the multithreaded plot verification</p>",
+        "id": 220451387,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608348499
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I added a semaphore guard for plotting specifically to the gqa code - on Linux, the multithreaded test is passing now.  Don't know if that's the long term fix, but hopefully it will do for release.</p>",
+        "id": 225340177,
+        "sender_full_name": "starseeker",
+        "timestamp": 1612551088
+    }
+]

@@ -1,0 +1,50 @@
+[
+    {
+        "content": "<p>I can confirm seeing the file descriptor leak from ged_test_list, and according to valgrind it's the process.c:290 assignment (looks like specifically fd_in)</p>",
+        "id": 207399119,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597838931
+    },
+    {
+        "content": "<p>for what it's worth, I vaguely recall putting a Tcl_Sleep throttle into the event processing and it having negative effect. <br>\n sometimes events stream fast, dozens per second, and a throttle stalls the loop</p>",
+        "id": 207409134,
+        "sender_full_name": "Sean",
+        "timestamp": 1597844609
+    },
+    {
+        "content": "<p>Would a raw sleep call be safer?</p>",
+        "id": 207409314,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597844697
+    },
+    {
+        "content": "<p>Or do you mean it just drags down the execution time too much?  I did see that if I used larger values.</p>",
+        "id": 207409522,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597844788
+    },
+    {
+        "content": "<p>no, it just literally stalls the process for however much time, so if there are 100 pending events for example, it's going to take \"100 x sleeptime\" to get through them all</p>",
+        "id": 207409749,
+        "sender_full_name": "Sean",
+        "timestamp": 1597844890
+    },
+    {
+        "content": "<p>I was surprised to find that many could cluster up, but it happens</p>",
+        "id": 207409790,
+        "sender_full_name": "Sean",
+        "timestamp": 1597844910
+    },
+    {
+        "content": "<p>Hmm.  Well, I don't know that the sleep call is needed - maybe just skip it until it proves necessary?</p>",
+        "id": 207411378,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597845616
+    },
+    {
+        "content": "<p>btw, I noticed if rt doesn't exit cleanly, it also leaks a file descriptor in most cases by not freeing the rtip.  Is it worth going through and cleaning up the rtips before bu_exit calls to avoid the leaks?</p>",
+        "id": 207420616,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597850013
+    }
+]

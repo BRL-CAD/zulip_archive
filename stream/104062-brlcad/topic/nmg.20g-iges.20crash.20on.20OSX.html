@@ -1,0 +1,87 @@
+<html>
+<head><meta charset="utf-8"><title>nmg g-iges crash on OSX · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmg.20g-iges.20crash.20on.20OSX.html">nmg g-iges crash on OSX</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="225318725"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmg%20g-iges%20crash%20on%20OSX/near/225318725" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmg.20g-iges.20crash.20on.20OSX.html#225318725">(Feb 05 2021 at 16:10)</a>:</h4>
+<p>The following regression test is crashing on OSX.  Running it in Linux valgrind I can see an issue, but so far I'm not having much luck making heads or tails out of it...</p>
+<div class="codehilite"><pre><span></span><code>valgrind ../../bin/g-iges -f -o iges.m35.r516.iges iges.m35.g r516
+==2827298== Memcheck, a memory error detector
+==2827298== Copyright (C) 2002-2017, and GNU GPL&#39;d, by Julian Seward et al.
+==2827298== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==2827298== Command: ../../bin/g-iges -f -o iges.m35.r516.iges iges.m35.g r516
+==2827298==
+BRL-CAD Release 7.32.1  BRL-CAD to IGES Translator
+    Fri, 05 Feb 2021 15:36:57 UTC, Compilation 3
+    cyapp@ubuntu2019
+Please direct bug reports to &lt;bugs@brlcad.org&gt;
+
+ {s516} - {s517}
+ {(s516 - s517)} - {s512}
+r516
+==2827298== Invalid read of size 4
+==2827298==    at 0x48DD8FB: db_free_tree (db_tree.c:1357)
+==2827298==    by 0x10D3E6: do_nmg_region_end (g-iges.c:647)
+==2827298==    by 0x48DF875: _db_walk_dispatcher (db_tree.c:2016)
+==2827298==    by 0x53D61E2: bu_parallel (parallel.c:574)
+==2827298==    by 0x48E02FD: db_walk_tree (db_tree.c:2199)
+==2827298==    by 0x10C312: main (g-iges.c:343)
+==2827298==  Address 0x8a6a3d0 is 0 bytes inside a block of size 72 free&#39;d
+==2827298==    at 0x483CA3F: free (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2827298==    by 0x53B209C: bu_free (malloc.c:220)
+==2827298==    by 0x4F15A78: nmg_free (alloc.cpp:102)
+==2827298==    by 0x4FC31E3: nmg_kr (mk.c:1619)
+==2827298==    by 0x10D29A: do_nmg_region_end (g-iges.c:617)
+==2827298==    by 0x48DF875: _db_walk_dispatcher (db_tree.c:2016)
+==2827298==    by 0x53D61E2: bu_parallel (parallel.c:574)
+==2827298==    by 0x48E02FD: db_walk_tree (db_tree.c:2199)
+==2827298==    by 0x10C312: main (g-iges.c:343)
+==2827298==  Block was alloc&#39;d at
+==2827298==    at 0x483E0F0: memalign (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2827298==    by 0x483E212: posix_memalign (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2827298==    by 0x53B1E02: alloc (malloc.c:137)
+==2827298==    by 0x53B1F53: bu_calloc (malloc.c:174)
+==2827298==    by 0x4F15820: nmg_calloc (alloc.cpp:58)
+==2827298==    by 0x4FBB117: nmg_mrsv (mk.c:311)
+==2827298==    by 0x4920D20: rt_arb_tess (arb8.c:1522)
+==2827298==    by 0x4AE3A87: nmg_booltree_leaf_tess (nmg.c:4522)
+==2827298==    by 0x48DCEB3: db_recurse (db_tree.c:1170)
+==2827298==    by 0x48DBC31: _db_recurse_subtree (db_tree.c:925)
+==2827298==    by 0x48DBF1F: _db_recurse_subtree (db_tree.c:956)
+==2827298==    by 0x48DBF1F: _db_recurse_subtree (db_tree.c:956)
+==2827298==
+Wrote the following numbers and type of entities:
+    27 - Line
+    11 - Point
+    11 - Direction
+    1 - Manifold Boundary Representation
+    11 - Plane Surface
+    1 - Attribute Table Definition
+    1 - Property Entity
+    1 - Attribute Table Instance
+    1 - Vertex List
+    1 - Edge List
+    11 - Loop
+    11 - Face
+    1 - Shell
+Total of 89 entities written
+Tried 1 regions, 1 converted to nmg&#39;s successfully.  100%
+</code></pre></div>
+
+
+
+<a name="225320493"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/nmg%20g-iges%20crash%20on%20OSX/near/225320493" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/nmg.20g-iges.20crash.20on.20OSX.html#225320493">(Feb 05 2021 at 16:22)</a>:</h4>
+<p>My best guess is the subsequent db_free_tree call is doing a redundant nmg_kr...</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

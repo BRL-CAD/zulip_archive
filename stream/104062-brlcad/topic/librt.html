@@ -1,0 +1,755 @@
+<html>
+<head><meta charset="utf-8"><title>librt · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html">librt</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="126119079"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126119079" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126119079">(May 04 2018 at 23:18)</a>:</h4>
+<p>i'm wondering if the <code>struct bu_list l</code> member of <code>struct seg</code> is still used, or if it is deprecated. and if it is still used, what's the difference between the list of segments in a partition and the list in <code>struct seg</code>? :-?</p>
+
+
+
+<a name="126121911"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126121911" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126121911">(May 05 2018 at 00:44)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> I'm not really an expert on bu_list, but my understanding is that the "l" member of a bu_list is always pretty much essential, and if I'm remembering correctly structures whose first element is a bu_list "l" can function as bu_lists for some purposes</p>
+
+
+
+<a name="126133170"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126133170" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126133170">(May 05 2018 at 08:11)</a>:</h4>
+<p>thanks for replying :D what i don't get is why <code>struct seg</code> functions as a bu_list as well. comments say that if a ray intersects geometry in multiple places (for example shooting through a torus), the <code>bu_list l</code> member points to the next intersection. but a partition is described as containing "information about intervals of the ray which pass through geometry". so aren't they doing the same thing?</p>
+
+
+
+<a name="126133215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126133215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126133215">(May 05 2018 at 08:13)</a>:</h4>
+<p>well, i don't think it's that important, and so far i haven't seen <code>struct seg</code> used as a linked list in code, but i was afraid i might have a wrong understanding of what segments and partitions are</p>
+
+
+
+<a name="126225390"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225390" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225390">(May 07 2018 at 17:45)</a>:</h4>
+<blockquote>
+<p>thanks for replying :D what i don't get is why <code>struct seg</code> functions as a bu_list as well. comments say that if a ray intersects geometry in multiple places (for example shooting through a torus), the <code>bu_list l</code> member points to the next intersection. but a partition is described as containing "information about intervals of the ray which pass through geometry". so aren't they doing the same thing?</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> Understanding how bu_lists work takes a bit of in-depth understanding of C, how memory is managed, how structures are accessed (typewise).  Putting a bu_list struct into ANY other structure (e.g., struct seg) turns it into a doubly linked list because of old C trick called pointer aliasing.</p>
+
+
+
+<a name="126225461"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225461" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225461">(May 07 2018 at 17:46)</a>:</h4>
+<p>you can read up on that, but the gist is if you have struct A {struct B; int C;}, I can pretend A is B and vice versa because the first byte of A is also the first byte of B, so it all happens to work if I simply cast</p>
+
+
+
+<a name="126225526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225526">(May 07 2018 at 17:48)</a>:</h4>
+<p>i understand that and i understand how it works</p>
+
+
+
+<a name="126225532"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225532" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225532">(May 07 2018 at 17:48)</a>:</h4>
+<p>later versions of C came along and said you should only be able to alias if A and B are the same size, which resulted in the addition of the -fno-strict-aliasing flag, but the trick remains because of how the memory is arranged</p>
+
+
+
+<a name="126225549"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225549" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225549">(May 07 2018 at 17:48)</a>:</h4>
+<p>okay, so then did I misunderstand the question?</p>
+
+
+
+<a name="126225560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225560">(May 07 2018 at 17:49)</a>:</h4>
+<p>my question was, if <code>struct seg</code> is a list of segments, and a partition is a list of segments as well, what's the difference between them?</p>
+
+
+
+<a name="126225699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225699">(May 07 2018 at 17:52)</a>:</h4>
+<p>ah, so that difference is struct seg "IS A" list of segments and struct partition "HAS A" list of segments and "IS A" list of partitions</p>
+
+
+
+<a name="126225712"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225712" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225712">(May 07 2018 at 17:52)</a>:</h4>
+<p>a partition has a lot more information about an intersection event</p>
+
+
+
+<a name="126225726"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225726" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225726">(May 07 2018 at 17:52)</a>:</h4>
+<p>a segment is a simple slice of a primitive</p>
+
+
+
+<a name="126225757"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225757" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225757">(May 07 2018 at 17:53)</a>:</h4>
+<p>and is struct seg used anywhere as a list of segments?</p>
+
+
+
+<a name="126225808"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225808" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225808">(May 07 2018 at 17:54)</a>:</h4>
+<p>because in a partition, the list of segments is stored as <code>struct bu_ptbl      pt_seglist;</code>, for example</p>
+
+
+
+<a name="126225854"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225854" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225854">(May 07 2018 at 17:55)</a>:</h4>
+<blockquote>
+<p>and is struct seg used anywhere as a list of segments?</p>
+</blockquote>
+<p>oof, now that's a broad question ... and the answer is "probably" :)</p>
+<p>finding them might be tricky because it could be something operating on bu_list or on struct seg's</p>
+
+
+
+<a name="126225917"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126225917" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126225917">(May 07 2018 at 17:56)</a>:</h4>
+<p>yeah, i was about to say that "anywhere" is a bit much :D</p>
+
+
+
+<a name="126226004"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226004" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226004">(May 07 2018 at 17:58)</a>:</h4>
+<p>segments are not typically accessed that way, so the answer very well could be no</p>
+
+
+
+<a name="126226008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226008">(May 07 2018 at 17:58)</a>:</h4>
+<p>but what prompted the question was a comment in <code>rt/seg.h</code>. it says that <code>struct seg</code> "Contains forward link to additional intersection segments if the intersection spans multiple segments (e.g., shooting a ray through a torus)."</p>
+
+
+
+<a name="126226022"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226022" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226022">(May 07 2018 at 17:59)</a>:</h4>
+<p>typically, callers iterate over partitions that have been woven and ordered, or they iterate over the bu_ptbl set</p>
+
+
+
+<a name="126226038"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226038" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226038">(May 07 2018 at 17:59)</a>:</h4>
+<p>but my understanding was that if i shoot a ray through a torus, i should have a partition containing the two segments, not a struct seg with a link to the the other segment</p>
+
+
+
+<a name="126226092"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226092" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226092">(May 07 2018 at 18:00)</a>:</h4>
+<p>right, they are definitely stored as a list -- lots of primitives can result in a list of segs</p>
+
+
+
+<a name="126226098"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226098" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226098">(May 07 2018 at 18:00)</a>:</h4>
+<p>triangle meshes in particular</p>
+
+
+
+<a name="126226183"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226183" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226183">(May 07 2018 at 18:02)</a>:</h4>
+<p>you can test that understanding easily enough, but basically I think you'll end up with the rt_tor_shot() routine giving back a seg list with two segments that are returned to the caller as a partition with in_seg on the first seg and out_seg on the latter seg and the ptbl containing them both</p>
+
+
+
+<a name="126226186"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226186" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226186">(May 07 2018 at 18:02)</a>:</h4>
+<p>oh, ok, that makes sense</p>
+
+
+
+<a name="126226187"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226187" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226187">(May 07 2018 at 18:02)</a>:</h4>
+<p>so you could iterate from in_seg to the next (which is equal to out_seg), or access out_seg, or access via the hash</p>
+
+
+
+<a name="126226207"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226207" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226207">(May 07 2018 at 18:03)</a>:</h4>
+<p>for something simple like a torus, it's overkill, but there are obviously much more complex primitives that could return an infinite number of segments during shot()</p>
+
+
+
+<a name="126226257"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226257" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226257">(May 07 2018 at 18:04)</a>:</h4>
+<p>so the primitives work with lists of segments, and a partition is more of a user-facing structure?</p>
+
+
+
+<a name="126226269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226269">(May 07 2018 at 18:04)</a>:</h4>
+<p>almost, yes</p>
+
+
+
+<a name="126226288"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226288" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226288">(May 07 2018 at 18:05)</a>:</h4>
+<p>evaluating a ray against primitives gives segments (basically sets of <br>
+in-out hit points)</p>
+
+
+
+<a name="126226326"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226326" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226326">(May 07 2018 at 18:06)</a>:</h4>
+<p>great, then this pretty much answers the original question</p>
+
+
+
+<a name="126226331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226331">(May 07 2018 at 18:06)</a>:</h4>
+<p>depending on the geometry definition (you could call this "user-facing" I suppose) determines how those segments are processed</p>
+
+
+
+<a name="126226446"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226446" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226446">(May 07 2018 at 18:09)</a>:</h4>
+<p>if I have a region R1 that is "A union B", then it'll return a partition for R1 that is the segments of A merged with the segments of B, which might end up being just 1 segment -- consider A is [0,1] and B is [0.5,2] then it could return a partition with segment C [0,2] because they overlapped and were the same region (they're the same material)</p>
+
+
+
+<a name="126226525"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226525" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226525">(May 07 2018 at 18:11)</a>:</h4>
+<p>i was looking at the code in <code>bool_eval</code>, and a lot of the time there is spent checking if a solid in a region is in the partition to evaluate, because it scans the list of segments linearly. i think that can be sped up with a bit vector of solids present in the partition, since solids already have a bits assigned to them and i see bit vectors are already present in a few places</p>
+
+
+
+<a name="126226526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226526">(May 07 2018 at 18:11)</a>:</h4>
+<p>that's where you 'll see, mentioned throughout the code, "bool_weave" and "bool_final" making themselves relevant</p>
+
+
+
+<a name="126226610"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226610" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226610">(May 07 2018 at 18:13)</a>:</h4>
+<p>oh, also, i started reading parts of the librt code last week, and i wrote here some of the things i learned <a href="https://cezarelnazli.github.io/librt.txt" target="_blank" title="https://cezarelnazli.github.io/librt.txt">https://cezarelnazli.github.io/librt.txt</a></p>
+
+
+
+<a name="126226611"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226611" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226611">(May 07 2018 at 18:13)</a>:</h4>
+<p>yeah, there's definitely a few places like that where you could eliminate an O(n)</p>
+
+
+
+<a name="126226679"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226679" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226679">(May 07 2018 at 18:15)</a>:</h4>
+<p>regarding the bitvectors, i reread the messages in the performance topic and i saw that one of the areas was "optimization/elimination of libbu pointer tables (bu_pbtl_* calls) and bit vectors"</p>
+
+
+
+<a name="126226693"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226693" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226693">(May 07 2018 at 18:15)</a>:</h4>
+<p>regarding the terminology, the hardest part to understand is usually what regions are and why we need them</p>
+
+
+
+<a name="126226744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226744">(May 07 2018 at 18:16)</a>:</h4>
+<p>i was wondering why bit vectors would have to be eliminated :-? and i thought that using bitvectors for the solids in a partition might not be ok if bitvectors should be eliminated</p>
+
+
+
+<a name="126226764"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226764" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226764">(May 07 2018 at 18:17)</a>:</h4>
+<p>it's visualized slightly in <a href="http://brlcad.org/w/images/5/52/MGED_Quick_Reference_Card.pdf" target="_blank" title="http://brlcad.org/w/images/5/52/MGED_Quick_Reference_Card.pdf">http://brlcad.org/w/images/5/52/MGED_Quick_Reference_Card.pdf</a> but it basically comes down to having a means for knowing the difference between a when something represents some space/volume/area vs something physically occupying space/volume/area</p>
+
+
+
+<a name="126226814"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226814" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226814">(May 07 2018 at 18:18)</a>:</h4>
+<p>and a solid represents some space and a region is physically occupying that space?</p>
+
+
+
+<a name="126226837"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226837" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226837">(May 07 2018 at 18:19)</a>:</h4>
+<p>bitvectors is merely a book-keeping optimization, right? so consider why they are needed at all, and whether we could speed things up if we didn't have them</p>
+
+
+
+<a name="126226887"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226887" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226887">(May 07 2018 at 18:20)</a>:</h4>
+<p>specifically to performance, bitv's currently pop up on a profile where they should not, taking too much time where they should take zero</p>
+
+
+
+<a name="126226898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226898">(May 07 2018 at 18:20)</a>:</h4>
+<p>a solid or combination can represent some space</p>
+
+
+
+<a name="126226904"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226904" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226904">(May 07 2018 at 18:21)</a>:</h4>
+<blockquote>
+<p>and a solid represents some space and a region is physically occupying that space?</p>
+</blockquote>
+<p>a solid or combination can represent some space ... marking it as a "region" is you saying that it physically occupies space</p>
+
+
+
+<a name="126226977"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126226977" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126226977">(May 07 2018 at 18:22)</a>:</h4>
+<p>so having a solid A and B overlapping represent some volume .. and if you union them, you have a new volume (say C) or you have an error (e.g., if you had a region A' and region B' overlapping)</p>
+
+
+
+<a name="126227100"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227100" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227100">(May 07 2018 at 18:25)</a>:</h4>
+<p>it's a little more evident if you apply material properties, say A is a 100mm sphere and B is a 1000mm sphere, both at the origin; if you union A and B, you obviously get a 1000mm sphere and no problems.  If, however, you have an  A' region that is "water" and a B' that is steel .. then you have an error because the 100mm inner space cannot be both water and steel simultaneously.</p>
+
+
+
+<a name="126227298"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227298" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227298">(May 07 2018 at 18:29)</a>:</h4>
+<p>so i suppose this means that you can apply union/intersection/diff to primitives, but not to regions?</p>
+
+
+
+<a name="126227305"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227305" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227305">(May 07 2018 at 18:30)</a>:</h4>
+<p>no, you can</p>
+
+
+
+<a name="126227357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227357">(May 07 2018 at 18:30)</a>:</h4>
+<p>but they just have to not overlap?</p>
+
+
+
+<a name="126227359"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227359" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227359">(May 07 2018 at 18:30)</a>:</h4>
+<p>if A' and B' don't overlap, you could certainly "union" aka group them together and there's no problem</p>
+
+
+
+<a name="126227360"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227360" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227360">(May 07 2018 at 18:30)</a>:</h4>
+<p>right</p>
+
+
+
+<a name="126227375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227375">(May 07 2018 at 18:31)</a>:</h4>
+<p>technically even if they were the same material, it probably shouldn't be an error, but currently is treated as one (if you have two water volumes overlapping, what is a "double" water??)</p>
+
+
+
+<a name="126227409"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227409" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227409">(May 07 2018 at 18:32)</a>:</h4>
+<p>subtractions are far more common</p>
+
+
+
+<a name="126227513"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227513" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227513">(May 07 2018 at 18:35)</a>:</h4>
+<p>one could conceptually argue that "subtracting a steel volume from a water volume" doesn't make sense, but it's such a common user operation that it's allowed and presumed they meant to subtract the shape, not the object itself</p>
+
+
+
+<a name="126227593"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227593" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227593">(May 07 2018 at 18:37)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> per your notes, rays do appear in code -- see the a_ray entry in struct application in rtexample.c for example</p>
+
+
+
+<a name="126227601"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227601" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227601">(May 07 2018 at 18:37)</a>:</h4>
+<p>you can also have regions with just one solid</p>
+
+
+
+<a name="126227878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126227878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126227878">(May 07 2018 at 18:43)</a>:</h4>
+<p>oh, right. i actually modified rtexample to shoot along X instead of Z, but i didn't notice that a_ray was a field. i misread that as a_ray_r_dir</p>
+
+
+
+<a name="126228113"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126228113" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126228113">(May 07 2018 at 18:48)</a>:</h4>
+<p>coming back to the bitvector discussion, i suppose they are needed in order to check if something (like a solid or a region) is present in a set. so was your point about eliminating the need to check in the first place?</p>
+
+
+
+<a name="126228586"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126228586" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126228586">(May 07 2018 at 19:00)</a>:</h4>
+<p>right, eliminate the need or use a different method or speed up the existing method</p>
+
+
+
+<a name="126228675"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126228675" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126228675">(May 07 2018 at 19:02)</a>:</h4>
+<p>one problem I distinctly noted a few months back was bu_bitv_shift() came up in a profile ... and that should never happen -- implies CHAR_BIT wasn't defined or something else was wrong in build logic  (see include/bu/bitv.h)</p>
+
+
+
+<a name="126228688"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126228688" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126228688">(May 07 2018 at 19:02)</a>:</h4>
+<p>means a couple things went wrong like CHAR_BIT not defined and the cmake 'inline' test failing</p>
+
+
+
+<a name="126230335"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230335" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230335">(May 07 2018 at 19:48)</a>:</h4>
+<p>ok, another question would be, is rt_boolweave really in need of speeding up? i profiled raytracing havoc.g, and it took 25 minutes, and rt_boolweave was only 27 seconds. is there a case that was not highlighted by this database where rt_boolweave takes a lot of time?</p>
+
+
+
+<a name="126230404"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230404" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230404">(May 07 2018 at 19:50)</a>:</h4>
+<p>also in that same profile, i didn't see bu_list showing up. heaviest stack traces were BU_PTBL_FOR and bu_ptbl_cat_uniq</p>
+
+
+
+<a name="126230422"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230422" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230422">(May 07 2018 at 19:51)</a>:</h4>
+<p>you're not going to see bu_list in a profile -- the performance impact there is that they fully prevent automatic vectorization by the compiler</p>
+
+
+
+<a name="126230483"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230483" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230483">(May 07 2018 at 19:52)</a>:</h4>
+<p>boolweave can take anywhere from 0 to 50% of the ray trace time, depending on the model and view.  on havoc, zoom into the space where the rotor blades all come togheter -- profile that</p>
+
+
+
+<a name="126230546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230546">(May 07 2018 at 19:54)</a>:</h4>
+<p>i'm sure you could contrive a model that exacerbates boolean evaluation even more than 50% too, but typical performance is in the 10-30% range for a traditional detailed csg model</p>
+
+
+
+<a name="126230560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230560">(May 07 2018 at 19:54)</a>:</h4>
+<p>that said ... 25 minutes.... what were you doing?  that's a LOT of time for havoc</p>
+
+
+
+<a name="126230590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230590">(May 07 2018 at 19:55)</a>:</h4>
+<p>i was running with -H127 -J0 -B :-?</p>
+
+
+
+<a name="126230641"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230641" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230641">(May 07 2018 at 19:56)</a>:</h4>
+<p>aha, heh</p>
+
+
+
+<a name="126230652"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230652" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230652">(May 07 2018 at 19:56)</a>:</h4>
+<p>-H511* actually</p>
+
+
+
+<a name="126230668"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230668" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230668">(May 07 2018 at 19:57)</a>:</h4>
+<p>oh, i'm also curious what the effect of shooting multiple rays is. is there some randomness with each, which is then aggregated for better results?</p>
+
+
+
+<a name="126230683"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230683" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230683">(May 07 2018 at 19:57)</a>:</h4>
+<p>with -B there is no effect, you just increased the work by the -H count</p>
+
+
+
+<a name="126230749"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230749" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230749">(May 07 2018 at 19:59)</a>:</h4>
+<p>without -B, there is randomness within each cell with results averaged together</p>
+
+
+
+<a name="126230852"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126230852" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126230852">(May 07 2018 at 20:01)</a>:</h4>
+<p>thanks for answering all these questions, i think i have a clearer picture now</p>
+
+
+
+<a name="126231075"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126231075" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126231075">(May 07 2018 at 20:06)</a>:</h4>
+<p>it's important work, so keep the questions flowing and ping me/others again if you don't get an answer or don't get a  satisfactory answer</p>
+
+
+
+<a name="126231146"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126231146" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126231146">(May 07 2018 at 20:08)</a>:</h4>
+<p>it's an optimized system, but there's ALWAYS room for improvement and gains to be made, especially as you start to see the bigger picture</p>
+
+
+
+<a name="126241697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126241697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126241697">(May 08 2018 at 00:54)</a>:</h4>
+<p>I imagine this was already hashed out, but would it be worthwhile/practical to start with replacing bu_ptbl with something else and see what that does, rather than deep diving into the boolean eval workflow?  (serious question, not a hint to try something else...)</p>
+
+
+
+<a name="126247816"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126247816" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126247816">(May 08 2018 at 04:25)</a>:</h4>
+<p>yeah, I agree. my understanding is that <span class="user-mention" data-user-id="106398">@Cezar</span> already has several good leads from some profiles and is just exploring the landscape, but tackling one of them like ptbls is as good a place as any to start with</p>
+
+
+
+<a name="126253955"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126253955" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126253955">(May 08 2018 at 08:02)</a>:</h4>
+<p>the bu_ptbl work is where i'll most likely start. these past two weeks i've been trying to get more familiar with the code</p>
+
+
+
+<a name="126259720"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126259720" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126259720">(May 08 2018 at 11:05)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> No problem, that's a good thing - I just didn't want you to feel obligated to untangle all the yarn before doing any knitting ;-).   We do need to deal with bu_list and its implications, but as you're learning that one will take a fair bit of digesting.</p>
+
+
+
+<a name="126271509"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126271509" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126271509">(May 08 2018 at 16:17)</a>:</h4>
+<p>Are the shorthand # defines in search.h really necessary? It looks like a holdover from OpenBSD and they have caused me at least one hard to debug error. I'm tempted to remove them.</p>
+
+
+
+<a name="126294890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126294890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126294890">(May 09 2018 at 02:19)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span> I'm sure they're there from the BSD code - I've no objection to making them explicit and removing the defines</p>
+
+
+
+<a name="126294999"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126294999" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126294999">(May 09 2018 at 02:22)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span> There are a number of things about search that aren't really optimal - for example, right now it builds an array of all paths in a database and applies the filters to that.  I ended up doing that because it was simpler than debugging problems with properly terminating tree walking (ended up with missing items that should have been found in the search but weren't, if I recall correctly) but for large databases that initial list build and processing all the extra paths when a condition might have terminated searching whole subtrees is quite expensive.</p>
+
+
+
+<a name="126295074"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126295074" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126295074">(May 09 2018 at 02:25)</a>:</h4>
+<p>Generally speaking with search, the importance ordering is 1) accuracy 2) features 3) performance</p>
+
+
+
+<a name="126297069"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126297069" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126297069">(May 09 2018 at 03:36)</a>:</h4>
+<blockquote>
+<p>Are the shorthand # defines in search.h really necessary? It looks like a holdover from OpenBSD and they have caused me at least one hard to debug error. I'm tempted to remove them.</p>
+</blockquote>
+<p>shorthand?  which defines are you referring too?</p>
+
+
+
+<a name="126309353"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126309353" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126309353">(May 09 2018 at 10:56)</a>:</h4>
+<p>I think he's talking about src/librt/search.h starting around line 132</p>
+
+
+
+<a name="126554747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126554747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126554747">(May 14 2018 at 19:52)</a>:</h4>
+<p>I have a patch that removes them, could you take a look? <a href="https://sourceforge.net/p/brlcad/patches/485/" target="_blank" title="https://sourceforge.net/p/brlcad/patches/485/">https://sourceforge.net/p/brlcad/patches/485/</a><br>
+I just wrote a simple Lua script that expanded the macros in search.c, everything built fine afterwards so I it should be fine</p>
+
+
+
+<a name="126706120"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126706120" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126706120">(May 17 2018 at 16:38)</a>:</h4>
+<p>I updated the patch that removes the shorthand definitions</p>
+
+
+
+<a name="126706128"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126706128" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126706128">(May 17 2018 at 16:38)</a>:</h4>
+<p>it _should_ work with SVN now</p>
+
+
+
+<a name="126730603"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/126730603" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#126730603">(May 18 2018 at 03:50)</a>:</h4>
+<blockquote>
+<p>I updated the patch that removes the shorthand definitions</p>
+</blockquote>
+<p>Well done Peter!  Now just one more patch ....</p>
+
+
+
+<a name="179425196"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179425196" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179425196">(Oct 30 2019 at 12:15)</a>:</h4>
+<p>if I asked "parallel tessellation?", how hard would everyone laugh? <span aria-label="big smile" class="emoji emoji-1f604" role="img" title="big smile">:big_smile:</span></p>
+
+
+
+<a name="179750516"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179750516" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179750516">(Nov 03 2019 at 14:57)</a>:</h4>
+<p>&lt;snort&gt; depends on what you mean by parallel</p>
+
+
+
+<a name="179752213"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179752213" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179752213">(Nov 03 2019 at 15:49)</a>:</h4>
+<p>Processing multiple objects in parallel - eventually yes.  Parallel tessellation of a single NURBS brep object - not anytime soon, and for some stages of the watertight processing that would be quite difficult.</p>
+
+
+
+<a name="179880083"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179880083" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179880083">(Nov 04 2019 at 21:45)</a>:</h4>
+<p><span class="user-mention" data-user-id="103542">@Erik</span> you mean parallel boolean evaluation (e.g., 'facetize' in parallel)?  There's nothing really preventing it.  It's actually imminently doable at the NMG layers but nobody has even tried as far as I know.</p>
+
+
+
+<a name="179880920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179880920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179880920">(Nov 04 2019 at 21:54)</a>:</h4>
+<p>I'm thinking nmg(bot), single region facetize for stl-&gt;gcode. I vaguely recall it was a bit of a hot topic a decade ago and my computers seem to have more cores instead of faster ones lately :)</p>
+
+
+
+<a name="179880945"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179880945" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179880945">(Nov 04 2019 at 21:54)</a>:</h4>
+<p>Yep, still an issue.</p>
+
+
+
+<a name="179880962"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/179880962" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#179880962">(Nov 04 2019 at 21:54)</a>:</h4>
+<p>Nobody has even tried afaik.</p>
+
+
+
+<a name="180110587"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180110587" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180110587">(Nov 07 2019 at 08:07)</a>:</h4>
+<p>Hello. have a question about central_ray in bundle. I will shoot bunch of rays which r_pt and r_dir  taken from a .txt and actually there is no central ray among them.  Do I have to add  a central_ray to application inside bundle struct, can I  add as NULL vect_t ?<br>
+Thnks for all your answers</p>
+
+
+
+<a name="180400688"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180400688" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180400688">(Nov 11 2019 at 06:19)</a>:</h4>
+<p>Hello<br>
+have a question about central_ray in bundle. I will shoot bunch of rays which r_pt and r_dir taken from a .txt and actually there is no central ray among them. Do I have to add a central_ray to application inside bundle struct, can I add as NULL vect_t ?<br>
+Thnks for all your answers</p>
+
+
+
+<a name="180419789"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180419789" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180419789">(Nov 11 2019 at 12:45)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> Where do you see a central_ray reference?  I'm not familiar with that or seeing anything named that in the bundle interface</p>
+
+
+
+<a name="180419824"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180419824" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180419824">(Nov 11 2019 at 12:46)</a>:</h4>
+<p>Also, are you using the rt_shootrays() interface or the rt_shootray_bundle() interface?</p>
+
+
+
+<a name="180425795"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180425795" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180425795">(Nov 11 2019 at 14:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  rt_shootrays(). Filled the xrays structure and list. But I could not decide what to give to struct application.a_ray inside the struct application_bundle. I do not need it actually. xrays is enough for me</p>
+
+
+
+<a name="180740751"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180740751" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180740751">(Nov 14 2019 at 15:25)</a>:</h4>
+<p>Hello <span class="user-mention" data-user-id="102902">@Sean</span>  I want to change global coordinate system in  the model space by code  such that after changing, GUI and model space for example, can show new "x "axis  as rotated by 60 degrees of the default x axis . In which file can I define my own global coordinate system  ??</p>
+
+
+
+<a name="180760917"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180760917" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180760917">(Nov 14 2019 at 18:49)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> Matrix transformations are applied to combinations,  and you can have arbitrary nestings of combinations, so the typical way to do that would be a top-level transformation combination that applies the desired rotation.</p>
+
+
+
+<a name="180761307"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180761307" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180761307">(Nov 14 2019 at 18:53)</a>:</h4>
+<p>By large, we've avoided implementing arbitrary coordinate systems as a generic non-combination construct as a matter of consistency and compatibility (it's dealt with better on import/export), but there's actually not been a user feature request for such a thing -- you're welcome to submit something if you can formalize what all your requirements would entail.</p>
+
+
+
+<a name="180822370"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180822370" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180822370">(Nov 15 2019 at 11:14)</a>:</h4>
+<blockquote>
+<p>By large, we've avoided implementing arbitrary coordinate systems as a generic non-combination construct as a matter of consistency and compatibility (it's dealt with better on import/export), but there's actually not been a user feature request for such a thing -- you're welcome to submit something if you can formalize what all your requirements would entail.</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  as first step I would like to test by changing axis and rotate with trial and error to see .  Is brlcad coord. system  based on opennurbs-rhino (same) ?</p>
+
+
+
+<a name="180841352"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180841352" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180841352">(Nov 15 2019 at 15:17)</a>:</h4>
+<p>Yes, I believe so -- both are a typical right-hand Z-up coordinate system that is typical among CAD software.  It's those crazy content modeling systems that use Y-up that are typically rotated on import/export. :)</p>
+
+
+
+<a name="180990537"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/180990537" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#180990537">(Nov 18 2019 at 05:57)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  thanks. I checked the fun bu_parallel and could not understand one thing. max_psw is defined as 1024 and table [max_psw] is initialized. while  calling with npu=0, it returns "bu_avail_cpus" (eg: npu=4). Does it meant that only table[4] is working parallel or 4*table[1024] is working parallel. like 4 cores each has 1024 proccess ?</p>
+
+
+
+<a name="181014716"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181014716" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181014716">(Nov 18 2019 at 13:24)</a>:</h4>
+<p>I did some tests to see time difference for  rtshootrays. generate 2 exe, one is defined  SHOOTRAYS_IN_PARALLEL and one is not. Checked time using chrono and used 18k shoots. Run in 2 machines (4 cores and 48 cores) Some times parallel run - exe return shorter time than the other but sometimes vice versa. But results are quite similar. Why could not get a speed increase (even not-parallel exe return shorter times)</p>
+
+
+
+<a name="181031478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181031478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181031478">(Nov 18 2019 at 16:35)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> max_psw is simply the maximum amount of concurrent parallelism that libbu will support, no matter what your hardware will support.  You generally should not need to think about that limit as it's rare to find a supercomputer with more parallelism per node.</p>
+
+
+
+<a name="181031619"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181031619" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181031619">(Nov 18 2019 at 16:37)</a>:</h4>
+<p>the ncpu value that you specify to bu_parallel is how many concurrent threads of execution you are requesting.  in general, this will be equal to the number of cores, so the default '0' for whatever your hardware has available is usually adequate.</p>
+
+
+
+<a name="181031828"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181031828" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181031828">(Nov 18 2019 at 16:39)</a>:</h4>
+<p>as for testing performance, I would first make sure you have enough work -- 19k shots will be nearly instantaneous on most non-nurbs geometry models.  literally sub-second.  so that means your program time is going to be dominated by OS initialization, process startup time, model loading, and other factors.</p>
+
+
+
+<a name="181032058"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181032058" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181032058">(Nov 18 2019 at 16:41)</a>:</h4>
+<p>For most models, especially in parallel, you want to profile with somewhere between 100k to 10M rays.  That still might only be 1s of work because ray tracing is that fast.  If you're not sure, run rt and look at the summary at the end to get an idea of the upper-bound (rt does rt_shootray() plus calls into liboptical, so the timings are an upper bound for rt_shootray()).</p>
+
+
+
+<a name="181032184"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181032184" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181032184">(Nov 18 2019 at 16:43)</a>:</h4>
+<p>If you don't have that many rays, then you'll want to run a profiler like 'perf' on linux to see where your performance bottleneck is at.</p>
+
+
+
+<a name="181187018"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/181187018" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#181187018">(Nov 20 2019 at 08:10)</a>:</h4>
+<blockquote>
+<p>For most models, especially in parallel, you want to profile with somewhere between 100k to 10M rays.  That still might only be 1s of work because ray tracing is that fast.  If you're not sure, run rt and look at the summary at the end to get an idea of the upper-bound (rt does rt_shootray() plus calls into liboptical, so the timings are an upper bound for rt_shootray()).</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  defined SHOOTRAYS_IN_PARALLEL macro in bundle.c and run but noticed that "while (rays-&gt;ap[i].a_magic != RT_AP_MAGIC)" is not working since I initialize  ap with rt_ap_init in my codes and magic num is rt_ap_magic . Instead of "while" , I did a for loop iterating over nrays which is 18k. But this time did not hit anything with again longer time . if ap not have magic num as RT_AP_MAGIC, returning with errors naturally.<br>
+Could not solve , feeling that missing a small detail ?</p>
+
+
+
+<a name="284671652"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/284671652" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#284671652">(Jun 01 2022 at 21:25)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="102902">@Sean</span>  , should  db_apply_state_from_one_member be a public function?  At a glance, that looks like part of the librt tree internal implementation...</p>
+
+
+
+<a name="284771492"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/librt/near/284771492" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/librt.html#284771492">(Jun 02 2022 at 16:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  There's a bunch of functions in db_tree.c that shouldn't be public -- looks like nobody has really given it consideration in there.  db_apply_state_from_one_member() def looks like an implementation detail to db_follow_path().</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,44 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> also, how did you observe the deadlock you mention in r71111?  if it's user-visible, that'll warrant a NEWS line.  if it was theoretical or only encountered in dev testing, then it doesn't need anything.</p>",
+        "id": 129437563,
+        "sender_full_name": "Sean",
+        "timestamp": 1531261348
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> also, how did you observe the deadlock you mention in r71111?  if it's user-visible, that'll warrant a NEWS line.  if it was theoretical or only encountered in dev testing, then it doesn't need anything.</p>\n</blockquote>\n<p>i had a bug while implementing the SoA thing which set <code>dont_restat</code> to non-zero, so the branch which released the semaphore was not taken. however, i grepped for <code>dont_restat =</code> afterwards, and there was a place (librt/primites/something.c) which set it to 1, so i think it's not only theoretical</p>",
+        "id": 129440220,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531265532
+    },
+    {
+        "content": "<p>maybe it warrants adding a test for it?</p>",
+        "id": 129440228,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531265547
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>brl-clean/src % grep -R &quot;dont_restat =&quot; .\n./librt/primitives/submodel/submodel.c: if (sub_dbip-&gt;dbi_mf) sub_dbip-&gt;dbi_mf-&gt;dont_restat = 1;\n</pre></div>",
+        "id": 129440237,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531265579
+    },
+    {
+        "content": "<p>maybe the submodel code in the grep is never used/reached, can't tell. but even looking at the mappedfile.c code, either there is a case where the branch is not taken and the semaphore is never released, or there isn't, in which case the conditional is unnecessary :-?</p>",
+        "id": 129440470,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531265912
+    },
+    {
+        "content": "<blockquote>\n<p>maybe it warrants adding a test for it?</p>\n</blockquote>\n<p>if you want, but I wouldn't unless I'd actually encountered bad behavior.  there is too much code to stop at every potential -- stop at the actuals. :)</p>",
+        "id": 129449494,
+        "sender_full_name": "Sean",
+        "timestamp": 1531282099
+    },
+    {
+        "content": "<p>submodel code is essentially incomplete and not yet been made robust (and confirmed buggy during GCI), so it's fair game to clean up and fix as warranted</p>",
+        "id": 129450350,
+        "sender_full_name": "Sean",
+        "timestamp": 1531283439
+    }
+]

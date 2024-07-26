@@ -1,0 +1,830 @@
+[
+    {
+        "content": "<p>Think this concerns BRL-CAD too, when it's nearer the time:<br>\n<a href=\"https://www.anandtech.com/show/12894/apple-deprecates-opengl-across-all-oses\" target=\"_blank\" title=\"https://www.anandtech.com/show/12894/apple-deprecates-opengl-across-all-oses\">https://www.anandtech.com/show/12894/apple-deprecates-opengl-across-all-oses</a></p>",
+        "id": 127641599,
+        "sender_full_name": "Armin (LordOfBikes)",
+        "timestamp": 1528266882
+    },
+    {
+        "content": "<blockquote>\n<p>Think this concerns BRL-CAD too, when it's nearer the time:<br>\n<a href=\"https://www.anandtech.com/show/12894/apple-deprecates-opengl-across-all-oses\" target=\"_blank\" title=\"https://www.anandtech.com/show/12894/apple-deprecates-opengl-across-all-oses\">https://www.anandtech.com/show/12894/apple-deprecates-opengl-across-all-oses</a></p>\n</blockquote>\n<p>Yeah, I saw the infuriating announcement earlier in the week, opencl too</p>",
+        "id": 127695306,
+        "sender_full_name": "Sean",
+        "timestamp": 1528348641
+    },
+    {
+        "content": "<p>What I suspect will shake down in the near term is OpenGL will remain for at least 5+ years and the open source Vulkan driver's would take over from there (essentially wrapping Metal)</p>",
+        "id": 127695367,
+        "sender_full_name": "Sean",
+        "timestamp": 1528348702
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span>   How's your Linux OpenGL foo these days?  I'm getting a maddening issue and I'm not sure where it's coming from...</p>\n<p>When I do a low level MGED classic mode opengl display manager attach, I'm getting a really weird transparency effect in the window.  How do I disable this?</p>\n<p><a href=\"/user_uploads/1549/gSwHaKk_fKtr-s6lBpG5M9Ik/opengl_drawing_oddness.png\">opengl_drawing_oddness.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/gSwHaKk_fKtr-s6lBpG5M9Ik/opengl_drawing_oddness.png\" title=\"opengl_drawing_oddness.png\"><img src=\"/user_uploads/1549/gSwHaKk_fKtr-s6lBpG5M9Ik/opengl_drawing_oddness.png\"></a></div>",
+        "id": 207885692,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598297233
+    },
+    {
+        "content": "<p>I'm sure it's at least partially due to new effects from Gnome and compositing wms and such, but  as far as I know there's been no substantive change to our OpenGL drawing code in a very long time so I don't know what we're doing (or more likely not doing) to produce this result.</p>",
+        "id": 207885904,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598297329
+    },
+    {
+        "content": "<p>(The part I REALLY don't get is that the terminal background shows through in the non-geometry areas, which would be annoying enough, but now the text is rendering on TOP of the geometry???)</p>",
+        "id": 207886019,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598297395
+    },
+    {
+        "content": "<p>OK, it's definitely something to do with Gnome - when I switch to Fluxbox everything behaves.</p>",
+        "id": 207892948,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598300769
+    },
+    {
+        "content": "<p>/me hasn't used fluxbox since switching to the high DPI monitor... kinda nice to be back, actually...</p>",
+        "id": 207893376,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598301000
+    },
+    {
+        "content": "<p>Um, what's the clear color alpha? Could it be that?</p>",
+        "id": 207902055,
+        "sender_full_name": "Erik",
+        "timestamp": 1598306077
+    },
+    {
+        "content": "<p>Heh, mate and icewm for me, lately...</p>",
+        "id": 207902101,
+        "sender_full_name": "Erik",
+        "timestamp": 1598306108
+    },
+    {
+        "content": "<p>I tried flipping that from 0 to 1, didn't seem to change anything...</p>",
+        "id": 207915611,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598317756
+    },
+    {
+        "content": "<p>try finding what the blending function is set to..  <a href=\"https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBlendFunc.xhtml\">https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBlendFunc.xhtml</a></p>",
+        "id": 207987675,
+        "sender_full_name": "Sean",
+        "timestamp": 1598373954
+    },
+    {
+        "content": "<p>Might need to set/call it if it's not set.  Default may have changed from one mode or another, might be getting set inside Tk or getting changed in the driver by another app and needing to be reset on our end each redraw, or something like that.</p>",
+        "id": 207987896,
+        "sender_full_name": "Sean",
+        "timestamp": 1598374035
+    },
+    {
+        "content": "<p>looks kind of like it's GL_ONE_MINUS_DST_ALPHA</p>",
+        "id": 207988054,
+        "sender_full_name": "Sean",
+        "timestamp": 1598374103
+    },
+    {
+        "content": "<p>or GL_DST_COLOR, something DST-related</p>",
+        "id": 207988131,
+        "sender_full_name": "Sean",
+        "timestamp": 1598374138
+    },
+    {
+        "content": "<p>when it should be something else..</p>",
+        "id": 207988192,
+        "sender_full_name": "Sean",
+        "timestamp": 1598374173
+    },
+    {
+        "content": "<p>HAH!  Used apitrace to look at the OpenGL calls in Gnome and Fluxbox with fbserv, and they were essentially the same despite different visual outcomes (Gnome transparent, Fluxbox not.)  That pointed the finger at the XVisual setup.  Some hunting and a stackoverflow post pointing to an obscure corner of the XVisualInfo setup, and we're now able to filter out transparent window types!</p>",
+        "id": 208022905,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598389236
+    },
+    {
+        "content": "<p>Must confess fixing that is intensely satisfying - that's been a thorn in the graphics side of things for years now.</p>",
+        "id": 208023032,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598389312
+    },
+    {
+        "content": "<p>Nice work</p>",
+        "id": 208023679,
+        "sender_full_name": "Sean",
+        "timestamp": 1598389634
+    },
+    {
+        "content": "<p>We may need to ultimately support visuals with an alpha channel (e.g., if there aren't any), in which case the other fix look like to just set the clear color, which we probably don't do but should.   glClearColor(bg[R],bg[G],bg[B],1.0f);</p>",
+        "id": 208023930,
+        "sender_full_name": "Sean",
+        "timestamp": 1598389789
+    },
+    {
+        "content": "<p>I tried fiddling around with that, but I couldn't seem to make a dent - it was almost like the entire window contents were being blended by the desktop's compositor.</p>",
+        "id": 208024118,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598389899
+    },
+    {
+        "content": "<p>Did you see/set the blending function?  That still comes into play too.</p>",
+        "id": 208024232,
+        "sender_full_name": "Sean",
+        "timestamp": 1598389953
+    },
+    {
+        "content": "<p>ogl has a transparency setting that toggles that - otherwise we don't touch it in our code as far as I can tell.</p>",
+        "id": 208024290,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598389990
+    },
+    {
+        "content": "<p>It didn't get triggered in either fbserv invocation</p>",
+        "id": 208024313,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390007
+    },
+    {
+        "content": "<p>that's was my point though -- we are probably not setting it correctly</p>",
+        "id": 208024512,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390109
+    },
+    {
+        "content": "<p>I'm not very good at figuring out which OpenGL state transitions and functions need to go where in the dm drawing cycle to achieve specific effects - if we ever really have to drill down on that I'm going  to have to set up a stand-alone drawing app and do a lot of fiddling</p>",
+        "id": 208024528,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390119
+    },
+    {
+        "content": "<p>probably should be something like glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);</p>",
+        "id": 208024562,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390136
+    },
+    {
+        "content": "<p>before the draw</p>",
+        "id": 208024577,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390139
+    },
+    {
+        "content": "<p>assuming GL_BLEND mode is being enabled</p>",
+        "id": 208024611,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390147
+    },
+    {
+        "content": "<p>Really hoping we can just move to a higher level drawing API and ditch the whole mess...</p>",
+        "id": 208024628,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390150
+    },
+    {
+        "content": "<p>Sure, but that's not happening today or tomorrow, so until that's basically pending release, it's a non-solution :)</p>",
+        "id": 208024744,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390188
+    },
+    {
+        "content": "<p>(hope, that is) ;)</p>",
+        "id": 208024763,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390201
+    },
+    {
+        "content": "<p>'specially since the planet seems to be moving to vulkan/metal...</p>",
+        "id": 208024776,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390210
+    },
+    {
+        "content": "<p>skipping visuals with an alpha confirms there's a bug</p>",
+        "id": 208024809,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390226
+    },
+    {
+        "content": "<p>definitely cool that it's fixed from users' perspective and we at least know more what the issue is</p>",
+        "id": 208025008,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390316
+    },
+    {
+        "content": "<p>We may also need to set some value to control the alphaMask on windows that have it - we're at the X11 layer with those calls, which I know virtually nothing about.</p>",
+        "id": 208025096,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390353
+    },
+    {
+        "content": "<p>still could also be just that we never clear the alpha channel, that'd be my guess</p>",
+        "id": 208025222,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390405
+    },
+    {
+        "content": "<p>in that case, something like glColorMask() to select the alpha channel, glClearColor() to set it to black or bg, then glClear().  I bet that does the trick</p>",
+        "id": 208025315,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390455
+    },
+    {
+        "content": "<p>Before each draw cycle you mean?  Or when the window is created?</p>",
+        "id": 208025351,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390478
+    },
+    {
+        "content": "<p>glColorMask(0, 0, 0, 1); glClearColor(0, 0, 0, 1.0); glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</p>",
+        "id": 208025401,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390502
+    },
+    {
+        "content": "<p>just when the window is created</p>",
+        "id": 208025416,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390513
+    },
+    {
+        "content": "<p>probably have to reset the mask to glColorMask(1, 1, 1, 1);</p>",
+        "id": 208025670,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390642
+    },
+    {
+        "content": "<p>That does seem to work, in a quick test.</p>",
+        "id": 208025829,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390711
+    },
+    {
+        "content": "<p>kind of amazing if that's not somewhere in the code already</p>",
+        "id": 208025904,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390750
+    },
+    {
+        "content": "<p>Let me try the FB too - if that's good, as you say it's a better solution.</p>",
+        "id": 208025909,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390754
+    },
+    {
+        "content": "<p>Or you can commit it if you prefer, since it's your fix ;-)</p>",
+        "id": 208025989,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390779
+    },
+    {
+        "content": "<p>no diff to me, I would have to search to even know where init is even happening.</p>",
+        "id": 208026051,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390814
+    },
+    {
+        "content": "<p>used to do a lot more opengl back in the day.  need to go through some vulkan exercises.</p>",
+        "id": 208026100,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390840
+    },
+    {
+        "content": "<p>/me isn't surprised - this code probably predates alpha channels, at least in any sort of practical implementation, so it was never added and never missed.  I'll bet we have a bunch of stuff missing that we \"should\" be doing by modern standards...</p>",
+        "id": 208026124,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390856
+    },
+    {
+        "content": "<p>I know the theory of the changes, but have no practical experience with it</p>",
+        "id": 208026151,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390873
+    },
+    {
+        "content": "<p>nah, alpha channel have been a thing since the 80's, before it was even called OpenGL</p>",
+        "id": 208026218,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390896
+    },
+    {
+        "content": "<p>PHIGS!</p>",
+        "id": 208026229,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390903
+    },
+    {
+        "content": "<p>support has been a thing since before opengl 1.0</p>",
+        "id": 208026279,
+        "sender_full_name": "Sean",
+        "timestamp": 1598390940
+    },
+    {
+        "content": "<p>Hmm.  OK, probably just the active use of alpha channels for desktops then.</p>",
+        "id": 208026361,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598390994
+    },
+    {
+        "content": "<p>we're almost certainly just suffering from Xorg initializing glx differently from X11 or maybe nvidia defaulting to something different in the driver</p>",
+        "id": 208026435,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391011
+    },
+    {
+        "content": "<p>Maybe, but the symptoms at least are desktop specific  - I wasn't restarting the Xserver (at least, not deliberately) flipping between Gnome and Fluxbox</p>",
+        "id": 208026513,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391064
+    },
+    {
+        "content": "<p>like diff of having int alpha; in the code and someone coming along and going, oh, that should be on and changing it to int alpha=1.0; so we suddenly are in trouble because we assumed 0.0</p>",
+        "id": 208026524,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391070
+    },
+    {
+        "content": "<p>you using Wayland?</p>",
+        "id": 208026672,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391147
+    },
+    {
+        "content": "<p>Should be Xorg - I've tried Wayland once or twice when Ubuntu came out with it, but wasn't quite there</p>",
+        "id": 208026721,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391178
+    },
+    {
+        "content": "<p>Blast it - now it's not working (???)</p>",
+        "id": 208026955,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391300
+    },
+    {
+        "content": "<p>What the heck.</p>",
+        "id": 208026979,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391313
+    },
+    {
+        "content": "<p>Wonder if I forgot to recompile or something - cleared out the window filters, and now I'm getting that transparency again with the dm and fb.</p>",
+        "id": 208027190,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391402
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Yeah, nothing doing now - can't clear the transparency.</p>",
+        "id": 208027463,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391541
+    },
+    {
+        "content": "<p>I think I see it.</p>",
+        "id": 208027531,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391580
+    },
+    {
+        "content": "<p>there's a bunch of glClearColor(0,0,0,0)'s in the code.  that's asking the alpha to be transparent, so when it clears, it's set to zero but not visible..</p>",
+        "id": 208027649,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391630
+    },
+    {
+        "content": "<p>try setting the four calls in ./glx/if_ogl.c to have alpha 1.0</p>",
+        "id": 208027746,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391682
+    },
+    {
+        "content": "<p>er, 5 calls</p>",
+        "id": 208027767,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391693
+    },
+    {
+        "content": "<p>yeah, I bet that's it... we're actually requesting a transparent background and it's finally obliging</p>",
+        "id": 208027928,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391774
+    },
+    {
+        "content": "<p>Do I still need to initialize as before?  Changed all glClearColor settings to 1, still getting transparency</p>",
+        "id": 208027992,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391812
+    },
+    {
+        "content": "<p>Nope, that doesn't help</p>",
+        "id": 208028161,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391886
+    },
+    {
+        "content": "<p>so you set glClearColor(#,#,#, 1.0)?</p>",
+        "id": 208028270,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391952
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 208028321,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391963
+    },
+    {
+        "content": "<p>and that was on dm or fb?</p>",
+        "id": 208028338,
+        "sender_full_name": "Sean",
+        "timestamp": 1598391978
+    },
+    {
+        "content": "<p>both</p>",
+        "id": 208028354,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598391988
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Zhzbed366sLKzEcBHzblgjkP/patch\">patch</a></p>",
+        "id": 208028521,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392114
+    },
+    {
+        "content": "<p>Think that was what you meant?</p>",
+        "id": 208028535,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392131
+    },
+    {
+        "content": "<p>/me looks</p>",
+        "id": 208028552,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392141
+    },
+    {
+        "content": "<p>yeah, so that is what I had in mind, so while that's an issue, it's apparently not <em>the</em> issue</p>",
+        "id": 208028968,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392395
+    },
+    {
+        "content": "<p>I wonder i ...</p>",
+        "id": 208029095,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392473
+    },
+    {
+        "content": "<p>So we should correct those anyway, just on general principles?</p>",
+        "id": 208029106,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392485
+    },
+    {
+        "content": "<p>so is this mged -c or tk mged?</p>",
+        "id": 208029128,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392495
+    },
+    {
+        "content": "<p>mged -c</p>",
+        "id": 208029131,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392502
+    },
+    {
+        "content": "<p>or both have the issu?</p>",
+        "id": 208029134,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392503
+    },
+    {
+        "content": "<p>Tk has never had it, as far as I know - embedding it in the Tk window seems to avoid the issue.  (I always figured that was because of how Tk was creating their X11 windows...)</p>",
+        "id": 208029193,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392543
+    },
+    {
+        "content": "<p>As much as I think it's wrong, I wouldn't change it if it's not fixing this issue as it could affect other things we're maybe not thinking about.  At least, not without having a half dozen platforms manually demonstrating it's still working as expected.</p>",
+        "id": 208029299,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392604
+    },
+    {
+        "content": "<p>ah, that's interesting</p>",
+        "id": 208029313,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392613
+    },
+    {
+        "content": "<p>Tk definitely has a bit more going on</p>",
+        "id": 208029334,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392625
+    },
+    {
+        "content": "<p>it's calling XChangeProperty, which might be setting the state differently.</p>",
+        "id": 208029403,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392682
+    },
+    {
+        "content": "<p>So when it does the transarent thing, and you move the window</p>",
+        "id": 208029467,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392704
+    },
+    {
+        "content": "<p>does it update the window contents, or does it look like the window took a snapshot of the background</p>",
+        "id": 208029501,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392725
+    },
+    {
+        "content": "<p>of what's behind it</p>",
+        "id": 208029524,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392741
+    },
+    {
+        "content": "<p>It's like a pane of semitransparent glass</p>",
+        "id": 208029561,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392768
+    },
+    {
+        "content": "<p>so it updates if you move it</p>",
+        "id": 208029585,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392783
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 208029597,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392789
+    },
+    {
+        "content": "<p>try a hide/expose event (minimize +  unminimize)</p>",
+        "id": 208029706,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392824
+    },
+    {
+        "content": "<p>no change - still shows/updating background</p>",
+        "id": 208029741,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392858
+    },
+    {
+        "content": "<p>so yeah, then it's definitely been set up (and set up wrong)</p>",
+        "id": 208029766,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392877
+    },
+    {
+        "content": "<p>do you know if it's a direct or indirect windowing context?</p>",
+        "id": 208029833,
+        "sender_full_name": "Sean",
+        "timestamp": 1598392916
+    },
+    {
+        "content": "<p>Not sure</p>",
+        "id": 208029963,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392980
+    },
+    {
+        "content": "<p>Here's the visual, fwiw:<br>\n<a href=\"/user_uploads/1549/xNB5MXvqc4XA8nvWQTJ12oAr/ogl_dm-2020-08-25-18-02.gif\">ogl_dm-2020-08-25-18-02.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/xNB5MXvqc4XA8nvWQTJ12oAr/ogl_dm-2020-08-25-18-02.gif\" title=\"ogl_dm-2020-08-25-18-02.gif\"><img src=\"/user_uploads/1549/xNB5MXvqc4XA8nvWQTJ12oAr/ogl_dm-2020-08-25-18-02.gif\"></a></div>",
+        "id": 208029988,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598392995
+    },
+    {
+        "content": "<p>OH, that's telling</p>",
+        "id": 208030050,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393041
+    },
+    {
+        "content": "<p>notice it's blending the blue bg color</p>",
+        "id": 208030101,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393052
+    },
+    {
+        "content": "<p>let's see if we can find where that blue is getting set</p>",
+        "id": 208030191,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393105
+    },
+    {
+        "content": "<p>wait a min, didn't you say you were using dm-X?  or is that dm-ogl?</p>",
+        "id": 208030329,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393172
+    },
+    {
+        "content": "<p>That's dm-ogl</p>",
+        "id": 208030422,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393228
+    },
+    {
+        "content": "<p>X doesn't have the issue</p>",
+        "id": 208030430,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393234
+    },
+    {
+        "content": "<p>That was why I've been futzing with fixing the classic X dm's update behavior - I figured I was going to need it if the ogl windows kept showing that transparency effect.</p>",
+        "id": 208030493,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393281
+    },
+    {
+        "content": "<p>(well that and it was busted, but that's what made it urgent)</p>",
+        "id": 208030551,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393300
+    },
+    {
+        "content": "<p>okay, cool</p>",
+        "id": 208030553,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393301
+    },
+    {
+        "content": "<p>GLFW has some code that looks related to this alpha thing, but I've not wound through it yet</p>",
+        "id": 208030591,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393332
+    },
+    {
+        "content": "<p>good news is .. the bug's in src/libdm/glx/dm-ogl.c ;)</p>",
+        "id": 208030606,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393340
+    },
+    {
+        "content": "<p>and if_ogl.c, but yes</p>",
+        "id": 208030639,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393357
+    },
+    {
+        "content": "<p>what's an fb look like if you run rt on havoc?</p>",
+        "id": 208030665,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393382
+    },
+    {
+        "content": "<p>(not embedded, transient window)</p>",
+        "id": 208030676,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393394
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/XoKCpe4pszBm2PGlMWcF3Za6/havoc-2020-08-25-18-10.gif\">havoc-2020-08-25-18-10.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/XoKCpe4pszBm2PGlMWcF3Za6/havoc-2020-08-25-18-10.gif\" title=\"havoc-2020-08-25-18-10.gif\"><img src=\"/user_uploads/1549/XoKCpe4pszBm2PGlMWcF3Za6/havoc-2020-08-25-18-10.gif\"></a></div>",
+        "id": 208030795,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393470
+    },
+    {
+        "content": "<p>Maybe related, although they're doing this if the window is <em>not</em> transparent... <a href=\"https://github.com/glfw/glfw/blob/master/src/x11_window.c#L338\">https://github.com/glfw/glfw/blob/master/src/x11_window.c#L338</a></p>",
+        "id": 208031045,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393667
+    },
+    {
+        "content": "<p>/me is reminded he needs to experiment with a GLFW based libdm/fb backend... won't work for embedded Tk windows, but for stand-alone gsh it would be perfect...</p>",
+        "id": 208031287,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598393873
+    },
+    {
+        "content": "<p>hm, everyone is calling up that property and I have no idea what this XAtom stuff is all about</p>",
+        "id": 208031399,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393955
+    },
+    {
+        "content": "<p>no idea what XA_CARDINAL means, can't find much on it, except that it's 6</p>",
+        "id": 208031421,
+        "sender_full_name": "Sean",
+        "timestamp": 1598393977
+    },
+    {
+        "content": "<p>bbiab</p>",
+        "id": 208031523,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598394023
+    },
+    {
+        "content": "<p>oh, this might be it</p>",
+        "id": 208031574,
+        "sender_full_name": "Sean",
+        "timestamp": 1598394068
+    },
+    {
+        "content": "<p>give that a try</p>",
+        "id": 208032908,
+        "sender_full_name": "Sean",
+        "timestamp": 1598395063
+    },
+    {
+        "content": "<p>Nope - still transparent.</p>",
+        "id": 208037077,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598398201
+    },
+    {
+        "content": "<p>hm, another thought could be a mismatch between glx and tk</p>",
+        "id": 208038856,
+        "sender_full_name": "Sean",
+        "timestamp": 1598399710
+    },
+    {
+        "content": "<p>does the tk dm work?</p>",
+        "id": 208038875,
+        "sender_full_name": "Sean",
+        "timestamp": 1598399739
+    },
+    {
+        "content": "<p>No, unfortunately.</p>",
+        "id": 208040018,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598400781
+    },
+    {
+        "content": "<p>I had started on a rewrite earlier, but didn't get it to completion before I had to shift to other stuff</p>",
+        "id": 208040031,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598400800
+    },
+    {
+        "content": "<p>wouldn't matter looking at the code, but I see it doesn't call glx</p>",
+        "id": 208040034,
+        "sender_full_name": "Sean",
+        "timestamp": 1598400809
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> diminishing returns.  I really think the issue is how the window+context is being set up, prior to opengl (which is why they made no change), but I think we can just run with your fix for now.  If I had a platform to debug on in front of me, I think I could knock it out in an evening, but again ... diminishing returns.  I think a better fix would be dm-tk or dm-osg or dm-sdl or dm-glut where this would almost certainly become a non-issue.</p>",
+        "id": 208128336,
+        "sender_full_name": "Sean",
+        "timestamp": 1598466095
+    },
+    {
+        "content": "<p>Agreed.  Can revisit if we hit a case in the wild where there are no alpha free X11 windows.</p>",
+        "id": 208128478,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598466145
+    },
+    {
+        "content": "<p>Looking at the code, we're mixing old and new calls for creating a context.  For example, we don't call glXChooseVisual with attributes, we do it all manually (old school).</p>",
+        "id": 208128489,
+        "sender_full_name": "Sean",
+        "timestamp": 1598466148
+    },
+    {
+        "content": "<p>/me is pecking at the tk dm a bit again, but no  chance it'll be ready to replace X by release time.</p>",
+        "id": 208128608,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598466199
+    },
+    {
+        "content": "<p>that's where I suspect the issue is.  don't even think it's \"bug\" per-se, as much as it is just something we're not specifying, that we didn't need to before but could/should now because of change.</p>",
+        "id": 208128681,
+        "sender_full_name": "Sean",
+        "timestamp": 1598466229
+    },
+    {
+        "content": "<p>thought it was opengl, but your video yesterday that showed it clearly blending the window with a background color being draw punts this out of opengl's domain and into the window's.</p>",
+        "id": 208128826,
+        "sender_full_name": "Sean",
+        "timestamp": 1598466284
+    },
+    {
+        "content": "<p>Oh, while I'm thinking about it: <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> , do you need the changes you started with librt in the 7.32.0 release?  If not my inclination is to not merge those to RELEASE yet, since that's a pretty low level of the stack to be modifying right before a release.</p>",
+        "id": 208129247,
+        "sender_full_name": "starseeker",
+        "timestamp": 1598466456
+    },
+    {
+        "content": "<p>sad thing is I bet a dm-sdl or dm-glut could be implemented in less than a day.  can almost see all the lines of code needed.</p>",
+        "id": 208129580,
+        "sender_full_name": "Sean",
+        "timestamp": 1598466597
+    },
+    {
+        "content": "<p>need to get that comfortable with qt :/</p>",
+        "id": 208129639,
+        "sender_full_name": "Sean",
+        "timestamp": 1598466606
+    },
+    {
+        "content": "<p>It's okay for me to have them in the release after the 7.32.0.</p>",
+        "id": 208137779,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1598470614
+    }
+]

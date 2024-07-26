@@ -1,0 +1,154 @@
+<html>
+<head><meta charset="utf-8"><title>compile errors · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html">compile errors</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="166674667"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/166674667" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> mark999 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#166674667">(May 28 2019 at 01:03)</a>:</h4>
+<p>what gcc versions are known to work? I keep getting compile errors. I've tried 2 gcc versions (7.3,8.3) and 2 brlcad versions (latest release, HEAD) with cmake 3.14.3</p>
+<div class="codehilite"><pre><span></span>mkdir brlcad/build<span class="p">;</span> <span class="nb">cd</span> brlcad/build
+cmake .. -DBRLCAD_BUNDLED_LIBS<span class="o">=</span>BUNDLED -DBRLCAD_ENABLE_OPENGL<span class="o">=</span>ON -DENABLE_ALL_CXX_COMPILE<span class="o">=</span>ON -DBRLCAD_EXTRADOCS<span class="o">=</span>ON -DCMAKE_BUILD_TYPE<span class="o">=</span>Release -DBRLCAD_ENABLE_QT<span class="o">=</span>ON -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/opt/brlcad/git -DBRLCAD_ENABLE_STRICT<span class="o">=</span>OFF
+make
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>...
+[ 33%] Building CXX object src/libbu/CMakeFiles/libbu-obj.dir/uuid.c.o
+In file included from /path/to/brlcad/src/libbu/uuid.c:25:
+/path/to/brlcad/include/bu/uuid.h:42:27: error: expected primary-expression before &#39;static&#39;
+ #  define STATIC_ARRAY(x) static (x)
+                           ^~~~~~
+/path/to/brlcad/include/bu/uuid.h:58:29: note: in expansion of macro &#39;STATIC_ARRAY&#39;
+ bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);
+                             ^~~~~~~~~~~~
+/path/to/brlcad/include/bu/uuid.h:58:29: error: expected &#39;]&#39; before &#39;static&#39;
+ bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);
+                             ^
+                             ]
+/path/to/brlcad/include/bu/uuid.h:58:29: error: expected &#39;)&#39; before &#39;static&#39;
+ bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);
+               ~             ^
+                             )
+/path/to/brlcad/include/bu/uuid.h:42:27: error: expected initializer before &#39;static&#39;
+ #  define STATIC_ARRAY(x) static (x)
+                           ^~~~~~
+/path/to/brlcad/include/bu/uuid.h:58:29: note: in expansion of macro &#39;STATIC_ARRAY&#39;
+ bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);
+                             ^~~~~~~~~~~~
+...
+</pre></div>
+
+
+
+<a name="166750097"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/166750097" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#166750097">(May 28 2019 at 19:20)</a>:</h4>
+<p><span class="user-mention" data-user-id="223247">@mark999</span> Set <code>-DENABLE_ALL_CXX_COMPILE=OFF</code>. It's courageous to compile the C code as if it would be C++ ;)</p>
+
+
+
+<a name="166925737"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/166925737" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> mark999 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#166925737">(May 30 2019 at 17:00)</a>:</h4>
+<p>Ah, didn't realize what that flag did. I assumed it enabled extra stuff that was c++, as opposed to building everything as if it's c++. No wonder the compiler got indigestion :)</p>
+
+
+
+<a name="166997613"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/166997613" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#166997613">(May 31 2019 at 13:39)</a>:</h4>
+<p><span class="user-mention" data-user-id="223247">@mark999</span> Was your compile successful?  (that's pretty funny -- we should perhaps document that option better)</p>
+
+
+
+<a name="178107491"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178107491" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178107491">(Oct 14 2019 at 14:24)</a>:</h4>
+<p>At least for MS Visual Studio 2019, src/libbu/process.h conflicts with a system header with same name.</p>
+
+
+
+<a name="178195703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178195703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178195703">(Oct 15 2019 at 13:58)</a>:</h4>
+<p>The current trunk compiles now with MS Visual Studio 2019 - except the libbrep test brep_cdt_mesh. This program uses a private (not DLL-exported) class, which results in linkage errors.</p>
+
+
+
+<a name="178549781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178549781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178549781">(Oct 19 2019 at 14:59)</a>:</h4>
+<p>I defined somefunctions and declared in a .h (extern or extern "C") file , include &amp; built both .dll and .lib to use from another project. Altough I did all the linking libs (librt) and sent dll files to myproject.exe dir, could not build myproject.  If I  link static.libs , I got so many unresolved linkage errors &amp; I do not know which libraries to link.  If I add non_static libs,  myproject.exe returns with runtime error.<br>
+What am I missing ?</p>
+
+
+
+<a name="178557552"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178557552" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178557552">(Oct 19 2019 at 18:27)</a>:</h4>
+<p>Your application is probably missing a DLL. I.e., the DLL are all created, but are in a directory where your executable can't find them. Copying all (*.exe and *.dll) into the same directory could help.</p>
+<p>However, if you want simply write a program, which can create, read, write, explore and change a BRL-CAD database on Windows, you could consider to use the brlcad.dll. See <a href="http://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface" target="_blank" title="http://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface">http://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface</a> for a quick start. The <em>devel</em> file in <a href="https://sourceforge.net/projects/brlcad/files/BRL-CAD%20Runtime%20Libraries/7.26.0/" target="_blank" title="https://sourceforge.net/projects/brlcad/files/BRL-CAD%20Runtime%20Libraries/7.26.0/">https://sourceforge.net/projects/brlcad/files/BRL-CAD%20Runtime%20Libraries/7.26.0/</a> contains everything you need. It contains the already compiles brlcad.dll for 32 and 64 bit programs.</p>
+
+
+
+<a name="178581129"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178581129" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178581129">(Oct 20 2019 at 07:01)</a>:</h4>
+<p>yes, that would help but I was thinking to add some functions to fortray, compile and use from another app. I added all the required dll files.  Linking librt.lib and got 0xc000007b error. I read it is related with x64,x86 difference of compilers but I build both brlcad and clientapp as x64.</p>
+
+
+
+<a name="178643529"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178643529" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178643529">(Oct 21 2019 at 10:43)</a>:</h4>
+<p>tried in another computer and it worked :))</p>
+
+
+
+<a name="178724688"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178724688" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178724688">(Oct 22 2019 at 05:44)</a>:</h4>
+<p>did not understand bu_list functionality in structs. When bu_list_append, seems like is appending as circular fashion but what it stores (address of e.g. xrays)?</p>
+
+
+
+<a name="178816832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178816832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178816832">(Oct 23 2019 at 02:08)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> it stores whatever you list element you provide to it.  bu_lists are a bit "backwards" in traditional list sense in that they leverage a feature of C that isn't utilized very often any more (type punning).  You can turn any C struct into a singly or doubly linked list trivially, very easily.</p>
+
+
+
+<a name="178816939"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/178816939" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#178816939">(Oct 23 2019 at 02:10)</a>:</h4>
+<p>the lists are circular whether you need them to be or not.  it all depends on which functions you use to access the list which determines whether it's a single linked list, a double, a deque, a queue, etc.</p>
+
+
+
+<a name="179030505"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/179030505" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#179030505">(Oct 25 2019 at 08:17)</a>:</h4>
+<p>thanks. Why buparallel takes "0" as ncpu in rtshootrays ?</p>
+
+
+
+<a name="179043780"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/179043780" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#179043780">(Oct 25 2019 at 12:15)</a>:</h4>
+<p>autodetects the number of cores</p>
+
+
+
+<a name="179072941"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/179072941" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#179072941">(Oct 25 2019 at 17:49)</a>:</h4>
+<p>yes, you can either provide the number of cores of parallelism you want it to use or you can specify "0" to use all of them</p>
+
+
+
+<a name="179507182"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/179507182" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#179507182">(Oct 31 2019 at 07:17)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> is the magic numbers used to prevent memory leaks, could not understand exactly their purpose ?</p>
+
+
+
+<a name="179877347"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/compile%20errors/near/179877347" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/compile.20errors.html#179877347">(Nov 04 2019 at 21:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> They are a platform agnostic way of detecting memory errors, ideally before corruption affects data, so applications can quit as quickly as possible if there is a problem.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

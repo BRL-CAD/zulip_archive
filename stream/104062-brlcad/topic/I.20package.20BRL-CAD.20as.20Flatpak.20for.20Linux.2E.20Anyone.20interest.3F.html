@@ -1,0 +1,165 @@
+<html>
+<head><meta charset="utf-8"><title>I package BRL-CAD as Flatpak for Linux. Anyone interest? · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html">I package BRL-CAD as Flatpak for Linux. Anyone interest?</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="378402793"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/378402793" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kavin Teenakul <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#378402793">(Jul 25 2023 at 09:42)</a>:</h4>
+<p>Hi,<br>
+I am experimenting on packaging BRL-CAD as Flatpak to distribute in Flathub for Linux distribution.<br>
+<a href="https://www.flatpak.org/">https://www.flatpak.org/</a><br>
+<a href="https://flathub.org/">https://flathub.org/</a></p>
+<p>The advantage is that once the package is distributed in Flathub. Any Linux distro can install and update BRL-CAD.<br>
+This also ensures that BRL-CAD that ships with Flathub are the same.</p>
+<p>I have a Flatpak manifest here.<br>
+<a href="https://github.com/kevinsmia1939/flathub/tree/org.brlcad.BRL_CAD">https://github.com/kevinsmia1939/flathub/tree/org.brlcad.BRL_CAD</a></p>
+<p>I want to include more features, but failed to compile when I try to compile with Bullet.<br>
+<a href="https://github.com/BRL-CAD/brlcad/issues/86">https://github.com/BRL-CAD/brlcad/issues/86</a></p>
+<p>Let me know if anyone is interest.</p>
+
+
+
+<a name="378562550"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/378562550" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#378562550">(Jul 25 2023 at 17:57)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="634455">@Kavin Teenakul</span>, that's an interesting approach, which could work.</p>
+<p>First, to answer your question: Don't use Bullet. It was included in the repository some time ago, because there were the chance it could be used. But, as far as I know, it won't be used anywhere in BRL-CAD.</p>
+<p>I have however some more comments:</p>
+<ul>
+<li>Don't pack the developer version but a release. The last one was tagged with <a href="https://github.com/BRL-CAD/brlcad/tree/rel-7-34-2">rel-7-34-2</a>.</li>
+<li>BRL-CAD uses a lot of libraries, which can either be bundled with it or provided by the system (i.e. are already installed). Have an eye on them and choose the setup on purpose. You can review their state with the CMake GUI.</li>
+<li>For a distribution, I would do a release build with optimizations.</li>
+</ul>
+<p>The only (open source) feature, which is not included in a default build, is the appleseed ray tracing art. But this requires an appleseed installation, and I would recommend to omit it for the moment.</p>
+
+
+
+<a name="378583013"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/378583013" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kavin Teenakul <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#378583013">(Jul 25 2023 at 19:17)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <br>
+Thank for the info. I temporary using the latest commit hoping that some of the issues were solved.<br>
+In the flatpak manifest, I use the bundled dependencies.<br>
+As for the optimization, did you mean building with -O3 or -O2 flag?<br>
+Edit: Found BRLCAD_OPTIMIZED:BOOL=ON which is ON by default.</p>
+
+
+
+<a name="378683135"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/378683135" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#378683135">(Jul 26 2023 at 06:52)</a>:</h4>
+<p>On my machines, BRLCAD_OPTIMIZED is off by default.</p>
+<p>However, have a look at the summery at the end of the CMake configuration, e.g.</p>
+<div class="codehilite"><pre><span></span><code>CC       = /usr/bin/cc
+CXX      = /usr/bin/c++
+CFLAGS   = -std=c11 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -m64 -g -ggdb3 -O3 -fipa-pta -fstrength-reduce
+           -fexpensive-optimizations -finline-functions -flto
+           -fno-omit-frame-pointer -pedantic -pedantic-errors -Wall -Wextra
+           -Wundef -Wfloat-equal -Wshadow -Wbad-function-cast -Wc++-compat
+           -Winline -Wno-long-long -Wno-variadic-macros -Werror
+CXXFLAGS = -std=c++14 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -ftemplate-depth-128 -m64 -g -ggdb3 -O3 -fipa-pta -fstrength-reduce
+           -fexpensive-optimizations -finline-functions -flto
+           -fno-omit-frame-pointer -pedantic -Wall -Wextra -Wundef
+           -Wfloat-equal -Wshadow -Wbad-function-cast -Wno-inline
+           -Wno-long-long -Wno-variadic-macros -Werror
+LDFLAGS  = -m64 -g -ggdb3
+
+Compile Tcl ........................: ON
+Compile Tk .........................: ON
+Compile Itcl/Itk ...................: ON
+Compile Iwidgets ...................: ON
+Compile libpng .....................: OFF
+Compile libregex ...................: OFF
+Compile zlib .......................: OFF
+Compile STEPcode....................: ON
+
+OpenGL support (optional) ..........: ON
+X11 support (optional) .............: ON
+Qt support (optional) ..............: OFF
+Run-time debuggability (optional) ..: ON
+
+Build 32/64-bit release ............: 64BIT (Auto)
+Build with optimization ............: ON
+Build static libraries .............: ON
+Build dynamic libraries ............: ON
+Install example geometry models ....: ON
+Generate extra docs ................: ON (html/man)
+</code></pre></div>
+<p>There, you should see <code>Build with optimization</code> set to <code>ON</code> and <code>CFLAGS</code> and <code>CXXFLAGS</code> with <code>-O3</code>.</p>
+<p>Which reminds me, when you build with Qt support, you get the experimental qged GUI as well.</p>
+
+
+
+<a name="378815160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/378815160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kavin Teenakul <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#378815160">(Jul 26 2023 at 14:05)</a>:</h4>
+<p>Thanks.  I start to build with Qt.</p>
+<p>Do you know if BRLCAD_ENABLE_AQUA, BRLCAD_ENABLE_COVERAGE, BRLCAD_ENABLE_DTRACE, BRLCAD_ENABLE_OPENCL, and BRLCAD_ENABLE_OPENVDB are of any importance?</p>
+
+
+
+<a name="378883087"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/378883087" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#378883087">(Jul 26 2023 at 17:10)</a>:</h4>
+<p>Aqua is the macOS GUI, i.e. not relevant for Linux. Code coverage tests and DTrace is useful for development only. Open Computing Language is used to execute parts of the ray-trace on the graphic card, which is still experimental and should not be used in production.</p>
+<p>OpenVDB adds however the g-vdb export and a remesh for BOTs.</p>
+
+
+
+<a name="383095542"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/383095542" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kavin Teenakul <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#383095542">(Aug 08 2023 at 22:50)</a>:</h4>
+<p>Hi,</p>
+<p>I succeed in building BRL-CAD Flatpak.<br>
+Need some testers.</p>
+<p>First install flatpak.<br>
+Ubuntu: <code>sudo apt install flatpak</code><br>
+For other distros, follow this instructions. <a href="https://flathub.org/setup">https://flathub.org/setup</a></p>
+<p>optional: <code>flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo</code></p>
+<p>Then to install BRL-CAD flatpak.<br>
+<code>flatpak install --user https://dl.flathub.org/build-repo/40303/org.brlcad.BRL_CAD.flatpakref</code></p>
+
+
+
+<a name="383774247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/383774247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#383774247">(Aug 10 2023 at 22:40)</a>:</h4>
+<p>That's great to hear <span class="user-mention" data-user-id="634455">@Kavin Teenakul</span> ... are there any metrics available for how many people end up installing via flatpak?</p>
+
+
+
+<a name="383785700"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/383785700" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kavin Teenakul <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#383785700">(Aug 11 2023 at 00:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F/near/383774247">said</a>:</p>
+<blockquote>
+<p>That's great to hear <span class="user-mention silent" data-user-id="634455">Kavin Teenakul</span> ... are there any metrics available for how many people end up installing via flatpak?</p>
+</blockquote>
+<p>Hi,<br>
+This is a test build, so the statistics are not collected.<br>
+The build is done here: <a href="https://github.com/flathub/flathub/pull/4363">https://github.com/flathub/flathub/pull/4363#</a></p>
+<p>But once it is accept and upload to Flathub, there will be stats below. For example: <a href="https://flathub.org/apps/org.mozilla.firefox">https://flathub.org/apps/org.mozilla.firefox</a><br>
+Also, stats can also be view here: <a href="https://klausenbusk.github.io/flathub-stats/#ref=org.mozilla.firefox&amp;interval=infinity&amp;downloadType=installs">https://klausenbusk.github.io/flathub-stats/#ref=org.mozilla.firefox&amp;interval=infinity&amp;downloadType=installs</a></p>
+<p>Right now, I just want someone to test BRL-CAD Flatpak. And I also want someone to be a co-owner of the repo in Github as well.<br>
+If anyone is interest in co-owner the Github repo let me know.</p>
+
+
+
+<a name="386708429"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/386708429" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kavin Teenakul <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#386708429">(Aug 22 2023 at 22:55)</a>:</h4>
+<p>Anyone have give it a try?<br>
+Use this to install the latest test build.<br>
+flatpak install --user <a href="https://dl.flathub.org/build-repo/42975/org.brlcad.BRL_CAD.flatpakref">https://dl.flathub.org/build-repo/42975/org.brlcad.BRL_CAD.flatpakref</a></p>
+
+
+
+<a name="386911672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/I%20package%20BRL-CAD%20as%20Flatpak%20for%20Linux.%20Anyone%20interest%3F/near/386911672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F.html#386911672">(Aug 23 2023 at 16:23)</a>:</h4>
+<p>I haven't used Flatpak before, but I will definitely give it a try. However, it doesn't have top priority at the moment .</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

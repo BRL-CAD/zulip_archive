@@ -1,0 +1,158 @@
+[
+    {
+        "content": "<p>I want to make sure that the brlcad.dll works with the next release (7.30.8). What's the best branch to test it? The code seems to go from <strong>trunk</strong> to <strong>RELEASE</strong> to <strong>STABLE</strong> to <strong>tags</strong>. I.e., RELEASE or STABLE would be a good candidate, or?</p>",
+        "id": 195803775,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588229812
+    },
+    {
+        "content": "<p>Right now, I'd go with RELEASE</p>",
+        "id": 195832057,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588250051
+    },
+    {
+        "content": "<p>I think I'm synced to stable, but would need to double check - you may want to wait until we decide what to do about the iges-g  OSX bug report in case that requires code changes prior to release.</p>",
+        "id": 195832205,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588250158
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Quickhull.hpp is one of the files behind the bot chull command.  A quick Linux test seems to work fine, but Windows is the one I'd want to check for that sort of change - IIRC it was the most work to get going originally.  I'll see if I'm in a building state with trunk on Windows...</p>",
+        "id": 195832546,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588250314
+    },
+    {
+        "content": "<p>Seems to be OK on Windows.</p>",
+        "id": 195842602,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588255250
+    },
+    {
+        "content": "<p>Okay, thanks, will test RELEASE then.</p>",
+        "id": 195854881,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588259968
+    },
+    {
+        "content": "<p>Hmm, RELEASE doesn't contain the off_t for Windows fixes. I can't build the 32 bit version with Visual Studio.</p>",
+        "id": 196198086,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588606553
+    },
+    {
+        "content": "<p>Another issue is the zlib in openNURBS: openNURBS-static is linked with zlib, i.e. the shared library version of it. This is not optimal for the brlcad.dll. I think, a static library shouldn't be linked with something else. This has to be done by the linker of the binary using the static library.<br>\n(I'm not sure, will test what happens.)</p>",
+        "id": 196199678,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588607200
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  I did some  updates to RELEASE today - do they help?   (not sure yet what to do about openNURBS, but I did notice the off_t wasn't in there so I've tried to backport it.)</p>",
+        "id": 196259664,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588642234
+    },
+    {
+        "content": "<p>Unfortunately, it still doesn't work. E.g., src/libbu/vls.c doesn't compile.<br>\nI could find differences in include/config_win.h.in, include/bu/glob.h, and include/bu/vls.h which could be of relevance, but replacing them didn't fixed it. I wasn't able to find the difference between revision 75083b(my reference) which breaks the build yet.</p>\n<p>BTW, don't take care of the \"zlib in openNURBS\" thing. I can easily fix it for my purpose, and if it works I can regularly commit it to the trunk.</p>",
+        "id": 196312206,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588687712
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I think I may have had to start from a clean build directory.</p>",
+        "id": 196330514,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588695533
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> are you working with RELEASE or trunk?</p>",
+        "id": 196330581,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588695570
+    },
+    {
+        "content": "<p>RELEASE is the one I thought I got working yesterday with the off_t updates...</p>",
+        "id": 196330629,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588695597
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> are you working with RELEASE or trunk?</p>\n</blockquote>\n<p>I did the tests with RELEASE, but compared them with a revision from the trunk where I know it works.</p>",
+        "id": 196334248,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588697367
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> I think I may have had to start from a clean build directory.</p>\n</blockquote>\n<p>From which revision did you forked the RELEASE? The last one before the TCL upgrades?</p>\n<p>Maybe, you can choose a revision from the trunk for the fork, and I test this revision in advance if it works for me.</p>",
+        "id": 196334628,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588697538
+    },
+    {
+        "content": "<p>RELEASE was forked a long time back - we periodically merge from trunk.  The last big merge was well before the Tcl upgrade.</p>",
+        "id": 196341421,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588700699
+    },
+    {
+        "content": "<p>Can you tell me what build error you were seeing with a vanilla RELEASE checkout that's current as of this morning?  Most likely culprit is something to do with the regex.h header...</p>",
+        "id": 196341650,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588700798
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  I think I got past the libbu issue - let me know if that does it for you</p>",
+        "id": 196354275,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588706687
+    },
+    {
+        "content": "<p>RELEASE compiles now with VS2019, both 32 and 64 bit.</p>",
+        "id": 196605090,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588755484
+    },
+    {
+        "content": "<p>Excellent, thanks!  Everything look like it is working OK?</p>",
+        "id": 196630297,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588770074
+    },
+    {
+        "content": "<p>Until now: Yes.<br>\nI haven't done much tests yet, but the BrlCadViewer seems to work, at least.</p>",
+        "id": 196631043,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588770408
+    },
+    {
+        "content": "<p>Sounds good.</p>",
+        "id": 196631145,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588770462
+    },
+    {
+        "content": "<p>Thanks! :)</p>",
+        "id": 196631400,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588770560
+    },
+    {
+        "content": "<p>np - thank you for catching it before we released!  trunk is still shaking down from a lot of changes, so I'd like 7.30.8 to be working as widely as possible while we work through the updates.</p>",
+        "id": 196632168,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588770884
+    },
+    {
+        "content": "<p>This time I want to build a new brlcad.dll from the release. We found some bugs in the old one (from 2016?) and I would like to have an official new one.</p>",
+        "id": 196650962,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1588778686
+    },
+    {
+        "content": "<p>very good - let me know if you have any trouble getting the dll to build from RELEASE branch.  I'm not ready to tag yet anyway, so there's still time to address any issues.</p>",
+        "id": 196653752,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588779852
+    }
+]

@@ -1,0 +1,78 @@
+<html>
+<head><meta charset="utf-8"><title>.bz · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html">.bz</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="194986701"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194986701" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194986701">(Apr 22 2020 at 20:24)</a>:</h4>
+<p><span class="user-mention" data-user-id="103542">@Erik</span> Seeing a lot of memory pressure on the server.  Any idea where it's coming from or better still what we can do about it?  I changed the configuration to kill processes that put pressure on memory instead of letting it swap.</p>
+
+
+
+<a name="194986784"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194986784" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194986784">(Apr 22 2020 at 20:25)</a>:</h4>
+<p>That has greatly helped with responsiveness and stability, but is making things like Jenkins CI testing fail on the regular (kill's even simple rt's for some reason during distcheck).</p>
+
+
+
+<a name="194986994"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194986994" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194986994">(Apr 22 2020 at 20:26)</a>:</h4>
+<p>jenkins is sitting on over 2 gigs resident, mysql is #1 at 867 megs, then we're down into &lt;=100 meg procs</p>
+
+
+
+<a name="194987054"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194987054" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194987054">(Apr 22 2020 at 20:27)</a>:</h4>
+<p>top and o res :)</p>
+
+
+
+<a name="194987208"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194987208" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194987208">(Apr 22 2020 at 20:28)</a>:</h4>
+<p>how much is apache and the other dbs at?  Last I looked, it was loads too, just spread across lots of child processes</p>
+
+
+
+<a name="194987252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194987252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194987252">(Apr 22 2020 at 20:28)</a>:</h4>
+<p>I think server has 16gb</p>
+
+
+
+<a name="194987264"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/194987264" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#194987264">(Apr 22 2020 at 20:28)</a>:</h4>
+<p>(don't have a console up atm)</p>
+
+
+
+<a name="195096929"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/195096929" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#195096929">(Apr 23 2020 at 17:53)</a>:</h4>
+<div class="codehilite"><pre><span></span>bz% ps axu | grep &#39;www.*http.*T$&#39; | awk &#39;{print $6}&#39; | xargs | sed &#39;s/ /+/g;s,.*,(&amp;)/1024,&#39; | bc -l
+613.26171875000000000000
+</pre></div>
+
+
+<p>613 megs, like half of mysql and 1/4ish of jenkins</p>
+
+
+
+<a name="195097147"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/195097147" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#195097147">(Apr 23 2020 at 17:55)</a>:</h4>
+<p>system seems to have plenty of available memory...</p>
+
+
+
+<a name="195115670"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/.bz/near/195115670" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/.2Ebz.html#195115670">(Apr 23 2020 at 20:32)</a>:</h4>
+<p>yet it still runs out on the regular.  I think something spikes it up.  Maybe a botnet attaching and sucking up memory on the mailer or httpd (it's happened before), or maybe just regular activity coinciding.  hrm.  :(</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

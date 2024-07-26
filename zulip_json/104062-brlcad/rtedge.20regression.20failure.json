@@ -1,0 +1,44 @@
+[
+    {
+        "content": "<p>I've been working on debugging the regress_rtwizard_D test case failure and wanted to shared some updates.  Looks like the failures are genuine mistakes, and possibly that even the committed reference is wrong.  Looks like the occlusion modes aren't testing/applying the edge pixels correctly.</p>",
+        "id": 166174617,
+        "sender_full_name": "Sean",
+        "timestamp": 1558447122
+    },
+    {
+        "content": "<p>This shows the three occlusion modes (regress is using om=1) which are on the top row.  Two leftmost images are the two specified occlusion objects.  Notice the occluded pixels on the hub cylinders in om=1 (differences shown in the second column, bottom row).  Remaining two black images is supposedly the unoccluded edge pixels and a default edge rendering.<br>\n<a href=\"/user_uploads/1549/VtVmWRdFJNwrpgx7mhCffpJg/Screen-Shot-2019-05-21-at-9.56.12-AM.png\" target=\"_blank\" title=\"Screen-Shot-2019-05-21-at-9.56.12-AM.png\">Screen-Shot-2019-05-21-at-9.56.12-AM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/VtVmWRdFJNwrpgx7mhCffpJg/Screen-Shot-2019-05-21-at-9.56.12-AM.png\" target=\"_blank\" title=\"Screen-Shot-2019-05-21-at-9.56.12-AM.png\"><img src=\"/user_uploads/1549/VtVmWRdFJNwrpgx7mhCffpJg/Screen-Shot-2019-05-21-at-9.56.12-AM.png\"></a></div>",
+        "id": 166175251,
+        "sender_full_name": "Sean",
+        "timestamp": 1558447471
+    },
+    {
+        "content": "<p>Zooming in, you can see the hub cylinder pixels that are partially occluded, partially not occluded.<br>\n<a href=\"/user_uploads/1549/9clXXoNvB1krcfHlxLveky0o/Screen-Shot-2019-05-20-at-11.13.35-PM.png\" target=\"_blank\" title=\"Screen-Shot-2019-05-20-at-11.13.35-PM.png\">Screen-Shot-2019-05-20-at-11.13.35-PM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/9clXXoNvB1krcfHlxLveky0o/Screen-Shot-2019-05-20-at-11.13.35-PM.png\" target=\"_blank\" title=\"Screen-Shot-2019-05-20-at-11.13.35-PM.png\"><img src=\"/user_uploads/1549/9clXXoNvB1krcfHlxLveky0o/Screen-Shot-2019-05-20-at-11.13.35-PM.png\"></a></div>",
+        "id": 166175318,
+        "sender_full_name": "Sean",
+        "timestamp": 1558447508
+    },
+    {
+        "content": "<p>All differences with the reference image accentuated 2x.  <a href=\"/user_uploads/1549/seEbR9m-15dSIjZ75n6FVWNs/Screen-Shot-2019-05-20-at-8.17.41-PM.png\" target=\"_blank\" title=\"Screen-Shot-2019-05-20-at-8.17.41-PM.png\">Screen-Shot-2019-05-20-at-8.17.41-PM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/seEbR9m-15dSIjZ75n6FVWNs/Screen-Shot-2019-05-20-at-8.17.41-PM.png\" target=\"_blank\" title=\"Screen-Shot-2019-05-20-at-8.17.41-PM.png\"><img src=\"/user_uploads/1549/seEbR9m-15dSIjZ75n6FVWNs/Screen-Shot-2019-05-20-at-8.17.41-PM.png\"></a></div>",
+        "id": 166175456,
+        "sender_full_name": "Sean",
+        "timestamp": 1558447583
+    },
+    {
+        "content": "<p>Occlusion modes om=2 and om=3 are even worse (upper two right images), but I suspect a symptom of the same problem.  However it is determining occlusion is inconsistently getting applied.</p>\n<p>Intuitively, it seems as though there's some tolerance or logic fault with the overlay edge hit points being actually on the overlay objects.  I would expect all edges on occluded objects to either draw or not be drawn, probably the prior, for om=1.  For om=2, I would probably expect all edges to draw and the unoccluded objects to show where not on edges.  For om=3, I would expect all edges to draw, unoccluded to show where not on edges, and occluded to show dithered (this part seems part seems correct now).</p>\n<p>So it's 1) not drawing edges when it always should and 2) incorrectly determining that an occlusion has occurred.</p>",
+        "id": 166176576,
+        "sender_full_name": "Sean",
+        "timestamp": 1558448287
+    },
+    {
+        "content": "<p>I've ruled out rtwizard or the framebuffer doing anything wrong.  </p>\n<p>Anyone looking to help debug this, the file in question is src/rt/viewedge.c for rtedge.  Running \"ctest -R regress.*D\" will run the test case that fails.</p>\n<p>Alternatively, you can run these manual steps to reproduce the bug:</p>\n<p>bin/fbserv 0 /dev/Xl &amp;</p>\n<p>bin/rt  -B -F 0 -V 1.0 -R -A 0.9 -p 0 -C 255/255/255 -c \"{viewsize 6.787387573242200e+03}\" -c \"{orientation 2.480973490458727e-01 4.765905732660484e-01 7.480973490458729e-01 3.894348305183902e-01}\" -c \"{eye_pt 1.845382932318572e+04 1.175461729657747e+04 1.044847417329058e+04}\" share/db/m35.g component/suspension component/power.train</p>\n<p>bin/rtedge -B -F 0 -V 1.0 -R -A 0.9 -p 0 -c \"set fg=0,0,0\" -c \"set om=1\" -c \"set oo=\\\\\\\"component/power.train component/suspension\\\\\\\"\" -c \"viewsize 6.787387573242200e+03\" -c \"orientation 2.480973490458727e-01 4.765905732660484e-01 7.480973490458729e-01 3.894348305183902e-01\" -c \"eye_pt 1.845382932318572e+04 1.175461729657747e+04 1.044847417329058e+04\" share/db/m35.g component</p>",
+        "id": 166177006,
+        "sender_full_name": "Sean",
+        "timestamp": 1558448571
+    },
+    {
+        "content": "<p>UPDATE!  This problem is now FIXED.  See recent commits for details, but short summary is occlusion objects that were also in the render object lists ended up occluding themselves (inconsistently due to floating point fuzzing).  Fix was to detect overlapping/exact occlusion and not treat that as occluded, thus all exterior exposed edges will get drawn.</p>",
+        "id": 166273376,
+        "sender_full_name": "Sean",
+        "timestamp": 1558535677
+    }
+]

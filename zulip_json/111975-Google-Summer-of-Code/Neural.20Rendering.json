@@ -1,0 +1,1616 @@
+[
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"694938\">@Senthil Palanisamy</span>, lets continue the discussion here.  Can you tell me more about your background and what you understand about this effort?  Have you read the AMD paper?</p>",
+        "id": 424426002,
+        "sender_full_name": "Sean",
+        "timestamp": 1709397741
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 424429528,
+        "sender_full_name": "Vidit Jain",
+        "timestamp": 1709400467
+    },
+    {
+        "content": "<p>Hi Sean, Thanks for the message. </p>\n<p><strong>About my background:</strong> I come from a geometric vision background where I worked more than 6 years, to go along with my masters in robotics from Northwestern.  I have developed solutions to problems like Stereo visual Odometry, Depth data based SLAM / TSDF fusion of depth maps into a volumetric volume to generate geometry, Extrinsic sensor calibration algorithms (the act of optimizing solutions to where sensors are located). I have done a few deep learning works as well like deep reinforcement policy  learning for a knot tieing, weed localization and human character recgonition. I can send you my resume to any mail id of interest, if you want to know about my background further. Though I don't actively have a graphics background, I do understand the broader details and am able to grasp quickly to execute ideas. My programming languages of comfort are C++ and python (though I do think I can pick up any language within a reasonable time)</p>\n<p><strong>About the work</strong>: I did spent a few hours trying to understand the work. Here is my summary - A classic ray tracing pipeline on BVH for rendering objects is slow. One of the deep learning ways to speed this up is to  train a MLP to be a neural intersection function - a network that primarily predicts occupancy as a probability (0-1), but it can be trained to predict other properties as well like shading /  reflectence. This network can be trained directly on position and ray directions, but it does not practically work well. So, the solution is to learn some feature embeddings for position and direction, which then feed into MLP. Each of position and direction are points in R^3, but this leads to ray duplicates, so they can be compactly represented as points in R^2, by using spherical co-ordinates and substituting the ray origin with ray intersection. Raycasting is usually done in multi bounces, where secondary rays are traced from the primary ray. So there are two NIFs one (outer NIF) predicting the primary intersection, and the other (inner NIF) predicting occupancy from the secondary intersection. The inner NIF takes ray distance embedding as input in addition to position and direction embeddings. It seems like a classic tracing tracing scheme employs two hierarchies in BVH to trace rays. The top BVH tracing is cheap while the bottom BVH tracking is expensive. NIFs replace the bottom BVH part, while the top BVH tracing is done through classical means. The outer NIF just predicts occupancy while the inner NIF predicts other properties in addition to occupancy.</p>\n<p><strong>Some open questions I am still trying to find answers to</strong></p>\n<ol>\n<li>What is the feature embedding scheme for position and direction? I know that sine and cosine bases (fourier analysis motivated) is used a lot in works like nerfs, but I have not got to the bottom of what embedding is used here</li>\n<li>It seems like the networks used here are AMD specific C++ libraries. Is this something that we will use in this work? Or is the idea to use a more popular library like pytorch.</li>\n</ol>\n<p><strong>My personal motivation for taking this work</strong></p>\n<ol>\n<li>I have never contributed to open source and I was scouting for places to begin my open source journey. Contributing to open source increases my visibility and exposes me to learn a lot more than from just contributing to the private repos that I work for.</li>\n<li>I want to work on a geometric deep learning project to update myself to the SOTA</li>\n</ol>",
+        "id": 424455092,
+        "sender_full_name": "Senthil Palanisamy",
+        "timestamp": 1709422610
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"694938\">@Senthil Palanisamy</span> Thank you for the excellent introduction.  From your background, it sounds like you could probably propose a couple different projects that would align with needs (like a slam-based object reconstruction using ray tracing), which is all outstanding background for working on neural rendering.  Obviously a lot of related concepts.  As for your resume, you can just submit that when you submit a proposal (which you can/should do early and then continuously update, whenever it opens).  Given the nature of GSoC, resume's and the project write-up itself are only a small fraction of selection criteria.  It's communication that matters most (both here and via code).</p>\n<p>I think your understanding of the project is right on track and you did a great job summarizing AMD's work.  They essentially showed that it can be faster, so now my question is whether it can be faster and more generally applicable for a set of conditions like expensive geometries and reasonably precise hit points. Can we actually use it as an acceleration structure in practice, or is the training phase entirely impractical; what sort of net is needed to capture all the necessary detail; is the two-layer network adequate; are the two NIFs actually necessary; ... lots of open questions many of which are hand-waved in the paper and proved challenging in our previous investigations by a team at TAMU.</p>\n<p>As to your questions, if I'm understanding you correctly, then 1) is really just a dimensionality reduction so lookups can be fast and fewer parameters in the latent space are needed for encoding.  Instead of using 6 float/double values for the input layer (xyz pos + ijk dir), they use 4 float values (az/el pos + az/el dir).  There may be more nuance implied for feature embedding, though, so there may be work needed to understand it if changes are to be made.  I'm a little surprised I didn't see residual linkages, and that they got away with such simple topology, but then we have yet to reproduce  their results either. As for 2) the did rely on libs for performance and they certainly can be used but they're not a focus or requirement.  The fundamental question is is this approach even feasible as an acceleration approach to represent a given geometry model.  That has both elements of accuracy and performance, but can be proven without making it production-ready.  Libs like pytorch can certainly be used.  In fact, the previous team fully bridged from C to Py to C during ray-tracing which was of course painfully slow, but they weren't successful in getting accurate hit points so the question is still an open one.</p>",
+        "id": 424676516,
+        "sender_full_name": "Sean",
+        "timestamp": 1709564802
+    },
+    {
+        "content": "<p>Thanks for the response. The grid look up makes sense now. I was intially under the misunderstanding that some network converts position, direction -&gt; position, direction embedding. But it does make sense that it is just a grid that is trained as well in the training process. I have a few follow up questions</p>\n<ol>\n<li>What kind of training practically are we talking of? Since this is a CAD product, is the idea that the network has to train real time as the user possibly edits the model to update the rendering in real time? Or is the idea the training can be done once, in a somewhat offline fashion (like a few minutes or few 10s of minutes) and then can be used for rendering (where the user is assumed to not edit)</li>\n<li>As for the implementation is concerned, the network itself looks simple and innocuous, each NIF is a MLP - the outer is a 2 layer MLP with 64 units in each layer, while the inner NIF is a two layer MLP with 48 units in each layer, I am just trying to get my head around how the training data is generated and from what sources,  to set up this training problem. I should be able to code this up once I figure out the training data.</li>\n<li>You mentioned something about another project - \"slam-based object reconstruction using ray tracing\", Can you point me to any thread or resources to understand this better? I would love to know details about this.</li>\n</ol>",
+        "id": 424707867,
+        "sender_full_name": "Senthil Palanisamy",
+        "timestamp": 1709573037
+    },
+    {
+        "content": "<p>It's not really a grid lookup.  It's just a different way to express a vector.  For the neural net, it's less input data and thus less latent space nodes are needed to encode.  It's still just a vector though, a clever optimization.  We even coincidentally have an image depicting both (the vector can point outwards or inwards): <a href=\"https://brlcad.org/gallery/picture.php?/4\">https://brlcad.org/gallery/picture.php?/4</a></p>\n<ol>\n<li>\n<p>The latter. A given model will get \"baked\" such that a NN is trained, ideally in just a couple minutes,  and then is available+valid for use until the geometry changes.</p>\n</li>\n<li>\n<p>The training data should come directly from the ray tracer (either in advance or streamed real-time).  Imagine shooting a million rays at an object from it's bounding sphere, some hit, some miss.  Each hit is not just the first hit but all the possible hits along the path.  That's the training corpus.  Rays input, hit list output.  We can probably shoot rays faster than the net can train an epoch, so you'd probably want to just stream rays as fast as it can train.  Alternatively, shoot a million, train, shoot another million, train, etc.<br>\n<a href=\"/user_uploads/1549/NkXAc6hfckCsEFq5EfLJEnb0/rppvalidation_dirs.png\">rppvalidation_dirs.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/NkXAc6hfckCsEFq5EfLJEnb0/rppvalidation_dirs.png\" title=\"rppvalidation_dirs.png\"><img src=\"/user_uploads/1549/NkXAc6hfckCsEFq5EfLJEnb0/rppvalidation_dirs.png\"></a></div></li>\n<li>\n<p>there's no threads on the topic.  general idea though would be to propose something CAD-related involving slam like making a portable 3D CAD scanner app. e.g., try to output CAD instead of just point clouds or meshes.  maybe hook into iphone lidar sensor.   could also be slam and point cloud based, but then imports into BRL-CAD on the fly for processing.  lots of possibilities.</p>\n</li>\n</ol>\n<p>You'd have to really make a strong case for your project regardless.  Needs to have a compelling benefit that ties into CAD specifically, not just 3D or vision or graphics-related.</p>",
+        "id": 424801041,
+        "sender_full_name": "Sean",
+        "timestamp": 1709618357
+    },
+    {
+        "content": "<p>Thanks for the clarification. I went back and spent more time. I think I am getting closer to the true understanding. Its funny my understanding about the work keeps getting refined and is probably starting to converge. So it seems like the grid encoding is done on a per object basis - the inputs for both for the outer and inner network, while the networks itself are object agnostic occupancy predictors. So we would end up having two encoded grids (one for outer and one for innter) for each unique object and two network that are sort of object agnostic, but acts on any given object to predict occupancy. </p>\n<p>In order to accomplish this, I would need to modify the ray tracing pipeline on our system - record input data - for both outer and inner network and then attempt to train those networks</p>\n<p>So my two action items are</p>\n<ol>\n<li>Modify the existing pipeline to record data</li>\n<li>Work on the network that can train on this</li>\n</ol>\n<p>I think I can do action 2 pretty independently (the networks are simple) but to do 1, I would need some directions on how I can do this. What's the fastest way to get there? Are there any documents /sections of code in our repository that I can go through to better understand how to do this? Also, I will try to setup BRL CAD (<a href=\"https://github.com/BRL-CAD/brlcad\">https://github.com/BRL-CAD/brlcad</a>) in the first place, which I will get started with</p>\n<p>I know we are interested in the core hypothesis of - is this fast enough? If there is a way to get this data, without having to collect it ourselves (may be any opensource datasets that can be directly plugged in), if any such options exist, the core hypothesis on speed can be validated quicker? Any thoughts on this</p>",
+        "id": 425358037,
+        "sender_full_name": "Senthil Palanisamy",
+        "timestamp": 1709832385
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span> and others, I have uploaded information and materials relevant to the neural rendering project to <a href=\"https://brlcad.org/design/neural\">https://brlcad.org/design/neural</a></p>",
+        "id": 429793730,
+        "sender_full_name": "Sean",
+        "timestamp": 1711521733
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span> I looked over your proposal update and it looks really pretty good.  I like that you identified some potential errors in the tamu team's approach.   I think overall you have a good plan. </p>\n<p>That said, I think you could make your proposal even better by more clearly identifying what the results of your project will be exactly.  I love that you dedicated time to writing up results -- it's reasonable to spend time getting a paper out of this work given the nature of the work.  In additional to a technical paper, though, what precisely will be the resulting products of your work in addition to things learned, which will be documented and which you underscored in your writeup.</p>",
+        "id": 430048328,
+        "sender_full_name": "Sean",
+        "timestamp": 1711626112
+    },
+    {
+        "content": "<p>Is the goal to implement a non-grid sampling method, train on that, and demonstrate the efficacy of using that method with \"rt\" or something similar?  The tamu team resorted to a fixed view silhouette rendering via \"rt\" as their output target given they couldn't fully achieve generalization to 3D.</p>",
+        "id": 430048607,
+        "sender_full_name": "Sean",
+        "timestamp": 1711626238
+    },
+    {
+        "content": "<p>You mention nerf and potentially using different networks -- could definitely write more on what you mean there.  I do suspect that the simple 2-layer FCN is inadequate for full generalization, but AMD's results certainly suggest otherwise may be possible.</p>",
+        "id": 430048840,
+        "sender_full_name": "Sean",
+        "timestamp": 1711626317
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Thank you for reading. Essentially, the goal is to achieve generalization, so we will try an approach aimed at improving the bounding box approach. However, even by adding this, I suspect that the neural network implemented by the students may not be sufficient to ensure good generalization for any view and thus for any arbitrary ray. For this reason, I believe (but it needs to be verified after obtaining the results of the first part) that it is reasonable to consider modifying the neural network with others more powerful to encode more information about the geometry of the 3D object. In any case, I will provide a better explanation in the proposal. Thank you.</p>",
+        "id": 430050286,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1711626757
+    },
+    {
+        "content": "<p>An approach I think would be considerably more effective is generating training data based on spherical sampling.  That in practice does a very good job to sample the volume unbiased and converges through potential shotlines.  It's pretty simple to generate -- I just did that in our new \"rtsurf\" application.</p>",
+        "id": 430050760,
+        "sender_full_name": "Sean",
+        "timestamp": 1711626896
+    },
+    {
+        "content": "<p>Ends up looking a bit like this:<br>\n<a href=\"/user_uploads/1549/ksk6tkZoPOh8aEOEwT9AtASh/rppvalidation_dirs.png\">rppvalidation_dirs.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ksk6tkZoPOh8aEOEwT9AtASh/rppvalidation_dirs.png\" title=\"rppvalidation_dirs.png\"><img src=\"/user_uploads/1549/ksk6tkZoPOh8aEOEwT9AtASh/rppvalidation_dirs.png\"></a></div>",
+        "id": 430050913,
+        "sender_full_name": "Sean",
+        "timestamp": 1711626944
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/430050913\">ha scritto</a>:</p>\n<blockquote>\n<p>Ends up looking a bit like this:<br>\n<a href=\"/user_uploads/1549/ksk6tkZoPOh8aEOEwT9AtASh/rppvalidation_dirs.png\">rppvalidation_dirs.png</a></p>\n</blockquote>\n<p>yes i think it's the same of the bounding box approach used by tamu students or am I wrong?<br>\n<a href=\"/user_uploads/1549/r0S--pVCJ3nqBeJL1barFFe6/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/r0S--pVCJ3nqBeJL1barFFe6/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/r0S--pVCJ3nqBeJL1barFFe6/image.png\"></a></div>",
+        "id": 430051414,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1711627090
+    },
+    {
+        "content": "<p>I don't know why they call it bounding box even though it seems more like a sphere.</p>",
+        "id": 430051517,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1711627124
+    },
+    {
+        "content": "<p>So it seems that Tamu students have previously employed this method to generate training data, but encountered issues with its generalization. I believe that the neural network might be lacking in its ability to extract all pertinent information from the geometry.</p>",
+        "id": 430052785,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1711627448
+    },
+    {
+        "content": "<p>I have not looked into their code to see whether they're actually evaluating the bounding box or bounding sphere, but I do recall them saying all rays sample through the origin so it's not an unbiased sampling regardless.</p>",
+        "id": 430053474,
+        "sender_full_name": "Sean",
+        "timestamp": 1711627624
+    },
+    {
+        "content": "<p>that image there could also simply be hits on a sphere in a bounding box, heh.  would have to double check that as well.</p>",
+        "id": 430053747,
+        "sender_full_name": "Sean",
+        "timestamp": 1711627697
+    },
+    {
+        "content": "<p>That is, I believe they were sampling the geometry like this:  <a href=\"/user_uploads/1549/TLh7Bb0AEw2wdPF0pP9pUy4x/samples.png\">samples.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/TLh7Bb0AEw2wdPF0pP9pUy4x/samples.png\" title=\"samples.png\"><img src=\"/user_uploads/1549/TLh7Bb0AEw2wdPF0pP9pUy4x/samples.png\"></a></div><p>The general assumption being they were sampling and trying to reconstruct simple shapes like a box, sphere, torus, etc.</p>",
+        "id": 430054563,
+        "sender_full_name": "Sean",
+        "timestamp": 1711628014
+    },
+    {
+        "content": "<p>i.e., <a href=\"/user_uploads/1549/pMsyrJjZ86LIxqmXAVd5-uwW/box.png\">box.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/pMsyrJjZ86LIxqmXAVd5-uwW/box.png\" title=\"box.png\"><img src=\"/user_uploads/1549/pMsyrJjZ86LIxqmXAVd5-uwW/box.png\"></a></div>",
+        "id": 430054708,
+        "sender_full_name": "Sean",
+        "timestamp": 1711628058
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> you were right. I studied better what they did as sampling methods and it seems they used these two approaches: one is a grid approach (and ok we all agree it can't be used for generalization), the second is a mixed bounding box exactly like you said (ray origins were selected from a bounding sphere around the geometry, as well as from within the bounding sphere itself). <br>\nBut there was another approach they never tested, the \"pure\" bounding sphere approach: this<br>\nmethod find a random point at radius distance away from the center of the geometry. This would serve as the ray origin. Then, it would find a different, random point at radius distance away from the origin. It would then determine the direction between the two points to determine the direction vector of the ray. It's pretty clear that this is the approach you suggested.<br>\nThis morning I had understood that they had used this latest approach (so I assumed that neither with this sampling they could generalize), but I was wrong. So, this changes everything because there might not be a need to implement any more sophisticated neural network (but it all depends on the results we will have on thanks to this different spherical sampling).</p>",
+        "id": 430077955,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1711635590
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I have updated my proposal and submitted it. I am looking forward for hearing from you. <br>\nThanks</p>",
+        "id": 430087784,
+        "sender_full_name": "Vidit Jain",
+        "timestamp": 1711638029
+    },
+    {
+        "content": "<p>While looking through previous work(<a href=\"https://brlcad.org/design/neural/\">https://brlcad.org/design/neural/</a>), I noticed this <a href=\"https://colab.research.google.com/drive/1WtY_IdgLojdbwzfachHtpOIim7n1XPbg?usp=sharing#scrollTo=jLLlkJfDP-tN\">file</a> to what looks like a python version of the NIF implementation. Perhaps I could start by converting this job to a C++ version?Then in the meantime, I'll try to optimize it.</p>",
+        "id": 440303717,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1716464186
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 440312021,
+        "sender_full_name": "Vidit Jain",
+        "timestamp": 1716467338
+    },
+    {
+        "content": "<p>I have some thoughts on why AMD chose a simple neural network. Recently, while deploying a Transformer model, I found that when there are too many parameters, the model's speed also noticeably decreases. Therefore, overly complex neural networks may sacrifice some efficiency.</p>",
+        "id": 443607575,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1717947284
+    },
+    {
+        "content": "<p>I have a question about '''rt_shootray()\".  When calling <code>rt</code> with default parameters, does it call <code>rt_shootray</code> only once for each pixel to calculate the RGB value, and does it not use the Monte Carlo algorithm at all during the process?</p>",
+        "id": 444221101,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1718194969
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/443607575\">said</a>:</p>\n<blockquote>\n<p>I have some thoughts on why AMD chose a simple neural network. Recently, while deploying a Transformer model, I found that when there are too many parameters, the model's speed also noticeably decreases. Therefore, overly complex neural networks may sacrifice some efficiency.</p>\n</blockquote>\n<p>Yes, and I mentioned something to that effect -- it was absolutely made that simple in order to achieve their realtime performance goal.  What's still particularly amazing though is that it achieved such precise matching output on such a complex scene with so few parameters.</p>",
+        "id": 444265054,
+        "sender_full_name": "Sean",
+        "timestamp": 1718206047
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/444221101\">said</a>:</p>\n<blockquote>\n<p>I have a question about '''rt_shootray()\".  When calling <code>rt</code> with default parameters, does it call <code>rt_shootray</code> only once for each pixel to calculate the RGB value, and does it not use the Monte Carlo algorithm at all during the process?</p>\n</blockquote>\n<p>It will call rt_shootray one for each primary ray -- which typically results in secondary rays as well for reflection, specular, light/shadow samples, etc.  Rt is not a montecarlo renderer, but there are options like -H for hypersampling where there will be multiple samples per pixel.  There are also different lighting modes and different renderers that employ different methods.  For example -l7 uses photon mapping and the 'art' ray tracer is a PBR renderer based on appleseed.</p>",
+        "id": 444266014,
+        "sender_full_name": "Sean",
+        "timestamp": 1718206283
+    },
+    {
+        "content": "<p>After the rendering is complete, I want to plot some sampling points. I think I should operate on this object. Is there any related function?</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"k\">struct</span><span class=\"w\"> </span><span class=\"nc\">fb</span><span class=\"w\"> </span><span class=\"o\">*</span><span class=\"n\">fbp</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">FB_NULL</span><span class=\"p\">;</span><span class=\"w\"> </span><span class=\"cm\">/* Framebuffer handle */</span>\n</code></pre></div>",
+        "id": 445278798,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1718691258
+    },
+    {
+        "content": "<p>If rendering is complete do you mean 2d plotting over the image??  Or are you wanting to plot 3D points and render them as well?</p>",
+        "id": 445459785,
+        "sender_full_name": "Sean",
+        "timestamp": 1718744166
+    },
+    {
+        "content": "<p>If you’re just wanting to visualize some diagnostic info for debugging, you can make geometry (eg point cloud or spheres) and view that in mged or with rt, you can plot to 3D with annotation points, you could manually project 3D points to 2d and draw them</p>",
+        "id": 445460135,
+        "sender_full_name": "Sean",
+        "timestamp": 1718744316
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/445460135\">said</a>:</p>\n<blockquote>\n<p>If you’re just wanting to visualize some diagnostic info for debugging, you can make geometry (eg point cloud or spheres) and view that in mged or with rt, you can plot to 3D with annotation points, you could manually project 3D points to 2d and draw them</p>\n</blockquote>\n<p>Sorry for not being clear. I just want to visualize these points, and I will try to plot them in a 3D view.</p>",
+        "id": 445495215,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1718763574
+    },
+    {
+        "content": "<p>Happy Friday! did you figure out how to plot the points? Is there enough progress for a little show&amp;tell?</p>",
+        "id": 446189703,
+        "sender_full_name": "Erik",
+        "timestamp": 1719010451
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/446189703\">said</a>:</p>\n<blockquote>\n<p>Happy Friday! did you figure out how to plot the points? Is there enough progress for a little show&amp;tell?</p>\n</blockquote>\n<p>I'm sorry for the late reply. I completed the drawing in a strange way...</p>",
+        "id": 446367597,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719117448
+    },
+    {
+        "content": "<p>I do have some results to report, and I would like to know if my direction is correct. Is next Wednesday or Thursday okay?</p>",
+        "id": 446367611,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719117460
+    },
+    {
+        "content": "<p>where is the center of model bounding sphere?</p>\n<p><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-mathml\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><semantics><mrow><mn>0.5</mn><mo stretchy=\"false\">(</mo><mi>m</mi><mi>d</mi><mi>l</mi><mi mathvariant=\"normal\">_</mi><mi>m</mi><mi>i</mi><mi>n</mi><mo>+</mo><mi>m</mi><mi>d</mi><mi>l</mi><mi mathvariant=\"normal\">_</mi><mi>m</mi><mi>a</mi><mi>x</mi><mo stretchy=\"false\">)</mo><mo stretchy=\"false\">?</mo></mrow><annotation encoding=\"application/x-tex\">0.5(mdl\\_min+mdl\\_max)?</annotation></semantics></math></span><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord\">0.5</span><span class=\"mopen\">(</span><span class=\"mord mathnormal\">m</span><span class=\"mord mathnormal\">d</span><span class=\"mord mathnormal\" style=\"margin-right:0.01968em;\">l</span><span class=\"mord\" style=\"margin-right:0.02778em;\">_</span><span class=\"mord mathnormal\">min</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span></span><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord mathnormal\">m</span><span class=\"mord mathnormal\">d</span><span class=\"mord mathnormal\" style=\"margin-right:0.01968em;\">l</span><span class=\"mord\" style=\"margin-right:0.02778em;\">_</span><span class=\"mord mathnormal\">ma</span><span class=\"mord mathnormal\">x</span><span class=\"mclose\">)?</span></span></span></span></span></p>\n<div class=\"codehilite\"><pre><span></span><code>struct rt_i{\n...\n/* THESE ITEMS ARE AVAILABLE FOR APPLICATIONS TO READ */\npoint_t             mdl_min;        /**&lt; @brief  min corner of model bounding RPP */\npoint_t             mdl_max;        /**&lt; @brief  max corner of model bounding RPP */\npoint_t             rti_pmin;       /**&lt; @brief  for plotting, min RPP */\npoint_t             rti_pmax;       /**&lt; @brief  for plotting, max RPP */\ndouble              rti_radius;     /**&lt; @brief  radius of model bounding sphere */\nstruct db_i *       rti_dbip;       /**&lt; @brief  prt to Database instance struct */\n</code></pre></div>",
+        "id": 446797805,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719300150
+    },
+    {
+        "content": "<p>And please let me know when will you're available to meet. I will be free after Tuesday.</p>",
+        "id": 446798094,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719300250
+    },
+    {
+        "content": "<p>I have finished a few sample methods , this is uniform sphere sample:<br>\n<a href=\"/user_uploads/1549/PRn-rHvwlNCdeXaXjWHdCpfu/sample.png\">sample.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/PRn-rHvwlNCdeXaXjWHdCpfu/sample.png\" title=\"sample.png\"><img src=\"/user_uploads/1549/PRn-rHvwlNCdeXaXjWHdCpfu/sample.png\"></a></div>",
+        "id": 446895409,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719324577
+    },
+    {
+        "content": "<p>I can make time on Wednesday, or on Thursday until 1630EDT, or Friday after 0830EDT. But I think Sean is more aware of what's going on and it'd be more valuable to have him present? <br>\nthe center of the bounding sphere is the same as the bounding box, um, I think the AABB is used more than the sphere. iirc, when I did the metaball primitive, I did a bounding box, then just said the bounding sphere was the same center and had  a radius equal to the distance from  a corner of the bounding box to the center?</p>",
+        "id": 447031678,
+        "sender_full_name": "Erik",
+        "timestamp": 1719363137
+    },
+    {
+        "content": "<p>Okay, I'll ask Sean when he's available.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/447031678\">said</a>:</p>\n<blockquote>\n<p>I can make time on Wednesday, or on Thursday until 1630EDT, or Friday after 0830EDT. But I think Sean is more aware of what's going on and it'd be more valuable to have him present? <br>\nthe center of the bounding sphere is the same as the bounding box, um, I think the AABB is used more than the sphere. iirc, when I did the metaball primitive, I did a bounding box, then just said the bounding sphere was the same center and had  a radius equal to the distance from  a corner of the bounding box to the center?</p>\n</blockquote>",
+        "id": 447103961,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719375368
+    },
+    {
+        "content": "<p>There looks to be a small error in rt/worker.c:  there is no need to statistic <strong> colorsum </strong> for normal sample, just do it in hyper sample</p>\n<div class=\"codehilite\" data-code-language=\"C\"><pre><span></span><code><span class=\"k\">if</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">hypersample</span><span class=\"w\"> </span><span class=\"o\">==</span><span class=\"w\"> </span><span class=\"mi\">0</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"p\">...</span>\n<span class=\"n\">VADD2</span><span class=\"p\">(</span><span class=\"n\">colorsum</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">colorsum</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">a_color</span><span class=\"p\">);</span>\n\n<span class=\"p\">}</span><span class=\"w\"> </span><span class=\"k\">else</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"cm\">/* hypersampling, so iterate */</span>\n</code></pre></div>",
+        "id": 447164652,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719393341
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  <span class=\"user-mention\" data-user-id=\"252475\">@Himanshu</span>  I have created a new pull request addressing the selectPrimitive feature's bug <a href=\"https://github.com/BRL-CAD/arbalest/pull/51\">here</a></p>",
+        "id": 447193979,
+        "sender_full_name": "Vidit Jain",
+        "timestamp": 1719401827
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> Is June 28 11.30(EDT) OK for you?</p>",
+        "id": 447396149,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719469613
+    },
+    {
+        "content": "<p>I finished the whole process of neural network rendering and generated a not-so-good rgb map：<br>\n<a href=\"/user_uploads/1549/C7uS7O5qsj76boNEH3OoxFjU/render.png\">render.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/C7uS7O5qsj76boNEH3OoxFjU/render.png\" title=\"render.png\"><img src=\"/user_uploads/1549/C7uS7O5qsj76boNEH3OoxFjU/render.png\"></a></div>",
+        "id": 448092373,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719738874
+    },
+    {
+        "content": "<p>why the direction of ray keep const when rendering? According to ray tracing algorithm, each ray should have a different direction: <br>\n<a href=\"/user_uploads/1549/dD6UbTaZBMD1b4ynfeUIJh9m/RaysViewportSchema.png\">RaysViewportSchema.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/dD6UbTaZBMD1b4ynfeUIJh9m/RaysViewportSchema.png\" title=\"RaysViewportSchema.png\"><img src=\"/user_uploads/1549/dD6UbTaZBMD1b4ynfeUIJh9m/RaysViewportSchema.png\"></a></div>",
+        "id": 448099591,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719742701
+    },
+    {
+        "content": "<p>Is there a function to calculate the intersection of a ray and a sphere?</p>",
+        "id": 448123324,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719758762
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/448099591\">said</a>:</p>\n<blockquote>\n<p>why the direction of ray keep const when rendering? According to ray tracing algorithm, each ray should have a different direction: <br>\n<a href=\"/user_uploads/1549/dD6UbTaZBMD1b4ynfeUIJh9m/RaysViewportSchema.png\">RaysViewportSchema.png</a></p>\n</blockquote>\n<p>I get it , the default is to use parallel projection</p>",
+        "id": 448222663,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719810366
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/448123324\">said</a>:</p>\n<blockquote>\n<p>Is there a function to calculate the intersection of a ray and a sphere?</p>\n</blockquote>\n<p>I implemented the algorithm myself</p>",
+        "id": 448341781,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1719842467
+    },
+    {
+        "content": "<p>I found an interesting parper:NeRF: Representing Scenes as  Neural Radiance Fields for View Synthesis(<a href=\"https://dl.acm.org/doi/abs/10.1145/3503250\">https://dl.acm.org/doi/abs/10.1145/3503250</a>)</p>",
+        "id": 448846756,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720012551
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/448846756\">ha scritto</a>:</p>\n<blockquote>\n<p>I found an interesting parper:NeRF: Representing Scenes as  Neural Radiance Fields for View Synthesis(<a href=\"https://dl.acm.org/doi/abs/10.1145/3503250\">https://dl.acm.org/doi/abs/10.1145/3503250</a>)</p>\n</blockquote>\n<p>Why do you think it is interesting?</p>",
+        "id": 448853370,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720014104
+    },
+    {
+        "content": "<p>The Positional encoding,  according to Rahaman's work <a href=\"https://arxiv.org/abs/1806.08734\">On the Spectral Bias of Neural Networks</a>, deep networks are biased towards learning lower frequency functions. They use positional encoding methods to solve this problem.</p>",
+        "id": 448863224,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720016647
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/P9drWOCeKtYxqLMuDm4nnvp7/IMG_1921.jpeg\">IMG_1921.jpeg</a><br>\nthis is the ground truth</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/P9drWOCeKtYxqLMuDm4nnvp7/IMG_1921.jpeg\" title=\"IMG_1921.jpeg\"><img src=\"/user_uploads/1549/P9drWOCeKtYxqLMuDm4nnvp7/IMG_1921.jpeg\"></a></div>",
+        "id": 448900107,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720024722
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/uMhAaXGt-u3MRQyJvV2NV3H4/IMG_1922.jpeg\">IMG_1922.jpeg</a><br>\nAnd this is with neural network prediction (bounding box). There are some issues to resolve</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/uMhAaXGt-u3MRQyJvV2NV3H4/IMG_1922.jpeg\" title=\"IMG_1922.jpeg\"><img src=\"/user_uploads/1549/uMhAaXGt-u3MRQyJvV2NV3H4/IMG_1922.jpeg\"></a></div>",
+        "id": 448900278,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720024795
+    },
+    {
+        "content": "<p>Probably they are mainly with rendering and not with the NN itself</p>",
+        "id": 448900529,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720024862
+    },
+    {
+        "content": "<p>Or maybe the number of samples in the dataset are too low.</p>",
+        "id": 448901952,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720025378
+    },
+    {
+        "content": "<p>I solved the issue with the rendering and got improvements</p>",
+        "id": 449297977,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720181346
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/adq2ZvACbgm9ME6bkj2zezyB/IMG_1929.jpeg\">IMG_1929.jpeg</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/adq2ZvACbgm9ME6bkj2zezyB/IMG_1929.jpeg\" title=\"IMG_1929.jpeg\"><img src=\"/user_uploads/1549/adq2ZvACbgm9ME6bkj2zezyB/IMG_1929.jpeg\"></a></div>",
+        "id": 449297987,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720181349
+    },
+    {
+        "content": "<p>With n=100'000 rays I got 0.94% of accuracy which is not bad but the major problem is that with bounding sphere approach we need to sample a lot of rays in order to achieve a good accuracy for every angle of the camera.</p>",
+        "id": 449298375,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720181453
+    },
+    {
+        "content": "<p>The problem isn't with the Neural Network because I have a 0.99 accuracy with Training Set, but since we have an infinite number of rays that goes in all the directions in the bounding sphere, I think it is not possible to achieve the same results with the rendering without changing something because otherwise we need to sample an infinite number of rays to give to the NN (and of course it is not possible).</p>",
+        "id": 449298872,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720181635
+    },
+    {
+        "content": "<p>So we must be smarter than this and try to change representations of the input features or trying different architectures of NN</p>",
+        "id": 449299212,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720181745
+    },
+    {
+        "content": "<p>But first I want to try with n=1 million samples to see how good are the performances.</p>",
+        "id": 449299318,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720181772
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/448900107\">ha scritto</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/P9drWOCeKtYxqLMuDm4nnvp7/IMG_1921.jpeg\">IMG_1921.jpeg</a><br>\nthis is the ground truth</p>\n</blockquote>\n<p>Remember that this is the ground truth.</p>",
+        "id": 449299951,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720182010
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/r-ScLIaNys2JvMxwkVH66F9J/IMG_1930.jpeg\">IMG_1930.jpeg</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/r-ScLIaNys2JvMxwkVH66F9J/IMG_1930.jpeg\" title=\"IMG_1930.jpeg\"><img src=\"/user_uploads/1549/r-ScLIaNys2JvMxwkVH66F9J/IMG_1930.jpeg\"></a></div>",
+        "id": 449318723,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720187753
+    },
+    {
+        "content": "<p>This is with 1 million rays, I got the best epoch with 0.986 % of accuracy. We are on the right path :)</p>",
+        "id": 449318885,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720187804
+    },
+    {
+        "content": "<p>I use a deep resnet to learn rgb value. The left is the result of neural rendering and the right is normal rendering<br>\n<a href=\"/user_uploads/1549/uf9jPQ3xnxGHfn2dY-EsoxuB/微信图片_20240705225713.png\">res_net.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/uf9jPQ3xnxGHfn2dY-EsoxuB/微信图片_20240705225713.png\" title=\"res_net.png\"><img src=\"/user_uploads/1549/uf9jPQ3xnxGHfn2dY-EsoxuB/微信图片_20240705225713.png\"></a></div>",
+        "id": 449330639,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720191527
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/449330639\">ha scritto</a>:</p>\n<blockquote>\n<p>I use a deep resnet to learn rgb value. The left is the result of neural rendering and the right is normal rendering<br>\n<a href=\"/user_uploads/1549/uf9jPQ3xnxGHfn2dY-EsoxuB/微信图片_20240705225713.png\">res_net.png</a></p>\n</blockquote>\n<p>Which sampling approach have you used?</p>",
+        "id": 449330816,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720191596
+    },
+    {
+        "content": "<p>Random sample, with 1million rays which have the same direction and hit the bounding sphere</p>",
+        "id": 449331053,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720191651
+    },
+    {
+        "content": "<p>I want to improve network first and then sample method</p>",
+        "id": 449331190,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720191689
+    },
+    {
+        "content": "<p>Mh ok so it cannot be generalized with every angle at the moment... Predicting rgb is much more difficult, I see...</p>",
+        "id": 449331352,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720191723
+    },
+    {
+        "content": "<p>The current network fits a continuous function, but the objective function is not actually continuous..</p>",
+        "id": 449331376,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720191731
+    },
+    {
+        "content": "<p>We need a new structure...</p>",
+        "id": 449331502,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720191769
+    },
+    {
+        "content": "<p>I don't know if it can improve the results, but have you tried giving to the network only the rays that hit the  object and not all the rays?<br>\nThis can be done because first we predict with \"my\" network if it has hitted or not, so \"your\" network should predict only the ones that hit the object</p>",
+        "id": 449333208,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720192236
+    },
+    {
+        "content": "<p>This a direction. I will try it later</p>",
+        "id": 449333774,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720192400
+    },
+    {
+        "content": "<p>Can you tell which object you've hit?</p>",
+        "id": 449333873,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720192432
+    },
+    {
+        "content": "<p>This would be very helpful to me, maybe I could train two networks</p>",
+        "id": 449334154,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720192504
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/449333873\">ha scritto</a>:</p>\n<blockquote>\n<p>Can you tell which object you've hit?</p>\n</blockquote>\n<p>Regarding this, we must decide if we have to train one network for each object or not... I think  deciding all this in a meeting would be more appropriate.</p>",
+        "id": 449335156,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720192788
+    },
+    {
+        "content": "<p>OK, let's decide this later</p>",
+        "id": 449335299,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720192820
+    },
+    {
+        "content": "<p>I got a great result with gridnet:<br>\n<a href=\"/user_uploads/1549/K98ISdwSDeqXntg_Hov3rESp/微信图片_20240707144043.png\">grid_methos</a><br>\nhere is the loss:<br>\n<a href=\"/user_uploads/1549/tOkJMFHecvWhXo_DsJ_0DK9m/微信图片_20240707144141.png\">loss</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/K98ISdwSDeqXntg_Hov3rESp/微信图片_20240707144043.png\" title=\"grid_methos\"><img src=\"/user_uploads/1549/K98ISdwSDeqXntg_Hov3rESp/微信图片_20240707144043.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/tOkJMFHecvWhXo_DsJ_0DK9m/微信图片_20240707144141.png\" title=\"loss\"><img src=\"/user_uploads/1549/tOkJMFHecvWhXo_DsJ_0DK9m/微信图片_20240707144141.png\"></a></div>",
+        "id": 449613007,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720334532
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/449613007\">ha scritto</a>:</p>\n<blockquote>\n<p>I got a great result with gridnet:<br>\n<a href=\"/user_uploads/1549/K98ISdwSDeqXntg_Hov3rESp/微信图片_20240707144043.png\">grid_methos</a><br>\nhere is the loss:<br>\n<a href=\"/user_uploads/1549/tOkJMFHecvWhXo_DsJ_0DK9m/微信图片_20240707144141.png\">loss</a></p>\n</blockquote>\n<p>Very good. This is grid + resnet?</p>",
+        "id": 449614206,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720335549
+    },
+    {
+        "content": "<p>Just grid net. I will add resnet later.</p>",
+        "id": 449615980,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720337078
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/449615980\">ha scritto</a>:</p>\n<blockquote>\n<p>Just grid net. I will add resnet later.</p>\n</blockquote>\n<p>What is the mean absolute error?I think it would be easier to understand how good is this model.</p>",
+        "id": 449616299,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720337366
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/449613007\">ha scritto</a>:</p>\n<blockquote>\n<p>I got a great result with gridnet:<br>\n<a href=\"/user_uploads/1549/K98ISdwSDeqXntg_Hov3rESp/微信图片_20240707144043.png\">grid_methos</a><br>\nhere is the loss:<br>\n<a href=\"/user_uploads/1549/tOkJMFHecvWhXo_DsJ_0DK9m/微信图片_20240707144141.png\">loss</a></p>\n</blockquote>\n<p>And why do you think  there are those white dots (noise) ?</p>",
+        "id": 449616407,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720337433
+    },
+    {
+        "content": "<p>Anyway, seeing your results, I think I will also add this grid method, I think it would improve my network too.</p>",
+        "id": 449616444,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720337496
+    },
+    {
+        "content": "<p>I tried with grid encoding but my network does not seem to improve any further. I will try different sampling approach.</p>",
+        "id": 449825650,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720433036
+    },
+    {
+        "content": "<p>I think that grid encoding is appropriate only when the direction of the rays is fixed, because if you divide your sphere in 256*256 = 65536 cells, then each cell will have an average number of 15 rays to be trained (if your training set has 1 million rays). The problem is that if your direction is fixed, then 15 rays for each cell can be acceptable but if the direction isn't fixed, then 15 is a very small number of rays to train.<br>\nI tried also with a different size of grid (20x20, 50x50, 100x100) and the NN performs like before more or less (98% accuracy with 20x20).<br>\nI also implemented different grid versions  in the same NN (20x20, 50x50, 100x100, 256x256) and combined them together with some weights, but I got the same results...<br>\nSo this makes me think that grid encoding isn't appropriate when rays are not fixed.</p>",
+        "id": 449828956,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720434095
+    },
+    {
+        "content": "<p>Today I improved results to 0.991 (test set) using a different optimizer.</p>",
+        "id": 449937826,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720460338
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/448099591\">said</a>:</p>\n<blockquote>\n<p>why the direction of ray keep const when rendering? According to ray tracing algorithm, each ray should have a different direction: <br>\n<a href=\"/user_uploads/1549/dD6UbTaZBMD1b4ynfeUIJh9m/RaysViewportSchema.png\">RaysViewportSchema.png</a></p>\n</blockquote>\n<p>There are two different kinds of cameras -- perspective and orthogonal.  Orthogonal is default for most engineering purposes and perspective is what you want for visualizations approximating human vision.  Perspective rays (typically) diverge.  Ortho are parallel grids. </p>\n<p>For volumetric encoding, you almost certainly will want ortho or unbiased random.</p>",
+        "id": 449953919,
+        "sender_full_name": "Sean",
+        "timestamp": 1720464581
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/448092373\">said</a>:</p>\n<blockquote>\n<p>I finished the whole process of neural network rendering and generated a not-so-good rgb map：<br>\n<a href=\"/user_uploads/1549/C7uS7O5qsj76boNEH3OoxFjU/render.png\">render.png</a></p>\n</blockquote>\n<p>That's actually not \"terrible\".  Not great but not terrible to say the least.  It's clearly recognizable.</p>",
+        "id": 449954153,
+        "sender_full_name": "Sean",
+        "timestamp": 1720464628
+    },
+    {
+        "content": "<p>I also use a 4-Dimensions network to train, the inputs are both direction and position:<br>\n<a href=\"/user_uploads/1549/3-6KdipvOSsCxWHiqXExe85L/net.png\">net.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/3-6KdipvOSsCxWHiqXExe85L/net.png\" title=\"net.png\"><img src=\"/user_uploads/1549/3-6KdipvOSsCxWHiqXExe85L/net.png\"></a></div>",
+        "id": 450216289,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720541895
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/450216289\">said</a>:</p>\n<blockquote>\n<p>I also use a 4-Dimensions network to train, the inputs are both direction and position:<br>\n<a href=\"/user_uploads/1549/3-6KdipvOSsCxWHiqXExe85L/net.png\">net.png</a></p>\n</blockquote>\n<p>That's clearly \"seeing\" the model in some sense, even getting some of the surfacing right but in a dream state.  How many training epochs is that?</p>\n<p>One thing you could try is to reduce the input dimensionality to just azimuth and elevation (2 floats).  That's a much smaller space to optimize across and will result in the same centered visual for our current purposes.</p>",
+        "id": 450457252,
+        "sender_full_name": "Sean",
+        "timestamp": 1720619175
+    },
+    {
+        "content": "<p>Oh, I have convert both direction and position to azimuth and elevation, so there are just four float inputs. It takes me one hour to train(with a 4060 GPU)</p>",
+        "id": 450458097,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720619444
+    },
+    {
+        "content": "<p>I use a grid which has a shape of 128<em>128</em>64*64 to train.  That's the maximum number of ginsengs my GPU can handle.</p>",
+        "id": 450458373,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720619529
+    },
+    {
+        "content": "<p>I noticed this paper: <a href=\"https://arxiv.org/pdf/2003.08934\">NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis</a>, they used a A100 to train and it costs more than two days.</p>",
+        "id": 450458592,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720619610
+    },
+    {
+        "content": "<p>I'm trying to improve my net from the sampling methodology. Since I know more about active learning, I might train another network for sampling</p>",
+        "id": 450459161,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720619737
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/450458592\">ha scritto</a>:</p>\n<blockquote>\n<p>I noticed this paper: <a href=\"https://arxiv.org/pdf/2003.08934\">NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis</a>, they used a A100 to train and it costs more than two days.</p>\n</blockquote>\n<p>Yeah, this paper and its related works are the state of the art about neural rendering.</p>",
+        "id": 450469913,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720622026
+    },
+    {
+        "content": "<p>Close to state of the art -- I listened to that paper when it came out back in 2020.  There's been a lot of work on NeRFs since then and a lot of advancements.  That's still a rather different approach altogether that thus far hasn't generalized very well.  That's why the newer AMD research is more the basis for this work.</p>",
+        "id": 450806288,
+        "sender_full_name": "Sean",
+        "timestamp": 1720729913
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/450806288\">ha scritto</a>:</p>\n<blockquote>\n<p>Close to state of the art -- I listened to that paper when it came out back in 2020.  There's been a lot of work on NeRFs since then and a lot of advancements.  That's still a rather different approach altogether that thus far hasn't generalized very well.  That's why the newer AMD research is more the basis for this work.</p>\n</blockquote>\n<p>Do you know why was there a need to try a different approach rather than NeRFs?</p>",
+        "id": 450810201,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720731587
+    },
+    {
+        "content": "<p>Well fundamentally, nerfs are based on trying to obtain output visualizations of a 3D object based on just having some 2D view points (pictures).  They only use the 3D in the test and evaluation phase, but the model is generally unknown or non-existent.</p>",
+        "id": 450812109,
+        "sender_full_name": "Sean",
+        "timestamp": 1720732410
+    },
+    {
+        "content": "<p>We have the 3D models.  They aren't the unknown in our case.  Our situation is really needing to know precisely where the 3D object is for given (unknown) view points.  That's where the optimization and needs are a bit different.  It's more about encoding and/or estimating a given model from the known model, but sufficiently abstracted that we can get accurate queries really fast.</p>",
+        "id": 450812416,
+        "sender_full_name": "Sean",
+        "timestamp": 1720732531
+    },
+    {
+        "content": "<p>We could certainly build up and train a NeRF by feeding it a set of renderings for the 3D model, to see if it can generalize it well enough, but every approach I've seen thus far is about achieving optically adequate results, not necessarily something that would pass any fidelity comparison with the ground truth 3D model.</p>",
+        "id": 450812801,
+        "sender_full_name": "Sean",
+        "timestamp": 1720732647
+    },
+    {
+        "content": "<p>Ok, understood. However, I believe that AMD research still lacks comprehensive volumetric information about 3D models, preventing the NN from predicting rays hit/miss with 100% precision if we wanna achieve full generalization. Perhaps we can draw inspiration from NeRF and its related works. I plan to update my work on GitHub tomorrow so that you can review and test what I have done so far.</p>",
+        "id": 450815937,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720733577
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Here there is the repo <a href=\"https://github.com/bralani/rt_volume/tree/neural_rendering\">https://github.com/bralani/rt_volume/tree/neural_rendering</a>. Please be sure you follow in order these steps:</p>\n<p>Installation:</p>\n<p>1) Download libtorch from here <a href=\"https://pytorch.org/\">https://pytorch.org/</a> paying attention to build \"preview nightly\" and remember the version you have installed (debug or release):<br>\n<a href=\"/user_uploads/1549/cs8UI0afE68eGit_YprQNA4b/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/cs8UI0afE68eGit_YprQNA4b/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/cs8UI0afE68eGit_YprQNA4b/image.png\"></a></div><p>2) Unzip the folder and put the libtorch folder wherever you want and then go to src\\rt\\CMakeLists.txt, line 56 and change these three paths with your libtorch path:<br>\n<a href=\"/user_uploads/1549/lSIfYYz08dyAGMJJlHun7s5K/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/lSIfYYz08dyAGMJJlHun7s5K/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/lSIfYYz08dyAGMJJlHun7s5K/image.png\"></a></div><p>3) Now be sure to build \"rt_trainneural\" with \"Debug\" version if you have installed libtorch \"Debug\" or with \"Release\" if you have installed \"Release\" libtorch.</p>\n<p>4) This step is not always required but in my case it was essential otherwise there were some issues in the execution: go to path_libtorch\\lib, copy all the files inside this folder and paste these files in the build/bin (where there is the .exe) of brl-cad.</p>\n<p>Ok now we can finally run the code with two steps:</p>\n<p>Go to rt/train_neural.cpp and see these options:<br>\n<a href=\"/user_uploads/1549/Q5q8p-QQUbsZbaIqgTFJUmO_/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Q5q8p-QQUbsZbaIqgTFJUmO_/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Q5q8p-QQUbsZbaIqgTFJUmO_/image.png\"></a></div><p>TRAINING:<br>\n1)  In the first step we generate the dataset with bounding sphere sampling (so make sure that opts.generate_dataset is true), set your db and obj as you want and set also the num of rays you want to generate (I suggest 1 million). Run the code.<br>\n2) You should see a file \"train_neural.json\" and \"test_neural.txt\" inside the path you have run the file (build/bin). <br>\n3) Go to rt/train.py and set on top your variables:<br>\n<a href=\"/user_uploads/1549/CIY8U07xrP71pBjgOZJvlry5/image.png\">image.png</a><br>\n4) Run the script, the NN will stop on epoch 200 but on each epoch it validate on test set and if the accuracy of current epoch is higher than all the previous, it overwrites the model \"<a href=\"http://model_sph.pt\">model_sph.pt</a>\".</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/CIY8U07xrP71pBjgOZJvlry5/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/CIY8U07xrP71pBjgOZJvlry5/image.png\"></a></div><p>RENDERING:<br>\n1) Go back to rt/train_neural.cpp, set opts.generate_dataset = false, set properly opts.model_path with the path of the model trained, adjust the azimuth and elevation as you wish (to perform render) and then set opts.neural_render=0 if you want the ground truth rendering, otherwise set to 1 if you want to perform your neural rendering. :)</p>",
+        "id": 451038141,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720806408
+    },
+    {
+        "content": "<p>I guarantee that it works in Windows, I have not tried with any other OS.</p>",
+        "id": 451039002,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720806758
+    },
+    {
+        "content": "<p>I have also a Mac M1 but I have always a lot of errors when I try to build BRL-CAD...</p>",
+        "id": 451039115,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720806804
+    },
+    {
+        "content": "<p>Awesome, thank you <span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span> I'll definitely be taking a deeper look at it later today, and see if I can get it up and running.  I'm on M2, so will see if there are issues.</p>",
+        "id": 451039490,
+        "sender_full_name": "Sean",
+        "timestamp": 1720806971
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span> on Mac, you must enable -DBRLCAD_BUNDLED_LIBS=ON or the build will fail when it tries to use the system Tcl/Tk</p>",
+        "id": 451039550,
+        "sender_full_name": "Sean",
+        "timestamp": 1720807007
+    },
+    {
+        "content": "<p>(during cmake)</p>",
+        "id": 451039559,
+        "sender_full_name": "Sean",
+        "timestamp": 1720807012
+    },
+    {
+        "content": "<p>I already have pytorch installed and a brl-cad build, so should hopefully all just work!</p>",
+        "id": 451039634,
+        "sender_full_name": "Sean",
+        "timestamp": 1720807056
+    },
+    {
+        "content": "<p>Ahh ok I will try it now so you don't have any issues tomorrow on your M2. <br>\nI have also prepared a small script here that tries to find CUDA if you have a GPU or metal acceleration if you have any \"M\" series of Mac:<br>\n<a href=\"/user_uploads/1549/RRPOkm_KlCg0rn9SRVTjdThx/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RRPOkm_KlCg0rn9SRVTjdThx/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/RRPOkm_KlCg0rn9SRVTjdThx/image.png\"></a></div>",
+        "id": 451039931,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720807183
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/450815937\">said</a>:</p>\n<blockquote>\n<p>Ok, understood. However, I believe that AMD research still lacks comprehensive volumetric information about 3D models, preventing the NN from predicting rays hit/miss with 100% precision if we wanna achieve full generalization. Perhaps we can draw inspiration from NeRF and its related works. I plan to update my work on GitHub tomorrow so that you can review and test what I have done so far.</p>\n</blockquote>\n<p>I'd like to hear more what you meant by this -- encoding comprehensive volumetric information isn't the goal, but some faithful encoding.  A prediction with some general precision assertion (hopefully).  Similar in the text space, we want a reasonably accurate response to an input prompt that is more than vague (blurry) writing. </p>\n<p>Issue I have with radiance fields is the method isn't exactly aligned well with our available training data.  We'd literally throw away information to then try to reconstitute it.  The method is really a whole field that's trying to construct 3D where it did not exist previously (i.e., from photos or scans).</p>",
+        "id": 451069638,
+        "sender_full_name": "Sean",
+        "timestamp": 1720816514
+    },
+    {
+        "content": "<p>From my reading, the AMD research is compelling because it is just a bifurcated training of two networks, one for outside, one for inside/near, and lots of reductions made for the sake of adequate performance.  My thinking is lets increase the network a bit, and see how well it can generalize.</p>",
+        "id": 451070030,
+        "sender_full_name": "Sean",
+        "timestamp": 1720816647
+    },
+    {
+        "content": "<p>On a related note, here's a nice site that summarizes a lot of the neural field papers -- definitely are concepts that are relevant in some of them:  <a href=\"https://radiancefields.com/siggraph-2024-program-announced\">https://radiancefields.com/siggraph-2024-program-announced</a></p>",
+        "id": 451070363,
+        "sender_full_name": "Sean",
+        "timestamp": 1720816753
+    },
+    {
+        "content": "<p>I have already made just a little bit more complex the NN of AMD research and it generalizes very well.</p>",
+        "id": 451070607,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720816832
+    },
+    {
+        "content": "<p>This means that for each angle of the object, the NN is able to understand the shape.</p>",
+        "id": 451070693,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720816858
+    },
+    {
+        "content": "<p>But the problem is that on the boundaries of the objects, there are still some artifacts (for example the shape is smooth even though it should be sharp from the ground truth). It is not very precise there.</p>",
+        "id": 451070780,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720816883
+    },
+    {
+        "content": "<p>My idea was to substitute the grid encoding approach they used.</p>",
+        "id": 451070930,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720816930
+    },
+    {
+        "content": "<p>Because for me, the grid encoding was working only because they trained the NN with fixed directions of the rays. But in our case, the rays can have infinite directions from the same origin.</p>",
+        "id": 451071002,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720816970
+    },
+    {
+        "content": "<p>If you think about the grid encoding, every ray that hit a specific cell have a very similar origin since the direction is fixed.</p>",
+        "id": 451071510,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720817128
+    },
+    {
+        "content": "<p>But in our case this is not true.</p>",
+        "id": 451071594,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720817155
+    },
+    {
+        "content": "<p>I know that encoding volumetric informations are not the final goal, but I believe that the NN is not able to capture very well this details due to the lack of volumetric informations of the model itself. We could use for example an encoding like \"voxels\" because they are invariant to directions. This is just an idea for the moment, I don't know if it can work.</p>",
+        "id": 451072518,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720817380
+    },
+    {
+        "content": "<p>I will read some papers in these days about this.</p>",
+        "id": 451073664,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720817656
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span>  That is sort of incorporating some of the concepts of a radiance field (what you're calling a grid encoding), also known as a volumetric encoding.  Your intuition about the direction vectors being fixed does certainly sound plausible.  While the image space was fixed, the rays themselves were scattering in nearly all directions due to the physically based lighting model they were using (lots of reflection rays, refraction rays, light sampling rays, diffuse surface rays, and more).  Still, that is certainly a vast subset for the net to train on, and like I said, you have a reasoned impetus for trying to encode it volumetrically.</p>",
+        "id": 451121429,
+        "sender_full_name": "Sean",
+        "timestamp": 1720843038
+    },
+    {
+        "content": "<p>You'd definitely need something more descriptive than voxels unless we go pixar route to sub-pixel resolution, which is not practical (for lots of reasons).</p>",
+        "id": 451121613,
+        "sender_full_name": "Sean",
+        "timestamp": 1720843099
+    },
+    {
+        "content": "<p>You'd probably need something more like a vdb signed distance field (sdf) where you have voxel occupancy as well as surface direction vectors.</p>",
+        "id": 451121738,
+        "sender_full_name": "Sean",
+        "timestamp": 1720843207
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span> AMD research doesn't use rays with fixed directions. They encoded both diection and position, then concatenated  them to a vector:<br>\n<a href=\"/user_uploads/1549/WCjqqOJr3v2hz1Y9QF_NlFfM/AMD.png\">AMD.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/WCjqqOJr3v2hz1Y9QF_NlFfM/AMD.png\" title=\"AMD.png\"><img src=\"/user_uploads/1549/WCjqqOJr3v2hz1Y9QF_NlFfM/AMD.png\"></a></div>",
+        "id": 451321049,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720935580
+    },
+    {
+        "content": "<p>I think a different strategy could be used for grid coding. Replacing a 2-dimensional network with a 4-dimensional network, this grid coding encodes both positional and directional information in a single vector</p>",
+        "id": 451321515,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720936080
+    },
+    {
+        "content": "<p>Maybe I was not so clear. Yes, they encoded both direction and position BUT they trained with a fixed viewpoint:<br>\n<a href=\"/user_uploads/1549/bLA96oXiOSQtHnGE1XcpOlqy/Screenshot-2024-07-14-alle-09.00.20.png\">Screenshot-2024-07-14-alle-09.00.20.png</a><br>\nThis means that all the rays have more or less the same directions each training.<br>\n<a href=\"/user_uploads/1549/-ze6tTd7GIv9w8LNXKteSUXt/Screenshot-2024-07-14-alle-09.01.26.png\">Screenshot-2024-07-14-alle-09.01.26.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bLA96oXiOSQtHnGE1XcpOlqy/Screenshot-2024-07-14-alle-09.00.20.png\" title=\"Screenshot-2024-07-14-alle-09.00.20.png\"><img src=\"/user_uploads/1549/bLA96oXiOSQtHnGE1XcpOlqy/Screenshot-2024-07-14-alle-09.00.20.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-ze6tTd7GIv9w8LNXKteSUXt/Screenshot-2024-07-14-alle-09.01.26.png\" title=\"Screenshot-2024-07-14-alle-09.01.26.png\"><img src=\"/user_uploads/1549/-ze6tTd7GIv9w8LNXKteSUXt/Screenshot-2024-07-14-alle-09.01.26.png\"></a></div><p>This is very different from our goal and I explained why it can not work in our case (from my hypothesis).</p>",
+        "id": 451328162,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720940570
+    },
+    {
+        "content": "<p>I got it. Thanks</p>",
+        "id": 451328614,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720940779
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/451321515\">ha scritto</a>:</p>\n<blockquote>\n<p>I think a different strategy could be used for grid coding. Replacing a 2-dimensional network with a 4-dimensional network, this grid coding encodes both positional and directional information in a single vector</p>\n</blockquote>\n<p>Can you elaborate more about this?</p>",
+        "id": 451328625,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720940805
+    },
+    {
+        "content": "<p>I put my codes here:<a href=\"https://github.com/Rainy-fall-end/Rendernn/blob/main/trainDir.py\">trainDir</a>. I use a 128×128×64×64 net to encodes both dir and pos.</p>",
+        "id": 451328750,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720940954
+    },
+    {
+        "content": "<p>Mh I cannot quite understand this. Are you using a total of 128x128x64x64=67billions cells?</p>",
+        "id": 451329160,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720941341
+    },
+    {
+        "content": "<p>This is quite overfitting because you will get train error 0 since you have less rays than cells.</p>",
+        "id": 451329221,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720941404
+    },
+    {
+        "content": "<p>Or am I wrong?</p>",
+        "id": 451329248,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720941440
+    },
+    {
+        "content": "<p>Yes... I am trying to improve it.</p>",
+        "id": 451329254,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720941448
+    },
+    {
+        "content": "<p>Maybe it can work only if the viewpoint is fixed.</p>",
+        "id": 451329264,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720941468
+    },
+    {
+        "content": "<p>There are too many parameters</p>",
+        "id": 451329267,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720941469
+    },
+    {
+        "content": "<p>I've been doing a lot of experimenting with grid net lately, and it's hard for him to predict rays in all directions, which may require a lot of parameters. One of the big problems is that the objective function is non-differentiable</p>",
+        "id": 451365877,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720973836
+    },
+    {
+        "content": "<p>Instead of using nif directly for rendering, AMD just uses NIF to intersect to speed up the rendering process. The focus is really on intersection, which is effective for rendering complex geometry.</p>",
+        "id": 451366101,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720974039
+    },
+    {
+        "content": "<p>Nerf is actually rendered differently than we are, they are using volume rendering while we are doing ray tracing.</p>",
+        "id": 451366395,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720974332
+    },
+    {
+        "content": "<p>I'd like to try to modify the objective function later in order to make ray-tracing a differentiable process, and if all the data for the model is known, can I then return exactly which point was hit, and the distance between the hit point and the origin?</p>",
+        "id": 451366539,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1720974442
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I confirm that on my Mac m1 it works well now.</p>",
+        "id": 451370675,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720979109
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/451328162\">said</a>:</p>\n<blockquote>\n<p>Maybe I was not so clear. Yes, they encoded both direction and position BUT they trained with a fixed viewpoint:</p>\n</blockquote>\n<p>I certainly got what you meant, and there's certainly truth in both statements.  The fact that the training is happening across two networks and with rays very much scattered in all directions does to me indicate that it likely can generalize (with more parameters).  They did not pick a simple scene to say the least, and their sampling was not at a low resolution.  The fixed viewpoint is what let them achieve their target performance, but I don't think that their approach was really indicative of an overtrained solution.  On the contrary, they showed how well it performed on other viewpoints in their talk (they just don't go into that detail on their paper -- that's another paper).</p>",
+        "id": 451371911,
+        "sender_full_name": "Sean",
+        "timestamp": 1720980391
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/451371911\">ha scritto</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/451328162\">said</a>:</p>\n<blockquote>\n<p>Maybe I was not so clear. Yes, they encoded both direction and position BUT they trained with a fixed viewpoint:</p>\n</blockquote>\n<p>I certainly got what you meant, and there's certainly truth in both statements.  The fact that the training is happening across two networks and with rays very much scattered in all directions does to me indicate that it likely can generalize (with more parameters).  They did not pick a simple scene to say the least, and their sampling was not at a low resolution.  The fixed viewpoint is what let them achieve their target performance, but I don't think that their approach was really indicative of an overtrained solution.  On the contrary, they showed how well it performed on other viewpoints in their talk (they just don't go into that detail on their paper -- that's another paper).</p>\n</blockquote>\n<p>Yes I agree with you, their approach is certainly able to generalize and I have proved it but we need to add a more complex encoding like we were saying yesterday to reach the maximum accuracy. I will study more about the papers you gave us and expecially with sdf.</p>",
+        "id": 451373109,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1720981771
+    },
+    {
+        "content": "<p>Before implementing a more complex encoding (like sdf), today I tried first with positional encoding of Nerf's work. The idea is that MPL neural networks perform poorly at representing high-frequency variation in geometry. Mapping the inputs to a higher dimensional space using high frequency functions before passing them to the network enables better fitting of data that contains high frequency variation.</p>\n<p>I got an improvement of 0.02% of accuracy, from 99.1% to 99.3%. These are two renders of the same objects but with different angles (and of course it's the same model without retraining):</p>\n<p><a href=\"/user_uploads/1549/n4oPMMw47I5E7k1mIpFE2-jC/output0_ground.png\">output0_ground.png</a><br>\n<a href=\"/user_uploads/1549/gf3Nw7Z7hRyMrQx8ggDI00ij/output0_pred.png\">output0_pred.png</a><br>\n<a href=\"/user_uploads/1549/S4qjgfMFSgiAlG5g2-hbHaPd/output1_ground.png\">output1_ground.png</a><br>\n<a href=\"/user_uploads/1549/Y7UzmOCsDRd57to14CjsC1Lv/output1_pred.png\">output1_pred.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/n4oPMMw47I5E7k1mIpFE2-jC/output0_ground.png\" title=\"output0_ground.png\"><img src=\"/user_uploads/1549/n4oPMMw47I5E7k1mIpFE2-jC/output0_ground.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/gf3Nw7Z7hRyMrQx8ggDI00ij/output0_pred.png\" title=\"output0_pred.png\"><img src=\"/user_uploads/1549/gf3Nw7Z7hRyMrQx8ggDI00ij/output0_pred.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/S4qjgfMFSgiAlG5g2-hbHaPd/output1_ground.png\" title=\"output1_ground.png\"><img src=\"/user_uploads/1549/S4qjgfMFSgiAlG5g2-hbHaPd/output1_ground.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Y7UzmOCsDRd57to14CjsC1Lv/output1_pred.png\" title=\"output1_pred.png\"><img src=\"/user_uploads/1549/Y7UzmOCsDRd57to14CjsC1Lv/output1_pred.png\"></a></div>",
+        "id": 451535418,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721059608
+    },
+    {
+        "content": "<p>Left is ground truth, right is prediction.</p>",
+        "id": 451537139,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721060129
+    },
+    {
+        "content": "<p>Major issues concern the boundaries, which are not as sharp as they should be but rather tend to be smooth.</p>",
+        "id": 451537557,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721060239
+    },
+    {
+        "content": "<p>I believe both of these issues can be resolved by using a different and more complex encoding approach, as we discussed. <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"700180\">@fall Rainy</span></p>",
+        "id": 451538558,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721060528
+    },
+    {
+        "content": "<p>Another idea I was thinking to help the NN is to modify a bit the sampling method. Now I use a totally randomic sampling around the bounding sphere but we can use a smarter approach using an importance sampling to sample more the regions where we are more uncertain.<br>\nThere are 4 steps: <br>\n-first we sample randomly using the same approach as now.<br>\n-Second, we can divide in N cells (like a grid) the rays basing on their origin and directions so that very similar rays will be found in the same cell.<br>\n-Third, we calculate for each cell the uncertainty (very easy to calculate).<br>\n-Lastly, We resemple but this time using the uncertainty in order to gather more samples in regions where we are more uncertain.</p>\n<p>Do you think it could work?</p>",
+        "id": 451638003,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721080775
+    },
+    {
+        "content": "<p>Think those percentages might be a little misleading?   Is it taking all the black background into account also?  If we count up expected hits vs predicted hits, that output0 in particular looks considerably more than 1% deviated.</p>",
+        "id": 451642643,
+        "sender_full_name": "Sean",
+        "timestamp": 1721082977
+    },
+    {
+        "content": "<p>Importance sampling would be good, but that's typically done as an optimization -- Would need to see a graph over epochs to see if this actually could converge onto the solution (even if over-trained).  Can you make a graph?</p>\n<p>That said, I think it might help with some of the perimeter and higher frequency detail, but it's really easy to get the sampling ever so subtle wrong and introduce bias or error.  Kind of what to see proven that we can get a robust fit, that a given network topology is capable of precise match before going down that route.</p>",
+        "id": 451643256,
+        "sender_full_name": "Sean",
+        "timestamp": 1721083293
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Can we treat the image as a whole, rather than a single pixel, so that we can use the filtering algorithm to do some post-processing?</p>",
+        "id": 451670446,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721098645
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/451642643\">ha scritto</a>:</p>\n<blockquote>\n<p>Think those percentages might be a little misleading?   Is it taking all the black background into account also?  If we count up expected hits vs predicted hits, that output0 in particular looks considerably more than 1% deviated.</p>\n</blockquote>\n<p>Yes you are right. The dataset is unbalanced (more black than white) and this is the reason why accuracy is not the best in this case (I print also precision recall and better F1). But I remember that previous students used accuracy as the main metric and I wouldn’t change it. If you are interested in F1, it is 0.988 (a bit lower)</p>",
+        "id": 451690863,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721112300
+    },
+    {
+        "content": "<p>Sure, I can plot a graph over epochs.</p>",
+        "id": 451690999,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721112354
+    },
+    {
+        "content": "<p>I want to discuss just a moment about metrics. Do you think precision, recall or F1 is the most important one in our case?</p>\n<p>Just to remember (I know you are familiar with all of these):</p>\n<ul>\n<li>precision is the percentage of true and predicted hitted rays among those predicted and hitted.</li>\n<li>recall is the pecentage of true predicted hitted rays among all true hitted rays.</li>\n<li>F1 is an armonic mean between precision and recall.</li>\n</ul>\n<p>I think both precision and recall are important in our case, so I believe that F1 is the most significant one.</p>",
+        "id": 451736447,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721128488
+    },
+    {
+        "content": "<p>Or maybe do you think some others metrics I have not mentioned are more relevant in our case?</p>",
+        "id": 451736529,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721128526
+    },
+    {
+        "content": "<p>This is the plot of the model of yesterday (so without importance sampling):<br>\n<a href=\"/user_uploads/1549/nheHYp8UKzkQYAfXESxespLx/download.png\">download.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/nheHYp8UKzkQYAfXESxespLx/download.png\" title=\"download.png\"><img src=\"/user_uploads/1549/nheHYp8UKzkQYAfXESxespLx/download.png\"></a></div><p>As we can notice, as we increase the number of epochs we get an average F1 between 0.98 and 0.99, so we can say that our model has an average error of 1.5%.</p>",
+        "id": 451739810,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721129899
+    },
+    {
+        "content": "<p>Today I will implement importance sampling to see if we get improvements.</p>",
+        "id": 451739890,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721129942
+    },
+    {
+        "content": "<p>And this is the behaviour with importance sampling (a moderate importance sampling):<br>\n<a href=\"/user_uploads/1549/ze_CILI4SHrGNIUCnCEs8NZy/download.png\">download.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ze_CILI4SHrGNIUCnCEs8NZy/download.png\" title=\"download.png\"><img src=\"/user_uploads/1549/ze_CILI4SHrGNIUCnCEs8NZy/download.png\"></a></div>",
+        "id": 451802049,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721146934
+    },
+    {
+        "content": "<p>I tried also with a more aggressive importance sampling and I got an improvement of F1: 0.991, accuracy: 0.994. So overall:<br>\nimportance sampling helps the model to understand better the regions more uncertain but it is not sufficient alone to achieve best results.</p>",
+        "id": 451802730,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721147073
+    },
+    {
+        "content": "<p>So it means that we need a more complex encoding or a more complex NN. For the moment I will focus on exploring encoding based on sdf.</p>",
+        "id": 451803116,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721147153
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/451670446\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> Can we treat the image as a whole, rather than a single pixel, so that we can use the filtering algorithm to do some post-processing?</p>\n</blockquote>\n<p>To what end, what exactly do you mean?  If the end result is pixel approximation, then it will be potentially useful for visualization purposes (only).  That has use, but it's definitely a different target.  The distinguishing feature that makes this challenge is replacing rt_shootray() with a neural net or the slightly higher level do_pixel().  Going full image robustly might allow for a (real-time) preview.</p>",
+        "id": 452234079,
+        "sender_full_name": "Sean",
+        "timestamp": 1721271649
+    },
+    {
+        "content": "<p>The image rendered with neural network will have noise, if I can use the denoising algorithm after generating the image, the effect will be good, the left side of the image rendered by neural network, the right side is the image <br>\n<a href=\"/user_uploads/1549/_v4_a7u2gkk4EpDk5B3Se1GG/denose.png\">denose.png</a><br>\nafter denoising</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/_v4_a7u2gkk4EpDk5B3Se1GG/denose.png\" title=\"denose.png\"><img src=\"/user_uploads/1549/_v4_a7u2gkk4EpDk5B3Se1GG/denose.png\"></a></div>",
+        "id": 452239169,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721274770
+    },
+    {
+        "content": "<p>Ok after studying some papers about sdf/nerf/gaussian splatting I have understood that one key information I do not actually use in the NN is the direction itself of the ray. Currently as input of the NN I use the spherical coordinates of the first and second intersection but not the direction vector.<br>\nBefore introducing any further and more complex encoding I need to add this new information as input of the NN because all these methods rely on the direction.<br>\nI was thinking that we can use a smart idea to help the NN: we are not interested in the orientation of the vector direction but only on its direction. <br>\n<a href=\"/user_uploads/1549/6TleqJhFROZ4p1NxNmqNi1yE/Direction-bounding-sphere.jpeg.png\">Direction-bounding-sphere.jpeg.png</a><br>\nImagine a vector in 2D, the maximum range we can have is from 0 to 180 (red region) since we are interested only on its direction. So, if the vector is in the green area, all we need to do is reflecting its angle to the positive half space. <br>\nThe same idea can be applied to 3D vectors in spherical coordinates (with a fixed radius).<br>\nI think that using these new input features will be beneficial for two reasons:<br>\n1) we could use some more complex encoding based on sdf/gaussian that they all rely on the concept of direction.<br>\n2) using these input features, we will have as the new input of our NN the first intersection on the bounding sphere and this new vector direction. The advantage is that the range of theta and phi (of the new vector direction) is smaller than the previous input features that used the full ranges in spherical coordinates of the second intersection on the bounding sphere. This should help the NN because it will have less input space to analyse but without loss of informations.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/6TleqJhFROZ4p1NxNmqNi1yE/Direction-bounding-sphere.jpeg.png\" title=\"Direction-bounding-sphere.jpeg.png\"><img src=\"/user_uploads/1549/6TleqJhFROZ4p1NxNmqNi1yE/Direction-bounding-sphere.jpeg.png\"></a></div><p>PS: we could even try grid encoding associated to direction and see how it works.</p>",
+        "id": 452335910,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721307021
+    },
+    {
+        "content": "<p>Is there any way to know exactly which object the light hit?</p>",
+        "id": 452380256,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721318040
+    },
+    {
+        "content": "<p>Ok I have added also the direction of the ray in the input features. As I was expecting, the NN does not improve adding the direction itself because we are not adding more informations but we are only using different features (I have also tried grid encoding).<br>\nBut the advantage is that now we can implement a more complex encoding that rely on the concept of direction.</p>",
+        "id": 452584525,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721399558
+    },
+    {
+        "content": "<p>I have 2 ideas about encodings to try:</p>\n<ul>\n<li>\n<p>first idea (and the best one in my opinion) is similar to the work of <a href=\"https://arxiv.org/abs/2011.13495\">DeepSDF</a>. The idea is to train latent vectors to predict the sdf for each ray.  Then this latent vectors will be the input of our NIF architecture. The problem is that we need to compute the sdf for each ray in the sampling approach. I don't know if there is a fast way to do it. <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> <br>\nNote that the sdf will be used only to train the latent vectors, so the NIF architecture won't use the sdf but only the latent vectors.</p>\n</li>\n<li>\n<p>second one (more difficult than the first) is a similar work of  <a href=\"https://arxiv.org/abs/2011.13495\">Neural pull</a>. In this case we do not have ground truth sdf, so the idea is to train latent vectors to \"pull\" rays towards the nearest surface by using the predicted signed distance values and their gradients, which the network computes. The movement of each rays is determined by the predicted distance and can be either towards or away from the surface, depending on the sign of the distance. </p>\n</li>\n</ul>\n<p>In both the cases,  we need to choose an arbitrary number of latent vectors that will be associated to each direction (and this is the reason why I have added the direction to the input features).</p>\n<p>I believe that if we can calculate the sdf for each ray the first encoding will be more efficient. I wait for your opinion. <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"103542\">@Erik</span></p>",
+        "id": 452590469,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721401099
+    },
+    {
+        "content": "<p>I have read a lot of papers, nerf, nerf++,etc...and I decided to use the methodology in this paper:<a href=\"https://arxiv.org/abs/2308.04079\">3D Gaussian Splatting for Real-Time Radiance Field Rendering</a></p>",
+        "id": 453079929,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721623597
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/452590469\">said</a>:</p>\n<blockquote>\n<p>I have 2 ideas about encodings to try:</p>\n<ul>\n<li>\n<p>first idea (and the best one in my opinion) is similar to the work of <a href=\"https://arxiv.org/abs/2011.13495\">DeepSDF</a>. The idea is to train latent vectors to predict the sdf for each ray.  Then this latent vectors will be the input of our NIF architecture. The problem is that we need to compute the sdf for each ray in the sampling approach. I don't know if there is a fast way to do it. <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span> <br>\nNote that the sdf will be used only to train the latent vectors, so the NIF architecture won't use the sdf but only the latent vectors.</p>\n</li>\n<li>\n<p>second one (more difficult than the first) is a similar work of  <a href=\"https://arxiv.org/abs/2011.13495\">Neural pull</a>. In this case we do not have ground truth sdf, so the idea is to train latent vectors to \"pull\" rays towards the nearest surface by using the predicted signed distance values and their gradients, which the network computes. The movement of each rays is determined by the predicted distance and can be either towards or away from the surface, depending on the sign of the distance. </p>\n</li>\n</ul>\n<p>In both the cases,  we need to choose an arbitrary number of latent vectors that will be associated to each direction (and this is the reason why I have added the direction to the input features).</p>\n<p>I believe that if we can calculate the sdf for each ray the first encoding will be more efficient. I wait for your opinion. <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span></p>\n</blockquote>\n<p>I'm reading some papers on sdf and have some questions, sdf is used to represent geometric objects, how to represent ray with sdf?</p>",
+        "id": 453089382,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721628080
+    },
+    {
+        "content": "<p>I have currently implemented 3d Gaussian ahah</p>",
+        "id": 453093169,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721629773
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/453089382\">ha scritto</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/452590469\">said</a>:</p>\n<blockquote>\n<p>I have 2 ideas about encodings to try:</p>\n<ul>\n<li>\n<p>first idea (and the best one in my opinion) is similar to the work of <a href=\"https://arxiv.org/abs/2011.13495\">DeepSDF</a>. The idea is to train latent vectors to predict the sdf for each ray.  Then this latent vectors will be the input of our NIF architecture. The problem is that we need to compute the sdf for each ray in the sampling approach. I don't know if there is a fast way to do it. <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span> <br>\nNote that the sdf will be used only to train the latent vectors, so the NIF architecture won't use the sdf but only the latent vectors.</p>\n</li>\n<li>\n<p>second one (more difficult than the first) is a similar work of  <a href=\"https://arxiv.org/abs/2011.13495\">Neural pull</a>. In this case we do not have ground truth sdf, so the idea is to train latent vectors to \"pull\" rays towards the nearest surface by using the predicted signed distance values and their gradients, which the network computes. The movement of each rays is determined by the predicted distance and can be either towards or away from the surface, depending on the sign of the distance. </p>\n</li>\n</ul>\n<p>In both the cases,  we need to choose an arbitrary number of latent vectors that will be associated to each direction (and this is the reason why I have added the direction to the input features).</p>\n<p>I believe that if we can calculate the sdf for each ray the first encoding will be more efficient. I wait for your opinion. <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span></p>\n</blockquote>\n<p>I'm reading some papers on sdf and have some questions, sdf is used to represent geometric objects, how to represent ray with sdf?</p>\n</blockquote>\n<p>The idea is to find the point on the ray such that it has the minimum distance to the surface. See the ray marching algorithm or sphere tracing.</p>",
+        "id": 453093531,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721629945
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/453093169\">ha scritto</a>:</p>\n<blockquote>\n<p>I have currently implemented 3d Gaussian ahah</p>\n</blockquote>\n<p>I am trying with a probabilistic approach because I wasn't sure how to correctly extract the sdf for rays.<br>\nMy idea is to use an autoencoder (giving as input only the direction) so as to encode in an embedding a number n of gaussians that represent the shape of the object for that direction.</p>",
+        "id": 453171884,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721653527
+    },
+    {
+        "content": "<p>In principle we do not need to encode all the \"pixels\" for a given direction in an embedding, but we need only to encode those areas which are the most uncertain.</p>",
+        "id": 453172190,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721653622
+    },
+    {
+        "content": "<p>So I think I will merge this idea with my previous network which was good apart from the boundaries of the object.</p>",
+        "id": 453172272,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721653655
+    },
+    {
+        "content": "<p>I made few tries in python so as to take confidence with gaussian splatting (for example I tried approximating an image using n gaussians) and I was really impressed how good is this technique.</p>",
+        "id": 453173077,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721653928
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/453172272\">said</a>:</p>\n<blockquote>\n<p>So I think I will merge this idea with my previous network which was good apart from the boundaries of the object.</p>\n</blockquote>\n<p>I agree with you. The problem is finding the boundaries.</p>",
+        "id": 453185710,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721657753
+    },
+    {
+        "content": "<p>I have an idea about this. Since I use a sigmoid activation function as last layer to predict hit/miss it is somehow an information of the uncertainty of the prediction.</p>",
+        "id": 453186252,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721657864
+    },
+    {
+        "content": "<p>So if it gives me a number around 0.5 it means that it is uncertain, so the gaussian should have more weight on that area.</p>",
+        "id": 453186436,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721657904
+    },
+    {
+        "content": "<p>I think consider using Bayesian optimization</p>",
+        "id": 453187833,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658144
+    },
+    {
+        "content": "<p>About this, I would also calculate what is the mean probability that the NN gives me to each missclassified ray to check whether it can work.</p>",
+        "id": 453188010,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658187
+    },
+    {
+        "content": "<p>Bayesian networks can output both mean and variance simultaneously</p>",
+        "id": 453188107,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658208
+    },
+    {
+        "content": "<p>what is your idea</p>",
+        "id": 453188196,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658237
+    },
+    {
+        "content": "<p>I'm going a little slow, and I'm still considering how to integrate 3dgs</p>",
+        "id": 453188334,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658266
+    },
+    {
+        "content": "<p>I've completely given up on grid net.</p>",
+        "id": 453188635,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658321
+    },
+    {
+        "content": "<p>If you want to know how I want to implemented it, i use an embedding of N gaussians for each direction</p>",
+        "id": 453188738,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658342
+    },
+    {
+        "content": "<p>each gaussian can have a number of parameter that you want</p>",
+        "id": 453188958,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658371
+    },
+    {
+        "content": "<p>Can I refer to your code?</p>",
+        "id": 453189056,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658388
+    },
+    {
+        "content": "<p>but for simplicity I use only mean, variance and I think I should add also a weight</p>",
+        "id": 453189071,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658392
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/453189056\">ha scritto</a>:</p>\n<blockquote>\n<p>Can I refer to your code?</p>\n</blockquote>\n<p>Ok later I will upload to github</p>",
+        "id": 453189193,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658416
+    },
+    {
+        "content": "<p>Ok, thx</p>",
+        "id": 453189310,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658437
+    },
+    {
+        "content": "<p>I tried with a small number of rays (10000) and a small number of gaussians for each direction and the NN is perfectly able to discretize all the rays</p>",
+        "id": 453189595,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658473
+    },
+    {
+        "content": "<p>The good thing is that I do not need to add any grid encoding to separate each direction, because the autoencoder is able to output the embedding in a continuos way since the input I give to it (only direction) is continuos</p>",
+        "id": 453189953,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721658533
+    },
+    {
+        "content": "<p>That sounds great. I'd like to replace the whole rendering process with a 3dgs approach, which might turn into a rasterized rendering</p>",
+        "id": 453190136,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1721658554
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/453189056\">ha scritto</a>:</p>\n<blockquote>\n<p>Can I refer to your code?</p>\n</blockquote>\n<p>i have uploaded the code for gaussian splatting. <br>\n<a href=\"https://github.com/bralani/rt_volume/blob/neural_rendering2/src/rt/gaussian_splatting.py\">https://github.com/bralani/rt_volume/blob/neural_rendering2/src/rt/gaussian_splatting.py</a></p>",
+        "id": 453265286,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721678047
+    },
+    {
+        "content": "<p>Today I made another improvement with gaussian splatting. I decided to associate a single gaussian to each positive hit of ray in the training set with a large variance.  Each gaussian has a mean (origin_theta, origin_phi, dir_phi, dir_theta) and a variance (variance_theta, variance_phi, dir_phi, dir_theta). Dir_phi and dir_theta are set to a fixed number of 0.05 because in my opinion we can save some memory in this way and the training process will be faster. The only thing the neural network is supposed to do is to find the maximum variance of each gaussian so that also the negative hits are correctly classified. <br>\nThe reason why we want to find the largest variance of gaussians is because of overfitting issues.</p>",
+        "id": 453535448,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721771337
+    },
+    {
+        "content": "<p>This works pretty good with 10000 rays but the problem is that if we increase just a bit the number of examples in the training set, the NN will become very complex in the number of parameters</p>",
+        "id": 453535937,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721771455
+    },
+    {
+        "content": "<p>I believe that this approach has a lot of potential</p>",
+        "id": 453536404,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721771573
+    },
+    {
+        "content": "<p>Tomorrow I will focus on reducing the number of gaussians without losing accuracy</p>",
+        "id": 453536818,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721771659
+    },
+    {
+        "content": "<p>There is a bottleneck of the current NN because as I increase the number of examples in the training set, it goes out of memory</p>",
+        "id": 453754141,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841407
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"702819\">@Matteo Balice</span> Can you recap the structure of the computations and memory involved with the gaussian approach?  How is that related to the Encoder/Decoder networks you have/had in your gaussian_splatting.py</p>",
+        "id": 453754152,
+        "sender_full_name": "Sean",
+        "timestamp": 1721841412
+    },
+    {
+        "content": "<p>Ok</p>",
+        "id": 453754204,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841432
+    },
+    {
+        "content": "<p>I should update that file, anyway</p>",
+        "id": 453754347,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841480
+    },
+    {
+        "content": "<p>The network is very simple: there is an encoder (which has the task to produce the embedding) and a decoder which has the task to produce the output (a probability between 0 and 1)</p>",
+        "id": 453754522,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841527
+    },
+    {
+        "content": "<p>I'm seeing a 6-layer fully connected network there, where the layers are pretty hefty number of weights in total, which would explain the memory explosion</p>",
+        "id": 453754642,
+        "sender_full_name": "Sean",
+        "timestamp": 1721841574
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/453754642\">ha scritto</a>:</p>\n<blockquote>\n<p>I'm seeing a 6-layer fully connected network there, where the layers are pretty hefty number of weights in total, which would explain the memory explosion</p>\n</blockquote>\n<p>It is the old version, I don't use any layer anymore.</p>",
+        "id": 453754979,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841659
+    },
+    {
+        "content": "<p>I have uploaded the new version now</p>",
+        "id": 453755135,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841705
+    },
+    {
+        "content": "<p>Okay.  In the old, looks like approximately 4MB of memory for that latent_dim=100 construction on just the encoder side.</p>",
+        "id": 453755335,
+        "sender_full_name": "Sean",
+        "timestamp": 1721841755
+    },
+    {
+        "content": "<p>Sorry, way off... that's better.</p>",
+        "id": 453755472,
+        "sender_full_name": "Sean",
+        "timestamp": 1721841792
+    },
+    {
+        "content": "<p>Ok, in this new version I associate to each gaussian 4 numbers for the mean and 4 for the variance.</p>",
+        "id": 453755698,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841846
+    },
+    {
+        "content": "<p>And the number of gaussians are proportional to the number of positive hit in the training set.</p>",
+        "id": 453755812,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841878
+    },
+    {
+        "content": "<p>When I use 10k samples it works fine, with 100k is very slow and with 1 million it goes out of memory</p>",
+        "id": 453756111,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721841958
+    },
+    {
+        "content": "<p>Maybe I should not associate a single gaussian to each positive hit in the training set but I should randomly take a subset of positive hits...</p>",
+        "id": 453756882,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842151
+    },
+    {
+        "content": "<p>So you're using 10k ray samples currently right?  Is that your number of embeddings?</p>",
+        "id": 453757917,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842428
+    },
+    {
+        "content": "<p>With 10k rays, half are positive hits so about 5k are the embeddings</p>",
+        "id": 453758073,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842474
+    },
+    {
+        "content": "<p>Okay, but worst case it's 10k?</p>",
+        "id": 453758140,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842497
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 453758170,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842509
+    },
+    {
+        "content": "<p>or is there more on disk?  You have it actually using whatever is in the data folder</p>",
+        "id": 453758192,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842517
+    },
+    {
+        "content": "<p>(just need to make sure you don't have a json with 100M lines or something)</p>",
+        "id": 453758293,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842562
+    },
+    {
+        "content": "<p>my json has 1 million data</p>",
+        "id": 453758373,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842587
+    },
+    {
+        "content": "<p>but I take randomly only 10k samples</p>",
+        "id": 453758426,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842602
+    },
+    {
+        "content": "<p>Heh, okay .. but you're still creating an Encoder based on embeddings, which is based on how much is in your json, not how many samples, unless I'm reading this differently</p>",
+        "id": 453758530,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842649
+    },
+    {
+        "content": "<p>if you print(embeddings.shape[0]) in get_embeddings, what's that report?</p>",
+        "id": 453758712,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842716
+    },
+    {
+        "content": "<p>4683</p>",
+        "id": 453758832,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842764
+    },
+    {
+        "content": "<p>Line 47 i cut the json, so I take only 10k examples</p>",
+        "id": 453758866,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842777
+    },
+    {
+        "content": "<p>Okay, so it is hitting the else case in the constructor</p>",
+        "id": 453758894,
+        "sender_full_name": "Sean",
+        "timestamp": 1721842786
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 453758913,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721842797
+    },
+    {
+        "content": "<p>So in my back-of-napkin calculations, you're really not using much memory at all, nothing that explains running out.</p>",
+        "id": 453760043,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843010
+    },
+    {
+        "content": "<p>With 10k or with 1M?</p>",
+        "id": 453760148,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843053
+    },
+    {
+        "content": "<p>The autoencoder network is trivial as you noted, about 0.25MB total (which is dubious for any real model)</p>",
+        "id": 453760150,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843054
+    },
+    {
+        "content": "<p>I don't (yet) see where you're actually accruing memory in the test iterations.</p>",
+        "id": 453760343,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843139
+    },
+    {
+        "content": "<p>Unless pytorch is doing something under the hood that isn't being used but is growing</p>",
+        "id": 453760384,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843158
+    },
+    {
+        "content": "<p>It does not even start training with 1M</p>",
+        "id": 453760515,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843199
+    },
+    {
+        "content": "<p>You mean all you change is num_epochs = 1000000 and it dies?</p>",
+        "id": 453760828,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843327
+    },
+    {
+        "content": "<p>That doesn't add up</p>",
+        "id": 453760873,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843347
+    },
+    {
+        "content": "<p>not epochs</p>",
+        "id": 453760886,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843352
+    },
+    {
+        "content": "<p>I comment the line 47, so I load all the json</p>",
+        "id": 453760948,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843376
+    },
+    {
+        "content": "<p>Oooh oh, gotcha -- so you're chaning the [:10000] to other values, how much data, how many embeddings</p>",
+        "id": 453761014,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843399
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 453761063,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843406
+    },
+    {
+        "content": "<p>In the real paper of gaussian splatting they associate a single embedding to each example but I don't understand how they don't run out of memory</p>",
+        "id": 453761291,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843499
+    },
+    {
+        "content": "<p>I don't see how you're running out of memory.</p>",
+        "id": 453761854,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843714
+    },
+    {
+        "content": "<p>there must be some bug or cleanup issue that is ballooning.  Even with 1M samples, that's only about 38MB of data</p>",
+        "id": 453761926,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843742
+    },
+    {
+        "content": "<p>you surely have more than that available :)</p>",
+        "id": 453761948,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843751
+    },
+    {
+        "content": "<p>how do you calculate it?</p>",
+        "id": 453762030,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843767
+    },
+    {
+        "content": "<p>with double precision, your 5 origin+dir+label tensors consume just 40 bytes</p>",
+        "id": 453762189,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843834
+    },
+    {
+        "content": "<p>mmmm, maybe the issue is with the gradient of pytorch</p>",
+        "id": 453762388,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843917
+    },
+    {
+        "content": "<p>I remember I had this problem a long time ago</p>",
+        "id": 453762473,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843954
+    },
+    {
+        "content": "<p>I must do some checks, thanks</p>",
+        "id": 453762523,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721843979
+    },
+    {
+        "content": "<p>at 5000 embeddings, that's not even 1MB for the autoencoding (embeddings + embedding params + proxy vars)</p>",
+        "id": 453762527,
+        "sender_full_name": "Sean",
+        "timestamp": 1721843981
+    },
+    {
+        "content": "<p>got it</p>",
+        "id": 453762640,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844005
+    },
+    {
+        "content": "<p>even if it scaled linearly, to 500000 embeddings, that'd be 100MB max</p>",
+        "id": 453762802,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844045
+    },
+    {
+        "content": "<p>The json file is 100MB, so you are right</p>",
+        "id": 453763010,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844104
+    },
+    {
+        "content": "<p>Well that's text, but even as 8-byte double precision floats there's just not enough data</p>",
+        "id": 453763183,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844134
+    },
+    {
+        "content": "<p>I'd suggest adding some print or pause statements and watch the process memory usage, see if some particular operation is increasing usage substantially</p>",
+        "id": 453763319,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844174
+    },
+    {
+        "content": "<p>Ok thanks 👍🏻</p>",
+        "id": 453763399,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844210
+    },
+    {
+        "content": "<p>got to be something relatively simple.  If you were getting to iterations, I would suggest adding a gc.collect() or something to ensure python has opportunity to purge, but clearly something is going on before that even if it doesn't get to iterations.</p>",
+        "id": 453763490,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844228
+    },
+    {
+        "content": "<p>I don't see it yet, but something is consuming gobs of memory</p>",
+        "id": 453763619,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844252
+    },
+    {
+        "content": "<p>Yes it is really strange</p>",
+        "id": 453763674,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844267
+    },
+    {
+        "content": "<p>Thanks</p>",
+        "id": 453763913,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844330
+    },
+    {
+        "content": "<p>Like I could totally see if it your constructor data hash was making 1M copies of all those string hash keys... but those are reset on each iteration of self.datas.</p>",
+        "id": 453764292,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844430
+    },
+    {
+        "content": "<p>maybe some linear overhead of torch.Tensor, but that doesn't make sense to me</p>",
+        "id": 453764657,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844536
+    },
+    {
+        "content": "<p>any change if you replace them with:</p>\n<p>origin = torch.tensor(data[\"point1_sph\"], dtype=torch.float64) <br>\ndir = torch.tensor(data[\"dir_sph\"], dtype=torch.float64) <br>\nlabel = torch.tensor([data[\"label\"]], dtype=torch.float64)</p>\n<p>?</p>",
+        "id": 453764725,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844554
+    },
+    {
+        "content": "<p>I have not anymore the pc with me</p>",
+        "id": 453765068,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844628
+    },
+    {
+        "content": "<p>I will try later</p>",
+        "id": 453765089,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844633
+    },
+    {
+        "content": "<p>Okay.  I'd try that but then also exit before the training use and see if you can get a pause before exiting to see how much memory the app is actually using before RayDataset, after RayDataset construction, and after Autoencoder construction, see where it balloons out.</p>",
+        "id": 453765589,
+        "sender_full_name": "Sean",
+        "timestamp": 1721844762
+    },
+    {
+        "content": "<p>Yep it is what I am going to try 👍🏻</p>",
+        "id": 453765750,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721844813
+    },
+    {
+        "content": "<p>Came across this interesting high-level article posted today, nice generic tutorial... <a href=\"https://gpuopen.com/learn/deep_learning_crash_course/\">https://gpuopen.com/learn/deep_learning_crash_course/</a></p>",
+        "id": 453767361,
+        "sender_full_name": "Sean",
+        "timestamp": 1721845250
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/8gAx74Q6K7ERNGbn0gbqLPi0/Screenshot-2024-07-24-alle-23.59.31.png\">Screenshot-2024-07-24-alle-23.59.31.png</a><br>\nOk I got it. <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> You were right on all the estimations of the memory. The problem is in the decoder which you hadn't seen, when I calculate the probability of the examples that belongs to each gaussian.<br>\nI had implemented broadcasting (to speed up calculations) so I clone the embeddings (gaussian) n times where n is the batch size (number of examples).<br>\nIn this image the batch size was of 256 examples.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/8gAx74Q6K7ERNGbn0gbqLPi0/Screenshot-2024-07-24-alle-23.59.31.png\" title=\"Screenshot-2024-07-24-alle-23.59.31.png\"><img src=\"/user_uploads/thumbnail/1549/8gAx74Q6K7ERNGbn0gbqLPi0/Screenshot-2024-07-24-alle-23.59.31.png/840x560.webp\"></a></div>",
+        "id": 453804846,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721858577
+    },
+    {
+        "content": "<p>Broadcasting in this case isn't probably a smart way to speed up calculations since a lot of gaussians are totally useless for the calculations of the probability for the current examples, but only the closest one to the current example are relevant.</p>",
+        "id": 453805101,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721858661
+    },
+    {
+        "content": "<p>I have solved the broadcasting issue that run out memory and I have first results. For the moment I am trying with only 10k rays because the calculation of probability is pretty slow.</p>\n<p>Here the best epoch of the previous NIF network with only 10k rays:</p>\n<p>F1: 0.880218316493941 <br>\nAccuracy: 0.9283117186132877 <br>\nPrecision: 0.9087676930301201 <br>\nRecall: 0.8534080886985007</p>\n<p>Here, instead the best epoch with this new gaussian splatting network with 10K rays and only 1k gaussians embeddings (I decided to lower the number of gaussians to better explain the power of this model):</p>\n<p>F1 Score: 0.9155<br>\nAccuracy: 0.9261<br>\nPrecision: 0.9316<br>\nRecall: 0.9000</p>\n<p>As you can notice, the gaussian splatting architecture has more power than the NIF architecture BUT it is way slower. <br>\nThe interesting part is that I achieved this result in only 11 epochs, so the training is not slow but the inference is slow (the action from the start of the neural network to giving back the prediction).</p>\n<p>For this reason, I will now focus on speeding up the gaussian splatting architecture. I believe I should read some papers about real-time renderings with gaussian splatting so as to achieve this speed up.</p>\n<p>One idea I have is cutting some gaussians basing on the input I want to predict. (ie the furthest ones from the ray I want to predict).</p>\n<p>P.S: the results I have showed here are not close to the ones of the previous week (accuracy: 0.994 and F1: 0.991) just because they were achieved with 1 Million examples. Here I use only 10k rays just to compare NIF architecture with Gaussian Splatting.</p>",
+        "id": 453948030,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1721913821
+    }
+]

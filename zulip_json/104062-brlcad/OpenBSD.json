@@ -1,0 +1,164 @@
+[
+    {
+        "content": "<p>No wonder I was never able to do anything with that core file on OpenBSD - it needs lldb, not gdb: <a href=\"/user_uploads/1549/-E9wDPbN-ePPT9hNBGHqik13/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-E9wDPbN-ePPT9hNBGHqik13/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/-E9wDPbN-ePPT9hNBGHqik13/image.png\"></a></div>",
+        "id": 220336002,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608266031
+    },
+    {
+        "content": "<p>Not sure what to make of it, but finally got it...</p>",
+        "id": 220336233,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608266370
+    },
+    {
+        "content": "<p>that base variable is suspicious</p>",
+        "id": 220336590,
+        "sender_full_name": "Sean",
+        "timestamp": 1608266898
+    },
+    {
+        "content": "<p>looks like it's actually a pointer to mged_curr_dm-&gt;dm_mged_variables</p>",
+        "id": 220336694,
+        "sender_full_name": "Sean",
+        "timestamp": 1608267083
+    },
+    {
+        "content": "<p>I bet it's the offset getting calculated incorrectly.</p>",
+        "id": 220337566,
+        "sender_full_name": "Sean",
+        "timestamp": 1608268162
+    },
+    {
+        "content": "<p>loc is set to base + sdp-&gt;sp_offset<br>\nsdp is a line in the parsetab with sp_offset defined in the struct.  the struct is  mged_curr_dm-&gt;dm_mged_variables so it could be that mged_curr_dm is invalid or dm_mged_variables isn't initialized or dm_mged_variables is initailized but has bad offset values.</p>",
+        "id": 220337832,
+        "sender_full_name": "Sean",
+        "timestamp": 1608268535
+    },
+    {
+        "content": "<p>or mged_curr_dm is random garbage</p>",
+        "id": 220337886,
+        "sender_full_name": "Sean",
+        "timestamp": 1608268563
+    },
+    {
+        "content": "<p>next step would probably be to identify which mged_variables is being used/set there,  check dm_curr-dm for validity, and find where it's initalizing the fields of dm_mged_variables.</p>",
+        "id": 220338157,
+        "sender_full_name": "Sean",
+        "timestamp": 1608268977
+    },
+    {
+        "content": "<p>I wish I knew which test was doing that - \"make check\" produces it, but despite making a core file it doesn't halt the test.  Suggests something isn't checking a test return code somewhere, unless it's possible to dump a core and still complete \"successfully\"...</p>",
+        "id": 220371844,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608298302
+    },
+    {
+        "content": "<p>Hmm... wonder if lldb can tell me from the core file...</p>",
+        "id": 220371991,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608298380
+    },
+    {
+        "content": "<p>It's a little hard to follow, but it looks like it's running \"vars \" and when I do that in isolation the output does look strange: <a href=\"/user_uploads/1549/mTyu_mxgZmowQrlKxk_V5lHu/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/mTyu_mxgZmowQrlKxk_V5lHu/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/mTyu_mxgZmowQrlKxk_V5lHu/image.png\"></a></div>",
+        "id": 220374000,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608299643
+    },
+    {
+        "content": "<p>This is handy:  <a href=\"https://www.nesono.com/sites/default/files/lldb%20cheat%20sheet.pdf\">https://www.nesono.com/sites/default/files/lldb%20cheat%20sheet.pdf</a></p>",
+        "id": 220382573,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608304095
+    },
+    {
+        "content": "<p>Whee!  valgrind doesn't like the vars command run, even on Linux.</p>",
+        "id": 220410815,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316201
+    },
+    {
+        "content": "<p>yeah, that looks like memory corruption.</p>",
+        "id": 220411407,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316470
+    },
+    {
+        "content": "<p>I wonder if I updated mged_variables but never updated mged_vparse...</p>",
+        "id": 220411541,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316557
+    },
+    {
+        "content": "<p>looks like mged_curr_dm has to be involved, so maybe related to the dm init logic and the specific invocation mode of the script (like running with redirected input or something)</p>",
+        "id": 220411595,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316566
+    },
+    {
+        "content": "<p>Wow.  \"mged&gt; vars\" shows valgrind issues at least as far back as 70555...</p>",
+        "id": 220419608,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608320675
+    },
+    {
+        "content": "<p>Make that r62647 - getting old enough it's hard to test...</p>",
+        "id": 220420279,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608321037
+    },
+    {
+        "content": "<p>OK, clearly not a release blocker...</p>",
+        "id": 220420656,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608321269
+    },
+    {
+        "content": "<p>/me wonders if \"vars\" would be better called \"settings\" - for what it seems to be intended to be, I wouldn't have thought to look first for a \"vars\" command...</p>",
+        "id": 220421160,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608321530
+    },
+    {
+        "content": "<p>It definitely looks like the parsing is what's going wrong - gdb's reporting of the struct contents themselves seems to be OK...</p>",
+        "id": 220480211,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608400599
+    },
+    {
+        "content": "<p>Doh.</p>",
+        "id": 220480298,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608400781
+    },
+    {
+        "content": "<p>There we go - r78028.</p>",
+        "id": 220480377,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608400872
+    },
+    {
+        "content": "<p>/me tries OpenBSD again</p>",
+        "id": 220480378,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608400878
+    },
+    {
+        "content": "<p>hey everyone! <br>\nI was curious if I can contribute with the knowledge of c++</p>",
+        "id": 220517384,
+        "sender_full_name": "Aniket Khandagale",
+        "timestamp": 1608465987
+    },
+    {
+        "content": "<p>Do you mean specifically on OpenBSD?</p>",
+        "id": 220525184,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608479519
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"372795\">@Aniket Khandagale</span> If you mean C++ generically there's lots of opportunity - the new Qt graphical interface work, for example, is in Qt with C++</p>",
+        "id": 220538832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608500763
+    }
+]

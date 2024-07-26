@@ -1,0 +1,356 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  great news. <br>\nI was wondering that is it possible to change rt_shootray() with rt_shootrays() in fortray.c to increase performance ? <br>\nAlso  I was just shooting single rays in archer with \"nirt\", can  rt_shootrays() be executed in \"nirt\"  or just one single ray with rt_shootray ?</p>",
+        "id": 175526690,
+        "sender_full_name": "scorp08",
+        "timestamp": 1568293645
+    },
+    {
+        "content": "<p>Nirt only has one ray to shoot.  You have to also change nirt so it stores up ray requests or something.</p>",
+        "id": 175528320,
+        "sender_full_name": "Sean",
+        "timestamp": 1568294602
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  thnks. Can I gain performance with the  current version of rt_shootrays() or have to apply parallel proccessing, BSP (spatial partioning) etc ?</p>",
+        "id": 175531578,
+        "sender_full_name": "scorp08",
+        "timestamp": 1568296761
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> The current rt_shootrays() is an iterator over rt_shootray() which can be run in parallel and does the spatial partitioning already.  So ... I'm not sure what you're getting at. </p>\n<p>If you're shooting rays with nirt in a shell script, shooting rays with rt_shootray() or rt_shootrays() is probably going to be several overs of magnitude faster simply because the overhead of the shell script.  If you create a nirt script instead, that will be faster than a shell script but still limited by nirt code (e.g., it does not shoot in parallel).  If you create a program in C/C++ calling rt_shootray() or rt_shootrays(), then that will be faster still (or slower) depending on the overhead of your code.</p>",
+        "id": 175533548,
+        "sender_full_name": "Sean",
+        "timestamp": 1568298078
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  my aim is  change rt_shootray() in fortray.c with rt_shootrays() to gain performance boost rather than shooting rays individually</p>",
+        "id": 176005248,
+        "sender_full_name": "scorp08",
+        "timestamp": 1568813720
+    },
+    {
+        "content": "<p>@scorp08, I'm confused then because fortray.c has nothing to do with nirt ... that's the Fortran interface to librt.  Are you developing a Fortran code?</p>",
+        "id": 176012458,
+        "sender_full_name": "Sean",
+        "timestamp": 1568818285
+    },
+    {
+        "content": "<p>Nirt fires rays when it receives a \"shoot\" command, which you can find in src/nirt/command.c including the rt_shootray() call.  The problem is still not whether that can be changed to rt_shootrays() there, as it most certainly can.  The problem is that nirt only has one ray so you'd have to modify nirt to queue up shots instead of firing them immediately.  Not a hard change.</p>",
+        "id": 176012726,
+        "sender_full_name": "Sean",
+        "timestamp": 1568818453
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I will start with fortray for multiple shots but I stuck in the \"struct bu_list\". Do I need to create a queue template like explained in \"  --- BEGIN EXAMPLE --- \" in list.h to fill bu_list with xray ?</p>",
+        "id": 176095182,
+        "sender_full_name": "scorp08",
+        "timestamp": 1568897313
+    },
+    {
+        "content": "<p>@scorp08 I don't understand why you're modifying fortray ... that's not used by nirt.  Are you coding in Fortran?</p>",
+        "id": 176113623,
+        "sender_full_name": "Sean",
+        "timestamp": 1568908538
+    },
+    {
+        "content": "<blockquote>\n<p>Do I need to create a queue template like explained in \"  --- BEGIN EXAMPLE --- \" in list.h to fill bu_list with xray ?</p>\n</blockquote>\n<p>There are examples in src/librt/mkbundle.c -- you'll basically call BU_LIST_APPEND() after allocating a new xray.</p>",
+        "id": 176113978,
+        "sender_full_name": "Sean",
+        "timestamp": 1568908699
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Thnks. I will do some coding in fortran. Is it neccessary to use BU_FORTRAN while declaring a function everytime ?</p>",
+        "id": 176182206,
+        "sender_full_name": "scorp08",
+        "timestamp": 1568976743
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> Oh, that's interesting.  I'd be interested in hearing more (public or private) about what Fortran code you are working on.</p>\n<p>It is not necessary to use BU_FORTRAN with modern Fortran.  All it's doing these days is adding an underscore to the name.  It used to be helpful to modify the name so that the output object code had proper calling convention in Fortran, but that all has changed a lot since.  If you have changes to make to it, please do suggest them or submit a patch.</p>",
+        "id": 176375431,
+        "sender_full_name": "Sean",
+        "timestamp": 1569250187
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  thnks. Not last but least question :): After adding stuff to fortray.c , is there an easy way to test it ? Since it includes headers from different folders and those headers also includes from different folders , I frequently got file not found error which is normal. I am using codeblocks IDE but I do not know how can I  open brlcad-master as a project and work on files and build??</p>",
+        "id": 176455352,
+        "sender_full_name": "scorp08",
+        "timestamp": 1569325797
+    },
+    {
+        "content": "<p>Looks like cmake has a codeblocks output you can try: <a href=\"https://stackoverflow.com/questions/37618040/codeblocks-with-cmake\" target=\"_blank\" title=\"https://stackoverflow.com/questions/37618040/codeblocks-with-cmake\">https://stackoverflow.com/questions/37618040/codeblocks-with-cmake</a></p>",
+        "id": 176455755,
+        "sender_full_name": "Sean",
+        "timestamp": 1569326127
+    },
+    {
+        "content": "<p>The problem is for example build&amp;run \"rtshot.c\" not possible because \"raytrace.h\" is not in curdir. And similar for other files...</p>",
+        "id": 176456929,
+        "sender_full_name": "scorp08",
+        "timestamp": 1569327013
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> did you create and open a codeblocks project with cmake?  it should have the right include directories set if you do.</p>",
+        "id": 176458173,
+        "sender_full_name": "Sean",
+        "timestamp": 1569327978
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I could not fix error of \"java not found\"  in Cmake altough it is installed . find_package is used instead findJava.</p>",
+        "id": 176827314,
+        "sender_full_name": "scorp08",
+        "timestamp": 1569679223
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> that sounds like a general cmake issue.  we don't have any find java logic.  find_package() is the standard way to include things like Java -- that's what makes it call into the FindJava.cmake sources.  You can see this at <a href=\"https://cmake.org/cmake/help/v3.5/module/FindJava.html\" target=\"_blank\" title=\"https://cmake.org/cmake/help/v3.5/module/FindJava.html\">https://cmake.org/cmake/help/v3.5/module/FindJava.html</a></p>",
+        "id": 176902922,
+        "sender_full_name": "Sean",
+        "timestamp": 1569818985
+    },
+    {
+        "content": "<p>If it's not finding Java, make sure you delete your cache (rm -rf CMake*) after making sure you install it.  Note, you may still need to specify where it was installed into with the -DJAVA_HOME=/path/to/java during cmake.</p>",
+        "id": 176902984,
+        "sender_full_name": "Sean",
+        "timestamp": 1569819085
+    },
+    {
+        "content": "<p>solved findJava but this time findThread issue occured:(</p>",
+        "id": 176909625,
+        "sender_full_name": "scorp08",
+        "timestamp": 1569828853
+    },
+    {
+        "content": "<p>BRL-CAD specific issue or something in your cmake logic?</p>",
+        "id": 176928657,
+        "sender_full_name": "Sean",
+        "timestamp": 1569847862
+    },
+    {
+        "content": "<p>You can read the builddir/CMakeFiles/CMakeError.txt and CMakeOutput.txt to see why things fail.</p>",
+        "id": 176928678,
+        "sender_full_name": "Sean",
+        "timestamp": 1569847905
+    },
+    {
+        "content": "<p>it seems that \"-\" is missing in the c flag  \"Wunused-const-variable\".</p>",
+        "id": 176975243,
+        "sender_full_name": "scorp08",
+        "timestamp": 1569877923
+    },
+    {
+        "content": "<p>Loosing my mind, got -lpthreads not found error now. Using mingw-64. Is that the reason ?  using POSIX and searched spending couple of hours but could not find the solution</p>",
+        "id": 177029623,
+        "sender_full_name": "scorp08",
+        "timestamp": 1569914261
+    },
+    {
+        "content": "<p>Using the GNU compiler on Ms Windows (e.g. with Code::Blocks or MinGW) is known to have issues, and I would not recommend them for starters. Instead, MS Visual Studio is know for working well, at least up to version 2015. There is a free version of it you could use.</p>\n<p>Another possibility would be to use Linux, either on an own machine, in a dual boot configuration, or in a virtual machine. (However, the virtual machine image provided on SourceForge is a bit outdated (<a href=\"https://sourceforge.net/projects/brlcad/files/BRL-CAD%20for%20Virtual%20Machines/\" target=\"_blank\" title=\"https://sourceforge.net/projects/brlcad/files/BRL-CAD%20for%20Virtual%20Machines/\">https://sourceforge.net/projects/brlcad/files/BRL-CAD%20for%20Virtual%20Machines/</a>).)</p>",
+        "id": 177031713,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1569916632
+    },
+    {
+        "content": "<blockquote>\n<p>Loosing my mind, got -lpthreads not found error now. Using mingw-64. Is that the reason ?  using POSIX and searched spending couple of hours but could not find the solution</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> you'll want to delete your build directory every time (at least the cache file) ... it has a huge influence on subsequent cmake testing.  Daniel is right though -- mingw is not strongly supported by cmake in general (even some of the internal tests have issues).</p>",
+        "id": 177410494,
+        "sender_full_name": "Sean",
+        "timestamp": 1570275256
+    },
+    {
+        "content": "<p>it can work, but you're going to have to do a bit of work to get it working stable</p>",
+        "id": 177410498,
+        "sender_full_name": "Sean",
+        "timestamp": 1570275270
+    },
+    {
+        "content": "<p>tried with VS2013 but again findthread error \"CheckForPthreads.obj : error LNK2019: unresolved external symbol __imp_pthread_create referenced in function...\" . I need to add link with  'pthreadVC2.lib'. But could not understand where it is try to test CheckForPthreads.c ?   where can I add flag in cmakelists ??</p>",
+        "id": 177457894,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570362638
+    },
+    {
+        "content": "<p>Did you started from empty build directory? CMake should drop pthreads in this configuration because this isn't POSIX.</p>",
+        "id": 177467134,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570379258
+    },
+    {
+        "content": "<p>yes. It tries to build CheckForPthreads.c but not link 'pthreadVC2.lib'.</p>",
+        "id": 177492529,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570427496
+    },
+    {
+        "content": "<p>This is OK. CMake shall check for pthreads. However, this check fails for Visual Studio, therefore CMakes does not include them in the final build configuration.</p>",
+        "id": 177492911,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570428241
+    },
+    {
+        "content": "<p>I'll check it with my Visual Studio ...</p>",
+        "id": 177492960,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570428305
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> if you can post your cmake files or output, it might be easier to help figure out what's wrong</p>",
+        "id": 177512689,
+        "sender_full_name": "Sean",
+        "timestamp": 1570450037
+    },
+    {
+        "content": "<p>Just tried with VS 2013: CMake works. I had to close some error messages from test functions manually (the 3 AVX tests), but this is okay.</p>\n<p>But, the build fails because libbrep (RTree.h) requires C++11 which VS 2013 is not. Unfortunately, I don't have any newer Visual Studio, at least at the moment.</p>",
+        "id": 177513259,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570450630
+    },
+    {
+        "content": "<p>Until the feature is working, we can probably disable the files requiring it, but we are adopting C++11 so it's only a matter of time.  I believe VS2015 is the new minimum for it.</p>",
+        "id": 177516252,
+        "sender_full_name": "Sean",
+        "timestamp": 1570453176
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  It looked for pthread.h library and returned \"could not found\" error as I do not have. Why It force me to include pthread.h ?</p>",
+        "id": 177782521,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570688344
+    },
+    {
+        "content": "<p>What is \"It\"? CMake?</p>",
+        "id": 177784473,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570690933
+    },
+    {
+        "content": "<p>Findthreads.cmake</p>",
+        "id": 177785798,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570692541
+    },
+    {
+        "content": "<p>That's okay. It's the purpose of CMake to test many features and generate the build files according to the test results. In case of pthead this means to set the HAVE_PTHREAD_H macro accordingly.</p>\n<p>For example, have a look at src/libbu/parallel.c. If HAVE_PTHREAD_H is set rt_thread_t is pthread_t, but on MS Windows with _WIN32 rt_thread_t is HANDLE.</p>\n<p>Now, you experienced that CMake could not find pthread, therefore it does not define HAVE_PTHREAD_H, which results in not using pthread in the build. But, because it runs on MS Windows, _WIN32 is defined, which causes the use of the Windows threading. This is exactly what we expect CMake shall do.</p>",
+        "id": 177790116,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570696978
+    },
+    {
+        "content": "<p>understand but why (@222) findthreats.cmake is returning True ? findthreats is trying to add imported interface Threads::Threads. so, cause to \"could not found pthread.h \" error. While I was trying with my own cmake builds, it returned False, so there is no error.</p>",
+        "id": 177800888,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570707554
+    },
+    {
+        "content": "<p>@222? Did I missed a listing somewhere?</p>\n<p>FindThreads \"determines the thread library of the system\". On MS Windows, it should find the Win32 threading API.</p>",
+        "id": 177801730,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570708485
+    },
+    {
+        "content": "<p>\" <a href=\"https://github.com/Kitware/CMake/blob/master/Modules/FindThreads.cmake\" target=\"_blank\" title=\"https://github.com/Kitware/CMake/blob/master/Modules/FindThreads.cmake\">https://github.com/Kitware/CMake/blob/master/Modules/FindThreads.cmake</a>\" 222.row, that clause cause the error</p>",
+        "id": 177806144,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570711893
+    },
+    {
+        "content": "<p>This is an \"if\" clause. How could this cause an error?<br>\nI can only agree with Sean: <a href=\"#narrow/stream/104062-general/topic/Nirt/near/177512689\" title=\"#narrow/stream/104062-general/topic/Nirt/near/177512689\">https://brlcad.zulipchat.com/#narrow/stream/104062-general/topic/Nirt/near/177512689</a></p>",
+        "id": 177808303,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570713296
+    },
+    {
+        "content": "<blockquote>\n<p>\" <a href=\"https://github.com/Kitware/CMake/blob/master/Modules/FindThreads.cmake\" target=\"_blank\" title=\"https://github.com/Kitware/CMake/blob/master/Modules/FindThreads.cmake\">https://github.com/Kitware/CMake/blob/master/Modules/FindThreads.cmake</a>\" 222.row, that clause cause the error<br>\n``` I meant the add_library (@223) cause the error.<br>\nI tried in  another computer which I included pthread.h and dll file. Here is the errorfile <a href=\"/user_uploads/1549/hglfpsaUfOSk7u_tbHliaCLO/CMakeError.log\" target=\"_blank\" title=\"CMakeError.log\">CMakeError.log</a> <br>\nI will try to post other errorlog...</p>\n</blockquote>",
+        "id": 177825919,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570724004
+    },
+    {
+        "content": "<p>At a glance, the only thing suspicious I see is THREADS_FOUND on 222 should be Threads_FOUND, but that shouldn't matter here I think</p>",
+        "id": 177879547,
+        "sender_full_name": "Sean",
+        "timestamp": 1570772061
+    },
+    {
+        "content": "<p>the error log only shows individual test errors (which may be perfectly normal, hard to say without seeing other output), which is useful in conjunction with  the other logs.  what's the cmake output look like if you save it to a file?  that will be more informative towards fixing / preventing whatever is going wrong.</p>",
+        "id": 177879722,
+        "sender_full_name": "Sean",
+        "timestamp": 1570772334
+    },
+    {
+        "content": "<ul>\n<li>I don't recommend to provide the Windows build with the pthread.h and pthread.dll. I expect this to break the build because of conflicting the POSIX with the WIN32 threading API here.</li>\n<li>In my logs I see a \"fatal error\" because of the non-existent pthread.h. But, this is exactly what I expect to happen. The consequence is that HAVE_PTHREAD_H is not defined and WIN32 threading will be used instead.</li>\n</ul>\n<p>I still don't see your problem.</p>",
+        "id": 177882097,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570776093
+    },
+    {
+        "content": "<p>Maybe it is due to cmake version (i am using 3.8). In my case it is not configuring both ( with pthread.h and without ) . So i could not build</p>",
+        "id": 177889380,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570784328
+    },
+    {
+        "content": "<p>This does not make sense to me. CMake doesn't really need to configure the WIN32 version because the _WIN32 macro will be always set for Visual Studio builds, independently from what FindThreads says.</p>\n<p>Does CMake generate a solution (.sln) file?</p>",
+        "id": 177890170,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570785062
+    },
+    {
+        "content": "<p>No. If you have an option  to try with latest versions of cmake,  it would be good</p>",
+        "id": 177909688,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570802759
+    },
+    {
+        "content": "<p>I just run CMake 3.15.4 with the VS 2019 backend. There was an issue with a test program (.exe) which was hard to remove, but I got the VS build files at the end.</p>\n<p>You should really upload your &lt;build directory&gt;/CMakeFiles/CMakeOutput.log.</p>",
+        "id": 177910991,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570803553
+    },
+    {
+        "content": "<p>Ohhh, I was trying with brlcad 7.24. Now tried with latest and it is done !. But what is difference, what was the cause of thread error ?</p>",
+        "id": 177930769,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570815798
+    },
+    {
+        "content": "<p>Can't say without your logs <span aria-label=\"wink\" class=\"emoji emoji-1f609\" role=\"img\" title=\"wink\">:wink:</span></p>",
+        "id": 177998342,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1570901105
+    },
+    {
+        "content": "<p>ok. Is it possible to build latest version and use  dll files  in 7.24  ? especially librt ?</p>",
+        "id": 178008435,
+        "sender_full_name": "scorp08",
+        "timestamp": 1570917775
+    },
+    {
+        "content": "<p>Here the errorlogs from 7.24 (pthread.h -could not finished configure) ... <a href=\"/user_uploads/1549/y_iZJLHIwar_cwmPhZExO2xg/CMakeError.log\" target=\"_blank\" title=\"CMakeError.log\">CMakeError.log</a> <a href=\"/user_uploads/1549/9VPX1IuxShlDg0UeGRgyqg2d/CMakeOutput.log\" target=\"_blank\" title=\"CMakeOutput.log\">CMakeOutput.log</a></p>",
+        "id": 178081048,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571039611
+    },
+    {
+        "content": "<blockquote>\n<p>ok. Is it possible to build latest version and use  dll files  in 7.24  ? especially librt ?</p>\n</blockquote>\n<p>No, it is not possible because of changes in the API. Function parameters have changed meanwhile.</p>",
+        "id": 178086173,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1571044112
+    },
+    {
+        "content": "<blockquote>\n<p>Here the errorlogs from 7.24 (pthread.h -could not finished configure) ... <a href=\"/user_uploads/1549/y_iZJLHIwar_cwmPhZExO2xg/CMakeError.log\" target=\"_blank\" title=\"CMakeError.log\">CMakeError.log</a> <a href=\"/user_uploads/1549/9VPX1IuxShlDg0UeGRgyqg2d/CMakeOutput.log\" target=\"_blank\" title=\"CMakeOutput.log\">CMakeOutput.log</a></p>\n</blockquote>\n<p>All I can say is that</p>\n<div class=\"codehilite\"><pre><span></span>STATUS: Looking for pthread.h\nSTATUS: Looking for pthread.h - not found\nSTATUS: Found Threads: TRUE\n</pre></div>\n\n\n<p>is perfectly right for MS Windows. It has to look like this there.</p>\n<p>Another matter is your compiler. I'm not sure if MSVS 2017 will work with the BRL-CAD 7.24 set-up.</p>",
+        "id": 178091288,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1571049037
+    },
+    {
+        "content": "<p>I also tried with 2013, no success with same error...could not find the problem :(</p>",
+        "id": 178092086,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571049763
+    },
+    {
+        "content": "<p>Maybe it requires an even older version of Visual Studio or a CMake version 2.x.</p>\n<p>BUT, what do you want to do? Why do you want to be compatible with BRL-CAD version 7.24? If you want to write an own application using BRL-CAD libraries, there are other possibilities.</p>",
+        "id": 178096983,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1571054844
+    }
+]

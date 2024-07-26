@@ -1,0 +1,68 @@
+[
+    {
+        "content": "<p>Hi,<br>\nI am experimenting on packaging BRL-CAD as Flatpak to distribute in Flathub for Linux distribution.<br>\n<a href=\"https://www.flatpak.org/\">https://www.flatpak.org/</a><br>\n<a href=\"https://flathub.org/\">https://flathub.org/</a></p>\n<p>The advantage is that once the package is distributed in Flathub. Any Linux distro can install and update BRL-CAD.<br>\nThis also ensures that BRL-CAD that ships with Flathub are the same.</p>\n<p>I have a Flatpak manifest here.<br>\n<a href=\"https://github.com/kevinsmia1939/flathub/tree/org.brlcad.BRL_CAD\">https://github.com/kevinsmia1939/flathub/tree/org.brlcad.BRL_CAD</a></p>\n<p>I want to include more features, but failed to compile when I try to compile with Bullet.<br>\n<a href=\"https://github.com/BRL-CAD/brlcad/issues/86\">https://github.com/BRL-CAD/brlcad/issues/86</a></p>\n<p>Let me know if anyone is interest.</p>",
+        "id": 378402793,
+        "sender_full_name": "Kavin Teenakul",
+        "timestamp": 1690278163
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"634455\">@Kavin Teenakul</span>, that's an interesting approach, which could work.</p>\n<p>First, to answer your question: Don't use Bullet. It was included in the repository some time ago, because there were the chance it could be used. But, as far as I know, it won't be used anywhere in BRL-CAD.</p>\n<p>I have however some more comments:</p>\n<ul>\n<li>Don't pack the developer version but a release. The last one was tagged with <a href=\"https://github.com/BRL-CAD/brlcad/tree/rel-7-34-2\">rel-7-34-2</a>.</li>\n<li>BRL-CAD uses a lot of libraries, which can either be bundled with it or provided by the system (i.e. are already installed). Have an eye on them and choose the setup on purpose. You can review their state with the CMake GUI.</li>\n<li>For a distribution, I would do a release build with optimizations.</li>\n</ul>\n<p>The only (open source) feature, which is not included in a default build, is the appleseed ray tracing art. But this requires an appleseed installation, and I would recommend to omit it for the moment.</p>",
+        "id": 378562550,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1690307873
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> <br>\nThank for the info. I temporary using the latest commit hoping that some of the issues were solved.<br>\nIn the flatpak manifest, I use the bundled dependencies.<br>\nAs for the optimization, did you mean building with -O3 or -O2 flag?<br>\nEdit: Found BRLCAD_OPTIMIZED:BOOL=ON which is ON by default.</p>",
+        "id": 378583013,
+        "sender_full_name": "Kavin Teenakul",
+        "timestamp": 1690312678
+    },
+    {
+        "content": "<p>On my machines, BRLCAD_OPTIMIZED is off by default.</p>\n<p>However, have a look at the summery at the end of the CMake configuration, e.g.</p>\n<div class=\"codehilite\"><pre><span></span><code>CC       = /usr/bin/cc\nCXX      = /usr/bin/c++\nCFLAGS   = -std=c11 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe\n           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions\n           -m64 -g -ggdb3 -O3 -fipa-pta -fstrength-reduce\n           -fexpensive-optimizations -finline-functions -flto\n           -fno-omit-frame-pointer -pedantic -pedantic-errors -Wall -Wextra\n           -Wundef -Wfloat-equal -Wshadow -Wbad-function-cast -Wc++-compat\n           -Winline -Wno-long-long -Wno-variadic-macros -Werror\nCXXFLAGS = -std=c++14 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe\n           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions\n           -ftemplate-depth-128 -m64 -g -ggdb3 -O3 -fipa-pta -fstrength-reduce\n           -fexpensive-optimizations -finline-functions -flto\n           -fno-omit-frame-pointer -pedantic -Wall -Wextra -Wundef\n           -Wfloat-equal -Wshadow -Wbad-function-cast -Wno-inline\n           -Wno-long-long -Wno-variadic-macros -Werror\nLDFLAGS  = -m64 -g -ggdb3\n\nCompile Tcl ........................: ON\nCompile Tk .........................: ON\nCompile Itcl/Itk ...................: ON\nCompile Iwidgets ...................: ON\nCompile libpng .....................: OFF\nCompile libregex ...................: OFF\nCompile zlib .......................: OFF\nCompile STEPcode....................: ON\n\nOpenGL support (optional) ..........: ON\nX11 support (optional) .............: ON\nQt support (optional) ..............: OFF\nRun-time debuggability (optional) ..: ON\n\nBuild 32/64-bit release ............: 64BIT (Auto)\nBuild with optimization ............: ON\nBuild static libraries .............: ON\nBuild dynamic libraries ............: ON\nInstall example geometry models ....: ON\nGenerate extra docs ................: ON (html/man)\n</code></pre></div>\n<p>There, you should see <code>Build with optimization</code> set to <code>ON</code> and <code>CFLAGS</code> and <code>CXXFLAGS</code> with <code>-O3</code>.</p>\n<p>Which reminds me, when you build with Qt support, you get the experimental qged GUI as well.</p>",
+        "id": 378683135,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1690354324
+    },
+    {
+        "content": "<p>Thanks.  I start to build with Qt.</p>\n<p>Do you know if BRLCAD_ENABLE_AQUA, BRLCAD_ENABLE_COVERAGE, BRLCAD_ENABLE_DTRACE, BRLCAD_ENABLE_OPENCL, and BRLCAD_ENABLE_OPENVDB are of any importance?</p>",
+        "id": 378815160,
+        "sender_full_name": "Kavin Teenakul",
+        "timestamp": 1690380316
+    },
+    {
+        "content": "<p>Aqua is the macOS GUI, i.e. not relevant for Linux. Code coverage tests and DTrace is useful for development only. Open Computing Language is used to execute parts of the ray-trace on the graphic card, which is still experimental and should not be used in production.</p>\n<p>OpenVDB adds however the g-vdb export and a remesh for BOTs.</p>",
+        "id": 378883087,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1690391458
+    },
+    {
+        "content": "<p>Hi,</p>\n<p>I succeed in building BRL-CAD Flatpak.<br>\nNeed some testers.</p>\n<p>First install flatpak.<br>\nUbuntu: <code>sudo apt install flatpak</code><br>\nFor other distros, follow this instructions. <a href=\"https://flathub.org/setup\">https://flathub.org/setup</a></p>\n<p>optional: <code>flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo</code></p>\n<p>Then to install BRL-CAD flatpak.<br>\n<code>flatpak install --user https://dl.flathub.org/build-repo/40303/org.brlcad.BRL_CAD.flatpakref</code></p>",
+        "id": 383095542,
+        "sender_full_name": "Kavin Teenakul",
+        "timestamp": 1691535048
+    },
+    {
+        "content": "<p>That's great to hear <span class=\"user-mention\" data-user-id=\"634455\">@Kavin Teenakul</span> ... are there any metrics available for how many people end up installing via flatpak?</p>",
+        "id": 383774247,
+        "sender_full_name": "Sean",
+        "timestamp": 1691707232
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/I.20package.20BRL-CAD.20as.20Flatpak.20for.20Linux.2E.20Anyone.20interest.3F/near/383774247\">said</a>:</p>\n<blockquote>\n<p>That's great to hear <span class=\"user-mention silent\" data-user-id=\"634455\">Kavin Teenakul</span> ... are there any metrics available for how many people end up installing via flatpak?</p>\n</blockquote>\n<p>Hi,<br>\nThis is a test build, so the statistics are not collected.<br>\nThe build is done here: <a href=\"https://github.com/flathub/flathub/pull/4363\">https://github.com/flathub/flathub/pull/4363#</a></p>\n<p>But once it is accept and upload to Flathub, there will be stats below. For example: <a href=\"https://flathub.org/apps/org.mozilla.firefox\">https://flathub.org/apps/org.mozilla.firefox</a><br>\nAlso, stats can also be view here: <a href=\"https://klausenbusk.github.io/flathub-stats/#ref=org.mozilla.firefox&amp;interval=infinity&amp;downloadType=installs\">https://klausenbusk.github.io/flathub-stats/#ref=org.mozilla.firefox&amp;interval=infinity&amp;downloadType=installs</a></p>\n<p>Right now, I just want someone to test BRL-CAD Flatpak. And I also want someone to be a co-owner of the repo in Github as well.<br>\nIf anyone is interest in co-owner the Github repo let me know.</p>",
+        "id": 383785700,
+        "sender_full_name": "Kavin Teenakul",
+        "timestamp": 1691713395
+    },
+    {
+        "content": "<p>Anyone have give it a try?<br>\nUse this to install the latest test build.<br>\nflatpak install --user <a href=\"https://dl.flathub.org/build-repo/42975/org.brlcad.BRL_CAD.flatpakref\">https://dl.flathub.org/build-repo/42975/org.brlcad.BRL_CAD.flatpakref</a></p>",
+        "id": 386708429,
+        "sender_full_name": "Kavin Teenakul",
+        "timestamp": 1692744943
+    },
+    {
+        "content": "<p>I haven't used Flatpak before, but I will definitely give it a try. However, it doesn't have top priority at the moment .</p>",
+        "id": 386911672,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1692807833
+    }
+]

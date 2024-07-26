@@ -1,0 +1,284 @@
+[
+    {
+        "content": "<p>OK, one was resolvable but I don't think the other is - the tcl autotools build doesn't seem to like our crazy pathnames test.</p>",
+        "id": 216263865,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605037433
+    },
+    {
+        "content": "<p>Even when I try to boil it down outside of CMake with those paths, it wants an absolute path for --prefix but doesn't like the path we need to give it:</p>\n<div class=\"codehilite\"><pre><span></span><code>../TCL_BLD/unix/configure --prefix=/home/cyapp/extbuild/build/distcheck-odd_pathnames/1\\ Odd_\\ build\\ dir\\ ++/extinstall/tcl\n\n../TCL_BLD/unix/configure: line 18844: test: too many arguments\n../TCL_BLD/unix/configure: line 18857: Odd_: command not found\nconfigure: creating ./config.status\n./config.status: line 305: Odd_: command not found\nconfig.status: creating Makefile\nconfig.status: error: cannot find input file: ../unix/Makefile.in\n../TCL_BLD/unix/configure: eval: line 37: unexpected EOF while looking for matching `&quot;&#39;\n../TCL_BLD/unix/configure: eval: line 38: syntax error: unexpected end of file\n</code></pre></div>",
+        "id": 216264423,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605037739
+    },
+    {
+        "content": "<p>That's fairly annoying, actually... it means that test can't be reliably run, since there is no guarantee a user's home directory will be in a path that's free of spaces.</p>",
+        "id": 216272102,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605041285
+    },
+    {
+        "content": "<p>/me wonders if the Tcl irc channel has any useful insights...</p>",
+        "id": 216272169,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605041324
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I may need to disable the odd pathnames distcheck, if the tcl build can't handle it</p>",
+        "id": 216297801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605058178
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> you may not recall, but we when through phases struggling with support for spaces with our autotools build</p>",
+        "id": 216306811,
+        "sender_full_name": "Sean",
+        "timestamp": 1605068975
+    },
+    {
+        "content": "<p>it's doable, but just like anything, it has to be intentionally accommodated and it's easy to break when there's not a test for it.  I know some communities that just dismiss paths with spaces as \"don't care\"</p>",
+        "id": 216306862,
+        "sender_full_name": "Sean",
+        "timestamp": 1605069048
+    },
+    {
+        "content": "<p>I'd say file a bug report on it.  that's the kind of thing they'd likely fix right away or dismiss.</p>",
+        "id": 216306939,
+        "sender_full_name": "Sean",
+        "timestamp": 1605069159
+    },
+    {
+        "content": "<p>looking at their code, it actually looks like they try hard to quote everything correctly.  just found one issue that was probably a recent change.</p>",
+        "id": 216307948,
+        "sender_full_name": "Sean",
+        "timestamp": 1605070694
+    },
+    {
+        "content": "<p>just committed a fix, and a manual build with the odd-pathnames path as the prefix seems to have worked</p>",
+        "id": 216308076,
+        "sender_full_name": "Sean",
+        "timestamp": 1605070836
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Ah, nice catch!  I had forgotten (my memories of autotools are dominated by the libpng difficulties that were the straw that broke the camel's back as far as switching to CMake).</p>",
+        "id": 216343927,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605100586
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Looks like that's just the first of a number of issues.  Trying to turn back on the odd pathnames distcheck, the Tcl configure blows up quickly in several ways.  Testing manually (CPPFLAGS and LDFLAGS var setting quotes is a separate issue from the Tcl build but is also a problem) I can go through and quote some stuff in the configure script to get by a few more errors but then I get to the gcc test failing:</p>\n<div class=\"codehilite\"><pre><span></span><code>gcc version 9.3.0 (Ubuntu 9.3.0-17ubuntu1~20.04)\nconfigure:1780: $? = 0\nconfigure:1782: gcc -V &lt;/dev/null &gt;&amp;5\ngcc: error: unrecognized command line option &#39;-V&#39;\ngcc: fatal error: no input files\ncompilation terminated.\nconfigure:1785: $? = 1\nconfigure:1808: checking for C compiler default output file name\nconfigure:1811: gcc  -I/home/user/extbuild/build/distcheck-odd_pathnames/1 Odd_ build dir ++/include -L/home/user/extbuild/build/distcheck-odd_pathnames/1 Odd_ build dir ++/lib conftest.c  &gt;&amp;5\ngcc: error: Odd_: No such file or directory\ngcc: error: build: No such file or directory\ngcc: error: dir: No such file or directory\ngcc: error: ++/include: No such file or directory\ngcc: error: Odd_: No such file or directory\ngcc: error: build: No such file or directory\ngcc: error: dir: No such file or directory\ngcc: error: ++/lib: No such file or directory\nconfigure:1814: $? = 1\nconfigure: failed\n</code></pre></div>",
+        "id": 216345877,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605101647
+    },
+    {
+        "content": "<p>That one is clearly the CPPFLAGS=\"-I/home/user/extbuild/build/distcheck-odd_pathnames/1 Odd_ build dir ++/include\" value not propagating correctly, but even if I don't set that (which won't work long term) I still get a series of other errors.</p>",
+        "id": 216346375,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605101926
+    },
+    {
+        "content": "<p>I get the feeling they've not tested this sort of scenario in a while...</p>",
+        "id": 216346646,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605102071
+    },
+    {
+        "content": "<p>Do we try to go through and fix all of it?</p>",
+        "id": 216346793,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605102145
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   The quick alternative would be for me to put back my CMake Tcl build until we can sort it out with upstream (if they're included to fix it)</p>",
+        "id": 216473655,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605190743
+    },
+    {
+        "content": "<p>Per IRC recommendation, issue filed with Tcl at <a href=\"https://core.tcl-lang.org/tcl/tktview/888c1a8c9d84c1f5da4a46352bbf531424fe7126\">https://core.tcl-lang.org/tcl/tktview/888c1a8c9d84c1f5da4a46352bbf531424fe7126</a></p>",
+        "id": 216476856,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605192266
+    },
+    {
+        "content": "<p>Grrrr.  Tk CMake logic isn't working properly on Windows in stand-alone mode, needed for ExternalProject_Add use.  No easy answers...</p>",
+        "id": 216535027,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218209
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I don't have confidence in my own ability to identify and fix the quoting issues in autoconf.  I can try if necessary, but is there any chance you could take a look at it?  This is the stand-alone test that should (hopefully) trip most of the same wires as the odd-pathnames build:</p>\n<div class=\"codehilite\"><pre><span></span><code><span class=\"ch\">#!/bin/bash</span>\nmkdir <span class=\"s2\">&quot;1 Odd_ source dir++&quot;</span>\nmkdir <span class=\"s2\">&quot;1 Odd_ build dir++&quot;</span>\nmkdir <span class=\"s2\">&quot;1 Odd_ install dir++&quot;</span>\n<span class=\"nb\">cd</span> <span class=\"s2\">&quot;1 Odd_ source dir++&quot;</span>\ntar -xvf ~/Downloads/tcl8.6.10-src.tar.gz\n<span class=\"nb\">cd</span> <span class=\"s2\">&quot;</span><span class=\"nv\">$HOME</span><span class=\"s2\">/1 Odd_ build dir++&quot;</span>\n<span class=\"nb\">export</span> <span class=\"nv\">CPPFLAGS</span><span class=\"o\">=</span><span class=\"s2\">&quot;-I</span><span class=\"nv\">$HOME</span><span class=\"s2\">/1 Odd_ install dir++/include&quot;</span>\n<span class=\"nb\">export</span> <span class=\"nv\">LDFLAGS</span><span class=\"o\">=</span><span class=\"s2\">&quot;-L</span><span class=\"nv\">$HOME</span><span class=\"s2\">/1 Odd_ install dir++/lib&quot;</span>\n<span class=\"s2\">&quot;</span><span class=\"nv\">$HOME</span><span class=\"s2\">/1 Odd_ source dir++/tcl8.6.10/unix/configure&quot;</span> --prefix<span class=\"o\">=</span><span class=\"s2\">&quot;</span><span class=\"nv\">$HOME</span><span class=\"s2\">/1 Odd_ install dir++&quot;</span>\n</code></pre></div>",
+        "id": 216535214,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218313
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames/near/216346793\">said</a>:</p>\n<blockquote>\n<p>Do we try to go through and fix all of it?</p>\n</blockquote>\n<p>erm, I dunno -- I got a successful build on Mac after the change I made</p>",
+        "id": 216535526,
+        "sender_full_name": "Sean",
+        "timestamp": 1605218478
+    },
+    {
+        "content": "<p>I can give that script a try, but just at a glance, those flags look wrong  to me already</p>",
+        "id": 216535673,
+        "sender_full_name": "Sean",
+        "timestamp": 1605218556
+    },
+    {
+        "content": "<p>those spaces need to be escaped or the whole thing quoted, like export CPPFLAGS=\"-I\\\"$HOME/1 Odd_ install dir++/include\\\"\"<br>\nor better, export CPPFLAGS=\"\\\"-I$HOME/1 Odd_ install dir++/include\\\"\"</p>",
+        "id": 216535932,
+        "sender_full_name": "Sean",
+        "timestamp": 1605218707
+    },
+    {
+        "content": "<p>/me's eyes cross</p>",
+        "id": 216535965,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218731
+    },
+    {
+        "content": "<p>not as good, but should also work so long as HOME doesn't have spaces: export CPPFLAGS=\"-I$HOME/1\\ Odd_\\ install\\ dir++/include\"</p>",
+        "id": 216536016,
+        "sender_full_name": "Sean",
+        "timestamp": 1605218763
+    },
+    {
+        "content": "<p>Maybe the better thing to do is define a couple scripts to trigger the configure and build stages, have CMake configure_file them, and then just run them - between shell itself and CMake this is a quoting nightmare</p>",
+        "id": 216536117,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218816
+    },
+    {
+        "content": "<p>(which also means it will be a maintainability nightmare...)</p>",
+        "id": 216536178,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218857
+    },
+    {
+        "content": "<p>er, so try it without first then.... :)</p>",
+        "id": 216536215,
+        "sender_full_name": "Sean",
+        "timestamp": 1605218881
+    },
+    {
+        "content": "<p>Does the Mac build work for you with that script if you take out the flag setting?</p>",
+        "id": 216536216,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218881
+    },
+    {
+        "content": "<p>you mean without the flags?  IIRC I had to add them (or some version of them) for Tcl to pick up our local copy of zlib</p>",
+        "id": 216536401,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605218972
+    },
+    {
+        "content": "<p>the quoting rules are pretty straight forward.  if a var is within double-quotes, it's going to be expanded.  the cppflags and ldflags you have there are invalid pretty much everywhere not because of shell/cmake behavior but because Odd_ is not a flag and \"install\" is not a flag... etc.</p>",
+        "id": 216536603,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219029
+    },
+    {
+        "content": "<p>yes, I just ran configure with the odd prefix and it worked fine after the one fix</p>",
+        "id": 216536648,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219062
+    },
+    {
+        "content": "<p>Alright, let me try that...</p>",
+        "id": 216536788,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605219130
+    },
+    {
+        "content": "<p>if you have to set LDFLAGS, then you should expect to need more than -L for runtime lookup to work.  but should definitely try without it first and see.</p>",
+        "id": 216536878,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219203
+    },
+    {
+        "content": "<p>/home/user/1 Odd_ source dir++/tcl8.6.10/unix/configure: line 721: test: too many arguments<br>\n/home/user/1 Odd_ source dir++/tcl8.6.10/unix/configure: line 727: test: too many arguments<br>\nconfigure: error: sources are in /home/user/1 Odd_ source dir++/tcl8.6.10/unix, but `cd /home/user/1 Odd_ source dir++/tcl8.6.10/unix' does not work</p>",
+        "id": 216537257,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605219392
+    },
+    {
+        "content": "<p>/me looks</p>",
+        "id": 216537369,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219470
+    },
+    {
+        "content": "<p>that's because srcdir has spaces, I only fixed destination having spaces</p>",
+        "id": 216537496,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219540
+    },
+    {
+        "content": "<p>Right - that's why the script is set up the way it is - to try and introduce spaces everywhere we might hit them (do hit them, in distcheck-odd_pathnames)</p>",
+        "id": 216537575,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605219586
+    },
+    {
+        "content": "<p>I'll have to check if that's fixable -- autotools lets you target any path, but I'm not sure about configuring from any path</p>",
+        "id": 216537706,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219659
+    },
+    {
+        "content": "<p>can certainly fix the configure script manually easily enough -- it's only used in a few places</p>",
+        "id": 216537735,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219679
+    },
+    {
+        "content": "<p>it's just that may be generated code, a possible limitation of autotools.  lemme check.</p>",
+        "id": 216537777,
+        "sender_full_name": "Sean",
+        "timestamp": 1605219719
+    },
+    {
+        "content": "<p>Yeah, even if I quote those config.status isn't happy</p>",
+        "id": 216537832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605219734
+    },
+    {
+        "content": "<p>If true (i.e. it's an innate autotools limitation) that pretty much restricts us to requiring a system Tcl/Tk install for distcheck-odd_pathnames...</p>",
+        "id": 216538155,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605219953
+    },
+    {
+        "content": "<p>it is an autotools limitation, documented even.  they say outright that paths with special chars are not supported for source, build, or destination dirs.  reading people's experience, looks like source and destination dirs can have spaces, but the build dir is a bit more ingrained.</p>",
+        "id": 216542853,
+        "sender_full_name": "Sean",
+        "timestamp": 1605222661
+    },
+    {
+        "content": "<p>so I think we either just  add detection to our cmakelists to warn and/or make sure we build from a path without spaces when building ext</p>",
+        "id": 216543000,
+        "sender_full_name": "Sean",
+        "timestamp": 1605222768
+    },
+    {
+        "content": "<p>I think I've got something workable in r77736.</p>",
+        "id": 216564611,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605240004
+    },
+    {
+        "content": "<p>sounds good</p>",
+        "id": 216605670,
+        "sender_full_name": "Sean",
+        "timestamp": 1605271940
+    },
+    {
+        "content": "<p>on a barely related topic, I was happy to see cmake has support for non-failure test codes, i.e., a way to run a test that figures out some testing condition isn't satisfied, so it can report a different code that makes the test actually report as skipped instead of blankly claiming it failed or falsely making it appear to have passed.   no action, just thought it was a nice discovery.  I put it to use on the bigdb test which can't run on low-memory systems.</p>",
+        "id": 216606125,
+        "sender_full_name": "Sean",
+        "timestamp": 1605272208
+    }
+]

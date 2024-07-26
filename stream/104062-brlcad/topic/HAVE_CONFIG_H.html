@@ -1,0 +1,164 @@
+<html>
+<head><meta charset="utf-8"><title>HAVE_CONFIG_H · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html">HAVE_CONFIG_H</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="199909969"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199909969" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199909969">(Jun 05 2020 at 17:37)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Does it make sense these days to have the HAVE_CONFIG_H define in common.h?  As far as I know we're not doing anything to make sure it works without defining that variable.</p>
+
+
+
+<a name="199910322"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199910322" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199910322">(Jun 05 2020 at 17:40)</a>:</h4>
+<p>Anything defining the *_DLL_EXPORTS and *_DLL_IMPORTS defines will need it for sure at the moment, since the COMPILER_DLLEXPORT and COMPILER_DLLIMPORT definitions are coming from CMake.  I could check that COMPILER_DLLEXPORT is defined and define out the *_EXPORT if it's not, but that would lead to working, silent skipping of the hidden visibility feature as well as complicating all the *_EXPORT blocks...</p>
+
+
+
+<a name="199911882"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199911882" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199911882">(Jun 05 2020 at 17:55)</a>:</h4>
+<p>After thinking it through that's probably the best option though - it will keep default behavior for codes that don't use brlcad_config.h</p>
+
+
+
+<a name="199916218"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199916218" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199916218">(Jun 05 2020 at 18:24)</a>:</h4>
+<p>Well, best for Linux anyway - Windows is still going to require HAVE_CONFIG_H,  because without it they won't have the declspec definitions they need in the headers</p>
+
+
+
+<a name="199916862"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199916862" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199916862">(Jun 05 2020 at 18:29)</a>:</h4>
+<p>We were more less accidentally stand-alone previously with every definition having the platform specific logic... </p>
+<p>Looks like the options are require HAVE_CONFIG_H in client codes or go back to having the ifdef PLATFORM piece in common.h that sets COMPILER_DLL* values without the configure test.</p>
+
+
+
+<a name="199918014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199918014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199918014">(Jun 05 2020 at 18:38)</a>:</h4>
+<p>Actually, they'll need both BRLCADBUILD and HAVE_CONFIG_H.  Ugh.</p>
+
+
+
+<a name="199918094"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199918094" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199918094">(Jun 05 2020 at 18:39)</a>:</h4>
+<p>Should we make a second generated header that's not specific to BRLCADBUILD?</p>
+
+
+
+<a name="199918795"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199918795" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199918795">(Jun 05 2020 at 18:45)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Ugh.  I know you don't like platform symbol tests Sean, but darned if I'm seeing a better solution to this one so far...</p>
+
+
+
+<a name="199918820"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199918820" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199918820">(Jun 05 2020 at 18:45)</a>:</h4>
+<p>Conceptually, the config header is supposed to be a report out of the compiling-computer's configuration</p>
+
+
+
+<a name="199918939"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199918939" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199918939">(Jun 05 2020 at 18:46)</a>:</h4>
+<p>So it shouldn't have the import/export logic in it as to an installed brl-cad, the config header shouldn't exist to them.</p>
+
+
+
+<a name="199919064"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919064" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919064">(Jun 05 2020 at 18:47)</a>:</h4>
+<p>the typical way this is dealt with is compile-time definitions passed as flags</p>
+
+
+
+<a name="199919137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919137">(Jun 05 2020 at 18:48)</a>:</h4>
+<p>But how would the client code know it needs to define them in the first place?</p>
+
+
+
+<a name="199919412"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919412" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919412">(Jun 05 2020 at 18:51)</a>:</h4>
+<p>API instructions for each lib typically if import isn't the default, but usually import is simply the default and then the local build has to define exports accordingly.</p>
+
+
+
+<a name="199919575"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919575" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919575">(Jun 05 2020 at 18:52)</a>:</h4>
+<p>Did a problem crop up?</p>
+
+
+
+<a name="199919613"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919613" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919613">(Jun 05 2020 at 18:53)</a>:</h4>
+<p>yes.  client code attempted to build, but COMPILE_DLLIMPORT wasn't defined</p>
+
+
+
+<a name="199919761"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919761" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919761">(Jun 05 2020 at 18:54)</a>:</h4>
+<p>I'm not seeing a reference to COMPILE_DLLIMPORT on trunk -- where is it?</p>
+
+
+
+<a name="199919795"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919795" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919795">(Jun 05 2020 at 18:54)</a>:</h4>
+<p>I found it, common.h</p>
+
+
+
+<a name="199919804"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919804" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919804">(Jun 05 2020 at 18:55)</a>:</h4>
+<p>typo</p>
+
+
+
+<a name="199919827"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919827" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919827">(Jun 05 2020 at 18:55)</a>:</h4>
+<p>Sorry, COMPILER_DLLIMPORT.</p>
+
+
+
+<a name="199919887"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919887" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919887">(Jun 05 2020 at 18:55)</a>:</h4>
+<p>Set in toplevel CMakeLists.txt line 1980, written to the brlcad_config.h header</p>
+
+
+
+<a name="199919970"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199919970" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199919970">(Jun 05 2020 at 18:56)</a>:</h4>
+<p>The __declspec(dllimport) used to be hardcoded everywhere, so client codes didn't have to worry about it.</p>
+
+
+
+<a name="199920114"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199920114" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199920114">(Jun 05 2020 at 18:57)</a>:</h4>
+<p>right, so yeah, should take it out of config.  that belongs in common.h or down in each lib</p>
+
+
+
+<a name="199920754"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199920754" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199920754">(Jun 05 2020 at 19:03)</a>:</h4>
+<p>I’d put it in common with some offed logic, like ifdef attribute</p>
+
+
+
+<a name="199921234"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199921234" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199921234">(Jun 05 2020 at 19:08)</a>:</h4>
+<p>So really, brlcad_config.h shouldn't be installed at all?  Or do we include it as a reference so we know how the libs were built?</p>
+
+
+
+<a name="199959226"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/HAVE_CONFIG_H/near/199959226" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/HAVE_CONFIG_H.html#199959226">(Jun 06 2020 at 06:29)</a>:</h4>
+<p>it's for the latter.  granted someone can set BRLCADBUILD and HAVE_CONFIG_H to try and use it, but that's on them and why they have to take extra steps.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

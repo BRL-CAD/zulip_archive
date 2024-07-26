@@ -1,0 +1,94 @@
+<html>
+<head><meta charset="utf-8"><title>OSX · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html">OSX</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="195113680"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195113680" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195113680">(Apr 23 2020 at 20:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  May be worth giving the Mac another shot.  The X framebuffer issue here doesn't immediately appear to be the Tk stubs - when force them into the Tk build MGED crashes on start, and the include line for gcc doesn't seem to be pulling it in.</p>
+
+
+
+<a name="195119204"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195119204" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195119204">(Apr 23 2020 at 21:02)</a>:</h4>
+<p>Hmm... I wonder if that xlib include was just cargo culted in by me or was needed on Windows</p>
+
+
+
+<a name="195119312"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195119312" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195119312">(Apr 23 2020 at 21:03)</a>:</h4>
+<p>itk definitely needs the x11 headers due to how it peeks into tk, so it would need them on windows</p>
+
+
+
+<a name="195130304"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195130304" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195130304">(Apr 23 2020 at 23:06)</a>:</h4>
+<p>Yeah, X embedded framebuffer crashes with both system and local Tcl/Tk builds, even when I completely remove the src/other/tk source directory and build against system - don't see how it could be the xlib include dir.</p>
+
+
+
+<a name="195146998"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195146998" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195146998">(Apr 24 2020 at 04:59)</a>:</h4>
+<p>RELEASE build completed successfully with default cmake options, will try distcheck-full and report out if it fails.</p>
+
+
+
+<a name="195147229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195147229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195147229">(Apr 24 2020 at 05:04)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/OSX/near/195130304" title="#narrow/stream/104062-general/topic/OSX/near/195130304">said</a>:</p>
+<blockquote>
+<p>Yeah, X embedded framebuffer crashes with both system and local Tcl/Tk builds, even when I completely remove the src/other/tk source directory and build against system - don't see how it could be the xlib include dir.</p>
+</blockquote>
+<p>Yeah, unlikely unless they're getting pulled from somewhere else.  Check otool -L and make sure wish and mged are linking the same libs</p>
+
+
+
+<a name="195175836"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195175836" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195175836">(Apr 24 2020 at 11:39)</a>:</h4>
+<p>They are - MGED has more obviously, but all of wish's libs are present in the MGED linkages</p>
+
+
+
+<a name="195347179"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195347179" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195347179">(Apr 26 2020 at 18:46)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  are we still busted on the Mac?</p>
+
+
+
+<a name="195379933"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195379933" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195379933">(Apr 27 2020 at 07:13)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/OSX/near/195146998" title="#narrow/stream/104062-general/topic/OSX/near/195146998">said</a>:</p>
+<blockquote>
+<p>RELEASE build completed successfully with default cmake options, will try distcheck-full and report out if it fails.</p>
+</blockquote>
+<p>so looks like distcheck-enableall_release failed .. iges converter crashed.  that's a new on to me.  it's crashing after "...running ../bin/g-iges -o iges.import3.export.iges iges.import3.g box.nmg" (and reporting db_lookup(box.nmg) failed: box.nmg does not exist), followed by "... running diff -I G iges.export.iges iges.import.export.iges" and<br>
+"... running ../bin/g-iges -f -o iges.m35.r516.iges iges.m35.g r516" &lt;-- which is the one that crashed</p>
+
+
+
+<a name="195421055"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195421055" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195421055">(Apr 27 2020 at 14:01)</a>:</h4>
+<p>O.o  I didn't realize anything had changed recently with the iges converter...  are you able to slap a debugger on it?</p>
+
+
+
+<a name="195747599"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195747599" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195747599">(Apr 29 2020 at 18:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> what were you wanting to do about this for the 7.30.8 release?</p>
+
+
+
+<a name="195747890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX/near/195747890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.html#195747890">(Apr 29 2020 at 18:03)</a>:</h4>
+<p>Let me see what the backtrace looks like</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

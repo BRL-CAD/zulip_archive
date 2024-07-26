@@ -1,0 +1,728 @@
+[
+    {
+        "content": "<p>Welp, <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> the new facetize logic just saved me some effort.  After nearly 24 hours processing, I got something where I would have gotten nothing:</p>\n<div class=\"codehilite\"><pre><span></span><code>NMG: tessellating my.ebm...\nNMG: failed to generate my.bot\nCM: error at size 0.883902\nCM: retrying with size 0.0883902\nCM: completed in 16 seconds with size 0.0883902\nCM: completed in 20 seconds with size 0.0795512\nCM: completed in 26 seconds with size 0.0715961\nCM: timed out after 30 seconds with size 0.0644365\nCM: unable to polygonize at target size (0.0662927), using last successful BoT with 2064364 faces, feature size 0.0715961\nCM: decimation succeeded, final BoT has 55724 faces\n</code></pre></div>\n<p>Lots of bits missing including important details, but enough succeeded that I think I can make it work.</p>",
+        "id": 219787983,
+        "sender_full_name": "Sean",
+        "timestamp": 1607902777
+    },
+    {
+        "content": "<p>24 HOURS processing..... :)</p>",
+        "id": 219787991,
+        "sender_full_name": "Sean",
+        "timestamp": 1607902795
+    },
+    {
+        "content": "<p>memory usage never skyrocketed.  I think it was just a lot of single-threaded O(N^3) iterations that made it take forever.</p>",
+        "id": 219788043,
+        "sender_full_name": "Sean",
+        "timestamp": 1607902839
+    },
+    {
+        "content": "<p>Hmm.  Was it 24hrs on the NMG for my.ebm, or is my.ebm part of a larger model?</p>",
+        "id": 219792895,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607910808
+    },
+    {
+        "content": "<p>Unfortunately a timeout bail on NMG would be quite a lot of work... IIRC I looked at it back when I did the facetize setup.  There's basically a whole lot of individual steps you would need to pass a time limit through.  An alternative might be an environment variable, but the problem there would be checking that a whole lot in internal NMG routines.  I never did id a path forward that didn't involve basically rewriting it...</p>",
+        "id": 219793008,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607910998
+    },
+    {
+        "content": "<p>Best answer I have so far would be a proper subprocess we could terminate, but that needs an over-the-wire communication of geometry to and from the subprocess.</p>",
+        "id": 219793015,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607911071
+    },
+    {
+        "content": "<p>Poor man's answer of keeping input to a tmp file and dbconcating the output back in <em>might</em> work to get up and running, but we would still need a subprocess based facetize command.</p>",
+        "id": 219793080,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607911171
+    },
+    {
+        "content": "<p>I didn't want it to bail out.  If it would have succeeded, it would have been what I wanted.  I apparently lost two orders of magnitude polys.</p>",
+        "id": 219800758,
+        "sender_full_name": "Sean",
+        "timestamp": 1607922099
+    },
+    {
+        "content": "<p>Which wasn't so bad, but then when I went to combine it with another bot, I again lost two more orders and now it's unusable:</p>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; facetize tip2.bot tip2.r\nNMG: tessellating tip2.r...\nNMG: failed to generate tip2.bot\nCM: error at size 28.4152\nCM: retrying with size 2.84152\nCM: error at size 2.84152\nCM: retrying with size 1.42076\nCM: error at size 1.42076\nCM: retrying with size 0.710381\nCM: completed in 4 seconds with size 0.710381\nCM: successfully polygonized BoT with 150508 faces at feature size 0.497267\nCM: decimation succeeded, final BoT has 7370 faces\n</code></pre></div>",
+        "id": 219800824,
+        "sender_full_name": "Sean",
+        "timestamp": 1607922137
+    },
+    {
+        "content": "<p>I was originally just surprised that it worked the first time despite taking 24 hours.   It probably was 24 hours on the nmg part.  Don't know how long the other part took.</p>",
+        "id": 219800937,
+        "sender_full_name": "Sean",
+        "timestamp": 1607922259
+    },
+    {
+        "content": "<p>Is there any way to control the quality?</p>",
+        "id": 219800941,
+        "sender_full_name": "Sean",
+        "timestamp": 1607922270
+    },
+    {
+        "content": "<p>trying --feature-size 0.1</p>",
+        "id": 219801065,
+        "sender_full_name": "Sean",
+        "timestamp": 1607922419
+    },
+    {
+        "content": "<p>Well, I have to say I'm impressed - <a href=\"https://github.com/elalish/manifold\">https://github.com/elalish/manifold</a> managed to \"facetize -r\" an xpushed tire with tread successfully:</p>\n<p><a href=\"/user_uploads/1549/LlngSCjEa_o2NM0PJ46io--4/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/LlngSCjEa_o2NM0PJ46io--4/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/LlngSCjEa_o2NM0PJ46io--4/image.png\"></a></div>",
+        "id": 398779067,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698360889
+    },
+    {
+        "content": "<p>And it looks like it handled all the valid m35 truck cases as well.  Neither case needing the fallback methods.</p>",
+        "id": 398779891,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698361324
+    },
+    {
+        "content": "<p>Not sure about havoc yet - it completes, but the results aren't right - first suspect is my tree walking though.</p>",
+        "id": 398784516,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698364304
+    },
+    {
+        "content": "<p>Ah, the tree walk was faulty.  OK, getting more failure cases now.  Still impressed it handled tire, but not handling all of m35 and crashing on havoc.  Time to isolate some failure inputs.</p>",
+        "id": 398959995,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698436439
+    },
+    {
+        "content": "<p>Heh - forgot to support the trivial case, so a lot of simple things fail.  Duh...</p>",
+        "id": 398977384,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698446649
+    },
+    {
+        "content": "<p>Incredible.  Only 3 failed regions for facetize -r --MANIFOLD havoc h and only one of those regions shows a non-empty rt image.</p>",
+        "id": 398988817,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698454703
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/VP1aTfaU7PJVG5eNYzHoFFA6/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/VP1aTfaU7PJVG5eNYzHoFFA6/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/VP1aTfaU7PJVG5eNYzHoFFA6/image.png\"></a></div>",
+        "id": 398988886,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698454765
+    },
+    {
+        "content": "<p>To the best of my knowledge, this is the best facetization result that has ever been achieved with the havoc model.</p>",
+        "id": 398989055,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698454836
+    },
+    {
+        "content": "<p>I want to say I recall Havoc facetizing back in the early 2000's ...   Around v5 days.  Of course that was all pre-richard..  Need that dashboard to see if I'm just wearing rosy-colored history glasses.  We do have an edge-case test set stashed somewhere with all possible combinations of two arbs that was set up for conversion testing.</p>",
+        "id": 399171999,
+        "sender_full_name": "Sean",
+        "timestamp": 1698600212
+    },
+    {
+        "content": "<p>Still that is impressive results.  If there's a way to prevent/catch the crashes, I'd say toss it into the mix of multiple methods to try.</p>",
+        "id": 399172054,
+        "sender_full_name": "Sean",
+        "timestamp": 1698600254
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I was able to wrap it in a try/catch, so it looks like it'll work.  I've got it wired in now, and building on Windows as well. CI says it builds on Mac as well but I've not tested it personally there.</p>",
+        "id": 399178894,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698606883
+    },
+    {
+        "content": "<p>You can give it a try with latest main if you like - for me, \"facetize -r havoc h\" succeeds with 1 NMG fallback (the two failures are both evaluate to empty regions).  Ditto m35, and if I'm not mistaken this is overall quite fast compared to the NMG evaluations.</p>",
+        "id": 399179014,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698606982
+    },
+    {
+        "content": "<p>Hmm.  I noticed an mistake on my part which is probably inflating the success rate of the new boolean logic for more complex cases - if the boolean evaluation fails, my logic was simply reporting an empty result and continuing onward.  That resulted (for example) in havoc reporting a successful facetize at a top level, even though it should have failed on the known difficult region that requires NMG fallback.</p>",
+        "id": 400059672,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698983734
+    },
+    {
+        "content": "<p>Need to re-run and get new numbers</p>",
+        "id": 400059684,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698983751
+    },
+    {
+        "content": "<p>Wait... now I'm confused.  I corrected the error returns, but the rt_booltree_evaluate accepts the TREE_NULL return from a nested call and keeps going.  Looking at the nmg_booltree_evaluate I refactored that from, as far as I can tell that's also what it is doing... is the intent of this to ignore lower level failures and proceed?</p>",
+        "id": 400063645,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698986290
+    },
+    {
+        "content": "<p>I guess that sorta makes sense, as the facetize treewalk logic can't actually tell the difference between an empty bool eval result and a failure to generate output as long as both cases just return the same TREE_NULL result...</p>",
+        "id": 400064014,
+        "sender_full_name": "starseeker",
+        "timestamp": 1698986637
+    },
+    {
+        "content": "<p>I don't know if this is related: I have a lot of geometries, imported from other CAD programs, with plate-mode bots. The tessellation of these objects is however not implemented at all. See rt_bot_tess() in src/librt/primitives/bot/bot.c. The function returns -1 for RT_BOT_PLATE.</p>",
+        "id": 401935901,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1699951734
+    },
+    {
+        "content": "<p>It's separate from the booltree_evaluate question, but I'm actually working on the plate mode issue right now.  Conversion of plate mode bots to explicit volumes is actually a very difficult problem in general.  I'm trying what amounts to a brute force solution, but it's still a work in progress.</p>",
+        "id": 402223471,
+        "sender_full_name": "starseeker",
+        "timestamp": 1700051023
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"484201\">@Christopher</span>   Here's the ged_tessellate line I'm using:</p>\n<p>bin/ged_tessellate --tol-abs 0.00000000000000000 --tol-rel 0.01000000000000000 --tol-norm 0.00000000000000000 --nmg --max-time 15 -O aet.g twisttrc.s</p>",
+        "id": 417519387,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706040244
+    },
+    {
+        "content": "<p>what's with all the trailing zeros...</p>",
+        "id": 417525675,
+        "sender_full_name": "Sean",
+        "timestamp": 1706042882
+    },
+    {
+        "content": "<p>copy / paste from a \"%0.17f\" sprintf</p>",
+        "id": 417526010,
+        "sender_full_name": "Christopher",
+        "timestamp": 1706043018
+    },
+    {
+        "content": "<p>and that name could use some work, seems misleading to me as it's not a ged_*() function nor does it correspond with a ged command.  If it's strictly a subprocess helper, it should probably not be installed in bin (libexec material).</p>\n<p>I presume it was added to more gracefully handle facetizations methods that otherwise crash?</p>",
+        "id": 417526415,
+        "sender_full_name": "Sean",
+        "timestamp": 1706043206
+    },
+    {
+        "content": "<p>Correct.  The command line is generated from the parent facetize command, so those numbers are simply printings of whatever the current tolerance settings are in the current MGED session.  It's not normally meant to be edited by humans - it's a library-to-subprocess command line.</p>",
+        "id": 417526894,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706043391
+    },
+    {
+        "content": "<p>It's a subprocess helper.  I haven't tried putting it in another location to run yet, so we'll have to see if that can work (particularly on Windows).  The naming convention isn't set in stone - I just had to call it something, and the functionality is a) specific to libged and b) intended for internal use in the library's facetize command.</p>",
+        "id": 417527234,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706043531
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"484201\">Christopher</span> <a href=\"#narrow/stream/104062-general/topic/facetize/near/417526010\">said</a>:</p>\n<blockquote>\n<p>copy / paste from a \"%0.17f\" sprintf</p>\n</blockquote>\n<p>I think the desired specifier was maybe \"%.17g\" ?</p>",
+        "id": 417527638,
+        "sender_full_name": "Sean",
+        "timestamp": 1706043693
+    },
+    {
+        "content": "<p>I suppose you could argue for _ged_facetize_tessellate if we wanted to denote it as an internal tool for a specific libged command, but I haven't given that aspect much thought yet - I needed to prove the whole idea could work at all technically before the naming conventions became important.  I think (knock on wood) it's looking like it can work, so it may be time now to think about that.</p>",
+        "id": 417527705,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706043721
+    },
+    {
+        "content": "<p>then yeah, sounds definitely libexec material.  that's defined specifically for binaries/plugins that one might run from library or application code, not by users.</p>",
+        "id": 417527910,
+        "sender_full_name": "Sean",
+        "timestamp": 1706043799
+    },
+    {
+        "content": "<p>If we wanted to have a shorter string when printf can do something intelligent that'd be correct, but my first concern in that situation was recreating the exact floating point number stored in the parent libged tolerance struct in the child program.  My understanding was the reliable way to do that was to put enough digits into the string to ensure per the standards that it would get read out and in the same way.</p>",
+        "id": 417527919,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706043804
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/facetize/near/417527705\">said</a>:</p>\n<blockquote>\n<p>I suppose you could argue for _ged_facetize_tessellate if we wanted to denote it as an internal tool for a specific libged command, but I haven't given that aspect much thought yet - I needed to prove the whole idea could work at all technically before the naming conventions became important.  I think (knock on wood) it's looking like it can work, so it may be time now to think about that.</p>\n</blockquote>\n<p>If you're at &gt; 99% conversions.. that's not exactly in the realm of \"proving the whole idea could work\".  That's well past proven.</p>",
+        "id": 417528224,
+        "sender_full_name": "Sean",
+        "timestamp": 1706043936
+    },
+    {
+        "content": "<p>I think everything in libexec right now is a .so/.dll file - I don't think we've figured out yet how to get an exe in there working portably.</p>",
+        "id": 417528459,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706044022
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/facetize/near/417527919\">said</a>:</p>\n<blockquote>\n<p>If we wanted to have a shorter string when printf can do something intelligent that'd be correct, but my first concern in that situation was recreating the exact floating point number stored in the parent libged tolerance struct in the child program.  My understanding was the reliable way to do that was to put enough digits into the string to ensure per the standards that it would get read out and in the same way.</p>\n</blockquote>\n<p>I got that intent, but that doesn't explain the trailing zeros.. :) </p>\n<p>there's no parsing difference I'm aware of between 0.0 and 0.00000000 in any fathomable situation :)</p>",
+        "id": 417528510,
+        "sender_full_name": "Sean",
+        "timestamp": 1706044045
+    },
+    {
+        "content": "<p>Well, I'm at &gt;99% on one platform - ubuntu linux.  With the subprocess tricks, I figured I needed to show it working on at least Linux, Windows and Mac before it could be considered a serious candidate</p>",
+        "id": 417528581,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706044076
+    },
+    {
+        "content": "<p>%g trims trailing zeros, which is why I suggested that -- and I think still applies the same precision requested</p>",
+        "id": 417528702,
+        "sender_full_name": "Sean",
+        "timestamp": 1706044115
+    },
+    {
+        "content": "<p>Does reading in the string \"0\" into memory always result in an exact floating point zero?  I'm not sure what the exact rules are for that.  My only recollection on that topic from back in the day was there's a whole bunch of ways to get it wrong, and since those command lines aren't for humans anyway I wasn't too worried about it.  If there's no danger we can certainly go with %g.</p>",
+        "id": 417528851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706044186
+    },
+    {
+        "content": "<p>The trailing zeros are fine, just a curiosity.  I don't think there's any situation where %.17g won't parse back exactly what you wrote.  It will resort to scientific notation if the number is really big or really small, but that will still parse back in to the precision that was printed.  Not a big deal either way.</p>",
+        "id": 417529845,
+        "sender_full_name": "Sean",
+        "timestamp": 1706044536
+    },
+    {
+        "content": "<p>Reading in a zero will always be exact floating point zero (i.e., all bits zero) as far as I know and have ever seen.  That absolutely holds for IEEE 754, but also non 754's predating.</p>",
+        "id": 417530296,
+        "sender_full_name": "Sean",
+        "timestamp": 1706044699
+    },
+    {
+        "content": "<p>OK.  I think I got the %0.17f bit from back when I was exploring the what and why of std::max_digits10:  <a href=\"https://stackoverflow.com/a/22458961/2037687\">https://stackoverflow.com/a/22458961/2037687</a></p>",
+        "id": 417530534,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706044803
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'm down with trying to figure out how to get executables into libexec for these purposes, but I do know I tried to figure out something similar on Windows at least once before, many years back, and struck out.  I might have better luck now, but it's basically the \"how do you keep a .exe in one place and .dll files in another\" problem, and that's one I still don't know the \"right\" answer for yet.</p>",
+        "id": 417531300,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706045090
+    },
+    {
+        "content": "<p>Guess we would start here:  <a href=\"https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order\">https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order</a></p>",
+        "id": 417532151,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706045404
+    },
+    {
+        "content": "<p>Nothing wrong with the %0.17f, I'd leave it if it's working.  Anything else is potential cleanup later but would probably involve a printing helper function, so not as neat code-wise.</p>",
+        "id": 417532244,
+        "sender_full_name": "Sean",
+        "timestamp": 1706045435
+    },
+    {
+        "content": "<p>.17g is going to ensure 17 significant digits, so that'll work for tolerances, but not if someone has tol &gt; 1 -- though in that situation printing 17 after isn't accurate either as we traded mantissa with exponent to go bigger.</p>",
+        "id": 417532439,
+        "sender_full_name": "Sean",
+        "timestamp": 1706045521
+    },
+    {
+        "content": "<p>Hmm - I wonder if this might be our ticket to making lib work on Windows:  <a href=\"https://learn.microsoft.com/en-us/windows/win32/api/Winbase/nf-winbase-setdlldirectorya\">https://learn.microsoft.com/en-us/windows/win32/api/Winbase/nf-winbase-setdlldirectorya</a></p>",
+        "id": 417532950,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706045736
+    },
+    {
+        "content": "<p>We'd need to do that across the board for all of our executables though.  Wonder if there's a clean way to do that without 400 new function calls in the main()s.  I suppose we could have bu_setprogname do it under the hood since we do need to call that one everywhere already, but that feels like a violation of the API design since load path altering isn't its job.</p>",
+        "id": 417533286,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706045875
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/facetize/near/417531300\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> I'm down with trying to figure out how to get executables into libexec for these purposes, but I do know I tried to figure out something similar on Windows at least once before, many years back, and struck out.  I might have better luck now, but it's basically the \"how do you keep a .exe in one place and .dll files in another\" problem, and that's one I still don't know the \"right\" answer for yet.</p>\n</blockquote>\n<p>My general understand is that for windows, we'd just put it in the bin dir.  bin=libexec.  The other platforms do the right thing and keep them separate/hidden from prying user eyes.</p>",
+        "id": 417533426,
+        "sender_full_name": "Sean",
+        "timestamp": 1706045922
+    },
+    {
+        "content": "<p>Maybe make a bu_init or something that takes the progname as an argument, but has a wider scope than just setting the program name?</p>",
+        "id": 417533433,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706045923
+    },
+    {
+        "content": "<p>same as we do with bin=lib</p>",
+        "id": 417533501,
+        "sender_full_name": "Sean",
+        "timestamp": 1706045953
+    },
+    {
+        "content": "<p>Ah.  So you don't want to tangle with trying to make Windows act the same as the other platforms?</p>",
+        "id": 417533560,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706045979
+    },
+    {
+        "content": "<p>Could be wrong, but I think SetDLLDirectoryA() is for the dynamic loader.</p>",
+        "id": 417533639,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046004
+    },
+    {
+        "content": "<p>that'd be a way to put all the ged/dm libs into a subdir and have them loaded proper</p>",
+        "id": 417533678,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046020
+    },
+    {
+        "content": "<p>So it wouldn't help with libbu et. al.?  That's a bit surprising...</p>",
+        "id": 417533747,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046051
+    },
+    {
+        "content": "<p>I don't think so</p>",
+        "id": 417533761,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046057
+    },
+    {
+        "content": "<p>their symbols are resolved at load time, before code is run</p>",
+        "id": 417533787,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046070
+    },
+    {
+        "content": "<p>now I don't know if the search paths are transitive, though.  You might be on to something if they are.</p>",
+        "id": 417534136,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046239
+    },
+    {
+        "content": "<p>Hmm.  Do you happen to know of any documentation that talks about the distinction between the two systems?  All I can find is the \"Dynamic-link library search\" page - I'm not having any luck with \"load time search\"</p>",
+        "id": 417534235,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046280
+    },
+    {
+        "content": "<p>that is, ged loads, libbu/libged/etc loads, then modify path to include lib/libexec dirs -- then invoke tessellate program.  when it loads, did it inherit the search paths of the parent or does it start fresh.  if it's the prior, that would probably work.</p>",
+        "id": 417534397,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046347
+    },
+    {
+        "content": "<p>I think I saw something about the child inheriting the parents.  I guess some testing is in order here.  (Ick, windows experiments.  Time to get the hip waders...)</p>",
+        "id": 417534547,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046407
+    },
+    {
+        "content": "<p>only issue would be you couldn't directly run it on the command line without modifying PATH, as the libs would still be in lib/bin at <em>tessellate's</em> load time.</p>",
+        "id": 417534586,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046419
+    },
+    {
+        "content": "<p>So modifying PATH is the only way to handle things at load time?  That's messed up..</p>",
+        "id": 417534660,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046462
+    },
+    {
+        "content": "<p>same reason it wouldn't work to put all the libs into 'lib'.  ged still needs to load them before code is called.</p>",
+        "id": 417534703,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046476
+    },
+    {
+        "content": "<p>on windows PATH == PATH+LD_LIBRARY_PATH</p>",
+        "id": 417534781,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046497
+    },
+    {
+        "content": "<p>And there's no equivalent to rpath?</p>",
+        "id": 417534823,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046515
+    },
+    {
+        "content": "<p>and there's no rpath on the executables iirc</p>",
+        "id": 417534827,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046516
+    },
+    {
+        "content": "<p><span aria-label=\"cry\" class=\"emoji emoji-1f622\" role=\"img\" title=\"cry\">:cry:</span></p>",
+        "id": 417534921,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046559
+    },
+    {
+        "content": "<p>that's an elf / mach-o binary thing</p>",
+        "id": 417535139,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046657
+    },
+    {
+        "content": "<p>/me stubbornly sets out to prove to himself that SetDllDirectory won't work...</p>",
+        "id": 417535159,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046666
+    },
+    {
+        "content": "<p>now we could get there with \"one simple trick\"</p>",
+        "id": 417535166,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046671
+    },
+    {
+        "content": "<p>if we basically make ged/mged's main be compiled into a library, you could have the \"app\" just add/set the dll directories, then invoke that main in the compiled lib, and all libs could then live elsewhere.</p>",
+        "id": 417535324,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046733
+    },
+    {
+        "content": "<p>not pretty -- I'd still say just shove the plugins into bin on windows, as that is the most common practice.  users are told what to run and/or we install the icons/menus we want them to run.  they don't pay attention to the filesystem the same as on linux/mac/bsd</p>",
+        "id": 417535577,
+        "sender_full_name": "Sean",
+        "timestamp": 1706046851
+    },
+    {
+        "content": "<p>OK.  So that circles us back to the name of the subprocess program then, since it'll be stuck in bin on Windows.  Thoughts?</p>",
+        "id": 417535799,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706046952
+    },
+    {
+        "content": "<p>If we're going to eventually turn a bunch of ged command functionality into subprocesses so they're interruptible like this, than we definitely do need some sort of convention.  I know I need to consolidate a number of ged commands into fewer plugins, but even so there'll be a number of them.</p>",
+        "id": 417536157,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047085
+    },
+    {
+        "content": "<p>mixed feelings/ideas.  tessellate is typically implies regular tiling and the result of facetization is anything but that, except for initial primitives.</p>",
+        "id": 417536506,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047223
+    },
+    {
+        "content": "<p>we could but don't actually do tessellation on the comb level</p>",
+        "id": 417536580,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047251
+    },
+    {
+        "content": "<p>OK.  Not strongly attached to any of my current names, so happy to adjust to something more appropriate</p>",
+        "id": 417536642,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047278
+    },
+    {
+        "content": "<p>_ged_facetize_triangulate ?</p>",
+        "id": 417536726,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047312
+    },
+    {
+        "content": "<p>for interruptibility, I'd hope we can find a general solution instead of per-command, so any ged_whatever() invocation is wrapped by a call through to a binary that invokes ged_whatever()</p>",
+        "id": 417536980,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047406
+    },
+    {
+        "content": "<p>Sure - I was figuring there'd be one (ged_exec?) level solution to that part.  The heavy lift in my mind is setting up the subprocess programs themselves and getting the inter-process communication working.</p>",
+        "id": 417537191,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047488
+    },
+    {
+        "content": "<p>but yeah, I think iff there's going to be a command-line executable, we make them align as closely as possible, like ged_facetize_triangulate if triangulate is the subcommand to facetize.</p>",
+        "id": 417537305,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047533
+    },
+    {
+        "content": "<p>I mean not ending up with hundred's of ged_whatever binaries</p>",
+        "id": 417537358,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047561
+    },
+    {
+        "content": "<p>just one like ged_exec, which is invoked as a subprocess that invokes similarly</p>",
+        "id": 417537496,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047603
+    },
+    {
+        "content": "<p>Hmm.  I wonder if this might be viable to let us use SetDllDirectory:  <a href=\"https://stackoverflow.com/a/2003775/2037687\">https://stackoverflow.com/a/2003775/2037687</a></p>",
+        "id": 417537587,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047639
+    },
+    {
+        "content": "<p><a href=\"https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170\">https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170</a></p>",
+        "id": 417537644,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047662
+    },
+    {
+        "content": "<p>So you mean have ged_facetize_triangulate be a function called by the ged_exec subprocess main, maybe based on the first arg or something like bu_test?</p>",
+        "id": 417537813,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706047726
+    },
+    {
+        "content": "<p>That's interesting (delayload).  I'd read about that years back.  That might be a way to make it work, but would require a crapton of testing ... especially for things like c/c++ libs with static initialization or complex lib structures like step-g's libs that need things in a particular order.  </p>\n<p>delayed loading would also means possible runtime hiccups as it searches for a particular lib, if that operation is expensive (e.g., running remote, on server, or on an nfs volume, etc)</p>",
+        "id": 417538380,
+        "sender_full_name": "Sean",
+        "timestamp": 1706047973
+    },
+    {
+        "content": "<p>&lt;nod&gt;  Probably not worth it, in the end, but it's a temptation to try.  Maybe something to have a student try out as an experiment.</p>",
+        "id": 417538492,
+        "sender_full_name": "starseeker",
+        "timestamp": 1706048030
+    },
+    {
+        "content": "<p>they basically create a bunch of function pointers that are initialized to a function that calls LoadLibrary()+GetProcAddress(), so once you actually call it at runtime, it loads and uses it from then on.</p>",
+        "id": 417538567,
+        "sender_full_name": "Sean",
+        "timestamp": 1706048048
+    },
+    {
+        "content": "<p>that's done for every symbol, so startup cost will go up by some measure if there are a lot of lookups.</p>",
+        "id": 417538699,
+        "sender_full_name": "Sean",
+        "timestamp": 1706048117
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/facetize/near/417537813\">said</a>:</p>\n<blockquote>\n<p>So you mean have ged_facetize_triangulate be a function called by the ged_exec subprocess main, maybe based on the first arg or something like bu_test?</p>\n</blockquote>\n<p>Maybe?  More like </p>\n<p>mged[main()] -&gt; ged_exec() -&gt; subprocess-exec(\"ged_exec search . -type region\") ;<br>\nged_exec[main()] -&gt; dlload(\"ged_search\") -&gt; ged_search() ... </p>\n<p>That would be adequate for protecting / interrupting facetize and we'd undo or leave the subprocess stuff it's doing, which just be a second exec if we left it:</p>\n<p>mged[main()] -&gt; ged_exec() -&gt; subprocess-exec(\"ged_exec facetize triangulate ...\") ;<br>\nged_exec[main()] -&gt; dlload(\"ged_facetize\") -&gt; ged_search() -&gt; subprocess-exec(\"ged_facetize_triangulate ...\") ;</p>",
+        "id": 417539604,
+        "sender_full_name": "Sean",
+        "timestamp": 1706048539
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> looks like geogram has three different tetrahedral mesh generators, tetgen was only one of them.</p>",
+        "id": 418915651,
+        "sender_full_name": "Sean",
+        "timestamp": 1706646882
+    },
+    {
+        "content": "<p>This paper reminds me of your DRI... <br>\n<a href=\"/user_uploads/1549/weLNKJwUiurt_6ZBCUqEwvJ-/wu_sgp18_csg.pdf\">wu_sgp18_csg.pdf</a></p>",
+        "id": 419135844,
+        "sender_full_name": "Sean",
+        "timestamp": 1706740560
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  General design question for you.  Right now, in libged, ged_exec is getting the names of viable commands to run because we're dynamically loading the shared object plugins at runtime.  If we wanted to have a mixed solution where ged_exec could know about both the dynamic plugins and a set of \"pre-baked\" commands just compiled directly into libged, is there a way to handle the \"pre-baked\" listing of the functions that are part of libged?</p>",
+        "id": 420945799,
+        "sender_full_name": "starseeker",
+        "timestamp": 1707707794
+    },
+    {
+        "content": "<p>The obvious answer is to generate and build a compile-time generated  list from the source files, sort of like what the env command does for environment variables, but I was wondering if there is a more elegant technical way to have libged's library initialization do some sort of load-time registration of built-in libged library functions that have some sort of indicator they are ged commands.</p>",
+        "id": 420946497,
+        "sender_full_name": "starseeker",
+        "timestamp": 1707708411
+    },
+    {
+        "content": "<blockquote>\n<p>...If we wanted to have a mixed solution where ged_exec could know about both the dynamic plugins and a set of \"pre-baked\" commands just compiled directly into libged,... </p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  Background context?  Why would you want a mixed solution?  Sounds like a path of questioning that can only result in additional complexity.  Depending on the issue, there might be other things to consider changing before doing that route.  That'd seem likely at least, as the primary reason shells have built-ins is for performance.  We've hand-waived performance thus far in the libged call stack.</p>\n<blockquote>\n<p>is there a way to handle the \"pre-baked\" listing of the functions that are part of libged?</p>\n</blockquote>\n<p>Several ways come to mind...</p>",
+        "id": 420958419,
+        "sender_full_name": "Sean",
+        "timestamp": 1707718209
+    },
+    {
+        "content": "<p>If you recall, we talked about having a core set years back.  It was an optimization (hence why we didn't) to avoid loading all or nothing, just preload a dozen or so used for read-only inspecting and let the rest auto-load.  To do it, the proper way would've been a registration table in libged.</p>",
+        "id": 420958911,
+        "sender_full_name": "Sean",
+        "timestamp": 1707718526
+    },
+    {
+        "content": "<p>Note it would've also likely required some documented criteria so as to avoid ad hoc and/or arbitrary cop-outs and promotions of convenience.  Otherwise, it easily all becomes glorified unencapsulated globals.  We also talked about potentially needing plugin versioning and/or making sure whatever we came up with would be sane in an ecosystem of 3rd party plugins also.</p>",
+        "id": 420959217,
+        "sender_full_name": "Sean",
+        "timestamp": 1707718731
+    },
+    {
+        "content": "<p>Potentially useful.... <a href=\"https://github.com/Janos95/mantis\">https://github.com/Janos95/mantis</a></p>",
+        "id": 421526072,
+        "sender_full_name": "Sean",
+        "timestamp": 1707942146
+    },
+    {
+        "content": "<p>Sweet - between the geogram hole repair and plate-&gt;vol BoT conversion, I was able to generate a completely plate mode free, fully manifold Generic Twin (triangle mottling is due to zfighting on very thin volumentric bots)<br>\n<a href=\"/user_uploads/1549/Inr0CJi_KUBLQrKOkZQSjrhP/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Inr0CJi_KUBLQrKOkZQSjrhP/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Inr0CJi_KUBLQrKOkZQSjrhP/image.png\"></a></div>",
+        "id": 421576852,
+        "sender_full_name": "starseeker",
+        "timestamp": 1707970156
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> just fyi, I was test building facetize branch on mac and hit a few snags (hence the commits).  I fixed a couple of them, but left one -- not finding glm headers when compiling facetize.cpp </p>\n<p>I don't see them specified in CMakeLists.txt so looks legit, but thought you'd like to know in case you know the quick fix.</p>",
+        "id": 423914827,
+        "sender_full_name": "Sean",
+        "timestamp": 1709159655
+    },
+    {
+        "content": "<p>I've been building using bext for geogram so a couple of the newer bits probably won't work with the src/other manifold right now</p>",
+        "id": 423915363,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709159947
+    },
+    {
+        "content": "<p>I added install logic for the glm headers there</p>",
+        "id": 423915446,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709160000
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>~/brlcad/build (facetize) $ ../sh/conversion.sh --bot MAXTIME=5000 share/db/*.g share/db/*/*.g\n\n[snip]\n\n... Done.\n\nSummary\n=======\nConverted: 100.0%  ( 16230 of 16230 objects, 58 files )\n\n   Passed: 16230   ( 16230 BoT )\n   Failed:   0   ( 0 BoT )\n  Timeout:   0   ( 0 BoT )\n\n BoT rate: 100.0%  ( 16230 of 16230 )\n\nPrim rate: 100.0%  ( 9928 of 9928 )\n Reg rate: 100.0%  ( 4023 of 4023 )\n\n  Elapsed: 39803.0 seconds\n  Average: 2.5 seconds per object\n\nFinished running ../sh/conversion.sh on Tue Mar  5 06:27:15 PM EST 2024\nOutput was saved to conversion-1542905-run.log from /home/user/brlcad/build\nConversion testing complete.\n</code></pre></div>",
+        "id": 424984053,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709685435
+    },
+    {
+        "content": "<p>Full log:  <a href=\"https://brlcad.org/~starseeker/first_100percent_facetize_conversion-1542905-run.log\">https://brlcad.org/~starseeker/first_100percent_facetize_conversion-1542905-run.log</a></p>",
+        "id": 424984160,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709685519
+    },
+    {
+        "content": "<p>Two observations.  1) Holy crap that's truly awesome, amazing, almost unbelievable, and 2) Holy crap 11 hours...</p>",
+        "id": 425134776,
+        "sender_full_name": "Sean",
+        "timestamp": 1709744237
+    },
+    {
+        "content": "<p>Yes, agreed it's slow.  The culprits  are first and foremost the Generic_Twin plate mode evaluations - there's about 500 of them, some of them quite large and slow, and <a href=\"http://conversion.sh\">conversion.sh</a> does them over and over processing all the various levels of the hierarchy.  The fallback NURBS evaluations with SPSR are also nothing to sneeze at.</p>",
+        "id": 425135286,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709744384
+    },
+    {
+        "content": "<p>What I'll do later today is pre-convert the Generic_Twin plate mode bots as a pre-processing step to take that part out of the timing.  With the exception of parallel processing the lower level boolean problems indivdiually, I'm not really sure how to speed up the plate mode conversion - it's a nasty problem.</p>",
+        "id": 425136163,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709744648
+    },
+    {
+        "content": "<p>I mean, unless they're 90% of the time, it's probably not going to make a huge difference.</p>",
+        "id": 425148175,
+        "sender_full_name": "Sean",
+        "timestamp": 1709748466
+    },
+    {
+        "content": "<p>Not much difference between 4 and 12 hours expectation-wise or practical use-wise.  That's conveniently about how many minutes per conversion it took and both are over \"coffee break\" time.</p>\n<p>Order of magnitude would be needed, and that is something SMP would offer if it's not currently parallel.  Full conversion in an hour, any given model in about a minute.  That would change the UX scale.</p>\n<p>Not a priority in the least, just navel-gazing observations..</p>",
+        "id": 425149682,
+        "sender_full_name": "Sean",
+        "timestamp": 1709748992
+    },
+    {
+        "content": "<p>FWIW pre-converting the plate mode bots in Generic_Twin and running conversion.h on all the top level objects only results in:</p>\n<div class=\"codehilite\" data-code-language=\"summary\"><pre><span></span><code>=======\nConverted: 100.0%  ( 197 of 197 objects, 58 files )\n\n   Passed: 197   ( 197 BoT )\n   Failed:   0   ( 0 BoT )\n  Timeout:   0   ( 0 BoT )\n\n BoT rate: 100.0%  ( 197 of 197 )\n\nPrim rate: 100.0%  ( 59 of 59 )\n Reg rate: 100.0%  ( 42 of 42 )\n\n  Elapsed: 4511.0 seconds\n  Average: 22.9 seconds per object\n</code></pre></div>",
+        "id": 425170261,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709756076
+    },
+    {
+        "content": "<p>Of that, 2622s was the NIST and brep_pinewood fallback conversions.  The Generic_Twin all boolean was still rough, at 840.3s, but quite a bit less than the 3911.3s it took without pre-processing.  It'd be interesting to see if Manifold's TBB support could knock the boolean time down on Generic_Twin.</p>",
+        "id": 425171247,
+        "sender_full_name": "starseeker",
+        "timestamp": 1709756446
+    },
+    {
+        "content": "<p>There we go - fixed it so <a href=\"http://conversion.sh\">conversion.sh</a> didn't have to exclude the empty trees.</p>\n<div class=\"codehilite\"><pre><span></span><code>~/brlcad/build (facetize) $ ../sh/conversion.sh --bot MAXTIME=5000 share/db/*.g share/db/*/*.g\n\n[snip]\n\n... Done.\n\nSummary\n=======\nConverted: 100.0%  ( 16278 of 16278 objects, 58 files )\n\n   Passed: 16278   ( 16278 BoT )\n   Failed:   0   ( 0 BoT )\n  Timeout:   0   ( 0 BoT )\n\n BoT rate: 100.0%  ( 16278 of 16278 )\n\nPrim rate: 100.0%  ( 9930 of 9930 )\n Reg rate: 100.0%  ( 4061 of 4061 )\n\n  Elapsed: 40258.0 seconds\n  Average: 2.5 seconds per object\n</code></pre></div>",
+        "id": 437654690,
+        "sender_full_name": "starseeker",
+        "timestamp": 1715176038
+    }
+]

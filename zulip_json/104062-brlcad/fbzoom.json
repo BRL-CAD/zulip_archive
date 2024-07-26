@@ -1,0 +1,92 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> How does one use fbzoom?  I tried it and it does seem to run, but as far as I can tell the controls don't work - at any rate, I can't use \"q\"  to quit...</p>",
+        "id": 191825357,
+        "sender_full_name": "starseeker",
+        "timestamp": 1585180159
+    },
+    {
+        "content": "<p>Me wonders if it might be a good student project to implement a glfw+imgui interface to replace the last remaining termio based applications...</p>",
+        "id": 191834469,
+        "sender_full_name": "starseeker",
+        "timestamp": 1585190004
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> typing a ? will display a menu</p>",
+        "id": 191834803,
+        "sender_full_name": "Sean",
+        "timestamp": 1585190437
+    },
+    {
+        "content": "<p>it's working for me (not a current build, doesn't have the termio changes)</p>",
+        "id": 191834812,
+        "sender_full_name": "Sean",
+        "timestamp": 1585190468
+    },
+    {
+        "content": "<p>q or enter should quit</p>",
+        "id": 191834834,
+        "sender_full_name": "Sean",
+        "timestamp": 1585190520
+    },
+    {
+        "content": "<p>you attach to an existing fbserv and can use +- to scale, hjkl to pan 1pixel, HJKL to pan a lot, c to center, etc</p>",
+        "id": 191834958,
+        "sender_full_name": "Sean",
+        "timestamp": 1585190644
+    },
+    {
+        "content": "<p>pretty sure we introduced bugs in some of the libfb zoom machinery at least in /dev/X, which I think is related to the buggy interlacing one sees when renderings smaller than 512x512, but the basic zooming logic does seem to work perfectly with /dev/ogl</p>",
+        "id": 191835108,
+        "sender_full_name": "Sean",
+        "timestamp": 1585190843
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/5X3FQM4HRyEbcgFxPgAEAm_K/Screen-Shot-2020-03-25-at-10.46.55-PM.png\" title=\"Screen-Shot-2020-03-25-at-10.46.55-PM.png\">Screen-Shot-2020-03-25-at-10.46.55-PM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/5X3FQM4HRyEbcgFxPgAEAm_K/Screen-Shot-2020-03-25-at-10.46.55-PM.png\" title=\"Screen-Shot-2020-03-25-at-10.46.55-PM.png\"><img src=\"/user_uploads/1549/5X3FQM4HRyEbcgFxPgAEAm_K/Screen-Shot-2020-03-25-at-10.46.55-PM.png\"></a></div>",
+        "id": 191835110,
+        "sender_full_name": "Sean",
+        "timestamp": 1585190849
+    },
+    {
+        "content": "<p>oh, I think I see what you might have done..  just running \"fbzoom /dev/X\" is wrong usage</p>",
+        "id": 191835391,
+        "sender_full_name": "Sean",
+        "timestamp": 1585191171
+    },
+    {
+        "content": "<p>looks like if you run it that way, they key bindings work initially until you try to quit, then it gets stuck</p>",
+        "id": 191835523,
+        "sender_full_name": "Sean",
+        "timestamp": 1585191297
+    },
+    {
+        "content": "<p>but again, that's not the valid use case -- you have to attach to an fbserv:</p>\n<div class=\"codehilite\"><pre><span></span>fbserv -S1024 0 /dev/ogl\npix-fb -F0 share/pix/moss.pix\nfbzoom -F0\n...\n</pre></div>",
+        "id": 191835591,
+        "sender_full_name": "Sean",
+        "timestamp": 1585191364
+    },
+    {
+        "content": "<p>Ah!  OK, looks like it's working after the libtermio changes (I couldn't get it working before them either, but I did get fbpoint to work)</p>",
+        "id": 191871605,
+        "sender_full_name": "starseeker",
+        "timestamp": 1585222895
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> that's also a case that doesn't really need termio -- it could just print the menu and coordinates if it needed to. It's just using a few control codes to replace the current size and position values bing printed.</p>",
+        "id": 191885034,
+        "sender_full_name": "Sean",
+        "timestamp": 1585229909
+    },
+    {
+        "content": "<p>Well, the main incentive to fiddle with it now would be to get it working on Windows - putting the termlib bits in libtermio eliminated most of my other pain points, as near as I can tell right now.  (We'll see what Mac/BSD do.)</p>",
+        "id": 191886983,
+        "sender_full_name": "starseeker",
+        "timestamp": 1585230696
+    },
+    {
+        "content": "<p>I've burned a lot of time over the years on the FindTERMLIB logic (which often didn't work right even after I rammed my head into it for a while) and playing with the new build setup I noticed it wasn't reliably looking where it needed to at runtime for the termcap file.  I don't know if it really needs that for what we're using it for, but if it does now I can use the bu_dir logic in libtermio to point it to the right place reliably.  (Haven't bothered yet , but easily doable if there's a way to test it and a need to fiddle with it.)</p>",
+        "id": 191887444,
+        "sender_full_name": "starseeker",
+        "timestamp": 1585230877
+    }
+]

@@ -1,0 +1,722 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> I'll let <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> chime in, but I can give you some background on the SPSR bit... it's an older version of  <a href=\"https://github.com/mkazhdan/PoissonRecon\">https://github.com/mkazhdan/PoissonRecon</a> reworked for embedding in our library:  </p>\n<p>As far as the results being satisfactory... not always, unfortunately.  It has trouble with sharp edges and doesn't always give us a usable output.  It's possible the newer version of the code might do somewhat better, but where it's most useful in practice is when a case fails for some reason but doesn't have a \"weird\" volume.  We're basically using it in place of ball pivot from the original pipeline you worked on - raytrace a whole lot of points to try to sample \"dense enough\", assemble an initial huge mesh (ball pivot originally, SPSR for us) and then use your decimation code to step the result down to something sane size wise.  It doesn't always work, but there are cases where it <em>does</em> work and that's a win for users trying to get conversions to go  through.</p>",
+        "id": 405596786,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701573372
+    },
+    {
+        "content": "<p>Damn, that sounds awful. So you don't have any robust solution at all, to that some old problem of converting CSG to closed watertight triangle meshes.</p>",
+        "id": 405596946,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701573513
+    },
+    {
+        "content": "<p>Thinking about my planned algorithm here. When you extract a point cloud from CSG geometry, can you get points exactly on the edges? Imagine a cube, will you get points exactly over the edges and corners? Or do I get only points on the faces, and I should project the planes to reconstruct that sharp edge?</p>",
+        "id": 405597151,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701573682
+    },
+    {
+        "content": "<p>There's no way to guarantee sampling on the edges, since the edges themselves can be implicit - think about one sphere being subtracted from another, for example.</p>",
+        "id": 405597595,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574099
+    },
+    {
+        "content": "<p>Got it. Okay.</p>",
+        "id": 405597631,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701574145
+    },
+    {
+        "content": "<p>We could probably do something partial like making sure sample rays go through individual primitive verts and edges, but that won't help when the sharp edge is completely implicit so it's probably best not to depend on that sort of thing</p>",
+        "id": 405597651,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574173
+    },
+    {
+        "content": "<p>Yeah, right. I'm thinking about needing a third pass in the algorithm, comparing the triangle mesh with the point cloud to \"repair\" where normals meet...</p>",
+        "id": 405597728,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701574236
+    },
+    {
+        "content": "<p>To your earlier point - we're not faced with any particular deadlines.  This whole thing came up due to a combination of improvements triggered by using <a href=\"https://github.com/elalish/manifold\">https://github.com/elalish/manifold</a> and some cleanup of the third party codes we include in BRL-CAD.</p>",
+        "id": 405597740,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574244
+    },
+    {
+        "content": "<p>To give you some more context - most of the time, especially in the newer pipeline I'm working on, the point sampling fallback will hopefully be rare and applied to individual primitives NMG can't handle.  If Manifold continues to perform as well as it has in early testing, I'm hopeful that we can focus the meshing problem itself solely at the primitive level (essentially, as alternatives to the libnmg ft_tessellate routines) and just feed the resulting meshes into the same evaluation from there.</p>",
+        "id": 405597915,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574407
+    },
+    {
+        "content": "<p>Previously, we were raytracing whole regions to point sample as a means of bypassing the NMG booleval, if it was failing - a point sample of a region could let us jump \"straight to the final mesh\" and let the CSG raytracing deal with the booleans.</p>",
+        "id": 405598000,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574475
+    },
+    {
+        "content": "<p>Well, I'm certainly hoping it will handle any primitive. The effort will be a little intense (I'm not sure why my first impression was of an \"easy\" problem), but it's a nice problem, it's a nice challenge</p>",
+        "id": 405598159,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701574569
+    },
+    {
+        "content": "<p>We probably still want to be able to try that as a last resort, but if we can produce inputs that satisfy Manifold's requirements from our primitives (and, barring bad BoTs, we should be able to do that since our primitives are supposed to define closed volumes) I want to push the meshing problem as far down the tree as possible.</p>",
+        "id": 405598214,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574589
+    },
+    {
+        "content": "<p>Since a lot of our \"bad\" meshes are very close to solid volumes and ought to be amenable to some form of automatic repair, I'd like to incorporate that capability into our BoT processing as well.  A couple of the mesh libraries out there have hole filling algorithms which might be useful, although I'm not far enough along yet to have tried any of them.</p>",
+        "id": 405598375,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574722
+    },
+    {
+        "content": "<p>Another alternative to SPSR and ball pivot that I was planning to look into is geogram's Co3Ne <a href=\"https://github.com/BrunoLevy/geogram/wiki/Reconstruction#co3ne-reconstruction-concurrent-co-cones\">https://github.com/BrunoLevy/geogram/wiki/Reconstruction#co3ne-reconstruction-concurrent-co-cones</a></p>",
+        "id": 405598429,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574786
+    },
+    {
+        "content": "<p>I tried hole repair in ball pivoting a decade ago, and it was a disaster. I'm planning an algorithm that would iteratively deform a closed watertight mesh, maintaining proper topology all the way until the output</p>",
+        "id": 405598432,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701574794
+    },
+    {
+        "content": "<p>&lt;nod&gt;  I wasn't planning to use hole repair for that case - the problem I'm thinking about is when someone brings in an stl or something that wasn't watertight to begin with (but is ALMOST watertight).  If we can deal with even some of those automatically it would save trouble for users otherwise having to do manual repair for a lot of very tiny little problems.</p>",
+        "id": 405598558,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701574889
+    },
+    {
+        "content": "<p>I think you could feed the vertices and normals of that STL file into the algorithm I'm planning, and it would just repair the holes as well</p>",
+        "id": 405598690,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575004
+    },
+    {
+        "content": "<p>I'm also wondering if <a href=\"https://github.com/wjakob/instant-meshes\">https://github.com/wjakob/instant-meshes</a> might be useful, but I've not dug into it enough to have a sense of whether it's applicable to our particular \"rebuilding an almost manifold mesh into a manifold\" case</p>",
+        "id": 405598693,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575010
+    },
+    {
+        "content": "<p>I was wondering if that might be possible, but I didn't know if the points and normals from a mesh would be too sparse for those types of algorithms to work.</p>",
+        "id": 405598762,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575048
+    },
+    {
+        "content": "<p>Yeah, that's my concern, I can see cases where the algorithm would get confused while trying to go \"in\" the hole. But you could generate a ton of extra coplanar points everywhere, and, in theory, the final geometry wouldn't be any more complex</p>",
+        "id": 405598813,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575112
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> don't sink too much of your free time into it if it looks to be too hard - past a certain point, it would probably be more of a win to fix the mesh generating routines for the individual primitives rather than trying to solve a super-hard general problem (at least, if Manifold really can handle the load for the booleval piece)</p>",
+        "id": 405598942,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575212
+    },
+    {
+        "content": "<p>It's a fun problem and I have had a ton of experience with 2D/3D geometry problems over the years. I was a bit hoping that Mark (from SURVICE) would say \"Oh, we need that algorithm too, you can charge the hours\"... but that didn't happen <span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>",
+        "id": 405599035,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575286
+    },
+    {
+        "content": "<p>Am I wrong in thinking of your proposed algorithm as sort of a \"shrink wrap\" process?</p>",
+        "id": 405599086,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575346
+    },
+    {
+        "content": "<p>Yes, kind of. The algorithm:</p>\n<ul>\n<li>I start with a big box, and I collapse it over the mesh, like a convex hull</li>\n<li>I collapse the triangles further to capture concave details, whenever the points and normals agree</li>\n<li>I evaluate the final triangle mesh, I move vertices to reconstruct sharp edges where the normals indicate it would be appropriate</li>\n</ul>",
+        "id": 405599230,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575467
+    },
+    {
+        "content": "<p>I have no idea what other algorithms are used out there, or how they are named. Checking what others are doing takes the fun out of solving problems. The name \"shrink wrap\" sounds close enough</p>",
+        "id": 405599272,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575511
+    },
+    {
+        "content": "<p>OK, so this probably isn't relevant then:  <a href=\"https://www.sciencedirect.com/science/article/pii/S0010448523001409\">https://www.sciencedirect.com/science/article/pii/S0010448523001409</a></p>",
+        "id": 405599361,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575566
+    },
+    {
+        "content": "<p>Currently, the one point that bothers me a bit is how the collapsing box should reconnect with itself as it goes through holes, on both sides. Meeting with itself, how to best detect that case and get a proper surface out of that step before continuing the process. In case you have ideas</p>",
+        "id": 405599386,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575600
+    },
+    {
+        "content": "<p>Heh - nevermind, if you're not looking for other algorithms that's pointless anyway</p>",
+        "id": 405599392,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575607
+    },
+    {
+        "content": "<p>If it meets itself, shouldn't it \"collapse\" and form a torus topology?  If I'm understanding correctly, the boxes would only meet if they found a path without any volume along it?</p>",
+        "id": 405599511,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575719
+    },
+    {
+        "content": "<p>For moving vertices to reconstruct sharp edges, I'm thinking summing up squared planed equations and solving the quadrics, like I do in mesh decimation. Finding the best vertex placement to recover the lost sharp edges</p>",
+        "id": 405599518,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575725
+    },
+    {
+        "content": "<p>Since I believe you have googled everything already, does that algorithm already exist? Is it \"shrink wrap\"?</p>",
+        "id": 405599588,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575771
+    },
+    {
+        "content": "<p>Actually, Sean's the one who is more up on the shrink wrap problem - let's wait for him to weigh in.  I have only a casual knowledge</p>",
+        "id": 405599647,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575844
+    },
+    {
+        "content": "<p>I lost your torus example. The collapsing box would wrap around a torus (step #0), then the next step would be to collapse further through the holes. Both sides of the collapsing box will meet in the hole, before collapsing further to properly capture all the inner sides of the torus</p>",
+        "id": 405599717,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575891
+    },
+    {
+        "content": "<p>It's the \"collapsing box meeting itself\" I'm a bit stuck on, how to best detect and resolve it, how to rebuild the box's surface (which is really no longer a box at this point) with a... tunnel in it</p>",
+        "id": 405599763,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701575947
+    },
+    {
+        "content": "<p>Right - so wouldn't the center of the torus be where the two sides of the original box would connect?  I.e. the box would intersect itself?  Or am I misunderstanding?</p>",
+        "id": 405599781,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701575979
+    },
+    {
+        "content": "<p>Or are you asking how to detect when the self-intersection occurs?</p>",
+        "id": 405599861,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701576017
+    },
+    {
+        "content": "<p>Yes, somewhere in the hole. Might not be the exact center really, but they will meet</p>",
+        "id": 405599867,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576019
+    },
+    {
+        "content": "<p>Detecting self-intersection fast is part of it, in an extremely robust manner, without any floating point precision concerns. How to resolve that intersection is the other part</p>",
+        "id": 405599958,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576066
+    },
+    {
+        "content": "<p>I'm afraid compared to your expertise Alexis my ideas would be on the naive side.  For collision detection, the only thing that comes to mind is trying to use something like an RTree to identify potential intersecting faces and then doing the triangle/triangle intersect calculation.</p>",
+        "id": 405600428,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701576343
+    },
+    {
+        "content": "<p>I'm aware generally of collision detection research for things like cloth simulation, but I don't know the details of the algorithms they use.</p>",
+        "id": 405600501,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701576374
+    },
+    {
+        "content": "<p>Yeah... but collisions will be rare, the vast majority of the iterative steps won't collide, and I want to have 64 threads working on that in parallel. So I want that to be really fast, with minimal spatial locking</p>",
+        "id": 405600568,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576444
+    },
+    {
+        "content": "<p>Collision resolution will imply some kind of local boolean operation on triangle meshes. Which I have never done, doesn't seem excessively hard, but it's the kind of details that made me realize \"oh, perhaps it's not that simple in the end...\" <span aria-label=\"laughing\" class=\"emoji emoji-1f606\" role=\"img\" title=\"laughing\">:laughing:</span></p>",
+        "id": 405600672,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576528
+    },
+    {
+        "content": "<p>Yes - \"local boolean operation on triangle meshes\" has caused a world of hurt for lots of computer graphics folks over the years :-P</p>",
+        "id": 405600706,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701576577
+    },
+    {
+        "content": "<p>Yes, really, I'm not surprised... This one small detail, fast self-collision and resolution by boolean thing, is what is currently bothering me. Everything else has been planned on paper</p>",
+        "id": 405600809,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576652
+    },
+    {
+        "content": "<p>I think, if I'm following correctly, it's not really the mesh collision problem so much as it is detecting and resolving self-intersection</p>",
+        "id": 405600835,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701576695
+    },
+    {
+        "content": "<p>Yes, it's the box colliding with itself. But the box is the mesh, it's the only mesh, the one slowly deforming to capture the point cloud's surface</p>",
+        "id": 405600914,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576749
+    },
+    {
+        "content": "<p>I realize naming it \"box\" is getting terribly inappropriate. It made sense at the time</p>",
+        "id": 405600931,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576773
+    },
+    {
+        "content": "<p>Subdivided box might work</p>",
+        "id": 405600957,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701576795
+    },
+    {
+        "content": "<p>Which can break into multiple boxes and with tunnels... but it's still a box to me! <span aria-label=\"rolling on the floor laughing\" class=\"emoji emoji-1f923\" role=\"img\" title=\"rolling on the floor laughing\">:rolling_on_the_floor_laughing:</span></p>",
+        "id": 405600969,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576825
+    },
+    {
+        "content": "<p>Well, that's the problem that's stopping me from getting started, it would be great if one of us could come up with a good solution</p>",
+        "id": 405601076,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701576905
+    },
+    {
+        "content": "<p>This might be worth a read:  <a href=\"https://dl.acm.org/doi/pdf/10.1145/3592136\">https://dl.acm.org/doi/pdf/10.1145/3592136</a></p>",
+        "id": 405601642,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701577422
+    },
+    {
+        "content": "<p>Thanks, reading.<br>\nJust to clarify a point, instead of having to do boolean operations on the triangle mesh (box), I was leaning towards the possibility of detecting a potential collision (if I perform the step), and then just meet the other colliding surface and joining vertices, creating the tunnel. It's less a hassle and more robust numerically than boolean operations</p>",
+        "id": 405601751,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701577534
+    },
+    {
+        "content": "<p>As soon as the tunnel exists with a proper surface topology, then the box will go on collapsing and capturing the hole's walls properly</p>",
+        "id": 405601833,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701577597
+    },
+    {
+        "content": "<p>Ah, so rather than a geometric calculation on the mesh to find an intersection, you would simply recognize the collision and locally alter the mesh topology to allow for further correct refinement?</p>",
+        "id": 405601892,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701577672
+    },
+    {
+        "content": "<p>Yes. Just detect if a step X would cause a self-intersection, instead create a tiny tunnel connecting the two surfaces, and let that tunnel grow with the future iterative steps</p>",
+        "id": 405602044,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701577804
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> I should probably mention something - before we fall back to SPSR based reconstruction, we first try the \"Continuation\" method based on Bloomenthal's polygonizer.  That basically marches a mesh around the boundary of a volume using our raytracer for the inside/outside part of Bloomenthal's algorithm.  Like SPSR it doesn't always work, but it tends to do better that SPSR at preserving our shapes.  We also use the decimator on its output, IIRC, so it has that in common with SPSR.</p>",
+        "id": 405602427,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578238
+    },
+    {
+        "content": "<p>Hm. I'm not sure I understand how that \"marching a mesh around the boundary of a volume\" works with complex shapes and holes... but I get the idea that you have multiple solutions, and none of them is guaranteed to work</p>",
+        "id": 405602555,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701578388
+    },
+    {
+        "content": "<p>I'm probably not describing it very well - <a href=\"https://people.eecs.berkeley.edu/~jrs/meshpapers/Bloomenthal.pdf\">https://people.eecs.berkeley.edu/~jrs/meshpapers/Bloomenthal.pdf</a> is the writeup</p>",
+        "id": 405602687,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578494
+    },
+    {
+        "content": "<p>It's actually our best option at the moment for the dsp height field primitive, and it does fairly well when we don't have super-thin shapes (but to be fair SPSR can't handle super-thin volumes well either)</p>",
+        "id": 405602776,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578562
+    },
+    {
+        "content": "<p>I figured I should mention it because there's a chance a more intelligent implementation of that approach than the one I hacked together might have overall better behavior than doing an initial sampling with a point cloud</p>",
+        "id": 405602878,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578658
+    },
+    {
+        "content": "<p>It's looking a bit like marching cubes?</p>",
+        "id": 405602880,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701578660
+    },
+    {
+        "content": "<p>It's related, I believe</p>",
+        "id": 405602889,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578675
+    },
+    {
+        "content": "<p>I remember Doug from SURVICE had written a marching cubes implementation for Lee Butler, while I did ball pivoting. Also consuming raytraced point clouds</p>",
+        "id": 405602972,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701578733
+    },
+    {
+        "content": "<p>A straight up marching cubes has been tried before by Sean as well (IIRC) and the results are pretty bad - this does somewhat better, although we do tend to get some artifacts around sharp edges (typically less so than SPSR though.)</p>",
+        "id": 405602987,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578757
+    },
+    {
+        "content": "<p>I'm not too concerned about sharp edges... Sum up squared planes (using point cloud normals) of near vertices in a quadric, invert and solve the matrix, get the best placement for edge vertices. It really should reconstruct the edges nicely</p>",
+        "id": 405603087,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701578844
+    },
+    {
+        "content": "<p>That'd be pretty cool.  I'd be thrilled to ditch the polygonizer and SPSR codes if we had something that was reliable and produced better output - those fall squarely into the \"it's ugly but currently useful enough we can't ditch 'em\" category</p>",
+        "id": 405603198,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701578966
+    },
+    {
+        "content": "<p>Oh - I doubt you'll want or need it, but we do have Eigen available at compile time if that's a help.</p>",
+        "id": 405603288,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579050
+    },
+    {
+        "content": "<p>Yes, I can imagine. It's a nice problem, it's a fun problem. And most of all, I like being able to correct \"mistakes\" of the past, when I have once written code that I'm absolutely not proud of</p>",
+        "id": 405603298,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579061
+    },
+    {
+        "content": "<p>(Eons ago, SURVICE also put me on fluid dynamics, my math wasn't up to the task so I went brute force CUDA with tiny time steps, raw numerical turbulence, no shortcuts... A decade later, I had my revenge: <a href=\"http://www.rayforce.net/newcfd002.html\">http://www.rayforce.net/newcfd002.html</a> )</p>",
+        "id": 405603564,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579298
+    },
+    {
+        "content": "<p>Wow!</p>",
+        "id": 405603697,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579442
+    },
+    {
+        "content": "<p>Is Rayforce still a thing, by the way?  I can't find much of anything about it online these days</p>",
+        "id": 405603760,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579487
+    },
+    {
+        "content": "<p>I don't think so... It was the fastest raytracer in the world for a while, but the \"graph construction\" was intense. It was taking a while. It was useless for games or any kind of dynamic geometry</p>",
+        "id": 405603798,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579555
+    },
+    {
+        "content": "<p>It made sense if you were going to shoot a billion rays at the same model</p>",
+        "id": 405603809,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579575
+    },
+    {
+        "content": "<p>Ah - yeah, I can see where that wouldn't be ideal for games or movies.</p>",
+        "id": 405604017,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579691
+    },
+    {
+        "content": "<p>Some SURVICE guy wrote a paper or two about some novel techniques in it. He put me as co-author. I guess that was it</p>",
+        "id": 405604139,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579737
+    },
+    {
+        "content": "<p>I can find the announcement SURVICE put about about releasing it as open source, but I can't find the source itself.</p>",
+        "id": 405604184,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579760
+    },
+    {
+        "content": "<p>Oh. I have no idea really, I have moved on to other problems long ago <span aria-label=\"grinning\" class=\"emoji emoji-1f600\" role=\"img\" title=\"grinning\">:grinning:</span></p>",
+        "id": 405604250,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579805
+    },
+    {
+        "content": "<p>No worries, just curious.</p>",
+        "id": 405604261,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579824
+    },
+    {
+        "content": "<p>I've got 200 other holes to dig out of before I start trying to optimize our triangle raytracing more :-P</p>",
+        "id": 405604324,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701579861
+    },
+    {
+        "content": "<p>Eheh. Yeah, that makes sense. Let's make that 199!</p>",
+        "id": 405604345,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701579901
+    },
+    {
+        "content": "<p>Instead of simply collapsing the box to reconstruct the surface, I'm considering that the box could actually be full of tetrahedra, which becomes subdivided as I continuously create vertices over the box's surface. Then detecting a collision is just a matter of detecting when a tetrahedra gets totally squished. It's perfectly robust, no numerical issues with floating point. It also sounds a bit slow. And messy</p>",
+        "id": 405611809,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701586423
+    },
+    {
+        "content": "<p>(nevermind that, it's awful, all the processing time will be spent rebuilding the internal tetrahedra as the surface continuously gets deformed and tetrahedra are being punched in, it's complicated code too)</p>",
+        "id": 405636995,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701599816
+    },
+    {
+        "content": "<p>On-paper planning complete, now beginning to write code. Might take a few weeks, some parts are a bit complicated</p>",
+        "id": 405948423,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701739592
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> here's another fun point cloud:  <a href=\"https://brlcad.org/~starseeker/ztec.pnts\">https://brlcad.org/~starseeker/ztec.pnts</a></p>",
+        "id": 406591076,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701970657
+    },
+    {
+        "content": "<p>I think the point of the cone is causing problems for all our current methods</p>",
+        "id": 406591131,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701970679
+    },
+    {
+        "content": "<p>Cool, thanks. I have only written the code for the first step #0, creating a convex hull. Seems to run okay but I need to write a quick visualization, I'm sure the next steps will have bugs to fix</p>",
+        "id": 406618792,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701982359
+    },
+    {
+        "content": "<p>If it's easy for you, could you generate point clouds for simple/easy test cases? Like a bolt or something. And something without holes. I'm sure I could use simple shapes to investigate future bugs</p>",
+        "id": 406618920,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701982416
+    },
+    {
+        "content": "<p>Sure - it'll be a little bit, but its no problem</p>",
+        "id": 406657789,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702001395
+    },
+    {
+        "content": "<p>I think we're using <a href=\"https://github.com/akuukka/quickhull\">https://github.com/akuukka/quickhull</a> right now - if you've got a better one perhaps we can switch to it and remove that code too :-).  IIRC, there are some slim/small cases where that implementation doesn't quite work</p>",
+        "id": 406658155,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702001572
+    },
+    {
+        "content": "<p>At first glance, that code has epsilon values and comments like \"This may fail due to numerical instability in which case we give up trying to solve horizon edge for this point and accept a minor degeneration\"</p>",
+        "id": 406682309,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702012666
+    },
+    {
+        "content": "<p>And that sounds pretty bad. I have added checks so that everything is robust by design, no matter the numerical accuracy... now I just need examples that would stress these very rare paths</p>",
+        "id": 406682400,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702012707
+    },
+    {
+        "content": "<p>You actually need a convex hull code, that does only that, convex hull? It was only the first step of 3 for my planned code</p>",
+        "id": 406682453,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702012755
+    },
+    {
+        "content": "<p>Wow... when a point from the point cloud is giving trouble to their code, they just delete the point. Nice thinking there. Problem solved</p>",
+        "id": 406683211,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702013228
+    },
+    {
+        "content": "<p>And they call deleting points a \"minor degeneration\"</p>",
+        "id": 406683303,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702013289
+    },
+    {
+        "content": "<p>convex hull is exposed as a feature of the bot command - it's more of a \"nice to have\" but it's one option to produce a simple stand-in for a more complex shape</p>",
+        "id": 406790400,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702051759
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> <a href=\"https://brlcad.org/~starseeker/pnts/\">https://brlcad.org/~starseeker/pnts/</a></p>",
+        "id": 406792072,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702052164
+    },
+    {
+        "content": "<p>the new ones should be pretty basic</p>",
+        "id": 406792147,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702052181
+    },
+    {
+        "content": "<p>Cool, thanks. I'll refine my question though... would it be possible to get a couple examples with fewer points? <span aria-label=\"grimacing\" class=\"emoji emoji-1f62c\" role=\"img\" title=\"grimacing\">:grimacing:</span> I expect to go step-by-step to visually recognize any glitches, while inspecting a verbose log. And that gets harder above 1k points</p>",
+        "id": 406822314,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702062515
+    },
+    {
+        "content": "<p>Heh - sure <span aria-label=\"laughing\" class=\"emoji emoji-1f606\" role=\"img\" title=\"laughing\">:laughing:</span>   I was thinking in terms of dense sampling to represent the shape, but you're quite right that large sizes are a debugging problem.</p>",
+        "id": 406822534,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702062604
+    },
+    {
+        "content": "<p>I can actually control the number of points sampled - any specific requests?</p>",
+        "id": 406822607,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702062639
+    },
+    {
+        "content": "<p>Oh, 500 or so is perfect</p>",
+        "id": 406822627,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702062649
+    },
+    {
+        "content": "<p>OK, the *_500.pnts files in the same directory have the smaller samples</p>",
+        "id": 406823106,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702062858
+    },
+    {
+        "content": "<p>Did you want sparse samples for the \"problem\" cases as well?</p>",
+        "id": 406823154,
+        "sender_full_name": "starseeker",
+        "timestamp": 1702062889
+    },
+    {
+        "content": "<p>I certainly want all the point clouds that are giving you trouble with other codes!</p>",
+        "id": 406823263,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702062945
+    },
+    {
+        "content": "<p>Oh nevermind, I misunderstood. I don't need low res of these</p>",
+        "id": 406823315,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702062964
+    },
+    {
+        "content": "<p>Thanks</p>",
+        "id": 406823965,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1702063231
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> Did those examples end up being what you need?</p>",
+        "id": 409213026,
+        "sender_full_name": "starseeker",
+        "timestamp": 1703087342
+    },
+    {
+        "content": "<p>Hey yes, I think so. SURVICE keeps dragging me to do a bunch of things, I'm hoping to have the free time I requested shortly</p>",
+        "id": 409250828,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1703102073
+    },
+    {
+        "content": "<p>I thought the chat was quite dead until your notification, it needed a Ctrl+R to see the new messages. Is Erik still around? He was on the user list on the right when I arrived, he isn't anymore. It would be fun to reconnect after all those years</p>",
+        "id": 409250964,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1703102140
+    },
+    {
+        "content": "<p>He's on occasionally.</p>",
+        "id": 409252742,
+        "sender_full_name": "starseeker",
+        "timestamp": 1703102842
+    },
+    {
+        "content": "<p>All right, cool. Sean, have you seen the previous discussion about the proposed mesh reconstruction algorithm? I know you are a great programmer so I'm interested in any thoughts you might have</p>",
+        "id": 409261162,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1703106739
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span>, you had mentioned having gotten as far as having a convex hull implementation - do you think it's to the point where it's stable enough to add to the mmesh repository?</p>",
+        "id": 416789267,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705674600
+    },
+    {
+        "content": "<p>If <span class=\"user-mention\" data-user-id=\"680928\">@pca006132</span> or one of the other Manifold devs is going to look at their quickhull, it might be helpful to know what your implementation looks like...</p>",
+        "id": 416789526,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705674676
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> what problem did you find with the point cloud? I tried both ztec.pnts and box_500.pnts and did not trigger the akuukka/quickhull problem (deleting a point)</p>",
+        "id": 416985806,
+        "sender_full_name": "pca006132",
+        "timestamp": 1705752184
+    },
+    {
+        "content": "<p>If my understanding of the pnts format is correct... I treat it as x y z nx ny nz (and just discard the normals when thrown into the convex hull)</p>",
+        "id": 416985834,
+        "sender_full_name": "pca006132",
+        "timestamp": 1705752220
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"680928\">@pca006132</span> Those inputs weren't problematic for quickhull - they're intended for a different algorithm Alexis wants to work on, a pseudo-shrinkwrap method to replace our Screened Poisson and polygonalizer fallback methods for facetization.</p>",
+        "id": 417123122,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705872468
+    },
+    {
+        "content": "<p>The problem I believe we've encountered with the QuickHull implementation (although I don't have a test case handy) was a super thin mesh -  it didn't end up producing a manifold convex hull</p>",
+        "id": 417123228,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705872533
+    },
+    {
+        "content": "<p>It's a rarely used feature in BRL-CAD proper, so it hasn't been a priority to fix - it would be interesting to see what Manifold does with that particular mesh as an input.</p>",
+        "id": 417123427,
+        "sender_full_name": "starseeker",
+        "timestamp": 1705872689
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> sure, I remember I got this previously when I was doing some crazy minkowski sum, can probably try to reproduce that and extract a few test cases later.</p>",
+        "id": 417125263,
+        "sender_full_name": "pca006132",
+        "timestamp": 1705874194
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> Any update on the reconstruction code?</p>",
+        "id": 428136227,
+        "sender_full_name": "starseeker",
+        "timestamp": 1711029746
+    }
+]

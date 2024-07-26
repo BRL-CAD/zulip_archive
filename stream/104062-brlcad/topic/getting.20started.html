@@ -1,0 +1,634 @@
+<html>
+<head><meta charset="utf-8"><title>getting started · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html">getting started</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="148190760"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/148190760" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#148190760">(Nov 22 2018 at 18:56)</a>:</h4>
+<blockquote>
+<p>As you told i have started "playing" with BRL-CAD and its nice,I am doing on MGED.<br>
+I have also downloaded the BRL-CAD archer.<br>
+Actually i am a little confused about about relation of MGED and Archer, can we use same command on archer.<br>
+And what coding work is there? on Archer or MGED? I have seen some project ideas here: <a href="http://brlcad.org/wiki/Google_Summer_of_Code/Project_Ideas" target="_blank" title="http://brlcad.org/wiki/Google_Summer_of_Code/Project_Ideas">http://brlcad.org/wiki/Google_Summer_of_Code/Project_Ideas</a><br>
+And i have a good control over c/c++ and opengl so where to go?</p>
+</blockquote>
+<p>Archer was designed as "next generation" mged application. Both are graphical user interfaces to BRL-CAD, and both are using the same core libraries as back end, including the TCL command interpreter.</p>
+
+
+
+<a name="148191435"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/148191435" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#148191435">(Nov 22 2018 at 19:16)</a>:</h4>
+<p>OK, I've an OpenGL issue for you: <br>
+Consider the annotation primitive in BRL-CAD: <a href="https://brlcad.org/wiki/Annot" target="_blank" title="https://brlcad.org/wiki/Annot">https://brlcad.org/wiki/Annot</a><br>
+You can create an example with the following commands:</p>
+<div class="codehilite"><pre><span></span><span class="nv">units</span> mm
+<span class="nv">in</span> sphere.s sph <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1000</span>
+<span class="nv">in</span> annotation.s annot <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> Sphere <span class="mi">5</span> <span class="mi">5</span> <span class="mi">1</span> <span class="mi">3</span>
+<span class="nv">g</span> all.g sphere.s annotation.s
+</pre></div>
+
+
+<p>Start mged with the X-Window backend: <code>mged -c</code> and then <code>X</code>. This shows how it should look like: The line of the annotation is always 5mm on the screen long. Zoom in and out to see the effect.<br>
+Now, start mged with the OpenGL backend: <code>mged -c</code> and then <code>ogl</code>. Here, the line is always 5mm in the model coordinate system long, which isn't correct.</p>
+<p>The OpenGL source code for this can be found in "src/libdm/dm-ogl.c. Look for BN_VLIST_DISPLAY_MAT there, this shall toggle the used coordinate system to display scale.</p>
+
+
+
+<a name="148217619"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/148217619" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kartik kumar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#148217619">(Nov 23 2018 at 09:21)</a>:</h4>
+<p>thank you .. Ok i m looking into it.<br>
+And yah next time i will text on public stream</p>
+
+
+
+<a name="151185159"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/151185159" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#151185159">(Dec 08 2018 at 17:32)</a>:</h4>
+<p><span class="user-mention" data-user-id="138776">@Kartik kumar</span> </p>
+<blockquote>
+<p>Hello,<br>
+I was going through somes deuces work</p>
+<p><a href="http://brlcad.org/wiki/Deuces#Implement_a_primitive_centroid_function" target="_blank" title="http://brlcad.org/wiki/Deuces#Implement_a_primitive_centroid_function">http://brlcad.org/wiki/Deuces#Implement_a_primitive_centroid_function</a></p>
+<p>Is this code complete?  i don't see any function in this?</p>
+</blockquote>
+<p>As far as I know, not all primitives have a centroid function yet. You could do a <code>grep -R centroid *</code> in the src/librt/primitives directory to find out which primitives have already a rt_~_centroid() function and which do not.</p>
+
+
+
+<a name="151185321"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/151185321" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#151185321">(Dec 08 2018 at 17:36)</a>:</h4>
+<blockquote>
+<p>Also i see some primitives to implement here<br>
+<a href="http://brlcad.org/~sean/ideas.html" target="_blank" title="http://brlcad.org/~sean/ideas.html">http://brlcad.org/~sean/ideas.html</a><br>
+does it only require c/c++ or opencl also?</p>
+</blockquote>
+<p>For the moment they require C only.<br>
+BTW, the implementation of some of them was already started but not finished.</p>
+
+
+
+<a name="151223659"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/151223659" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kartik kumar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#151223659">(Dec 09 2018 at 14:20)</a>:</h4>
+<p>I am not getting the code of primitives like arb etc. what to do?  I want to implement some primitives given here <a href="http://brlcad.org/~sean/ideas.html" target="_blank" title="http://brlcad.org/~sean/ideas.html">http://brlcad.org/~sean/ideas.html</a> . Does it require to understand the whole code of primitive?</p>
+
+
+
+<a name="151228524"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/151228524" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#151228524">(Dec 09 2018 at 17:07)</a>:</h4>
+<p>Maybe not the whole code of all primitives, but which functions the primitives have and why.</p>
+
+
+
+<a name="157088131"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157088131" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157088131">(Jan 29 2019 at 08:07)</a>:</h4>
+<p><span class="user-mention" data-user-id="198962">@Mayank Madan</span> The official BRL-CAD bug tracker is <a href="https://sourceforge.net/p/brlcad/bugs/" target="_blank" title="https://sourceforge.net/p/brlcad/bugs/">https://sourceforge.net/p/brlcad/bugs/</a><br>
+Regarding mged: On which operating system do you run the program?</p>
+
+
+
+<a name="157094085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157094085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Mayank Madan <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157094085">(Jan 29 2019 at 10:06)</a>:</h4>
+<p>I'm on Ubuntu 18.10</p>
+
+
+
+<a name="157170292"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157170292" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Mayank Madan <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157170292">(Jan 30 2019 at 08:23)</a>:</h4>
+<p>Did the latest commit to the repository break the build? Because I cant build even after a fresh checkout</p>
+
+
+
+<a name="157170388"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157170388" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Mayank Madan <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157170388">(Jan 30 2019 at 08:25)</a>:</h4>
+<p>It says it has no rule to make target lemper.c</p>
+
+
+
+<a name="157176804"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157176804" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Mayank Madan <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157176804">(Jan 30 2019 at 10:44)</a>:</h4>
+<p>I'm really sorry but it seems that its building fine. Im not sure why it was happening because i did not mess with CMakeLists or Makefile(s) that were generated(the svn diff command didnt output anything so I'm pretty sure i didnt mess with anything). I decided to just start over by deleting the local copy of the repository and starting fresh and now it works. Sorry for the spam</p>
+
+
+
+<a name="157184238"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157184238" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157184238">(Jan 30 2019 at 12:46)</a>:</h4>
+<p>The BRL-CAD build needs a clean-up from time to time because of tricky changes in the CMake files which cannot be handled automatically in an existing build.</p>
+
+
+
+<a name="157184335"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/157184335" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#157184335">(Jan 30 2019 at 12:48)</a>:</h4>
+<p>Therefore, if a build fails and the reason isn't obvious you should try it again from scratch.</p>
+
+
+
+<a name="167018009"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/167018009" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#167018009">(May 31 2019 at 17:48)</a>:</h4>
+<p><span class="user-mention" data-user-id="211316">@Chetan Shinde</span> there's lots of ways you can get started on a project, and "what" mostly depends on your interest and abilities.  If you have at least basic programming skills, something we really need is a program that creates all available objects.</p>
+
+
+
+<a name="167018036"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/167018036" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#167018036">(May 31 2019 at 17:48)</a>:</h4>
+<p>if that sounds interesting, I can give you some pointers to help you get started.</p>
+
+
+
+<a name="167336174"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/167336174" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Chetan Shinde <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#167336174">(Jun 04 2019 at 21:10)</a>:</h4>
+<blockquote>
+<p>if that sounds interesting, I can give you some pointers to help you get started.</p>
+</blockquote>
+<p>Yea, i am excited.</p>
+
+
+
+<a name="167338416"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/167338416" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Chetan Shinde <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#167338416">(Jun 04 2019 at 21:44)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="211316">Chetan Shinde</span> there's lots of ways you can get started on a project, and "what" mostly depends on your interest and abilities.  If you have at least basic programming skills, something we really need is a program that creates all available objects.</p>
+</blockquote>
+<p>Yes, i do have some basic skills.</p>
+
+
+
+<a name="170924465"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/170924465" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rajesh Kumar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#170924465">(Jul 15 2019 at 19:38)</a>:</h4>
+<p>Hey, <span class="user-mention" data-user-id="102902">@Sean</span>  can you please help me with this. Thanks</p>
+<p>CMake Error at misc/CMake/BRLCAD_Util.cmake:553 (string):<br>
+  string sub-command STRIP requires two arguments.<br>
+Call Stack (most recent call first):<br>
+  CMakeLists.txt:154 (set_config_time)</p>
+
+
+
+<a name="171263050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171263050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171263050">(Jul 19 2019 at 14:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="216670">@Rajesh Kumar</span> my first guess would be that you're using an older or newer version of cmake.  Try a newer or older version if you're not comfortable debugging CMake code.</p>
+
+
+
+<a name="171368131"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171368131" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rajesh Kumar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171368131">(Jul 21 2019 at 11:09)</a>:</h4>
+<p>Thank you for your response.<br>
+I currently have a CMake version 3.13.4 on my machine (macOS), and cmakelist for BRL-CAD specifies minimum version VERSION 3.1.3, which in my case should not be an issue.<br>
+Additionally, I am trying to use a cross-compiling toolchain to generate llvm code. All goes very well until I get this error. <br>
+After a little look into it, I saw that brl-cad tries to maintain version history and ask for some variables through STRIP command, (CONFIG_DAY...).<br>
+you can find this in @ brlcad/misc/CMake/BRLCAD_Util.cmake Line: Line 553. which gets called from set_config_time.</p>
+<p>I hope I have provided enough info about my problem. It will be really helpful if you could give me assistance on setting correct build environment.<br>
+Thanks</p>
+
+
+
+<a name="171385890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171385890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171385890">(Jul 21 2019 at 20:04)</a>:</h4>
+<p>The minimum version we currently specify may not be correct.  We don't always go back to those older versions to make sure everything is working right.  Similarly, we don't necessarily check the very latest cmake to see if they broke anything that was working.  That said, 3.13 sounds new enough that I agree it should not be an issue.  I'm using 3.14 at the moment successfully.</p>
+
+
+
+<a name="171385961"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171385961" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171385961">(Jul 21 2019 at 20:06)</a>:</h4>
+<p>What I suspect is happening is that "${CONFIG_DAY}" on line 553 is empty, so cmake only sees: string(STRIP   CONFIG_DAY)</p>
+
+
+
+<a name="171385969"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171385969" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171385969">(Jul 21 2019 at 20:06)</a>:</h4>
+<p>which would happen if the preceding execute_process line fails for some reason</p>
+
+
+
+<a name="171386023"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171386023" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171386023">(Jul 21 2019 at 20:08)</a>:</h4>
+<p>what you can try doing is put the rfc2822_src code into a file and just try compiling and running that by hand</p>
+
+
+
+<a name="171386035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171386035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171386035">(Jul 21 2019 at 20:09)</a>:</h4>
+<p>it's this code:</p>
+<div class="codehilite"><pre><span></span><span class="cm">/* RFC2822 timestamp and individual day, month and year files */</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+   <span class="kt">time_t</span> <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+   <span class="k">struct</span> <span class="n">tm</span> <span class="o">*</span><span class="n">currenttime</span> <span class="o">=</span> <span class="n">localtime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">t</span><span class="p">);</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">char</span> <span class="n">rfc2822</span><span class="p">[</span><span class="mi">200</span><span class="p">];</span>
+      <span class="n">strftime</span><span class="p">(</span><span class="n">rfc2822</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">rfc2822</span><span class="p">),</span> <span class="err">\</span><span class="s">&quot;%a, %d %b %Y %H:%M:%S %z</span><span class="se">\&quot;</span><span class="s">, currenttime);</span>
+      <span class="n">printf</span><span class="p">(</span><span class="err">\</span><span class="s">&quot;%s</span><span class="se">\&quot;</span><span class="s">, rfc2822);</span>
+      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="err">\</span><span class="s">&quot;day</span><span class="se">\&quot;</span><span class="s">, 4) == 0) {</span>
+      <span class="n">printf</span><span class="p">(</span><span class="err">\</span><span class="s">&quot;%02d</span><span class="se">\&quot;</span><span class="s">, currenttime-&gt;tm_mday);</span>
+   <span class="p">}</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="err">\</span><span class="s">&quot;month</span><span class="se">\&quot;</span><span class="s">, 5) == 0) {</span>
+      <span class="n">printf</span><span class="p">(</span><span class="err">\</span><span class="s">&quot;%02d</span><span class="se">\&quot;</span><span class="s">, currenttime-&gt;tm_mon + 1);</span>
+   <span class="p">}</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="err">\</span><span class="s">&quot;year</span><span class="se">\&quot;</span><span class="s">, 4) == 0) {</span>
+      <span class="n">printf</span><span class="p">(</span><span class="err">\</span><span class="s">&quot;%d</span><span class="se">\&quot;</span><span class="s">, currenttime-&gt;tm_year + 1900);</span>
+   <span class="p">}</span>
+   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+
+<a name="171386087"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171386087" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171386087">(Jul 21 2019 at 20:10)</a>:</h4>
+<p>if you can compile that, try running it as "path/to/the/exe day"</p>
+
+
+
+<a name="171386095"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/171386095" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#171386095">(Jul 21 2019 at 20:10)</a>:</h4>
+<p>that should shed some light on what's going wrong.</p>
+
+
+
+<a name="179334747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179334747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179334747">(Oct 29 2019 at 14:38)</a>:</h4>
+<p>BRL-CAD mged tutorial: <a href="https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf" target="_blank" title="https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a></p>
+
+
+
+<a name="179411334"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179411334" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179411334">(Oct 30 2019 at 08:35)</a>:</h4>
+<p>Welcome newbies! Here an answer to the FAQ "How to start?":</p>
+<ul>
+<li>Install BRL-CAD. You can find the necessary installation packages at <a href="https://sourceforge.net/projects/brlcad/files/" target="_blank" title="https://sourceforge.net/projects/brlcad/files/">https://sourceforge.net/projects/brlcad/files/</a></li>
+<li>This will install over 200 programs. Most of them are small command line tools. The most interesting for you are our old but still heavily used GUI <code>mged</code> and the more modern GUI <code>archer</code>.</li>
+<li>Go through the mged tutorial <a href="https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf" target="_blank" title="https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a></li>
+<li>Gain an overview of the existing documentation at <a href="https://brlcad.org/wiki/Main_Page" target="_blank" title="https://brlcad.org/wiki/Main_Page">https://brlcad.org/wiki/Main_Page</a></li>
+</ul>
+<p>To start with programming</p>
+<ul>
+<li>Download the source code (<a href="https://brlcad.org/wiki/SVN" target="_blank" title="https://brlcad.org/wiki/SVN">https://brlcad.org/wiki/SVN</a>)</li>
+<li>Compile and install it (<a href="https://brlcad.org/wiki/Compiling" target="_blank" title="https://brlcad.org/wiki/Compiling">https://brlcad.org/wiki/Compiling</a>)</li>
+<li>You can use <a href="https://brlcad.org/wiki/Deuces" target="_blank" title="https://brlcad.org/wiki/Deuces">https://brlcad.org/wiki/Deuces</a> as a starter for small programming tasks</li>
+</ul>
+<p>BTW, the posts in this Zulip chat are organized in streams and topics. Make sure that you posts are meaningfully categorized there. E.g., this post is in <a class="stream-topic" data-stream-id="104062" href="/#narrow/stream/104062-general/topic/getting.20started">#general &gt; getting started</a></p>
+
+
+
+<a name="179700109"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179700109" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aniruddha Ghadge <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179700109">(Nov 02 2019 at 12:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  I have been got familiar with mged and rt  (gone through the pdf ) what should be my further approach ?</p>
+
+
+
+<a name="179877449"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179877449" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179877449">(Nov 04 2019 at 21:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="247003">@Aniruddha Ghadge</span> Now that you have some basics, what would you like to do or learn?</p>
+
+
+
+<a name="179877475"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179877475" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179877475">(Nov 04 2019 at 21:16)</a>:</h4>
+<p>If you're looking to get into code development, there is literally an endless supply of tasks small and big.</p>
+
+
+
+<a name="179877531"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179877531" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179877531">(Nov 04 2019 at 21:17)</a>:</h4>
+<p>If you're looking to become a more proficient 3D modeler, there's nothing quite as effective as measuring and modeling something near you in detail.</p>
+
+
+
+<a name="179918068"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179918068" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aniruddha Ghadge <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179918068">(Nov 05 2019 at 10:19)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  I am looking to get into the code starting with small tasks and further growing step by step , I would like to gain some knowledge about API or UI design as I am interested in those two things. Can u suggest something related to these ?</p>
+
+
+
+<a name="179927314"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179927314" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179927314">(Nov 05 2019 at 12:36)</a>:</h4>
+<p><span class="user-mention" data-user-id="247003">@Aniruddha Ghadge</span> Sure, but it's a really big system so it'll help to focus on something really small.  Looking at our TODO file, there's only a couple hundred to choose from, but I can suggest one to start with. ;)</p>
+
+
+
+<a name="179927337"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179927337" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179927337">(Nov 05 2019 at 12:36)</a>:</h4>
+<p>looking at the list in TODO, this one is pretty simple: overlay command needs to accept multiple file arguments</p>
+
+
+
+<a name="179951050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179951050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179951050">(Nov 05 2019 at 16:48)</a>:</h4>
+<p>To point you in the right direction, "overlay" is a command you can run in MGED on the command-line.  Sources for it are in src/libged/overlay.c</p>
+
+
+
+<a name="179958355"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179958355" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aniruddha Ghadge <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179958355">(Nov 05 2019 at 18:01)</a>:</h4>
+<p>Yeah I was familiar with that command but I was not getting the sources ...... Thanks !</p>
+
+
+
+<a name="179958430"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179958430" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179958430">(Nov 05 2019 at 18:02)</a>:</h4>
+<p>nearly all mged commands are in src/libged</p>
+
+
+
+<a name="179958823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/179958823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aniruddha Ghadge <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#179958823">(Nov 05 2019 at 18:06)</a>:</h4>
+<p>Okayy</p>
+
+
+
+<a name="180987893"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/180987893" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#180987893">(Nov 18 2019 at 04:41)</a>:</h4>
+<p>Hi, I've just compiled the source code on Debian and while I believe it worked successfully, I've been having some trouble working with MGED . When I call the MGED command, my computer becomes extremely slow, and it takes around 15-20 minutes for the graphics window to open while the command window does not open at all. I don't believe that this is simply a hardware issue, so I was wondering if anyone has resolved similar issues before? Any help would be much appreciated.</p>
+
+
+
+<a name="181014236"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181014236" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181014236">(Nov 18 2019 at 13:15)</a>:</h4>
+<p>What kind of cpu, mem, 3d accel, etc?</p>
+
+
+
+<a name="181032422"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181032422" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181032422">(Nov 18 2019 at 16:45)</a>:</h4>
+<p><span class="user-mention" data-user-id="250111">@Jeffrey Liu</span> I've never heard of such an issue happening with mged before!  Try running "mged -c" and try the "nu" for no-graphics mode.  If that works fine, try running the "attach X" command, and then "attach ogl" command and see if both work (they should display a graphics window each).</p>
+
+
+
+<a name="181038084"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181038084" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181038084">(Nov 18 2019 at 17:43)</a>:</h4>
+<p>I'm experiencing a similar issue with <code>rt</code>. Also Debian, buster latest version: Mged starts normally, but when I load any geometry and run <code>rt</code> (even without selecting an object before), my system freezes for some minutes. After this, half of my swap space is used. A clean shut-down isn't possible either, because the swap device cant be switched off. (The laptop has 4G RAM and 8G swap space).<br>
+Same behavior with the stand alone <code>rt</code> command and <code>-P 1</code>.</p>
+
+
+
+<a name="181038695"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181038695" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181038695">(Nov 18 2019 at 17:51)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> seriously??  this is definitely emergency news ... I assume it's latest trunk and not the last release?  Does it happen every time?  Is it using the bundled Tcl/Tk or the system Tcl/Tk?</p>
+
+
+
+<a name="181038869"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181038869" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181038869">(Nov 18 2019 at 17:53)</a>:</h4>
+<p>If Rt is doing it too... that implies something lower level, which is even more concerning.  If it reliably has a delay, see if it goes away after: rm -rf ~/.cache/BRL-CAD</p>
+
+
+
+<a name="181038963"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181038963" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181038963">(Nov 18 2019 at 17:54)</a>:</h4>
+<p>If that's on Windows, it's in a different location, standard Windows user cache folder.</p>
+
+
+
+<a name="181039247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181039247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181039247">(Nov 18 2019 at 17:57)</a>:</h4>
+<p>Only other thing I can think of is (on Linux at least) library pre-binding.  It might be prebinding all the libraries and that could be taking an exhaustive amount of time and memory.  Maybe something we could do to pre-bind in the build system, but would need to confirm what's going on first.</p>
+
+
+
+<a name="181067809"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181067809" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181067809">(Nov 18 2019 at 23:33)</a>:</h4>
+<p>The bad news is that</p>
+<ul>
+<li>removing the cache doesn't change anything and</li>
+<li>configuring all libs to bundled doesn't change it either.</li>
+</ul>
+<p>But, rendering to a file works well. The difference in the output are the following two lines:</p>
+<div class="codehilite"><pre><span></span>  CACHE  /home/rossberg/.cache/BRL-CAD/.rt
+WARNING: ^ Directory does not exist.  Initializing.
+</pre></div>
+
+
+<p><a href="/user_uploads/1549/hRt_q_yuOqidBiWlkW8Lng-g/rt_out.txt" target="_blank" title="rt_out.txt">rt_out.txt</a> <a href="/user_uploads/1549/rSV9yYe4aemrDkWaxtUA74G0/rt-to-file_out.txt" target="_blank" title="rt-to-file_out.txt">rt-to-file_out.txt</a> <br>
+What's the <code>^</code> directory?</p>
+<p>Another idea: Can I use X-Window instead of OpenGL for the output? Maybe with the <code>-F</code> command line parameter? OpenGL doesn't work well anyeway. The framebuffer window is always transparent.</p>
+
+
+
+<a name="181068614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181068614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181068614">(Nov 18 2019 at 23:46)</a>:</h4>
+<blockquote>
+<p>Hi, I've just compiled the source code on Debian and while I believe it worked successfully, I've been having some trouble working with MGED . When I call the MGED command, my computer becomes extremely slow, and it takes around 15-20 minutes for the graphics window to open while the command window does not open at all. I don't believe that this is simply a hardware issue, so I was wondering if anyone has resolved similar issues before? Any help would be much appreciated.</p>
+</blockquote>
+<p><span aria-label="grinning face with smiling eyes" class="emoji emoji-1f601" role="img" title="grinning face with smiling eyes">:grinning_face_with_smiling_eyes:</span> I just reproduced this by starting mged in X-Window mode. It looks like OpenGL isn't the cause in this case <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+
+
+
+<a name="181084055"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181084055" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181084055">(Nov 19 2019 at 05:42)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102902">@Sean</span> , thank you so much for your response! Running "mged -c" seems to work fine with both "nu" as well as "X," but there doesn't seem to be a valid "ogl" option for me.</p>
+
+
+
+<a name="181084367"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181084367" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181084367">(Nov 19 2019 at 05:51)</a>:</h4>
+<p><span class="user-mention" data-user-id="103542">@Erik</span> I am using an Intel i5-6300HQ CPU with 8 GB of RAM. I do have a GTX950M with drivers installed, but I've been having some trouble enabling it so I believe that integrated graphics is being used at the moment.</p>
+
+
+
+<a name="181282027"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181282027" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181282027">(Nov 21 2019 at 07:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="250111">@Jeffrey Liu</span> that's fine regarding no ogl.  does it consistently take a long time without -c ?  does it take a long time with "mged -c" and then run the "gui" command?</p>
+
+
+
+<a name="181282323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181282323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181282323">(Nov 21 2019 at 07:36)</a>:</h4>
+<blockquote>
+<p>The bad news is that</p>
+<ul>
+<li>removing the cache doesn't change anything and</li>
+</ul>
+</blockquote>
+<p>That's actually really good news.  It's one of the few major changes with potential to affect rt and mged, so it's good to hear it's not involved.</p>
+<blockquote>
+<ul>
+<li>configuring all libs to bundled doesn't change it either.</li>
+</ul>
+</blockquote>
+<p>That helps rule out it being something from a system-installed dep on Linux, like a system Tk.</p>
+<blockquote>
+<p>What's the <code>^</code> directory?</p>
+</blockquote>
+<p>It's pointing at the cache directory on the previous line, similar to a compiler warning marker.</p>
+<blockquote>
+<p>Another idea: Can I use X-Window instead of OpenGL for the output? Maybe with the <code>-F</code> command line parameter? OpenGL doesn't work well anyeway. The framebuffer window is always transparent.</p>
+</blockquote>
+<p>I believe this is possible, though I forget the exact mechanics.  Using -F will set the default for mged -c, but I don't know if that passes through to the gui command which kicks off the Tk gui logic.  I recall there being an internal command that configures the gui to using ogl or X, but I don't recall what it was.  You can manually run "attach X" even in gui mode and it will create additional graphics windows using X.</p>
+
+
+
+<a name="181282469"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181282469" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181282469">(Nov 21 2019 at 07:40)</a>:</h4>
+<blockquote>
+<p><span aria-label="grinning face with smiling eyes" class="emoji emoji-1f601" role="img" title="grinning face with smiling eyes">:grinning_face_with_smiling_eyes:</span> I just reproduced this by starting mged in X-Window mode. It looks like OpenGL isn't the cause in this case <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+</blockquote>
+<p>That's good bad news.  If you have 'perf' installed, can you run "perf record -F 99 mged" followed by "perf report" to see if there's indication of what's going on?</p>
+
+
+
+<a name="181312357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181312357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181312357">(Nov 21 2019 at 15:03)</a>:</h4>
+<p>I traced the malloc() and realloc() functions, with no result. Even <code>ps</code> and <code>top</code> aren't able to determine the process which consumes that much memory. I suppose therefore that the huge memory allocation is not on the heap,  but maybe by the graphics unit instead.</p>
+<p>I'll try the perf command. I just installed it.</p>
+
+
+
+<a name="181610602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181610602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181610602">(Nov 22 2019 at 05:10)</a>:</h4>
+<p>Unfortunately, perf didn't helped.</p>
+<p>So, I did it the hard way and stepped trough the program until it hangs again and again, with reboots between the trials. And, I found that the rt command hangs in src/libfb/if_ogl.c line 514.</p>
+<p>There, 4 Gig of memory is allocated and initialized, probable for no good reason. On machines with 8 Gig RAM and more this may not be an issue, on my laptop with only 4 Gig it is however. I don't know why MODE_1MALLOC isn't the default or what's the benefit of allocating always the largest possible frame buffer memory.</p>
+
+
+
+<a name="181691579"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181691579" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181691579">(Nov 23 2019 at 00:49)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102902">@Sean</span> , the issue occurred every time I ran it without -c, but mged -c and gui took a reasonable amount of time (maybe around 2-3 seconds). I don't quite know what the issue was because everything works fine after I compiled on Windows.</p>
+
+
+
+<a name="181692085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181692085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181692085">(Nov 23 2019 at 00:59)</a>:</h4>
+<p><span class="user-mention" data-user-id="250111">@Jeffrey Liu</span> when you run "mged -c" what does it report for display modes you can attach to?</p>
+
+
+
+<a name="181692113"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181692113" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181692113">(Nov 23 2019 at 00:59)</a>:</h4>
+<p>and are you saying you recompiled and it worked, but the distributed binaries had the delay?</p>
+
+
+
+<a name="181692692"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181692692" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181692692">(Nov 23 2019 at 01:12)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> That's a bit disconcerting.  None of that code has changed, but that's still bizarre because that memset size is not very large at all ... unless .... one of the max sizes is unitialized/negative and resulting in a huge number..</p>
+
+
+
+<a name="181693338"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181693338" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181693338">(Nov 23 2019 at 01:31)</a>:</h4>
+<p>When I ran "mged -c", I believed it offered "nu|txt|X|tk." What I meant was that I was previously trying to compile on Debian Buster, so I suspect that it was most likely a driver or library issue.</p>
+
+
+
+<a name="181694708"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181694708" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181694708">(Nov 23 2019 at 02:05)</a>:</h4>
+<p>it offered "tk"???</p>
+
+
+
+<a name="181695285"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181695285" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181695285">(Nov 23 2019 at 02:20)</a>:</h4>
+<p>Yep, I just booted into Debian again and those options are still there. It still opens a graphics window but the top toolbar is a little messed up.</p>
+
+
+
+<a name="181695988"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181695988" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181695988">(Nov 23 2019 at 02:42)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> That's a bit disconcerting.  None of that code has changed, but that's still bizarre because that memset size is not very large at all ... unless .... one of the max sizes is unitialized/negative and resulting in a huge number..</p>
+</blockquote>
+<p>I wouldn't call 4 gigabyte of RAM "not very large". This is all this laptop has.</p>
+
+
+
+<a name="181703575"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181703575" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181703575">(Nov 23 2019 at 06:59)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> it shouldn't have been 4 gigs.  that sounds like a signed overflow or signed to unsigned mistake.</p>
+
+
+
+<a name="181703862"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181703862" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181703862">(Nov 23 2019 at 07:09)</a>:</h4>
+<p>that explains it. </p>
+<p>looks like I made a change last year in r71760 that consolidated the max image size to consistently be 32768<em>32768</em>4 = 4294967296 bytes (i.e., 4GB), which is obviously a major problem for 4GB systems.</p>
+
+
+
+<a name="181703908"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181703908" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181703908">(Nov 23 2019 at 07:10)</a>:</h4>
+<p>(to be clear, not an overflow or signed mistake, just a default memory assumption changed with implications not fully expected.</p>
+
+
+
+<a name="181704323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181704323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181704323">(Nov 23 2019 at 07:24)</a>:</h4>
+<p>applied a change that reduces the usage by more than half -- can you test?</p>
+
+
+
+<a name="181717702"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181717702" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181717702">(Nov 23 2019 at 14:23)</a>:</h4>
+<p>I'll see what I can do. I'm the most time in the air this weekend.</p>
+
+
+
+<a name="181717881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181717881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181717881">(Nov 23 2019 at 14:28)</a>:</h4>
+<p>The change with revision 71742 seems to have a much bigger impact.</p>
+
+
+
+<a name="181722307"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181722307" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181722307">(Nov 23 2019 at 16:40)</a>:</h4>
+<p>Yes, that general commit timeframe was a refactoring to support larger images.  Hit limits doing large poster-size production rendering.</p>
+
+
+
+<a name="181722464"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181722464" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181722464">(Nov 23 2019 at 16:44)</a>:</h4>
+<p>looks like ogl went from 16k^2 to 32^2, so 1GB to 4GB minimum memory implication on context initialization</p>
+
+
+
+<a name="181727292"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181727292" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181727292">(Nov 23 2019 at 19:04)</a>:</h4>
+<p>I made some tests. In general, there were okay. I got the best results with OpenGL. With this interface, the memory doesn't need to be actually allocated in the RAM, at least not all of it. (For some reason the 4 Gig was  always fully allocated/placed in the RAM.)</p>
+<p>With the X-Window interface, always the whole 1.6 Gig was placed in the RAM, but it seems to not use shared memory either. If you are in bad luck and it starts swapping (happened to me once), it hangs.</p>
+
+
+
+<a name="181727434"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181727434" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181727434">(Nov 23 2019 at 19:08)</a>:</h4>
+<blockquote>
+<p>Hi, I've just compiled the source code on Debian and while I believe it worked successfully, I've been having some trouble working with MGED . When I call the MGED command, my computer becomes extremely slow, and it takes around 15-20 minutes for the graphics window to open while the command window does not open at all. I don't believe that this is simply a hardware issue, so I was wondering if anyone has resolved similar issues before? Any help would be much appreciated.</p>
+</blockquote>
+<p>With the X-Window interface (for example, if you compiled BRL-CAD without OpenGL support), no extra command window will open. The command line is in the terminal were you started mged instead.</p>
+
+
+
+<a name="181727508"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/181727508" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#181727508">(Nov 23 2019 at 19:10)</a>:</h4>
+<p>I wonder what are the benefits of using shared memory and allocating more of it than needed <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+
+
+
+<a name="436276094"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/436276094" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#436276094">(Apr 30 2024 at 13:49)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="714250">@Grant Taylor</span>, welcome at BRL-CAD!</p>
+<p>You can start with BRL-CAD like you did with the other CADs you mentioned: Install the programs (installation packages can be found at <a href="https://github.com/BRL-CAD/brlcad/releases">https://github.com/BRL-CAD/brlcad/releases</a>). This will install over 200 programs. Most of them are small command line tools. The most interesting for you are our old but still heavily used GUI mged and the more modern GUI archer. Try them out! You can use the tutorial <a href="https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a> four guidance.</p>
+
+
+
+<a name="436488536"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/getting%20started/near/436488536" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Grant Taylor <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/getting.20started.html#436488536">(May 01 2024 at 12:00)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/104062-brlcad/topic/getting.20started/near/436276094">said</a>:</p>
+<blockquote>
+<p>Hi <span class="user-mention silent" data-user-id="714250">Grant Taylor</span>, welcome at BRL-CAD!</p>
+<p>You can start with BRL-CAD like you did with the other CADs you mentioned: Install the programs (installation packages can be found at <a href="https://github.com/BRL-CAD/brlcad/releases">https://github.com/BRL-CAD/brlcad/releases</a>). This will install over 200 programs. Most of them are small command line tools. The most interesting for you are our old but still heavily used GUI mged and the more modern GUI archer. Try them out! You can use the tutorial <a href="https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf">https://brlcad.org/w/images/c/cf/Introduction_to_MGED.pdf</a> four guidance.</p>
+</blockquote>
+<p>Thank you very much Daniel. I think my problem is I was trying to figure out MGED more or less blind, and there was mild confusion as a result. I think I'll try using Archer for a bit. Thanks again!</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

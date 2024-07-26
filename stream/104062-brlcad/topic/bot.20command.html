@@ -1,0 +1,77 @@
+<html>
+<head><meta charset="utf-8"><title>bot command · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html">bot command</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="197338640"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197338640" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197338640">(May 12 2020 at 20:59)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> bot command arg ordering is potentially minimally impacting.<br>
+bot get is a bit impactful, but bot check would be a bit surprising that the args couldn't be adjusted in a minimally-impacting way.</p>
+
+
+
+<a name="197345858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197345858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197345858">(May 12 2020 at 22:03)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  - Haven't put extensive thought into it, so maybe.  Was mostly just trying to refactor so it's easier to add new subcommand functionality - a general cleanup can probably wait until we finalize a general pattern for such commands.  Right now bot and brep are doing different things, and minimally we'd have to audit Archer and the other Tcl codes when we change any  of them.</p>
+
+
+
+<a name="197346130"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197346130" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197346130">(May 12 2020 at 22:05)</a>:</h4>
+<p>I've broken enough stuff lately.  I'm going to finish up the C++ version of <a href="http://repository.sh">repository.sh</a> - I'm fairly close now, that shouldn't break anything in the mainline code,  and initial performance tests are looking quite promising - but after that I need to get back to understanding how Tk events and threads interact.</p>
+
+
+
+<a name="197373832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197373832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Notification Bot <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197373832">(May 13 2020 at 06:44)</a>:</h4>
+<p>This topic was moved by <span class="user-mention silent" data-user-id="102902">Sean</span> to <a class="stream-topic" data-stream-id="197058" href="/#narrow/stream/197058-Google-Season-of-Docs/topic/introduction">#Google Season of Docs &gt; introduction</a></p>
+
+
+
+<a name="197403165"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197403165" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197403165">(May 13 2020 at 12:13)</a>:</h4>
+<p>That said, we need to have a discussion at some point if/when/how to merge the refactoring of the display manager / framebuffer code back into trunk.  It will turn stale relatively quickly, given the extensive nature of the changes, so if we want to use it that merge shouldn't linger indefinitely...  I know we need to get a working release with Tcl/Tk 8.6 out first, but I'd like to have a game plan once we're over that hurdle.</p>
+
+
+
+<a name="197458321"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197458321" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197458321">(May 13 2020 at 18:46)</a>:</h4>
+<p>I would plan for it as 7.34 after at least two 7.32 releases with Tcl/Tk 8.6.  Or vice versa.</p>
+<p>That's a pretty significant change.  To merge, really needs to have cross-platform confidence from more than one person, doesn't have shortcuts (not claiming it does, didn't pay close attention because it's on a branch), doesn't have other maintenance concerns, and isn't otherwise going to introduce badness.</p>
+<p>It's not tied to a user-visible feature, so  burden is intrinsically on the branch.  It's a pretty significant change LIKELY to introduce a bug somewhere, even with testing.</p>
+<p>Is it working now?  I can do some builds next week to see how it's looking.   Just recently you still seemed to be debugging and hacking on it, though?  I think at a minimum, someone (else) on Windows and Mac needs to test it.</p>
+
+
+
+<a name="197505637"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197505637" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197505637">(May 14 2020 at 04:39)</a>:</h4>
+<p>Well, blast.  The C++ version of <a href="http://repository.sh">repository.sh</a> takes the time from 30sec to &lt;10sec on Linux, but takes it from 40sec to 90sec on FreeBSD.  What on earth...</p>
+
+
+
+<a name="197506106"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197506106" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197506106">(May 14 2020 at 04:53)</a>:</h4>
+<p>run it through perf.  haven't looked, but I'd blindly guess you're copying copies of copies of strings, or making copies of containers.  latest gcc tries harder to hide it, it's a common mistake, and is pretty good at deferring with copy-on-write but that causes that kind of performance disparity.   could also simply be some buffer not tuned right that is stalling out.</p>
+
+
+
+<a name="197506429"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197506429" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197506429">(May 14 2020 at 05:01)</a>:</h4>
+<p>Looks like it was either the regex statements or something related to them - latest update gets it down from 90 seconds to under 10 on bz</p>
+
+
+
+<a name="197506903"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bot%20command/near/197506903" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bot.20command.html#197506903">(May 14 2020 at 05:14)</a>:</h4>
+<p>hm.  then it might be disk caching.  are you scanning over the filesystem multiple times?  should take care to only scan once or twice.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

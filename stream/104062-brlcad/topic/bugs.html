@@ -1,0 +1,485 @@
+<html>
+<head><meta charset="utf-8"><title>bugs · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html">bugs</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="129049458"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129049458" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129049458">(Jul 03 2018 at 21:43)</a>:</h4>
+<p><a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703" target="_blank" title="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703">there is a bug here</a>. freesolid is iterated, the head element is removed, and then added again, resulting in an infinite loop. i don't know how to fix it, since i don't know what it's actually trying to accomplish</p>
+
+
+
+<a name="129063815"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129063815" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129063815">(Jul 04 2018 at 04:51)</a>:</h4>
+<blockquote>
+<p><a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703" target="_blank" title="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703">there is a bug here</a>. freesolid is iterated, the head element is removed, and then added again, resulting in an infinite loop. i don't know how to fix it, since i don't know what it's actually trying to accomplish</p>
+</blockquote>
+<p>I'm not seeing it -- can you explain?  are you referring to RT_G_DEBUG mode on line 738?  that can be deleted if it's gotten out-of-date.</p>
+
+
+
+<a name="129064827"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129064827" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129064827">(Jul 04 2018 at 05:26)</a>:</h4>
+<p><code>FREE_SOLID</code> (<a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/include/rt/solid.h#l81" target="_blank" title="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/include/rt/solid.h#l81">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/include/rt/solid.h#l81</a>) also does a <code>BU_LIST_APPEND</code> of <code>sp</code> (which has just been dequeued) to <code>freesolid</code> (from which it has just dequeued <code>sp</code>)</p>
+
+
+
+<a name="129064890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129064890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129064890">(Jul 04 2018 at 05:28)</a>:</h4>
+<p>it's true that <code>RT_G_DEBUG</code> has to be on. i ran an mged test with <code>-x 801 -X 801</code> and stumbled upon the issue</p>
+
+
+
+<a name="129065890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129065890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129065890">(Jul 04 2018 at 05:52)</a>:</h4>
+<p>I think that's code that got out of sync with other code.  There almost certainly was other RT_G_DEBUG code that has since been deleted that make it work right.  The "fix" is to probably just delete this offending code.  We should not be doing manual data-specific pooling (freelists) like that any more.  They're crazy slow, incoherent, pointer chasing.</p>
+
+
+
+<a name="129069697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129069697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129069697">(Jul 04 2018 at 07:17)</a>:</h4>
+<p>i removed the code in r71109. i ran the tests before committing, everything was fine</p>
+
+
+
+<a name="129344388"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129344388" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129344388">(Jul 09 2018 at 12:01)</a>:</h4>
+<p><code>regress-rtwizard-rtwiz_m35_D</code> fails on mac, but not on linux. <a href="/user_uploads/1549/3OnliYcF2X7otHULnXZuDAFP/m35_D_diff.pix" target="_blank" title="m35_D_diff.pix">here's the output of pix-cmp -l</a> and <a href="/user_uploads/1549/2mxAoHMCMlJ5EPxCbUTeT0MK/m35_D_diff.png" target="_blank" title="m35_D_diff.png">here are the different pixels</a> (using imagemagick). any suggestions on how i could debug this? i get the same results on both release and debug</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/2mxAoHMCMlJ5EPxCbUTeT0MK/m35_D_diff.png" target="_blank" title="here are the different pixels"><img src="/user_uploads/1549/2mxAoHMCMlJ5EPxCbUTeT0MK/m35_D_diff.png"></a></div>
+
+
+
+<a name="129344496"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129344496" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129344496">(Jul 09 2018 at 12:03)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> should i pursue this further, or should i focus on the SoA work for now?</p>
+
+
+
+<a name="129388063"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129388063" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129388063">(Jul 10 2018 at 03:26)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> should i pursue this further, or should i focus on the SoA work for now?</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> if you would like to debug this, please do - it's some relatively recent change.  you might have a good chance finding it simply by bisecting commits until you find the culprit. </p>
+<p>I'm also seeing the failure on mac.</p>
+
+
+
+<a name="129388207"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129388207" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129388207">(Jul 10 2018 at 03:30)</a>:</h4>
+<p>all of the differences are subtle shading changes at extreme angles (e.g., 0/0/0 vs 2/2/2 rgb values on the tire edges), implying something has changed mathematically somewhere.  i have a mini backlog of commits I've not yet peer-reviewed, so I'll try to keep an eye out for likely cause but typically will be something like subtle bounding box change via redefinition of INFINITY, optimized math rounding, error accumulation, etc</p>
+
+
+
+<a name="129398351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129398351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129398351">(Jul 10 2018 at 08:20)</a>:</h4>
+<p>i tried with 7.26.4 from sourceforge, the test still fails. 7.26.0 doesn't build and i didn't try to fix it. it's either not that new, or maybe clang's libc++ could be at fault? i'll try building with -stdlib=libstdc++</p>
+
+
+
+<a name="129398411"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129398411" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129398411">(Jul 10 2018 at 08:22)</a>:</h4>
+<p>i'll try building with clang on linux next, hopefully that uses libc++ and not the gnu one. i tried gcc 8 on mac, but lld can't link stuff (something about unrecognized options), and gnu ld doesn't produce mach-o's</p>
+
+
+
+<a name="129418731"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129418731" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129418731">(Jul 10 2018 at 15:56)</a>:</h4>
+<blockquote>
+<p>i tried with 7.26.4 from sourceforge, the test still fails. 7.26.0 doesn't build and i didn't try to fix it. it's either not that new, or maybe clang's libc++ could be at fault? i'll try building with -stdlib=libstdc++</p>
+</blockquote>
+<p>@cezar It's typically better when hunting for bugs to go by commit revisions, not releases, so you can linearly walk back in time until you find when it last worked/broke.  That's the bisecting I referred to as it's a typical workflow for both svn and git (though slightly different for each).  That said, it's sounding like this might be a little too far down the rabbit hole for you right now, so I'd say just move on and I'll take a look.</p>
+
+
+
+<a name="129418825"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129418825" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129418825">(Jul 10 2018 at 15:58)</a>:</h4>
+<p>i know how to do that with revisions, it’s what i did with the flto bug a few days ago, but in this case, i went to r69000 and it was still failing, so i was curious if the release was ok or not :D</p>
+
+
+
+<a name="129418854"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129418854" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129418854">(Jul 10 2018 at 16:00)</a>:</h4>
+<p>would you like me to submit a bug report, maybe, so it’s not forgotten about?</p>
+
+
+
+<a name="129418953"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129418953" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129418953">(Jul 10 2018 at 16:01)</a>:</h4>
+<p>no, don't bother</p>
+
+
+
+<a name="129418962"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129418962" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129418962">(Jul 10 2018 at 16:01)</a>:</h4>
+<p>it won't be forgotten -- it's failing make test, so we can't release until it's fixed</p>
+
+
+
+<a name="129419016"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/129419016" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#129419016">(Jul 10 2018 at 16:02)</a>:</h4>
+<p>obviously slipped through on 7.26.4, but now we know about it -- you could add a line to the TODO file's top section as those are release blockers</p>
+
+
+
+<a name="131063413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131063413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131063413">(Aug 07 2018 at 19:11)</a>:</h4>
+<p>ran into this </p>
+<div class="codehilite"><pre><span></span>mged&gt; search / | /
+
+ERROR: bad pointer 0x5629bc520f18: s/b db_full_path(x64626670), was librt directory(x5551212), file /home/rain/Sync/gsoc/build/svn-master/src/librt/db_fullpath.c, line 264
+
+ERROR: bad pointer 0x5629bc520f18: s/b db_full_path(x64626670), was librt directory(x5551212), file /home/rain/Sync/gsoc/build/svn-master/src/librt/db_fullpath.c, line 264
+
+Saving stack trace to mged-5688-bomb.log
+</pre></div>
+
+
+
+<a name="131082122"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131082122" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131082122">(Aug 08 2018 at 02:15)</a>:</h4>
+<p>confirmed, I can reproduce it.</p>
+
+
+
+<a name="131083825"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131083825" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131083825">(Aug 08 2018 at 03:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span>  can you explain to me again why you're thinking the hole syntax needs changing?</p>
+
+
+
+<a name="131083957"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131083957" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131083957">(Aug 08 2018 at 03:03)</a>:</h4>
+<p>OK, r71438 should take care of that crash.</p>
+
+
+
+<a name="131136187"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136187" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136187">(Aug 08 2018 at 22:27)</a>:</h4>
+<p>it doesn't necessarily, not with the latest patch</p>
+
+
+
+<a name="131136413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136413">(Aug 08 2018 at 22:32)</a>:</h4>
+<p><a href="/user_uploads/1549/Qsx3_8wOiG5YmGmSN-UutEum/1533767464.png" target="_blank" title="1533767464.png">1533767464.png</a> </p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Qsx3_8wOiG5YmGmSN-UutEum/1533767464.png" target="_blank" title="1533767464.png"><img src="/user_uploads/1549/Qsx3_8wOiG5YmGmSN-UutEum/1533767464.png"></a></div><p>ran into this by clicking around randomly in the manpage viewer in MGED</p>
+
+
+
+<a name="131136431"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136431" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136431">(Aug 08 2018 at 22:33)</a>:</h4>
+<p>it keeps changing and stealing focus and i can't check out the Details&gt;&gt; thing or do anything but kill MGED</p>
+
+
+
+<a name="131136445"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136445" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136445">(Aug 08 2018 at 22:33)</a>:</h4>
+<p>it basically DOSes one's desktop</p>
+
+
+
+<a name="131136454"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136454" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136454">(Aug 08 2018 at 22:33)</a>:</h4>
+<p>no idea what the cause is but i'm more concerned about error messages being able to "DOS"</p>
+
+
+
+<a name="131136526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136526">(Aug 08 2018 at 22:34)</a>:</h4>
+<p>there should be One (1) error window where all errors are collected and the user can scroll back and stuff</p>
+
+
+
+<a name="131136548"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131136548" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131136548">(Aug 08 2018 at 22:35)</a>:</h4>
+<p>something like Unity's log window is a good example (the game engine)</p>
+
+
+
+<a name="131138363"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131138363" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131138363">(Aug 08 2018 at 23:21)</a>:</h4>
+<p>since that's a bit vague, what happens more precisely is:<br>
+the node ID keeps incrementing in the error message, so telling it to skip the message doesn't because (i assume) each message counts as different due to the different ID</p>
+
+
+
+<a name="131143770"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131143770" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131143770">(Aug 09 2018 at 01:45)</a>:</h4>
+<p>hmm.  does that error appear right away or after clicking on a few man pages?</p>
+
+
+
+<a name="131143858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131143858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131143858">(Aug 09 2018 at 01:47)</a>:</h4>
+<p>I can't seem to get that error, although I can get an error when I try to follow a hyperlink...</p>
+
+
+
+<a name="131144878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131144878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131144878">(Aug 09 2018 at 02:15)</a>:</h4>
+<p>never right away, i had to click on a number of pages on the left and idk which one triggered it</p>
+
+
+
+<a name="131144884"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131144884" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131144884">(Aug 09 2018 at 02:15)</a>:</h4>
+<p>sometimes it's only ~20 clicks, sometimes a lot more</p>
+
+
+
+<a name="131144948"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131144948" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131144948">(Aug 09 2018 at 02:16)</a>:</h4>
+<p>that may be some quirk in the tkhtml widget - it's still kinda got wires sticking out around the edges in some respects.</p>
+
+
+
+<a name="131154276"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131154276" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131154276">(Aug 09 2018 at 06:46)</a>:</h4>
+<blockquote>
+<p>it basically DOSes one's desktop</p>
+</blockquote>
+<p>what's going on is you're generating mouse events on that window every time you move the mouse (and there's obviously some problem in the event handler that causes the dialog to pop up).  there are probably LOTS of events queued up, and every time you click a button or move the mouse to dismiss the panel, even more events are generated (dozens, maybe hundreds).  if you took the window out of full screen and moved it out of the way from the dialog so the mouse doesn't go over it, you could probably clear out all the dialogs (which would clear out all the pending events)..</p>
+
+
+
+<a name="131154280"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/131154280" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#131154280">(Aug 09 2018 at 06:46)</a>:</h4>
+<blockquote>
+<p>there should be One (1) error window where all errors are collected and the user can scroll back and stuff</p>
+</blockquote>
+<p>completely agree</p>
+
+
+
+<a name="303893107"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/303893107" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#303893107">(Oct 13 2022 at 17:56)</a>:</h4>
+<p>Open <strong>toyjeep.g</strong> in mged + <code>e all</code>.<br>
+Related to <a href="https://github.com/BRL-CAD/brlcad/commit/30e45f823ceca8c37fc7591c2bcf37f628471724">https://github.com/BRL-CAD/brlcad/commit/30e45f823ceca8c37fc7591c2bcf37f628471724</a> ?</p>
+
+
+
+<a name="303950712"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/303950712" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#303950712">(Oct 14 2022 at 01:50)</a>:</h4>
+<p>I just tried with latest main and it seems to draw the wireframe - what are the symptoms you're seeing?</p>
+
+
+
+<a name="303986030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/303986030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#303986030">(Oct 14 2022 at 08:40)</a>:</h4>
+<p>Same for me, after <a href="https://github.com/BRL-CAD/brlcad/commit/9cd246294876ef3b757914c4e1dbf272b6751fd5">https://github.com/BRL-CAD/brlcad/commit/9cd246294876ef3b757914c4e1dbf272b6751fd5</a> "Apparently we can't depend on cts_s.ts_dbip always being valid - try rti_dbip instead."</p>
+
+
+
+<a name="303987729"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/303987729" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#303987729">(Oct 14 2022 at 08:51)</a>:</h4>
+<p>BTW, I'm experiencing a build error with the new stepcode:</p>
+<ul>
+<li>Using latest Debian stable</li>
+<li>Clean checkout</li>
+<li>With default CMake options, except <strong>CMAKE_INSTALL_PREFIX</strong></li>
+</ul>
+<p>I'm seeing a kind of chicken or the egg dilemma in stepcode with expscan.h. The file is necessary to get generated. The work-around is to copy the file from the <strong>generated</strong> directory in the source tree to the <strong>ExpScanner_expscan</strong> directory in the binaries tree. It will be overwritten by the generated one then.</p>
+
+
+
+<a name="304011342"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304011342" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304011342">(Oct 14 2022 at 11:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  what failure are you seeing trying to draw?  Is it crashing?  Failing to create the wireframe correctly?</p>
+
+
+
+<a name="304011500"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304011500" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304011500">(Oct 14 2022 at 11:32)</a>:</h4>
+<p>I'll have to try and set up a Debian Stable VM to see if I can reproduce - I've not encountered that stepcode failure mode on any of the testing so far, and I've not seen it from the github runners, so it's a little puzzling...  that'll be a few days before I can attempt</p>
+
+
+
+<a name="304012071"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304012071" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304012071">(Oct 14 2022 at 11:37)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/bugs/near/304011342">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span>  what failure are you seeing trying to draw?  Is it crashing?  Failing to create the wireframe correctly?</p>
+</blockquote>
+<p>After your commit (I mentioned above), I don't get the error anymore. It should have fixed it. I meant with "same for me" that it draws the wireframe now. Before, I got a bad pointer message.</p>
+
+
+
+<a name="304012155"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304012155" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304012155">(Oct 14 2022 at 11:37)</a>:</h4>
+<p>Ah - I thought you meant "same" as in "no change to error" :-)</p>
+
+
+
+<a name="304012477"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304012477" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304012477">(Oct 14 2022 at 11:40)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I don't know if you can easily tell, but what in the initial build process is needing expscan.h?  I'm wondering how that can be needed on just Debian stable...</p>
+
+
+
+<a name="304012588"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304012588" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304012588">(Oct 14 2022 at 11:41)</a>:</h4>
+<p>It might be that there's something wonky with the perplex/lemon setup, which should be the only time generated gets involved...</p>
+
+
+
+<a name="304017128"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304017128" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304017128">(Oct 14 2022 at 12:11)</a>:</h4>
+<p>expscan.h is included in expparse.y. This is where the error comes from, during the generation phase, I think. </p>
+<div class="codehilite"><pre><span></span><code>[ 26%] Creating directories for &#39;STEPCODE_BLD&#39;
+[ 26%] No download step for &#39;STEPCODE_BLD&#39;
+[ 26%] No update step for &#39;STEPCODE_BLD&#39;
+[ 26%] No patch step for &#39;STEPCODE_BLD&#39;
+[ 26%] Performing configure step for &#39;STEPCODE_BLD&#39;
+-- STEPCODE_BLD configure command succeeded.  See also /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-configure-*.log
+[ 26%] Performing build step for &#39;STEPCODE_BLD&#39;
+CMake Error at /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build-.cmake:37 (message):
+  Command failed: 2
+
+   &#39;make&#39;
+
+  See also
+
+    /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build-*.log
+
+
+-- stdout output is:
+Scanning dependencies of target ExpParser_input_cpy
+[  0%] Generating expparse.y.sentinel
+[  1%] Generating expparse.y
+[  1%] Built target ExpParser_input_cpy
+[  1%] [LEMON][ExpParser] Building parser with /home/rossberg/Devel/BRL-CAD/build/brlcad/bin/lemon
+Scanning dependencies of target objlib_expparse_c
+[  2%] Building C object src/express/CMakeFiles/objlib_expparse_c.dir/expparse.c.o
+
+-- stderr output is:
+In file included from expparse.y:5:
+/home/rossberg/Devel/BRL-CAD/brlcad/src/other/ext/stepcode/src/express/parse_data.h:3:10: fatal error: expscan.h: Datei oder Verzeichnis nicht gefunden
+    3 | #include &quot;expscan.h&quot;
+      |          ^~~~~~~~~~~
+compilation terminated.
+make[5]: *** [src/express/CMakeFiles/objlib_expparse_c.dir/build.make:86: src/express/CMakeFiles/objlib_expparse_c.dir/expparse.c.o] Fehler 1
+make[4]: *** [CMakeFiles/Makefile2:1172: src/express/CMakeFiles/objlib_expparse_c.dir/all] Fehler 2
+make[3]: *** [Makefile:149: all] Fehler 2
+
+CMake Error at /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build-.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+make[2]: *** [src/other/ext/CMakeFiles/STEPCODE_BLD.dir/build.make:130: src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build] Fehler 1
+make[1]: *** [CMakeFiles/Makefile2:15471: src/other/ext/CMakeFiles/STEPCODE_BLD.dir/all] Fehler 2
+make: *** [Makefile:182: all] Fehler 2
+</code></pre></div>
+
+
+
+<a name="304017994"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304017994" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304017994">(Oct 14 2022 at 12:16)</a>:</h4>
+<p>Putting PERPLEX_TARGET before LEMON_TARGET doesn't help.</p>
+
+
+
+<a name="304140304"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304140304" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304140304">(Oct 15 2022 at 01:08)</a>:</h4>
+<p>I've seen an occasional, not reliably reproducible error that seems to be either a missing dependency specification or one of those situations were I/O operations aren't fully completing correctly.  If you run "make" again after that error appears by going down into the build directory of the stepcode subbuild and manually running make, does it complete?</p>
+
+
+
+<a name="304239995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304239995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304239995">(Oct 15 2022 at 20:11)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Let me know if 658f8329fc2d works/helps.</p>
+
+
+
+<a name="304320716"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304320716" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304320716">(Oct 16 2022 at 15:32)</a>:</h4>
+<p>I got a clean build now <span aria-label="smiley" class="emoji emoji-1f603" role="img" title="smiley">:smiley:</span></p>
+
+
+
+<a name="304366120"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304366120" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304366120">(Oct 17 2022 at 01:22)</a>:</h4>
+<p>We'll want to make sure it works by running it for a while - if that's the issue I've seen it doesn't always manifest.  If it consistently fixes it I'll push it upstream.</p>
+
+
+
+<a name="304458561"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/304458561" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#304458561">(Oct 17 2022 at 13:20)</a>:</h4>
+<p>I tested it on 3 machines before. On all, I got the same error. I applied your bugfix on two of them already. The builds on both are successful now.</p>
+
+
+
+<a name="315666455"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/315666455" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#315666455">(Dec 13 2022 at 19:18)</a>:</h4>
+<p>However, solving one problem mean to run into the next one. This is probably related to <a href="https://github.com/BRL-CAD/brlcad/commit/d6980c17fc16c6c694e561f6f8697d2e57d69f0e#diff-0a778b8459b95589232e39c837dc5217b2fb7d691baf5f7bc7601cda19c14dc7">https://github.com/BRL-CAD/brlcad/commit/d6980c17fc16c6c694e561f6f8697d2e57d69f0e#diff-0a778b8459b95589232e39c837dc5217b2fb7d691baf5f7bc7601cda19c14dc7</a>.</p>
+<p>I open a GED handle with GED_INIT() and close it with ged_close <strong>but</strong> the wdbp handled to the init should be still intact after the GED handle was closed. Insted, I'm seeing an error like this</p>
+<div class="codehilite"><pre><span></span><code>ERROR: bad pointer 0x55b1fa4ac120: s/b struct db_i(x57204381), was Unknown_Magic(xfa4a8250), file /home/rossberg/Devel/BRL-CAD/brlcad/src/librt/db_open.c, line 352
+</code></pre></div>
+
+
+
+<a name="315718315"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/315718315" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#315718315">(Dec 14 2022 at 01:07)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  Looking at the previous (7.32.6) release (<a href="https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/src/libged/ged.c#L83">https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/src/libged/ged.c#L83</a>) it looks like ged_close is calling wdbp_close.  Also from the 7.32.6 release, GED_INIT is assigning the supplied wdbp to gedp-&gt;ged_wdbp (<a href="https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/include/ged/defines.h#L105">https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/include/ged/defines.h#L105</a>)</p>
+<p>Naively, my expectation would be that a wdbp passed to GED_INIT and then subjected to ged_close wouldn't be expected to be valid?  Perhaps I'm missing something...</p>
+
+
+
+<a name="316367689"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/316367689" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#316367689">(Dec 16 2022 at 21:56)</a>:</h4>
+<p>Maybe. I never really tested it. What I did is</p>
+<ul>
+<li>opend a BRL-CAD file for read/write</li>
+</ul>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="n">resource</span><span class="o">*</span><span class="w"> </span><span class="n">resp_db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">static_cast</span><span class="o">&lt;</span><span class="n">resource</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">bu_calloc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">resource</span><span class="p">),</span><span class="w"> </span><span class="s">"resp_db"</span><span class="p">));</span><span class="w"></span>
+<span class="n">rt_init_resource</span><span class="p">(</span><span class="n">resp_db</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">db_i</span><span class="o">*</span><span class="w"> </span><span class="n">dbip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">db_open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span><span class="w"> </span><span class="s">"rw"</span><span class="p">);</span><span class="w"></span>
+<span class="n">db_dirbuild</span><span class="p">(</span><span class="n">dbip</span><span class="p">);</span><span class="w"></span>
+<span class="n">rt_wdb</span><span class="o">*</span><span class="w"> </span><span class="n">wdbp_db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wdb_dbopen</span><span class="p">(</span><span class="n">dbip</span><span class="p">,</span><span class="w"> </span><span class="n">RT_WDB_TYPE_DB_DISK</span><span class="p">);</span><span class="w"></span>
+<span class="n">rt_i</span><span class="o">*</span><span class="w"> </span><span class="n">rtip_db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rt_new_rti</span><span class="p">(</span><span class="n">wdbp_db</span><span class="o">-&gt;</span><span class="n">dbip</span><span class="p">);</span><span class="w"></span>
+<span class="n">rt_init_resource</span><span class="p">(</span><span class="n">resp_db</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">rtip_db</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+<p>I.e., resp_db, rtip_db, and wdbp_db are my variables used for the writable database.</p>
+<ul>
+<li>attached GED</li>
+</ul>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="n">ged</span><span class="o">*</span><span class="w"> </span><span class="n">gedp_ged</span><span class="p">;</span><span class="w"></span>
+<span class="n">BU_GET</span><span class="p">(</span><span class="n">gedp_ged</span><span class="p">,</span><span class="w"> </span><span class="n">ged</span><span class="p">);</span><span class="w"></span>
+<span class="n">GED_INIT</span><span class="p">(</span><span class="n">gedp_ged</span><span class="p">,</span><span class="w"> </span><span class="n">wdbp_db</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>removed GED</li>
+</ul>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="n">ged_close</span><span class="p">(</span><span class="n">gedp_ged</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>closed the file</li>
+</ul>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="n">wdb_close</span><span class="p">(</span><span class="n">wdbp_db</span><span class="p">);</span><span class="w"></span>
+<span class="n">rt_free_rti</span><span class="p">(</span><span class="n">rtip_db</span><span class="p">);</span><span class="w"></span>
+<span class="n">rt_clean_resource_complete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">resp_db</span><span class="p">);</span><span class="w"></span>
+<span class="n">bu_free</span><span class="p">(</span><span class="n">resp_db</span><span class="p">,</span><span class="w"> </span><span class="s">"resp_db"</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+
+
+
+<a name="316369429"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/316369429" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#316369429">(Dec 16 2022 at 22:08)</a>:</h4>
+<p>I get the error in rt_free_rti (db_close_client). Maybe, I should make a copy first and hand this over to GED_INIT?</p>
+
+
+
+<a name="316375594"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/316375594" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#316375594">(Dec 16 2022 at 22:58)</a>:</h4>
+<p>BTW, why does GED_INIT call ged_init twice?</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

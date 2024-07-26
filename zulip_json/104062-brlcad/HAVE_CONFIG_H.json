@@ -1,0 +1,152 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Does it make sense these days to have the HAVE_CONFIG_H define in common.h?  As far as I know we're not doing anything to make sure it works without defining that variable.</p>",
+        "id": 199909969,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591378651
+    },
+    {
+        "content": "<p>Anything defining the *_DLL_EXPORTS and *_DLL_IMPORTS defines will need it for sure at the moment, since the COMPILER_DLLEXPORT and COMPILER_DLLIMPORT definitions are coming from CMake.  I could check that COMPILER_DLLEXPORT is defined and define out the *_EXPORT if it's not, but that would lead to working, silent skipping of the hidden visibility feature as well as complicating all the *_EXPORT blocks...</p>",
+        "id": 199910322,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591378841
+    },
+    {
+        "content": "<p>After thinking it through that's probably the best option though - it will keep default behavior for codes that don't use brlcad_config.h</p>",
+        "id": 199911882,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591379710
+    },
+    {
+        "content": "<p>Well, best for Linux anyway - Windows is still going to require HAVE_CONFIG_H,  because without it they won't have the declspec definitions they need in the headers</p>",
+        "id": 199916218,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591381491
+    },
+    {
+        "content": "<p>We were more less accidentally stand-alone previously with every definition having the platform specific logic... </p>\n<p>Looks like the options are require HAVE_CONFIG_H in client codes or go back to having the ifdef PLATFORM piece in common.h that sets COMPILER_DLL* values without the configure test.</p>",
+        "id": 199916862,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591381767
+    },
+    {
+        "content": "<p>Actually, they'll need both BRLCADBUILD and HAVE_CONFIG_H.  Ugh.</p>",
+        "id": 199918014,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591382333
+    },
+    {
+        "content": "<p>Should we make a second generated header that's not specific to BRLCADBUILD?</p>",
+        "id": 199918094,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591382389
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Ugh.  I know you don't like platform symbol tests Sean, but darned if I'm seeing a better solution to this one so far...</p>",
+        "id": 199918795,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591382735
+    },
+    {
+        "content": "<p>Conceptually, the config header is supposed to be a report out of the compiling-computer's configuration</p>",
+        "id": 199918820,
+        "sender_full_name": "Sean",
+        "timestamp": 1591382750
+    },
+    {
+        "content": "<p>So it shouldn't have the import/export logic in it as to an installed brl-cad, the config header shouldn't exist to them.</p>",
+        "id": 199918939,
+        "sender_full_name": "Sean",
+        "timestamp": 1591382807
+    },
+    {
+        "content": "<p>the typical way this is dealt with is compile-time definitions passed as flags</p>",
+        "id": 199919064,
+        "sender_full_name": "Sean",
+        "timestamp": 1591382874
+    },
+    {
+        "content": "<p>But how would the client code know it needs to define them in the first place?</p>",
+        "id": 199919137,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591382907
+    },
+    {
+        "content": "<p>API instructions for each lib typically if import isn't the default, but usually import is simply the default and then the local build has to define exports accordingly.</p>",
+        "id": 199919412,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383084
+    },
+    {
+        "content": "<p>Did a problem crop up?</p>",
+        "id": 199919575,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383171
+    },
+    {
+        "content": "<p>yes.  client code attempted to build, but COMPILE_DLLIMPORT wasn't defined</p>",
+        "id": 199919613,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591383196
+    },
+    {
+        "content": "<p>I'm not seeing a reference to COMPILE_DLLIMPORT on trunk -- where is it?</p>",
+        "id": 199919761,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383274
+    },
+    {
+        "content": "<p>I found it, common.h</p>",
+        "id": 199919795,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383298
+    },
+    {
+        "content": "<p>typo</p>",
+        "id": 199919804,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383300
+    },
+    {
+        "content": "<p>Sorry, COMPILER_DLLIMPORT.</p>",
+        "id": 199919827,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591383311
+    },
+    {
+        "content": "<p>Set in toplevel CMakeLists.txt line 1980, written to the brlcad_config.h header</p>",
+        "id": 199919887,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591383347
+    },
+    {
+        "content": "<p>The __declspec(dllimport) used to be hardcoded everywhere, so client codes didn't have to worry about it.</p>",
+        "id": 199919970,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591383375
+    },
+    {
+        "content": "<p>right, so yeah, should take it out of config.  that belongs in common.h or down in each lib</p>",
+        "id": 199920114,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383475
+    },
+    {
+        "content": "<p>I’d put it in common with some offed logic, like ifdef attribute</p>",
+        "id": 199920754,
+        "sender_full_name": "Sean",
+        "timestamp": 1591383825
+    },
+    {
+        "content": "<p>So really, brlcad_config.h shouldn't be installed at all?  Or do we include it as a reference so we know how the libs were built?</p>",
+        "id": 199921234,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591384128
+    },
+    {
+        "content": "<p>it's for the latter.  granted someone can set BRLCADBUILD and HAVE_CONFIG_H to try and use it, but that's on them and why they have to take extra steps.</p>",
+        "id": 199959226,
+        "sender_full_name": "Sean",
+        "timestamp": 1591424976
+    }
+]

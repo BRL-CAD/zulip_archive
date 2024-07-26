@@ -1,0 +1,326 @@
+<html>
+<head><meta charset="utf-8"><title>lz4 · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html">lz4</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="184021856"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184021856" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184021856">(Dec 21 2019 at 19:05)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> I can fix the decompress fast deprecation in Jan.  I don't believe safe is the one we want, but I can check it.</p>
+
+
+
+<a name="184021900"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184021900" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184021900">(Dec 21 2019 at 19:06)</a>:</h4>
+<p>OK, I won't worry about it then</p>
+
+
+
+<a name="184021915"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184021915" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184021915">(Dec 21 2019 at 19:06)</a>:</h4>
+<p><a href="https://fossies.org/linux/lz4/doc/lz4_manual.html" target="_blank" title="https://fossies.org/linux/lz4/doc/lz4_manual.html">https://fossies.org/linux/lz4/doc/lz4_manual.html</a> down at the bottom is where they recommend LZ4_decompress_safe</p>
+
+
+
+<a name="184021938"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184021938" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184021938">(Dec 21 2019 at 19:07)</a>:</h4>
+<p>or more officially <a href="https://github.com/lz4/lz4/blob/dev/doc/lz4_manual.html" target="_blank" title="https://github.com/lz4/lz4/blob/dev/doc/lz4_manual.html">https://github.com/lz4/lz4/blob/dev/doc/lz4_manual.html</a></p>
+
+
+
+<a name="184022019"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022019" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022019">(Dec 21 2019 at 19:09)</a>:</h4>
+<p>thanks</p>
+
+
+
+<a name="184022101"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022101" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022101">(Dec 21 2019 at 19:11)</a>:</h4>
+<p>from that, looks like they're recommending it more from a security position than performance, and that they made decompress_fast a lot slower by adding some checks</p>
+
+
+
+<a name="184022162"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022162" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022162">(Dec 21 2019 at 19:12)</a>:</h4>
+<p>which is to say that our usage would slow down if/when we update, so in that scenario, using safe will be faster than the now-slow 'fast', but still may not be good for us.  I tested safe during development and recall it being not as good, so may have to revisit our options.</p>
+
+
+
+<a name="184022166"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022166" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022166">(Dec 21 2019 at 19:12)</a>:</h4>
+<p>/me winces</p>
+
+
+
+<a name="184022269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022269">(Dec 21 2019 at 19:15)</a>:</h4>
+<p>not a problem, we just might see a tiny performance dip</p>
+
+
+
+<a name="184022346"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022346" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022346">(Dec 21 2019 at 19:17)</a>:</h4>
+<p>Our bundled libs could get rather tricky with appleseed... they have a lot of their own copies of things, and it could get interesting linking both librt and appleseed in if we're on different versions.  libz, liblz4 and libpng I definitely see right off, and there are a few others that may be issues down the road.</p>
+
+
+
+<a name="184022470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022470">(Dec 21 2019 at 19:20)</a>:</h4>
+<p>Crud.  Yep, the art build doesn't like bundled libs - complains about png</p>
+
+
+
+<a name="184022994"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184022994" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184022994">(Dec 21 2019 at 19:36)</a>:</h4>
+<p>Oh well, should be good enough for the purpose</p>
+
+
+
+<a name="184083477"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184083477" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184083477">(Dec 23 2019 at 04:59)</a>:</h4>
+<blockquote>
+<p>Our bundled libs could get rather tricky with appleseed... they have a lot of their own copies of things, and it could get interesting linking both librt and appleseed in if we're on different versions.  libz, liblz4 and libpng I definitely see right off, and there are a few others that may be issues down the road.</p>
+</blockquote>
+<p>Shoot, that seems like a big issue I'm going to encounter in the future... any idea how I would be able to resolve this?</p>
+
+
+
+<a name="184117610"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184117610" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184117610">(Dec 23 2019 at 17:02)</a>:</h4>
+<p>The most straightforward is probably to try and have BRL-CAD's build use appleseed's libs (or rather compatible versions of them) as system libs instead of building our own.  That's not something I usually do with Windows, so I'm not sure how it will go, but that's the most straightforward of the options.</p>
+
+
+
+<a name="184117715"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184117715" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184117715">(Dec 23 2019 at 17:04)</a>:</h4>
+<p>The other options involve rebuilding appleseed using compatible libs or our own src/other libs, which based on my first round with it is going to be quite a job.</p>
+
+
+
+<a name="184117745"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184117745" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184117745">(Dec 23 2019 at 17:04)</a>:</h4>
+<p>Hmm... yeah I asked Franz about it as well and he said something similar (but to have appleseed use BRLCAD's libs)</p>
+
+
+
+<a name="184117785"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184117785" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184117785">(Dec 23 2019 at 17:05)</a>:</h4>
+<p>If you can get appleseed building on your system that might be an option.</p>
+
+
+
+<a name="184117863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184117863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184117863">(Dec 23 2019 at 17:07)</a>:</h4>
+<p>It might work better with MSVC, actually - Ubuntu Linux is using a newer version of GCC by default than the one Appleseed currently specifies, so I get build errors when I try it out of the box.  Ultimately correctable of course, but not something I have time for at the moment - C++ build errors are sometimes... interesting to figure out.</p>
+
+
+
+<a name="184118120"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118120" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118120">(Dec 23 2019 at 17:10)</a>:</h4>
+<p>Alright, I'll try to work it out once I get to it. Thank you for your insight!</p>
+
+
+
+<a name="184118126"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118126" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118126">(Dec 23 2019 at 17:10)</a>:</h4>
+<p><span class="user-mention" data-user-id="250111">@Jeffrey Liu</span>   If it gets too frustrating one option might be to use VirtualBox to set up a Ubuntu VM, and then grab the binary and build BRL-CAD using system libs the way I specified in the art.cpp file - you'll have to install some devel packages on Ubuntu per the doc/Readme.Linux file (as well as the libpng and libz devel files based on my own experience) but I did get as far as a running program that way.</p>
+
+
+
+<a name="184118187"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118187" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118187">(Dec 23 2019 at 17:12)</a>:</h4>
+<p>I do have Debian ready to dual boot if that's ok, do you mean the appleseed binaries?</p>
+
+
+
+<a name="184118239"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118239" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118239">(Dec 23 2019 at 17:12)</a>:</h4>
+<p>On Windows I can only recommend to use the brlcad.dll. It has everything compiled in, even the C library. The only dependency is the nt.dll.</p>
+<p>If you don't like the C++, you can build your own version from misc/win32-msvc/Dll.</p>
+
+
+
+<a name="184118364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118364">(Dec 23 2019 at 17:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Sorry if I'm understanding incorrectly, but if I am trying to add a program within BRLCAD itself while linking to another application, then I can't use the brlcad.dll, right?</p>
+
+
+
+<a name="184118709"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118709" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118709">(Dec 23 2019 at 17:18)</a>:</h4>
+<p>The brlcad.dll is self-containing. It contains BRL-CAD's core libraries and is intended for use in other programs, maybe like appleseed. If you have already an appleseed plugin set-up, you need to add one additional library only.</p>
+
+
+
+<a name="184118920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184118920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184118920">(Dec 23 2019 at 17:21)</a>:</h4>
+<p>Sorry, I still don't think I understand - if I were to try to call appleseed functions from BRLCAD (for an art command in MGED), would brlcad.dll be the ideal solution?</p>
+
+
+
+<a name="184119011"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119011" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119011">(Dec 23 2019 at 17:22)</a>:</h4>
+<p>What do you mean by "from BRL-CAD"?</p>
+
+
+
+<a name="184119068"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119068" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119068">(Dec 23 2019 at 17:23)</a>:</h4>
+<p>I can't find a <em>brlcad</em> in the bin directory ;)</p>
+
+
+
+<a name="184119085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119085">(Dec 23 2019 at 17:23)</a>:</h4>
+<p>i think the next set of appleseed integration tasks is to create some sort of command in MGED, "art", which renders the BRLCAD geometry database using appleseed rendering.</p>
+
+
+
+<a name="184119286"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119286" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119286">(Dec 23 2019 at 17:26)</a>:</h4>
+<p>Therefore, you mean mged and archer, and libged. Which applesed function do you want to call?</p>
+
+
+
+<a name="184119387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119387">(Dec 23 2019 at 17:27)</a>:</h4>
+<p>Did you already tried to add the appleseed library as a dependency to libged?</p>
+
+
+
+<a name="184119481"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119481" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119481">(Dec 23 2019 at 17:28)</a>:</h4>
+<p>I haven't really gotten that far yet, but I think I would be able to look at some of the appleseed src to figure it out. The general idea after "art" is called, I think, would be to generate an appleseed project and then calling appleseed rendering using that project.</p>
+
+
+
+<a name="184119499"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119499" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119499">(Dec 23 2019 at 17:28)</a>:</h4>
+<blockquote>
+<p>Did you already tried to add the appleseed library as a dependency to libged?</p>
+</blockquote>
+<p>Not yet, I'm still working through some other tasks before resuming appleseed #7</p>
+
+
+
+<a name="184119644"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119644" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119644">(Dec 23 2019 at 17:30)</a>:</h4>
+<p>On the other hand, it could be better to write an appleseed program which will be called from libged, similar to the rt command, which calls the <code>rt</code> program.</p>
+
+
+
+<a name="184119663"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119663" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119663">(Dec 23 2019 at 17:31)</a>:</h4>
+<p>Yep, that's what I was thinking (or what is entailed in the task description, I suppose). In that case, I would need to link appleseed libraries, right?</p>
+
+
+
+<a name="184119733"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119733" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119733">(Dec 23 2019 at 17:32)</a>:</h4>
+<p>This appleseed_rt would live in the appleseed program space, and could use a brlcad.dll for reading and ray-tracing .g files.</p>
+
+
+
+<a name="184119776"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119776" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119776">(Dec 23 2019 at 17:33)</a>:</h4>
+<p>Ohh, and then I could just call this appleseed_rt whenever "art" is called from MGED?</p>
+
+
+
+<a name="184119832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119832">(Dec 23 2019 at 17:34)</a>:</h4>
+<p>Right, just like <code>rt</code>.</p>
+
+
+
+<a name="184119859"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119859" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119859">(Dec 23 2019 at 17:35)</a>:</h4>
+<p>art as appleseed-rt</p>
+
+
+
+<a name="184119862"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119862" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119862">(Dec 23 2019 at 17:35)</a>:</h4>
+<p>Alright, thanks so much for your help! I'll look into it when I get back into the task set - I haven't really looked at the inner workings of <code>rt</code> yet</p>
+
+
+
+<a name="184119881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184119881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184119881">(Dec 23 2019 at 17:35)</a>:</h4>
+<p>Keep it simple, for the beginning.</p>
+
+
+
+<a name="184124325"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184124325" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184124325">(Dec 23 2019 at 18:50)</a>:</h4>
+<p>The src/rt/art.cpp program is already set up (given the presence of a binary appleseed) to link both librt and appleseed's library into a single executable.  It's a command line program, not an MGED/Archer command</p>
+
+
+
+<a name="184124393"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184124393" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184124393">(Dec 23 2019 at 18:51)</a>:</h4>
+<p>libged doesn't enter into the picture (yet) - but the problem remains when trying to link both appleseed (which depends on png/libz) and librt (which also depends on libpng/libz) into the same executable when they are using different versions of those libraries.</p>
+
+
+
+<a name="184124444"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184124444" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184124444">(Dec 23 2019 at 18:52)</a>:</h4>
+<p>It may be static linking would help with that - I've not experimented with that route.</p>
+
+
+
+<a name="184127917"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184127917" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184127917">(Dec 23 2019 at 19:46)</a>:</h4>
+<p>Oh wait, so at the moment, you can already run art.cpp through the command line if you have appleseed installed?</p>
+
+
+
+<a name="184140817"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184140817" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184140817">(Dec 24 2019 at 00:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="250111">@Jeffrey Liu</span>  You can run the program, but all it will do is run the helloworld example from appleseed.  The idea (if you can get it to behave, which currently requires the steps I was talking about earlier with getting BRL-CAD and Appleseed using compatible libraries) would be to take the work done so far to use librt as a backend for the Appleseed rendering and incorporate it into the art.cpp code.</p>
+
+
+
+<a name="184140892"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184140892" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184140892">(Dec 24 2019 at 00:02)</a>:</h4>
+<p>I deliberately staged the art.cpp binary in src/art so students could use that as a starting point rather than having to wade through getting librt and appleseed into the same executable - hopefully it should now be fairly straightforward to get the art executable to generate a png image which is the rendering you were showing earlier in your screenshots.</p>
+
+
+
+<a name="184140904"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184140904" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184140904">(Dec 24 2019 at 00:02)</a>:</h4>
+<p>src/rt/art.cpp rather, not src/art</p>
+
+
+
+<a name="184141138"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184141138" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184141138">(Dec 24 2019 at 00:09)</a>:</h4>
+<p>If we can get that far (and ideally look at things like  mapping material settings as well) it will be worth it to wade into making Appleseed build with BRL-CAD compatible dependencies so we can make everything work seemlessly, but that's a slog - we need to be sure Appleseed rendering will work before tackling it.</p>
+
+
+
+<a name="184143519"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184143519" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Jeffrey Liu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184143519">(Dec 24 2019 at 01:06)</a>:</h4>
+<p>Ah ok, so when you say use librt as the backend, you mean use rt_shootray() and such to provide the necessary information, right?</p>
+
+
+
+<a name="184150247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184150247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184150247">(Dec 24 2019 at 04:29)</a>:</h4>
+<p>Yes.</p>
+
+
+
+<a name="184151405"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/lz4/near/184151405" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Omega Cuber <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/lz4.html#184151405">(Dec 24 2019 at 05:08)</a>:</h4>
+<p>#GoogleCodein Hi I am Omega Cuber and I am participating in GCI and I like the tasks related BRL-CAD as it helps in 3D design.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

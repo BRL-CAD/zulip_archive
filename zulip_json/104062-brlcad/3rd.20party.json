@@ -1,0 +1,356 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> FYI, the inclusion of nearly all tinygltf was intentional -- I messaged on teams, but the gist is that was a working setup with sample data and examples that this semester's students were given as a starting point.  plus, I think it'll simply be less effort to manage as updates to tinygltf are expected possibly repeatedly over the next couple months while they work.  I don't know their plans for that code yet, we may not even keep it as it's a working reference.</p>",
+        "id": 273291815,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827276
+    },
+    {
+        "content": "<p>Can we put it in src/other/ext?  It's pretty messy for the main tree</p>",
+        "id": 273291883,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645827328
+    },
+    {
+        "content": "<p>I mean, nothing else uses it and probably never will...</p>",
+        "id": 273291908,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827357
+    },
+    {
+        "content": "<p>that's the pattern we used elsewhere when something is only used once</p>",
+        "id": 273291964,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827371
+    },
+    {
+        "content": "<p>fyi I was also thinking to apply the same dist inclusion pattern I settled on there as it solves the problem of quoting files and needing to know the var name</p>",
+        "id": 273292014,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827415
+    },
+    {
+        "content": "<p>I hate cluttering up the main tree that way... when I do that elsewhere, I usually make an effort to strip things down to a minimal core</p>",
+        "id": 273292029,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645827426
+    },
+    {
+        "content": "<p>I'll put it back for the student efforts, but I'm not crazy about it.</p>",
+        "id": 273292072,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645827463
+    },
+    {
+        "content": "<p>Give me a minute so I can try and do it without breaking the regress checks.</p>",
+        "id": 273292524,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645827619
+    },
+    {
+        "content": "<p>There's two concerns, there's clutter in the tree and there's maintainability across updates too.  I'd think there's considerably less effort overall the less we modify 3rd party deps, no matter where they are.  openNURBS being a great example of edits essentially halting maintenance and development.</p>",
+        "id": 273292685,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827708
+    },
+    {
+        "content": "<p>all to save a few bytes or reduce a directory listing a few lines, which I don't think impose a technical problem (presently at least), more an aesthetic one</p>",
+        "id": 273292804,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827770
+    },
+    {
+        "content": "<p>To me it's more than just aesthetics - when something goes into the main tree, I want to be able to understand easily why its there.  As an ideal, I'd like to be able to look at every file in the source tree that's not in src/other or misc/tools and be able to identify why it's there from a BRL-CAD perspective.</p>",
+        "id": 273293096,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645827951
+    },
+    {
+        "content": "<p>What makes it feel like clutter?  Or what's the consequence/effect?  we have another example in src/libged/bullet where even the bullet source files are hundreds of lines, and they're necessary for the feature, but don't appear to appreciably affect anything by being in the tree</p>",
+        "id": 273293101,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827957
+    },
+    {
+        "content": "<p>(other than the same consequence as other libs -- since it's not a drop-in, I can't update and test the latest bullet without considerable effort)</p>",
+        "id": 273293109,
+        "sender_full_name": "Sean",
+        "timestamp": 1645827961
+    },
+    {
+        "content": "<p>bullet should be in src/other/ext - it was my own technical inability to get it working successfully (on Windows, IIRC) any other way that landed it there.</p>",
+        "id": 273293253,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828054
+    },
+    {
+        "content": "<p>Anyway, I'll get the gltf stuff back for the students.</p>",
+        "id": 273293334,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828097
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/3rd.20party/near/273293096\">said</a>:</p>\n<blockquote>\n<p>To me it's more than just aesthetics - when something goes into the main tree, I want to be able to understand easily why its there.</p>\n</blockquote>\n<p>but isn't saying \"src/conv/gltf/tinygltf is there because that's tinygltf and gltf-g uses tinygltf\"?  at least it is in my mind, though I could see a case for something like src/conv/gltf/other/tinygltf or src/conv/gltf/ext/tinygltf to really indicate in the path itself that it's a local dependency, and graduate to src/other when it's multiply used.</p>",
+        "id": 273293379,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828135
+    },
+    {
+        "content": "<p>The latter would be better in that the repository checking tools could be taught more easily to treat those patterns differently</p>",
+        "id": 273293518,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828211
+    },
+    {
+        "content": "<p>I mean I'd also be cool putting ALL external deps in src/other, but that seems like additional work for little benefit, especially for header-only stuff or single file situations.  hard to justify.</p>",
+        "id": 273293631,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828218
+    },
+    {
+        "content": "<p>I guess I could see a convention where anything inside an */ext/ directory is handled as external source code, and it wouldn't have to necessarily be in src/other</p>",
+        "id": 273293878,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828371
+    },
+    {
+        "content": "<p>But I'd want some convention like that, which makes it clear that our standards for organization, build flags, etc. don't need to apply.</p>",
+        "id": 273293960,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828430
+    },
+    {
+        "content": "<p>we should figure something out, as I see that really being an issue for GCV.</p>",
+        "id": 273294039,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828458
+    },
+    {
+        "content": "<p>(which notionally is where gltf will land by the time summer is here)</p>",
+        "id": 273294060,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828485
+    },
+    {
+        "content": "<p>I was going to try and move one of the other converters to get a feel for the effort needed.</p>",
+        "id": 273294089,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828503
+    },
+    {
+        "content": "<p>Agreed.  I'll go ahead and put it back for now, once I figure out how to do so without the github CI checks breaking, but I would like to have some definite scheme in place.</p>",
+        "id": 273294122,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828528
+    },
+    {
+        "content": "<p>okay, definitely appreciated for this -- I literally just showcased the folder to them yesterday and told them to git pull and explore :)</p>",
+        "id": 273294207,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828568
+    },
+    {
+        "content": "<p>Ow.  Alright, it'll probably take a hour or two - keep an eye out for the push</p>",
+        "id": 273294244,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828608
+    },
+    {
+        "content": "<p>they have a huge mountain of concepts they're climbing, so trying to make things as absolutely simple as possible.  only thing I didn't do for the converter team was drop in the Khronos gltf test cases they're going to conform against, but that'll need to go somewhere too eventually.</p>",
+        "id": 273294406,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828698
+    },
+    {
+        "content": "<p>it's technically test infrastructure, so probably something like src/gcv/tests/gltf</p>",
+        "id": 273294604,
+        "sender_full_name": "Sean",
+        "timestamp": 1645828850
+    },
+    {
+        "content": "<p>If we can come up with a few simple directory naming patterns we can put in the repository regression tester and similar tools so they know to treat the contents of those dirs differently, and then use those reliably, that would probably work.</p>",
+        "id": 273294671,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645828920
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> were you deliberately leaving some whitespace issues for them to find and fix?</p>",
+        "id": 273295119,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645829257
+    },
+    {
+        "content": "<p>I like ext, short and sweet, would parallel src/other/ext and could be managed similarly.  you have a nice simple setup there, so lets run with it.</p>",
+        "id": 273295298,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829396
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/3rd.20party/near/273295119\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> were you deliberately leaving some whitespace issues for them to find and fix?</p>\n</blockquote>\n<p>Not find and fix, no - the instruction was simply that it's working reference code.  It \"works\" in the sense that it compiles and they can directly see how it was derived from the loader example in tinygltf, but it doesn't raytrace and isn't structured.</p>",
+        "id": 273295476,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829510
+    },
+    {
+        "content": "<p>their task is to make a gcv plugin, so src/conv/gltf will probably get deleted when they get theirs working</p>",
+        "id": 273295534,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829531
+    },
+    {
+        "content": "<p>OK, just making sure I wasn't blowing away a test case ;-)</p>",
+        "id": 273295551,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645829540
+    },
+    {
+        "content": "<p>that whole dir was a compilable reference for them, they may choose to start with it as a base -- and if they do, then we'd have a talk about the code conventions being wrong.  I had in mind to pretty-print format the code, but was keeping it as-is for now just so they can line-compare with where it came from</p>",
+        "id": 273295649,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829617
+    },
+    {
+        "content": "<p>but yeah, I don't think formatting will make or break their understanding</p>",
+        "id": 273295745,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829668
+    },
+    {
+        "content": "<p>half of them use VS Code which does NOT like our style by default.. indentation is all screwed up</p>",
+        "id": 273295812,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829704
+    },
+    {
+        "content": "<p>We never did get around to the astyle reformat, did we</p>",
+        "id": 273295849,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645829734
+    },
+    {
+        "content": "<p>nope, with good reason -- I think about that often :)</p>",
+        "id": 273295876,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829749
+    },
+    {
+        "content": "<p>would invalidate every outstanding patch and code we have pretty hard... I'd at least want to try and merge as much as possible first</p>",
+        "id": 273295942,
+        "sender_full_name": "Sean",
+        "timestamp": 1645829775
+    },
+    {
+        "content": "<p>OK, I (more or less) put it back - I'm not sure what to do about the static analyzer though, other than bump the count back up</p>",
+        "id": 273296065,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645829867
+    },
+    {
+        "content": "<p>I got a few in the main converter file, but IIRC some of the complaints are from the stb headers.</p>",
+        "id": 273296196,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645829959
+    },
+    {
+        "content": "<p>I'll know in a bit... re-running now</p>",
+        "id": 273296785,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830227
+    },
+    {
+        "content": "<p>what's it complaining about?</p>",
+        "id": 273297306,
+        "sender_full_name": "Sean",
+        "timestamp": 1645830523
+    },
+    {
+        "content": "<p>way to exclude it perhaps since it's not production?</p>",
+        "id": 273297376,
+        "sender_full_name": "Sean",
+        "timestamp": 1645830568
+    },
+    {
+        "content": "<p>I don't really know of a good way to tell clang to ignore code coming in from particular headers, unfortunately</p>",
+        "id": 273297500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830633
+    },
+    {
+        "content": "<p>Dead store  Dead assignment conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5708    1   <br>\nDead store  Dead increment  conv/gltf/tinygltf/stb_image.h  stbi__high_bit  5079    1   <br>\nDead store  Dead initialization conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5531    1   <br>\nDead store  Dead initialization conv/gltf/tinygltf/stb_image.h  stbi__parse_png_file    4890    1   <br>\nDead store  Dead initialization conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5530    1   <br>\nDead store  Dead nested assignment  conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5709    1   <br>\nDead store  Dead nested assignment  conv/gltf/tinygltf/stb_image.h  stbi__zexpand   4015    1   <br>\nDead store  Dead nested assignment  conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5708    1   <br>\nDead store  Dead nested assignment  conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5709    1   <br>\nDead store  Dead nested assignment  conv/gltf/tinygltf/stb_image.h  stbi__tga_load  5708    1   <br>\nUnix API    Allocator sizeof operand mismatch   conv/gltf/tinygltf/stb_image_write.h    stbi_zlib_compress  875 1</p>",
+        "id": 273297568,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830683
+    },
+    {
+        "content": "<p>Can be cleared easily enough - I already did so in fact - but then we're back to not being vanilla</p>",
+        "id": 273297723,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830784
+    },
+    {
+        "content": "<p>If this turns out to be production code I'm OK with that, but since we're not sure this is the answer...</p>",
+        "id": 273297760,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830816
+    },
+    {
+        "content": "<p>I'll just bump the expected count for now.</p>",
+        "id": 273297806,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830839
+    },
+    {
+        "content": "<p>Yeah, I was giving them this week to look it over, and then recommend they implement what they want to do from scratch (using it as a reference or whatever, but do so cleanly).</p>",
+        "id": 273297883,
+        "sender_full_name": "Sean",
+        "timestamp": 1645830875
+    },
+    {
+        "content": "<p>could exclude src/conv/gltf/gltf-g.c ?  just leave a comment so we can revisit in 3 months</p>",
+        "id": 273297943,
+        "sender_full_name": "Sean",
+        "timestamp": 1645830915
+    },
+    {
+        "content": "<p>it's kind of funny.. stb_image.h is a header-only library that implements a whole slew of image file formats, used by tinygltf which is also header only</p>",
+        "id": 273298029,
+        "sender_full_name": "Sean",
+        "timestamp": 1645830963
+    },
+    {
+        "content": "<p>I'm not really set up to do that any more, unfortunately - I simplified the analyzer script when I got the bug count down, so I'm no longer calling out very many individual targets.</p>",
+        "id": 273298042,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645830974
+    },
+    {
+        "content": "<p>okay</p>",
+        "id": 273298055,
+        "sender_full_name": "Sean",
+        "timestamp": 1645830983
+    },
+    {
+        "content": "<p>Bumping the count is the simplest thing for now, and if we use 'em for real we'll have to try and clean 'em up</p>",
+        "id": 273298089,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645831011
+    },
+    {
+        "content": "<p>I think they trigger a few Coverity issues as well, for that matter</p>",
+        "id": 273298139,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645831051
+    },
+    {
+        "content": "<p>(I didn't shift it into an ext subdir yet, so your instructions should be good again.)</p>",
+        "id": 273298414,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645831255
+    },
+    {
+        "content": "<p>You know, with the new ext build setup I should probably revisit bullet - if I'm using their build system as-is I might not have the problems we had before.</p>",
+        "id": 273298911,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645831564
+    }
+]

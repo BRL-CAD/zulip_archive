@@ -1,0 +1,1298 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   There are several ways I can go with a superbuild pattern, all of which have their tradeoffs:</p>\n<ol>\n<li>\n<p>I can treat BRL-CAD the same way I'm treating the other builds, listing final outputs explicitly for management by the superbuild during final install.</p>\n</li>\n<li>\n<p>I can define a custom install script for the superbuild that reconfigures and recompiles the  BRL-CAD subbuild for its final target location, avoiding any need for the superbuild to explicitly manage BRL-CAD outputs but requiring some recompilation of  BRL-CAD for the install step.</p>\n</li>\n<li>\n<p>I can do the custom install script for all subbuilds, not just BRL-CAD, in lieu of the custom ExternalProject extensions and output listing I'm doing currently.  This is probably the simplest option from the superbuild's standpoint, but we would likely pay a substantial recompilation penalty for the install step as we'd be rebuilding most or all of the src/other projects.</p>\n</li>\n</ol>\n<p>My inclination is to try number 2, but at this juncture a second opinion is probably in order...</p>",
+        "id": 211911991,
+        "sender_full_name": "starseeker",
+        "timestamp": 1601559938
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I honestly didn't understand any of those three options. lol.</p>",
+        "id": 212125071,
+        "sender_full_name": "Sean",
+        "timestamp": 1601670644
+    },
+    {
+        "content": "<p>It was my understanding that cmake has proper sub-build support so one shouldn't need to explicitly list or script things.</p>",
+        "id": 212125082,
+        "sender_full_name": "Sean",
+        "timestamp": 1601670649
+    },
+    {
+        "content": "<p>what're others doing?</p>",
+        "id": 212125116,
+        "sender_full_name": "Sean",
+        "timestamp": 1601670669
+    },
+    {
+        "content": "<p>I'm also not sure what's meant by recompiling for final location.  Is that's referring to embedded rpaths, those are also adjustable post-compilation (not sure how strong cmake's support is, but the tooling is pretty straightforward).</p>",
+        "id": 212125305,
+        "sender_full_name": "Sean",
+        "timestamp": 1601670764
+    },
+    {
+        "content": "<p>I think I've seem some projects do that on install, just re-run install_tool and ldconfig and such.</p>",
+        "id": 212125357,
+        "sender_full_name": "Sean",
+        "timestamp": 1601670787
+    },
+    {
+        "content": "<p>I think we don't want to be rebuilding anything in src/other -- they do their thing, they're installed, and they're done.  BRL-CAD's build (or BRL-CAD's superbuild) just detects or is explicitly configured where they exist and uses them in their locations.</p>\n<p>So I guess in the superbuild context, src/other is make+install stage followed by a make stage for BRL-CAD and, optionally, install.</p>",
+        "id": 212125816,
+        "sender_full_name": "Sean",
+        "timestamp": 1601671024
+    },
+    {
+        "content": "<p>Still would be good to see what others did.  That's just my naive thoughts based on how ar and ld behave, what they need.  I also assume you're sorting through how to run pre-install (including 3rd party deps) and that's certainly appealing too.</p>",
+        "id": 212126874,
+        "sender_full_name": "Sean",
+        "timestamp": 1601671583
+    },
+    {
+        "content": "<p>Ah, sorry - assumed too much context.</p>\n<p>I'm attempting to create a superbuild that will use ExternalProject_Add for the 3rd party builds where that makes sense, but still preserve the current property where we can create a relocatable bundle (including those 3rd party deps.)</p>\n<p>When using ExternalProject_Add, to ensure proper ordering (3rd party builds complete, then build BRL-CAD using their outputs) it is necessary that BRL-CAD itself be built with ExternalProject_Add.  No other available CMake mechanism  provides the necessary ordering guarantees, since the 3rd party builds must be completed and installed before the BRL-CAD build makes any attempt to compile its source files.  (My first attempt, which didn't do that, got very close to success but finally ran aground on that limitation.)</p>\n<p>If we perform BRL-CAD's \"main\" build with ExternalProject_Add, the superbuild must take over the responsibility of assembling the final package that will form the BRL-CAD binary (incorporating the 3rd party deps and BRL-CAD into a single install package.)  My three options were various approaches that could be taken to work towards achieving that result.</p>",
+        "id": 212144414,
+        "sender_full_name": "starseeker",
+        "timestamp": 1601685689
+    },
+    {
+        "content": "<p>I'm pretty sure what others are doing is unlikely to be as aggressive as what I'm trying to do, in the sense that I'm trying to preserve the present property of our build that the build directory compilation output is fully functional without requiring write access to the final install location.  ExternalProject_Add complicates that quite a lot - I've solved some of the problems, but </p>\n<p>To allow the creation of a working setup without requiring the user have permissions to write to the final install location, the superbuild sets the \"install\" location for all subprojects to its own build directory.   Once all of the ExternalProject_Add \"install\" steps are complete, the superbuild's \"build\" step can be considered complete and it can then assemble the outputs of all the various subbuilds into the final package.</p>\n<p>For most of the projects I have a series of extensions to ExternalProject that list and process their expected output files to achieve this final assembly - essentially duplicating the RPath magic CMake uses for this process but applying it to the outputs of the ExternalProject_Add builds.  This appears to work, but it's a tall order for BRL-CAD - our output changes too much and too rapidly to want to manually maintain such an output list.  That leaves us with the tradeoffs mentioned before.</p>\n<p>It's probably possible to teach our CMake logic to write out the necessary information to allow the superbuild to process our outputs directly, and that would have the advantage of being consistent with the way other projects are managed, but it's likely to be the most work to set up.</p>\n<p>The \"cheating\" alternative is to just reconfigure the BRL-CAD subbuild to recompile as much as is needed to support the CPack requirements for creating the final bundle - essentially create a \"make install\" step for the superbuild that manipulates the BRL-CAD compilation as needed to achieve the desired results.  That's easier to experiment with and less work, but even it if  proves viable it will mean that an \"install\" step (whether make install or package creation) will also entail a significant amount of recompilation of the BRL-CAD libs/programs.</p>",
+        "id": 212150444,
+        "sender_full_name": "starseeker",
+        "timestamp": 1601694967
+    },
+    {
+        "content": "<p>One other possibility might be to invoke the ExternalProject builds from the configure stage of the main build, rather than as part of the build process.  That would guarantee the correct ordering as far as the main build is concerned, and the main price would be a (potentially) very long configure process as the src/other builds were completed to have the correct find_package inputs ready to go...</p>",
+        "id": 212293873,
+        "sender_full_name": "starseeker",
+        "timestamp": 1601902068
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> just noticed the recent commits and a couple things.. first, have a vague recollection that sdai header names and paths are mandated a particular way for implementations to be conformant.  Might be breaking things hard there.  Other issue, those changes are pushing us farther from upstream, which has a slew of fixes.   I was hoping to update post migration.. and that’d require undoing/redoing everything.</p>",
+        "id": 215928163,
+        "sender_full_name": "Sean",
+        "timestamp": 1604717970
+    },
+    {
+        "content": "<p>Basically, SDAI isn’t just a bunch of arbitrary design decisions.  That interface is part of STEP spec iirc.</p>",
+        "id": 215928232,
+        "sender_full_name": "Sean",
+        "timestamp": 1604718047
+    },
+    {
+        "content": "<p>I made a quick try at using the upstream, and for whatever reason it didn't work.  Debugging why has a high probability of being a laborious, time-consuming process, as they've changed a number of things about how the C++ files are generated.</p>",
+        "id": 215930831,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722158
+    },
+    {
+        "content": "<p>The whole setup badly needs simplification - it's still using a variation on my original CMake build logic, which ended up being way too heavy for the purpose of the libraries in retrospect.  Unfortunately, I don't have any sense at this point of how involved that would be while avoiding breaking the python pieces.</p>",
+        "id": 215930896,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722261
+    },
+    {
+        "content": "<p>At this point I'm just trying to zero in on why the Ninja Windows build specifically is failing (while the Visual Studio build on the same machine, same compiler does not.)  I'm getting (I think) some form of memory corruption trying to read a step file in step-g, but only with the Ninja build.</p>",
+        "id": 215930973,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722370
+    },
+    {
+        "content": "<p>exp2cxx has a separate problem on the Mac, which I've not been able to diagnose at this point, in either case I'm trying to eliminate all the extraneous complexity I can.</p>",
+        "id": 215930987,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722405
+    },
+    {
+        "content": "<p>If I need to scrap what I'm doing now once I actually figure out what the problem is that's fine...</p>",
+        "id": 215930995,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722439
+    },
+    {
+        "content": "<p>I suspect I'm not understanding some of the motivations for the SDAI interface design properly - so far my experiences working with it have been pretty negative.</p>",
+        "id": 215931053,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722513
+    },
+    {
+        "content": "<p>If I had the time (which I acknowledge I don't) I'd probably want to go back to the original plan - grab the express bits, and write a new convertor logic ignoring SDAI that focuses just on what we need for converters.</p>",
+        "id": 215931203,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604722774
+    },
+    {
+        "content": "<p>Growl... best guess at this point is the build flags from the MSBUILD setup happen to produce a working converter, the Ninja generator is generating something different, and the STEPCODE C++ isn't tolerating it...</p>",
+        "id": 216156440,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604964744
+    },
+    {
+        "content": "<p>Main flaw in that theory is the all-in-one build does work with Ninja...</p>",
+        "id": 216156463,
+        "sender_full_name": "starseeker",
+        "timestamp": 1604964775
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> If you want, I can try to track down more specifically whether sdai subdirs violate or are okay with the spec -- that's a case where I'd have to actually go back to the spec and read up on it.  My recollection could be wrong, but I seem to recall it being spelled out in detail for conformance testing of implementations.  Happy to look, it just might take a while to locate and read up on it.  Been a while since I dug through the docs.</p>",
+        "id": 216223268,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020284
+    },
+    {
+        "content": "<p>I think that was also a reason we'd have to do some dynamic work to have support for multiple AP's in a single binary.</p>",
+        "id": 216223339,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020315
+    },
+    {
+        "content": "<p>No problem, and not terribly urgent - upstream doesn't work, the refactor didn't fix what I'm fighting on the github runners, and even if we waded through it all a correct answer would result in no functional improvements :-/</p>",
+        "id": 216223514,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605020380
+    },
+    {
+        "content": "<p>I was going to say, that all seems orthogonal to the problem you described with ninja.</p>",
+        "id": 216223593,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020403
+    },
+    {
+        "content": "<p>if a ninja build is different, that should be directly observable -- what's being compiled or linked differently?</p>",
+        "id": 216223697,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020430
+    },
+    {
+        "content": "<p>It is - I knew it probably would be, but I was trying to minimize the amount of clutter I had to wade through.  It served its purpose, as far as that goes...</p>",
+        "id": 216223728,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605020448
+    },
+    {
+        "content": "<p>fwiw, I don't think you were on the discussion thread, but AP214 support came up just a couple days ago.  matt suggested an scr so we can prioritize it.</p>",
+        "id": 216223845,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020500
+    },
+    {
+        "content": "<p>I did finally figure out how to get a look at the comparative build options - msbuild is not friendly, when it comes to that.  It looks like the root issue was that I wasn't passing CMAKE_BUILD_TYPE to the subbuilds, so they were doing the default thing.</p>",
+        "id": 216223868,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605020510
+    },
+    {
+        "content": "<p>(very much hoping that's it, and some preliminary tests succeeded - that's why I reverted)</p>",
+        "id": 216223985,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605020547
+    },
+    {
+        "content": "<p>I'm surprised that even worked at all... Debug builds aren't typically considered link-compatible with Release builds on Windows.</p>",
+        "id": 216224085,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020590
+    },
+    {
+        "content": "<p>-Mt vs non-Mt can also make them incompatible iirc</p>",
+        "id": 216224164,
+        "sender_full_name": "Sean",
+        "timestamp": 1605020628
+    },
+    {
+        "content": "<p>I think it was probably the std::string exposure that actually failed - most of the other libs probably accidentally worked, but I was getting warnings about std::string needing some kind of DLL exporting instructions from the step code.  Was <em>really</em> hoping I wouldn't have to dive that deep... that's a very thorny rabbit hole</p>",
+        "id": 216224333,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605020695
+    },
+    {
+        "content": "<p>I think I'm getting it sorted now - in retrospect it's not surprising we're seeing these sorts of issues, since direct add_subdirectory integration into the build gives us a <em>lot</em> of settings for free...</p>",
+        "id": 216224456,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605020751
+    },
+    {
+        "content": "<p>aha! yes, that'd be an issue with debug and release -- where is std::string exposed in the API?</p>",
+        "id": 216225038,
+        "sender_full_name": "Sean",
+        "timestamp": 1605021026
+    },
+    {
+        "content": "<p>In some of the classes - hang on, I'll try to pull some of the logs from github</p>",
+        "id": 216225188,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605021112
+    },
+    {
+        "content": "<p>it's typically not recommended to expose STL across DLL boundaries, because it will compile but will result in run-time crashes as the debug vs non-debug versions of c++ template instantiation are different (and in production release will result in runtime crashes where it might locally work just fine).</p>",
+        "id": 216225304,
+        "sender_full_name": "Sean",
+        "timestamp": 1605021153
+    },
+    {
+        "content": "<p>that's an old time msvc issue.</p>",
+        "id": 216225318,
+        "sender_full_name": "Sean",
+        "timestamp": 1605021159
+    },
+    {
+        "content": "<p>as far as I know/knew though, STEPcode didn't/doesn't expose STL across a public library boundary</p>",
+        "id": 216225420,
+        "sender_full_name": "Sean",
+        "timestamp": 1605021227
+    },
+    {
+        "content": "<p>Here's an example:</p>\n<p>2020-11-09T17:43:18.9047539Z D:\\a\\cadcitest\\cadcitest\\src\\other\\ext\\stepcode\\include\\stepcode\\utils/errordesc.h(58,29): warning C4251: 'ErrorDescriptor::_userMsg': class 'std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt;&gt;' needs to have dll-interface to be used by clients of class 'ErrorDescriptor' [D:\\a\\cadcitest\\cadcitest\\build\\src\\other\\ext\\STEPCODE_BLD-prefix\\src\\STEPCODE_BLD-build\\src\\dai\\stepdai.vcxproj] [D:\\a\\cadcitest\\cadcitest\\build\\src\\other\\ext\\STEPCODE_BLD.vcxproj]<br>\n2020-11-09T17:43:18.9050908Z   C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.27.29110\\include\\xstring(4564): message : see declaration of 'std::basic_string&lt;char,std::char_traits&lt;char&gt;,std::allocator&lt;char&gt;&gt;' [D:\\a\\cadcitest\\cadcitest\\build\\src\\other\\ext\\STEPCODE_BLD-prefix\\src\\STEPCODE_BLD-build\\src\\dai\\stepdai.vcxproj]</p>",
+        "id": 216225864,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605021425
+    },
+    {
+        "content": "<p>ahh, I see.</p>",
+        "id": 216227785,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022333
+    },
+    {
+        "content": "<p>So <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> this is a deeper issue (two issues actually)</p>",
+        "id": 216228226,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022542
+    },
+    {
+        "content": "<p>first, someone apparently exposed STL in an interface there.  that's typically discouraged for truly portable library code, but isn't uncommon and is perfectly fine under static (i.e., non-dll) compilation.</p>",
+        "id": 216228395,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022626
+    },
+    {
+        "content": "<p>I seem to recall STEPcode originally having an SCLstring class to specifically avoid this issue.  That may be something we pulled from upstream or did to ourselves.</p>",
+        "id": 216228572,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022691
+    },
+    {
+        "content": "<p>That said, it can be made to work in a DLL (which is undoubtedly how it's working now on trunk) where we just assume we're compiling and linking with the same compiler and same options.</p>",
+        "id": 216228692,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022752
+    },
+    {
+        "content": "<p>We're obviously using the same compiler, so the error is definitely coming from different compilation options being used.</p>",
+        "id": 216228769,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022796
+    },
+    {
+        "content": "<p>So fix will be to either make the compilation options consistent which should prevent it from throwing the error about not having a dll-interface, or to re-wrap the STL types behind a class (ugh).</p>",
+        "id": 216229033,
+        "sender_full_name": "Sean",
+        "timestamp": 1605022912
+    },
+    {
+        "content": "<p>this is an ancient c++ issue, fwiw.  here's some background on the issue as it pertains to msvc, but it's not specific to msvc: <a href=\"https://stackoverflow.com/questions/5661738/how-can-i-use-standard-library-stl-classes-in-my-dll-interface-or-abi\">https://stackoverflow.com/questions/5661738/how-can-i-use-standard-library-stl-classes-in-my-dll-interface-or-abi</a></p>",
+        "id": 216229292,
+        "sender_full_name": "Sean",
+        "timestamp": 1605023017
+    },
+    {
+        "content": "<p>also worth mentioning that microsoft just open sourced their libc++ just last year and there's a lot of callouts made about c++ stl compatibility, so what was once very bleak and a \"don't ever do that\" isn't as much a concern going forward fortunately.</p>",
+        "id": 216229987,
+        "sender_full_name": "Sean",
+        "timestamp": 1605023320
+    },
+    {
+        "content": "<p>/me nods - yeah, it's looking like fixing the build type (which aligns the options properly) is getting buy it.  We originally switched to std::string to get off of the SCL string class, which IIRC had some issues, but it looks like we didn't end up PImpling it well enough.</p>",
+        "id": 216233567,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605024655
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> did you get a chance to try the extbuild branch on the Mac?</p>",
+        "id": 216675540,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605302976
+    },
+    {
+        "content": "<p>yes, sorry, I thought I'd conveyed that .. it fails in a couple places.  the tclsh8.6 binary is crashing (image not found error, so something is wrong in the linking/pathing) and it throws a compile-time error in itk3 (looks like trunk issue using system Framework headers)</p>",
+        "id": 217052334,
+        "sender_full_name": "Sean",
+        "timestamp": 1605642305
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DBUILD_itk -DHAVE_DLFCN_H=1 -DHAVE_ERRNO_H=1 -DHAVE_FLOAT_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_ITCL_STUBS -DUSE_TCL_STUBS -DUSE_TK_STUBS -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Headers -I/Users/morrison/brlcad.extbuild/.build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic -I/Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/unix -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../itcl3/generic  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14   -o CMakeFiles/itkstub.dir/generic/itkStubLib.c.o   -c /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2765:14: error:\n      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?\nMODULE_SCOPE Tcl_NRPostProc TclNRForIterCallback;\n             ^~~~~~~~~~~~~~\n             Tcl_CloseProc\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:\n      &#39;Tcl_CloseProc&#39; declared here\ntypedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));\n              ^\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2766:14: error:\n      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?\nMODULE_SCOPE Tcl_NRPostProc TclNRCoroutineActivateCallback;\n             ^~~~~~~~~~~~~~\n             Tcl_CloseProc\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:\n      &#39;Tcl_CloseProc&#39; declared here\ntypedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));\n              ^\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2768:14: error:\n      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?\nMODULE_SCOPE Tcl_NRPostProc TclNRTailcallEval;\n             ^~~~~~~~~~~~~~\n             Tcl_CloseProc\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:\n      &#39;Tcl_CloseProc&#39; declared here\ntypedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));\n              ^\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2774:14: error:\n      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?\nMODULE_SCOPE Tcl_NRPostProc TclNRReleaseValues;\n             ^~~~~~~~~~~~~~\n             Tcl_CloseProc\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:\n      &#39;Tcl_CloseProc&#39; declared here\ntypedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));\n              ^\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:2886:14: error:\n      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?\nMODULE_SCOPE Tcl_NRPostProc TclClearRootEnsemble;\n             ^~~~~~~~~~~~~~\n             Tcl_CloseProc\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:\n      &#39;Tcl_CloseProc&#39; declared here\ntypedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));\n              ^\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:4888:5: error:\n      unknown type name &#39;Tcl_NRPostProc&#39;; did you mean &#39;Tcl_CloseProc&#39;?\n    Tcl_NRPostProc *procPtr;\n    ^~~~~~~~~~~~~~\n    Tcl_CloseProc\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers/tcl.h:652:15: note:\n      &#39;Tcl_CloseProc&#39; declared here\ntypedef void (Tcl_CloseProc) _ANSI_ARGS_((ClientData data));\n              ^\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\nIn file included from /Users/morrison/brlcad.extbuild/.build/include/itclInt.h:50:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclInt.h:4928:\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:153:8: error:\n      unknown type name &#39;CONST86&#39;\nEXTERN CONST86 char *   TclpGetUserHome(const char *name,\n       ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:153:16: error:\n      expected identifier or &#39;(&#39;\nEXTERN CONST86 char *   TclpGetUserHome(const char *name,\n               ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:262:8: error:\n      unknown type name &#39;CONST86&#39;\nEXTERN CONST86 char *   TclSetPreInitScript(const char *string);\n       ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:262:16: error:\n      expected identifier or &#39;(&#39;\nEXTERN CONST86 char *   TclSetPreInitScript(const char *string);\n               ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:691:5: error:\n      unknown type name &#39;CONST86&#39;\n    CONST86 char * (*tclpGetUserHome) (const char *name, Tcl_DString *bu...\n    ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:691:13: error:\n      expected member name or &#39;;&#39; after declaration specifiers\n    CONST86 char * (*tclpGetUserHome) (const char *name, Tcl_DString *bu...\n    ~~~~~~~ ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:691:12: error:\n      expected &#39;;&#39; at end of declaration list\n    CONST86 char * (*tclpGetUserHome) (const char *name, Tcl_DString *bu...\n           ^\n           ;\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:750:5: error:\n      unknown type name &#39;CONST86&#39;\n    CONST86 char * (*tclSetPreInitScript) (const char *string); /* 101 */\n    ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:750:13: error:\n      expected member name or &#39;;&#39; after declaration specifiers\n    CONST86 char * (*tclSetPreInitScript) (const char *string); /* 101 */\n    ~~~~~~~ ^\n/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic/tclIntDecls.h:750:12: error:\n      expected &#39;;&#39; at end of declaration list\n    CONST86 char * (*tclSetPreInitScript) (const char *string); /* 101 */\n           ^\n           ;\n16 errors generated.\nmake[5]: *** [CMakeFiles/itkstub.dir/generic/itkStubLib.c.o] Error 1\nmake[4]: *** [CMakeFiles/itkstub.dir/all] Error 2\nmake[3]: *** [all] Error 2\nmake[2]: *** [src/other/ext/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build] Error 2\nmake[1]: *** [src/other/ext/CMakeFiles/ITK_BLD.dir/all] Error 2\n</code></pre></div>",
+        "id": 217052357,
+        "sender_full_name": "Sean",
+        "timestamp": 1605642318
+    },
+    {
+        "content": "<p>You had mentioned earlier the possibility of my getting a login somewhere on an OSX box - is that practical?  It's looking like I'm going to have to iterate on this to try and run it to ground - especially worried about the linking/path issue, which I know has nuttiness unique to OSX...)</p>",
+        "id": 217053933,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605643051
+    },
+    {
+        "content": "<p>If I manually change the compile line to this, it works:</p>\n<div class=\"codehilite\"><pre><span></span><code>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DBUILD_itk -DHAVE_DLFCN_H=1 -DHAVE_ERRNO_H=1 -DHAVE_FLOAT_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_ITCL_STUBS -DUSE_TCL_STUBS -DUSE_TK_STUBS -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Headers -I/Users/morrison/brlcad.extbuild/.build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic -I/Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/unix -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../itcl3/generic  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -I/usr/X11/include -mmacosx-version-min=10.14   -o CMakeFiles/itkstub.dir/generic/itkStubLib.c.o   -c /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c\n</code></pre></div>",
+        "id": 217054160,
+        "sender_full_name": "Sean",
+        "timestamp": 1605643138
+    },
+    {
+        "content": "<p>(namely, changed frameworks to isysroot and added the missing X11 include dirs</p>",
+        "id": 217054221,
+        "sender_full_name": "Sean",
+        "timestamp": 1605643167
+    },
+    {
+        "content": "<p>let me know if you want me to test a different configuration -- I believe this is default</p>",
+        "id": 217054300,
+        "sender_full_name": "Sean",
+        "timestamp": 1605643203
+    },
+    {
+        "content": "<p>(cmake ..)</p>",
+        "id": 217054349,
+        "sender_full_name": "Sean",
+        "timestamp": 1605643214
+    },
+    {
+        "content": "<p>Did we change something in trunk to fix that?  It shouldn't be pulling in framework headers at all, really...</p>",
+        "id": 217057105,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605644529
+    },
+    {
+        "content": "<p>I see I adjusted the extbuild FindTCL on 11/3 but apparently that didn't do the trick.</p>",
+        "id": 217057181,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605644580
+    },
+    {
+        "content": "<p>my last trunk build was enable all so I don't know the current status.  I seem to recall you tweaking the FindTcl file.</p>",
+        "id": 217057194,
+        "sender_full_name": "Sean",
+        "timestamp": 1605644584
+    },
+    {
+        "content": "<p>i'll try a trunk default build</p>",
+        "id": 217057260,
+        "sender_full_name": "Sean",
+        "timestamp": 1605644621
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> If you get a chance, can you confirm <a href=\"https://github.com/starseeker/citest\">https://github.com/starseeker/citest</a> also fails on your machine?</p>",
+        "id": 217060383,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605646052
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>[ 93%] Built target stepeditor_stage\nScanning dependencies of target stepdai_stage\n[ 94%] Generating lib/libstepdai.2.0.0.dylib\n[ 95%] Generating lib/libstepdai.dylib\n[ 96%] Generating lib/libstepdai.2.dylib\n[ 96%] Built target stepdai_stage\nScanning dependencies of target exp2cxx_exe_stage\n[ 97%] Generating bin/exp2cxx\n[ 97%] Built target exp2cxx_exe_stage\nScanning dependencies of target exptest\n[ 98%] Generating exp.stamp\ndyld: Library not loaded: @rpath/libexppp.2.dylib\n  Referenced from: /Users/morrison/brlcad.trunk/cliff_test/.build/bin/exp2cxx\n  Reason: image not found\nmake[2]: *** [exp.stamp] Abort trap: 6\nmake[1]: *** [CMakeFiles/exptest.dir/all] Error 2\n</code></pre></div>",
+        "id": 217065798,
+        "sender_full_name": "Sean",
+        "timestamp": 1605648643
+    },
+    {
+        "content": "<p>Interesting!  Different message, but same failure point.  Now the question is why...</p>",
+        "id": 217067351,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605649510
+    },
+    {
+        "content": "<p>For tcl, r77671 and 77674 were the changes I was thinking of - rather surprised we're still picking up a framework with those in place...</p>",
+        "id": 217074973,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605653859
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I adjusted the RPATH logic for Mac - can you try rebuilding?  And if tclsh or btclsh don't work, can you check what otool says about their rpath settings?</p>",
+        "id": 217081415,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605658711
+    },
+    {
+        "content": "<p>Nevermind, I finally got a useful printout on the runner.  Ick.</p>",
+        "id": 217093766,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605671747
+    },
+    {
+        "content": "<p>My, sourceforge is cranky today...  lots of \"svn: E000013: Can't open file '/svn/p/brlcad/code/db/txn-current-lock': Permission denied\" errors...</p>",
+        "id": 217133016,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605705683
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  If you can try extbuild r77744 and maybe get a debugger on one of the crashing  btclsh runs I'd appreciate it - I'm still getting an abort trap but now I'm not seeing any immediately obvious issues with the rpaths...</p>",
+        "id": 217154123,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605715047
+    },
+    {
+        "content": "<p>Actually, wait - I'm still testing asc2g, let me first check btclsh directly</p>",
+        "id": 217154293,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605715093
+    },
+    {
+        "content": "<p>Grr.  Yeah, Abort trap.  What on earth...</p>",
+        "id": 217155224,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605715402
+    },
+    {
+        "content": "<p>Anybody know any good tricks to get gdb (or is it lldb with clang?)  to spit out a backtrace on a github runner when a scripted program crashes?</p>",
+        "id": 217185079,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605727900
+    },
+    {
+        "content": "<p>Interesting.  We didn't actually need to link libitcl, and Linux figured that out automatically - in the process, it ignored what would have been a lib lookup problem.  OSX went ahead and tried to find it (and failed) which is apparently why btclsh wasn't working.</p>",
+        "id": 217218512,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605748223
+    },
+    {
+        "content": "<p>Now just need to figure out why rpath setting is failing on OSX during package build...</p>",
+        "id": 217218525,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605748241
+    },
+    {
+        "content": "<p>/me is going crazy... I wish Apple would make dev images available for debugging purposes or something</p>",
+        "id": 217228167,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605759263
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> If you do a vanilla autotools build of tclsh on the Mac, does otool -l report that LC_RPATH is set in the executable?</p>",
+        "id": 217274204,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605795247
+    },
+    {
+        "content": "<p>still need me to test extbuild?</p>",
+        "id": 217369771,
+        "sender_full_name": "Sean",
+        "timestamp": 1605857846
+    },
+    {
+        "content": "<p>also, since 77752 doesn't really seem to do what's needed, should it stay in there?  the logic in there looks potentially problematic as I think I saw a separate Darwin case, so that's potentially a no-op or undefined behavior logic.</p>",
+        "id": 217373005,
+        "sender_full_name": "Sean",
+        "timestamp": 1605860779
+    },
+    {
+        "content": "<p>No, don't need to test right now (thanks though) - trying your idea to use install_name_tool</p>",
+        "id": 217403470,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605880631
+    },
+    {
+        "content": "<p>Agreed - r77752 should be obe and removed in the next few commits</p>",
+        "id": 217403684,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605880737
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   I'm going somewhat cross-eyed.  With r77757 I'm seeing the following:  <a href=\"https://brlcad.org/~starseeker/osx_runner.log\">https://brlcad.org/~starseeker/osx_runner.log</a></p>\n<p>Per otool -l, the install_name_tool command is running but not changing the path:</p>\n<p>Before:</p>\n<div class=\"codehilite\"><pre><span></span><code>2020-11-20T15:13:22.8653280Z OLD_RPATH: /Users/runner/work/cadcitest/cadcitest/build/lib\n2020-11-20T15:13:22.8654490Z NEW_RPATH: /usr/brlcad/rel-7.32.1/bin;@loader_path/../bin\n2020-11-20T15:13:22.8679810Z -rwxr-xr-x  1 runner  staff  49688 Nov 20 14:43 /Users/runner/work/cadcitest/cadcitest/build/_CPack_Packages/Darwin/TBZ2/BRL-CAD_7.32.1_Darwin_x86_64/bin/tclsh8.6\n2020-11-20T15:13:22.8833280Z OTOOL_OUT: /Users/runner/work/cadcitest/cadcitest/build/_CPack_Packages/Darwin/TBZ2/BRL-CAD_7.32.1_Darwin_x86_64/bin/tclsh8.6:\n2020-11-20T15:13:22.8834170Z Mach header\n2020-11-20T15:13:22.8935420Z Load command 19\n2020-11-20T15:13:22.8935770Z           cmd LC_RPATH\n2020-11-20T15:13:22.8936100Z       cmdsize 64\n2020-11-20T15:13:22.8944310Z          path /Users/runner/work/cadcitest/cadcitest/build/lib (offset 12)\n</code></pre></div>\n<p>Command:</p>\n<div class=\"codehilite\"><pre><span></span><code>2020-11-20T15:13:22.8946440Z install_name_tool -change /Users/runner/work/cadcitest/cadcitest/build/lib /usr/brlcad/rel-7.32.1/bin;@loader_path/../bin /Users/runner/work/cadcitest/cadcitest/build/_CPack_Packages/Darwin/TBZ2/BRL-CAD_7.32.1_Darwin_x86_64/bin/tclsh8.6\n</code></pre></div>\n<p>After:</p>\n<div class=\"codehilite\"><pre><span></span><code>2020-11-20T15:13:22.9239390Z Load command 19\n2020-11-20T15:13:22.9240000Z           cmd LC_RPATH\n2020-11-20T15:13:22.9240630Z       cmdsize 64\n2020-11-20T15:13:22.9241520Z          path /Users/runner/work/cadcitest/cadcitest/build/lib (offset 12)\n</code></pre></div>\n<p>Can you see anything wrong with the install_name_tool command?</p>",
+        "id": 217417205,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605887039
+    },
+    {
+        "content": "<p>I'll see if I can capture a binary package off of the runner to allow for direct inspection...</p>",
+        "id": 217417419,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605887120
+    },
+    {
+        "content": "<p><a href=\"http://brlcad.org/~starseeker/BRLCAD_OSX.zip\">brlcad.org/~starseeker/BRLCAD_OSX.zip</a></p>",
+        "id": 217427232,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605890849
+    },
+    {
+        "content": "<p>OK, nevermind -change doesn't work, but successive -delete_rpath and -add_rpath calls do.</p>",
+        "id": 217436180,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605894815
+    },
+    {
+        "content": "<p>Rebuilding with full config enabled  - if that works,  will be ready for build testing on a platform with graphics capability.  (Should know in a few hours if the full build succeeds... - no bets either way at this point.)</p>",
+        "id": 217436415,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605894935
+    },
+    {
+        "content": "<p>/me is reminded of why he disliked dealing with the original Tcl build so much...</p>",
+        "id": 217451811,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605902419
+    },
+    {
+        "content": "<p>Setting LDFLAGS to our build directory's lib directory messes with Tcl's configure.</p>",
+        "id": 217451876,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605902453
+    },
+    {
+        "content": "<p>Or, more correctly, configure messes with our LDFLAGS setting.  Grr.</p>",
+        "id": 217455478,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605904423
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> It's probably worth trying a Mac build now (extbuild branch).</p>",
+        "id": 217508574,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605976738
+    },
+    {
+        "content": "<p>If it works for you I'd like to consider merging back to trunk...</p>",
+        "id": 217572863,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606083098
+    },
+    {
+        "content": "<p>at a glance, I would have questioned whether semi-colon delimited is valid or not.  since you can add multiple rpaths, I would kind of expect that to be not valid syntax unless something explicitly said so</p>",
+        "id": 217642280,
+        "sender_full_name": "Sean",
+        "timestamp": 1606145645
+    },
+    {
+        "content": "<p>I could also see that semicolon making the install_name_tool command invalid (missing arg), hence no result</p>",
+        "id": 217642488,
+        "sender_full_name": "Sean",
+        "timestamp": 1606145739
+    },
+    {
+        "content": "<p>I'll give the extbuild a compile today</p>",
+        "id": 217642507,
+        "sender_full_name": "Sean",
+        "timestamp": 1606145750
+    },
+    {
+        "content": "<p>that's major surgery, it really needs multiple configurations tested before being merged back to trunk -- I really can't have trunk be unstable on me right now</p>",
+        "id": 217642711,
+        "sender_full_name": "Sean",
+        "timestamp": 1606145834
+    },
+    {
+        "content": "<p>by the way, is 77803 cheating?  ... you're supposed to fix one if you added one, not bump the number :)</p>",
+        "id": 217643021,
+        "sender_full_name": "Sean",
+        "timestamp": 1606145960
+    },
+    {
+        "content": "<p>Here's log files as of 77804, fresh build dir:<br>\n<a href=\"/user_uploads/1549/QFNqi6KtCajpN3jCFv4tVPps/cmake.log\">cmake.log</a><br>\n<a href=\"/user_uploads/1549/9fDOlvZrCkWUEsuFppvuf1W5/build.log\">build.log</a></p>",
+        "id": 217656322,
+        "sender_full_name": "Sean",
+        "timestamp": 1606151770
+    },
+    {
+        "content": "<p>Yes, it's cheating, but I couldn't afford the distraction of chasing down a platform symbol in the middle of other testing - jaw is locked on getting this done before I lose it.</p>",
+        "id": 217683664,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166111
+    },
+    {
+        "content": "<p>Blast it - we're STILL getting the framework headers included???</p>",
+        "id": 217683701,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166134
+    },
+    {
+        "content": "<p>Alright, I'll leave trunk alone for now.</p>",
+        "id": 217683869,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166235
+    },
+    {
+        "content": "<p>Oh... it looks like its trying to build against the system Tcl/Tk.  That's not good...</p>",
+        "id": 217684117,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166398
+    },
+    {
+        "content": "<p>At least, if it's trying to build against the framework.  The Tk graphics test should have caught that and failed it... not too surprised that bit's not working I guess, since it's the one piece I can't test here at all.</p>",
+        "id": 217684270,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166473
+    },
+    {
+        "content": "<p>/me shakes head... I'll try to clean up what I've got and make sure someone can pick it up later.  In one sense it probably wouldn't be a bad thing for me to leave it and return to it later with fresh eyes.</p>",
+        "id": 217684722,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166749
+    },
+    {
+        "content": "<p>I think at this point I've demonstrated the fundamental practicality of the mechanism itself - it's just cleaning up all the details of the various platforms.</p>",
+        "id": 217684991,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606166905
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/superbuild/near/217683664\">said</a>:</p>\n<blockquote>\n<p>Yes, it's cheating, but I couldn't afford the distraction of chasing down a platform symbol in the middle of other testing - jaw is locked on getting this done before I lose it.</p>\n</blockquote>\n<p>We should delete the test if you're not going to adhere to it, or if you just see it as a distraction.  That's the only / entire point of the test.  Bumping the number is up there with turning off a particular warning because they fail strict build.  Of course, there's a difference if increases are coming from 3rd party being updated vs code we touch/write/modify.</p>",
+        "id": 217715946,
+        "sender_full_name": "Sean",
+        "timestamp": 1606195516
+    },
+    {
+        "content": "<p>I also can't say I support intentionally degrading or relaxing our code quality measures to reach any goal.  Maybe a pause to come back with fresh energy later would be good.  Otherwise, let me know if there's something else I can test on Mac to figure out what's wrong there with the framework logic.</p>",
+        "id": 217716087,
+        "sender_full_name": "Sean",
+        "timestamp": 1606195760
+    },
+    {
+        "content": "<p>I'll try to get the number back down before we merge to trunk - I needed to canvas the regression test behavior across multiple platforms looking for design issues, and it was easier to adjust the number in the branch  for that purpose than to manually change it on each platform.</p>",
+        "id": 217763035,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606229246
+    },
+    {
+        "content": "<p>I'll be pausing on this anyway - the urgency was the need for Thread Building Blocks to address the parallel issues, and from what you were saying the stability of trunk is more critical to that goal unless/until we are actually ready to introduce the new dependency.</p>\n<p>I think the fundamental issues have largely been solved - I know now how to use the imported target mechanism and custom targets to integrate the ExternalProject builds into our main build, and demonstrated that in principle it can work across multiple platforms.  I'll try to cherrypick a few build simplifications back into trunk, but otherwise I'll leave it unless/until we need to make the shift.</p>",
+        "id": 217764044,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606229683
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/superbuild/near/217763035\">said</a>:</p>\n<blockquote>\n<p>I'll try to get the number back down before we merge to trunk - I needed to canvas the regression test behavior across multiple platforms looking for design issues, and it was easier to adjust the number in the branch  for that purpose than to manually change it on each platform.</p>\n</blockquote>\n<p>But that begs the question why it's increasing at all.  If platform-specific code is being introduced as a pattern of problem solving, that's also no good imho, no matter the reason.  If it's coming from other people's code, so be it (but then that begs a question why regression is seeing it).</p>",
+        "id": 217765790,
+        "sender_full_name": "Sean",
+        "timestamp": 1606230449
+    },
+    {
+        "content": "<p>In that particular case it was because the new 3rd party logic has to accommodate the naming patterns of files produced by 3rd party build systems, and those names are highly platform specific.  OpenBSD is particularly entertaining, because unless the build outputs match their particular naming pattern find_package doesn't see them.</p>",
+        "id": 217765979,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606230534
+    },
+    {
+        "content": "<p>If you don't see how that applies here, coming to agreement / understanding is going to be really hard.</p>",
+        "id": 217766511,
+        "sender_full_name": "Sean",
+        "timestamp": 1606230774
+    },
+    {
+        "content": "<p>anything with different behavior can be framed as being platform specific.  there wouldn't be a difference otherwise.</p>",
+        "id": 217766546,
+        "sender_full_name": "Sean",
+        "timestamp": 1606230794
+    },
+    {
+        "content": "<p>it's like binaries using .exe on windows.  sure that's platform specific, but the point is how to deal with that deviation.</p>",
+        "id": 217766658,
+        "sender_full_name": "Sean",
+        "timestamp": 1606230842
+    },
+    {
+        "content": "<p>one can always frame that in a platform perspective and type up code that does ifdef _WIN32, do_something(\".exe\") .. but that is the pattern that costs more in the long-term, particularly to the person that didn't write that code working with other environments.</p>",
+        "id": 217766924,
+        "sender_full_name": "Sean",
+        "timestamp": 1606230942
+    },
+    {
+        "content": "<p>For me it was an order of operations priority.  IFF this can work, it may be worth trying to figure out a better solution to that particular issue.  Until last week, I wasn't even sure it could work at all.  My take was that I need to prove that it <em>could</em> work before the effort to improve things like the platform file convention name handling were worth the investment.</p>",
+        "id": 217766941,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606230949
+    },
+    {
+        "content": "<p>I'm not immediately sure what a better solution would look like, to be honest - Windows, Apple, *BSD/Unix, and OpenBSD all have different naming conventions, and individual libraries also have their own naming quirks.  I'm certainly open to a better way to generalize that, but I'm not really sure where to start...</p>",
+        "id": 217767277,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606231084
+    },
+    {
+        "content": "<p>but you don't...</p>",
+        "id": 217767467,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231166
+    },
+    {
+        "content": "<p>You have to see you've used that reasoning before many times.  Either something else steals priority attention, thus not returning to do any \"better solution\", or you literally run out of time and can't justify spending more effort on it, or you're just tired with it.  All the while, it almost never happens.</p>",
+        "id": 217767888,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231346
+    },
+    {
+        "content": "<p>That's not a jab at you as much as it is the avalanche of competing priorities and values.  There's always going to be something else.  If writing \"code complete\" is not valued while it's being written, it's not likely to happen later as it costs even more then.</p>",
+        "id": 217768262,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231527
+    },
+    {
+        "content": "<p>Well, for something like this and given my own capabilities and resources, it's the best I can do.  The option is to not attempt these large changes.</p>",
+        "id": 217768460,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606231609
+    },
+    {
+        "content": "<p>I guess I've just also seen you do things differently too (often grumbling, but when you do it turns out well)</p>",
+        "id": 217768542,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231652
+    },
+    {
+        "content": "<p>search is a great example.  The code doesn't look like you short-circuited much of anything in there and it's been pretty robust to new development, hasn't felt brittle, has been exemplary of a really hard chunk of code made to work well.</p>",
+        "id": 217768781,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231746
+    },
+    {
+        "content": "<p>It's also a lot simpler in terms of its interactions - it's almost completely isolated from any platform specific issues.  It's world is the .g file and BRL-CAD APIs - I love it when we can live there, because it's far simpler.</p>",
+        "id": 217768961,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606231829
+    },
+    {
+        "content": "<p>The build system is a lot more like the compatibility layers we have to put in libbu, IMHO</p>",
+        "id": 217769005,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606231848
+    },
+    {
+        "content": "<p>I'm not a fan of platform specific stuff - indeed, the whole CMake conversion was an attempt to <em>reduce</em> platform specific build logic - but at some point, somewhere, those differences must be abstracted.</p>",
+        "id": 217769115,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606231910
+    },
+    {
+        "content": "<p>The question is where and how.</p>",
+        "id": 217769132,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606231917
+    },
+    {
+        "content": "<p>the plugins is probably a good platform-specific example.  it's had instability, but by large hasn't had platform-specific injection (unless I missed them).  granted, some of that was already refactored into libbu.</p>",
+        "id": 217769278,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231970
+    },
+    {
+        "content": "<p>speaking of which, I assume you saw bills messages -- looks like gcv is broken</p>",
+        "id": 217769309,
+        "sender_full_name": "Sean",
+        "timestamp": 1606231990
+    },
+    {
+        "content": "<p>or his build was incomplete</p>",
+        "id": 217769338,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232000
+    },
+    {
+        "content": "<p>bu_dlopen and friends are the only reason we were able to get away with that</p>",
+        "id": 217769364,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232012
+    },
+    {
+        "content": "<p>I didn't scrutinize his logs to figure out which</p>",
+        "id": 217769382,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232023
+    },
+    {
+        "content": "<p>It's broken - I think I know what it is</p>",
+        "id": 217769394,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232031
+    },
+    {
+        "content": "<p>I'm on leave this week, but I'll see if I can fix it - short term fix is probably to revert 77777</p>",
+        "id": 217769519,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232077
+    },
+    {
+        "content": "<p>I just guess I really am not approving of giving CMake a pass on these issues because it's build system code.</p>",
+        "id": 217769781,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232179
+    },
+    {
+        "content": "<p>Code is code.  Maybe we need the equivalent of libbu-for-cmake so platform-specific things aren't intermixed with build logic.</p>",
+        "id": 217769821,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232197
+    },
+    {
+        "content": "<p>Hmm.  I like that idea, actually</p>",
+        "id": 217769868,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232215
+    },
+    {
+        "content": "<p>I see the complexity and it takes me ages to figure out what's actually going on, so much spaghetti and side effects</p>",
+        "id": 217769907,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232230
+    },
+    {
+        "content": "<p>Agreed - I don't like it myself, and I know as the author of most of it it's way easier for me to deal with.  But that also means I'm not going to be the best one to come up with how to solve the problem, since I'm inherently less able to recognize it when it's there.</p>",
+        "id": 217770286,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232363
+    },
+    {
+        "content": "<p>I see things like the gcv conversion and it's concerning when the build logic goes from being a one-liner in a subdir to being 20 lines.  Other places, it's logic repeated in a half dozen places that seem to all be doing the same thing, the same repetition of code blocks all including the same pattern.</p>",
+        "id": 217770309,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232373
+    },
+    {
+        "content": "<p>If we want something better than my ad-hoc solutions to a lot of those problems, we should probably take a day or two to examine what the various BRLCAD_ADD* and BRLCAD_MANAGE_* functions are doing, what the plugins need/do that is different, and how best to organize it all.</p>",
+        "id": 217770884,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232601
+    },
+    {
+        "content": "<p>heh, i've not even encountered BRLCAD_MANAGE_ yet...</p>",
+        "id": 217771072,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232677
+    },
+    {
+        "content": "<p>I think you have and you've forgotten/blocked the memory - you didn't care for it, IIRC</p>",
+        "id": 217771155,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232716
+    },
+    {
+        "content": "<p>I would believe that -- I don't remember it at all, but then I don't like what's implied by the name either... :)</p>",
+        "id": 217771299,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232767
+    },
+    {
+        "content": "<p>It's the bit responsible for staging data files and the like in the build directory and setting up their install rules.  Has to do one thing for platforms with symlinks and another for platforms without.</p>",
+        "id": 217771327,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606232780
+    },
+    {
+        "content": "<p>BRLCAD_ADD is all fine/good stuff, reasonable familiar abstraction</p>",
+        "id": 217771363,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232795
+    },
+    {
+        "content": "<p>ahh.  yeah, that sounds like something I wouldn't like implemented as some sort of \"management\" interface.  it should be patterned after whatever it's doing, not a catch-all.</p>",
+        "id": 217771627,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232899
+    },
+    {
+        "content": "<p>in gcv's case, though -- was there a reason the plugin logic couldn't be put behind a function/macro?  there was already one there and it was replaced I think?</p>",
+        "id": 217771788,
+        "sender_full_name": "Sean",
+        "timestamp": 1606232975
+    },
+    {
+        "content": "<p>Anyway, there's that, the BRLCAD_ADD bits and their attendant functions (of which there are a lot), the plugins, and the doc building, not to mention the various converter running functions for db/ and the tclIndex building stuff.</p>",
+        "id": 217771928,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233013
+    },
+    {
+        "content": "<p>Um.  Probably not - I was just duplicating the pattern established for libdm/libged, which put the plugins in the correct libexec subdirs.  Undoubtedly all of that should be consolidated into a BRLCAD_PLUGIN function or something along those lines, but that begs the question of what functionality it should share with BRLCAD_ADDLIB</p>",
+        "id": 217772125,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233109
+    },
+    {
+        "content": "<p>I backed out the gcv plugin change - hopefully that'll get bill working until I figure out what was making Windows unhappy.</p>",
+        "id": 217772660,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233313
+    },
+    {
+        "content": "<p>I thought a bit about making a \"PLUGIN\" option to add to BRLCAD_ADDLIB, but I'm not sure if that's ontologically correct.</p>",
+        "id": 217772947,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233409
+    },
+    {
+        "content": "<p>I need to write a gcv plugin myself.  For me a lot of this becomes more clear when I go through the motions of adding another and seeing what knowledge is being required of others to extend it.</p>",
+        "id": 217772973,
+        "sender_full_name": "Sean",
+        "timestamp": 1606233418
+    },
+    {
+        "content": "<p>The whole GCV setup is very add-hoc, or at least the gcv executable itself is - my recollection is that was mostly me trying to figure out how on earth to expose arbitrarily complex options for all the plugins on the command line.  I don't recall being involved too much with the initial GCV plugin design/setup, so I don't know as much about it.</p>",
+        "id": 217773525,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233636
+    },
+    {
+        "content": "<p>I am pretty sure though that the gcv plugins predate our support for the libexec directory.</p>",
+        "id": 217773845,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233760
+    },
+    {
+        "content": "<p>yeah, they do predate it.  how the plugins are set up and managed isn't meant to dominate gcv.  if anything, it just needs to be something simple for authors (hence importance of writing a plugin), which I think we recently failed so I intended to take a look at it all here soon.</p>",
+        "id": 217774166,
+        "sender_full_name": "Sean",
+        "timestamp": 1606233877
+    },
+    {
+        "content": "<p>/me nods.  Whatever we decide on, we should update libdm and libged to do as well so we're consistent across the board.</p>",
+        "id": 217774307,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606233947
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"247135\">@Sumagna Das</span> test was pretty much a failure on GCV's part... I spent a day debugging only to realize what we were trying to make it do wasn't possible without fundamentally changing some things (not a good sign for any plugin system).</p>",
+        "id": 217774332,
+        "sender_full_name": "Sean",
+        "timestamp": 1606233961
+    },
+    {
+        "content": "<p>consistent would be great, but they do serve rather different purposes.  ged and dm's plugins are a means to an end.  for gcv, it's intentional architectural and conceptual design.</p>",
+        "id": 217774645,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234063
+    },
+    {
+        "content": "<p>they may (or may not) end up being the same as they have slightly different needs, different runtime profiles.</p>",
+        "id": 217774799,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234126
+    },
+    {
+        "content": "<p>Ah, the mime type thing?  I'd have to go back over the discussions, but my recollection is there were at least one or two fundamental conceptual issues that were unresolved (like how to handle multiple plugins supporting the same format, or plugins that could do multiple different things with the same input - i.e., a converter that can embed a png as an image in a .g fle or generate an extruded solid from that png file... which behavior does the user want, and how do they specify?  Moreover, how do they learn that they <em>can</em> specify such options?)</p>",
+        "id": 217774962,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606234194
+    },
+    {
+        "content": "<p>the mime type was a symptom -- but no, not it specifically.  it's when facing a new dev with the task of implementing a simple plugin, are they likely independently successful without pulling in another dev or a debugger.  in his case, the simple plugin was riddled with issues including mime types, other plugins seeming taking priority, inconsistent searching rules making it not obvious what his plugin is actually doing, is it even loading and failing or not loading, etc.</p>",
+        "id": 217775747,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234409
+    },
+    {
+        "content": "<p>point being there wasn't a solution that didn't involve modifying gcv and didn't involve a debugger.</p>",
+        "id": 217775777,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234420
+    },
+    {
+        "content": "<p>Ah, gotcha.</p>",
+        "id": 217776287,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606234613
+    },
+    {
+        "content": "<p>and to be clear, that's not a negative on you or anyone else.  it's just a status check on the state of GCV.</p>",
+        "id": 217776314,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234627
+    },
+    {
+        "content": "<p>Agreed.  Have to say it doesn't surprise me, really - I found the problem pretty overwhelming the last time I poked at gcv.</p>",
+        "id": 217776402,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606234673
+    },
+    {
+        "content": "<p>that's why I was saying I think I need to add a plugin, that will make it real and relatable to me, and should suss out the essential pain points without overarchitecting solutions.</p>",
+        "id": 217776506,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234698
+    },
+    {
+        "content": "<p>The png case was actually an interesting one - we didn't consider the possibility of non-geometry to geometry conversions when the mimes were originally set up, so it makes me wonder how we can avoid similar unconscious assumptions</p>",
+        "id": 217776681,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606234782
+    },
+    {
+        "content": "<p>I think part of the problem can be improved if we eliminate concepts of \"auto\".  We have to get declarative working, so behavior is deterministic and self-discoverable.</p>",
+        "id": 217776687,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234789
+    },
+    {
+        "content": "<p>So make the plugins be explicit about their formats?  GDAL's gonna be a doozy...</p>",
+        "id": 217776820,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606234843
+    },
+    {
+        "content": "<p>I considered it as creating geometry from images and images from geometry has been on my mind for gcv from the onset, but even still I didn't realize the implications of the mime type groupings at the time it was implemented.</p>",
+        "id": 217776875,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234864
+    },
+    {
+        "content": "<p>Hmm.  Does \"gcv file.g image.png\" become an alias for rt?</p>",
+        "id": 217776973,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606234909
+    },
+    {
+        "content": "<p>gdal is a great example actually</p>",
+        "id": 217777023,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234924
+    },
+    {
+        "content": "<p>for example, I wouldn't just write out all potential gdal inputs ... they'd need to be tested and we turn on the ones we know work, and then we immediately explicitly are faced with what to do when two things read stl.</p>",
+        "id": 217777171,
+        "sender_full_name": "Sean",
+        "timestamp": 1606234979
+    },
+    {
+        "content": "<p>that came up with gdal stealing png input and then consequently crashing GCV because of something not getting handled right.  if png weren't explicitly enabled, that wouldn't have happened until someone tested it and made sure it was working.</p>",
+        "id": 217777386,
+        "sender_full_name": "Sean",
+        "timestamp": 1606235062
+    },
+    {
+        "content": "<p>what happened to GCV exactly?</p>",
+        "id": 217797830,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1606243972
+    },
+    {
+        "content": "<p>I dont have time to read the whole conversation right now so can anyone give a brief account of it?</p>",
+        "id": 217798536,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1606244305
+    },
+    {
+        "content": "<p>Just discussion about what design decisions are needed to correct the current difficulties of working with/adding to it</p>",
+        "id": 217798676,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606244376
+    },
+    {
+        "content": "<p>yeah, sorry for the ping <span class=\"user-mention\" data-user-id=\"247135\">@Sumagna Das</span> -- that's not something you need to read through.  Summary is just that gcv needs some lovin' and your work making a plugin for it make that obvious.</p>",
+        "id": 217799890,
+        "sender_full_name": "Sean",
+        "timestamp": 1606244953
+    },
+    {
+        "content": "<p>its ok...i just dont have time right now due to my final exams</p>",
+        "id": 217799943,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1606244995
+    },
+    {
+        "content": "<p>no problem, maybe I'll have it cleaned up by the time you're done with exams ;)</p>",
+        "id": 217800036,
+        "sender_full_name": "Sean",
+        "timestamp": 1606245030
+    },
+    {
+        "content": "<p>good luck with your exams <span class=\"user-mention\" data-user-id=\"247135\">@Sumagna Das</span> !</p>",
+        "id": 217800049,
+        "sender_full_name": "Sean",
+        "timestamp": 1606245043
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Don't update the platform symbol count yet - the reduction in trunk is targeted to get the count in extbuild below the current specified level in trunk.</p>",
+        "id": 218510833,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606878909
+    },
+    {
+        "content": "<p>(Did it in trunk to keep the merge simpler - let me know if you prefer to keep those changes out of trunk until the merge...)</p>",
+        "id": 218510861,
+        "sender_full_name": "starseeker",
+        "timestamp": 1606878960
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> If you've got spare machine cycles, it would be interesting to know if the extbuild's failure mode has changed on the Mac with the latest changes to the branch.</p>",
+        "id": 218791881,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607054267
+    },
+    {
+        "content": "<p>I'll check it.  My cpu fans finally died down just an hour ago (been doing renders for a particular tasker that have been keeping things .. hot)</p>",
+        "id": 218791935,
+        "sender_full_name": "Sean",
+        "timestamp": 1607054313
+    },
+    {
+        "content": "<p>urk.  nevermind, then - I'll ping after I've gone another round with the github runners</p>",
+        "id": 218792030,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607054443
+    },
+    {
+        "content": "<p>I'm saying it's fine, I can</p>",
+        "id": 218792050,
+        "sender_full_name": "Sean",
+        "timestamp": 1607054468
+    },
+    {
+        "content": "<p>Ah, OK - wasn't sure if you were wanting to cool things down a bit first ;-)</p>",
+        "id": 218792062,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607054495
+    },
+    {
+        "content": "<p>it was a bit anticlimactic... had a single render take nearly 24 hours and it was barely better than the previous at around 30 min.</p>",
+        "id": 218792503,
+        "sender_full_name": "Sean",
+        "timestamp": 1607055118
+    },
+    {
+        "content": "<p>I miscalculated how much I'd increased the workload, but figured I'd let it complete anyways</p>",
+        "id": 218792550,
+        "sender_full_name": "Sean",
+        "timestamp": 1607055153
+    },
+    {
+        "content": "<p>Blegh.  Hate it when that happens...</p>",
+        "id": 218792560,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607055180
+    },
+    {
+        "content": "<p>Got extbuild distcheck-full pass on both ubuntu and GhostBSD.</p>",
+        "id": 218997975,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607279214
+    },
+    {
+        "content": "<p>Cool!  What's GhostBSD like?</p>",
+        "id": 219046450,
+        "sender_full_name": "Sean",
+        "timestamp": 1607323179
+    },
+    {
+        "content": "<p>It's one of the current iteration of the \"GUI desktop\" BSDs - tends to be very current (I think it was the first distro I hit with clang 10)</p>",
+        "id": 219079762,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607348114
+    },
+    {
+        "content": "<p>FreeBSD based (it's kinda my \"FreeBSD stand-in\" so I don't have to bother with getting Xorg, etc. set up on FreeBSD.)</p>",
+        "id": 219080012,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607348245
+    },
+    {
+        "content": "<p>As long as I remember to use gmake I can get a successful distcheck-full on it, so I keep it around as my \"second platform\" for release testing.  bz manifests that threading issue, which means it can build but not run the tests, and OpenBSD has some sort of core dump with MGED that I've so far been unable to debug on that platform (I can't get a version of gdb or egdb to successfully load the dump...)</p>",
+        "id": 219080266,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607348402
+    },
+    {
+        "content": "<p>Sounds interesting.  I've not done much with any of the BSD desktop distros.</p>",
+        "id": 219102475,
+        "sender_full_name": "Sean",
+        "timestamp": 1607358605
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> FYI, common.h provides GCC_PREREQ() and ICC_PREREQ() for detecting minimum versions in our code, doing the right thing for versions that pre-date the new gcc built-ins.</p>",
+        "id": 219102630,
+        "sender_full_name": "Sean",
+        "timestamp": 1607358679
+    },
+    {
+        "content": "<p>Ah, OK.  I'll shift those over - thanks.</p>",
+        "id": 219102864,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607358770
+    },
+    {
+        "content": "<p>I have a compile of the latest extbuild going now, should have a mac compile-test result for you in the morning.</p>",
+        "id": 219181741,
+        "sender_full_name": "Sean",
+        "timestamp": 1607416017
+    },
+    {
+        "content": "<p>actually have it now, failed:</p>\n<div class=\"codehilite\"><pre><span></span><code>-- Looking for IceConnectionNumber in ICE - found\n-- Configuring done\n-- Generating done\n-- Build files have been written to: /Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build\n[ 24%] Performing build step for &#39;ITK_BLD&#39;\nScanning dependencies of target itkstub\n[ 11%] Building C object CMakeFiles/itkstub.dir/generic/itkStubLib.c.o\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\n/Users/morrison/Applications/include/itclInt.h:58:10: fatal error: &#39;common.h&#39;\n      file not found\n#include &quot;common.h&quot;\n         ^~~~~~~~~~\n1 error generated.\nmake[5]: *** [CMakeFiles/itkstub.dir/generic/itkStubLib.c.o] Error 1\nmake[4]: *** [CMakeFiles/itkstub.dir/all] Error 2\nmake[3]: *** [all] Error 2\nmake[2]: *** [src/other/ext/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build] Error 2\nmake[1]: *** [src/other/ext/CMakeFiles/ITK_BLD.dir/all] Error 2\nmake: *** [all] Error 2\n</code></pre></div>",
+        "id": 219183751,
+        "sender_full_name": "Sean",
+        "timestamp": 1607417642
+    },
+    {
+        "content": "<p>More detail:</p>\n<div class=\"codehilite\"><pre><span></span><code>[ 11%] Building C object CMakeFiles/itkstub.dir/generic/itkStubLib.c.o\n/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DBUILD_itk -DHAVE_DLFCN_H=1 -DHAVE_ERRNO_H=1 -DHAVE_FLOAT_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DTCL_THREADS=1 -DUSE_ITCL_STUBS -DUSE_TCL_STUBS -DUSE_TK_STUBS -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tcl.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Headers -I/Users/morrison/Applications/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic -I/Users/morrison/brlcad.extbuild/.build/src/other/ext/ITK_BLD-prefix/src/ITK_BLD-build/include -I/opt/X11/include -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/generic -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../tcl/unix -I/Users/morrison/brlcad.extbuild/src/other/ext/itk3/../itcl3/generic  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14   -o CMakeFiles/itkstub.dir/generic/itkStubLib.c.o   -c /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itkStubLib.c:31:\nIn file included from /Users/morrison/brlcad.extbuild/src/other/ext/itk3/generic/itk.h:79:\n/Users/morrison/Applications/include/itclInt.h:58:10: fatal error: &#39;common.h&#39; file not found\n</code></pre></div>",
+        "id": 219185629,
+        "sender_full_name": "Sean",
+        "timestamp": 1607419079
+    },
+    {
+        "content": "<p>fwiw, this was the cmd: rm -rf .build &amp;&amp; mkdir .build &amp;&amp; cd .build &amp;&amp; cmake .. &amp;&amp; make</p>",
+        "id": 219186921,
+        "sender_full_name": "Sean",
+        "timestamp": 1607419979
+    },
+    {
+        "content": "<p>Interesting.  It's finding an Itcl installation in your Applications directory, which must be one of our installs since it's trying to include common.h.  That must be an old one though, since neither trunk nor extbuild itcl3 has any common.h includes...</p>",
+        "id": 219211699,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607437381
+    },
+    {
+        "content": "<p>Did you do a \"system\" install of Itcl3 to avoid having to rebuild it for the cad builds?  If so, I'd suggest trying a \"vanilla\" Itcl3 version without the common.h include as a system install and seeing if that helps.</p>",
+        "id": 219212613,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607437870
+    },
+    {
+        "content": "<p>I can't dig into it today (deadline), but I'll take a look tomorrow.  There is a full install of brlcad in ~/Applications from 2016 that's occasionally used for testing.  There isn't an itcl3 just for itcl3's sake.</p>",
+        "id": 219217920,
+        "sender_full_name": "Sean",
+        "timestamp": 1607440429
+    },
+    {
+        "content": "<p>Ah, that makes sense.  The trick will be how to ignore it then.  No hurry - I've got a deadline too.</p>",
+        "id": 219218186,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607440537
+    },
+    {
+        "content": "<p>The question is also how's it picking it up now while it wasn't before (afaik) and isn't on trunk.</p>",
+        "id": 219220912,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441783
+    },
+    {
+        "content": "<p>their configure script?</p>",
+        "id": 219220945,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441794
+    },
+    {
+        "content": "<p>Trunk may be picking it up and we just aren't noticing - if itk is built with an include dir that includes common.h, we'd probably never see it.</p>",
+        "id": 219220997,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441826
+    },
+    {
+        "content": "<p>IIRC there were a couple issues like that I ran into with the extbuild work when builds actually became fully independent...</p>",
+        "id": 219221034,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441849
+    },
+    {
+        "content": "<p>FindITCL is probably locating it.</p>",
+        "id": 219221090,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441879
+    },
+    {
+        "content": "<p>I can check that tomorrow, but there's a slew of other stuff in ~/Applcations/include -- that's my own personal system installation directory, might as well be /usr/local</p>",
+        "id": 219221285,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441963
+    },
+    {
+        "content": "<p>it's not specified anywhere that I know of for it to find it -- the only possible linkage I can think of is that the compiler is coming from there but again, that's been true for years and across branches too.  did I mention that was a 2016 install of BRL-CAD?</p>",
+        "id": 219221525,
+        "sender_full_name": "Sean",
+        "timestamp": 1607442096
+    },
+    {
+        "content": "<p>Yes - the difference would be in the itk build logic and (possibly) what the Find packages in extbuild are identifying.  If the trunk itk build includes a common.h directory we'd never notice any issues, and the newer Find modules may be better at locating things on the system.</p>",
+        "id": 219221756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607442226
+    }
+]

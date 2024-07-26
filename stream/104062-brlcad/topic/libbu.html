@@ -1,0 +1,244 @@
+<html>
+<head><meta charset="utf-8"><title>libbu · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html">libbu</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="126560262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126560262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126560262">(May 14 2018 at 21:52)</a>:</h4>
+<p>Someone modified the signature of some function and that did this:</p>
+<div class="codehilite"><pre><span></span>[ 33%] Building C object src/libbu/CMakeFiles/libbu-obj.dir/heap.c.o
+/home/rain/Sync/gsoc/brlcad-code/src/libbu/heap.c: In function ‘bu_heap_log’:
+/home/rain/Sync/gsoc/brlcad-code/src/libbu/heap.c:99:38: error: cast between incompatible function types from ‘void (*)(const char *, ...)’ to ‘int (*)(const char *, ...)’ [-Werror=cast-function-type]
+     static bu_heap_func_t heap_log = (bu_heap_func_t)&amp;bu_log;
+                                      ^
+/home/rain/Sync/gsoc/brlcad-code/src/libbu/heap.c: At top level:
+cc1: error: unrecognized command line option ‘-Wno-c11-extensions’ [-Werror]
+</pre></div>
+
+
+
+<a name="126602093"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126602093" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126602093">(May 15 2018 at 17:22)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> so, I have this problem and idk how to fix it and I can't build mged because of it, did I do something wrong? I try to keep my local gsoc branch up to date with the master, maybe I shouldn't??</p>
+
+
+
+<a name="126612939"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126612939" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126612939">(May 15 2018 at 21:21)</a>:</h4>
+<p>well. that was a gcc bug.</p>
+
+
+
+<a name="126620655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126620655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126620655">(May 16 2018 at 00:39)</a>:</h4>
+<p>What compiler/version are you trying with?  And did you have a working build broken by a recent commit?</p>
+
+
+
+<a name="126623484"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126623484" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126623484">(May 16 2018 at 02:20)</a>:</h4>
+<p>I'm using the archlinux packages, the gcc and gcc-libs versions were 8.1.0 and I rolled back to 7.3.1<br>
+I could build it a few commits ago, I even wrote a script that tried to go back further and further to find a commit that would work, but it didn't find any, so that pretty much proved that the error was not in the code. Clang could also build that part of the code (but not some C++ parts), so that was also suspicious.</p>
+
+
+
+<a name="126623490"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126623490" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126623490">(May 16 2018 at 02:21)</a>:</h4>
+<p>(corr: it didn't find any within a reasonable timeframe, obviously I didn't wait for it to go back into the 80's)</p>
+
+
+
+<a name="126625694"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126625694" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126625694">(May 16 2018 at 03:40)</a>:</h4>
+<p>8.1 is pretty new - I don't know if we're tested there yet</p>
+
+
+
+<a name="126625704"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126625704" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126625704">(May 16 2018 at 03:41)</a>:</h4>
+<p>If your main distro is too unstable, an alternative might be to set up a VM - you don't want to spend too much time fighting your build environment</p>
+
+
+
+<a name="126643230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126643230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126643230">(May 16 2018 at 12:44)</a>:</h4>
+<p>I don't have too much space on my machine, but I'll try to figure something out.<br>
+So far I had a much better experience with clang, so I'd use that if the C++ parts of the code worked with it. I'm pretty sure Clang also has bugs but GCC did something completely crazy for the second time (I had a uni assignment that it crashed on), so I trust Clang way more.</p>
+
+
+
+<a name="126645137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126645137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126645137">(May 16 2018 at 13:32)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> so, I have this problem and idk how to fix it and I can't build mged because of it, did I do something wrong? I try to keep my local gsoc branch up to date with the master, maybe I shouldn't??</p>
+</blockquote>
+<p>if you run "svn diff" what are your changes?  that error is a strictness warning (we turn warnings into errors) that we don't seem to see anywhere else just yet -- what's your compiler version?  confirm what changes you have locally -- nothing changed recently that I"m aware of that would affect that</p>
+
+
+
+<a name="126645204"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126645204" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126645204">(May 16 2018 at 13:33)</a>:</h4>
+<blockquote>
+<p>well. that was a gcc bug.</p>
+</blockquote>
+<p>i wouldn't be so sure -- the message is true</p>
+
+
+
+<a name="126645262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126645262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126645262">(May 16 2018 at 13:34)</a>:</h4>
+<blockquote>
+<p>8.1 is pretty new - I don't know if we're tested there yet</p>
+</blockquote>
+<p>ah that would probably explain it -- it's likely a new compiler check that we're getting tripped up on.  the fix would be to either change the signature or wrap bu_log in a function matching the callback</p>
+
+
+
+<a name="126646471"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126646471" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126646471">(May 16 2018 at 14:03)</a>:</h4>
+<p>I'm using git svn, I compared my branch with master, there was nothing that touched the relevant files. I tried to build master on its own, I wrote that script that went back further and further, and it always failed.</p>
+
+
+
+<a name="126675294"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126675294" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126675294">(May 17 2018 at 01:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span>  Try compiling with -DBRLCAD_ENABLE_STRICT=OFF and see if that lets you get a working build.</p>
+
+
+
+<a name="126675309"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126675309" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126675309">(May 17 2018 at 01:32)</a>:</h4>
+<p>(option to CMake)</p>
+
+
+
+<a name="126675345"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126675345" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126675345">(May 17 2018 at 01:33)</a>:</h4>
+<p>I'll try that tomorrow, but I gotta get some shuteye</p>
+
+
+
+<a name="126675485"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126675485" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126675485">(May 17 2018 at 01:38)</a>:</h4>
+<p>Sounds good.  Oh, can you upload a version of your patch that doesn't use git formatting for the diff?  Right now we need to apply it in SVN</p>
+
+
+
+<a name="126675845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126675845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126675845">(May 17 2018 at 01:53)</a>:</h4>
+<p>I'll see if I can take gcc 8.1 for a spin, since it's adding new checks</p>
+
+
+
+<a name="126677182"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126677182" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126677182">(May 17 2018 at 02:44)</a>:</h4>
+<p>Urk.  This will take longer than I thought...</p>
+
+
+
+<a name="126678692"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126678692" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126678692">(May 17 2018 at 03:38)</a>:</h4>
+<blockquote>
+<p>Urk.  This will take longer than I thought...</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> patch isn't right -- we either need to introduce a bu_vlog function that takes a va_list, expand the wrapper, eliminate the logger, or change bu_log and friends to return an int</p>
+
+
+
+<a name="126678955"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126678955" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126678955">(May 17 2018 at 03:49)</a>:</h4>
+<p>fixed, expanded the wrapper</p>
+
+
+
+<a name="126678967"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126678967" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126678967">(May 17 2018 at 03:49)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span> it should be fixed now -- give it a try (without disabling strict)</p>
+
+
+
+<a name="126693162"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126693162" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126693162">(May 17 2018 at 11:28)</a>:</h4>
+<p>OK, thanks Sean.  (Yeesh - I did the same sort of thing in nirt, looked at that for an example, and totally zoned on bu_log not being va_list based.   Apparently trying to do more than three things at once is a bad idea...)</p>
+
+
+
+<a name="126693224"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126693224" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126693224">(May 17 2018 at 11:30)</a>:</h4>
+<p>I managed to try a gcc 8 build on another machine, and there are several more errors of the function pointer casting variety (at at least one other new one about memsetting a complex data structure.)</p>
+
+
+
+<a name="126705863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126705863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126705863">(May 17 2018 at 16:30)</a>:</h4>
+<p>it fails to compile a different part:</p>
+<div class="codehilite"><pre><span></span>/home/rain/Sync/gsoc/brlcad-code/src/libbu/parallel.c: In function ‘bu_parallel’:
+/home/rain/Sync/gsoc/brlcad-code/src/libbu/parallel.c:696:38: error: cast between incompatible function types from ‘void (*)(struct thread_data *)’ to ‘void * (*)(void *)’ [-Werror=cast-function-type]
+  if (pthread_create(&amp;thread, &amp;attrs, (void *(*)(void *))parallel_interface_arg, &amp;thread_context[x])) {
+                                      ^
+/home/rain/Sync/gsoc/brlcad-code/src/libbu/parallel.c: At top level:
+cc1: error: unrecognized command line option ‘-Wno-c11-extensions’ [-Werror]
+cc1: all warnings being treated as errors
+</pre></div>
+
+
+
+<a name="126727339"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126727339" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126727339">(May 18 2018 at 01:42)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span> does compiling non-strict work?</p>
+
+
+
+<a name="126727348"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126727348" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Peter Pronai <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126727348">(May 18 2018 at 01:43)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> yep, but it shows a few other warnings too, idk if those are bad??? they are abour a GNU specific printf format</p>
+
+
+
+<a name="126727391"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126727391" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126727391">(May 18 2018 at 01:44)</a>:</h4>
+<p><span class="user-mention" data-user-id="111633">@Peter Pronai</span> worth fixing, but if they're not in your immediate code path don't worry about it yet - we need to check what we want to do about the new error category</p>
+
+
+
+<a name="126727538"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/126727538" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#126727538">(May 18 2018 at 01:50)</a>:</h4>
+<p>Yep, patch applied - committed as revision 70970</p>
+
+
+
+<a name="128795111"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/128795111" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#128795111">(Jun 28 2018 at 21:17)</a>:</h4>
+<p>in <code>malloc.h</code>, i think <code>bu_prmem</code> and <code>bu_mem_barriercheck</code> are useless/broken. in <code>bu_prmem</code>, there two checks before any work happens. one is <code>if (bu_memdebug_len &gt; 0)</code>, and the other is <code>if (bu_memq != BU_LIST_NULL)</code>. however, they are initially set to 0/BU_LIST_NULL and never modified, so the conditions are never true and nothing really happens in that function, except for a few prints. am i missing anything?</p>
+
+
+
+<a name="128795320"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/128795320" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#128795320">(Jun 28 2018 at 21:21)</a>:</h4>
+<p>and i think <code>bu_mem_barriercheck</code> has a segfault in there. it's doing <code>&amp;bu_memdebug[bu_memdebug_len-1]</code>, but <code>bu_memdebug_len</code> is never greater than 0. and even if it were, it's not doing any checks before the access. it's actually the first line in that function</p>
+
+
+
+<a name="129063692"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/129063692" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#129063692">(Jul 04 2018 at 04:47)</a>:</h4>
+<blockquote>
+<p>in <code>malloc.h</code>, i think <code>bu_prmem</code> and <code>bu_mem_barriercheck</code> are useless/broken. in <code>bu_prmem</code>, there two checks before any work happens. one is <code>if (bu_memdebug_len &gt; 0)</code>, and the other is <code>if (bu_memq != BU_LIST_NULL)</code>. however, they are initially set to 0/BU_LIST_NULL and never modified, so the conditions are never true and nothing really happens in that function, except for a few prints. am i missing anything?</p>
+</blockquote>
+<p>I committed a removal of all our old barrier check code a couple weeks ago.  I may have missed some details, but there were two public functions that couldn't be directly removed without going through deprecation (bu_ck_malloc_ptr, bu_mem_barriercheck -- see CHANGES).  so their implementations now seem silly, but they're basically no-op functions until we can remove them.</p>
+
+
+
+<a name="129063741"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/libbu/near/129063741" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/libbu.html#129063741">(Jul 04 2018 at 04:48)</a>:</h4>
+<p>sounds like I probably didn't make bu_mem_barriercheck too safe for no-op -- feel free to fix or reduce it further or ignore it. ;)</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

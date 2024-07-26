@@ -1,0 +1,62 @@
+[
+    {
+        "content": "<p>So I just re-ran a test and eliminating the register keyword everywhere (at least on mac 10.14) still results in a very slight but consistent performance decrease, approximately 1%.</p>",
+        "id": 199687239,
+        "sender_full_name": "Sean",
+        "timestamp": 1591224901
+    },
+    {
+        "content": "<p>Given it seems to be on its way out, standards wise, what options do we have?</p>",
+        "id": 199695150,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591231946
+    },
+    {
+        "content": "<p>it's not on it's way out for C, that's a C++ thing.  just means we should probably continue to ignore it and not add more intentionally.</p>",
+        "id": 199695237,
+        "sender_full_name": "Sean",
+        "timestamp": 1591232050
+    },
+    {
+        "content": "<p>i'm sure at some point, if push comes to shove, we can just take the hit and remove it if we hit a maintenance issue.  not like it's an issue.  I just wanted to give a situational awareness update -- still amazingly providing some benefit with current compilers, which is the real surprise.</p>",
+        "id": 199695321,
+        "sender_full_name": "Sean",
+        "timestamp": 1591232179
+    },
+    {
+        "content": "<p>Although I admit we're a ways away, it'll most likely become an issue if we try to get the \"build everything as C++\" option working.  Maybe we can preprocess it out for that case somehow?</p>",
+        "id": 199699205,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591237669
+    },
+    {
+        "content": "<p>A simple #define register /**/ in config would make them all go poof.  Not an issue.</p>",
+        "id": 199699270,
+        "sender_full_name": "Sean",
+        "timestamp": 1591237764
+    },
+    {
+        "content": "<p>I think that's what was originally done, I think maybe used -Dregister=\"\"</p>",
+        "id": 199699322,
+        "sender_full_name": "Sean",
+        "timestamp": 1591237807
+    },
+    {
+        "content": "<p>It's worth noting that we seem to be a solid 25% slower than we were some time ago.  I have vgr results spanning a broad gamut, with current optimized builds sitting right in the middle of the pack:</p>\n<div class=\"codehilite\"><pre><span></span><code>agua:.build morrison$ grep vgr bench/summary  |awk &#39;{print $9}&#39; | sort -n\n13756.42\n14717.22\n15413.82\n15542.82\n15788.07\n15974.65\n16610.00\n16619.31\n16810.47\n17450.78\n17922.01\n18847.25\n19818.99\n21523.09\n31678.95\n31773.81\n33843.48\n33974.45\n33988.44\n34024.96\n34287.17\n34377.16\n36554.54\n38227.29\n38659.17\n39677.67\n39860.67\n39976.24\n40401.68\n41149.49\n42381.23\n44658.15\n46135.64\n</code></pre></div>\n\n\n<p>The teens are simply default unoptimized builds and are to be expected.  Current optimized is in the 34k ballpark, yet I clearly have had significantly faster builds, more typically in the 40k range. </p>\n<p>Trying an pgo build.</p>",
+        "id": 199833639,
+        "sender_full_name": "Sean",
+        "timestamp": 1591329095
+    },
+    {
+        "content": "<p>Ugh, PGO build is actually showing 10% slower... will have to dig deeper.</p>",
+        "id": 199904484,
+        "sender_full_name": "Sean",
+        "timestamp": 1591375778
+    },
+    {
+        "content": "<p>30k</p>",
+        "id": 199904505,
+        "sender_full_name": "Sean",
+        "timestamp": 1591375786
+    }
+]

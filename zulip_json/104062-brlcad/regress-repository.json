@@ -1,0 +1,1058 @@
+[
+    {
+        "content": "<p>Not scanning at all, actually - that's probably where I was getting the cmakefiles.cmake reference.  I use that as my initial list, so there's no scanning at all.</p>",
+        "id": 197506927,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433351
+    },
+    {
+        "content": "<p>I mean scanning file contents, i.e., reading from disk</p>",
+        "id": 197506975,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433392
+    },
+    {
+        "content": "<p>hierarchy traversal is nearly instantaneous these days on all platforms</p>",
+        "id": 197507006,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433424
+    },
+    {
+        "content": "<p>Oh.  I'm resetting the offset in the stream once per pass type - getting finer than that is going to get pretty tricky.</p>",
+        "id": 197507015,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433451
+    },
+    {
+        "content": "<p>traversal is measured in hundreds of thousands of inodes per second, thousands of dirs per second</p>",
+        "id": 197507035,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433482
+    },
+    {
+        "content": "<p>so I open the ifstream, do a bio.h check, reset seeking to 0, do the bnetwork.h check, etc.</p>",
+        "id": 197507060,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433487
+    },
+    {
+        "content": "<p>hm</p>",
+        "id": 197507066,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433510
+    },
+    {
+        "content": "<p>that definitely is going to involve disk caching</p>",
+        "id": 197507078,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433544
+    },
+    {
+        "content": "<p>In principle I might be able to reuse each getline to do all the processing, but I'm leery of trying - that would involve multiple simultaneous scanning state managements, and just to save 5 or 6 seconds I doubt it's worth it.</p>",
+        "id": 197507134,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433621
+    },
+    {
+        "content": "<p>to eliminate the effect, you'd need to parse the ifstream into a stringstream or other buffer type and do all your work on that</p>",
+        "id": 197507136,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433623
+    },
+    {
+        "content": "<p>Hmm.  More ram usage, but none of our files are big enough to be an issue anyway on any sane system...</p>",
+        "id": 197507148,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433668
+    },
+    {
+        "content": "<p>not even close to being an issue</p>",
+        "id": 197507153,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433683
+    },
+    {
+        "content": "<p>the only downside would be if you don't actually have enough work, i.e., if the cost of a malloc+memcpy is more than your regex (which seems unlikely)</p>",
+        "id": 197507207,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433754
+    },
+    {
+        "content": "<p>the memcpy can be avoided, but you'd need to use bu_mapped_file or mmap or similar and just scan the buffer instead of using getline.  it's an order of magnitude faster for read-only work.</p>",
+        "id": 197507266,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433861
+    },
+    {
+        "content": "<p>relies on the virtual memory manager to do the best thing, and it's really hard to do better oneself</p>",
+        "id": 197507280,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433906
+    },
+    {
+        "content": "<p>in a quick test stringstream didn't do much</p>",
+        "id": 197507417,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434163
+    },
+    {
+        "content": "<p>for what it's worth, it's very likely possible to get the repo check down to a sub-second time compiled.  not necessary of course, and any improvement will be gravy.</p>",
+        "id": 197507418,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434165
+    },
+    {
+        "content": "<p>you're already disk-cached -- you'd have to invalidate the cache to see the effect</p>",
+        "id": 197507421,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434189
+    },
+    {
+        "content": "<p>ah</p>",
+        "id": 197507425,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434200
+    },
+    {
+        "content": "<p>I'd still expect it to be a smidgen gain, but it's mostly saving seek time.  if it's cached, though, it's all in memory already and there is no actual seeking going on</p>",
+        "id": 197507475,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434261
+    },
+    {
+        "content": "<p>I'm probably not using it correctly - I literally dropped in the stringstream instead of the ifstream, and I doubt that's right</p>",
+        "id": 197507512,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434323
+    },
+    {
+        "content": "<p>If you want to watch it blow up on OSX, you can try it with cmake -DREPOCHECK_TEST=ON to have \"make regress-repository\" use the new version.</p>",
+        "id": 197507540,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434416
+    },
+    {
+        "content": "<p>mapped file really will be the best for this.</p>",
+        "id": 197507541,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434417
+    },
+    {
+        "content": "<p>for myself I'd rather figure out how to get it to check all of our files defining main to make sure they call bu_setprogname</p>",
+        "id": 197507604,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434546
+    },
+    {
+        "content": "<p>it's as simple as </p>\n<div class=\"codehilite\"><pre><span></span><code>struct bu_mapped_file *mf =  bu_open_mapped_file(myfile, &quot;whatever&quot;);\n</code></pre></div>\n\n\n<p>and just start searching (char*)mf-&gt;buf for content.</p>",
+        "id": 197507652,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434600
+    },
+    {
+        "content": "<p>Don't know if I've added a new program in the last 5 years without forgetting to do that and then having to debug why the relative lookup acted weird...</p>",
+        "id": 197507653,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434608
+    },
+    {
+        "content": "<p>bu_getline will work on that?  (been a while since I used a mapped file)</p>",
+        "id": 197507680,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434649
+    },
+    {
+        "content": "<p>need lines for the line number reporting...</p>",
+        "id": 197507692,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434666
+    },
+    {
+        "content": "<p>you don't need bu_getline, you just use it almost like it was getline's result</p>",
+        "id": 197507758,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434744
+    },
+    {
+        "content": "<p>just, it's all lines</p>",
+        "id": 197507764,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434762
+    },
+    {
+        "content": "<p>instantaneously.  it's a beautiful thing.</p>",
+        "id": 197507768,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434781
+    },
+    {
+        "content": "<p>Well, if you think it's worth it I can take a look tomorrow.  Need to try it on some more machines, but for myself if it's reliably &lt;10sec (or even &lt;30 sec) across the board that's probably good enough for now...</p>",
+        "id": 197507832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434877
+    },
+    {
+        "content": "<p>Yeah, I agree with you on the bu_setprogname -- that's bit us repeatedly.  ideally we shouldn't need to call it at all, but we still don't have all platforms yet.</p>",
+        "id": 197507834,
+        "sender_full_name": "Sean",
+        "timestamp": 1589434879
+    },
+    {
+        "content": "<p>I don't think we can get around it for OpenBSD - I couldn't find any other solution that worked reliably</p>",
+        "id": 197507843,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434910
+    },
+    {
+        "content": "<p>It's actually pretty cool that the iwd/setprogname pairing does work - I think that might be an unusual capability</p>",
+        "id": 197507883,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589434945
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regress-repository/near/197507832\">said</a>:</p>\n<blockquote>\n<p>Well, if you think it's worth it I can take a look tomorrow.  Need to try it on some more machines, but for myself if it's reliably &lt;10sec (or even &lt;30 sec) across the board that's probably good enough for now...</p>\n</blockquote>\n<p>if one of your goals/reasons for transcoding it was to make it faster, then it's definitely worth it.  I think it would be worthwhile simply because the code definitely has a 10x cyclomatic complexity increase, so we should at least take advantage it'll give decreasing iterative testing times.</p>",
+        "id": 197507895,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435017
+    },
+    {
+        "content": "<p>if it can be made fast enough, then we might even be able to break up the tests themselves so it's not a compound test</p>",
+        "id": 197507936,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435053
+    },
+    {
+        "content": "<p>Well, kinda - I wanted to get to a place where we don't see those crazy outliers that sometimes break the CI results with a \"timed out\" fail</p>",
+        "id": 197507954,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435107
+    },
+    {
+        "content": "<p>(and have it run on Windows...)</p>",
+        "id": 197507958,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435124
+    },
+    {
+        "content": "<p>breaking it up with certainly do that too :)</p>",
+        "id": 197507960,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435128
+    },
+    {
+        "content": "<p>and it could run in parallel</p>",
+        "id": 197507985,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435138
+    },
+    {
+        "content": "<p>I could probably do that now, actually (running the individual tests bit) - didn't bother since it's no longer a drop-in replacement for <a href=\"http://repository.sh\">repository.sh</a> when I do that, but shouldn't be too hard.</p>",
+        "id": 197508066,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435205
+    },
+    {
+        "content": "<p>the only reason all those tests were munged together was because of shell scripting I/O performance limitations.  I would have needed to use shared memory or ports/socket communication to break it up effectively, which is a pain in shell scripts.</p>",
+        "id": 197508177,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435332
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Most of the complexity is to support threading - if you want to go simpler and single threaded it can probably be about the same or maybe a little simpler than the shell script</p>",
+        "id": 197508179,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435340
+    },
+    {
+        "content": "<p>threading o.O</p>",
+        "id": 197508190,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435363
+    },
+    {
+        "content": "<p>Launches the test suite against multiple files in parallel</p>",
+        "id": 197508201,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435395
+    },
+    {
+        "content": "<p>what complexity are you referring to?</p>",
+        "id": 197508249,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435433
+    },
+    {
+        "content": "<p>I see no threading in repocheck.cpp</p>",
+        "id": 197508254,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435451
+    },
+    {
+        "content": "<p>look around 748 (you may need to svn update if you haven't in the last few hours)</p>",
+        "id": 197508269,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435507
+    },
+    {
+        "content": "<p>alright, I gotta call it a night</p>",
+        "id": 197508537,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435850
+    },
+    {
+        "content": "<p>ah, I see what you mean now</p>",
+        "id": 197508539,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435852
+    },
+    {
+        "content": "<p>yeah, I think it should be single threaded..</p>",
+        "id": 197508589,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435910
+    },
+    {
+        "content": "<p>It did make a difference, at least in earlier testing - maybe less so now.</p>",
+        "id": 197508603,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589435960
+    },
+    {
+        "content": "<p>this is already turning 1-line shell script commands into 100 line C++ logic, which has it's obvious benefits, but I don't think it's healthy to add to that complexity unnecessarily.  it won't be as maintainable.</p>",
+        "id": 197508604,
+        "sender_full_name": "Sean",
+        "timestamp": 1589435969
+    },
+    {
+        "content": "<p><a href=\"http://repository.sh\">repository.sh</a> is 382 lines,  repocheck.cpp is (currently) 885 - more like 3x overall...</p>",
+        "id": 197508671,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436074
+    },
+    {
+        "content": "<p><a href=\"http://repository.sh\">repository.sh</a> has an unrealistic amount of error checking for typical scripting</p>",
+        "id": 197508688,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436113
+    },
+    {
+        "content": "<p>but fair enough since even the error checking and logging is transcodd</p>",
+        "id": 197508730,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436179
+    },
+    {
+        "content": "<p>the script could be distilled down to something like 10 lines, though, one grep for each test</p>",
+        "id": 197508754,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436228
+    },
+    {
+        "content": "<p>&lt;snort&gt; if we don't factor in readability of the lines, sure you can win that way ;-)</p>",
+        "id": 197508808,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436264
+    },
+    {
+        "content": "<p>it's not a competition</p>",
+        "id": 197508824,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436292
+    },
+    {
+        "content": "<p>Well, maybe in the sense of competing solutions - the C++ code has to be good enough to warrant replacement of an existing, working solution</p>",
+        "id": 197508863,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436337
+    },
+    {
+        "content": "<p>Without, as you say, insane maintenance burdens being taken on as a result.</p>",
+        "id": 197508919,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436384
+    },
+    {
+        "content": "<p>readability of both is dominated by reader experience.  assuming an experienced programmer, the difference here is going to predominantly be lines of code and potential for error, long-term maintainability</p>",
+        "id": 197508932,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436416
+    },
+    {
+        "content": "<p>cyclomatic complexity of c++ is nowhere near that of any higher level language including shell script.  it's way higher.</p>",
+        "id": 197509006,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436480
+    },
+    {
+        "content": "<p>When I'm doing the coding you can add a 2x multiplier for error potential to shell scripting just due to spaces and special characters in path names.</p>",
+        "id": 197509050,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436489
+    },
+    {
+        "content": "<p>it's a win in the other benefits, portability and performance foremost</p>",
+        "id": 197509061,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436502
+    },
+    {
+        "content": "<p>Anyway, I'll crank it back to the single threaded version tomorrow and see if mapped files do anything helpful for performance.</p>",
+        "id": 197509156,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436624
+    },
+    {
+        "content": "<p>any single developer's experience or preference, mine and yours included, shouldn't be the dominant calculus in my opinion.  that leads to things like sticking with tcl/tk.</p>",
+        "id": 197509158,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436627
+    },
+    {
+        "content": "<p>heh.  In fairness, Tcl/Tk was the rational choice in 1990.  They just decided they liked it in 1990  and stayed put too long.</p>",
+        "id": 197509193,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436688
+    },
+    {
+        "content": "<p>alright, uncle.  need sleep</p>",
+        "id": 197509268,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589436749
+    },
+    {
+        "content": "<p>certainly, and shell scripts can still be written in significant fraction of the time as c++, they have their place</p>",
+        "id": 197509272,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436755
+    },
+    {
+        "content": "<p>cya</p>",
+        "id": 197509377,
+        "sender_full_name": "Sean",
+        "timestamp": 1589436887
+    },
+    {
+        "content": "<p>fyi, jenkins is barking a failure: make[3]: don't know how to make embedded_licenses.txt. Stop</p>",
+        "id": 197509554,
+        "sender_full_name": "Sean",
+        "timestamp": 1589437084
+    },
+    {
+        "content": "<p>just saw c75789 .. that's technically wrong too.  the correct form of a URI reference for a relative reference is simply the relative path (i.e., no file: prefix).  see <a href=\"https://en.wikipedia.org/wiki/Uniform_Resource_Identifier\">https://en.wikipedia.org/wiki/Uniform_Resource_Identifier</a></p>",
+        "id": 197510292,
+        "sender_full_name": "Sean",
+        "timestamp": 1589437911
+    },
+    {
+        "content": "<p>Was considering the \"root\" of the reference system to be the root of the BRL-CAD src tree (not the filesystem) so in that sense they're absolute.  However, if you prefer something like the reuse.software format we can do that - I just want to pick one answer, set it up, and not worry about it anymore.</p>",
+        "id": 197542769,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589457931
+    },
+    {
+        "content": "<p>stale build tree caught me - missed a variable.  r75796 should do it.</p>",
+        "id": 197543612,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589458354
+    },
+    {
+        "content": "<p>Well, that gets to &lt; 2s on Linux, but still ~15 on FreeBSD.</p>",
+        "id": 197564349,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589467093
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> is there any equivalent to perf on FreeBSD?</p>",
+        "id": 197565180,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589467454
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regress-repository/near/197542769\">said</a>:</p>\n<blockquote>\n<p>Was considering the \"root\" of the reference system to be the root of the BRL-CAD src tree (not the filesystem) so in that sense they're absolute.  However, if you prefer something like the reuse.software format we can do that - I just want to pick one answer, set it up, and not worry about it anymore.</p>\n</blockquote>\n<p>I know what you were considering; it was clear.  Just letting you know that it's technically wrong per the URI spec if that was the reason for using them.  There's little reason to prefer file:/path/to/file over file:path/to/file and vice versa.  The actual correct form is simply path/to/file or ./path/to/file as a URI reference, which is combined with a root path to create a valid URL, like file:/usr/home/brlcad/path/to/file or file:<code>pwd</code>/$filepath or file:${PWD}/${filepath} etc.</p>",
+        "id": 197573778,
+        "sender_full_name": "Sean",
+        "timestamp": 1589470712
+    },
+    {
+        "content": "<p>Note of the two relative forms, lots of software does support the latter (file:rel/path/to/file) despite being invalid (e.g., I believe some terminals will handle it)</p>",
+        "id": 197573880,
+        "sender_full_name": "Sean",
+        "timestamp": 1589470769
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regress-repository/near/197565180\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> is there any equivalent to perf on FreeBSD?</p>\n</blockquote>\n<p>yes, it's called the pmc interface on freebsd.  I think the main comparable tool is hwpmc but I have not tried it</p>",
+        "id": 197574149,
+        "sender_full_name": "Sean",
+        "timestamp": 1589470879
+    },
+    {
+        "content": "<p><a href=\"https://people.freebsd.org/~jkoshy/projects/perf-measurement/\">https://people.freebsd.org/~jkoshy/projects/perf-measurement/</a></p>",
+        "id": 197574198,
+        "sender_full_name": "Sean",
+        "timestamp": 1589470899
+    },
+    {
+        "content": "<p>looks like latest docs are <a href=\"https://wiki.freebsd.org/PmcTools\">https://wiki.freebsd.org/PmcTools</a></p>",
+        "id": 197574319,
+        "sender_full_name": "Sean",
+        "timestamp": 1589470930
+    },
+    {
+        "content": "<p>Looks like pcmstat is the user facing side, but I can't get it to kick off...</p>",
+        "id": 197576158,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589471690
+    },
+    {
+        "content": "<p>pmcstat: ERROR: Initialization of the pmc(3) library failed: No such file or directory</p>",
+        "id": 197576300,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589471750
+    },
+    {
+        "content": "<p>Not sure if that's my fault or if there's something missing on the system...</p>",
+        "id": 197576379,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589471766
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> just looking at 75799, you're not likely going to see a performance improvement with that approach.  you're making three copies of every file.  without copy on right, that could even be slower than what you had before.</p>",
+        "id": 197576452,
+        "sender_full_name": "Sean",
+        "timestamp": 1589471795
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I didn't see a way with mapped file to go line-by-line - it's just a big char buffer.  That won't work for this...</p>",
+        "id": 197576676,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589471888
+    },
+    {
+        "content": "<p>the benefit of mapped files is when you use the mmap-&gt;buf directly.  you do that to completely avoid user memory allocation, and it avoids unnecessary disk seeking.</p>",
+        "id": 197576693,
+        "sender_full_name": "Sean",
+        "timestamp": 1589471895
+    },
+    {
+        "content": "<p>sure it can</p>",
+        "id": 197576764,
+        "sender_full_name": "Sean",
+        "timestamp": 1589471924
+    },
+    {
+        "content": "<p>Short of manually storing offsets along the buffer...</p>",
+        "id": 197576962,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472012
+    },
+    {
+        "content": "<p>especially with regexes, it's geared for that use case.</p>",
+        "id": 197576968,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472014
+    },
+    {
+        "content": "<p>not following?  why would you store offsets?</p>",
+        "id": 197577049,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472052
+    },
+    {
+        "content": "<p>(we're in the wrong topic - one sec)</p>",
+        "id": 197577085,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472068
+    },
+    {
+        "content": "<p>For reporting I need line numbers, which means I'm processing per-line, not per file string</p>",
+        "id": 197577162,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472109
+    },
+    {
+        "content": "<p>there fixed</p>",
+        "id": 197577169,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472111
+    },
+    {
+        "content": "<p>file stream rather</p>",
+        "id": 197577181,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472119
+    },
+    {
+        "content": "<p>it seems to be literally the bytes in a buffer, which isn't enough structure by itself</p>",
+        "id": 197577381,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472186
+    },
+    {
+        "content": "<p>just because you need line numbers doesn't mean you have to process per-line</p>",
+        "id": 197577383,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472187
+    },
+    {
+        "content": "<p>?</p>",
+        "id": 197577422,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472203
+    },
+    {
+        "content": "<p>not following</p>",
+        "id": 197577441,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472211
+    },
+    {
+        "content": "<p>C/C++ literally has no concept of lines, it's a construct by convention.  a line only exists because we say it exists as denoted by special character values.</p>",
+        "id": 197577663,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472295
+    },
+    {
+        "content": "<p>there is std api that implements that convention, but it's not rote and not the only way</p>",
+        "id": 197577724,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472318
+    },
+    {
+        "content": "<p>the performance gain is had from just keeping track where things are in the -&gt;buf</p>",
+        "id": 197578007,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472420
+    },
+    {
+        "content": "<p>you can certainly find a match with a regex regardless of newlines or with newlines being taken into account</p>",
+        "id": 197578040,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472440
+    },
+    {
+        "content": "<p>for example</p>",
+        "id": 197578052,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472445
+    },
+    {
+        "content": "<p>to find a line number, you just count newlines backwards from a match point (of course, probably would make sense to wrap that 2-liner into a whatsthislinenumber(off_t position) function)</p>",
+        "id": 197578347,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472549
+    },
+    {
+        "content": "<p>but that happens entirely in memory, without a memory copy, so it's instantaneous compared to the alternatives</p>",
+        "id": 197578524,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472606
+    },
+    {
+        "content": "<p>there's probably a c++ helper, but the C was would be to iteratively call strchr() from a match point</p>",
+        "id": 197578662,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472666
+    },
+    {
+        "content": "<p>or literally for (i=pos; i&gt;0; i--) if (buf[i] == newline) linenumber++;</p>",
+        "id": 197578998,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472807
+    },
+    {
+        "content": "<p>just with strchr, you might get lucky and get a vectorized implementation</p>",
+        "id": 197579061,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472837
+    },
+    {
+        "content": "<p>groan... that's a lot of really finicky overhaul for a few seconds, assuming I can get it to work - that would involve ripping out virtually all the std::string usage.</p>",
+        "id": 197579180,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589472866
+    },
+    {
+        "content": "<p><em>shrug</em> would be a REALLY good real usecase to learn about performance, but certainly up to you</p>",
+        "id": 197579379,
+        "sender_full_name": "Sean",
+        "timestamp": 1589472950
+    },
+    {
+        "content": "<p>this is applicable everywhere in the code, and particularly relevant given how much you like to use std::string and the stl containers.</p>",
+        "id": 197579597,
+        "sender_full_name": "Sean",
+        "timestamp": 1589473036
+    },
+    {
+        "content": "<p>also it doesn't get any simpler than this.<br>\nbut you're also right that it's certainly not necessary for this unit test, just rare to have learning opportunities isolated like this.</p>",
+        "id": 197580136,
+        "sender_full_name": "Sean",
+        "timestamp": 1589473238
+    },
+    {
+        "content": "<p>for what it's worth:</p>\n<div class=\"codehilite\"><pre><span></span><code>std::string fbuff((char *)ifile-&gt;buf);  // A) this potentially reads entire file from disk, mallocs memory, and copies the entire memory span\nstd::istringstream fs(fbuff); // B) this potentially mallocs more memory and copies memory, albeit typically in blocksizes but could result in a full allocation duplicate of fbuff\n...\nwhile (std::getline(fs, sline) ... // C) this necessary causes an allocation, albeit typically only one blocksize worth\n</code></pre></div>",
+        "id": 197581573,
+        "sender_full_name": "Sean",
+        "timestamp": 1589473819
+    },
+    {
+        "content": "<p>&lt;nod&gt;  - there's also some risk that the regex_match calls may malloc under the hood if I feed them const char * inputs - not sure about that</p>",
+        "id": 197581746,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589473904
+    },
+    {
+        "content": "<p>gcc and llvm have optimizations that try to defer the allocations in A and B, but they're not guaranteed or portably reliable</p>",
+        "id": 197581749,
+        "sender_full_name": "Sean",
+        "timestamp": 1589473905
+    },
+    {
+        "content": "<p>could be wrong, but I don't think so</p>",
+        "id": 197581986,
+        "sender_full_name": "Sean",
+        "timestamp": 1589474014
+    },
+    {
+        "content": "<p>regfree() releases things allocated by recompile</p>",
+        "id": 197582107,
+        "sender_full_name": "Sean",
+        "timestamp": 1589474067
+    },
+    {
+        "content": "<p>The C library probably doesn't - was thinking about the C++11 implementations.</p>",
+        "id": 197582159,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589474098
+    },
+    {
+        "content": "<p>I'd be surprised if they do too... that's old behavior, there's no need for it to allocate unless you do something like request the match in a new object</p>",
+        "id": 197582246,
+        "sender_full_name": "Sean",
+        "timestamp": 1589474142
+    },
+    {
+        "content": "<p>which you definitely don't need for this</p>",
+        "id": 197582279,
+        "sender_full_name": "Sean",
+        "timestamp": 1589474158
+    },
+    {
+        "content": "<p>I mean the implementation certainly could under the hood if they wanted, but that's true of the C version and nearly any API that doesn't explicitly say they don't make syscalls.</p>",
+        "id": 197582947,
+        "sender_full_name": "Sean",
+        "timestamp": 1589474435
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Is r75802 headed in the direction you were suggesting?</p>",
+        "id": 197597878,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589480899
+    },
+    {
+        "content": "<p>yeah, that's definitely in the right direction!  awesome.  fast study!</p>",
+        "id": 197598883,
+        "sender_full_name": "Sean",
+        "timestamp": 1589481314
+    },
+    {
+        "content": "<p>you could make pos_to_line_num a bit faster as you don't need to calculate offset.  can just check NULL result.</p>",
+        "id": 197599056,
+        "sender_full_name": "Sean",
+        "timestamp": 1589481382
+    },
+    {
+        "content": "<p>the fastest version of this probably involves a start-to-end positional parameters so you can accumulate instead of parsing all the way back to the start repeatedly.  still should be really fast, but O(n) vs O(n^2) in the worst case</p>",
+        "id": 197599215,
+        "sender_full_name": "Sean",
+        "timestamp": 1589481472
+    },
+    {
+        "content": "<p>you also might not gain much from the bio.h precheck, might even be slowing it down, but that's easy enough to test and observe.</p>",
+        "id": 197599366,
+        "sender_full_name": "Sean",
+        "timestamp": 1589481532
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> here's the weird part - compared to the prior commit, this version is slower on FreeBSD</p>",
+        "id": 197608213,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589485637
+    },
+    {
+        "content": "<p>the only additional work is the repeat backscanning, so pos_to_line_num() could be a bigger issue than I gave it.  not that surprising -- it's going to be more sensitive to cpu.  I can try a profile if you want me to dig deeper, or install them if they're not there if you want to give it a go.</p>",
+        "id": 197608761,
+        "sender_full_name": "Sean",
+        "timestamp": 1589485920
+    },
+    {
+        "content": "<p>I'll fiddle with it a bit first, if you think that's the likely source.  I don't trust FreeBSD's regex performance, but my code is the likelier issue.</p>",
+        "id": 197608967,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589486035
+    },
+    {
+        "content": "<p>Would it be worth making a libbu function in the bu/mapped_files.h API that wraps the \"correct\" position to line number translation, once that's done?  Would be a waste to have to re-invent it down the road if we're going to use mapped file more.</p>",
+        "id": 197609110,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589486089
+    },
+    {
+        "content": "<p>I'm not quite following what you're proposing about not calculating the offset.  Don't I have to know that to know when to stop accumulating line counts?</p>",
+        "id": 197609562,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589486317
+    },
+    {
+        "content": "<p>perf on linux puts most of the time in the bu_open_mapped_file command, but it's also much faster than FreeBSD so that's probably not a helpful indication.</p>",
+        "id": 197609751,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589486403
+    },
+    {
+        "content": "<p>don't think it belongs with mapped files, but could exist as some sort of helper function elsewhere, bu_str_ maybe.  I'd wait until there's a second use case.  More importantly, though -- the faster version of this is probably going to require a different function signature, different args.</p>",
+        "id": 197610977,
+        "sender_full_name": "Sean",
+        "timestamp": 1589486994
+    },
+    {
+        "content": "<p>hm, thinking about it some more, there's potential for a really big performance boost by only loading the top of the file.  that works for the header checks but I guess wouldn't be so great for some of the other checks.</p>",
+        "id": 197613356,
+        "sender_full_name": "Sean",
+        "timestamp": 1589488106
+    },
+    {
+        "content": "<p>I'm only checking the first 500 lines for some  of the checks...</p>",
+        "id": 197613782,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589488290
+    },
+    {
+        "content": "<p>Even with the C++ isms I'm sub-second on my ubuntu box, so I'm going to go ahead and wire it in - if nothing else we should be able to git rid of that 600 second timeout special case...</p>",
+        "id": 197613964,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589488385
+    },
+    {
+        "content": "<p>cool.</p>",
+        "id": 197614467,
+        "sender_full_name": "Sean",
+        "timestamp": 1589488644
+    },
+    {
+        "content": "<p>Hah - taught it to look for bu_setprogname in files with main()</p>",
+        "id": 197622889,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589493003
+    },
+    {
+        "content": "<p>Not totally debugged yet - it's not catching them all - but progress</p>",
+        "id": 197622992,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589493067
+    },
+    {
+        "content": "<p>Ah, right - int may be on a different line.  That's more like it - 303 that don't call it</p>",
+        "id": 197623248,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589493237
+    },
+    {
+        "content": "<p>&lt;rolls up sleeves&gt;</p>",
+        "id": 197623675,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589493486
+    },
+    {
+        "content": "<p>/me peels eyeballs off the monitor and heads for bed</p>",
+        "id": 197640756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589508476
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> it looks like you changed some of the repository regular expressions, was there a problem?</p>",
+        "id": 197708322,
+        "sender_full_name": "Sean",
+        "timestamp": 1589556342
+    },
+    {
+        "content": "<p>Not really - adjusted slightly what I was checking at which times, mostly</p>",
+        "id": 197708504,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556398
+    },
+    {
+        "content": "<p>Had to un-quote some stuff as well</p>",
+        "id": 197708547,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556414
+    },
+    {
+        "content": "<p>just noticing some of them will match differently now</p>",
+        "id": 197708758,
+        "sender_full_name": "Sean",
+        "timestamp": 1589556487
+    },
+    {
+        "content": "<p>which ones?</p>",
+        "id": 197708799,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556510
+    },
+    {
+        "content": "<p>not sure if it was intentional or fixing a mismatch<br>\nlooks like you fixed one of the ones changed in 75812</p>",
+        "id": 197708804,
+        "sender_full_name": "Sean",
+        "timestamp": 1589556512
+    },
+    {
+        "content": "<p>I think in one or two cases I simplified while testing, I may have forgotten to put back one or two of the more specific regex strings</p>",
+        "id": 197708913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556559
+    },
+    {
+        "content": "<p>I know that was one of those cases, there may be others I missed...</p>",
+        "id": 197708949,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556575
+    },
+    {
+        "content": "<p>matching space chars is rather different from matching [[:space:]] ... :)</p>",
+        "id": 197708976,
+        "sender_full_name": "Sean",
+        "timestamp": 1589556590
+    },
+    {
+        "content": "<p>that's not a simplification</p>",
+        "id": 197708999,
+        "sender_full_name": "Sean",
+        "timestamp": 1589556602
+    },
+    {
+        "content": "<p>Heh - I mean simplifying the regex expression while I was debugging setting them up in C++</p>",
+        "id": 197709070,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556626
+    },
+    {
+        "content": "<p>When translating the longer ones a single char misstep could wipe out badly - if I couldn't see what the problem was the first step was to take it back down to something I could readily parse by eye to make sure I hadn't made some more basic mistake.</p>",
+        "id": 197709215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556709
+    },
+    {
+        "content": "<p>I introduced each problem deliberately into my source tree to detect them, so there is some positive evidence they'll catch things</p>",
+        "id": 197709338,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556754
+    },
+    {
+        "content": "<p>(runs on Windows in &lt;10s, btw)</p>",
+        "id": 197709431,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589556803
+    },
+    {
+        "content": "<p>in doing so, I think some matching behavior has changed.  could be wrong, but the regular expressions for the function matches and platform checks look different.  some less aggressive, some more aggressive.</p>",
+        "id": 197710468,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557246
+    },
+    {
+        "content": "<p>great that it's running fast</p>",
+        "id": 197710494,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557261
+    },
+    {
+        "content": "<p>The one behavior I know has changed is that platform symbols are counted per-symbol, not per line - so some of the lines with WIN32 and CYGWIN on one line, for example, are now registering 2 counts instead of 1</p>",
+        "id": 197710627,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589557319
+    },
+    {
+        "content": "<p>you're also catching mixed case now, which it wasn't doing before (not saying that's good or bad, just different)</p>",
+        "id": 197710725,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557358
+    },
+    {
+        "content": "<p>you mean the platform symbols?  I thought that was still matching just all upper and all lower...</p>",
+        "id": 197710897,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589557433
+    },
+    {
+        "content": "<p>can I make a request on the function tests -- can you make it so the things to match are only on one line?</p>",
+        "id": 197710903,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557437
+    },
+    {
+        "content": "<p>maybe I misread</p>",
+        "id": 197711024,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557474
+    },
+    {
+        "content": "<p>/me checks</p>",
+        "id": 197711042,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557484
+    },
+    {
+        "content": "<p>Oh, you mean the the lists of specific functions and platforms? sure</p>",
+        "id": 197711068,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589557496
+    },
+    {
+        "content": "<p>list of platforms is fine, they're one per line</p>",
+        "id": 197711108,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557520
+    },
+    {
+        "content": "<p>functions are on two lines</p>",
+        "id": 197711130,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557529
+    },
+    {
+        "content": "<p>worried that one will get updated and not the other over time</p>",
+        "id": 197711182,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557549
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> where are you looking? not following...</p>",
+        "id": 197711342,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589557597
+    },
+    {
+        "content": "<p>api_func_strs</p>",
+        "id": 197711381,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557618
+    },
+    {
+        "content": "<p>oh, wait I see what you're doing now</p>",
+        "id": 197711478,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557669
+    },
+    {
+        "content": "<p>Right - the static array.   Are you referring to the api_exemptions?</p>",
+        "id": 197711489,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589557675
+    },
+    {
+        "content": "<p>no, I thought strings were being combined, but I get it now</p>",
+        "id": 197711575,
+        "sender_full_name": "Sean",
+        "timestamp": 1589557697
+    }
+]

@@ -1,0 +1,764 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'm not able to reproduce r75847 on GhostBSD, OpenBSD or bz - are there specific conditions that trigger it?</p>",
+        "id": 198236659,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589998441
+    },
+    {
+        "content": "<p>no conditions, default build + make regress<br>\n.bz is stalling (see jenkins)</p>",
+        "id": 198243170,
+        "sender_full_name": "Sean",
+        "timestamp": 1590001537
+    },
+    {
+        "content": "<p>or did at least once.  i haven't been back to check it, been debugging it for a while.</p>",
+        "id": 198243257,
+        "sender_full_name": "Sean",
+        "timestamp": 1590001572
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> debugging is going slow though.  took a while just to get at the actual calls.</p>\n<p>the regression tests are a bit of a mess..  some using macros, some using functions, some using nothing, some logging, some not logging, all slightly different from the rest.  any relief planned?</p>\n<p>even noticed undefined global keywords like EXCLUDE_FROM_DEFAULT_BUILD and EXCLUDE_FROM _REGRESS that trigger special logic elsewhere (e.g., top-level cmakelists.txt file ).  that makes it super hard to figure out what's going on, frustrating because of the unnecessary spaghet.</p>",
+        "id": 198244226,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002070
+    },
+    {
+        "content": "<p>Yeah, most of those grew organically and weren't well designed for multi-config setups.</p>",
+        "id": 198244763,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002323
+    },
+    {
+        "content": "<p>is that because of the log files?</p>",
+        "id": 198244870,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002368
+    },
+    {
+        "content": "<p>how does multiconfig complicate it?</p>",
+        "id": 198244903,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002391
+    },
+    {
+        "content": "<p>Mostly has to do with the need to launch built executable programs from configuration dependent output directories.  I need to look into whether generator expressions in newer CMake can help clean that up, but it was a real pain originally</p>",
+        "id": 198245063,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002460
+    },
+    {
+        "content": "<p>$&lt;TARGET_FILE: doesn't take care of that?</p>",
+        "id": 198245150,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002517
+    },
+    {
+        "content": "<p>It may now - that wasn't an option when most of them were written.  regress-repository and regress-license experiment with using those expressions - so far successfully</p>",
+        "id": 198245236,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002553
+    },
+    {
+        "content": "<p>ah okay</p>",
+        "id": 198245255,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002566
+    },
+    {
+        "content": "<p>Log and stamp files are another issue though - if you switch configs in MSVC, you need everything to look for configuration dependent stamp files to know to re-run tests.</p>",
+        "id": 198245300,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002598
+    },
+    {
+        "content": "<p>Those aren't an issue with repo and license - those just run every time the target is called.  Maybe that's what all the regress targets should do - would simplify that a fair bit</p>",
+        "id": 198245357,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002639
+    },
+    {
+        "content": "<p>Also depends on how much you want logged to text files - Running things from execute_process in CMake allows capture of stdout and stderror to per-test log files.</p>",
+        "id": 198245516,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002723
+    },
+    {
+        "content": "<p>just for some context, here's the hot tests on mac laptop (ssd):</p>",
+        "id": 198245531,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002733
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>30/37 Test #33: regress-nurbs-nirt-NIST03_MISS_01 .........   Passed   37.87 sec\n31/37 Test  #3: regress-solids ............................   Passed    8.65 sec\n32/37 Test #48: regress-repository ........................   Passed   47.49 sec\n33/37 Test #46: regress-gchecker ..........................   Passed   21.88 sec\n34/37 Test  #6: regress-rtedge ............................   Passed   60.01 sec\n35/37 Test #47: regress-licenses ..........................   Passed   26.60 sec\n36/37 Test #14: regress-red ...............................   Passed   68.78 sec\n37/37 Test #36: regress-pkg ...............................***Failed  1009.37 sec\n</code></pre></div>",
+        "id": 198245567,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002755
+    },
+    {
+        "content": "<p>(looks like latest jenkins tests either succeeded or are failing on usual rtedge issue unless I'm looking at the wrong thing...)</p>",
+        "id": 198245657,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002796
+    },
+    {
+        "content": "<p>pkg only aborted after I ended up killing the server process manually.</p>",
+        "id": 198245667,
+        "sender_full_name": "Sean",
+        "timestamp": 1590002809
+    },
+    {
+        "content": "<p>O.o</p>",
+        "id": 198245676,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002818
+    },
+    {
+        "content": "<p>OK... if you run stand-alone what happens?</p>\n<p>./bin/regress_pkg ./bin/regress_pkg_server ./bin/regress_pkg_client</p>",
+        "id": 198245774,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002873
+    },
+    {
+        "content": "<p>I thought I set regress-pkg to not be part of the make check/make regress targets - let me see if I goofed that up somehow</p>",
+        "id": 198245882,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002923
+    },
+    {
+        "content": "<p>Huh.  r75832 should have taken it out of both regress and check - only make test or a specific run of the regress-pkg target should trigger it.</p>",
+        "id": 198246031,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590002998
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> will the jenkins instance run multiple builds in parallel (i.e. if commits some in one after the other?)</p>",
+        "id": 198246215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590003074
+    },
+    {
+        "content": "<p>that could definitely hang it, if multiple pkg test programs start mixing it up</p>",
+        "id": 198246377,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590003146
+    },
+    {
+        "content": "<p>it's configured to test commits one at a time</p>",
+        "id": 198246394,
+        "sender_full_name": "Sean",
+        "timestamp": 1590003161
+    },
+    {
+        "content": "<p>the stall feels like a race condition and that's what the log seems to confirm to some extent, like the client runs before the server, exits, and then the server runs and waits forever, just due to how the threads got scheduled.</p>",
+        "id": 198246658,
+        "sender_full_name": "Sean",
+        "timestamp": 1590003294
+    },
+    {
+        "content": "<p>this probably needs to be accommodated in the client code.  I noticed it exits immediately, which is not the behavior needed here.</p>",
+        "id": 198246734,
+        "sender_full_name": "Sean",
+        "timestamp": 1590003335
+    },
+    {
+        "content": "<p>client should probably try a few times and for a few seconds before giving up</p>",
+        "id": 198246851,
+        "sender_full_name": "Sean",
+        "timestamp": 1590003377
+    },
+    {
+        "content": "<p>So you're thinking around line 94 to loop for a little while if the initial connection attempt fails?</p>",
+        "id": 198247065,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590003488
+    },
+    {
+        "content": "<p>Probably could also have the sever time out after a second or so - this test should be virtually instantaneous if it's running correctly</p>",
+        "id": 198247152,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590003540
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> you want me to go ahead and add some timing logic to see if I can force it to behave a little better if something goes wrong?</p>",
+        "id": 198247400,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590003669
+    },
+    {
+        "content": "<p>r75850 should help some.  I'm not seeing a non-blocking option to pkg_process in pkg.h offhand...</p>",
+        "id": 198250396,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590005202
+    },
+    {
+        "content": "<p>a second is likely not enough, that depends on the kernel.  starting a process can commonly take 0-5 depending on operating system, level of concurrency, and other factors</p>",
+        "id": 198251227,
+        "sender_full_name": "Sean",
+        "timestamp": 1590005601
+    },
+    {
+        "content": "<p>but yeah, that looks like the right direction</p>",
+        "id": 198251247,
+        "sender_full_name": "Sean",
+        "timestamp": 1590005618
+    },
+    {
+        "content": "<p>should document those magic numbers (which is what the BU_SEC2USEC macro does in effect, or a comment)</p>",
+        "id": 198251346,
+        "sender_full_name": "Sean",
+        "timestamp": 1590005658
+    },
+    {
+        "content": "<p>not sure about making the server non-blocking on getting clients, that doesn't seem right</p>",
+        "id": 198251385,
+        "sender_full_name": "Sean",
+        "timestamp": 1590005686
+    },
+    {
+        "content": "<p>that's just going to make it spin hot and/or fall right into the error condition</p>",
+        "id": 198251443,
+        "sender_full_name": "Sean",
+        "timestamp": 1590005723
+    },
+    {
+        "content": "<p>The snooze was intended to keep it from spinning hot - will that not work?</p>",
+        "id": 198251543,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590005770
+    },
+    {
+        "content": "<p>Only other option that came to mind was launching the connection wait from a thread, which seemed like a fair bit of complication for what's supposed to be something simple...</p>",
+        "id": 198251698,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590005842
+    },
+    {
+        "content": "<p>no, you're right -- the sleep alleviates it running hot, but it does fall right into the condition</p>\n<p>note, that it doesn't mean it's busy.  null return just means there's no client to get.</p>",
+        "id": 198254604,
+        "sender_full_name": "Sean",
+        "timestamp": 1590007320
+    },
+    {
+        "content": "<p>this is informative, the server is now running and timing out before the client even starts</p>",
+        "id": 198254684,
+        "sender_full_name": "Sean",
+        "timestamp": 1590007354
+    },
+    {
+        "content": "<p>With a 10 second wait time? O.o</p>",
+        "id": 198255040,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590007552
+    },
+    {
+        "content": "<p>Is the machine thread starved somehow?</p>",
+        "id": 198255123,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590007580
+    },
+    {
+        "content": "<p>nope</p>",
+        "id": 198255273,
+        "sender_full_name": "Sean",
+        "timestamp": 1590007670
+    },
+    {
+        "content": "<p>Or is the port just blocked outright?  Not sure how that would manifest...</p>",
+        "id": 198255329,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590007688
+    },
+    {
+        "content": "<p>nope</p>",
+        "id": 198255351,
+        "sender_full_name": "Sean",
+        "timestamp": 1590007708
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>34/37 Test #36: regress-pkg ...............................***Failed    2.10 sec\nLaunching server\nSERVER thread starting\nListening on port 2000\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nConnection seems to be busy, waiting...\nLaunching client\nCLIENT thread starting\nConnection inactive for &gt; 1 second, quitting.\n\nTimeout - inactive\nSERVER thread ending\nConnecting to 127.0.0.1, port 2000\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\n</code></pre></div>",
+        "id": 198255364,
+        "sender_full_name": "Sean",
+        "timestamp": 1590007721
+    },
+    {
+        "content": "<p>So... the 1 second wait isn't long enough?  It looks like CLIENT thread is starting just before the server bails?</p>",
+        "id": 198255585,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590007846
+    },
+    {
+        "content": "<p>running some tests</p>",
+        "id": 198255788,
+        "sender_full_name": "Sean",
+        "timestamp": 1590007953
+    },
+    {
+        "content": "<p>curiouser and curiouser</p>\n<div class=\"codehilite\"><pre><span></span><code>Launching server\nSERVER thread starting\nListening on port 2000\nNo client input available, waiting...\nNo client input available, waiting...\nLaunching client\nCLIENT thread starting\nNo client input available, waiting...\nNo client input available, waiting...\nWaiting for client to exit\nNo client input available, waiting...\nNo client input available, waiting...\nNo client input available, waiting...\nNo client input available, waiting...\nNo client input available, waiting...\nNo client input available, waiting...\nConnection inactive for &gt; 5 seconds, quitting.\n\nTimeout - inactive\nSERVER thread ending\nConnecting to 127.0.0.1, port 2000\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\npkg_open: client connect: errno=61\nConnection to 127.0.0.1, port 2000, failed.\n</code></pre></div>",
+        "id": 198257622,
+        "sender_full_name": "Sean",
+        "timestamp": 1590008985
+    },
+    {
+        "content": "<p>Is that BSD?  or OSX?</p>",
+        "id": 198257832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009043
+    },
+    {
+        "content": "<p>so the client thread starts, but the client process does not until the second process completes.  I wonder, this could be a security or system implementation issue that prevents simultaneous std::system() calls from multiple threads</p>",
+        "id": 198257850,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009060
+    },
+    {
+        "content": "<p>this is OSX</p>",
+        "id": 198257866,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009069
+    },
+    {
+        "content": "<p>Um.  Unfortunately, to the best of my knowledge CTest doesn't provide a way to define a test that launches multiple executables.  (The controlling regress_pkg program was an attempt to get cute and work around that.)</p>",
+        "id": 198258089,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009198
+    },
+    {
+        "content": "<p>why make it multiprocess?</p>",
+        "id": 198258187,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009249
+    },
+    {
+        "content": "<p>To verify that information moved successfully between two different programs</p>",
+        "id": 198258215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009271
+    },
+    {
+        "content": "<p>instead of std::system, just call their (renamed) main functions accordingly</p>",
+        "id": 198258218,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009273
+    },
+    {
+        "content": "<p>That'll probably do for exercising libpkg.  That wasn't why I originally put that example together, so I was probably to focused on the multiple programs sharing information aspect - I'll try the renamed mains and see if communication-across-threads works.</p>",
+        "id": 198258388,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009390
+    },
+    {
+        "content": "<p>add_test can't take multiple COMMAND lines?</p>",
+        "id": 198258413,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009412
+    },
+    {
+        "content": "<p>or custom_target</p>",
+        "id": 198258447,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009441
+    },
+    {
+        "content": "<p>Docs for add_test don't look like it takes multiple COMMANDs - even if it did, if it's like the other add_ functions it would execute in series.</p>",
+        "id": 198258485,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009474
+    },
+    {
+        "content": "<p>I thought we had examples calling multiple commands, things that replaced shell scripts</p>",
+        "id": 198258506,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009480
+    },
+    {
+        "content": "<p>in series is fine -- server is run (stays running), client is run (exits), server is shut down</p>",
+        "id": 198258592,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009517
+    },
+    {
+        "content": "<p>I don't think it will launch the client until the server completes - e.g. std::system()</p>",
+        "id": 198258631,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009550
+    },
+    {
+        "content": "<p>it wouldn't be using std::system, pkg_regress would go away</p>",
+        "id": 198258662,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009577
+    },
+    {
+        "content": "<p>if cmake can run multiple commands in series or otherwise, it's doable as multiprocess</p>",
+        "id": 198258678,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009594
+    },
+    {
+        "content": "<p>Er, sorry - wasn't clear.  As far as I know, CMake script execution can't do async process launching - it runs one program to exit, then launches the next</p>",
+        "id": 198258742,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009623
+    },
+    {
+        "content": "<p>that'd work</p>",
+        "id": 198258766,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009639
+    },
+    {
+        "content": "<p>Not following - it would wait for the server to finish, then launch the client - would do just what OSX is doing now.</p>",
+        "id": 198258834,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009665
+    },
+    {
+        "content": "<p>you run the server, it detaches and keeps running, the process exits (server remains running)</p>",
+        "id": 198258838,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009670
+    },
+    {
+        "content": "<p>It doesn't detach (as far as I know)</p>",
+        "id": 198258854,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009683
+    },
+    {
+        "content": "<p>well not now, we're talking about what it could be made to do in a serial cmake context</p>",
+        "id": 198258884,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009710
+    },
+    {
+        "content": "<p>it could be made to detach</p>",
+        "id": 198258956,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009745
+    },
+    {
+        "content": "<p>I don't think CMake detaches either - looking for docs now, but I think a script doesn't proceed until program return.</p>",
+        "id": 198258961,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009749
+    },
+    {
+        "content": "<p>still, no it wouldn't you'd have to write the code to make it detach</p>",
+        "id": 198258981,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009765
+    },
+    {
+        "content": "<p>I mean, I think multithreaded tests is adequate myself</p>",
+        "id": 198258991,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009776
+    },
+    {
+        "content": "<p>but sounds doable</p>",
+        "id": 198258999,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009779
+    },
+    {
+        "content": "<p>we have multiprocess libpkg testing, several regress scripts render via pkg</p>",
+        "id": 198259069,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009832
+    },
+    {
+        "content": "<p>we don't have pkg unit testing, that would be interesting <br>\n(and maybe tricky to get right)</p>",
+        "id": 198259148,
+        "sender_full_name": "Sean",
+        "timestamp": 1590009879
+    },
+    {
+        "content": "<p>I'll try the multithreading - at this point I'm regretting stepping on the land mine, so if that's the shortest way out of the patch I'm all for it ;-)</p>",
+        "id": 198259215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590009928
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/GKRbGbAKo5Yr7NQhY2S-wDs4/test2.cpp\">test2.cpp</a> <a href=\"/user_uploads/1549/80Ric5GfE235clRvXbhSJJaL/test2.sh\">test2.sh</a></p>",
+        "id": 198260453,
+        "sender_full_name": "Sean",
+        "timestamp": 1590010700
+    },
+    {
+        "content": "<p>looks like that's definitely what's going on</p>",
+        "id": 198260466,
+        "sender_full_name": "Sean",
+        "timestamp": 1590010710
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>agua:.build morrison$ clang++ test2.cpp\nagua:.build morrison$ ./a.out\nrunning ONE\nrunning ONE\nrunning ONE\nrunning ONE\nrunning ONE\nrunning ONE\nrunning TWO\nrunning TWO\nrunning TWO\nrunning TWO\nrunning TWO\nrunning TWO\n</code></pre></div>",
+        "id": 198260488,
+        "sender_full_name": "Sean",
+        "timestamp": 1590010729
+    },
+    {
+        "content": "<p>I wonder...</p>",
+        "id": 198260530,
+        "sender_full_name": "Sean",
+        "timestamp": 1590010752
+    },
+    {
+        "content": "<p>I just got a multithreaded test working (I think) - I'll pull in your updates and commit so you can give it a whirl</p>",
+        "id": 198260586,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590010791
+    },
+    {
+        "content": "<p>I found an alternative that should work for multiprocess too</p>",
+        "id": 198261116,
+        "sender_full_name": "Sean",
+        "timestamp": 1590011146
+    },
+    {
+        "content": "<p>if it doesn't pan out, but testing indicates it will</p>",
+        "id": 198261130,
+        "sender_full_name": "Sean",
+        "timestamp": 1590011158
+    },
+    {
+        "content": "<p>OK, I'll hold off</p>",
+        "id": 198261249,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590011230
+    },
+    {
+        "content": "<p>I think you should do the threaded approach.  it's still simpler and avoids std::system (which will show up on a security audit anyways as a high-vulnerability code issue).</p>",
+        "id": 198262526,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012039
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  btw, add_executable in CMake won't install out of the box - you need an install() as well.  The BRLCAD_ADDEXEC call does all that automatically, so that's why it has the NO_INSTALL flag.  What you did works fine, just thought I'd mention it for clarity</p>",
+        "id": 198262553,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012057
+    },
+    {
+        "content": "<p>alrightie - committing.  Let me know what the Mac thinks.</p>",
+        "id": 198262619,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012087
+    },
+    {
+        "content": "<p>ah, gotcha.  it was more that I noticed they were oddities in my build/bin dir.</p>",
+        "id": 198262645,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012108
+    },
+    {
+        "content": "<p>I'll sometimes just us add_executable when I don't need to link in lots of stuff, worry about DLL defines, and all the other complex pieces - I shouldn't really, since I've also been bit on a few occasions when I was wrong about not needing it after trying on Windows...</p>",
+        "id": 198262794,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012202
+    },
+    {
+        "content": "<p>If the free OSes are going to implement something similar to that DLL import/export business, we should probably enable it even if we don't otherwise care just to more easily test the Windows behavior</p>",
+        "id": 198262934,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012291
+    },
+    {
+        "content": "<p>I think it's good practice not to just because it creates outliers that beg questions to whomever didn't write that logic</p>",
+        "id": 198263035,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012348
+    },
+    {
+        "content": "<p>I <em>really</em> need to get a CI setup somewhere using the new Ninja/CMake multiconfig build - up until that was added it was only Xcode and Visual Studio that could exercise that part of things.</p>",
+        "id": 198263095,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012365
+    },
+    {
+        "content": "<p>won't know why one is different from the rest</p>",
+        "id": 198263125,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012385
+    },
+    {
+        "content": "<p>true</p>",
+        "id": 198263135,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012390
+    },
+    {
+        "content": "<p>looks like there are only 6 instances currently</p>",
+        "id": 198263158,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012402
+    },
+    {
+        "content": "<p>we could also adopt the forced import/export behavior on linux/mac so it's the same everywhere</p>",
+        "id": 198263248,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012465
+    },
+    {
+        "content": "<p>it would eliminate the conditionals and make everyone fail like windows</p>",
+        "id": 198263329,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012497
+    },
+    {
+        "content": "<p>I've never actually seen that done on any platform other than Windows - how does it work?</p>",
+        "id": 198263369,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012522
+    },
+    {
+        "content": "<p>it's identical</p>",
+        "id": 198263393,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012539
+    },
+    {
+        "content": "<p>I think clang (or maybe gcc or both?? I forget) even adopted the same syntax</p>",
+        "id": 198263438,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012564
+    },
+    {
+        "content": "<p>__declspec(dllexport) and __declspec(dllimport) ?</p>",
+        "id": 198263454,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012569
+    },
+    {
+        "content": "<p>yep</p>",
+        "id": 198263462,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012574
+    },
+    {
+        "content": "<p>hrm.  Well, I guess if configure tested for support for it...</p>",
+        "id": 198263490,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012595
+    },
+    {
+        "content": "<p>there's another cflag that makes them required iirc</p>",
+        "id": 198263491,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012597
+    },
+    {
+        "content": "<p>Much as it irks me in some ways, we should probably mandate it - that's one of the major rolling pain points building on Windows.</p>",
+        "id": 198263606,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012647
+    },
+    {
+        "content": "<p>here it is: <a href=\"https://gcc.gnu.org/wiki/Visibility\">https://gcc.gnu.org/wiki/Visibility</a></p>",
+        "id": 198263636,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012663
+    },
+    {
+        "content": "<p>will have to do some performance testing as it does affect what is visible to the optimizer as well (could be better or worse, why it warrants testing)</p>",
+        "id": 198263758,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012716
+    },
+    {
+        "content": "<p>there it is -- just have to add -fvisibility=hidden</p>",
+        "id": 198263840,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012744
+    },
+    {
+        "content": "<p>then of course the appropriate dllimport/export decls we use on windows should be used</p>",
+        "id": 198263893,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012779
+    },
+    {
+        "content": "<p>/me thinks __attribute__ ((dllimport)) is stupid given they made it fully compatible with __declspec(dllimport)</p>",
+        "id": 198263949,
+        "sender_full_name": "Sean",
+        "timestamp": 1590012816
+    },
+    {
+        "content": "<p>agreed - if that works I see no reason to complicate things.</p>",
+        "id": 198264025,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012844
+    },
+    {
+        "content": "<p>Trying to remember where we made the DLL bits windows specific... first I'd better make sure I can test for -fvisibility=hidden.</p>",
+        "id": 198264085,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012878
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Did the threaded version of regress_pkg build on OSX?</p>",
+        "id": 198264212,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590012947
+    },
+    {
+        "content": "<p>be back in a bit</p>",
+        "id": 198264613,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590013200
+    },
+    {
+        "content": "<p>builds and passes now</p>",
+        "id": 198289442,
+        "sender_full_name": "Sean",
+        "timestamp": 1590040992
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   about the regression testing - I'll go through and convert everything I can to functions.</p>\n<p>I can probably remove the stamp file mechanism from the regression tests altogether - that's important for custom build steps, but is unnecessary for regression tests since we want them to run each time one of the targets is invoked.  I originally based the regression test code on the other custom runs for the build, and it migrated in with that IIRC.</p>\n<p>The EXCLUDE_FROM_DEFAULT_BUILD property is a standard CMake option that keeps a target from being run by \"Build Solution\" in Visual Studio.  I never run that target myself, so I'd be OK with skipping it:<br>\n<a href=\"https://cmake.org/cmake/help/latest/prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD.html\">https://cmake.org/cmake/help/latest/prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD.html</a></p>\n<p>EXCLUDE_FROM_REGRESS and the other implicit naming conventions are trickier.  It might be possible to define a better wrapper function which hides the details to assemble the check and regress targets, but I don't know if you'd like that any better than what's there...  I'll take a stab at it, but we'll have to see.</p>\n<p>For test logging, here are the options I know of:</p>\n<p>1)  current solution - launch test programs with execute_process inside a .cmake script which is run by cmake -P via add_test  in the parent build.  This captures I/O to log files, but does complicate execution.  In particular, the .cmake script has to know how to launch the executable specific to the current configuration, as well as writing out the log files in the appropriate directories.</p>\n<p>2)  Directly run the regression executable with add_test, no wrapping .cmake file.  This has the virtue of simplicity, but to the best of my knowledge this approach has no way to capture the I/O from the test executable to a file.  It is captured by ctest, which I believe does do some organization of its reported outputs, but as far as I can discover it has no sophisticated logging options so we give up per-test logging files.</p>",
+        "id": 198345120,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590079525
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> upon inspection  It looks like the regress-flawfinder target is successfully running, so the failure is flawfinder not liking something</p>",
+        "id": 198690947,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590429644
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> bioh branch has the rework of the regression testing system.  It should be at a point now where it's worth you taking a look and seeing if it addresses your concerns</p>",
+        "id": 198698011,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590436595
+    },
+    {
+        "content": "<p>The system is now the BRLCAD_REGRESSION_TEST function in misc/CMake/BRLCAD_Targets.cmake along with  the *.cmake.in files and CMakeLists.txt files in the regress directory and subdirectories.</p>",
+        "id": 198715023,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590459526
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regress-pkg/near/198690947\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> upon inspection  It looks like the regress-flawfinder target is successfully running, so the failure is flawfinder not liking something</p>\n</blockquote>\n<p>Oh cool.  I <em>thought</em> flawinder was left at a really low setting that always detected real code smells, but wasn't sure.</p>",
+        "id": 198850482,
+        "sender_full_name": "Sean",
+        "timestamp": 1590556806
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/regress-pkg/near/198698011\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> bioh branch has the rework of the regression testing system.  It should be at a point now where it's worth you taking a look and seeing if it addresses your concerns</p>\n</blockquote>\n<p>K, will take a look!</p>",
+        "id": 198851108,
+        "sender_full_name": "Sean",
+        "timestamp": 1590557890
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Unless something is clearly broken, I'd like to go ahead and merge the regress updates - even if that's not its final form, I think it's an improvement over what was there previously</p>",
+        "id": 199285322,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590890320
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> the branch looks good to me, all running well.  love the unified logging.   making it work with/without existing test definitions was a nice addition.</p>",
+        "id": 199296698,
+        "sender_full_name": "Sean",
+        "timestamp": 1590913386
+    }
+]

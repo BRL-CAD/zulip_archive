@@ -1,0 +1,464 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> Am I correct that if we were going to set up a \"make install\" rule for the meshdecimation code as a library, only the meshdecimation.h header would need to be installed?  (I.e. the rest are needed only at compile time?)</p>",
+        "id": 405378475,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701442100
+    },
+    {
+        "content": "<p>Hey. Yes, that's correct. Although I'm reusing many of these extra files in about everything I write, so you could either strip the symbols or handle reuse (box collapse algorithm will use them)</p>",
+        "id": 405416844,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701455216
+    },
+    {
+        "content": "<p>Oh by the way, something that might perhaps be of general interest: the included cchash.h<br>\nThe story is that I needed hash tables for billions of items, my hash functions were performing... poorly. So I wrote some very exhaustive statistical analysis, in order to find the \"best\" hash functions.<br>\nSurprising twist of the story: every hash function I could find failed my statistical analysis, including the built-in hash functions for many popular languages (for their dictionaries or whatever)</p>",
+        "id": 405417336,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701455429
+    },
+    {
+        "content": "<p>My initial thought was to create a \"mmesh\" library that could supply both algorithms - then we can just reuse the common files for building both.</p>\n<p>Oh - did you see my question about the mmthread.c file?</p>",
+        "id": 405417428,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701455477
+    },
+    {
+        "content": "<p>So... I wrote some genetic algorithm that would converge on functions that would maximize the statistical analysis score, while being the cheapest possible for CPUs to run. cchash.h is the result, to me they are the \"perfect\" hash functions. Maybe you want to reuse them somewhere</p>",
+        "id": 405417514,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701455520
+    },
+    {
+        "content": "<p>Sweet!</p>",
+        "id": 405417591,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701455539
+    },
+    {
+        "content": "<p>Yes, mmthread.c wasn't necessary, it's only using the static inline functions in mmthread.h</p>",
+        "id": 405417602,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701455542
+    },
+    {
+        "content": "<p>OK, I'll set up a BRL-CAD/mmesh github project and get the CMake and DLL import/export foo going.</p>",
+        "id": 405417696,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701455585
+    },
+    {
+        "content": "<p>All right, cool</p>",
+        "id": 405417779,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701455621
+    },
+    {
+        "content": "<p>Will be basic initially - compiler flags for optimization can come once the basic setup is in place.  Any recommendations for what might constitute good functionality/regression testing, beyond just tossing in a mesh and running the algorithm?</p>",
+        "id": 405417952,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701455697
+    },
+    {
+        "content": "<p>The best benchmark would be evaluating the change of \"shape\" for the object, comparing before and after. I have that somewhere but it's heavy. I would just toss a mesh ;)</p>",
+        "id": 405418192,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701455814
+    },
+    {
+        "content": "<p>Oh, and give cchash.h a try, it really made a nice difference for me in a bunch of projects. If I were in academia, it would be worth a paper or something, but I'm not</p>",
+        "id": 405419050,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701456201
+    },
+    {
+        "content": "<p>I've been using xxhash, but it sounds like your cchash would be a step up</p>",
+        "id": 405419168,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701456247
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/mmesh\">https://github.com/BRL-CAD/mmesh</a> is up</p>",
+        "id": 405420140,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701456677
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> Would you like to throw together a README for it?  I can rough in something basic, but if you're interested it seems more fitting for you to create it</p>",
+        "id": 405420290,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701456730
+    },
+    {
+        "content": "<p>Hrm. I guess that would be a good idea. I usually just document the .h</p>",
+        "id": 405420837,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701456966
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> are you able to see build results here?  <a href=\"https://github.com/BRL-CAD/mmesh/actions\">https://github.com/BRL-CAD/mmesh/actions</a></p>",
+        "id": 405422633,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701457566
+    },
+    {
+        "content": "<p>Looks like MSVC and Mac are unhappy out of the gate</p>",
+        "id": 405423230,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701457799
+    },
+    {
+        "content": "<p>I never cared much about either, but yes, it would be good to fix that. Can that emit compiler output error messages?</p>",
+        "id": 405423529,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701457905
+    },
+    {
+        "content": "<p>Yes - the logs are generated.  If you can't see them I can post them</p>",
+        "id": 405423630,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701457938
+    },
+    {
+        "content": "<p>First MSVC error in various files:<br>\nsrc\\meshdecimation.c(1431,3): error C2059: syntax error: '{' [D:\\a\\mmesh\\mmesh\\build\\src\\mmesh.vcxproj]<br>\nsrc\\mmhashinternal.h(52,28): error C2054: expected '(' to follow 'mmHashPage' [D:\\a\\mmesh\\mmesh\\build\\src\\mmesh.vcxproj]</p>",
+        "id": 405423835,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701458029
+    },
+    {
+        "content": "<p>OSX:<br>\nIn file included from /Users/runner/work/mmesh/mmesh/src/meshdecimation.c:298:<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:46:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>\nstatic inline CC_STRICT_MATH void mathShewchukInit( mathShewchukSum *sum )<br>\n              ^~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>\n  #define CC_STRICT_MATH __attribute__((__optimize__(\"no-associative-math\", \"no-unsafe-math-optimizations\", \"no-fast-math\")))<br>\n                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:53:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>\nstatic inline CC_STRICT_MATH void mathShewchukAdd( mathShewchukSum *sum, double x )<br>\n              ^~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>\n  #define CC_STRICT_MATH __attribute__((__optimize__(\"no-associative-math\", \"no-unsafe-math-optimizations\", \"no-fast-math\")))<br>\n                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:84:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>\nstatic inline CC_STRICT_MATH void mathShewchukMultiply( mathShewchukSum *sum, double x )<br>\n              ^~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>\n  #define CC_STRICT_MATH __attribute__((__optimize__(\"no-associative-math\", \"no-unsafe-math-optimizations\", \"no-fast-math\")))<br>\n                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:92:15: warning: unknown attribute '__optimize__' ignored [-Wunknown-attributes]<br>\nstatic inline CC_STRICT_MATH double mathShewchukTotal( mathShewchukSum *sum )<br>\n              ^~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/mathshewchuk.h:28:41: note: expanded from macro 'CC_STRICT_MATH'<br>\n  #define CC_STRICT_MATH __attribute__((__optimize__(\"no-associative-math\", \"no-unsafe-math-optimizations\", \"no-fast-math\")))<br>\n                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>\n/Users/runner/work/mmesh/mmesh/src/meshdecimation.c:4366:5: warning: array index 3 is past the end of the array (which contains 3 elements) [-Warray-bounds]<br>\n    vertex-&gt;point[3] = 0.0;<br>\n    ^             ~<br>\n/Users/runner/work/mmesh/mmesh/src/meshdecimation.c:805:3: note: array 'point' declared here<br>\n  mdf point[3];</p>",
+        "id": 405424205,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701458181
+    },
+    {
+        "content": "<p>Oh hrm, I guess __declspec(align(64)) needs to be placed somewhere else in the declaration. That's me trying to be portable to MSVC without ever touching the thing</p>",
+        "id": 405424316,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701458230
+    },
+    {
+        "content": "<p>/Users/runner/work/mmesh/mmesh/src/mm.c:3017:49: error: use of undeclared identifier 'MAP_LOCKED'<br>\n2023-12-01T19:04:32.8918770Z       mmapflags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED;</p>",
+        "id": 405424319,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701458233
+    },
+    {
+        "content": "<p>I thought clang supported GCC's __attribute__ syntax, but clearly not all of it. No MAP_LOCKED on OSX? Okay</p>",
+        "id": 405424451,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701458285
+    },
+    {
+        "content": "<p>mathshewchuk.h will be GCC only then. All other compilers will produce less accurate results</p>",
+        "id": 405424545,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701458334
+    },
+    {
+        "content": "<p>We might be able to ping some clang experts later and ask them how to do it there</p>",
+        "id": 405424722,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701458426
+    },
+    {
+        "content": "<p>So MSVC doesn't like this for some reason<br>\n#define MD_VectorCrossProduct(x,y,z) ({(x)[0]=((y)[1]<em>(z)[2])-((y)[2]</em>(z)[1]);(x)[1]=((y)[2]<em>(z)[0])-((y)[0]</em>(z)[2]);(x)[2]=((y)[0]<em>(z)[1])-((y)[1]</em>(z)[0]);})<br>\nI guess I'll convert everything to static inline. <em>sigh</em></p>",
+        "id": 405426151,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701459062
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span>  OSX built, MSVC is failing with:<br>\nD:\\a\\mmesh\\mmesh\\src\\meshdecimation.c(3324): error C2059: syntax error: '{'<br>\nD:\\a\\mmesh\\mmesh\\src\\meshdecimation.c(3324): error C2143: syntax error: missing ';' before ')'</p>",
+        "id": 405430982,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701461253
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> Yep, that got it!</p>",
+        "id": 405444920,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701468199
+    },
+    {
+        "content": "<p>Noticed a warning from MSVC:  src\\mmhash.c(2340) : warning C4700: uninitialized local variable 'accumscore' used</p>",
+        "id": 405445017,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701468235
+    },
+    {
+        "content": "<p>Hey, that's a real warning, will fix that. You can just initialize to zero on your end. Nothing important, it's just in a debugging function (asking a hash table how healthy it's feeling today)</p>",
+        "id": 405445241,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701468345
+    },
+    {
+        "content": "<p>Done.  Compile also succeed on FreeBSD.</p>",
+        "id": 405445471,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701468464
+    },
+    {
+        "content": "<p>(That health function can be used to check how well the hash function is working, it's the function that launched the long quest that ended up with cchash.h)</p>",
+        "id": 405445556,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701468495
+    },
+    {
+        "content": "<p>Cool, glad to hear it</p>",
+        "id": 405445569,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701468502
+    },
+    {
+        "content": "<p>Alpine Linux builds too.  OpenBSD and HaikuOS are the other traditionally iffy platforms, but I'll have to check those next week.</p>",
+        "id": 405445870,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701468690
+    },
+    {
+        "content": "<p>Also will be time to hook it up under facetize and see how it does &lt;grin&gt;  Looking forward to that.</p>",
+        "id": 405446026,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701468802
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> Looking at the code we are using in librt, there's also a \"moOptimizeMesh\" function that is run after the main decimation is complete.  Is that still something we would want for the modern decimation implementation?</p>",
+        "id": 405450389,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701471384
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> It's unrelated to mesh decimation.<br>\nMesh optimization is mostly optimizing the order of vertex indices to maximize the use of the GPU post-transform vertex caches. You can get a significant performance boost for rendering optimized meshes, when the GPU is a bit strained. Although note I have reused that same code in various non-GPU contexts, such as optimizing the vertex storage order in a graph for CPU pathfinding, boosting performance by 5% (better use of the CPU caches).</p>",
+        "id": 405455620,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701474552
+    },
+    {
+        "content": "<p>This is good code, I have had significant performance boosts by applying it on game-like models</p>",
+        "id": 405455777,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701474667
+    },
+    {
+        "content": "<p>Is there a version of moOptimizeMesh that we could include with the mmesh repo?  I can try to refactor the one we have in librt to work with the modern support files if need be, but I'm not sure how tricky that would be - it probably dates to the same era as the ball-pivot code</p>",
+        "id": 405489965,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701491068
+    },
+    {
+        "content": "<p>Sure, sending that</p>",
+        "id": 405489986,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701491105
+    },
+    {
+        "content": "<p>On the topic of mesh manipulation, I have other algorithms... There's one to convert an indexed mesh into an indexed triangle strip, but highly optimized to minimize the count of swaps/jumps (it beats the numbers I found in some paper). Too bad no one cares about triangle strips anymore (in modern GPUs with large post-transform vertex caches, heavy vertex data, and expensive shaders, cache optimized indexed meshes are better than indexed strips in most cases).</p>",
+        "id": 405492167,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701492174
+    },
+    {
+        "content": "<p>I'm touching that topic because I have a question that only old timers who have played with IRIS GL 30 years ago could answer. ;) That code can generate GL/VK strips, but also \"IRIS GL strips\" where swaps are encoded in the top bit (handy when you <em>really</em> want to minimize memory usage for a 3D mesh, not necessarily draw the stuff)</p>",
+        "id": 405492462,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701492256
+    },
+    {
+        "content": "<p>Hmm.  Our software fallback for OpenGL rendering is an old version of Mesa's swrast - I wonder if the CPU software rendering of that code would benefit from that sort of optimization.</p>",
+        "id": 405492483,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701492281
+    },
+    {
+        "content": "<p>My question is: was that actually how IRIS GL strips worked? I couldn't find the documentation, just some very indirect hints scattered over the place. I should change how it's called in the API if these are actually not IRIS GL strips</p>",
+        "id": 405492495,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701492293
+    },
+    {
+        "content": "<p>Mesh optimization for GPU post-transform vertex caches works best for gaming-like models, where you have heavy vertex data and complicated shaders. The gain will be small otherwise, but it's always something</p>",
+        "id": 405492556,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701492359
+    },
+    {
+        "content": "<p>Got a failure of the optimizer code on OSX:<br>\nUndefined symbols for architecture x86_64:<br>\n  \"_mtSleepBarrierDestroy\", referenced from:<br>\n      _moMeshOptimizationEnd in meshoptimizer.c.o<br>\n  \"_mtSleepBarrierInit\", referenced from:<br>\n      _moMeshOptimizationInit in meshoptimizer.c.o<br>\n  \"_mtSleepBarrierSync\", referenced from:<br>\n      _moMeshOptimizationThread in meshoptimizer.c.o</p>",
+        "id": 405493073,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701492588
+    },
+    {
+        "content": "<p>Oh. That's the mmthread.c I told you wasn't needed</p>",
+        "id": 405493213,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701492612
+    },
+    {
+        "content": "<p>heh :-)</p>",
+        "id": 405493271,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701492625
+    },
+    {
+        "content": "<p>MSVC is unhappy as well, but for a different reason:<br>\nD:\\a\\mmesh\\mmesh\\src\\meshoptimizer.c(513): error C2059: syntax error: '{'</p>",
+        "id": 405493392,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701492656
+    },
+    {
+        "content": "<p>Once again it's the #define FOO ({...}) thing, fixing.</p>",
+        "id": 405493557,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701492727
+    },
+    {
+        "content": "<p>As far as IRIS GL is concerned, I'm afraid I'm not enough of an old-timer to have played with it myself.  I don't know if anybody involved with the original implementation of our GL code would still be active online to ask.</p>",
+        "id": 405493898,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701492942
+    },
+    {
+        "content": "<p>Eh, I figured... It's not important, I just would like to get my terminology right, as a tiny homage to the SGI legacy</p>",
+        "id": 405493990,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493001
+    },
+    {
+        "content": "<p>(I'm actually using these \"IRIS GL\" strips internally, I have had to reduce memory usage for meshes with billions of triangles... I'm running out of RAM with 256gb)</p>",
+        "id": 405494115,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493127
+    },
+    {
+        "content": "<p>Looks like that got the compiler error on MSVC - now it's failing to link the same way OSX does.</p>",
+        "id": 405494224,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701493201
+    },
+    {
+        "content": "<p>Just bring back that mmthread.c, it's still in the first tarball I sent by email</p>",
+        "id": 405494374,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493225
+    },
+    {
+        "content": "<p>OK.  Should  I use the same license statement as in the other files?  (IIRC it was one of the ones that had the \"don't distribute\" statement.)</p>",
+        "id": 405494553,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701493260
+    },
+    {
+        "content": "<p>Yes. Sorry about that.</p>",
+        "id": 405494716,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493294
+    },
+    {
+        "content": "<p>I would love to keep one copy for all these files I'm reusing everywhere, with symbolic links, but every project needs a different header. It's a mess</p>",
+        "id": 405494792,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493323
+    },
+    {
+        "content": "<p>No worries - I just wanted to be sure, I'm twitchy about changing license statements myself without an explicit OK</p>",
+        "id": 405494829,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701493331
+    },
+    {
+        "content": "<p>OSX is now good.  Windows is cranky about mmthread.c:<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(575): error C2037: left of 'tv_sec' specifies undefined struct/union 'timeval'<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(576): error C2037: left of 'tv_usec' specifies undefined struct/union 'timeval'<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(584): error C2079: 'lntime' uses undefined struct 'timeval'<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(585): warning C4133: 'function': incompatible types - from 'int *' to 'timeval *'<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(586): error C2224: left of '.tv_sec' must have struct/union type<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(586): error C2224: left of '.tv_usec' must have struct/union type<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(594): error C2079: 'lntime' uses undefined struct 'timeval'<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(595): warning C4133: 'function': incompatible types - from 'int *' to 'timeval *'<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(596): error C2224: left of '.tv_sec' must have struct/union type<br>\nD:\\a\\mmesh\\mmesh\\src\\mmthread.h(596): error C2224: left of '.tv_usec' must have struct/union type</p>",
+        "id": 405495392,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701493618
+    },
+    {
+        "content": "<p>Urgh. But wait, that header was fine when #included for mesh decimation? Perhaps it's missing a Windows header</p>",
+        "id": 405495528,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493729
+    },
+    {
+        "content": "<p>Maybe winsock.h?  <a href=\"https://learn.microsoft.com/en-us/windows/win32/api/winsock/ns-winsock-timeval\">https://learn.microsoft.com/en-us/windows/win32/api/winsock/ns-winsock-timeval</a>  </p>\n<p>I'll give that a shot</p>",
+        "id": 405495554,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701493758
+    },
+    {
+        "content": "<p>cc.h: #include &lt;winsock2.h&gt; /* For struct timeval, don't ask me how that makes any sense */<br>\nI love my old comments</p>",
+        "id": 405495569,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493784
+    },
+    {
+        "content": "<p>Just #include mm.h before mmthread.h in mmthread.c and it's all good</p>",
+        "id": 405495774,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701493855
+    },
+    {
+        "content": "<p>That did the trick - we're clean on Windows, OSX and Linux again.</p>",
+        "id": 405496136,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701494028
+    },
+    {
+        "content": "<p>Checking BSD...</p>",
+        "id": 405496143,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701494036
+    },
+    {
+        "content": "<p>Yep, good there.</p>",
+        "id": 405496203,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701494070
+    },
+    {
+        "content": "<p>Cool. (Also fixed here, I'm all for writing portable code, it's just not frequently a concern)</p>",
+        "id": 405496269,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701494134
+    },
+    {
+        "content": "<p>I'll take a look next week (getting too tired to trust myself now) but I think that should be everything we need to allow for a straight up switch from the  old embedded librt version to mmesh.</p>",
+        "id": 405496357,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701494218
+    },
+    {
+        "content": "<p>Great. And it's good you are making that code public somewhere. Frankly, I have a ton of code that I think is worth sharing, but I just don't want to maintain a github and do customer support</p>",
+        "id": 405496444,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701494294
+    },
+    {
+        "content": "<p>Oh - if you want to incorporate the define stuff for dll import/export, probably want to wait until I've done functionality testing with BRL-CAD to make sure all the linking bits work as expected.  When I'm shooting blind on that stuff it's not uncommon for me to mess up the first time.</p>",
+        "id": 405496493,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701494355
+    },
+    {
+        "content": "<p>Our pleasure - thank you for sharing the improvements you've been making!</p>",
+        "id": 405496511,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701494393
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"671298\">@Alexis Naveros</span> question - a quick experiment suggests that it might not be all that hard to make mmesh compile as C++, in addition to C - looks like mostly needing to specify explicit type casts for void * -&gt; something else assignments and fixing some cases where C++ doesn't allow static strings to be passed to things wanting (char *).  Would there be any objections to doing that?  (Might be interesting to see if there's any performance difference between a C and C++ build...)</p>",
+        "id": 405544579,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701531816
+    },
+    {
+        "content": "<p>Microsoft tends to put a lot more work into their C++ compiler, so one of BRL-CAD's longer term goals is to try and get our code to the point where everything can compile as C++ if we want to.</p>",
+        "id": 405544706,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701531925
+    },
+    {
+        "content": "<p>You are free to do so but, personally, I have no interest whatsoever in C++. I profoundly dislike the language. I hate how the code isn't explicit, it can be doing a bunch of things everywhere that you don't even see just by looking at the code. I hate how bloated the C++ standard library is (did you know they added garbage collection, then removed it because no one was using it?). C++ doesn't offer me anything that I want over my beloved C</p>",
+        "id": 405563868,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701548463
+    }
+]

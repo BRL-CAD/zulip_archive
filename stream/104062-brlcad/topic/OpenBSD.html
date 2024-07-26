@@ -1,0 +1,179 @@
+<html>
+<head><meta charset="utf-8"><title>OpenBSD · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html">OpenBSD</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="220336002"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220336002" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220336002">(Dec 18 2020 at 04:33)</a>:</h4>
+<p>No wonder I was never able to do anything with that core file on OpenBSD - it needs lldb, not gdb: <a href="/user_uploads/1549/-E9wDPbN-ePPT9hNBGHqik13/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/-E9wDPbN-ePPT9hNBGHqik13/image.png" title="image.png"><img src="/user_uploads/1549/-E9wDPbN-ePPT9hNBGHqik13/image.png"></a></div>
+
+
+
+<a name="220336233"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220336233" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220336233">(Dec 18 2020 at 04:39)</a>:</h4>
+<p>Not sure what to make of it, but finally got it...</p>
+
+
+
+<a name="220336590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220336590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220336590">(Dec 18 2020 at 04:48)</a>:</h4>
+<p>that base variable is suspicious</p>
+
+
+
+<a name="220336694"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220336694" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220336694">(Dec 18 2020 at 04:51)</a>:</h4>
+<p>looks like it's actually a pointer to mged_curr_dm-&gt;dm_mged_variables</p>
+
+
+
+<a name="220337566"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220337566" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220337566">(Dec 18 2020 at 05:09)</a>:</h4>
+<p>I bet it's the offset getting calculated incorrectly.</p>
+
+
+
+<a name="220337832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220337832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220337832">(Dec 18 2020 at 05:15)</a>:</h4>
+<p>loc is set to base + sdp-&gt;sp_offset<br>
+sdp is a line in the parsetab with sp_offset defined in the struct.  the struct is  mged_curr_dm-&gt;dm_mged_variables so it could be that mged_curr_dm is invalid or dm_mged_variables isn't initialized or dm_mged_variables is initailized but has bad offset values.</p>
+
+
+
+<a name="220337886"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220337886" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220337886">(Dec 18 2020 at 05:16)</a>:</h4>
+<p>or mged_curr_dm is random garbage</p>
+
+
+
+<a name="220338157"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220338157" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220338157">(Dec 18 2020 at 05:22)</a>:</h4>
+<p>next step would probably be to identify which mged_variables is being used/set there,  check dm_curr-dm for validity, and find where it's initalizing the fields of dm_mged_variables.</p>
+
+
+
+<a name="220371844"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220371844" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220371844">(Dec 18 2020 at 13:31)</a>:</h4>
+<p>I wish I knew which test was doing that - "make check" produces it, but despite making a core file it doesn't halt the test.  Suggests something isn't checking a test return code somewhere, unless it's possible to dump a core and still complete "successfully"...</p>
+
+
+
+<a name="220371991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220371991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220371991">(Dec 18 2020 at 13:33)</a>:</h4>
+<p>Hmm... wonder if lldb can tell me from the core file...</p>
+
+
+
+<a name="220374000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220374000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220374000">(Dec 18 2020 at 13:54)</a>:</h4>
+<p>It's a little hard to follow, but it looks like it's running "vars " and when I do that in isolation the output does look strange: <a href="/user_uploads/1549/mTyu_mxgZmowQrlKxk_V5lHu/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/mTyu_mxgZmowQrlKxk_V5lHu/image.png" title="image.png"><img src="/user_uploads/1549/mTyu_mxgZmowQrlKxk_V5lHu/image.png"></a></div>
+
+
+
+<a name="220382573"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220382573" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220382573">(Dec 18 2020 at 15:08)</a>:</h4>
+<p>This is handy:  <a href="https://www.nesono.com/sites/default/files/lldb%20cheat%20sheet.pdf">https://www.nesono.com/sites/default/files/lldb%20cheat%20sheet.pdf</a></p>
+
+
+
+<a name="220410815"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220410815" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220410815">(Dec 18 2020 at 18:30)</a>:</h4>
+<p>Whee!  valgrind doesn't like the vars command run, even on Linux.</p>
+
+
+
+<a name="220411407"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220411407" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220411407">(Dec 18 2020 at 18:34)</a>:</h4>
+<p>yeah, that looks like memory corruption.</p>
+
+
+
+<a name="220411541"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220411541" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220411541">(Dec 18 2020 at 18:35)</a>:</h4>
+<p>I wonder if I updated mged_variables but never updated mged_vparse...</p>
+
+
+
+<a name="220411595"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220411595" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220411595">(Dec 18 2020 at 18:36)</a>:</h4>
+<p>looks like mged_curr_dm has to be involved, so maybe related to the dm init logic and the specific invocation mode of the script (like running with redirected input or something)</p>
+
+
+
+<a name="220419608"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220419608" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220419608">(Dec 18 2020 at 19:44)</a>:</h4>
+<p>Wow.  "mged&gt; vars" shows valgrind issues at least as far back as 70555...</p>
+
+
+
+<a name="220420279"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220420279" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220420279">(Dec 18 2020 at 19:50)</a>:</h4>
+<p>Make that r62647 - getting old enough it's hard to test...</p>
+
+
+
+<a name="220420656"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220420656" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220420656">(Dec 18 2020 at 19:54)</a>:</h4>
+<p>OK, clearly not a release blocker...</p>
+
+
+
+<a name="220421160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220421160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220421160">(Dec 18 2020 at 19:58)</a>:</h4>
+<p>/me wonders if "vars" would be better called "settings" - for what it seems to be intended to be, I wouldn't have thought to look first for a "vars" command...</p>
+
+
+
+<a name="220480211"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220480211" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220480211">(Dec 19 2020 at 17:56)</a>:</h4>
+<p>It definitely looks like the parsing is what's going wrong - gdb's reporting of the struct contents themselves seems to be OK...</p>
+
+
+
+<a name="220480298"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220480298" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220480298">(Dec 19 2020 at 17:59)</a>:</h4>
+<p>Doh.</p>
+
+
+
+<a name="220480377"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220480377" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220480377">(Dec 19 2020 at 18:01)</a>:</h4>
+<p>There we go - r78028.</p>
+
+
+
+<a name="220480378"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220480378" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220480378">(Dec 19 2020 at 18:01)</a>:</h4>
+<p>/me tries OpenBSD again</p>
+
+
+
+<a name="220517384"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220517384" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aniket Khandagale <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220517384">(Dec 20 2020 at 12:06)</a>:</h4>
+<p>hey everyone! <br>
+I was curious if I can contribute with the knowledge of c++</p>
+
+
+
+<a name="220525184"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220525184" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220525184">(Dec 20 2020 at 15:51)</a>:</h4>
+<p>Do you mean specifically on OpenBSD?</p>
+
+
+
+<a name="220538832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OpenBSD/near/220538832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OpenBSD.html#220538832">(Dec 20 2020 at 21:46)</a>:</h4>
+<p><span class="user-mention" data-user-id="372795">@Aniket Khandagale</span> If you mean C++ generically there's lots of opportunity - the new Qt graphical interface work, for example, is in Qt with C++</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

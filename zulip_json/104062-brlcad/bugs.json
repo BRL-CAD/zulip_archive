@@ -1,0 +1,356 @@
+[
+    {
+        "content": "<p><a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703\">there is a bug here</a>. freesolid is iterated, the head element is removed, and then added again, resulting in an infinite loop. i don't know how to fix it, since i don't know what it's actually trying to accomplish</p>",
+        "id": 129049458,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530654202
+    },
+    {
+        "content": "<blockquote>\n<p><a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/mged/chgview.c#l703\">there is a bug here</a>. freesolid is iterated, the head element is removed, and then added again, resulting in an infinite loop. i don't know how to fix it, since i don't know what it's actually trying to accomplish</p>\n</blockquote>\n<p>I'm not seeing it -- can you explain?  are you referring to RT_G_DEBUG mode on line 738?  that can be deleted if it's gotten out-of-date.</p>",
+        "id": 129063815,
+        "sender_full_name": "Sean",
+        "timestamp": 1530679893
+    },
+    {
+        "content": "<p><code>FREE_SOLID</code> (<a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/include/rt/solid.h#l81\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/include/rt/solid.h#l81\">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/include/rt/solid.h#l81</a>) also does a <code>BU_LIST_APPEND</code> of <code>sp</code> (which has just been dequeued) to <code>freesolid</code> (from which it has just dequeued <code>sp</code>)</p>",
+        "id": 129064827,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530682013
+    },
+    {
+        "content": "<p>it's true that <code>RT_G_DEBUG</code> has to be on. i ran an mged test with <code>-x 801 -X 801</code> and stumbled upon the issue</p>",
+        "id": 129064890,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530682108
+    },
+    {
+        "content": "<p>I think that's code that got out of sync with other code.  There almost certainly was other RT_G_DEBUG code that has since been deleted that make it work right.  The \"fix\" is to probably just delete this offending code.  We should not be doing manual data-specific pooling (freelists) like that any more.  They're crazy slow, incoherent, pointer chasing.</p>",
+        "id": 129065890,
+        "sender_full_name": "Sean",
+        "timestamp": 1530683541
+    },
+    {
+        "content": "<p>i removed the code in r71109. i ran the tests before committing, everything was fine</p>",
+        "id": 129069697,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530688654
+    },
+    {
+        "content": "<p><code>regress-rtwizard-rtwiz_m35_D</code> fails on mac, but not on linux. <a href=\"/user_uploads/1549/3OnliYcF2X7otHULnXZuDAFP/m35_D_diff.pix\" target=\"_blank\" title=\"m35_D_diff.pix\">here's the output of pix-cmp -l</a> and <a href=\"/user_uploads/1549/2mxAoHMCMlJ5EPxCbUTeT0MK/m35_D_diff.png\" target=\"_blank\" title=\"m35_D_diff.png\">here are the different pixels</a> (using imagemagick). any suggestions on how i could debug this? i get the same results on both release and debug</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/2mxAoHMCMlJ5EPxCbUTeT0MK/m35_D_diff.png\" target=\"_blank\" title=\"here are the different pixels\"><img src=\"/user_uploads/1549/2mxAoHMCMlJ5EPxCbUTeT0MK/m35_D_diff.png\"></a></div>",
+        "id": 129344388,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531137666
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> should i pursue this further, or should i focus on the SoA work for now?</p>",
+        "id": 129344496,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531137803
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> should i pursue this further, or should i focus on the SoA work for now?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> if you would like to debug this, please do - it's some relatively recent change.  you might have a good chance finding it simply by bisecting commits until you find the culprit. </p>\n<p>I'm also seeing the failure on mac.</p>",
+        "id": 129388063,
+        "sender_full_name": "Sean",
+        "timestamp": 1531193214
+    },
+    {
+        "content": "<p>all of the differences are subtle shading changes at extreme angles (e.g., 0/0/0 vs 2/2/2 rgb values on the tire edges), implying something has changed mathematically somewhere.  i have a mini backlog of commits I've not yet peer-reviewed, so I'll try to keep an eye out for likely cause but typically will be something like subtle bounding box change via redefinition of INFINITY, optimized math rounding, error accumulation, etc</p>",
+        "id": 129388207,
+        "sender_full_name": "Sean",
+        "timestamp": 1531193423
+    },
+    {
+        "content": "<p>i tried with 7.26.4 from sourceforge, the test still fails. 7.26.0 doesn't build and i didn't try to fix it. it's either not that new, or maybe clang's libc++ could be at fault? i'll try building with -stdlib=libstdc++</p>",
+        "id": 129398351,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531210855
+    },
+    {
+        "content": "<p>i'll try building with clang on linux next, hopefully that uses libc++ and not the gnu one. i tried gcc 8 on mac, but lld can't link stuff (something about unrecognized options), and gnu ld doesn't produce mach-o's</p>",
+        "id": 129398411,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531210975
+    },
+    {
+        "content": "<blockquote>\n<p>i tried with 7.26.4 from sourceforge, the test still fails. 7.26.0 doesn't build and i didn't try to fix it. it's either not that new, or maybe clang's libc++ could be at fault? i'll try building with -stdlib=libstdc++</p>\n</blockquote>\n<p>@cezar It's typically better when hunting for bugs to go by commit revisions, not releases, so you can linearly walk back in time until you find when it last worked/broke.  That's the bisecting I referred to as it's a typical workflow for both svn and git (though slightly different for each).  That said, it's sounding like this might be a little too far down the rabbit hole for you right now, so I'd say just move on and I'll take a look.</p>",
+        "id": 129418731,
+        "sender_full_name": "Sean",
+        "timestamp": 1531238197
+    },
+    {
+        "content": "<p>i know how to do that with revisions, it’s what i did with the flto bug a few days ago, but in this case, i went to r69000 and it was still failing, so i was curious if the release was ok or not :D</p>",
+        "id": 129418825,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531238322
+    },
+    {
+        "content": "<p>would you like me to submit a bug report, maybe, so it’s not forgotten about?</p>",
+        "id": 129418854,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531238400
+    },
+    {
+        "content": "<p>no, don't bother</p>",
+        "id": 129418953,
+        "sender_full_name": "Sean",
+        "timestamp": 1531238469
+    },
+    {
+        "content": "<p>it won't be forgotten -- it's failing make test, so we can't release until it's fixed</p>",
+        "id": 129418962,
+        "sender_full_name": "Sean",
+        "timestamp": 1531238494
+    },
+    {
+        "content": "<p>obviously slipped through on 7.26.4, but now we know about it -- you could add a line to the TODO file's top section as those are release blockers</p>",
+        "id": 129419016,
+        "sender_full_name": "Sean",
+        "timestamp": 1531238532
+    },
+    {
+        "content": "<p>ran into this </p>\n<div class=\"codehilite\"><pre><span></span>mged&gt; search / | /\n\nERROR: bad pointer 0x5629bc520f18: s/b db_full_path(x64626670), was librt directory(x5551212), file /home/rain/Sync/gsoc/build/svn-master/src/librt/db_fullpath.c, line 264\n\nERROR: bad pointer 0x5629bc520f18: s/b db_full_path(x64626670), was librt directory(x5551212), file /home/rain/Sync/gsoc/build/svn-master/src/librt/db_fullpath.c, line 264\n\nSaving stack trace to mged-5688-bomb.log\n</pre></div>",
+        "id": 131063413,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533669102
+    },
+    {
+        "content": "<p>confirmed, I can reproduce it.</p>",
+        "id": 131082122,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533694505
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  can you explain to me again why you're thinking the hole syntax needs changing?</p>",
+        "id": 131083825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533697211
+    },
+    {
+        "content": "<p>OK, r71438 should take care of that crash.</p>",
+        "id": 131083957,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533697435
+    },
+    {
+        "content": "<p>it doesn't necessarily, not with the latest patch</p>",
+        "id": 131136187,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767271
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Qsx3_8wOiG5YmGmSN-UutEum/1533767464.png\" target=\"_blank\" title=\"1533767464.png\">1533767464.png</a> </p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Qsx3_8wOiG5YmGmSN-UutEum/1533767464.png\" target=\"_blank\" title=\"1533767464.png\"><img src=\"/user_uploads/1549/Qsx3_8wOiG5YmGmSN-UutEum/1533767464.png\"></a></div><p>ran into this by clicking around randomly in the manpage viewer in MGED</p>",
+        "id": 131136413,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767539
+    },
+    {
+        "content": "<p>it keeps changing and stealing focus and i can't check out the Details&gt;&gt; thing or do anything but kill MGED</p>",
+        "id": 131136431,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767585
+    },
+    {
+        "content": "<p>it basically DOSes one's desktop</p>",
+        "id": 131136445,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767606
+    },
+    {
+        "content": "<p>no idea what the cause is but i'm more concerned about error messages being able to \"DOS\"</p>",
+        "id": 131136454,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767634
+    },
+    {
+        "content": "<p>there should be One (1) error window where all errors are collected and the user can scroll back and stuff</p>",
+        "id": 131136526,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767689
+    },
+    {
+        "content": "<p>something like Unity's log window is a good example (the game engine)</p>",
+        "id": 131136548,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533767718
+    },
+    {
+        "content": "<p>since that's a bit vague, what happens more precisely is:<br>\nthe node ID keeps incrementing in the error message, so telling it to skip the message doesn't because (i assume) each message counts as different due to the different ID</p>",
+        "id": 131138363,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533770510
+    },
+    {
+        "content": "<p>hmm.  does that error appear right away or after clicking on a few man pages?</p>",
+        "id": 131143770,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533779127
+    },
+    {
+        "content": "<p>I can't seem to get that error, although I can get an error when I try to follow a hyperlink...</p>",
+        "id": 131143858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533779261
+    },
+    {
+        "content": "<p>never right away, i had to click on a number of pages on the left and idk which one triggered it</p>",
+        "id": 131144878,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533780917
+    },
+    {
+        "content": "<p>sometimes it's only ~20 clicks, sometimes a lot more</p>",
+        "id": 131144884,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533780939
+    },
+    {
+        "content": "<p>that may be some quirk in the tkhtml widget - it's still kinda got wires sticking out around the edges in some respects.</p>",
+        "id": 131144948,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533780990
+    },
+    {
+        "content": "<blockquote>\n<p>it basically DOSes one's desktop</p>\n</blockquote>\n<p>what's going on is you're generating mouse events on that window every time you move the mouse (and there's obviously some problem in the event handler that causes the dialog to pop up).  there are probably LOTS of events queued up, and every time you click a button or move the mouse to dismiss the panel, even more events are generated (dozens, maybe hundreds).  if you took the window out of full screen and moved it out of the way from the dialog so the mouse doesn't go over it, you could probably clear out all the dialogs (which would clear out all the pending events)..</p>",
+        "id": 131154276,
+        "sender_full_name": "Sean",
+        "timestamp": 1533797181
+    },
+    {
+        "content": "<blockquote>\n<p>there should be One (1) error window where all errors are collected and the user can scroll back and stuff</p>\n</blockquote>\n<p>completely agree</p>",
+        "id": 131154280,
+        "sender_full_name": "Sean",
+        "timestamp": 1533797201
+    },
+    {
+        "content": "<p>Open <strong>toyjeep.g</strong> in mged + <code>e all</code>.<br>\nRelated to <a href=\"https://github.com/BRL-CAD/brlcad/commit/30e45f823ceca8c37fc7591c2bcf37f628471724\">https://github.com/BRL-CAD/brlcad/commit/30e45f823ceca8c37fc7591c2bcf37f628471724</a> ?</p>",
+        "id": 303893107,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665683818
+    },
+    {
+        "content": "<p>I just tried with latest main and it seems to draw the wireframe - what are the symptoms you're seeing?</p>",
+        "id": 303950712,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665712256
+    },
+    {
+        "content": "<p>Same for me, after <a href=\"https://github.com/BRL-CAD/brlcad/commit/9cd246294876ef3b757914c4e1dbf272b6751fd5\">https://github.com/BRL-CAD/brlcad/commit/9cd246294876ef3b757914c4e1dbf272b6751fd5</a> \"Apparently we can't depend on cts_s.ts_dbip always being valid - try rti_dbip instead.\"</p>",
+        "id": 303986030,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665736849
+    },
+    {
+        "content": "<p>BTW, I'm experiencing a build error with the new stepcode:</p>\n<ul>\n<li>Using latest Debian stable</li>\n<li>Clean checkout</li>\n<li>With default CMake options, except <strong>CMAKE_INSTALL_PREFIX</strong></li>\n</ul>\n<p>I'm seeing a kind of chicken or the egg dilemma in stepcode with expscan.h. The file is necessary to get generated. The work-around is to copy the file from the <strong>generated</strong> directory in the source tree to the <strong>ExpScanner_expscan</strong> directory in the binaries tree. It will be overwritten by the generated one then.</p>",
+        "id": 303987729,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665737508
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  what failure are you seeing trying to draw?  Is it crashing?  Failing to create the wireframe correctly?</p>",
+        "id": 304011342,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665747086
+    },
+    {
+        "content": "<p>I'll have to try and set up a Debian Stable VM to see if I can reproduce - I've not encountered that stepcode failure mode on any of the testing so far, and I've not seen it from the github runners, so it's a little puzzling...  that'll be a few days before I can attempt</p>",
+        "id": 304011500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665747158
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/bugs/near/304011342\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span>  what failure are you seeing trying to draw?  Is it crashing?  Failing to create the wireframe correctly?</p>\n</blockquote>\n<p>After your commit (I mentioned above), I don't get the error anymore. It should have fixed it. I meant with \"same for me\" that it draws the wireframe now. Before, I got a bad pointer message.</p>",
+        "id": 304012071,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665747428
+    },
+    {
+        "content": "<p>Ah - I thought you meant \"same\" as in \"no change to error\" :-)</p>",
+        "id": 304012155,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665747471
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I don't know if you can easily tell, but what in the initial build process is needing expscan.h?  I'm wondering how that can be needed on just Debian stable...</p>",
+        "id": 304012477,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665747617
+    },
+    {
+        "content": "<p>It might be that there's something wonky with the perplex/lemon setup, which should be the only time generated gets involved...</p>",
+        "id": 304012588,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665747671
+    },
+    {
+        "content": "<p>expscan.h is included in expparse.y. This is where the error comes from, during the generation phase, I think. </p>\n<div class=\"codehilite\"><pre><span></span><code>[ 26%] Creating directories for &#39;STEPCODE_BLD&#39;\n[ 26%] No download step for &#39;STEPCODE_BLD&#39;\n[ 26%] No update step for &#39;STEPCODE_BLD&#39;\n[ 26%] No patch step for &#39;STEPCODE_BLD&#39;\n[ 26%] Performing configure step for &#39;STEPCODE_BLD&#39;\n-- STEPCODE_BLD configure command succeeded.  See also /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-configure-*.log\n[ 26%] Performing build step for &#39;STEPCODE_BLD&#39;\nCMake Error at /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build-.cmake:37 (message):\n  Command failed: 2\n\n   &#39;make&#39;\n\n  See also\n\n    /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build-*.log\n\n\n-- stdout output is:\nScanning dependencies of target ExpParser_input_cpy\n[  0%] Generating expparse.y.sentinel\n[  1%] Generating expparse.y\n[  1%] Built target ExpParser_input_cpy\n[  1%] [LEMON][ExpParser] Building parser with /home/rossberg/Devel/BRL-CAD/build/brlcad/bin/lemon\nScanning dependencies of target objlib_expparse_c\n[  2%] Building C object src/express/CMakeFiles/objlib_expparse_c.dir/expparse.c.o\n\n-- stderr output is:\nIn file included from expparse.y:5:\n/home/rossberg/Devel/BRL-CAD/brlcad/src/other/ext/stepcode/src/express/parse_data.h:3:10: fatal error: expscan.h: Datei oder Verzeichnis nicht gefunden\n    3 | #include &quot;expscan.h&quot;\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake[5]: *** [src/express/CMakeFiles/objlib_expparse_c.dir/build.make:86: src/express/CMakeFiles/objlib_expparse_c.dir/expparse.c.o] Fehler 1\nmake[4]: *** [CMakeFiles/Makefile2:1172: src/express/CMakeFiles/objlib_expparse_c.dir/all] Fehler 2\nmake[3]: *** [Makefile:149: all] Fehler 2\n\nCMake Error at /home/rossberg/Devel/BRL-CAD/build/brlcad/src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build-.cmake:47 (message):\n  Stopping after outputting logs.\n\n\nmake[2]: *** [src/other/ext/CMakeFiles/STEPCODE_BLD.dir/build.make:130: src/other/ext/STEPCODE_BLD-prefix/src/STEPCODE_BLD-stamp/STEPCODE_BLD-build] Fehler 1\nmake[1]: *** [CMakeFiles/Makefile2:15471: src/other/ext/CMakeFiles/STEPCODE_BLD.dir/all] Fehler 2\nmake: *** [Makefile:182: all] Fehler 2\n</code></pre></div>",
+        "id": 304017128,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665749516
+    },
+    {
+        "content": "<p>Putting PERPLEX_TARGET before LEMON_TARGET doesn't help.</p>",
+        "id": 304017994,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665749802
+    },
+    {
+        "content": "<p>I've seen an occasional, not reliably reproducible error that seems to be either a missing dependency specification or one of those situations were I/O operations aren't fully completing correctly.  If you run \"make\" again after that error appears by going down into the build directory of the stepcode subbuild and manually running make, does it complete?</p>",
+        "id": 304140304,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665796091
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> Let me know if 658f8329fc2d works/helps.</p>",
+        "id": 304239995,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665864681
+    },
+    {
+        "content": "<p>I got a clean build now <span aria-label=\"smiley\" class=\"emoji emoji-1f603\" role=\"img\" title=\"smiley\">:smiley:</span></p>",
+        "id": 304320716,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1665934359
+    },
+    {
+        "content": "<p>We'll want to make sure it works by running it for a while - if that's the issue I've seen it doesn't always manifest.  If it consistently fixes it I'll push it upstream.</p>",
+        "id": 304366120,
+        "sender_full_name": "starseeker",
+        "timestamp": 1665969724
+    },
+    {
+        "content": "<p>I tested it on 3 machines before. On all, I got the same error. I applied your bugfix on two of them already. The builds on both are successful now.</p>",
+        "id": 304458561,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1666012837
+    },
+    {
+        "content": "<p>However, solving one problem mean to run into the next one. This is probably related to <a href=\"https://github.com/BRL-CAD/brlcad/commit/d6980c17fc16c6c694e561f6f8697d2e57d69f0e#diff-0a778b8459b95589232e39c837dc5217b2fb7d691baf5f7bc7601cda19c14dc7\">https://github.com/BRL-CAD/brlcad/commit/d6980c17fc16c6c694e561f6f8697d2e57d69f0e#diff-0a778b8459b95589232e39c837dc5217b2fb7d691baf5f7bc7601cda19c14dc7</a>.</p>\n<p>I open a GED handle with GED_INIT() and close it with ged_close <strong>but</strong> the wdbp handled to the init should be still intact after the GED handle was closed. Insted, I'm seeing an error like this</p>\n<div class=\"codehilite\"><pre><span></span><code>ERROR: bad pointer 0x55b1fa4ac120: s/b struct db_i(x57204381), was Unknown_Magic(xfa4a8250), file /home/rossberg/Devel/BRL-CAD/brlcad/src/librt/db_open.c, line 352\n</code></pre></div>",
+        "id": 315666455,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670959092
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  Looking at the previous (7.32.6) release (<a href=\"https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/src/libged/ged.c#L83\">https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/src/libged/ged.c#L83</a>) it looks like ged_close is calling wdbp_close.  Also from the 7.32.6 release, GED_INIT is assigning the supplied wdbp to gedp-&gt;ged_wdbp (<a href=\"https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/include/ged/defines.h#L105\">https://github.com/BRL-CAD/brlcad/blob/rel-7-32-6/include/ged/defines.h#L105</a>)</p>\n<p>Naively, my expectation would be that a wdbp passed to GED_INIT and then subjected to ged_close wouldn't be expected to be valid?  Perhaps I'm missing something...</p>",
+        "id": 315718315,
+        "sender_full_name": "starseeker",
+        "timestamp": 1670980070
+    },
+    {
+        "content": "<p>Maybe. I never really tested it. What I did is</p>\n<ul>\n<li>opend a BRL-CAD file for read/write</li>\n</ul>\n<div class=\"codehilite\" data-code-language=\"C\"><pre><span></span><code><span class=\"n\">resource</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">resp_db</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">static_cast</span><span class=\"o\">&lt;</span><span class=\"n\">resource</span><span class=\"o\">*&gt;</span><span class=\"p\">(</span><span class=\"n\">bu_calloc</span><span class=\"p\">(</span><span class=\"mi\">1</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"k\">sizeof</span><span class=\"p\">(</span><span class=\"n\">resource</span><span class=\"p\">),</span><span class=\"w\"> </span><span class=\"s\">\"resp_db\"</span><span class=\"p\">));</span><span class=\"w\"></span>\n<span class=\"n\">rt_init_resource</span><span class=\"p\">(</span><span class=\"n\">resp_db</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"mi\">0</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"nb\">NULL</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"k\">struct</span><span class=\"w\"> </span><span class=\"nc\">db_i</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">dbip</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">db_open</span><span class=\"p\">(</span><span class=\"n\">fileName</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"s\">\"rw\"</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">db_dirbuild</span><span class=\"p\">(</span><span class=\"n\">dbip</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">rt_wdb</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">wdbp_db</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">wdb_dbopen</span><span class=\"p\">(</span><span class=\"n\">dbip</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">RT_WDB_TYPE_DB_DISK</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">rt_i</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">rtip_db</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">rt_new_rti</span><span class=\"p\">(</span><span class=\"n\">wdbp_db</span><span class=\"o\">-&gt;</span><span class=\"n\">dbip</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">rt_init_resource</span><span class=\"p\">(</span><span class=\"n\">resp_db</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"mi\">0</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">rtip_db</span><span class=\"p\">);</span><span class=\"w\"></span>\n</code></pre></div>\n<p>I.e., resp_db, rtip_db, and wdbp_db are my variables used for the writable database.</p>\n<ul>\n<li>attached GED</li>\n</ul>\n<div class=\"codehilite\" data-code-language=\"C\"><pre><span></span><code><span class=\"n\">ged</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">gedp_ged</span><span class=\"p\">;</span><span class=\"w\"></span>\n<span class=\"n\">BU_GET</span><span class=\"p\">(</span><span class=\"n\">gedp_ged</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">ged</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">GED_INIT</span><span class=\"p\">(</span><span class=\"n\">gedp_ged</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">wdbp_db</span><span class=\"p\">);</span><span class=\"w\"></span>\n</code></pre></div>\n<ul>\n<li>removed GED</li>\n</ul>\n<div class=\"codehilite\" data-code-language=\"C\"><pre><span></span><code><span class=\"n\">ged_close</span><span class=\"p\">(</span><span class=\"n\">gedp_ged</span><span class=\"p\">);</span><span class=\"w\"></span>\n</code></pre></div>\n<ul>\n<li>closed the file</li>\n</ul>\n<div class=\"codehilite\" data-code-language=\"C\"><pre><span></span><code><span class=\"n\">wdb_close</span><span class=\"p\">(</span><span class=\"n\">wdbp_db</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">rt_free_rti</span><span class=\"p\">(</span><span class=\"n\">rtip_db</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">rt_clean_resource_complete</span><span class=\"p\">(</span><span class=\"mi\">0</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">resp_db</span><span class=\"p\">);</span><span class=\"w\"></span>\n<span class=\"n\">bu_free</span><span class=\"p\">(</span><span class=\"n\">resp_db</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"s\">\"resp_db\"</span><span class=\"p\">);</span><span class=\"w\"></span>\n</code></pre></div>",
+        "id": 316367689,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1671227799
+    },
+    {
+        "content": "<p>I get the error in rt_free_rti (db_close_client). Maybe, I should make a copy first and hand this over to GED_INIT?</p>",
+        "id": 316369429,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1671228508
+    },
+    {
+        "content": "<p>BTW, why does GED_INIT call ged_init twice?</p>",
+        "id": 316375594,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1671231482
+    }
+]

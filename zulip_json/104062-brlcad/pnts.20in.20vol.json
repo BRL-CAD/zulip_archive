@@ -1,0 +1,1418 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> something about r76818 feels really off (designwise).  I get what it's for, but it feels rather wrong design approach to me so highly specialized to points and new nomenclature (inside/outside) when the concept itself is common.  you basically implemented the union operator on a point set.</p>\n<p>A generality we've had on deck for a while is the introduction of a \"cg\" command to \"compile geometry\", which would bake/simplify a comb with expression \"volobj u pntsobj\" into a newcomb with \"newpnts\" expression.  This would be an excellent first step.</p>",
+        "id": 207229586,
+        "sender_full_name": "Sean",
+        "timestamp": 1597734839
+    },
+    {
+        "content": "<p>That would set the stage for other automatic simplification, tree contractions, null object detections, etc.  even if initially it only does this one union pnts case.</p>",
+        "id": 207229684,
+        "sender_full_name": "Sean",
+        "timestamp": 1597734910
+    },
+    {
+        "content": "<p>I'm not quite following - maybe it's just me, but I would expect \"cg volobj u pntsobj\" to  return something that incorporated both volobj and pntsobj.  I think we're looking at intersect and subtraction operators here(?)  which would make it:</p>\n<p>cg pntsobj + volobj = pnts_inside_volobj<br>\ncg pntsobj - volobj = pnts_outside_volobj</p>",
+        "id": 207247262,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597749304
+    },
+    {
+        "content": "<p>cg pntsobj u volobj would have to just return pntsobj, since volobj wouldn't have any points.  For pnts on pnts interactions it would be better defined:</p>\n<p>cg pngsobj u pntsobj2 = all_pnts_in_both<br>\ncg pntsobj + pntsobj2 = pnts_only_in_both<br>\ncg pntsobj - pntsobj2 = pnts_in_pntsobj_but_not_in_pntsobj2</p>",
+        "id": 207247414,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597749472
+    },
+    {
+        "content": "<p>There would have to be some convention about the primitive type of the lefthand object dictating the type of the output object, or something along those lines.</p>",
+        "id": 207247513,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597749569
+    },
+    {
+        "content": "<p>We'd also have to think about what something like cg sphobj u pntsobj would mean - do we expand the sphere to contain the points? What do we do with (say) cg sphobj u sketchobj?</p>",
+        "id": 207247638,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597749652
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  is r76830 reasonably close to what you were thinking?</p>",
+        "id": 207278258,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597766416
+    },
+    {
+        "content": "<p>no, no -- it would rely on existing object, not be args, and act just like a compiler.   instead of an expression, you'd compile a given object like \"cg some_comb\" or \"cg -o compiled_obj some_comb\".</p>",
+        "id": 207302257,
+        "sender_full_name": "Sean",
+        "timestamp": 1597777879
+    },
+    {
+        "content": "<p>So you'd have to make a comb and then evaluate it to do the point subset op?</p>",
+        "id": 207302921,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778167
+    },
+    {
+        "content": "<p>yeah, the compiler would be written to recognize known patterns (just like the c/c++ optimizer in cc).  so if we have some_comb = \"volobj x pntsobj\", it'd see OBJ1 OP OBJ2 and match OP==intersect with either OBJ1 or OBJ2 with a pnts type, and know it can reduce/replace some_comb with a new pnts object</p>",
+        "id": 207303006,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778212
+    },
+    {
+        "content": "<p>codewise, it still just calls exactly what you wrote</p>",
+        "id": 207303060,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778240
+    },
+    {
+        "content": "<p>just, UI is through a generalized optimization that we can extend with other optimizable patterns</p>",
+        "id": 207303113,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778270
+    },
+    {
+        "content": "<p>I guess my main difficulty is that's not going to be at all what I think of as a user when I'm asking \"how do I figure out which points are inside this volume?\"  I'd never think to look to that feature to get there, personally...</p>",
+        "id": 207303221,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778312
+    },
+    {
+        "content": "<p>like detecting subtractions that do nothing, or replacing huge bot subtractions with minimal bot subtractions, etc</p>",
+        "id": 207303226,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778315
+    },
+    {
+        "content": "<p>well you wouldn't necessarily think to perform boolean operations to model geometry either -- that's just fundamentally learning the system</p>",
+        "id": 207303402,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778407
+    },
+    {
+        "content": "<p>the generality and simplicity would give it powerful flexibility too</p>",
+        "id": 207303443,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778430
+    },
+    {
+        "content": "<p>I guess I think of it as a fundamentally analytic operation rather than a geometric one... I would probably have tried to get it in the analyze command somehow.</p>\n<p>Anyway.  I'll see if I can tweak the existing cg code to look for a comb of the right form, but anything involving tree walking usually means a headache...</p>",
+        "id": 207303652,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778552
+    },
+    {
+        "content": "<p>also, you're currently concerned with points, but the question of what's inside something else is not intrinsically specific to points, and the idea of the concept extending to other object types quickly gets out of control</p>",
+        "id": 207303671,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778570
+    },
+    {
+        "content": "<p>Agreed.  Conceptually though, what's the distinction between a CSG boolean expression and a comb tree?  Isn't the former a serialization of the latter?</p>",
+        "id": 207303834,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778671
+    },
+    {
+        "content": "<p>just as likely to what to know what rpp's or sph's are inside some other object, or what triangles are inside another mesh and so on.</p>",
+        "id": 207303838,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778674
+    },
+    {
+        "content": "<p>comb tree is an object whose structure can be queried</p>",
+        "id": 207303913,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778720
+    },
+    {
+        "content": "<p>Right, but I mean from the cg command's perspective - why not feed in an evaluation string?  (As one of the options - not arguing against combs)</p>",
+        "id": 207304017,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778769
+    },
+    {
+        "content": "<p>an expression is just text.  maybe conforms to a structure, maybe not, is it ad hoc?  is it the same as comb command's expression parser or the ted command's or some other?  is it prefix?  postfix?  infix?</p>",
+        "id": 207304051,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778793
+    },
+    {
+        "content": "<p>Sure, but we already have to solve the problem anyway for the comb command.</p>",
+        "id": 207304128,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778857
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207304017\">said</a>:</p>\n<blockquote>\n<p>Right, but I mean from the cg command's perspective - why not feed in an evaluation string?  (As one of the options - not arguing against combs)</p>\n</blockquote>\n<p>Same reason compilers typically don't support something like:  cc \"int main() {printf(\\\"hello world\\\\n\\\"); return 0;\"</p>",
+        "id": 207304260,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778909
+    },
+    {
+        "content": "<p>Heh - I would have thought they would, actually...</p>",
+        "id": 207304321,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597778938
+    },
+    {
+        "content": "<p>I mean they could, but imagine how a compiler expands in complexity...</p>",
+        "id": 207304371,
+        "sender_full_name": "Sean",
+        "timestamp": 1597778962
+    },
+    {
+        "content": "<p>there's simplicity and improved usability in having consistency, you provide a file</p>",
+        "id": 207304478,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779007
+    },
+    {
+        "content": "<p>making cg actually mirror cc would be good for the same reasons like having search mirror find</p>",
+        "id": 207304534,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779047
+    },
+    {
+        "content": "<p>/me winces.  I see the argument and I'm willing to give it a shot, but it feels to me  like a significant sacrifice in usability and intuitiveness to require compiler-esque thinking to do geometry operations.</p>",
+        "id": 207304708,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597779129
+    },
+    {
+        "content": "<p>So what do you want me to get set up in the cg command to be \"minimally functional?\"  I'd like to leave the functionality at least exposed (undocumented) where it can be accessed</p>",
+        "id": 207304858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597779215
+    },
+    {
+        "content": "<p>I don't deny that it's non-obvious, but I think it's one of those things someone learns just once and then uses it and takes it for granted.</p>",
+        "id": 207304864,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779219
+    },
+    {
+        "content": "<p>there is an alternative design we could go with that avoids the expansion of per-type subcommands</p>",
+        "id": 207304956,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779248
+    },
+    {
+        "content": "<p>instead of cg</p>",
+        "id": 207304979,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779262
+    },
+    {
+        "content": "<p>cg's \"intent\" is to reduce / optimize / evaluate geometry into a more optimal, condensed, pre-evaluated, or compressed form</p>",
+        "id": 207305077,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779313
+    },
+    {
+        "content": "<p>you're wanting to filter geometry</p>",
+        "id": 207305136,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779359
+    },
+    {
+        "content": "<p>while a compiler can do this particular filtering because it's a reduction, there's plenty it can't do as a compiler</p>",
+        "id": 207305229,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779393
+    },
+    {
+        "content": "<p>towards that end, we could go with a different verb / action command that's more focused on lower level processing like an \"inside\" command (or \"evaluate\" command with an \"inside\" subcommand)</p>",
+        "id": 207305783,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779655
+    },
+    {
+        "content": "<p>probably a way to merge it into \"analyze\"</p>",
+        "id": 207305868,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779704
+    },
+    {
+        "content": "<p>That feels like a conceptually better fit to me - the cg compile could then call the analyze operations as needed for the reduction.</p>",
+        "id": 207306009,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597779770
+    },
+    {
+        "content": "<p>We'll  need to tweak analyze - right now it takes a list of object names, no subcommands.</p>",
+        "id": 207306187,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597779870
+    },
+    {
+        "content": "<p>yeah, and this is a dramatically different \"output\" so does beg for subcommands to differentiate</p>",
+        "id": 207306269,
+        "sender_full_name": "Sean",
+        "timestamp": 1597779915
+    },
+    {
+        "content": "<p>I guess the current behavior could be characterize as \"summary\" - existing behavior of analyze could then become \"analyze summary\", which in principle might be considered minimally impacting...</p>",
+        "id": 207306472,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597779995
+    },
+    {
+        "content": "<p>or \"summarize\" if we're going noun verb</p>",
+        "id": 207306628,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780075
+    },
+    {
+        "content": "<p>could also go the switch route ala gqa</p>",
+        "id": 207306810,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780162
+    },
+    {
+        "content": "<p>since it's the other \"analyze\" command that it'd likely merge with eventually</p>",
+        "id": 207306870,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780182
+    },
+    {
+        "content": "<p>I'll experiment with refactoring analyze a bit - that's pretty simple, from the looks of things.  I'll do it in a branch though - for release I think I just need to back this whole thing out.  The immediate need was met, so there's no pressing need for the pnt in/out test in the main release right now.</p>",
+        "id": 207307144,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780288
+    },
+    {
+        "content": "<p>actually now that I'm looking...</p>",
+        "id": 207307173,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780303
+    },
+    {
+        "content": "<p>I'm personally not a big fan of gqa's option handling... lots of negative user karma over the years.</p>",
+        "id": 207307265,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780334
+    },
+    {
+        "content": "<p>I suggest mirroring \"analyze\" like the \"check\" command, at least in synopsys terms</p>",
+        "id": 207307275,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780339
+    },
+    {
+        "content": "<p>/me checks check</p>",
+        "id": 207307298,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780351
+    },
+    {
+        "content": "<p>right, that's why I say it</p>",
+        "id": 207307301,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780353
+    },
+    {
+        "content": "<p>nobody remembers -Av</p>",
+        "id": 207307323,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780362
+    },
+    {
+        "content": "<p>but \"check volume obj\" is pretty darn simple and declarative</p>",
+        "id": 207307361,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780383
+    },
+    {
+        "content": "<p>/me nods - slightly different mechanism, but this looks similar in some ways to where I ended up with the brep command</p>",
+        "id": 207307442,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780431
+    },
+    {
+        "content": "<p>yeah, mechanism doesn't have to be the same</p>",
+        "id": 207307583,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780481
+    },
+    {
+        "content": "<p>I see check's not using bu_opt yet, so that'd be an improvement</p>",
+        "id": 207307611,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780498
+    },
+    {
+        "content": "<p>is check supposed to replace or merge with analyze eventually?</p>",
+        "id": 207307687,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780535
+    },
+    {
+        "content": "<p>/me is mentally substituting \"analyze\" for \"check\" in front of each of these and so far they all work...</p>",
+        "id": 207307851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780598
+    },
+    {
+        "content": "<p>I suppose they could but there is a problem with the different output types and that might be a reason to keep them separated</p>",
+        "id": 207308005,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780664
+    },
+    {
+        "content": "<p>/me nods</p>",
+        "id": 207308042,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780681
+    },
+    {
+        "content": "<p>as analyze is currently written, yeah, they totally merge as the summary it produces is also analytic, numbers, info</p>",
+        "id": 207308107,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780698
+    },
+    {
+        "content": "<p>it's having a command whose output is geometric that becomes very distinguishing</p>",
+        "id": 207308144,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780716
+    },
+    {
+        "content": "<p>not to say the concepts couldn't merge cleanly</p>",
+        "id": 207308294,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780797
+    },
+    {
+        "content": "<p>analyze volume -o output obj1 obj2   could work for example, but I'd probably expect 'output' to be an attribute object of some sort</p>",
+        "id": 207308508,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780883
+    },
+    {
+        "content": "<p>or a txt even, in that case...</p>",
+        "id": 207308651,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780936
+    },
+    {
+        "content": "<p>well, bo in BRL-CAD</p>",
+        "id": 207308670,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780945
+    },
+    {
+        "content": "<p>we don't have txt objects yet</p>",
+        "id": 207308714,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780968
+    },
+    {
+        "content": "<p>we have binunif, that'd be an alternative</p>",
+        "id": 207308732,
+        "sender_full_name": "Sean",
+        "timestamp": 1597780979
+    },
+    {
+        "content": "<p>Ah, right - couldn't remember where we were with that.</p>",
+        "id": 207308739,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597780984
+    },
+    {
+        "content": "<p>better would probably be a json-style rich object</p>",
+        "id": 207308777,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781013
+    },
+    {
+        "content": "<p>that way it could structurally contain the whole report in structured form</p>",
+        "id": 207308859,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781043
+    },
+    {
+        "content": "<p>there is one issue, though..</p>",
+        "id": 207308885,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781055
+    },
+    {
+        "content": "<p>how the usage would look for this command, without having completely different syntax (i.e., complexity), what [object(s)] means</p>",
+        "id": 207309016,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781120
+    },
+    {
+        "content": "<p>e.g., analyze inside -o output obj1 obj2 obj3</p>",
+        "id": 207309044,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781142
+    },
+    {
+        "content": "<p>could limit it to pairs of objects, then it'd be consistent</p>",
+        "id": 207309157,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781196
+    },
+    {
+        "content": "<p>/me figured the subcommands would have their own syntax</p>",
+        "id": 207309549,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781384
+    },
+    {
+        "content": "<p>could change the command too, instead of \"inside\" it could be \"intersect\" and it applies that operation to all object args, so \"obj1 obj2 obj3\" is treated as if it were a \"obj1 x obj2 x obj3\" comb expression</p>",
+        "id": 207309577,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781395
+    },
+    {
+        "content": "<p>/me is OK with limiting inside to pairs, at least for a first cut</p>",
+        "id": 207309805,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781497
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207309549\">said</a>:</p>\n<blockquote>\n<p>/me figured the subcommands would have their own syntax</p>\n</blockquote>\n<p>that's usually a sign they either don't belong together, or the design hasn't been sorted out to make it consistent ... otherwise, there's little point in them being subcommanded together when all the args that follow are different</p>",
+        "id": 207309836,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781514
+    },
+    {
+        "content": "<p>we have a few mashups like that currently</p>",
+        "id": 207309933,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781539
+    },
+    {
+        "content": "<p>they're usability nightmares imho</p>",
+        "id": 207309967,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781557
+    },
+    {
+        "content": "<p>I know them, and I have to pull up the usage every time.  that's just bad design.</p>",
+        "id": 207309994,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781571
+    },
+    {
+        "content": "<p>/me sees it mainly as a conceptual grouping - sort of like svn's subcommand's are all SVN related, even if they're individually very different.</p>",
+        "id": 207310083,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781620
+    },
+    {
+        "content": "<p>Or the per-primitive subcommands</p>",
+        "id": 207310192,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781657
+    },
+    {
+        "content": "<p>er, nearly all of svn commands just take paths... super consistent</p>",
+        "id": 207310407,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781763
+    },
+    {
+        "content": "<p>the deviation is on their options, not on what follows the options</p>",
+        "id": 207310463,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781781
+    },
+    {
+        "content": "<p>big difference</p>",
+        "id": 207310484,
+        "sender_full_name": "Sean",
+        "timestamp": 1597781795
+    },
+    {
+        "content": "<p>I guess I was thinking about svn merge taking two paths, where svn add can take many - that sort of thing</p>",
+        "id": 207310573,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781858
+    },
+    {
+        "content": "<p>well, three if you count the destination</p>",
+        "id": 207310597,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781876
+    },
+    {
+        "content": "<p>propset and friends I think are fairly structured as well</p>",
+        "id": 207310696,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597781919
+    },
+    {
+        "content": "<p>I'd just like to also acknowledge that considering the complexity of a revision control system is probably a terrible usability pattern to follow regardless ... :D</p>",
+        "id": 207310879,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782005
+    },
+    {
+        "content": "<p>s/acknowledge/propose/</p>",
+        "id": 207310897,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782020
+    },
+    {
+        "content": "<p>/me grins - I actually go the other way.  I think it's a good mapping to the conceptual complexity of the problem spaces we're working with.</p>",
+        "id": 207311014,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597782100
+    },
+    {
+        "content": "<p>I mean we're not talking about anything anywhere near as complex -- nearly everything we have can be simplified and made consistent because we have a specific taxonomy that is constrained</p>",
+        "id": 207311018,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782104
+    },
+    {
+        "content": "<p>the complexity a developer puts up with is not on par of that of general users</p>",
+        "id": 207311151,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782159
+    },
+    {
+        "content": "<p>we have a highly biased perspective as devs.  it's helpful to be aware of that and resist complexity where we can through more considered design.</p>",
+        "id": 207311233,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782211
+    },
+    {
+        "content": "<p>i'm happy to think through the design implications if you're not -- I just don't think we should punt and add options and have 2/3/4 synopsis lines to document command <em>where we can avoid it</em></p>",
+        "id": 207311375,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782260
+    },
+    {
+        "content": "<p>this seems like an easy case for example.  we can just apply the same op to all listed objects in succession</p>",
+        "id": 207311643,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782388
+    },
+    {
+        "content": "<p>Well, there are subtitles with that - what does it mean, for example, to have a sph followed by a point cloud followed by an arb?</p>",
+        "id": 207311732,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597782437
+    },
+    {
+        "content": "<p>That's the hesitation your sensing, I think - we can probably come up with a two object interpretation easily enough, but I'm not sure how it scales.</p>",
+        "id": 207311811,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597782478
+    },
+    {
+        "content": "<p>the operation you're using is still simply an intersection</p>",
+        "id": 207311899,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782500
+    },
+    {
+        "content": "<p>A intersect B</p>",
+        "id": 207311915,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782507
+    },
+    {
+        "content": "<p>A intersect B intersect C</p>",
+        "id": 207311956,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782521
+    },
+    {
+        "content": "<p>but what's the output?  the points from the point cloud?  the subset of the sphere from a gqa segment grid that overlaps the volumes of the other shapes?</p>",
+        "id": 207312021,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597782544
+    },
+    {
+        "content": "<p>the output is the geometric intersection of the three sets...</p>",
+        "id": 207312092,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782583
+    },
+    {
+        "content": "<p>A intersect B where either is a pnts object will always be a pnts object or the nul set</p>",
+        "id": 207312194,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782611
+    },
+    {
+        "content": "<p>that holds for any number of subsequent intersections</p>",
+        "id": 207312236,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782631
+    },
+    {
+        "content": "<p>always a pnts result or nul</p>",
+        "id": 207312256,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782641
+    },
+    {
+        "content": "<p>also generalizes nicely and can be extended to things like bot intersect bot</p>",
+        "id": 207312329,
+        "sender_full_name": "Sean",
+        "timestamp": 1597782679
+    },
+    {
+        "content": "<p>So for points we have an answer - what should we return for (say) two CSG spheres?</p>",
+        "id": 207312627,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597782837
+    },
+    {
+        "content": "<p>we don't have a single implicit object that can represent the result, so I'd expect it to either return a comb with \"A x B\" (assuming we're talking about geometric output) or return a nurbs object with the evaluated result</p>",
+        "id": 207313037,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783028
+    },
+    {
+        "content": "<p>would be an awesome place to hook the latter</p>",
+        "id": 207313077,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783048
+    },
+    {
+        "content": "<p>Now that you mention it I think there is a brep intersect subcommand somewhere...</p>",
+        "id": 207313117,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597783076
+    },
+    {
+        "content": "<p>could also envision there being something like a -t type option where you could specify bot, dsp, or some other object type</p>",
+        "id": 207313222,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783111
+    },
+    {
+        "content": "<p>there is</p>",
+        "id": 207313228,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783116
+    },
+    {
+        "content": "<p>I guess the other risk of putting a general syntax out there is users are going to try a whole bunch of things we don't have implemented - won't there be a risk of negative perceptions about our capability/quality/completeness?</p>",
+        "id": 207313259,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597783137
+    },
+    {
+        "content": "<p>facetize does it for bots</p>",
+        "id": 207313263,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783140
+    },
+    {
+        "content": "<p>sort of another version of the step importer not handling a lot of things...</p>",
+        "id": 207313314,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597783178
+    },
+    {
+        "content": "<p>I think it'd be fine if it aborts with an error saying  \"ERROR: analyze intersect support limited to 'comb'+'pnts' objects\" for starters.  Documents the scope, sets expectation, and is easily expanded as support expands.</p>",
+        "id": 207313614,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783334
+    },
+    {
+        "content": "<p>not that we should leave it that limited for long.  I think the comb fallback would be good to implement off the bat so it's well behaved on anthing</p>",
+        "id": 207313722,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783414
+    },
+    {
+        "content": "<p>So another interpretation question - if I intersect two pnts sets, do I return only the points that are in both sets within tolerance?</p>",
+        "id": 207313830,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597783455
+    },
+    {
+        "content": "<p>that would be my expectation and interpretation, yes</p>",
+        "id": 207313872,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783487
+    },
+    {
+        "content": "<p>someone wanting something else implies another operation, like this: analyze convexhull -o hull pnts; analyze intersection -o volpnts hull pnts2;</p>",
+        "id": 207314065,
+        "sender_full_name": "Sean",
+        "timestamp": 1597783573
+    },
+    {
+        "content": "<p>OK.  That's a separate implementation, so I'll have to think about how to do the pre-processing - whether to find and intersect pnt clouds first and then check them against other volumes...</p>",
+        "id": 207314071,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597783577
+    },
+    {
+        "content": "<p>I'll make  a branch and work with it a bit.</p>",
+        "id": 207314342,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597783723
+    },
+    {
+        "content": "<p>Another interpretation question - what if someone unions a point cloud into an otherwise volumetric CSG hierarchy?  Is it a no-op under those conditions?</p>",
+        "id": 207316203,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597784651
+    },
+    {
+        "content": "<p>you mean intersects?</p>",
+        "id": 207316262,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784687
+    },
+    {
+        "content": "<p>Well, I can think of a couple cases.  If we do want to intersect it, what if the CSG hierarchy subtracts a volume from the point cloud?  Do we first \"strip down\" the point cloud per the CSG hierarchy and then intersect it?</p>",
+        "id": 207316365,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597784752
+    },
+    {
+        "content": "<p>if it's unioned, it'll be essentially a no-op unless the ray happens to hit the pnt exactly or the pnts have a diameter</p>",
+        "id": 207316375,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784758
+    },
+    {
+        "content": "<p>the functionally act like spheres</p>",
+        "id": 207316470,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784794
+    },
+    {
+        "content": "<p>so really no different</p>",
+        "id": 207316480,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784799
+    },
+    {
+        "content": "<p>just the radii might be infintessimally small (or they could be huge)</p>",
+        "id": 207316510,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784818
+    },
+    {
+        "content": "<p>But if we intersect two point clouds as discussed earlier (toleranced distance comparison) then the point cloud will act differently in a hierarchy</p>",
+        "id": 207316522,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597784826
+    },
+    {
+        "content": "<p>Would that be surprising?</p>",
+        "id": 207316669,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597784905
+    },
+    {
+        "content": "<p>keep in mind that would be an analyzed intersection, which is what allows the tolerance and resulting behavior to be specified</p>",
+        "id": 207316677,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784913
+    },
+    {
+        "content": "<p>the result is a pnt cloud</p>",
+        "id": 207316704,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784926
+    },
+    {
+        "content": "<p>i'm not entirely following -- what would be surprising?</p>",
+        "id": 207316790,
+        "sender_full_name": "Sean",
+        "timestamp": 1597784975
+    },
+    {
+        "content": "<p>if I create rppA, pntsA, and pntsB; and combA is \"pntsA - rppA\" to cull some point, that's all pretty straightforward</p>",
+        "id": 207316940,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785046
+    },
+    {
+        "content": "<p>if I \"analyze intersection -o pntsC pntsA pntsB\", thn pntsC will have those in common to both</p>",
+        "id": 207316998,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785091
+    },
+    {
+        "content": "<p>explicitly</p>",
+        "id": 207317095,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785132
+    },
+    {
+        "content": "<p>if I \"comb combB pntsA x pntsB\", thats the same result, but implicitly</p>",
+        "id": 207317116,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785146
+    },
+    {
+        "content": "<p>So, given a pnt cloud A intersecting with a hierarchy B containing pnt cloud C.  If pnts in C are close within tolerance to pnts in A, such that A intersect C would yield a subset of point common to A and C, but A intersection tests against the hierarchy B using a ray in/out test points that would be part of the intersection only by the action of the point cloud C (i.e. none of the rest of volume of B interacts with A) would be skipped because the raytracing test would fail.</p>",
+        "id": 207317143,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785164
+    },
+    {
+        "content": "<p>that's one massive run-on sentence... I'm having trouble parsing it</p>",
+        "id": 207317457,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785278
+    },
+    {
+        "content": "<p>So in the limit case, intersect point cloud A with the hierarchy B containing A and a sph C that doesn't overlap A at all.</p>",
+        "id": 207317470,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785285
+    },
+    {
+        "content": "<p>A ray inside test against B from any point in A will report outside.</p>",
+        "id": 207317516,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785313
+    },
+    {
+        "content": "<p>But A intersect A will return the set A.</p>",
+        "id": 207317539,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785324
+    },
+    {
+        "content": "<p>when you say intersect, do you mean in the context of a comb intersect operation or this new intersection/intersect command?</p>",
+        "id": 207317602,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785359
+    },
+    {
+        "content": "<p>the new intersect command</p>",
+        "id": 207317654,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785371
+    },
+    {
+        "content": "<p>okay</p>",
+        "id": 207317658,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785373
+    },
+    {
+        "content": "<p>I'm thinking about how I implemented the inside/outside test and what the implications are (or trying to - it's causing run-on sentences...)</p>",
+        "id": 207317745,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785420
+    },
+    {
+        "content": "<p>if you have a point cloud A and a hierarchy B containing A (<em>unioned</em>), the result is going to be point cloud A...</p>",
+        "id": 207317800,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785449
+    },
+    {
+        "content": "<p>But I don't think it will - the ray interrogation won't report inside unless something other than A in the hierarchy contains pnts in A.</p>",
+        "id": 207317895,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785493
+    },
+    {
+        "content": "<p>Or put A' rather than exactly A in the hierarchy - just enough to throw off trivially exact hits, but close enough to pass a tolerance distance check.</p>",
+        "id": 207318006,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785571
+    },
+    {
+        "content": "<p>I'm not saying what your code does, I don't know what it does.. i\"m saying set theory is that A x A = A</p>",
+        "id": 207318019,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785576
+    },
+    {
+        "content": "<p>Right.  But my point is I have to do two different comparisons when faced with A vs A' and A vs B - the latter uses the solid raytracer, and the former can't</p>",
+        "id": 207318144,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785640
+    },
+    {
+        "content": "<p>So I'll get different answers for A' depending on whether it is inside a hierarchy B or not, which seems wrong.</p>",
+        "id": 207318180,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785673
+    },
+    {
+        "content": "<p>are you talking about the current limitation that pnts don't report hits from shot()??</p>",
+        "id": 207318189,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785681
+    },
+    {
+        "content": "<p>Kind of - but I think it's more fundamental than that...</p>",
+        "id": 207318306,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785740
+    },
+    {
+        "content": "<p>if so, then yeah absolutely have to handle pnts specifically because they don't have a raytrace interpretation</p>",
+        "id": 207318319,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785746
+    },
+    {
+        "content": "<p>ignore the tolerance issue first</p>",
+        "id": 207318331,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785765
+    },
+    {
+        "content": "<p>Right, so when we evaluate B (which uses the raytracer) there's a problem if a pnt cloud is included in B since the test won't work.</p>",
+        "id": 207318351,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785786
+    },
+    {
+        "content": "<p>right but that's specifically because of this implementation detail, not theory -- you have to handle pnts</p>",
+        "id": 207318405,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785825
+    },
+    {
+        "content": "<p>or implement shot() for them</p>",
+        "id": 207318419,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785837
+    },
+    {
+        "content": "<p>I'll have to construct a test case and see what happens, I guess - I think I know but I might be wrong.</p>",
+        "id": 207318554,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597785926
+    },
+    {
+        "content": "<p>it sounds like you're talking about an implementation concern, which is very much a yes -- you have to handle pnts and by handle pnts that means you have to recognize one is a pnts object and for each point, evaluate it against the other object</p>",
+        "id": 207318675,
+        "sender_full_name": "Sean",
+        "timestamp": 1597785999
+    },
+    {
+        "content": "<p>and if that other object is a comb, you'd have to scan it's logic and look for pnts (applying the right boolean recipe down the hierarchy) to evaluate them with a pnt-to-pnt distance calculation to get the right result...</p>",
+        "id": 207318744,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786064
+    },
+    {
+        "content": "<p>But if the other object is a mixed object (pnts unioned with other solids) what is the interpretation of the pnts object in the hierarchy?  Is it OK to return none of those points since they're zero volume in a CSG hierarchy of solids, or do we need to somehow figure out which points in the hierarchy survive the boolean ops and test them as individual points?</p>",
+        "id": 207318805,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786084
+    },
+    {
+        "content": "<p>or implement shot() and just look at whether your point is within the other object's partition list... ;)</p>",
+        "id": 207318830,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786102
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207318805\">said</a>:</p>\n<blockquote>\n<p>But if the other object is a mixed object (pnts unioned with other solids) what is the interpretation of the pnts object in the hierarchy?  Is it OK to return none of those points since they're zero volume in a CSG hierarchy of solids, or do we need to somehow figure out which points in the hierarchy survive the boolean ops and test them as individual points?</p>\n</blockquote>\n<p>to return the right set.. the latter!</p>",
+        "id": 207318919,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786164
+    },
+    {
+        "content": "<p>unless you implement shot()</p>",
+        "id": 207318929,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786171
+    },
+    {
+        "content": "<p>Assuming my test rays happened to pass close enough to the other points to register...  this is starting to sound nasty.</p>",
+        "id": 207318936,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786176
+    },
+    {
+        "content": "<p>you know all it takes to minimally implement shot() is to iterate over all pnts and call sph_shot().  could even create a db of spheres during prep so you get spatial partitioning.</p>",
+        "id": 207319047,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786227
+    },
+    {
+        "content": "<p>without implementing shot, you can just check the comb and only support whatever is easy</p>",
+        "id": 207319153,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786282
+    },
+    {
+        "content": "<p>reject the complicated as not yet implemented</p>",
+        "id": 207319173,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786302
+    },
+    {
+        "content": "<p>heh - another use of the db_search filter</p>",
+        "id": 207319250,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786335
+    },
+    {
+        "content": "<p>like you could support pnts+non-comb for starters, don't even support combs.</p>",
+        "id": 207319252,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786336
+    },
+    {
+        "content": "<p>but seriously, shot() on pnts is downright trivial to implement</p>",
+        "id": 207319282,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786362
+    },
+    {
+        "content": "<p>i I didn't have these commits I'm working through, I could have had an initial demo working already :)</p>",
+        "id": 207319326,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786400
+    },
+    {
+        "content": "<p>I don't know that that would be enough though - six rays for inside/outside solids vs. distance comparisons of pnt clouds are still different tests.</p>",
+        "id": 207319329,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786404
+    },
+    {
+        "content": "<p>six what??</p>",
+        "id": 207319364,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786433
+    },
+    {
+        "content": "<p>that's how I'm doing the inside outside test - looking in +- X, Y and Z directions</p>",
+        "id": 207319425,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786456
+    },
+    {
+        "content": "<p>uh, don't do that...</p>",
+        "id": 207319443,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786473
+    },
+    {
+        "content": "<p>Are the numerics solid enough to trust one ray?</p>",
+        "id": 207319507,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786519
+    },
+    {
+        "content": "<p>especially for bots and the like, I was concerned with edge cases</p>",
+        "id": 207319585,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786568
+    },
+    {
+        "content": "<p>So you're willing to 6-folding the computational cost because of concern, without actually knowing...</p>",
+        "id": 207319679,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786643
+    },
+    {
+        "content": "<p>heh, even if you care about edge cases, 3 rays would've been adequate</p>",
+        "id": 207319722,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786677
+    },
+    {
+        "content": "<p>rays are infinite, you just need to backout the starting point</p>",
+        "id": 207319783,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786706
+    },
+    {
+        "content": "<p>/me shrugs - I was throwing something together to see if it worked, wasn't especially worried about performance.</p>",
+        "id": 207319855,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786799
+    },
+    {
+        "content": "<p>that said, for this, I don't see without evidence why you'd want more than 1 ray per point.  you shoot through the point from outside the bounds, and if that point is within a partition, it's a match</p>",
+        "id": 207319898,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786806
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207319855\">said</a>:</p>\n<blockquote>\n<p>/me shrugs - I was throwing something together to see if it worked, wasn't especially worried about performance.</p>\n</blockquote>\n<p>heh, the same books that talk about premature optimization also talk very adamantly about making order-of-magnitude changing decisions like that without considering the implications!</p>",
+        "id": 207319992,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786910
+    },
+    {
+        "content": "<p>that's so far beyond not being worried about performance...</p>",
+        "id": 207320049,
+        "sender_full_name": "Sean",
+        "timestamp": 1597786933
+    },
+    {
+        "content": "<p>I knew there are grazing rays on objects that report solid partitions beyond their volume, so I just threw multiple directions at it to preclude that being an issue.  Your right 3 would have done it.</p>",
+        "id": 207320123,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597786995
+    },
+    {
+        "content": "<p>even still</p>",
+        "id": 207320168,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787039
+    },
+    {
+        "content": "<p>you're talking about plate mode</p>",
+        "id": 207320213,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787045
+    },
+    {
+        "content": "<p>I've seen it on NURBS</p>",
+        "id": 207320226,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787055
+    },
+    {
+        "content": "<p>(solid NURBS)</p>",
+        "id": 207320243,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787076
+    },
+    {
+        "content": "<p>true, plate mode and nurbs can return incorrect partitions on grazing rays</p>",
+        "id": 207320461,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787233
+    },
+    {
+        "content": "<p>but it's not right and shouldn't be allowed to spread like a disease to other algorithms because they got it wrong -- at least that's fundamentally wrong in my humble opinion</p>",
+        "id": 207320512,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787281
+    },
+    {
+        "content": "<p>we should fix them, or get whoever is wanting this feature to pay us to fix them</p>",
+        "id": 207346614,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787325
+    },
+    {
+        "content": "<p>could also reject those two -- relatively rare at this point -- outliers in the analyze command when it validates the args</p>",
+        "id": 207346685,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787388
+    },
+    {
+        "content": "<p>plate mode is just wrong-wrong and shouldn't be accommodated anywhere imho.. nurbs is obviously a harder issue but can probably be handled in code by looking at the grazing flag and only shooting a second ray when it grazes</p>",
+        "id": 207346803,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787473
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> as for who is wanting the point-inside-solid  feature - it's just something I threw together for Caleb</p>",
+        "id": 207346933,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787566
+    },
+    {
+        "content": "<p>I know, all the more reason I'd be concerned with what's left .. he's effectively done already</p>",
+        "id": 207346984,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787610
+    },
+    {
+        "content": "<p>(i mean left in the code, it's going to long outlast his involvement and residual impact)</p>",
+        "id": 207347061,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787652
+    },
+    {
+        "content": "<p>Well, the original bit was part of the facetization work for Dave a while back.  It's used by one of the fallback algorithms.</p>",
+        "id": 207347062,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787652
+    },
+    {
+        "content": "<p>(I already backed out the bit I put in for him in trunk.)</p>",
+        "id": 207347085,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787678
+    },
+    {
+        "content": "<p>That's why I was way more worried about robustness than performance at that juncture - I think it was some sort of crunch project for Dave.</p>",
+        "id": 207347163,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787748
+    },
+    {
+        "content": "<p>Honestly, I think you should just shoot a ray through the point and if it returns a bogus result because the partitions are wrong, so be it -- that puts pressure on fixing the partition list, however small, over time.  and it's completely justifiable.</p>",
+        "id": 207347220,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787769
+    },
+    {
+        "content": "<p>At the expense of distorted or failed factorization cases  that would otherwise succeed?  (Maybe that's not a serious risk - as you say I don't have stats on if or how frequent it is - but it would be a failure where we could potentially have succeeded.)</p>",
+        "id": 207347357,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597787881
+    },
+    {
+        "content": "<p>I don't mean to put you on the defensive.</p>",
+        "id": 207347417,
+        "sender_full_name": "Sean",
+        "timestamp": 1597787905
+    },
+    {
+        "content": "<p>Sorry.  I'm game to clean it up, if it makes sense to spend time on it.</p>",
+        "id": 207347609,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597788046
+    },
+    {
+        "content": "<p>I'll give you facetization just because we've hammered at that for decades unsuccessfully.</p>",
+        "id": 207347676,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788098
+    },
+    {
+        "content": "<p>I don't think that liberty extends anywhere else in the code, though.</p>",
+        "id": 207347685,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788109
+    },
+    {
+        "content": "<p>Sure.  I only pulled it from there 'cause when Caleb asked I remembered it being there - if it comes out \"for real\" we can certainly clean it up.</p>",
+        "id": 207347767,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597788142
+    },
+    {
+        "content": "<p>Until we can facetize reliably, or at least consistently complete, whatever that means, that's very much in the \"lets get anything working camp\".</p>",
+        "id": 207347815,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788194
+    },
+    {
+        "content": "<p>(By the way, one other case I know of where a ray test will fail is small triangles in meshes - I hit that with the JASP work earlier this year.  I've got a unit test in there somewhere were I captured and isolated an individual triangle that gives the wrong answer.)</p>",
+        "id": 207347898,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597788266
+    },
+    {
+        "content": "<p>That's why I'm using Dickinson's code, slow as it is, for the new brep meshing.</p>",
+        "id": 207348025,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597788366
+    },
+    {
+        "content": "<p>I'd still cringe at 6x vs 3x performance decisions in there if they're frequent, but as I said -- it is what it is until it works and facetize gets a hard pass because we've tried for so long.</p>",
+        "id": 207348028,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788368
+    },
+    {
+        "content": "<p>I think it DOES matter the moment that code is used anywhere else though.  Might as well not exist for use outside without having a critical re-write if it's been developed with a gloves-off approach.</p>",
+        "id": 207348134,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788461
+    },
+    {
+        "content": "<p>Fair enough.</p>",
+        "id": 207348177,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597788483
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207348025\">said</a>:</p>\n<blockquote>\n<p>That's why I'm using Dickinson's code, slow as it is, for the new brep meshing.</p>\n</blockquote>\n<p>With all due respect, this is rather dangerous thinking from an architecture and maintenance perspective.  It means we have multiple shotliners doing different things.  Both being maintained, both eventually being debugged.  Both with potentially completely disjoint sets of bugs.</p>",
+        "id": 207348336,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788611
+    },
+    {
+        "content": "<p>It's a green pasture fallacy.  One works with a code long enough to find a flaw.</p>",
+        "id": 207348351,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788639
+    },
+    {
+        "content": "<p>and then abandons using that code because of the flaw, in favor of something else less known but maybe known for that case</p>",
+        "id": 207348408,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788689
+    },
+    {
+        "content": "<p>that's literally the struggle mentality we have with the s2 folks that have been replicating their own geometry code instead of investing in one place.</p>",
+        "id": 207348498,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788766
+    },
+    {
+        "content": "<p>short term benefit, long term death</p>",
+        "id": 207348535,
+        "sender_full_name": "Sean",
+        "timestamp": 1597788817
+    },
+    {
+        "content": "<p>It's the src/libbg/trimesh_pt_in.c point-in-polyhedron test.  I ran it directly, side by side with the ray based inside/outside test and inspected reported differences - I'd be glad to ditch it if the issues with the ray test can be resolved, but I'm not sure yet  how to do that without potentially impacting performance in some other way or introducing other breakage.</p>",
+        "id": 207348816,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597789067
+    },
+    {
+        "content": "<p>(I remember when Keith tried to adjust our triangle intersection logic for small triangles and ended breaking the raytrace at larger scales, so I know it's not trivial...)</p>",
+        "id": 207349086,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597789256
+    },
+    {
+        "content": "<p>I know, that's why I didn't say anything when it was introduced, but those kinds of decisions do have significant consequence long term.  If there's not time to debug it when you have the error right in front of you and a task that's provoking it, when else will it ever be prioritized?  It simply won't and we end up with the duplication, complexity, and increasing costs.</p>",
+        "id": 207349215,
+        "sender_full_name": "Sean",
+        "timestamp": 1597789341
+    },
+    {
+        "content": "<p>it's a paper cut.  any one of them can be tolerated.</p>",
+        "id": 207349244,
+        "sender_full_name": "Sean",
+        "timestamp": 1597789369
+    },
+    {
+        "content": "<p>and then we spend months defending against things like particular three-letter systems that can be adapted and changed far more easily because they aren't having to maintain that kind of cruft.   and often have just as many or more issues,  just not yet noticed.</p>",
+        "id": 207349431,
+        "sender_full_name": "Sean",
+        "timestamp": 1597789549
+    },
+    {
+        "content": "<p>if someone came across it perusing code without knowing the history, they would be entirely justified replacing the perceived duplication without hesitation for something in bn or rt.  best we can hope for is putting up signs in the code that typically just scare away anyone but the original author from changing the code.</p>",
+        "id": 207350075,
+        "sender_full_name": "Sean",
+        "timestamp": 1597790034
+    },
+    {
+        "content": "<p>And I agree that's far from ideal, but I'm not sure what else to do.</p>",
+        "id": 207350270,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597790155
+    },
+    {
+        "content": "<p>could debug the small triangle case, understand what's failing (if it really is failing) and why (more importantly).  point in polyhedron is a very simple time-tested function in use throughout industry.  there's only a few variants that mostly center around when/how a particular division happens.</p>",
+        "id": 207350928,
+        "sender_full_name": "Sean",
+        "timestamp": 1597790543
+    },
+    {
+        "content": "<p>If ours is failing, it's probably related to floating point tolerances used in the implementation, not likely the algorithm itself.</p>",
+        "id": 207350995,
+        "sender_full_name": "Sean",
+        "timestamp": 1597790609
+    },
+    {
+        "content": "<p>I've taken an initial whack at the analyze command refactor here:  <a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/branches/analyze_cmd/src/libged/analyze/\">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/branches/analyze_cmd/src/libged/analyze/</a></p>\n<p>Current usage looks like:</p>\n<p>analyze obj.s ... - old behavior, except when obj.s matches a command name.<br>\nanalyze summarize obj.s ... - old behavior<br>\nanalyze intersect -o interior.pnts pnts.s sph.s ... - intersect pnts object with one or more volumes, generate output pnts object<br>\nanalyze subtract -o exterior.pnts pnts.s sph.s ... - subtract pnts from object that are inside one or more volumes, generate output pnts object.</p>\n<p>I also made a stab at cleaning up the inside/outside test - it's in op_pnts_vol.cpp, uses one backed out ray.</p>",
+        "id": 207482671,
+        "sender_full_name": "starseeker",
+        "timestamp": 1597889960
+    }
+]

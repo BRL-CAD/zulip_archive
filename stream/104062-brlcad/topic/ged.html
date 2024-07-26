@@ -1,0 +1,38 @@
+<html>
+<head><meta charset="utf-8"><title>ged · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html">ged</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="272030392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/272030392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#272030392">(Feb 15 2022 at 20:03)</a>:</h4>
+<p>Observation on the ged_exec changes - going that route, we're basically down to runtime-only detection of any errors in programmatic usage of libged.  I was originally hesitant to go ged_exec only, on the theory that at least with ged_zap et. al. being explicitly called out we would have a modicum of validation that the code was calling something that is intended to be present in libged.  I'm not opposed to going with the simpler route, but I just want to make sure and call out that we are moving to a runtime-only-validation configuration.  I know we already had that anyway with GED argc/argv argument processing, so in one sense it's not a huge change, but since it does lose us that "compiler checking the command name is valid" insight I wanted to mention it.</p>
+
+
+
+<a name="272032424"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/272032424" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#272032424">(Feb 15 2022 at 20:21)</a>:</h4>
+<p>I think with everything being dynamically loaded, it really makes the most sense.  Otherwise, it's already really a dynamic call and the only saving grace is that we had to violate modularity to expose it.</p>
+
+
+
+<a name="272032494"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/272032494" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#272032494">(Feb 15 2022 at 20:21)</a>:</h4>
+<p>They're technically already dynamic in a sense because of the automatic wrapper calling into ged_exec(), the only difference being the wrapper serving as a potential debugger breakpoint, but the actual call was still subject to whatever was put into argv[0].  architecturally the work was still happening dynamically.</p>
+
+
+
+<a name="272032937"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/272032937" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#272032937">(Feb 15 2022 at 20:25)</a>:</h4>
+<p>I think the big win is modularity.  Having every plugin have to be defined inside libged really defeats having everything in one place and propagates solutions like the mged/setup.c and tclcad/commands.c listings when they can/should just call exec. </p>
+<p>Plus the plugins themselves can still define a public ged_cmd function now if they want, and that will work.  They can be prebound into one library or linked against individually.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

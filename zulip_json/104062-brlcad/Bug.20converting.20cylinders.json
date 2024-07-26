@@ -1,0 +1,344 @@
+[
+    {
+        "content": "<p>As I did not understand how to proceed in the above problem, I tried another task from the Deuces page,  2.1.5,  <a href=\"https://brlcad.org/wiki/Deuces#Debug_and_fix_a_bug_converting_cylinders\">https://brlcad.org/wiki/Deuces#Debug_and_fix_a_bug_converting_cylinders</a><br>\nWhen I ran this <code> dbupgrade -r cylinder.g </code> it gave  <code> Usage: bin/dbupgrade [-f] input.g output.g </code><br>\nIf I run it with  <code> bin/dbupgrade -r cylinder.g output.g </code>  it gave <code>     _GLOBAL not supported in version 4 databases, not converted\n0 objects failed to convert </code><br>\nHow do I reproduce the bug mentioned in the task?</p>",
+        "id": 218881096,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607110554
+    },
+    {
+        "content": "<p>Could someone help me in reproducing this bug?</p>",
+        "id": 218971676,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235109
+    },
+    {
+        "content": "<p>Did you run the \"l\" command in mged before and after?</p>",
+        "id": 218971723,
+        "sender_full_name": "Sean",
+        "timestamp": 1607235187
+    },
+    {
+        "content": "<p>Yes i did, but the dbupgarde itself failed. So I dont think I reproduced the bug correctly</p>",
+        "id": 218971900,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235540
+    },
+    {
+        "content": "<p>where's the dbupgrade failure message?</p>",
+        "id": 218971907,
+        "sender_full_name": "Sean",
+        "timestamp": 1607235572
+    },
+    {
+        "content": "<p>what you pasted doesn't show one</p>",
+        "id": 218971909,
+        "sender_full_name": "Sean",
+        "timestamp": 1607235585
+    },
+    {
+        "content": "<p>Wait let me run it once again and tell you what output I got exactly</p>",
+        "id": 218971959,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235678
+    },
+    {
+        "content": "<p>First I entered \"dbupgrade -r cylinder.g \" as was given in the task</p>",
+        "id": 218972016,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235806
+    },
+    {
+        "content": "<p>Usage: bin/dbupgrade [-f] input.g output.g<br>\nThis was the output</p>",
+        "id": 218972020,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235826
+    },
+    {
+        "content": "<p>Then i entered : \"bin/dbupgrade -r cylinder.g output10.g\"</p>",
+        "id": 218972085,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235888
+    },
+    {
+        "content": "<p>This was the output: \"_GLOBAL not supported in version 4 databases, not converted, 0 objects failed to convert\"</p>",
+        "id": 218972097,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607235919
+    },
+    {
+        "content": "<p>yes... that all expected</p>\n<p>the first time, the usage was wrong.</p>\n<p>the second time, it worked .... \"0 objects failed to convert\"</p>",
+        "id": 218972271,
+        "sender_full_name": "Sean",
+        "timestamp": 1607236283
+    },
+    {
+        "content": "<p>the message about _GLOBAL is just informative as the -r flag is downgrading the database to a previous format that does not support _GLOBAL</p>",
+        "id": 218972320,
+        "sender_full_name": "Sean",
+        "timestamp": 1607236348
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/218972271\">said</a>:</p>\n<blockquote>\n<p>the second time, it worked .... \"0 objects failed to convert\"</p>\n</blockquote>\n<p>OMG sorry, I did not read it correctly. I did not focus on the 0 :P</p>",
+        "id": 218972325,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607236383
+    },
+    {
+        "content": "<p>reproduced the bug, Thanks</p>",
+        "id": 218972425,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607236538
+    },
+    {
+        "content": "<p>So in this, What does dbupgrade do?</p>",
+        "id": 219748724,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607843813
+    },
+    {
+        "content": "<p>typically it upgrades BRL-CAD format geometry data files from v4 format to v5 format.  With the -r flag, it does the reverse and downgrades a v5 format file into v4 format.</p>",
+        "id": 219749052,
+        "sender_full_name": "Sean",
+        "timestamp": 1607844439
+    },
+    {
+        "content": "<p>Ohk</p>",
+        "id": 219749103,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1607844485
+    },
+    {
+        "content": "<p>WHen I do <code> l rhc </code> what code is going to run?</p>",
+        "id": 219940071,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1608010911
+    },
+    {
+        "content": "<p>you can follow it from src/mged/setup.c - the mged_cmdtab translates the string into the first function to call</p>",
+        "id": 219991273,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608044738
+    },
+    {
+        "content": "<p>Ohh cool</p>",
+        "id": 220007022,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1608050744
+    },
+    {
+        "content": "<p>specifically, the 'l' command translates into ged_list() which is in src/libged/list/list.c</p>",
+        "id": 220050965,
+        "sender_full_name": "Sean",
+        "timestamp": 1608070676
+    },
+    {
+        "content": "<p>just in case you had trouble following the logic there.  setup.c registers a function callback, so when user types \"l\" it'll call that function.</p>",
+        "id": 220051129,
+        "sender_full_name": "Sean",
+        "timestamp": 1608070741
+    },
+    {
+        "content": "<p>Could someone help me with using a debugger for src code, like I know how to use it for small programs which are in 1 file.<br>\nMaybe you could send a link which explains this</p>",
+        "id": 220147805,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1608140579
+    },
+    {
+        "content": "<p>I want to log a variable for debugging, How do i do that? (bu_log works only for strings afaik)</p>",
+        "id": 221195730,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1609313601
+    },
+    {
+        "content": "<p>Ignore the above msg.<br>\nI think I have solved this bug, there was a small mistake with the management of <code>rhc_c</code> variable. The <code> l rhc </code> command works fine now, Should i test this in any other way?</p>",
+        "id": 221284784,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1609414614
+    },
+    {
+        "content": "<p>Could anyone tell me how I could test the fix I've made or if  <code>l rhc</code> has passed its sufficient?</p>",
+        "id": 222265688,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1610349352
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"353338\">@Vikram Atreya</span> did you figure out that bu_log() is the same as printf()?</p>",
+        "id": 224926892,
+        "sender_full_name": "Sean",
+        "timestamp": 1612295689
+    },
+    {
+        "content": "<p>If the \"l\" output is identical, that's a pretty good indication that you fixed the issue.  The only testing required would be a try a couple different rhc parameters to make sure the before/after looks the same.</p>",
+        "id": 224927341,
+        "sender_full_name": "Sean",
+        "timestamp": 1612295863
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224926892\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"353338\">Vikram Atreya</span> did you figure out that bu_log() is the same as printf()?</p>\n</blockquote>\n<p>Yeah I did :)</p>",
+        "id": 224970171,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612323340
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224927341\">said</a>:</p>\n<blockquote>\n<p>If the \"l\" output is identical, that's a pretty good indication that you fixed the issue.  The only testing required would be a try a couple different rhc parameters to make sure the before/after looks the same.</p>\n</blockquote>\n<p>Will do</p>",
+        "id": 224970176,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612323349
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"353338\">@Vikram Atreya</span> let me know when you have a patch to review and I'll take a look at it.</p>",
+        "id": 224970320,
+        "sender_full_name": "Sean",
+        "timestamp": 1612323546
+    },
+    {
+        "content": "<p>Cool</p>",
+        "id": 224970423,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612323654
+    },
+    {
+        "content": "<p>I created a ticket for the patch , #562</p>",
+        "id": 224973945,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612328659
+    },
+    {
+        "content": "<p>Wow, seriously good find <span class=\"user-mention\" data-user-id=\"353338\">@Vikram Atreya</span>...  That was  a pretty obscure well-hidden bug!</p>",
+        "id": 224975837,
+        "sender_full_name": "Sean",
+        "timestamp": 1612331050
+    },
+    {
+        "content": "<p>Your fix looks right to me.  The old import4/export4 code is what serializes data to/from disk.  It was writing it out in one position, but then reading it back from a different (wrong) position from the serialized bytes.</p>",
+        "id": 224975903,
+        "sender_full_name": "Sean",
+        "timestamp": 1612331138
+    },
+    {
+        "content": "<p>You'll be credited with this fix in our next public release.  Well done, again!</p>",
+        "id": 224975985,
+        "sender_full_name": "Sean",
+        "timestamp": 1612331176
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224975985\">said</a>:</p>\n<blockquote>\n<p>You'll be credited with this fix in our next public release.  Well done, again!</p>\n</blockquote>\n<p>Thank you <span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>",
+        "id": 224979627,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612334871
+    },
+    {
+        "content": "<p>U gave me 2 bugs which I could try solving back in Nov I think, I gave up on the first one :P as i dint have a lot of time back then. Also i would like to apply for GSoC this year. So based on that could you give me something to work upon?</p>",
+        "id": 224980368,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612335544
+    },
+    {
+        "content": "<p>certainly.  what kind of coding interests you?</p>",
+        "id": 224980384,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335580
+    },
+    {
+        "content": "<p>Umm what do you mean by kind? like debugging, new code etc?</p>",
+        "id": 224980462,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612335612
+    },
+    {
+        "content": "<p>there are all different kinds of coding, like low-level logic, or networking, or high performance optimization, or multithreading, or graphics, or interesting algorithms, or high level GUI work, or ....</p>",
+        "id": 224980585,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335751
+    },
+    {
+        "content": "<p>if you're unsure, that's an answer too and we can find something relatively self-contained.</p>",
+        "id": 224980599,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335784
+    },
+    {
+        "content": "<p>did you have ideas on what you intended to propose for gsoc?</p>",
+        "id": 224980632,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335799
+    },
+    {
+        "content": "<p>do you have strong feelings on C vs C++ vs Python vs ...</p>",
+        "id": 224980653,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335828
+    },
+    {
+        "content": "<p>I like interesting algorithms for sure, dont have any idea regarding high level GUI and multithreading</p>",
+        "id": 224980657,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612335835
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224980653\">said</a>:</p>\n<blockquote>\n<p>do you have strong feelings on C vs C++ vs Python vs ...</p>\n</blockquote>\n<p>Nothing like that, I am fine with all 3 languages</p>",
+        "id": 224980700,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612335852
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224980632\">said</a>:</p>\n<blockquote>\n<p>did you have ideas on what you intended to propose for gsoc?</p>\n</blockquote>\n<p>Not yet</p>",
+        "id": 224980711,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612335867
+    },
+    {
+        "content": "<p>any particular technology like opengl, opencl, pthreading, intel tbb, <br>\n...</p>",
+        "id": 224980714,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335869
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224980714\">said</a>:</p>\n<blockquote>\n<p>any particular technology like opengl, opencl, pthreading, intel tbb, <br>\n...</p>\n</blockquote>\n<p>I dont know any of them now, but im learning openGL as part of a course in college this semester.</p>",
+        "id": 224980739,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612335917
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"353338\">Vikram Atreya</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224980657\">said</a>:</p>\n<blockquote>\n<p>I like interesting algorithms for sure, dont have any idea regarding high level GUI and multithreading</p>\n</blockquote>\n<p>That's good to know -- I suggest leaning on your strengths and what you know for starters.</p>",
+        "id": 224980747,
+        "sender_full_name": "Sean",
+        "timestamp": 1612335929
+    },
+    {
+        "content": "<p>BRL-CAD can be complex and intimidating enough as it is to learn what is what and where things are to add new unknown technologies into the mix also (at least for GSoC -- on your own, do whatever you love).</p>",
+        "id": 224980814,
+        "sender_full_name": "Sean",
+        "timestamp": 1612336002
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"353338\">@Vikram Atreya</span> I suggest starting by reading over our previous GSoC years and see if any of those projects sound really interesting to you.  they're all on the wiki at <a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/YEAR\">https://brlcad.org/wiki/Google_Summer_of_Code/YEAR</a> where YEAR is 2019, 2018, 2017, etc.</p>",
+        "id": 224980927,
+        "sender_full_name": "Sean",
+        "timestamp": 1612336129
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/Bug.20converting.20cylinders/near/224980927\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"353338\">Vikram Atreya</span> I suggest starting by reading over our previous GSoC years and see if any of those projects sound really interesting to you.  they're all on the wiki at <a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/YEAR\">https://brlcad.org/wiki/Google_Summer_of_Code/YEAR</a> where YEAR is 2019, 2018, 2017, etc.</p>\n</blockquote>\n<p>Sure, I will get back if i find something interesting</p>",
+        "id": 224980961,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612336172
+    },
+    {
+        "content": "<p>picking up where someone else left off, or redoing their work if it wasn't successful, is always of interest in order to not start anew</p>",
+        "id": 224981013,
+        "sender_full_name": "Sean",
+        "timestamp": 1612336204
+    },
+    {
+        "content": "<p><a href=\"https://brlcad.org/wiki/\">https://brlcad.org/wiki/</a> <br>\nis not opening</p>",
+        "id": 225126113,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612422966
+    },
+    {
+        "content": "<p>Now its working</p>",
+        "id": 225136769,
+        "sender_full_name": "Vikram Atreya",
+        "timestamp": 1612431232
+    }
+]

@@ -1,0 +1,146 @@
+[
+    {
+        "content": "<p>i've tried running the tests, and regressions from 829 onwards are timing out</p>",
+        "id": 128791418,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530216408
+    },
+    {
+        "content": "<p>it works fine for me here</p>",
+        "id": 128791777,
+        "sender_full_name": "Saran Narayan",
+        "timestamp": 1530216892
+    },
+    {
+        "content": "<p><a href=\"https://hastebin.com/ejokomojaf\" target=\"_blank\" title=\"https://hastebin.com/ejokomojaf\">https://hastebin.com/ejokomojaf</a></p>",
+        "id": 128791824,
+        "sender_full_name": "Saran Narayan",
+        "timestamp": 1530216959
+    },
+    {
+        "content": "<p>hmm... ok, then the error is on my end. thanks</p>",
+        "id": 128792807,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530218105
+    },
+    {
+        "content": "<p>i tried running the tests, and the rtwizard regressions fail (853 to 859, from A to F + edge only)</p>",
+        "id": 130342649,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532610901
+    },
+    {
+        "content": "<p>yes, and I confirmed they fail too a while back.  they look like genuine regressions that somehow only affect mac</p>",
+        "id": 130343494,
+        "sender_full_name": "Sean",
+        "timestamp": 1532611675
+    },
+    {
+        "content": "<p>are you referring to our previous discussion? because then, only D was failing. the others were fine</p>",
+        "id": 130343559,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532611729
+    },
+    {
+        "content": "<p>ah, good point -- the disease is spreading</p>",
+        "id": 130344524,
+        "sender_full_name": "Sean",
+        "timestamp": 1532612635
+    },
+    {
+        "content": "<p>the new ones may be unrelated, will have to check them</p>",
+        "id": 130344570,
+        "sender_full_name": "Sean",
+        "timestamp": 1532612651
+    },
+    {
+        "content": "<p>I still have those regression failures from months ago and I'm on Linux</p>",
+        "id": 130528685,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532878891
+    },
+    {
+        "content": "<p>rtwizard regressions? or others? also, what linux + compiler?</p>",
+        "id": 130528972,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532879441
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>$ gcc -v\nUsing built-in specs.\nCOLLECT_GCC=gcc\nCOLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-pc-linux-gnu/8.1.1/lto-wrapper\nTarget: x86_64-pc-linux-gnu\nConfigured with: /build/gcc/src/gcc/configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=https://bugs.archlinux.org/ --enable-languages=c,c++,ada,fortran,go,lto,objc,obj-c++ --enable-shared --enable-threads=posix --enable-libmpx --with-system-zlib --with-isl --enable-__cxa_atexit --disable-libunwind-exceptions --enable-clocale=gnu --disable-libstdcxx-pch --disable-libssp --enable-gnu-unique-object --enable-linker-build-id --enable-lto --enable-plugin --enable-install-libiberty --with-linker-hash-style=gnu --enable-gnu-indirect-function --enable-multilib --disable-werror --enable-checking=release --enable-default-pie --enable-default-ssp\nThread model: posix\ngcc version 8.1.1 20180531 (GCC)\n</pre></div>\n\n\n<div class=\"codehilite\"><pre><span></span>The following tests FAILED:\n      1 - NOTE: some &#39;test&#39; tests are expected to fail, &#39;regress&#39; must pass (Failed)\n    824 - regress-solids (Failed)\n    828 - regress-weight (Failed)\n    831 - regress-usage (Timeout)\n    853 - regress-rtwizard-rtwiz_m35_A (Timeout)\n    854 - regress-rtwizard-rtwiz_m35_B (Timeout)\n    855 - regress-rtwizard-rtwiz_m35_C (Timeout)\n    856 - regress-rtwizard-rtwiz_m35_D (Timeout)\n    857 - regress-rtwizard-rtwiz_m35_E (Timeout)\n    858 - regress-rtwizard-rtwiz_m35_F (Timeout)\n    859 - regress-rtwizard-rtwiz_m35_edge_only (Timeout)\n    860 - regress-rtwizard-rtwiz_m35_edge_only_color (Timeout)\n</pre></div>",
+        "id": 130529758,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532881144
+    },
+    {
+        "content": "<p>i could try it with Clang if necessary</p>",
+        "id": 130530114,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532881179
+    },
+    {
+        "content": "<p>you can try to <code>ctest -V -I 831,831</code> for example, to get more info on why 831 is timing out</p>",
+        "id": 130533274,
+        "sender_full_name": "Cezar",
+        "timestamp": 1532886604
+    },
+    {
+        "content": "<p><a href=\"https://sourceforge.net/p/brlcad/code/71347/#diff-4\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/71347/#diff-4\">in r71347</a>, <code>rt</code> was made to return 0 when (extended?) usage is printed, causing <code>regress-usage</code> to fail (it expects <code>rt -?</code> to have exit code 1). i changed <code>rt</code> to return 1 when the extended usage is printed, but i'm not sure if this is the way to go (if i should've changed the test instead)</p>",
+        "id": 130934744,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533482573
+    },
+    {
+        "content": "<p>some tests are failing on my computer (814, 817, 822). i've traced the problem to running <code>make sph sph</code> inside <code>mged</code>. i've traced the problem to <code>mged/chgmodel.c:f_make</code>, which expands the command to <code>make -o -0 -0 -0 -s 1000 sph sph</code>. after that, <code>ged_make</code> tries to parse <code>-o</code> and expects an argument to <code>-o</code>, but then sees that <code>-0</code> starts with a minus and thinks that <code>-o</code> received no arguments</p>",
+        "id": 130973943,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533556703
+    },
+    {
+        "content": "<p>i don't know why the tests are failing now (a few weeks ago they did not), and i don't know what the proper fix is. what i did was to remove the <code>-</code> from <code>sprintf</code> in <code>f_make</code>, but there are other places in the code which also put the minus there, and i think minus goes in the opposite direction, so it changes the logic if you remove it</p>",
+        "id": 130974050,
+        "sender_full_name": "Cezar",
+        "timestamp": 1533556843
+    },
+    {
+        "content": "<blockquote>\n<p><a href=\"https://sourceforge.net/p/brlcad/code/71347/#diff-4\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/71347/#diff-4\">in r71347</a>, <code>rt</code> was made to return 0 when (extended?) usage is printed, causing <code>regress-usage</code> to fail (it expects <code>rt -?</code> to have exit code 1). i changed <code>rt</code> to return 1 when the extended usage is printed, but i'm not sure if this is the way to go (if i should've changed the test instead)</p>\n</blockquote>\n<p>I think the test should be updated.  The user requested help and the tool did exactly that, no error.  Non-zero is supposed to imply something went wrong, not just whenever usage is printed.</p>",
+        "id": 130987279,
+        "sender_full_name": "Sean",
+        "timestamp": 1533570961
+    },
+    {
+        "content": "<blockquote>\n<p>some tests are failing on my computer (814, 817, 822). i've traced the problem to running <code>make sph sph</code> inside <code>mged</code>. i've traced the problem to <code>mged/chgmodel.c:f_make</code>, which expands the command to <code>make -o -0 -0 -0 -s 1000 sph sph</code>. after that, <code>ged_make</code> tries to parse <code>-o</code> and expects an argument to <code>-o</code>, but then sees that <code>-0</code> starts with a minus and thinks that <code>-o</code> received no arguments</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"106398\">@Cezar</span> that failure is my fault, I'm working on it -- support was added for optional commands but it affected other behavior.</p>",
+        "id": 130987891,
+        "sender_full_name": "Sean",
+        "timestamp": 1533571563
+    },
+    {
+        "content": "<p>unit tests are doing their job :)</p>",
+        "id": 130987898,
+        "sender_full_name": "Sean",
+        "timestamp": 1533571569
+    },
+    {
+        "content": "<p>just FYI, looks like I'm finally getting to the bottom of the apparent rabbit hole fixing the integration issues of recent.  there's still an issue that affects my testing on linux, but I should have the regression failures knocked back out soon, this week.</p>",
+        "id": 284772325,
+        "sender_full_name": "Sean",
+        "timestamp": 1654188529
+    },
+    {
+        "content": "<p><span aria-label=\"tada\" class=\"emoji emoji-1f389\" role=\"img\" title=\"tada\">:tada:</span></p>",
+        "id": 284774164,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654189380
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I know there's been a lot going on - just curious where the regression fixes are in the queue?</p>",
+        "id": 289888407,
+        "sender_full_name": "starseeker",
+        "timestamp": 1658069050
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> they're top of the queue now that last week is done, so my fingers are crossed for knocking them out</p>",
+        "id": 289917106,
+        "sender_full_name": "Sean",
+        "timestamp": 1658112246
+    }
+]

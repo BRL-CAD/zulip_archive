@@ -1,0 +1,2360 @@
+[
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span>, it's better to discuss here so everyone is aware of the conversation.  The 2016 and 2017 projects that you linked to are not what I was referring to.  The two different idea directions would be to work on polygonal boolean evaluation or NURBS boolean evaluation, which have aspects in these projects:</p>",
+        "id": 277754743,
+        "sender_full_name": "Sean",
+        "timestamp": 1649088610
+    },
+    {
+        "content": "<p><strong>NURBS boolean evaluation:</strong><br>\n<a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/2013#NURBS_Intersections\">https://brlcad.org/wiki/Google_Summer_of_Code/2013#NURBS_Intersections</a><br>\n<a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/2012#Implicit_to_NURBS_Conversion\">https://brlcad.org/wiki/Google_Summer_of_Code/2012#Implicit_to_NURBS_Conversion</a><br>\n<a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/2009#Hybrid_Representation_through_BREP_on_BREP_CSG\">https://brlcad.org/wiki/Google_Summer_of_Code/2009#Hybrid_Representation_through_BREP_on_BREP_CSG</a><br>\n<a href=\"https://brlcad.org/wiki/NURBS_Booleans\">https://brlcad.org/wiki/NURBS_Booleans</a></p>\n<p><strong>Polygonal boolean evaluation (and editing):</strong><br>\n<a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/2015#NMG_.2F_BoT_Editing\">https://brlcad.org/wiki/Google_Summer_of_Code/2015#NMG_.2F_BoT_Editing</a><br>\n<a href=\"https://brlcad.org/wiki/Google_Summer_of_Code/2014#Mesh_Library_Cleanup\">https://brlcad.org/wiki/Google_Summer_of_Code/2014#Mesh_Library_Cleanup</a><br>\n<a href=\"https://brlcad.org/wiki/Mesh_library_cleanup\">https://brlcad.org/wiki/Mesh_library_cleanup</a></p>",
+        "id": 277755653,
+        "sender_full_name": "Sean",
+        "timestamp": 1649089052
+    },
+    {
+        "content": "<p>Also of relevance to the big picture for NURBS with anything related being suitable and on-topic is <a href=\"https://brlcad.org/wiki/NURBS\">https://brlcad.org/wiki/NURBS</a></p>",
+        "id": 277755719,
+        "sender_full_name": "Sean",
+        "timestamp": 1649089081
+    },
+    {
+        "content": "<p>For mesh booleans (which are properly speaking a subset of the NURBS boolean problem) I believe there have been a number of academic papers since the last time BRL-CAD looked into the matter - those would be worth looking into if there is interest in that topic.</p>",
+        "id": 277779276,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649099113
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> OK,I am looking into the references, and looking for papers to understand the aspects.</p>",
+        "id": 277838194,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649144127
+    },
+    {
+        "content": "<p>Are these two missions more urgent than Nurbes editing? If so, I am willing to choose topics based on a combination of urgency and personal interests.</p>",
+        "id": 277838378,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649144258
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> Some starting points for papers:  <a href=\"https://arxiv.org/pdf/2103.02486.pdf\">https://arxiv.org/pdf/2103.02486.pdf</a>  <a href=\"https://dl.acm.org/doi/abs/10.1145/2897824.2925901\">https://dl.acm.org/doi/abs/10.1145/2897824.2925901</a></p>",
+        "id": 277875160,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649164036
+    },
+    {
+        "content": "<p>I think the <a href=\"http://arxiv.org\">arxiv.org</a> paper is the newest.  I've not dug into these in detail to see how much work they would be to implement.</p>",
+        "id": 277875589,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649164212
+    },
+    {
+        "content": "<p>Note those are specifically for going down the polygonal route, but they are indeed excellent relevant current research on the topic.</p>",
+        "id": 277894221,
+        "sender_full_name": "Sean",
+        "timestamp": 1649171704
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> \"urgency\" isn't quite an appropriate term.  I would absolutely say robust export and graphical display is higher priority as it impacts so much, but if NURBS editing is what excites you the most and is most familiar to you, then that is what you should propose.  Open source is often about scratching your own itch.</p>",
+        "id": 277894567,
+        "sender_full_name": "Sean",
+        "timestamp": 1649171841
+    },
+    {
+        "content": "<p>Currently, polygonal export in BRL-CAD is around 95% reliable, which means any given model with 100+ objects is going to have several objects that fail to export to other formats such as STL, OBJ, 3DM, etc.  It really needs to be 99.99999% reliable.. (one in a million failure rate).  But that's an NP-complete problem and the reason why it's still an area of research.  It's hard to implement something robust and without caveats.  So that's why that's an interesting project -- you could A) propose implementing something new based on current research, or you could B) propose expanding our current implementation(e.g., utilize an existing library) with a new evaluation method, or you could C) propose approaching this from a TDD perspective and work on systematically proving each of the functions in libnmg is robust.</p>",
+        "id": 277895779,
+        "sender_full_name": "Sean",
+        "timestamp": 1649172299
+    },
+    {
+        "content": "<p>NURBS geometry is our newest major feature addition, so it's more about improving usability.  We can import NURBS, but then someone can edit it with a Boolean operation (e.g., subtract a cylinder) and we need to be able to evaluate it.  That's useful for 3D display as well as basic export.  It's also related to polygonal Booleans in that if implicit geometry (e.g., sphere UNION cylinder) can be converted to NURBS (e.g., sphere.brep UNION cylinder.brep), and Boolean evaluation on NURBS is robust (i.e., sphere.brep UNION cylinder.brep -&gt; newobject.brep), then conversion to polygons (ie.., newobject.brep -&gt; newobject.triangles) will also be robust.  This is a far superior method of Boolean evaluation that avoids trying to evaluate in polygonal space.</p>",
+        "id": 277897006,
+        "sender_full_name": "Sean",
+        "timestamp": 1649172765
+    },
+    {
+        "content": "<p>NURBS being new means it has a number of other areas of high-impact potential too -- including editing.  There currently exists no way to edit them outside of Boolean operations with other geometry, so it would be useful to have that.  It'd also be very useful if they could be raytraced faster (i.e., the existing implementation is currently unoptimized).  So there are lots of possibilities!</p>",
+        "id": 277897504,
+        "sender_full_name": "Sean",
+        "timestamp": 1649172962
+    },
+    {
+        "content": "<p>Thanks for your papers and reply. I totally understand and agree with you. It’s clear they are in high priority because of their importancy. As you say, polygonal export is a pioneering work and an interesting work, which also means it’s not realistic to come to a feasible proposal before April 20.</p>",
+        "id": 277964443,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649207589
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 277964449,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649207600
+    },
+    {
+        "content": "<p>I’m now committed to NURBS geometry. I have read previous GSOC work and wiki, get to know it better, but I still need some time to investigate existing functionality and read papers before make useful comments.</p>",
+        "id": 277964530,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649207681
+    },
+    {
+        "content": "<p>Accoding to issues in <a href=\"https://brlcad.org/wiki/NURBS\">wiki</a>, I have investigated and concluded the following two aspects</p>",
+        "id": 278405041,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649503833
+    },
+    {
+        "content": "<p><strong>aspect1: tessellation from splines</strong></p>\n<p>usage: Coverting BREP model to triangle mesh is very helpful in real-time visualization and ray tracing. They may also serve as the basis for generation of analysis suitable meshes by either providing a starting mesh or by facilitating its sizing field and gradation. </p>\n<p>method: Following <a href=\"https://www.sciencedirect.com/science/article/pii/S0010448515000032\">reference 3</a>, implement a robustly approximate CAD surfaces that define the boundary of complicated three dimensional geometric shapes with a minimum number of triangles NURBS tessellation method.</p>\n<p>references:</p>\n<ol>\n<li><a href=\"https://arc.aiaa.org/doi/pdf/10.2514/6.2018-1402\">A Review of Common Geometry Issues Affecting Mesh Generation 2018</a></li>\n<li><a href=\"http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.142.3042\">Efficient trimmed nurbs tessellation 2004</a></li>\n<li><a href=\"https://www.sciencedirect.com/science/article/pii/S0010448515000032\">A robust conforming NURBS tessellation for industrial applications based on a mesh generation approach</a></li>\n</ol>",
+        "id": 278405047,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649503863
+    },
+    {
+        "content": "<p><strong>aspect2:  Implicit boolean operation</strong></p>\n<p>(why not explicit? because I saw it in previous GSoC and I’m not sure is it still under developing)</p>\n<p>usage: In many applications concerning the analysis of multi-body interactions as in analysis of contact between two bodies,often it is not required to explicitly compute the intersection between interacting B-rep CAD models. Besides, I think the bounding box build is useful in ray tracing for plate model.</p>\n<p>method: Following <a href=\"https://www.sciencedirect.com/science/article/pii/S0010448516301129?casa_token=HlewySw5SJwAAAAA:vjFipBiA3Xw89bEUZ5bsGSVhnVX7RVVrMtoprU_BQ61m2QQQzTQXt1gzzN8smCPSrle-a04nrcM\">reference 1</a>, implement a purely algebraic, and therefore non-iterative, approach to carrying out point containment queries on complex B-rep models built using low-degree NURBS surfaces.</p>\n<p>references:</p>\n<ol>\n<li><a href=\"https://www.sciencedirect.com/science/article/pii/S0010448516301129?casa_token=HlewySw5SJwAAAAA:vjFipBiA3Xw89bEUZ5bsGSVhnVX7RVVrMtoprU_BQ61m2QQQzTQXt1gzzN8smCPSrle-a04nrcM\">Signed algebraic level sets on NURBS surfaces and implicit Boolean compositions for isogeometric CAD–CAE integration 2017</a></li>\n<li><a href=\"https://www.sciencedirect.com/science/article/pii/S0010448511002211\">GPU-accelerated Hausdorff distance computation between dynamic deformable NURBS surfaces</a></li>\n</ol>",
+        "id": 278405067,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649503885
+    },
+    {
+        "content": "<p>These are outlines of my current ideas, I don't know whether they are developing or useful in the big picture of NURBS. If any of them is suitable, I will investigate in more detail and make a  detailed proposal.</p>",
+        "id": 278405450,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649504256
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> I'm impressed with your thoroughness.  It's giving some reassurances that you will propose something good.  Keep it up! ;)</p>",
+        "id": 278414887,
+        "sender_full_name": "Sean",
+        "timestamp": 1649517541
+    },
+    {
+        "content": "<p>so for aspect1 and aspect2 it will be import to realize that brl-cad has nurbs tessellation and nurbs booleans respectively, they're just incomplete or not as robust as they need to be.  So familiarizing yourself with their current status will be essential in scoping what exactly you plan to do so that you either take the existing implementation into consideration, or have a good reason for ignoring what's there to implement a different method.</p>",
+        "id": 278414989,
+        "sender_full_name": "Sean",
+        "timestamp": 1649517697
+    },
+    {
+        "content": "<p>I have a general sense that the existing nurbs tessellation implementation is actually pretty good for visual purposes -- just not necessarily for export where it's supposed to guarantee that if an object is solid, that it's tessellation is also solid.</p>",
+        "id": 278415449,
+        "sender_full_name": "Sean",
+        "timestamp": 1649518360
+    },
+    {
+        "content": "<p>I do know the boolean evaluation support is pretty far along also, but definitely needs more work.  we even have documentation explaining where it's at.  if you read the \"NURBS Boolean Evaluation Development Guide\" it's a docbook article in our repo (bool_eval_development.html)</p>",
+        "id": 278415478,
+        "sender_full_name": "Sean",
+        "timestamp": 1649518426
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Lu5svw5lS-xMohM--jjBzcX2/NURBS-Boolean-Evaluation-Development-Guide.pdf\">NURBS-Boolean-Evaluation-Development-Guide.pdf</a>  It's in the source repo, but here's the doc in pdf form.</p>",
+        "id": 278415806,
+        "sender_full_name": "Sean",
+        "timestamp": 1649518893
+    },
+    {
+        "content": "<p>So proposing something/anything that extends that effort would be golden.  Especially if you can submit something related to it, even if it's a simple unit test or demonstrates an approach or improves it in any way.</p>",
+        "id": 278415868,
+        "sender_full_name": "Sean",
+        "timestamp": 1649518967
+    },
+    {
+        "content": "<p>that guide is exquisitely detailed, but if it's too overwhelming, you can always fall back on implementing a CLI editing interface</p>",
+        "id": 278415895,
+        "sender_full_name": "Sean",
+        "timestamp": 1649519027
+    },
+    {
+        "content": "<p>I have noticed that the NURBS Tessellation part is in src/librt/primitives/nmg/nmg_tri.c, using Marching Cube(MC) algorithm. I see there is a rough game plan in the notes of the file, but it hasn’t updated for years.</p>",
+        "id": 278519461,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649664146
+    },
+    {
+        "content": "<p>Luckly I just had looked into the MC algorithm. MC is popular for its simplicity, robustness and efficiency, but the origin MC algorithm (also the current brl-cad method) is not enough to generate a high quality mesh. Here are some up-to-date MC algorithms listed in the references. The advantages are:</p>\n<ol>\n<li>Make sure the manifold and topological correct of the mesh generrated. (the most important)</li>\n<li>The difference in calculation time is tiny(about 3% according to <a href=\"https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.12975\">ref 1</a>), because most of the cases handled are the same.</li>\n<li>For further development, maybe using octrees to set parameters to generate scaleable mesh. </li>\n</ol>\n<p>So for the usage of the project, it can be used as export generated triangle meshes from NURBS. And maybe it also can be used in visual.</p>",
+        "id": 278519498,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649664185
+    },
+    {
+        "content": "<p>references:</p>\n<ol>\n<li><em><strong><em><a href=\"https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.12975\">Construction of Topologically Correct and Manifold Isosurfaces 2016</a></em></strong></em></li>\n<li><a href=\"https://link.springer.com/article/10.1186/s13173-019-0086-6\">**An extended triangulation to the Marching Cubes 33 algorithm 2019**</a></li>\n<li><a href=\"https://arxiv.org/pdf/2005.11621.pdf\">**ManifoldPlus: A Robust and Scalable Watertight Manifold Surface Generation Method for Triangle Soups 2020**</a></li>\n</ol>",
+        "id": 278519613,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649664266
+    },
+    {
+        "content": "<p>MC is kind of sucky, imho.</p>\n<p>the code you're looking at in nmg is not the right/current code, that was a nurbs implementation done in the late 80's early 90's.</p>",
+        "id": 278519765,
+        "sender_full_name": "Sean",
+        "timestamp": 1649664402
+    },
+    {
+        "content": "<p>you'll want to look at libbrep for current nurbs code, and it's corresponding entity is the 'brep' primitive (so look in src/librt/primitives/brep)</p>",
+        "id": 278519828,
+        "sender_full_name": "Sean",
+        "timestamp": 1649664449
+    },
+    {
+        "content": "<p>src/libbrep is where most of the logic resides, notably the large intersect.cpp and boolean.cpp files.</p>",
+        "id": 278519904,
+        "sender_full_name": "Sean",
+        "timestamp": 1649664486
+    },
+    {
+        "content": "<p>the idea with nurbs booleans is that evaluation happens in the original nurbs boundary representation (brep) space, not in polygonal space.  so sampling methods like MC aren't even necessary and the evaluated result is quite superior.</p>",
+        "id": 278520116,
+        "sender_full_name": "Sean",
+        "timestamp": 1649664624
+    },
+    {
+        "content": "<p>OK... Do you think tessellation part still needs developing?</p>",
+        "id": 278520203,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649664690
+    },
+    {
+        "content": "<p>when working with NURBS, the only place where polygons are involved in any way is for display meshes (e.g., for temporary opengl display purposes) or export to a polygonal format.  if one has a sphere represented by a single NURBS surface, and it's intersecting another NURBS sphere with a union boolean operation, the evaluation of that boolean should result in 2+ surfaces in a new NURBS entity (and with no Boolean).</p>",
+        "id": 278520455,
+        "sender_full_name": "Sean",
+        "timestamp": 1649664845
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/278520203\">said</a>:</p>\n<blockquote>\n<p>OK... Do you think tessellation part still needs developing?</p>\n</blockquote>\n<p>Well yes, that's why it was mentioned as a potential project, but that task should not / cannot start from scratch.  There is already extensive code in src/libbrep that generates a tessellation of NURBS surfaces quite reliably.  What it doesn't necessarily do is ensure that if an object is solid, that its tessellation will also be solid.   That is critically important for exporting to polygonal formats.</p>",
+        "id": 278520621,
+        "sender_full_name": "Sean",
+        "timestamp": 1649664980
+    },
+    {
+        "content": "<p>Yes, I can understand the operation flow of NURBS or CAD. I've looked into explicit and implicit boolean operations, but haven't looked at the source code of brl-cad.</p>",
+        "id": 278520708,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649665056
+    },
+    {
+        "content": "<p>I have doubts about the meaning of NURBS “evalution”. Is it means to evaluate the effect of explicit boolean operations implemented? Or implement explicit boolean operations? I thinking it's better to make it clear to me to avoid misunderstanding like MC.</p>",
+        "id": 278521289,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649665411
+    },
+    {
+        "content": "<p>Sorry, I'm not understanding your question..</p>",
+        "id": 278522602,
+        "sender_full_name": "Sean",
+        "timestamp": 1649666124
+    },
+    {
+        "content": "<p>say you have two NURBS spheres.  they are each defined by a single surface.  they overlap halfway and are combined together with an intersection operation.   something like... <a href=\"/user_uploads/1549/dxRzgS84X5B9nRpKaxA8pqIa/GUID-4775186F-4BCD-4BAF-BA15-6AE8B2575105.png\">GUID-4775186F-4BCD-4BAF-BA15-6AE8B2575105.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/dxRzgS84X5B9nRpKaxA8pqIa/GUID-4775186F-4BCD-4BAF-BA15-6AE8B2575105.png\" title=\"GUID-4775186F-4BCD-4BAF-BA15-6AE8B2575105.png\"><img src=\"/user_uploads/1549/dxRzgS84X5B9nRpKaxA8pqIa/GUID-4775186F-4BCD-4BAF-BA15-6AE8B2575105.png\"></a></div>",
+        "id": 278523131,
+        "sender_full_name": "Sean",
+        "timestamp": 1649666377
+    },
+    {
+        "content": "<p>lens_object = sphA INTERSECT sphB</p>",
+        "id": 278523235,
+        "sender_full_name": "Sean",
+        "timestamp": 1649666424
+    },
+    {
+        "content": "<p>lens_object in that case is a combination object (i.e., its type is actually a 'comb' and it is not a brep/nurbs entity) that includes a boolean recipe.  that is called implicit or unevaluated representation.  lens_object is type comb, sphA is type ell, sphB is type ell.</p>",
+        "id": 278523493,
+        "sender_full_name": "Sean",
+        "timestamp": 1649666557
+    },
+    {
+        "content": "<p>now that's all fine and that works now.  but a very useful operation is to eliminate the boolean.  if we evaluate the boolean expression in lens_object, we should get a brep/nurbs entity that is the lens shape on the right (which has two surfaces) and there's no longer a boolean.</p>",
+        "id": 278523856,
+        "sender_full_name": "Sean",
+        "timestamp": 1649666770
+    },
+    {
+        "content": "<p>strongly recommend reading the aforementioned NURBS-Boolean-Evaluation-Development-Guide.pdf</p>",
+        "id": 278523884,
+        "sender_full_name": "Sean",
+        "timestamp": 1649666796
+    },
+    {
+        "content": "<p>To be more precise,  implicit boolean I said is determine whether two objects intersect, explicit refers to calculate the precise area of intersection, including union and other boolean operation.</p>",
+        "id": 278526590,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649668404
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/278523493\">said</a>:</p>\n<blockquote>\n<p>lens_object in that case is a combination object (i.e., its type is actually a 'comb' and it is not a brep/nurbs entity) that includes a boolean recipe.  that is called implicit or unevaluated representation.  lens_object is type comb, sphA is type ell, sphB is type ell.</p>\n</blockquote>\n<p>yes, I can get it. But in my incomplete survey, I did not find relevant papers.</p>",
+        "id": 278526990,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649668600
+    },
+    {
+        "content": "<p>Do you have any suggestions？</p>",
+        "id": 278527134,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649668689
+    },
+    {
+        "content": "<p>Is \"trimmed\" a related keyword？</p>",
+        "id": 278527320,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649668808
+    },
+    {
+        "content": "<p>I'm reading the NURBS-Boolean-Evaluation-Development-Guide.pdf, found many questions can be answered in the pdf. I'll reply after I read it totally.</p>",
+        "id": 278537704,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649675434
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/278527320\">said</a>:</p>\n<blockquote>\n<p>Is \"trimmed\" a related keyword？</p>\n</blockquote>\n<p>Yes, trimmed NURBS is what we have and use.  With NURBS, you define a surface, and then use trimming curves to dictate where the surface physically exists and where it does not.  E.g., <a href=\"https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.146.3590&amp;rep=rep1&amp;type=pdf\">https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.146.3590&amp;rep=rep1&amp;type=pdf</a></p>",
+        "id": 278604952,
+        "sender_full_name": "Sean",
+        "timestamp": 1649705448
+    },
+    {
+        "content": "<p>also relevant: <a href=\"https://mcmains.me.berkeley.edu/pubs/SPM08gpuSSI.pdf\">https://mcmains.me.berkeley.edu/pubs/SPM08gpuSSI.pdf</a></p>",
+        "id": 278605325,
+        "sender_full_name": "Sean",
+        "timestamp": 1649705637
+    },
+    {
+        "content": "<p>src/libbrep/cdt has the triangulation code - fast.cpp is the display tessellation, by far the fastest option but also will show cracks at the seams.  ON_Brep_CDT_Tessellate is an attempt at watertight tessellation, and if you grep the code for that function you'll find it is exposed in a couple of libged commands.  There's more in that logic than just watertightness - it will also locally converge the meshing to try and reduce the volume of overlapping between nearby brep objects.</p>",
+        "id": 278635838,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649724997
+    },
+    {
+        "content": "<p>See <a href=\"https://apps.dtic.mil/sti/pdfs/AD1094344.pdf\">https://apps.dtic.mil/sti/pdfs/AD1094344.pdf</a></p>",
+        "id": 278635958,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649725112
+    },
+    {
+        "content": "<p>(The most elaborate attempt at avoiding overlaps had to be backed out of the repo - we weren't able to mature it sufficiently in the available time.  Git has it in the history if/when we can revisit it.  For just watertight meshing, it's not necessary.)</p>",
+        "id": 278636018,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649725189
+    },
+    {
+        "content": "<p>The watertight tessellation code needs robustness testing and improvements.</p>",
+        "id": 278636141,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649725234
+    },
+    {
+        "content": "<p>I have read <em>BRL-CAD NURBS Boolean evaluation guide.pdf</em> carefully, as well as  source code and test code about NURBS boolean and intersect, and the two references listed.</p>",
+        "id": 278681804,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649764650
+    },
+    {
+        "content": "<p>It seems <em>ON_Boolean()</em> function in <em>src/libbrep/boolean.cpp</em> has implemented boolean operation using OpenNURBS, with ON_Brep variables input and ON_Brep variable output.</p>",
+        "id": 278681922,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649764700
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/278523493\">said</a>:</p>\n<blockquote>\n<p>lens_object in that case is a combination object (i.e., its type is actually a 'comb' and it is not a brep/nurbs entity) that includes a boolean recipe.  that is called implicit or unevaluated representation.  lens_object is type comb, sphA is type ell, sphB is type ell.</p>\n</blockquote>\n<p>I'm wondering what is needed to be done in the boolean operation. Does it mean there needs to be a type conversion from ellipse and other data structure to <em>ON_Brep</em> or <em>rt_brep_internal</em>? Or improve boolean function to combine the two input Brep into one, just like <a href=\"https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.146.3590&amp;rep=rep1&amp;type=pdf\">Watertight Trimmed NURBS</a>?</p>",
+        "id": 278682719,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649765117
+    },
+    {
+        "content": "<p>The latter.  There actually are already functions that convert nearly every primitive like ell to brep/ nurbs (see rt_ell_brep() in src/librt/primitives/ell.c)</p>",
+        "id": 278787522,
+        "sender_full_name": "Sean",
+        "timestamp": 1649829621
+    },
+    {
+        "content": "<p>In the example I gave .. it doesn’t matter if that’s an ell or ell that was converted to brep as it’s simple to get it in brep form.  The difficulty is the surface surface intersections</p>",
+        "id": 278787631,
+        "sender_full_name": "Sean",
+        "timestamp": 1649829707
+    },
+    {
+        "content": "<p>So it means there are something to be improved in <em>ON_Boolean()</em> and other functions in <em>src/libbrep/boolean.cpp &amp; intersect.cpp</em>, am I right?</p>",
+        "id": 278787930,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649829968
+    },
+    {
+        "content": "<p>You got it.  That’s the entirety of the project.  Make that function work.  Make it more robust.  Create tests that more systematically explore what is working and what is not working.  Or simply identify specific failures and create a plan for fixing them.  From there create a plan of attack to fix whatever else is not working and so on.</p>",
+        "id": 278788205,
+        "sender_full_name": "Sean",
+        "timestamp": 1649830238
+    },
+    {
+        "content": "<p>It would probably help if you create two overlapping brep spheres and try to Boolean evaluate them, now that you’ve ref the paper.  See if it works.  If I’d does, see if it fails when they nearly tangent.  If that works, see if one is fully inside/outside the other, and so on</p>",
+        "id": 278788345,
+        "sender_full_name": "Sean",
+        "timestamp": 1649830371
+    },
+    {
+        "content": "<p>If that all works great then maybe propose a project to do the same patter to all possible combination of two primitives</p>",
+        "id": 278788449,
+        "sender_full_name": "Sean",
+        "timestamp": 1649830446
+    },
+    {
+        "content": "<p>Yes, I see. There has been a lot of work in NURBS Boolean and it works in many cases. I can test normal and special cases, evaluate and improve the performance or accuracy of some of the functions.</p>",
+        "id": 278788601,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649830613
+    },
+    {
+        "content": "<p>But for the GSoC proposal deadline in one week, I think I need to proposal something concrete and digitized.</p>",
+        "id": 278788699,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649830716
+    },
+    {
+        "content": "<p>Should I test manually to get boolean issues? Maybe this will take some time and is not very efficient.</p>",
+        "id": 278789110,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649831134
+    },
+    {
+        "content": "<p>So I want to know where in NURBS Boolean or Intersect there is a higher modification priority, so that I can study the source code in a targeted manner, consult the papers and propose a concrete and detailed proposal.</p>",
+        "id": 278789183,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649831206
+    },
+    {
+        "content": "<p>The short summary that you hopefully understood from reading the paper is that it’s good, really good, but it’s stilll incomplete.</p>",
+        "id": 278789694,
+        "sender_full_name": "Sean",
+        "timestamp": 1649831744
+    },
+    {
+        "content": "<p>I think you should test manually enough to understand what works and what does not.   If you very quickly find issues, then you can simply propose to work on them for starters and will plan to continue that approach perhaps using TDD.</p>",
+        "id": 278789812,
+        "sender_full_name": "Sean",
+        "timestamp": 1649831846
+    },
+    {
+        "content": "<p>If you have trouble finding one that doesn’t work, then that would imply a very different project, one more automated and systematic.  Aim to prove just how good it is, or systematically test all possible conditions</p>",
+        "id": 278789892,
+        "sender_full_name": "Sean",
+        "timestamp": 1649831913
+    },
+    {
+        "content": "<p>OK.. It will be a different GSoC project. I will test it manually in the following days, report it here, write them in the document as well as my proposal. If it's accepted in GSOC, I will continue to TDD, record the process of my own testing, and improve or prove the functions according to the situation.</p>",
+        "id": 278790295,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649832303
+    },
+    {
+        "content": "<p>There will not a very accurate description of the project progress and workload in the proposal, but I will reflect them in the later reports.</p>",
+        "id": 278790406,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649832411
+    },
+    {
+        "content": "<p>I found there are lots of todo works in <a href=\"https://brlcad.org/wiki/NURBS_TODO\">wiki</a>,but but it looks like it hasn't been updated for a long time. I will pay more attention to these aspects.</p>",
+        "id": 278818962,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1649851038
+    },
+    {
+        "content": "<p>Here is one error I found test brep.</p>",
+        "id": 279084062,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650032365
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 279084161,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650032410
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/WpIEsM07WsFVGv29Comjrq0o/Snipaste_2022-04-15_22-16-47.png\">Snipaste_2022-04-15_22-16-47.png</a> <a href=\"/user_uploads/1549/Xto5cpxqQQZXShFhIxbFhf4A/Snipaste_2022-04-15_22-17-04.png\">Snipaste_2022-04-15_22-17-04.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/WpIEsM07WsFVGv29Comjrq0o/Snipaste_2022-04-15_22-16-47.png\" title=\"Snipaste_2022-04-15_22-16-47.png\"><img src=\"/user_uploads/1549/WpIEsM07WsFVGv29Comjrq0o/Snipaste_2022-04-15_22-16-47.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Xto5cpxqQQZXShFhIxbFhf4A/Snipaste_2022-04-15_22-17-04.png\" title=\"Snipaste_2022-04-15_22-17-04.png\"><img src=\"/user_uploads/1549/Xto5cpxqQQZXShFhIxbFhf4A/Snipaste_2022-04-15_22-17-04.png\"></a></div>",
+        "id": 279084834,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650032869
+    },
+    {
+        "content": "<p>Above is two arb8 objects</p>",
+        "id": 279084936,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650032916
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/HwrxPhWm7YZW_v-RtmN3ubBZ/Snipaste_2022-04-15_22-17-23.png\">Snipaste_2022-04-15_22-17-23.png</a> <a href=\"/user_uploads/1549/YtISwRcne5yVjNbESja_-IfY/Snipaste_2022-04-15_22-17-38.png\">Snipaste_2022-04-15_22-17-38.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/HwrxPhWm7YZW_v-RtmN3ubBZ/Snipaste_2022-04-15_22-17-23.png\" title=\"Snipaste_2022-04-15_22-17-23.png\"><img src=\"/user_uploads/1549/HwrxPhWm7YZW_v-RtmN3ubBZ/Snipaste_2022-04-15_22-17-23.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/YtISwRcne5yVjNbESja_-IfY/Snipaste_2022-04-15_22-17-38.png\" title=\"Snipaste_2022-04-15_22-17-38.png\"><img src=\"/user_uploads/1549/YtISwRcne5yVjNbESja_-IfY/Snipaste_2022-04-15_22-17-38.png\"></a></div>",
+        "id": 279084987,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650032955
+    },
+    {
+        "content": "<p>Below are union the two objects together, then convert the union to Brep. </p>\n<ol>\n<li>It's clear two surfaces do not generate properly.</li>\n<li>Mesh generated by Brep tessellation is of poor quality.</li>\n</ol>",
+        "id": 279085449,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650033235
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/TH3G1PgDMNUjim2XalyMEhA4/Snipaste_2022-04-15_22-34-10.png\">Snipaste_2022-04-15_22-34-10.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/TH3G1PgDMNUjim2XalyMEhA4/Snipaste_2022-04-15_22-34-10.png\" title=\"Snipaste_2022-04-15_22-34-10.png\"><img src=\"/user_uploads/1549/TH3G1PgDMNUjim2XalyMEhA4/Snipaste_2022-04-15_22-34-10.png\"></a></div>",
+        "id": 279085528,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650033269
+    },
+    {
+        "content": "<p>I'm writing my proposal and plan to send you a draft tomorrow.</p>",
+        "id": 279085818,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650033477
+    },
+    {
+        "content": "<p>Yep that looks like a bug in the eval.</p>",
+        "id": 279283180,
+        "sender_full_name": "Sean",
+        "timestamp": 1650285975
+    },
+    {
+        "content": "<p>Would be interesting to know if the bug happens if the arb is fully inside the face versus aligned to some side.</p>",
+        "id": 279283214,
+        "sender_full_name": "Sean",
+        "timestamp": 1650286022
+    },
+    {
+        "content": "<p>OK, I will test it later. Here are another bug</p>",
+        "id": 279284396,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650286908
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/v7FJJiQS7P3WdfZ0P7l0dI9s/Snipaste_2022-04-18_14-06-18.png\">Snipaste_2022-04-18_14-06-18.png</a> These are four solids before Brep</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/v7FJJiQS7P3WdfZ0P7l0dI9s/Snipaste_2022-04-18_14-06-18.png\" title=\"Snipaste_2022-04-18_14-06-18.png\"><img src=\"/user_uploads/1549/v7FJJiQS7P3WdfZ0P7l0dI9s/Snipaste_2022-04-18_14-06-18.png\"></a></div>",
+        "id": 279284461,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650286951
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/0797RXMqRHBZJ60Q2kCL4RoL/Snipaste_2022-04-18_14-06-29.png\">Snipaste_2022-04-18_14-06-29.png</a> This is after Brep operation.<br>\nNot only some faces of arb8 are lost, but also one sph is lost totally.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/0797RXMqRHBZJ60Q2kCL4RoL/Snipaste_2022-04-18_14-06-29.png\" title=\"Snipaste_2022-04-18_14-06-29.png\"><img src=\"/user_uploads/1549/0797RXMqRHBZJ60Q2kCL4RoL/Snipaste_2022-04-18_14-06-29.png\"></a></div>",
+        "id": 279284515,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650287020
+    },
+    {
+        "content": "<p>I think these bugs have something in common. I'm doing more tests, and try to locate the bugs.</p>",
+        "id": 279284749,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650287170
+    },
+    {
+        "content": "<p>I have found some errors in BRL-CAD, not only in terms of NURBS. How should I document these issues? Shall I add them to github issues?</p>",
+        "id": 279512003,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650442862
+    },
+    {
+        "content": "<p>Sure <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> if you found a bug and can reproduce it, sounds great for submitting an issue.. or if you fix it, submit a pull request.</p>",
+        "id": 279601687,
+        "sender_full_name": "Sean",
+        "timestamp": 1650488063
+    },
+    {
+        "content": "<p>Those bugs you found are great examples of simple failures.  One of the interesting and useful outcomes would be to systematically perform a broad variety of configurations and dashboard the failures.</p>",
+        "id": 279601821,
+        "sender_full_name": "Sean",
+        "timestamp": 1650488156
+    },
+    {
+        "content": "<p>Yes, I'm trying to list all the possible cases and combine them. Recoding them clearly will be useful for ensuring robustness of the system.</p>",
+        "id": 279626652,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650506030
+    },
+    {
+        "content": "<p>I have found some errors and added to issues:<br>\n<a href=\"https://github.com/BRL-CAD/brlcad/issues/35\">Compile error in windows about character encoding</a><br>\n<a href=\"https://github.com/BRL-CAD/brlcad/issues/31\">Display error while doing a boolean operation in archer</a><br>\n<a href=\"https://github.com/BRL-CAD/brlcad/issues/33\">Missing surfaces while boolean and brep</a><br>\n<a href=\"https://github.com/BRL-CAD/brlcad/issues/34\">Missing entity while boolean and brep</a></p>",
+        "id": 280035033,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650873629
+    },
+    {
+        "content": "<p>I am trying to read and modify the source code. And I will update important findings into issues.</p>",
+        "id": 280035462,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1650873866
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> those look great.  Looks like there's no shortage of issues to investigate and work on!  Do you think you could create a systematic test?  Like create a program that creates a 1000mm unit cube (0,0,0 to 1000,1000,1000), then creates another object (e.g., another unit cube) in all positions with respect to the other object.</p>",
+        "id": 280227458,
+        "sender_full_name": "Sean",
+        "timestamp": 1650987185
+    },
+    {
+        "content": "<p>ideally something systematic with a directly computable result so you can know when brep eval fails just by asking for the volume, for example, or evaluating a shotline thickness.</p>",
+        "id": 280227651,
+        "sender_full_name": "Sean",
+        "timestamp": 1650987271
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/280227458\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> those look great.  Looks like there's no shortage of issues to investigate and work on!  Do you think you could create a systematic test?  Like create a program that creates a 1000mm unit cube (0,0,0 to 1000,1000,1000), then creates another object (e.g., another unit cube) in all positions with respect to the other object.</p>\n</blockquote>\n<p>I think these tests will be useful. If possible, adding topology testing would be a good extension. <br>\nShall I write these tests using C or shell script?</p>",
+        "id": 280292207,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1651021381
+    },
+    {
+        "content": "<p>I have another question. According to NURBS-Boolean-Evaluation-Development-Guide.pdf chapter 4.1, <code>bool1*</code> and <code>bool2*</code> files are created for development convenience. But I can only find them when I run a shell script to test brep on linux. Running neither in archer nor megd generates.</p>",
+        "id": 280292674,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1651021831
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/280292674\">said</a>:</p>\n<blockquote>\n<p>I have another question. According to NURBS-Boolean-Evaluation-Development-Guide.pdf chapter 4.1, <code>bool1*</code> and <code>bool2*</code> files are created for development convenience. But I can only find them when I run a shell script to test brep on linux. Running neither in archer nor megd generates.</p>\n</blockquote>\n<p>OK..I find those files on windows. After boolean operation, those files are generated in <code>C:\\Users\\xxx</code>... But here it is generated, and it's not deleted. It's weird...</p>",
+        "id": 280437364,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1651111673
+    },
+    {
+        "content": "<p>Sorry for the delay because I took several midterm exams some days ago.</p>",
+        "id": 281794895,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1652172690
+    },
+    {
+        "content": "<p>I think calculating the length(or thickness) of the intersection of one ray and one Brep model is useful for testing. I didn't find it in current project, I'll list it into my TODO list.</p>",
+        "id": 281795247,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1652172867
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/279084987\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/HwrxPhWm7YZW_v-RtmN3ubBZ/Snipaste_2022-04-15_22-17-23.png\">Snipaste_2022-04-15_22-17-23.png</a> <a href=\"/user_uploads/1549/YtISwRcne5yVjNbESja_-IfY/Snipaste_2022-04-15_22-17-38.png\">Snipaste_2022-04-15_22-17-38.png</a></p>\n</blockquote>\n<p>For missing faces cases, I think it's important to tell if a Brep model is a manifold. As a simple start, I can start with determining whether each edge links two faces or not. If not, it's a non-manifold.</p>",
+        "id": 281795921,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1652173226
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> hope your exams went well!  Note that the \"nirt\" command in mged will fire a single ray (at any geometry).  It's often used to inspect geometry and ray tracing behavior, or even help with debugging a specific issue.</p>",
+        "id": 282148238,
+        "sender_full_name": "Sean",
+        "timestamp": 1652378662
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/281795921\">said</a>:</p>\n<div class=\"codehilite\"><pre><span></span><code>For missing faces cases, I think it&#39;s important to tell if a Brep model is a manifold. As a simple start, I can start with determining whether each edge links two faces or not. If not, it&#39;s a non-manifold.\n````\nThere are functions in OpenNURBS that report whether geometry IsSolid() and IsValid(), among other properties.  Can possibly look there to see if there&#39;s a manifold test at each phase of a given boolean evaluation.\n</code></pre></div>",
+        "id": 282148497,
+        "sender_full_name": "Sean",
+        "timestamp": 1652378764
+    },
+    {
+        "content": "<p>Thanks! I will check these comands and functions.</p>",
+        "id": 282190863,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1652403514
+    },
+    {
+        "content": "<p>Hi, I just finished all the exams this semester. I have more time available to invest in GSOC.</p>",
+        "id": 284458476,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1653995356
+    },
+    {
+        "content": "<p>Here are some TODOs before June 13.</p>",
+        "id": 284458857,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1653995456
+    },
+    {
+        "content": "<ol>\n<li>Look into Nurbs boolean source code</li>\n<li>Locate error code of missing surfaces while boolean and brep</li>\n<li>Investigate manifold check in boolean operation</li>\n<li>After reading source code, look into corresponding literature with the same Spline method</li>\n<li>double read document: nirt command &amp; NURBS Boolean Evaluation Development Guide</li>\n</ol>",
+        "id": 284459462,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1653995822
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Do you have any opinion? I think I need to do something as soon as possible to start my first commit.</p>",
+        "id": 284459713,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1653995991
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> in general that all sounds good, though #1-#4 seem rather ill-defined / unactionable.  I suggest doing #5, particularly reading the nurbs guide, but instead work on something that helps you get familiarized with the opennurbs data structures</p>\n<p>One idea that comes to mind is to re-implement converting an arb8 to brep, and see if you can make it support non-planar arb8 faces.</p>",
+        "id": 284502791,
+        "sender_full_name": "Sean",
+        "timestamp": 1654014540
+    },
+    {
+        "content": "<p>For example, currently if you create an arb8 box and just move one vertex, the resulting faces are non-planar.  You can see an example here:<br>\n<a href=\"http://\">Uploading Screen Shot 2022-05-31 at 12.27.34 PM.png…</a></p>",
+        "id": 284502981,
+        "sender_full_name": "Sean",
+        "timestamp": 1654014626
+    },
+    {
+        "content": "<p>That renders with rt, but it renders incorrectly (it assumes it's planar).  It could render correctly if we converted it to brep on the fly.  However, if I run the brep command now to convert it, it apparently splits the non-planar faces.  It could just convert them to brep as-is.</p>",
+        "id": 284503153,
+        "sender_full_name": "Sean",
+        "timestamp": 1654014717
+    },
+    {
+        "content": "<p>In fact, we have an example of non-planar cube code in src/proc-db/brep_simple.cpp (also see twistedcube.cpp) that shows it's possible.</p>",
+        "id": 284503269,
+        "sender_full_name": "Sean",
+        "timestamp": 1654014768
+    },
+    {
+        "content": "<p>I suggest familiarizing yourself with brep_simple (run it, render the model with rt, shoot it with nirt), create a cube and move one of the vertices (and test that with rt and nirt), and see if you can figure out how to get the brep command to generate the appropriate conversion.  Code for arb8 is in src/librt/primitives/arb8 directory.</p>",
+        "id": 284503579,
+        "sender_full_name": "Sean",
+        "timestamp": 1654014892
+    },
+    {
+        "content": "<p>Thanks! Your suggestion is very clear and useful, I will try and solve it as my first step. Although I can't open the png, but I can get your idea. I will reproduce the problem.</p>",
+        "id": 284554291,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654043836
+    },
+    {
+        "content": "<p>Btw, here is my detailed and pubilc TODO board for BRL-CAD. You can see and comment on it if you want.<a href=\"https://gregoryl.notion.site/699db68bfe1e4f9ab93359803a9e2cb4?v=66220ffbbfb14749b1effc8f41fe0fb7\">TODO list</a></p>",
+        "id": 284554559,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654044081
+    },
+    {
+        "content": "<p>For  #5 and  your suggestion, I will mark them as top priority. I think they would be a good start.</p>",
+        "id": 284554714,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654044226
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> ah, I see you have a dev log at <a href=\"https://brlcad.org/wiki/User:GregoryLi/GSoc2022/DevLog\">https://brlcad.org/wiki/User:GregoryLi/GSoc2022/DevLog</a>, which is great -- can you link to it on the 2022 page?</p>",
+        "id": 284773647,
+        "sender_full_name": "Sean",
+        "timestamp": 1654189165
+    },
+    {
+        "content": "<p>Sure, I will begin to update my devlog from today.</p>",
+        "id": 284826069,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654220735
+    },
+    {
+        "content": "<p>Apparently that screenshot upload never succeeded.  Here it is again: <a href=\"/user_uploads/1549/mJFNzDn4Z01jrfgx_BgqXdSk/Screen-Shot-2022-05-31-at-12.27.34-PM.png\">Screen-Shot-2022-05-31-at-12.27.34-PM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/mJFNzDn4Z01jrfgx_BgqXdSk/Screen-Shot-2022-05-31-at-12.27.34-PM.png\" title=\"Screen-Shot-2022-05-31-at-12.27.34-PM.png\"><img src=\"/user_uploads/1549/mJFNzDn4Z01jrfgx_BgqXdSk/Screen-Shot-2022-05-31-at-12.27.34-PM.png\"></a></div>",
+        "id": 284876251,
+        "sender_full_name": "Sean",
+        "timestamp": 1654261896
+    },
+    {
+        "content": "<p>Thanks, I can see it now and reproduce it.</p>",
+        "id": 284968830,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654334960
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Q3HzAuwbCV84tS1qbeW_Us_Z/image.png\">image.png</a> from this point of view, it's clear that there is problems while rt.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Q3HzAuwbCV84tS1qbeW_Us_Z/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Q3HzAuwbCV84tS1qbeW_Us_Z/image.png\"></a></div>",
+        "id": 284968915,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654335076
+    },
+    {
+        "content": "<p>btw, how to delete wiki page? I have created one wrong wiki page: <a href=\"https://brlcad.org/wiki/User:GregoryLi/GSoc2022/DevLog\">https://brlcad.org/wiki/User:GregoryLi/GSoc2022/DevLog</a><br>\nThe correct site should be:<br>\n<a href=\"https://brlcad.org/wiki/User:GregoryLi/GSoC2022/DevLog\">https://brlcad.org/wiki/User:GregoryLi/GSoC2022/DevLog</a><br>\nwith <strong>GSoc</strong> to <strong>GSoC</strong></p>",
+        "id": 284969427,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654335915
+    },
+    {
+        "content": "<p>I created both but I couldn't delete the wrong one...</p>",
+        "id": 284969435,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654335948
+    },
+    {
+        "content": "<p>I think it requires admin access. I've deleted the one with the lower case c</p>",
+        "id": 284984445,
+        "sender_full_name": "Erik",
+        "timestamp": 1654355060
+    },
+    {
+        "content": "<p>Thanks! I get it.</p>",
+        "id": 285008915,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654391677
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> there are a number of issues with rt rendering that arb8, but what's more interesting is whether it can be converted to brep/nurbs cleanly.  if it can, then we could probably detect non-planar faces and auto-convert during prep.  first step would be getting the brep command to successfully turn it into a brep though -- it currently doesn't from what I can see meaning the implementation in arb8_brep.cpp could be improved.</p>",
+        "id": 285116860,
+        "sender_full_name": "Sean",
+        "timestamp": 1654524424
+    },
+    {
+        "content": "<p>Yes, I'm now looking into <code>src/librt/primitives/arb8.c/rt_arb_tess()</code>. I can see it facetized in <code>nmg_cmface()</code>. What do you mean by \"improved\"? Here is one: we can get two facetize output as picture below. I think it's better to make it configurable or set a default case, such as convex as default. <a href=\"/user_uploads/1549/9PJLOavepEnbwQe78ai7O7rm/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/9PJLOavepEnbwQe78ai7O7rm/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/9PJLOavepEnbwQe78ai7O7rm/image.png\"></a></div>",
+        "id": 285204650,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654578334
+    },
+    {
+        "content": "<p>And I will try brep_simple now.</p>",
+        "id": 285204838,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654578553
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> converting an arb8 to a brep should not involve calling rt_arb_tess() .. that's for turning an arb8 into a tessellated triangle mesh</p>",
+        "id": 285289789,
+        "sender_full_name": "Sean",
+        "timestamp": 1654624354
+    },
+    {
+        "content": "<p>which explains why it splits the non-planar faces with an edge, but notice how the original object surface when you move just one vertex should be a smooth warped surface</p>",
+        "id": 285289907,
+        "sender_full_name": "Sean",
+        "timestamp": 1654624410
+    },
+    {
+        "content": "<p>Oh, it suddendly came to me <code>brep</code> and <code>facetize</code> are two totally different things!</p>",
+        "id": 285333267,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1654650308
+    },
+    {
+        "content": "<p>indeed, brep is a general purpose command for creating and manipulating brep (aka nurbs) objects;  facetize is a command that performs conversions of input geometry to a facetized (aka polygonal) format such as our Bag of Triangles (aka 'bot') format and N-Manifold Geometry (aka 'nmg') for more generalized polygons.</p>",
+        "id": 285340197,
+        "sender_full_name": "Sean",
+        "timestamp": 1654658282
+    },
+    {
+        "content": "<p>I'm sorry that I was quarantined due to policy about covid-19 :(. I had little time on BRL-CAD and I missed one work-day, which is going to be filled this Saturday. So far I have tested brep_simple.cpp/brep_cube.cpp and do it in the normal way.</p>",
+        "id": 286220779,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1655303772
+    },
+    {
+        "content": "<p>I see there is non-planar log info while convrting it into brep in mged.<br>\n<a href=\"/user_uploads/1549/wAuekikwzlqHARYv8RMZ_GTL/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/wAuekikwzlqHARYv8RMZ_GTL/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/wAuekikwzlqHARYv8RMZ_GTL/image.png\"></a></div>",
+        "id": 286221110,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1655303923
+    },
+    {
+        "content": "<p>The result seems confusing in brep_simple.cpp: the rt picture shows the none-planar faces have a fixed normal or a smoothly changing normal, with four non-planar vertex and four straight edge. It's hard to imagine how the surface looks like...</p>",
+        "id": 286221884,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1655304229
+    },
+    {
+        "content": "<p>I looked into source code of brep_simple.cpp, twistedcube.cpp and arb8_brep.cpp, try to find the differences between them. But further research is required... <br>\nAnd I want to replace the input data in brep_simple with arb8. I wrote some code but still need to adapt to the transition from C++ to C. (Because there are some C style codes)</p>",
+        "id": 286222980,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1655304648
+    },
+    {
+        "content": "<p>Imagine a cube made out of clay, and you grab the top four vertices and rotate it some.  That’s the example.</p>",
+        "id": 286304317,
+        "sender_full_name": "Sean",
+        "timestamp": 1655352851
+    },
+    {
+        "content": "<p>The twisted cube brep should render with rt just fine to get an idea for what it should look like.</p>",
+        "id": 286304339,
+        "sender_full_name": "Sean",
+        "timestamp": 1655352901
+    },
+    {
+        "content": "<p>Hi, I have wrote one example about arb8 test and I want to upload it, what should I do? Shall I fork BRL-CAD on github, or just create another branch?</p>",
+        "id": 286694448,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1655621953
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Hi, I just wrote some test projects like brep_simple, brep_trimmed and I'd like to upload them. What should I do?<br>\nchoice 1: create a branch in BRL-CAD and upload them.<br>\nchoice 2: fork BRL-CAD to my personal github and upload them.<br>\nI think I will write lots of test projects, I don't konw if it will be too many and boring for BRL-CAD.</p>",
+        "id": 287281634,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656037959
+    },
+    {
+        "content": "<p>I ran <strong>surfaceinteresct</strong> project but error occured. I tried to fix it but failed. Can you help me?</p>",
+        "id": 287294797,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656052741
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/UbEiRsUGtXHi-n4BkYgg-A2P/image.png\">image.png</a> <br>\nThis is the error stack.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/UbEiRsUGtXHi-n4BkYgg-A2P/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/UbEiRsUGtXHi-n4BkYgg-A2P/image.png\"></a></div>",
+        "id": 287294845,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656052797
+    },
+    {
+        "content": "<p>I think the reason is that the four <strong>ON_Curve</strong> object was not created and initialized properly. I changed them to <code>ON_Curve *left1 = new ON_NurbsCurve(), *right1 = new ON_NurbsCurve(), *left2 = new ON_NurbsCurve(), *right2 = new ON_NurbsCurve();</code> and failed still....</p>",
+        "id": 287295353,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656053191
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> Sorry I was consumed the past few days wrapping up a task and holiday.  As for your choices, you wont' be able to do #1 without having commit access and you won't have that until you successfully submit a couple PRs.  So I think that's your best bet -- submit changes as PRs that are clean.</p>",
+        "id": 287710439,
+        "sender_full_name": "Sean",
+        "timestamp": 1656420483
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/287294797\">said</a>:</p>\n<blockquote>\n<p>I ran <strong>surfaceinteresct</strong> project but error occured. I tried to fix it but failed. Can you help me?</p>\n</blockquote>\n<p>surfaceintersect is a good one to look at but understand that it's a work-in-progress code by another dev in an unknown working state.  I'm not sure it ever worked.  looking at the implementation, it appears to be trying to implement a SurfaceIntersect() function as that's one of the functions that opennurbs removes from their code.  however, the implementation still relies on ON_NurbsCurve::Split() which does exist and is where it's crashing -- so you'd have to debug through that function to see what it's expecting there.</p>",
+        "id": 287712519,
+        "sender_full_name": "Sean",
+        "timestamp": 1656421467
+    },
+    {
+        "content": "<p>I also get the same error stack, for what it's worth.  I think you're on the right track as the implementation seems to be expecting them to be ON_NurbsCurve() and cannot be ON_Curve entities.  My first thought would be to simply make them ON_NurbsCurve left, right; and pass references to Split().  I'd step through that in a debugger to see how it proceeds.</p>",
+        "id": 287713267,
+        "sender_full_name": "Sean",
+        "timestamp": 1656421828
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/287710439\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> Sorry I was consumed the past few days wrapping up a task and holiday.  As for your choices, you wont' be able to do #1 without having commit access and you won't have that until you successfully submit a couple PRs.  So I think that's your best bet -- submit changes as PRs that are clean.</p>\n</blockquote>\n<p>Thanks! I will clean up my code and submit them tomorrow. I want to make my test more formal and reproducible, that make a comparison of the changes before and after TTD for brep boolean. : )</p>",
+        "id": 287720405,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656425060
+    },
+    {
+        "content": "<p>Hi, I just created one PR here(<a href=\"https://github.com/BRL-CAD/brlcad/pull/53\">https://github.com/BRL-CAD/brlcad/pull/53</a>).</p>",
+        "id": 287832464,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656497880
+    },
+    {
+        "content": "<p>If it works well, you can see two error brep objects: <em>brep.arb_3</em> and <em>brep.arb_4</em><br>\n<a href=\"/user_uploads/1549/Jsc-r_O-ONpmR3YrZhFxKdiX/image.png\">image.png</a> <br>\n<a href=\"/user_uploads/1549/AzrvOLIkdOPWf0upjYDK-p1G/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Jsc-r_O-ONpmR3YrZhFxKdiX/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Jsc-r_O-ONpmR3YrZhFxKdiX/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AzrvOLIkdOPWf0upjYDK-p1G/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/AzrvOLIkdOPWf0upjYDK-p1G/image.png\"></a></div>",
+        "id": 287832742,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656498062
+    },
+    {
+        "content": "<p>The brep objects created by my project are wong. While converting them to brep using <em>brep</em> cmd in archer, the outputs are right. I found the problem just now. Looking into the problem :(</p>",
+        "id": 287833260,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1656498454
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I spend serval hours to rebuild the project after pulling recent merges and found serval problems while building.</p>",
+        "id": 288519488,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657023595
+    },
+    {
+        "content": "<p>In brlcad\\src\\conv\\ply\\g-ply.c, error occurs about array definition. <em>C2057: expected constant expression</em><br>\nI thought it is caused by C language standard, but still failed after using std:c17 <a href=\"/user_uploads/1549/iUv3IBuGsp7MtBOC0NT1UO45/image.png\">image.png</a> <br>\nFinally rebuild succeed by modifing the code.<br>\n<a href=\"/user_uploads/1549/yVAjC8a4J7JLzgE18rdac0-2/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/iUv3IBuGsp7MtBOC0NT1UO45/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/iUv3IBuGsp7MtBOC0NT1UO45/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/yVAjC8a4J7JLzgE18rdac0-2/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/yVAjC8a4J7JLzgE18rdac0-2/image.png\"></a></div>",
+        "id": 288520350,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657023972
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/287833260\">said</a>:</p>\n<blockquote>\n<p>The brep objects created by my project are wong. While converting them to brep using <em>brep</em> cmd in archer, the outputs are right. I found the problem just now. Looking into the problem :(</p>\n</blockquote>\n<p>As for the problem I mentioned, I use file output to track code stack by <em>_brep_cmd_brep</em> and found it's the same as my test case.</p>",
+        "id": 288521246,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657024430
+    },
+    {
+        "content": "<p>And I'm still debuging the brep funciton... I think there are more problems than I thought.</p>",
+        "id": 288521505,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657024558
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/288520350\">said</a>:</p>\n<blockquote>\n<p>In brlcad\\src\\conv\\ply\\g-ply.c, error occurs about array definition. <em>C2057: expected constant expression</em><br>\nI thought it is caused by C language standard, but still failed after using std:c17 <a href=\"/user_uploads/1549/iUv3IBuGsp7MtBOC0NT1UO45/image.png\">image.png</a> <br>\nFinally rebuild succeed by modifing the code.<br>\n<a href=\"/user_uploads/1549/yVAjC8a4J7JLzgE18rdac0-2/image.png\">image.png</a></p>\n</blockquote>\n<p>Microsoft Visual Studio does not support the C99 feature VLA (variable length array). In C11 it isn't mandatory. You can check there if the __STDC_NO_VLA__ macro is defined or not.</p>\n<p>Don't forget to free the array if it isn't needed anymore.</p>",
+        "id": 288559321,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1657040569
+    },
+    {
+        "content": "<p>Thanks, you hit the bullseye! It seems VLA is illegal in the ISO standard and not supported in Visual Studio. So do I need to change to a legal way such as using <em>bu_calloc</em>? Or I just use it in my local repository?</p>",
+        "id": 288615033,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657074372
+    },
+    {
+        "content": "<p>I haven't looked at what you are doing there exactly, but there are already similar constructs in g-ply.c using <em>bu_calloc()</em>. You can use them as template for your changes. At the end, the code should compile with all major compilers.</p>",
+        "id": 288629375,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1657089629
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> that build error you ran into was fixed last week, so it won't be a problem if you update.  windows should be building cleanly (is for me), but let me know if you encounter an issue.</p>",
+        "id": 289151140,
+        "sender_full_name": "Sean",
+        "timestamp": 1657522561
+    },
+    {
+        "content": "<p>I'd like to see a summary of progress sometime later this week, and we need to discuss.  \"Debug brep using file output system\" doesn't really say anything useful or actionable about what you're doing at all.  You have 7-8 days where you generally indicate that you're debugging, but no successful outcomes from any of them so whatever you're doing seems ineffective and probably shouldn't continue like that.  If this debugging is at the limit of your skills after reading the NURBS Development Guide, then we should shift your focus to something more productive like categorically identifying issues instead of debugging them.</p>",
+        "id": 289151713,
+        "sender_full_name": "Sean",
+        "timestamp": 1657523007
+    },
+    {
+        "content": "<p>I'm seriously behind schedule due to personal reason. I will organize my recent works and make dev log clear. Maybe reread NURBS Development Guide is critical to remind me not to go to the horns.</p>",
+        "id": 289154395,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657524857
+    },
+    {
+        "content": "<p>Hope to make a breakthrough before our discussion and work more efficiency.</p>",
+        "id": 289154523,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657524951
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289151140\">said</a>:</p>\n<blockquote>\n<p>Hi <span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> that build error you ran into was fixed last week, so it won't be a problem if you update.  windows should be building cleanly (is for me), but let me know if you encounter an issue.</p>\n</blockquote>\n<p>I rebuild the newest code and no error occured!</p>",
+        "id": 289160113,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657528463
+    },
+    {
+        "content": "<p>Find multiple outputs with the same 'brep' operation among three BRL-CAD versions:</p>\n<ul>\n<li>project build with current main branch                  -- missing faces</li>\n<li>BRL-CAD 7.32.6 release package                                 -- correct output</li>\n<li>project build with BRL-CAD 7.32.6 source code   -- Archer crashed</li>\n</ul>",
+        "id": 289341159,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657639518
+    },
+    {
+        "content": "<p>current main branch:<br>\n<a href=\"/user_uploads/1549/SdO7W8xqfE0P6MnNcePZWLn0/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/SdO7W8xqfE0P6MnNcePZWLn0/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/SdO7W8xqfE0P6MnNcePZWLn0/image.png\"></a></div>",
+        "id": 289341468,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657639638
+    },
+    {
+        "content": "<p>7.32.6 release package:<br>\n<a href=\"/user_uploads/1549/WdvB2N47LkdeRcwE-Ciyods1/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/WdvB2N47LkdeRcwE-Ciyods1/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/WdvB2N47LkdeRcwE-Ciyods1/image.png\"></a></div>",
+        "id": 289341699,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657639731
+    },
+    {
+        "content": "<p>build with BRL-CAD 7.32.6 source code:<br>\n<a href=\"/user_uploads/1549/e3FUWm6E8L27CY_OufQGM3ti/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/e3FUWm6E8L27CY_OufQGM3ti/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/e3FUWm6E8L27CY_OufQGM3ti/image.png\"></a></div>",
+        "id": 289341921,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657639818
+    },
+    {
+        "content": "<p>More boolean cases will be tested.  And I will compare the differences among them.</p>",
+        "id": 289342144,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657639912
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> thanks for sharing</p>",
+        "id": 289409144,
+        "sender_full_name": "Sean",
+        "timestamp": 1657679233
+    },
+    {
+        "content": "<p>note that the only value in comparing different versions would be what you show above -- a version that worked, and a more current version that does not -- but then bisecting to find what commit caused it to stop working</p>",
+        "id": 289409239,
+        "sender_full_name": "Sean",
+        "timestamp": 1657679312
+    },
+    {
+        "content": "<p>I get it. This will be my main TODO today.</p>",
+        "id": 289409599,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657679722
+    },
+    {
+        "content": "<p>see if you can find where it stops working.  you'll need to self-compile from a git checkout and obviously get your compiled version to work first.  then you can test different versions to find what change seemed to cause problems.</p>",
+        "id": 289409653,
+        "sender_full_name": "Sean",
+        "timestamp": 1657679764
+    },
+    {
+        "content": "<p>git bisect can greatly help, if you know how that works, or if you check out a tutorial.  or you can simply jump forward and backwards through commits until you narrow in on the commit</p>",
+        "id": 289409713,
+        "sender_full_name": "Sean",
+        "timestamp": 1657679847
+    },
+    {
+        "content": "<p>note, your 7.32.6 build with the abort message is not terribly helpful -- you'd need to either run that in a debugger to know where abort is being called, or see if you can get a stack trace some other way (I don't know what your buttons say).  simply knowing that it threw up an error is not useful information, however, as any number of unrelated things could be wrong.</p>",
+        "id": 289409815,
+        "sender_full_name": "Sean",
+        "timestamp": 1657679979
+    },
+    {
+        "content": "<p>Thanks, I will check them! Note that in Archer build by 7.32.6, <em>brep</em> cmd crashed only in some models, while others not.</p>",
+        "id": 289409954,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657680125
+    },
+    {
+        "content": "<p>you may want to compile in release mode as that does change the assertion checks that are performed on windows.  the release version may be silently ignoring errors.  release mode isn't terribly useful for debugging but there's no point trying to debug old versions, so it can help find what change succeeds correctly vs incorrectly</p>",
+        "id": 289410185,
+        "sender_full_name": "Sean",
+        "timestamp": 1657680477
+    },
+    {
+        "content": "<p>After that's all done, I have an idea for something you could work on that would be helpful.  Implement something that tells us which primitives convert to brep and which do not.  This could be a program like some of the src/proc-db programs, it could be a shell script, it could be a cmake script, it could be a ged script -- what matters is getting an output that includes entries for all of the various solid primitives in src/librt/primitives/table.cpp and reports which convert successfully, which fail (and shouldn't), which fail (and should), and/or which do not have an implementation.  The output can be text or a webpage or similar, but should ideally just be something we can simply run and get a report.  make sense?</p>",
+        "id": 289410562,
+        "sender_full_name": "Sean",
+        "timestamp": 1657680988
+    },
+    {
+        "content": "<p>OK, I ignored it.. Build Release now. So more current version should also be tested in Release mode.</p>",
+        "id": 289410663,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657681169
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289410562\">said</a>:</p>\n<blockquote>\n<p>After that's all done, I have an idea for something you could work on that would be helpful.  Implement something that tells us which primitives convert to brep and which do not.  This could be a program like some of the src/proc-db programs, it could be a shell script, it could be a cmake script, it could be a ged script -- what matters is getting an output that includes entries for all of the various solid primitives in src/librt/primitives/table.cpp and reports which convert successfully, which fail (and shouldn't), which fail (and should), and/or which do not have an implementation.  The output can be text or a webpage or similar, but should ideally just be something we can simply run and get a report.  make sense?</p>\n</blockquote>\n<p>OK, i understand.</p>",
+        "id": 289410759,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657681287
+    },
+    {
+        "content": "<p>Note if you need Release mode with debug info on Windows, you can get it as an option by setting the ENABLE_ALL_CONFIG_TYPES option in CMake</p>",
+        "id": 289439520,
+        "sender_full_name": "starseeker",
+        "timestamp": 1657708113
+    },
+    {
+        "content": "<p>That will enable RelWithDebInfo - that's not a normally used BRL-CAD config (we generally limit the build to Debug and Release modes), but it's sometimes necessary to use RelWithDebInfo  with MSVC</p>",
+        "id": 289439580,
+        "sender_full_name": "starseeker",
+        "timestamp": 1657708199
+    },
+    {
+        "content": "<p>That's okay, he really doesn't need to debug the old versions.  But good to know.</p>",
+        "id": 289543195,
+        "sender_full_name": "Sean",
+        "timestamp": 1657764015
+    },
+    {
+        "content": "<p>Thanks! I just located the merge <em>660c8f</em> is the key to solve the problem.</p>",
+        "id": 289551608,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657774962
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289341468\">said</a>:</p>\n<blockquote>\n<p>current main branch:<br>\n<a href=\"/user_uploads/1549/SdO7W8xqfE0P6MnNcePZWLn0/image.png\">image.png</a></p>\n</blockquote>\n<p>By the way, although it works well for <em>arb_4.r</em> in current main branch in RELEASE mode, errors still occurs for some other combinations.</p>",
+        "id": 289551769,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657775166
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> how do you figure 660c8f is key?  that's a merge commit on a different branch... I would think you should only be iterating through commits on main.</p>",
+        "id": 289685569,
+        "sender_full_name": "Sean",
+        "timestamp": 1657859397
+    },
+    {
+        "content": "<p>that commit merged a bunch of changes <em>from</em> main to swrast, so it's a commit to the swrast branch.</p>",
+        "id": 289685650,
+        "sender_full_name": "Sean",
+        "timestamp": 1657859497
+    },
+    {
+        "content": "<p>Sorry, I think the merge did not introduce errors. Now I'm locating it using bisect. But it's time consuming...</p>",
+        "id": 289685860,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657859806
+    },
+    {
+        "content": "<p>Still building now.<br>\n<a href=\"/user_uploads/1549/EM9P8RGY6xMj4UWTVjwSfp5r/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/EM9P8RGY6xMj4UWTVjwSfp5r/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/EM9P8RGY6xMj4UWTVjwSfp5r/image.png\"></a></div>",
+        "id": 289685873,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657859835
+    },
+    {
+        "content": "<p>I think it means it's one merge from Release branch to main... Using source tree.<br>\n<a href=\"/user_uploads/1549/iKQZNs0lmAVSRjrlh2UwLM4C/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/iKQZNs0lmAVSRjrlh2UwLM4C/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/iKQZNs0lmAVSRjrlh2UwLM4C/image.png\"></a></div>",
+        "id": 289686480,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657860742
+    },
+    {
+        "content": "<p>I located the error around <em>1583360</em>. For the specific test case, newer commits get wrong output, older get correct output, some middle versions crashed even in Release mode. Tring to figure it out.</p>",
+        "id": 289799859,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657933388
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> that's actually entirely possible that doing some initialization is changing behavior.  If you manually edit src/libbrep/opennurbs_ext.cpp from DBL_MAX to uninitialized, does it work?</p>",
+        "id": 289808076,
+        "sender_full_name": "Sean",
+        "timestamp": 1657946293
+    },
+    {
+        "content": "<p>that's actually a change in the area of code that could indeed affect the behavior of the boolean evaluation</p>",
+        "id": 289808102,
+        "sender_full_name": "Sean",
+        "timestamp": 1657946355
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289808076\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> that's actually entirely possible that doing some initialization is changing behavior.  If you manually edit src/libbrep/opennurbs_ext.cpp from DBL_MAX to uninitialized, does it work?</p>\n</blockquote>\n<p>Actually it's not a problem caused by one commit, but serval commits around it.  So far I have found that commit <em>8a508c8</em> makes <em>arb_4.r</em> test case go from correct to crash, and <em>c39d657cd</em> makes <em>arb_4.r</em> test case go from crash to error output. And it seems that these commits solved another brep problem while causing this new problem...</p>",
+        "id": 289831294,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1657982451
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289410562\">said</a>:</p>\n<blockquote>\n<p>After that's all done, I have an idea for something you could work on that would be helpful.  Implement something that tells us which primitives convert to brep and which do not.  This could be a program like some of the src/proc-db programs, it could be a shell script, it could be a cmake script, it could be a ged script -- what matters is getting an output that includes entries for all of the various solid primitives in src/librt/primitives/table.cpp and reports which convert successfully, which fail (and shouldn't), which fail (and should), and/or which do not have an implementation.  The output can be text or a webpage or similar, but should ideally just be something we can simply run and get a report.  make sense?</p>\n</blockquote>\n<p>Here's a diagram kind of showing what I had in mind for evaluating all evaluation conditions more systematically:  <a href=\"/user_uploads/1549/MM0JJ2C1nvzUtDOqjhuZwTNR/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/MM0JJ2C1nvzUtDOqjhuZwTNR/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/MM0JJ2C1nvzUtDOqjhuZwTNR/image.png\"></a></div>",
+        "id": 289867271,
+        "sender_full_name": "Sean",
+        "timestamp": 1658038634
+    },
+    {
+        "content": "<p>Basically you have pairs of geometry that you'd create in all possible configurations, which would be 5 x 5 x 5 = 125 pairings</p>",
+        "id": 289867322,
+        "sender_full_name": "Sean",
+        "timestamp": 1658038695
+    },
+    {
+        "content": "<p>The images is just a 2D depiction, but the idea would be to create each pair in 3D using two primitives created in different positions and then booleaned together using each operator.</p>",
+        "id": 289867345,
+        "sender_full_name": "Sean",
+        "timestamp": 1658038782
+    },
+    {
+        "content": "<p>this is just one height, of course, as there'd be 4 more heights to create pairings for (which would all be trivial using for() loops on the creation).</p>",
+        "id": 289867466,
+        "sender_full_name": "Sean",
+        "timestamp": 1658038939
+    },
+    {
+        "content": "<p>For starters, can just focus on arb8, where you'd create the first red box probably centered near the origin, and then make a second green one bigger at each of the corresponding positions in a loop.  It would then be easy to make the code create combinations of \"Red u Green\", \"Red - Green\", \"Red + Green\" (so 125 x 3 = 375 combinations).   We could then also see what the results look like for sph/sph or arb8/sph or sph/rcc etc too.</p>",
+        "id": 289867661,
+        "sender_full_name": "Sean",
+        "timestamp": 1658039264
+    },
+    {
+        "content": "<p>This would be very useful as we could also use it to test other algorithms like facetize, or create a fuzz test that creates random combinations looking for failures.</p>",
+        "id": 289867716,
+        "sender_full_name": "Sean",
+        "timestamp": 1658039349
+    },
+    {
+        "content": "<p>could encapsulate the entire generation in a function like func(struct wdb *wdbp, enum type1, enum type2, int size1, int size2, double stepsize) and it'd automatically figure out where to generate all pairings based on those integral sizes and it can just iterate the creation of type2 across all positions (maybe more than 5 x 5 x 5) depending on stepsize.</p>",
+        "id": 289868288,
+        "sender_full_name": "Sean",
+        "timestamp": 1658040296
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289867271\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289410562\">said</a>:</p>\n<blockquote>\n<p>After that's all done, I have an idea for something you could work on that would be helpful.  Implement something that tells us which primitives convert to brep and which do not.  This could be a program like some of the src/proc-db programs, it could be a shell script, it could be a cmake script, it could be a ged script -- what matters is getting an output that includes entries for all of the various solid primitives in src/librt/primitives/table.cpp and reports which convert successfully, which fail (and shouldn't), which fail (and should), and/or which do not have an implementation.  The output can be text or a webpage or similar, but should ideally just be something we can simply run and get a report.  make sense?</p>\n</blockquote>\n<p>Here's a diagram kind of showing what I had in mind for evaluating all evaluation conditions more systematically:  <a href=\"/user_uploads/1549/MM0JJ2C1nvzUtDOqjhuZwTNR/image.png\">image.png</a></p>\n</blockquote>\n<p>Thanks! The method is clear and I have made a similar framework. It's part of the <em>primitives test</em>, am I right?</p>",
+        "id": 289873318,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658048097
+    },
+    {
+        "content": "<p>Btw, the <em>dplot</em> command in NURBS Development Guide can not be used though Archer have the entrance.., Luckly plot and brep can perform most of its functions. I used them to debug the issues and found the error ssx, but I'm not very proficient in using it.</p>",
+        "id": 289873783,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658048722
+    },
+    {
+        "content": "<p>What primitives test are you referring to?  I think the answer is \"no\" ... what I described is a tool that does not exist.  I'm suggesting you implement a tool that autogenerates all pairings of two specified primitive types.</p>",
+        "id": 289916856,
+        "sender_full_name": "Sean",
+        "timestamp": 1658111926
+    },
+    {
+        "content": "<p>\"the dplot command .... can not be used though Archer have the entrance\" &lt;-- I don't understand what you wrote there.</p>",
+        "id": 289916942,
+        "sender_full_name": "Sean",
+        "timestamp": 1658112012
+    },
+    {
+        "content": "<p>dplot is a subcommand to the brep command.  are you saying it doesn't work in archer?  the doc may have been written prior to it becoming a subcommand (in which case you should update the nurbs dev guide -- it's an xml doc under doc/docbook)</p>",
+        "id": 289917030,
+        "sender_full_name": "Sean",
+        "timestamp": 1658112136
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289916856\">said</a>:</p>\n<blockquote>\n<p>What primitives test are you referring to?  I think the answer is \"no\" ... what I described is a tool that does not exist.  I'm suggesting you implement a tool that autogenerates all pairings of two specified primitive types.</p>\n</blockquote>\n<p>the primitives test means \"which primitives convert to brep and which do not\".  I get your idea.</p>",
+        "id": 289917306,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658112566
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289916942\">said</a>:</p>\n<blockquote>\n<p>\"the dplot command .... can not be used though Archer have the entrance\" &lt;-- I don't understand what you wrote there.</p>\n</blockquote>\n<p><a href=\"/user_uploads/1549/1g5LzD4kIYg6d8U6A2ccerpD/image.png\">image.png</a> here is an example, I use dplot but it prompts for <em>overlay</em> usage.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/1g5LzD4kIYg6d8U6A2ccerpD/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/1g5LzD4kIYg6d8U6A2ccerpD/image.png\"></a></div>",
+        "id": 289917392,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658112697
+    },
+    {
+        "content": "<p>I'ill check the map from dplot command to brep.</p>",
+        "id": 289917461,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658112804
+    },
+    {
+        "content": "<p>I've updated <em>brep_arbintersection</em> project. Now it can generate the 125 arb union cases and convert to brep, the other two operation are in development. How shall I test if one cases is correct or not? Shall I visualize them then record, or use some functions or properties such as how many brep faces, are they manifolds?</p>",
+        "id": 289972126,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658154138
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/I-23Z_8bebH6o4CUS8CB1j-b/image.png\">image.png</a> <br>\nThis is an error case.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/I-23Z_8bebH6o4CUS8CB1j-b/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/I-23Z_8bebH6o4CUS8CB1j-b/image.png\"></a></div>",
+        "id": 289972265,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658154203
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289917392\">said</a>:</p>\n<div class=\"codehilite\"><pre><span></span><code>[image.png](/user_uploads/1549/1g5LzD4kIYg6d8U6A2ccerpD/image.png) here is an example, I use dplot but it prompts for *overlay* usage.\n</code></pre></div>\n<p>Ah, I think I understand now!  Yeah, I think there's two things going on there.. first dplot was moved to a brep subcommand, but the archer command table was not updated (bug #1).  Second, the archer dplot command binding is calling ged_exec() on \"dplot\" and somehow that is matching the \"overlay\" command (bug #2).</p>",
+        "id": 290124065,
+        "sender_full_name": "Sean",
+        "timestamp": 1658247546
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289972126\">said</a>:</p>\n<blockquote>\n<p>I've updated <em>brep_arbintersection</em> project. Now it can generate the 125 arb union cases and convert to brep, the other two operation are in development. How shall I test if one cases is correct or not? Shall I visualize them then record, or use some functions or properties such as how many brep faces, are they manifolds?</p>\n</blockquote>\n<p>We actually already have a tool that does a comparison and validation check that can probably be adapted to testing if the conversion worked, but a couple alternative ways comes to mind also.  The ground truth is typically going to be the ray tracing result of the non-nurbs version.   That's what the tool relies on, so for it, you just create the arb8's and it'll do the brep conversions and evaluate if they worked.</p>",
+        "id": 290126809,
+        "sender_full_name": "Sean",
+        "timestamp": 1658248738
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290126809\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289972126\">said</a>:</p>\n<blockquote>\n<p>I've updated <em>brep_arbintersection</em> project. Now it can generate the 125 arb union cases and convert to brep, the other two operation are in development. How shall I test if one cases is correct or not? Shall I visualize them then record, or use some functions or properties such as how many brep faces, are they manifolds?</p>\n</blockquote>\n<p>We actually already have a tool that does a comparison and validation check that can probably be adapted to testing if the conversion worked, but a couple alternative ways comes to mind also.  The ground truth is typically going to be the ray tracing result of the non-nurbs version.   That's what the tool relies on, so for it, you just create the arb8's and it'll do the brep conversions and evaluate if they worked.</p>\n</blockquote>\n<p>So how can I use the tool?</p>",
+        "id": 290228773,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658320610
+    },
+    {
+        "content": "<p>I generated the intersection and subtraction test cases and checked the results, only a few cases get correct answer... Most of the intersection  cases result in brep obj with none faces, and most subtraction cases result in brep obj of the bigger arb8, with the part should be subtracted.</p>",
+        "id": 290229481,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658321134
+    },
+    {
+        "content": "<p>I almost thought I not testing properly. Here is the corresponding command to make a combination with intersection operation</p>\n<div class=\"codehilite\"><pre><span></span><code>r u.1 u arb_1 + arb_0\n</code></pre></div>\n<p>I think it mean the area <code>arb_1</code>intersects with <code>arb_0</code>, am I right?</p>",
+        "id": 290229943,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658321411
+    },
+    {
+        "content": "<p>correct, that creates a region called u.1 that has \"arb_1 + arb_0\" (i.e., intersect)</p>",
+        "id": 290330310,
+        "sender_full_name": "Sean",
+        "timestamp": 1658375604
+    },
+    {
+        "content": "<p>definitely want to either create all three operations or start with union</p>",
+        "id": 290330339,
+        "sender_full_name": "Sean",
+        "timestamp": 1658375629
+    },
+    {
+        "content": "<p>which would be:  <br>\nr u.1 u arb_1 u arb_0</p>",
+        "id": 290330397,
+        "sender_full_name": "Sean",
+        "timestamp": 1658375669
+    },
+    {
+        "content": "<p>to keep this in order, really needs to use some meaningful names or it's going to be a mess</p>",
+        "id": 290330408,
+        "sender_full_name": "Sean",
+        "timestamp": 1658375692
+    },
+    {
+        "content": "<p>probably would be good to use some form of grid notation like 0x0x0.r for the bottom corner, then 1x0x0.r for the first X-shifted position, etc until you get to 4x4x4.r in the opposite corner (or however many steps across there are)</p>",
+        "id": 290330637,
+        "sender_full_name": "Sean",
+        "timestamp": 1658375947
+    },
+    {
+        "content": "<p>as for how to use the tool, check out the <a href=\"http://conversion.sh\">conversion.sh</a> script that is in the sh/ dir and I think also gets installed.  it's not been run in a while, so may need some minor updating (might not).  by default, it will simply try to convert everything, which will actually be very informative.</p>",
+        "id": 290330988,
+        "sender_full_name": "Sean",
+        "timestamp": 1658376244
+    },
+    {
+        "content": "<p>would be really cool to create a combination that has all the regions moved into a gridded position so they can all be visualized simultaneously</p>",
+        "id": 290331010,
+        "sender_full_name": "Sean",
+        "timestamp": 1658376290
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290330637\">said</a>:</p>\n<blockquote>\n<p>probably would be good to use some form of grid notation like 0x0x0.r for the bottom corner, then 1x0x0.r for the first X-shifted position, etc until you get to 4x4x4.r in the opposite corner (or however many steps across there are)</p>\n</blockquote>\n<p>got it. So it seems intersect and subtract are kind of bad.</p>",
+        "id": 290358697,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658399748
+    },
+    {
+        "content": "<p>I think you can consider removing <em>brep</em> command file output in Release version. Now the test cases create thousands of brep files...</p>",
+        "id": 290364765,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658403895
+    },
+    {
+        "content": "<p>Do you mean this? <br>\n<a href=\"/user_uploads/1549/-t0ax_RusNMJwlvQm1LJ2xU4/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-t0ax_RusNMJwlvQm1LJ2xU4/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/-t0ax_RusNMJwlvQm1LJ2xU4/image.png\"></a></div>",
+        "id": 290380622,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658412788
+    },
+    {
+        "content": "<p>It works really cool with regular expressions!</p>",
+        "id": 290381123,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658413054
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/IE4kIU65t2Bmh7_vGPkYOVgQ/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/IE4kIU65t2Bmh7_vGPkYOVgQ/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/IE4kIU65t2Bmh7_vGPkYOVgQ/image.png\"></a></div>",
+        "id": 290381153,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658413074
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290381123\">said</a>:</p>\n<blockquote>\n<p>It works really cool with regular expressions!</p>\n</blockquote>\n<p>Do you mean globbing?  What are regular expressions being used for?</p>",
+        "id": 290385326,
+        "sender_full_name": "Sean",
+        "timestamp": 1658414880
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290380622\">said</a>:</p>\n<blockquote>\n<p>Do you mean this? <br>\n<a href=\"/user_uploads/1549/-t0ax_RusNMJwlvQm1LJ2xU4/image.png\">image.png</a></p>\n</blockquote>\n<p>YES!  This is exactly what I had in mind.  Very nice.  I'll have to look at your proc-db in close detail but I think it'd be helpful for debugging if all the pairings were the same identical two objects (just in different positions), and just let the relative sizes be specified/overridden as input parameters.</p>",
+        "id": 290385992,
+        "sender_full_name": "Sean",
+        "timestamp": 1658415185
+    },
+    {
+        "content": "<p>so the fixed inner object would be something like 1^3 and the outer would be 3^3 in this example configuration, and we could then script it to compare 3^3 vs 2^3 or 2.5^3 vs 5.01^3 etc.. Currently using a stepsize of 5 positions, but that could be an input too, and just have it go across the entire potential range of interaction</p>",
+        "id": 290386518,
+        "sender_full_name": "Sean",
+        "timestamp": 1658415397
+    },
+    {
+        "content": "<p>Well done.. this is going to be incredibly helpful!</p>",
+        "id": 290386537,
+        "sender_full_name": "Sean",
+        "timestamp": 1658415408
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290385326\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290381123\">said</a>:</p>\n<blockquote>\n<p>It works really cool with regular expressions!</p>\n</blockquote>\n<p>Do you mean globbing?  What are regular expressions being used for?</p>\n</blockquote>\n<p>Yes, it's globbing.</p>",
+        "id": 290388031,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658416009
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290385992\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290380622\">said</a>:</p>\n<blockquote>\n<p>Do you mean this? <br>\n<a href=\"/user_uploads/1549/-t0ax_RusNMJwlvQm1LJ2xU4/image.png\">image.png</a></p>\n</blockquote>\n<p>YES!  This is exactly what I had in mind.  Very nice.  I'll have to look at your proc-db in close detail but I think it'd be helpful for debugging if all the pairings were the same identical two objects (just in different positions), and just let the relative sizes be specified/overridden as input parameters.</p>\n</blockquote>\n<p>Do I need to upload the database? I don't konw how to use the same two objects to create 125 cases while visualizing them at the same time. Do you mean create the 1st brep obj, then update arb vertices positions followed by creating 2rd brep obj using the two arb?</p>",
+        "id": 290388885,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658416402
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290386518\">said</a>:</p>\n<blockquote>\n<p>so the fixed inner object would be something like 1^3 and the outer would be 3^3 in this example configuration, and we could then script it to compare 3^3 vs 2^3 or 2.5^3 vs 5.01^3 etc.. Currently using a stepsize of 5 positions, but that could be an input too, and just have it go across the entire potential range of interaction</p>\n</blockquote>\n<p>I see, I think you mean we should make the project more configuable, such as to config the size of arb and stepsize?</p>",
+        "id": 290389929,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658416869
+    },
+    {
+        "content": "<p>No you don't need to upload -- I'm referring to the code generating this.  That you'd create the same two objects for all specified positions.  It depends how you're creating the objects, whether you're a) creating primitives and moving them or b) creating primitives in position or c) creating just two primitives, then creating combs that moves them into position.</p>",
+        "id": 290390116,
+        "sender_full_name": "Sean",
+        "timestamp": 1658416956
+    },
+    {
+        "content": "<p>Now it is #b. It generates 125 pairs of arb in position, combine them using three operations.</p>",
+        "id": 290390916,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658417288
+    },
+    {
+        "content": "<p>This is a table about converting primitives to brep form, it's manually tested.</p>",
+        "id": 290520577,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658501571
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/BpM-MS2mfE6VD0dHilcpAnrO/MDMGHU5IV9RY_6PPTQM.png\">MDMGHU5IV9RY_6PPTQM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/BpM-MS2mfE6VD0dHilcpAnrO/MDMGHU5IV9RY_6PPTQM.png\" title=\"MDMGHU5IV9RY_6PPTQM.png\"><img src=\"/user_uploads/1549/BpM-MS2mfE6VD0dHilcpAnrO/MDMGHU5IV9RY_6PPTQM.png\"></a></div>",
+        "id": 290520620,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658501598
+    },
+    {
+        "content": "<p>I create the primitives with default values, then use brep command to convert them. <em>epa</em> and <em>rhc</em> went wrong with brep while <em>part</em> and <em>bot</em> went wrong with <em>shaded</em> render(maybe normal errors).</p>",
+        "id": 290521268,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658501870
+    },
+    {
+        "content": "<p>now here are at least three works to be done:</p>\n<ol>\n<li>make arb boolean test cases more configurable</li>\n<li>locate error codes and scenarios of arb boolean test cases</li>\n<li>fix brep converting function of <em>epa</em> and <em>rhc</em></li>\n<li>Modify NURBS Boolean Guide to an updated version<br>\n<span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Do you think there are other works? And which should be done first?</li>\n</ol>",
+        "id": 290523437,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658502750
+    },
+    {
+        "content": "<p>Let’s start there <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> that 1234 is a great list to be working on.  This is already helpful.  The only other work that comes to mind is a tool that generates a grid of all primitives so we can regenerate your table automatically, retest easily as changes are made.  There are already some tools that create primitives so one of them may already be suitable.</p>",
+        "id": 290556515,
+        "sender_full_name": "Sean",
+        "timestamp": 1658518261
+    },
+    {
+        "content": "<p>Ok, I think for non-soild primitives, such as half, annot, there is no need to test the brep function of them.</p>",
+        "id": 290598499,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658559885
+    },
+    {
+        "content": "<p>I use shell script to create the primitives, then convert them to brep format.</p>",
+        "id": 290895199,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658844286
+    },
+    {
+        "content": "<p>primitives:<br>\n<a href=\"/user_uploads/1549/g74U-iC11xI5YK_ZjwXrmNTL/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/g74U-iC11xI5YK_ZjwXrmNTL/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/g74U-iC11xI5YK_ZjwXrmNTL/image.png\"></a></div>",
+        "id": 290895230,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658844303
+    },
+    {
+        "content": "<p>brep format <br>\n<a href=\"/user_uploads/1549/k9npIlfxGsLWC3ulHFtXPTJp/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/k9npIlfxGsLWC3ulHFtXPTJp/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/k9npIlfxGsLWC3ulHFtXPTJp/image.png\"></a></div>",
+        "id": 290895698,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658844489
+    },
+    {
+        "content": "<p>Obviously there are some wrong with brep format. Now trying to evaluate them using 'nirt'.</p>",
+        "id": 290896302,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1658844774
+    },
+    {
+        "content": "<p>Yeah, looks like two, maybe epa and rhc are quite wrong -- probably a very obvious mistake if you want to try and see if you can fix them.  One's clearly being created in the wrong position, the other appears to have a parameter or two in the wrong position or using a wrong value.</p>",
+        "id": 291138094,
+        "sender_full_name": "Sean",
+        "timestamp": 1658980419
+    },
+    {
+        "content": "<p>OK, I'm working on it.</p>",
+        "id": 291178181,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659013235
+    },
+    {
+        "content": "<p>I'm trying to debug rhc error. Now I've found that the Bezier curve of the bottom face is not on the plane, most likely it has something to do with second control point's weight.</p>",
+        "id": 291711945,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659448594
+    },
+    {
+        "content": "<p>It's confusing that the three control points are on the same plane while the curve is not. I'm looking at algorithms for bezier curves and source codes.</p>",
+        "id": 291712837,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659448764
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/m4rXczdTwp4eM0pjBjltS1zP/image.png\">image.png</a> <br>\nHere are two bugs to be fixed for the bottom plane:</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/m4rXczdTwp4eM0pjBjltS1zP/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/m4rXczdTwp4eM0pjBjltS1zP/image.png\"></a></div><ol>\n<li>The bottom in brep format is larger than primitive.</li>\n<li>The curve of the bottom is not on the bottom plane.</li>\n</ol>",
+        "id": 291714255,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659449263
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/RuTZ09OXrJ8zzXNV1lCn47kh/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RuTZ09OXrJ8zzXNV1lCn47kh/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/RuTZ09OXrJ8zzXNV1lCn47kh/image.png\"></a></div>",
+        "id": 291714382,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659449320
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Q-Zvp5yjDsQXdeuNVha1rd8k/image.png\">image.png</a> This is the formula caculated by the source code.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Q-Zvp5yjDsQXdeuNVha1rd8k/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Q-Zvp5yjDsQXdeuNVha1rd8k/image.png\"></a></div>",
+        "id": 292017985,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659624591
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/4r6W7nI9L0GtnvW7_BTyY0VU/image.png\">image.png</a> This is the correct formula.(<a href=\"https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html\">https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html</a>)</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/4r6W7nI9L0GtnvW7_BTyY0VU/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/4r6W7nI9L0GtnvW7_BTyY0VU/image.png\"></a></div>",
+        "id": 292018118,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659624631
+    },
+    {
+        "content": "<p>I think the reason is:</p>\n<ol>\n<li>It misses a coefficient.</li>\n<li>We shall use relative coordinates while scaling the position of a vertex on the curve.</li>\n</ol>",
+        "id": 292018538,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659624806
+    },
+    {
+        "content": "<p>Hope I am correct....   <br>\nI think #1 explains the bottom in brep format is larger than primitive format. #2 explains the curve of the bottom is not on the bottom plane.</p>",
+        "id": 292018812,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659624911
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> impressive sleuthing on the math... have you tried fixing it?  is that calculation happening in the rt_*_brep() function or elsewhere?</p>",
+        "id": 292060671,
+        "sender_full_name": "Sean",
+        "timestamp": 1659642517
+    },
+    {
+        "content": "<p>I have not tested #1. I plan to do it today.</p>",
+        "id": 292088053,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659659056
+    },
+    {
+        "content": "<p>It's in the <code>src\\other\\openNURBS\\opennurbs_evaluate_nurbs.cpp</code> <code>ON_EvaluateBezier</code> function.</p>",
+        "id": 292088219,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659659182
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/292018538\">said</a>:</p>\n<blockquote>\n<p>I think the reason is:</p>\n<ol>\n<li>It misses a coefficient.</li>\n<li>We shall use relative coordinates while scaling the position of a vertex on the curve.</li>\n</ol>\n</blockquote>\n<p>I've tesed #2, it could keep the curve on the plane. Although there are some other problems.</p>",
+        "id": 292088471,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659659428
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/UXhjh8uqRgtakFLGHDrEGlUA/image.png\">image.png</a> The yellow curve is generated by adding the coefficient.  It makes the bottom keep its height and on the plane, but it's wider..</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/UXhjh8uqRgtakFLGHDrEGlUA/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/UXhjh8uqRgtakFLGHDrEGlUA/image.png\"></a></div>",
+        "id": 292220303,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659744095
+    },
+    {
+        "content": "<p>The result makes sense from math. So the rounder one is corresponds to the formula given by the website.</p>",
+        "id": 292220732,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659744442
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  If we use the rounder (yellow) curve to represent the bottom, the rhc primitive would be reshaped, I don't know if it leads to a big influence and shall I do it.</p>",
+        "id": 292220991,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659744669
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/YNVJnWm5K8V8aaXLIlTwt71h/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/YNVJnWm5K8V8aaXLIlTwt71h/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/YNVJnWm5K8V8aaXLIlTwt71h/image.png\"></a></div>",
+        "id": 292221078,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659744750
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/292220991\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  If we use the rounder (yellow) curve to represent the bottom, the rhc primitive would be reshaped, I don't know if it leads to a big influence and shall I do it.</p>\n</blockquote>\n<p>The code to be changed belongs to OpenNURBS(brlcad\\src\\other\\openNURBS\\opennurbs_bezier.cpp)</p>",
+        "id": 292221115,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659744831
+    },
+    {
+        "content": "<p>It influents the drawing of BezierCurve.</p>",
+        "id": 292221313,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1659745066
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> src/other is not our code to modify, and unlikely there's a bug in there... the bug would be in our calculations in src/librt/primitives/*</p>",
+        "id": 292627730,
+        "sender_full_name": "Sean",
+        "timestamp": 1660067758
+    },
+    {
+        "content": "<p>now that I read your link more closely, note that <a href=\"https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html\">https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html</a> is going through the math for a PARABOLOID ... not  HYPERBOLOID ...</p>",
+        "id": 292627828,
+        "sender_full_name": "Sean",
+        "timestamp": 1660067786
+    },
+    {
+        "content": "<p>rhc is a right hyperbolic cylinder, i.e., it's defined by hyperboloids (which is why it doesn't match your yellow parabolic curve)</p>",
+        "id": 292627998,
+        "sender_full_name": "Sean",
+        "timestamp": 1660067858
+    },
+    {
+        "content": "<p>I think you're maybe closer on point with #2 in that the scaling or translation is off</p>",
+        "id": 292628181,
+        "sender_full_name": "Sean",
+        "timestamp": 1660067911
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/292627828\">said</a>:</p>\n<blockquote>\n<p>now that I read your link more closely, note that <a href=\"https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html\">https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html</a> is going through the math for a PARABOLOID ... not  HYPERBOLOID ...</p>\n</blockquote>\n<p>OK.... I saw the reference link in <code>rhc_brep.cpp</code>.<br>\n<a href=\"/user_uploads/1549/rgRIiJ1jhTmxxla2NVBHlGyF/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/rgRIiJ1jhTmxxla2NVBHlGyF/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/rgRIiJ1jhTmxxla2NVBHlGyF/image.png\"></a></div>",
+        "id": 292673371,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660087554
+    },
+    {
+        "content": "<p>And I proved the reason why the curve is not on the plane is the formula(now it's Paraboloid formula) by OpenNURBS.</p>",
+        "id": 292673584,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660087683
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/C4ofBGoXXoeUuUi3HZ-ePJQA/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/C4ofBGoXXoeUuUi3HZ-ePJQA/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/C4ofBGoXXoeUuUi3HZ-ePJQA/image.png\"></a></div>",
+        "id": 292673612,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660087713
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/OTozBGdfDgrJ_VV7l1E2un2M/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/OTozBGdfDgrJ_VV7l1E2un2M/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/OTozBGdfDgrJ_VV7l1E2un2M/image.png\"></a></div>",
+        "id": 292673625,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660087732
+    },
+    {
+        "content": "<p>Those three surface are bottom surfaces of one rhc in different positions. So they share the same <code>w</code> and same <code>P0</code> <code>P1</code> <code>P2</code> in local coordinate. By the formula, all the midpoint of the curve leads to <code>1/1+w</code> multiply a fixed point in  local coordinate then plus (0,0,0), and the screenshot proved it.</p>",
+        "id": 292674349,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660088203
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/292627828\">said</a>:</p>\n<blockquote>\n<p>now that I read your link more closely, note that <a href=\"https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html\">https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html</a> is going through the math for a PARABOLOID ... not  HYPERBOLOID ...</p>\n</blockquote>\n<p>So I'd like go through hyperboloids formula and sort out the suitable parameter passing between OpenNURBS and BRL-CAD.</p>",
+        "id": 292675147,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660088680
+    },
+    {
+        "content": "<p>I take it back about that being equations for paraboloid on the RB-conics page... I read it too quickly.. It'll take some concentration to fully grasp the context here to understand where the error(s) are with respect to the code..</p>",
+        "id": 292680046,
+        "sender_full_name": "Sean",
+        "timestamp": 1660092467
+    },
+    {
+        "content": "<p>Good news! I find the data we created does not fit with openNURBS algorithm. Our data is correct if we just look into  alone, but evaluating bezier using Casteljau algorithm in openNURBS requires a scale for input data.</p>",
+        "id": 293467423,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660542339
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/xIoAWl00pHPLshaCfV-R49Sm/image.png\">image.png</a> this is the rhc primitive.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/xIoAWl00pHPLshaCfV-R49Sm/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/xIoAWl00pHPLshaCfV-R49Sm/image.png\"></a></div>",
+        "id": 293467526,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660542414
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/FY3LSkPF7hKJ83X5Sl1gP-sk/image.png\">image.png</a> this is the brep after debuging.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/FY3LSkPF7hKJ83X5Sl1gP-sk/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/FY3LSkPF7hKJ83X5Sl1gP-sk/image.png\"></a></div>",
+        "id": 293467634,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660542486
+    },
+    {
+        "content": "<p>But their shapes are not exactly the same, working to solve it. <a href=\"/user_uploads/1549/R7YHjDYoOrI5wyWG5CriggUG/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/R7YHjDYoOrI5wyWG5CriggUG/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/R7YHjDYoOrI5wyWG5CriggUG/image.png\"></a></div>",
+        "id": 293467886,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660542665
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/xs5GHvojTBg3X-qg4YmhC2c3/image.png\">image.png</a> <a href=\"/user_uploads/1549/KDntEFMmchQddZWtP2g8nNpN/image.png\">image.png</a> hidden line and rt of brep.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/xs5GHvojTBg3X-qg4YmhC2c3/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/xs5GHvojTBg3X-qg4YmhC2c3/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/KDntEFMmchQddZWtP2g8nNpN/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/KDntEFMmchQddZWtP2g8nNpN/image.png\"></a></div>",
+        "id": 293467997,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660542743
+    },
+    {
+        "content": "<p>Btw, the codes changed are in src/librt/primitives/rhc_brep.cpp</p>",
+        "id": 293559190,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660577721
+    },
+    {
+        "content": "<p>And the page (<a href=\"https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html\">https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html</a>) tells about HYPERBOLOID but not PARABOLOID, although it mentioned PARABOLOID in the beginning.</p>",
+        "id": 293559471,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660577817
+    },
+    {
+        "content": "<p>I spend several days understanding NURBS surface formula, looking into codes of epa elliptical parabolic NURBS surface and drawing, trying to debug and write a Transform function which is extremely complicated... I just found it's done in ON_NurbsSurface <span aria-label=\"upside down\" class=\"emoji emoji-1f643\" role=\"img\" title=\"upside down\">:upside_down:</span></p>",
+        "id": 294273926,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660918102
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/MIzltYj0zR9lK0fmzVTzSak7/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/MIzltYj0zR9lK0fmzVTzSak7/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/MIzltYj0zR9lK0fmzVTzSak7/image.png\"></a></div>",
+        "id": 294276969,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660919106
+    },
+    {
+        "content": "<p>Now epa primitive without rotation can be converted to brep correctly. Going to solve epa bugs tommorrow.</p>",
+        "id": 294277357,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1660919224
+    },
+    {
+        "content": "<p>I just solved all the problems when converting epa into brep format. This is the link <a href=\"https://github.com/BRL-CAD/brlcad/pull/56\">https://github.com/BRL-CAD/brlcad/pull/56</a></p>",
+        "id": 294554133,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661094483
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/HbEOXaqiIe7BtK3CpC-fY2a9/image.png\">image.png</a> <a href=\"/user_uploads/1549/AgRHerAq5fqxG3-5REx04MNq/image.png\">image.png</a> The results are correct in any position and rotation.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/HbEOXaqiIe7BtK3CpC-fY2a9/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/HbEOXaqiIe7BtK3CpC-fY2a9/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AgRHerAq5fqxG3-5REx04MNq/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/AgRHerAq5fqxG3-5REx04MNq/image.png\"></a></div>",
+        "id": 294554470,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661094703
+    },
+    {
+        "content": "<p>I have solved the hyperbola problem in rhc.</p>",
+        "id": 295044996,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661347185
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/FvDELX5ghJzxDgForZY3glH_/Snipaste_2022-08-24_21-10-04.png\">Snipaste_2022-08-24_21-10-04.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/FvDELX5ghJzxDgForZY3glH_/Snipaste_2022-08-24_21-10-04.png\" title=\"Snipaste_2022-08-24_21-10-04.png\"><img src=\"/user_uploads/1549/FvDELX5ghJzxDgForZY3glH_/Snipaste_2022-08-24_21-10-04.png\"></a></div>",
+        "id": 295045689,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661347383
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/l1OsnwJxgiHvXAlbdaS7aiVn/Snipaste_2022-08-24_21-10-13.png\">Snipaste_2022-08-24_21-10-13.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/l1OsnwJxgiHvXAlbdaS7aiVn/Snipaste_2022-08-24_21-10-13.png\" title=\"Snipaste_2022-08-24_21-10-13.png\"><img src=\"/user_uploads/1549/l1OsnwJxgiHvXAlbdaS7aiVn/Snipaste_2022-08-24_21-10-13.png\"></a></div>",
+        "id": 295045929,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661347451
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/h3RcHqjamUVK93svQCZzpxFp/Snipaste_2022-08-24_21-12-18.png\">Snipaste_2022-08-24_21-12-18.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/h3RcHqjamUVK93svQCZzpxFp/Snipaste_2022-08-24_21-12-18.png\" title=\"Snipaste_2022-08-24_21-12-18.png\"><img src=\"/user_uploads/1549/h3RcHqjamUVK93svQCZzpxFp/Snipaste_2022-08-24_21-12-18.png\"></a></div>",
+        "id": 295045939,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661347456
+    },
+    {
+        "content": "<p>Here are the key formula about drawing rhc primitive and hyperbola...It's really dizzying</p>",
+        "id": 295048168,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661348122
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/oJRXdLF-yzjOvr7jjK8-RyqV/Snipaste_2022-08-24_21-29-23.png\">Snipaste_2022-08-24_21-29-23.png</a>  <a href=\"/user_uploads/1549/I_vTTT9sKHQ8Mdf-ZFE1AcgW/Snipaste_2022-08-24_21-29-32.png\">Snipaste_2022-08-24_21-29-32.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/oJRXdLF-yzjOvr7jjK8-RyqV/Snipaste_2022-08-24_21-29-23.png\" title=\"Snipaste_2022-08-24_21-29-23.png\"><img src=\"/user_uploads/1549/oJRXdLF-yzjOvr7jjK8-RyqV/Snipaste_2022-08-24_21-29-23.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/I_vTTT9sKHQ8Mdf-ZFE1AcgW/Snipaste_2022-08-24_21-29-32.png\" title=\"Snipaste_2022-08-24_21-29-32.png\"><img src=\"/user_uploads/1549/I_vTTT9sKHQ8Mdf-ZFE1AcgW/Snipaste_2022-08-24_21-29-32.png\"></a></div>",
+        "id": 295048208,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661348132
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> Thank you so much for all the updates.  I was away a few days but am catching up on everything. <br>\n I'm very impressed at the depth you've gone to solve the math.</p>",
+        "id": 295778106,
+        "sender_full_name": "Sean",
+        "timestamp": 1661746397
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/295045939\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/h3RcHqjamUVK93svQCZzpxFp/Snipaste_2022-08-24_21-12-18.png\">Snipaste_2022-08-24_21-12-18.png</a></p>\n</blockquote>\n<p>Can you make a side-by-side comparison with non-brep rhc and brep rhc?  It'll take me a while to digest your math, but this brep rendering looks parabolic to me ...  The rt of both brep and non-brep forms should match identically.</p>\n<p>Also, how does it compare with rpc and brep rpc?</p>",
+        "id": 295778294,
+        "sender_full_name": "Sean",
+        "timestamp": 1661746601
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/_pSvTkI7KdTRNvevctOHrPa1/case1.png\">case1.png</a> <a href=\"/user_uploads/1549/RexF-mCRXo4jpsqq6f3Cz5S2/case2.png\">case2.png</a> <a href=\"/user_uploads/1549/VdRfjbx7vIeW67eaVGtjxC-T/case3.png\">case3.png</a> <a href=\"/user_uploads/1549/zQLyMUAHYtfq8QtwPD_I5Gwo/case4.png\">case4.png</a> <a href=\"/user_uploads/1549/kofRXNhqszmCrpKNMMnzH6Dp/case5.png\">case5.png</a> <a href=\"/user_uploads/1549/Kh9jH8QEsaIXAoR8Vzrz3w8A/case6.png\">case6.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/_pSvTkI7KdTRNvevctOHrPa1/case1.png\" title=\"case1.png\"><img src=\"/user_uploads/1549/_pSvTkI7KdTRNvevctOHrPa1/case1.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RexF-mCRXo4jpsqq6f3Cz5S2/case2.png\" title=\"case2.png\"><img src=\"/user_uploads/1549/RexF-mCRXo4jpsqq6f3Cz5S2/case2.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/VdRfjbx7vIeW67eaVGtjxC-T/case3.png\" title=\"case3.png\"><img src=\"/user_uploads/1549/VdRfjbx7vIeW67eaVGtjxC-T/case3.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/zQLyMUAHYtfq8QtwPD_I5Gwo/case4.png\" title=\"case4.png\"><img src=\"/user_uploads/1549/zQLyMUAHYtfq8QtwPD_I5Gwo/case4.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/kofRXNhqszmCrpKNMMnzH6Dp/case5.png\" title=\"case5.png\"><img src=\"/user_uploads/1549/kofRXNhqszmCrpKNMMnzH6Dp/case5.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Kh9jH8QEsaIXAoR8Vzrz3w8A/case6.png\" title=\"case6.png\"><img src=\"/user_uploads/1549/Kh9jH8QEsaIXAoR8Vzrz3w8A/case6.png\"></a></div>",
+        "id": 295805102,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661763553
+    },
+    {
+        "content": "<p>Here are six test cases for rhc. the green lines are rhc primitives, and the red lines are rhc primitives. the bigger the 'c' is, the larger the difference is. I don't know why yet.</p>",
+        "id": 295805567,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661763779
+    },
+    {
+        "content": "<p>the brep converting of rpc primitives are correct with change its parameters and rotations.</p>",
+        "id": 295806065,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661764041
+    },
+    {
+        "content": "<p>The rhc primitive is hyperbola at least for it's parameters.<br>\n''The rational Bézier curve defined by three non-collinear control points P0, P1 and P2 and weights 1, w and 1 is a hyperbola, a parabola or an ellipse if w is greater than, equal to, or less than 1.'' according to <a href=\"https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/NURBS/RB-conics.html\">RB-conics</a></p>",
+        "id": 295806886,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661764442
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/295048208\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/oJRXdLF-yzjOvr7jjK8-RyqV/Snipaste_2022-08-24_21-29-23.png\">Snipaste_2022-08-24_21-29-23.png</a>  <a href=\"/user_uploads/1549/I_vTTT9sKHQ8Mdf-ZFE1AcgW/Snipaste_2022-08-24_21-29-32.png\">Snipaste_2022-08-24_21-29-32.png</a></p>\n</blockquote>\n<p>Picture 1 here is some steps of drawing  conic arcs. I didn't finish the math sluthing because I thought the rhc error was caused by hyperbola parameters.</p>",
+        "id": 295807581,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661764736
+    },
+    {
+        "content": "<p>I'm updating previous arb8intersection project to make it more configurable and not limited to arb8 primitives.</p>",
+        "id": 296056747,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661848151
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Do you have any suggestion about to do what next?</p>",
+        "id": 296056989,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661848250
+    },
+    {
+        "content": "<p>now here are at least three works to be done</p>\n<ol>\n<li>make arb boolean test cases more configurable</li>\n<li>locate error codes and scenarios of arb boolean test cases</li>\n<li>Modify NURBS Boolean Guide to an updated version</li>\n</ol>",
+        "id": 296057192,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661848337
+    },
+    {
+        "content": "<p>Here are two pull requests. who should I look for as a reviewer?<br>\n<a href=\"https://github.com/BRL-CAD/brlcad/pull/57\">https://github.com/BRL-CAD/brlcad/pull/57</a><br>\n<a href=\"https://github.com/BRL-CAD/brlcad/pull/56\">https://github.com/BRL-CAD/brlcad/pull/56</a></p>",
+        "id": 296265284,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1661928535
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> I'll definitely be reviewing them.  They're in my evening review queue.  Just a few things ahead of them.</p>",
+        "id": 296510564,
+        "sender_full_name": "Sean",
+        "timestamp": 1662000711
+    },
+    {
+        "content": "<p>I did take a quick look at them when you submitted them and first glance looked really good.</p>",
+        "id": 296510613,
+        "sender_full_name": "Sean",
+        "timestamp": 1662000734
+    },
+    {
+        "content": "<p>As for what to do next, what do you think would be the most helpful?  I have my opinions on this, but wondering what you think.</p>",
+        "id": 296510646,
+        "sender_full_name": "Sean",
+        "timestamp": 1662000790
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/296510564\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> I'll definitely be reviewing them.  They're in my evening review queue.  Just a few things ahead of them.</p>\n</blockquote>\n<p>Thanks a lot. They haven't been dealt with for ten days so I care about if they are on the schedule.</p>",
+        "id": 296524044,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662013632
+    },
+    {
+        "content": "<p>I have extended the boolean and brep converting of arb8 primitive to sph and rcc primitives. Some of the results are wrong in missing faces, but I think extending primitives is not really helpful in locating the problem or fix it.</p>",
+        "id": 296524621,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662014019
+    },
+    {
+        "content": "<p>So I'd like to locate error codes and scenarios of arb boolean test cases as my first step, meanwhile I can update NURBS Boolean Guide.</p>",
+        "id": 296524838,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662014150
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I have made some progress in making primitives boolean test cases more configurable, locating boolean error codes and getting started with fix <strong>bool_eval_development.xml</strong>. But I think it's a long process to start fixing boolean operation because it needs to read papers and codes. I'm not sure if we can see some substantial change before GSOC deadline.</p>",
+        "id": 297369649,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662471365
+    },
+    {
+        "content": "<p>I remember a good work that the <strong>dplot</strong> command in archer is incorrect in some cases. Do you think fixing it is more feasible and meaningful?</p>",
+        "id": 297370376,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662471580
+    },
+    {
+        "content": "<p>just like this <a href=\"/user_uploads/1549/ch-ToTZ_gtAgz6r7ETD1TEGl/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ch-ToTZ_gtAgz6r7ETD1TEGl/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/ch-ToTZ_gtAgz6r7ETD1TEGl/image.png\"></a></div>",
+        "id": 297370740,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662471717
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/290124065\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/289917392\">said</a>:</p>\n<div class=\"codehilite\"><pre><span></span><code>[image.png](/user_uploads/1549/1g5LzD4kIYg6d8U6A2ccerpD/image.png) here is an example, I use dplot but it prompts for *overlay* usage.\n</code></pre></div>\n<p>Ah, I think I understand now!  Yeah, I think there's two things going on there.. first dplot was moved to a brep subcommand, but the archer command table was not updated (bug #1).  Second, the archer dplot command binding is calling ged_exec() on \"dplot\" and somehow that is matching the \"overlay\" command (bug #2).</p>\n</blockquote>\n<p>it has been clarified before.</p>",
+        "id": 297371287,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1662471863
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/297370376\">said</a>:</p>\n<blockquote>\n<p>I remember a good work that the <strong>dplot</strong> command in archer is incorrect in some cases. Do you think fixing it is more feasible and meaningful?</p>\n</blockquote>\n<p>Yes, fixing any minor bugs like that are always appreciated.  They're nuisance and sometimes distractions, and sometimes outright significant problems so yes .. please do :)</p>",
+        "id": 297832009,
+        "sender_full_name": "Sean",
+        "timestamp": 1662658534
+    },
+    {
+        "content": "<p>I have fixed ploting faces one by one for 'dplot xx faces' cmd by plot split face files instead of outloop curves. But when it comes to plot all the faces at last, the 'overlay' cmd can't plot all the faces(split face files) at the same time. How to solve this problem?</p>",
+        "id": 299196504,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663345266
+    },
+    {
+        "content": "<p>And I tried some boolean and brep cases, the results are wrong and the brep function doesn't involve any face trim operations(no ssx events), so some cmds of dplot just can't be tested successfully....</p>",
+        "id": 299197159,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663345466
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/deVlTS2AUb5s5g__GQh7_7pN/Snipaste_2022-09-17_00-26-24.png\">Snipaste_2022-09-17_00-26-24.png</a> <a href=\"/user_uploads/1549/7lc3XUhYrzm3NZBrLZxlhYgG/Snipaste_2022-09-17_00-26-30.png\">Snipaste_2022-09-17_00-26-30.png</a> <a href=\"/user_uploads/1549/7zDc1-LFQKXJjlMsV2ZLuPEY/Snipaste_2022-09-17_00-26-40.png\">Snipaste_2022-09-17_00-26-40.png</a> Here are some snipastes of <code>dplot xx faces</code> cmd</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/deVlTS2AUb5s5g__GQh7_7pN/Snipaste_2022-09-17_00-26-24.png\" title=\"Snipaste_2022-09-17_00-26-24.png\"><img src=\"/user_uploads/1549/deVlTS2AUb5s5g__GQh7_7pN/Snipaste_2022-09-17_00-26-24.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/7lc3XUhYrzm3NZBrLZxlhYgG/Snipaste_2022-09-17_00-26-30.png\" title=\"Snipaste_2022-09-17_00-26-30.png\"><img src=\"/user_uploads/1549/7lc3XUhYrzm3NZBrLZxlhYgG/Snipaste_2022-09-17_00-26-30.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/7zDc1-LFQKXJjlMsV2ZLuPEY/Snipaste_2022-09-17_00-26-40.png\" title=\"Snipaste_2022-09-17_00-26-40.png\"><img src=\"/user_uploads/1549/7zDc1-LFQKXJjlMsV2ZLuPEY/Snipaste_2022-09-17_00-26-40.png\"></a></div>",
+        "id": 299197718,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663345673
+    },
+    {
+        "content": "<p>I'm not fully understanding.  Can you give me a complete mged transcript I can repeat on my side (including arb creation)?</p>",
+        "id": 299236855,
+        "sender_full_name": "Sean",
+        "timestamp": 1663360167
+    },
+    {
+        "content": "<p>you should be able to overlay multiple plot files at the same time (or sequentially) ... at least I think so!</p>",
+        "id": 299237035,
+        "sender_full_name": "Sean",
+        "timestamp": 1663360237
+    },
+    {
+        "content": "<p>OK, now I can overlay multiple plot files sequentially.</p>",
+        "id": 299263651,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663379251
+    },
+    {
+        "content": "<p>Here are snipastes by plotting <code>bool*_split_face*_outerloop_curve*.plot3</code> files. To show these curves, you need to rollback to <code>https://github.com/GregoryLi0/brlcad/tree/b1a76f1d06f3708928b91a51c29d3a89bb057010</code></p>",
+        "id": 299263890,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663379488
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/uPWmU8wWRHt6Osv92_UHQTKS/image.png\">image.png</a> <a href=\"/user_uploads/1549/RWshdf6YOr_n_ztfWDJLIQEL/image.png\">image.png</a> <a href=\"/user_uploads/1549/fbbf9_CVALDX76iyELLKsVHK/image.png\">image.png</a> <br>\nAs shown in snipastes, only 1 or none curve of each face is drawn.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/uPWmU8wWRHt6Osv92_UHQTKS/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/uPWmU8wWRHt6Osv92_UHQTKS/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RWshdf6YOr_n_ztfWDJLIQEL/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/RWshdf6YOr_n_ztfWDJLIQEL/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/fbbf9_CVALDX76iyELLKsVHK/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/fbbf9_CVALDX76iyELLKsVHK/image.png\"></a></div>",
+        "id": 299264087,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663379665
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/VRt8tbgXCr2AltdSqMrVjVxc/arb_simple_brep.sh\">arb_simple_brep.sh</a> This is a simple shell to regenerate plot files.</p>",
+        "id": 299265070,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1663380696
+    },
+    {
+        "content": "<p>I was absent because of getting back to school and COVID-19 policy. I did some unreported work</p>",
+        "id": 301239886,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664372885
+    },
+    {
+        "content": "<p>Now dplot is almost fixed. I roll back to a previous commit which can cause ssx event files to help debug dplot cmd. But the overlay cmd can't plot every .plot3 files.</p>",
+        "id": 301240314,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664373006
+    },
+    {
+        "content": "<p>For example,  some of ssx<em>_event</em>.plot3 and clipped_curve*.plot3 files can't be plotted using overlay cmd, so I have to draw other files with the same effect if possible.</p>",
+        "id": 301240722,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664373139
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/TiK3XJ8McJCqAlGSC7jfR57l/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/TiK3XJ8McJCqAlGSC7jfR57l/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/TiK3XJ8McJCqAlGSC7jfR57l/image.png\"></a></div>",
+        "id": 301240763,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664373156
+    },
+    {
+        "content": "<p>welcome back <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> !  </p>\n<p>The plot interface is entirely for devs, so it's not critical but do you have any more info on why they can't be plotted using the overlay command?  What happens?  Does it crash?  Does it just not render correctly?  Usage error?  Are the plot files valid?</p>",
+        "id": 301363391,
+        "sender_full_name": "Sean",
+        "timestamp": 1664424026
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/301363391\">said</a>:</p>\n<blockquote>\n<p>welcome back <span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> !  </p>\n<p>The plot interface is entirely for devs, so it's not critical but do you have any more info on why they can't be plotted using the overlay command?  What happens?  Does it crash?  Does it just not render correctly?  Usage error?  Are the plot files valid?</p>\n</blockquote>\n<p>it didn't crash or render. Here is one example: overlay the first file get error and nothing plotted.</p>",
+        "id": 301416625,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664449915
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/L2JiTEHxvvbWD4u2eNpojWdG/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/L2JiTEHxvvbWD4u2eNpojWdG/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/L2JiTEHxvvbWD4u2eNpojWdG/image.png\"></a></div>",
+        "id": 301416632,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664449919
+    },
+    {
+        "content": "<p>overlay the second file get correct image.</p>",
+        "id": 301416759,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664449966
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/UE01X0Oyg4q50QM8DLRORmvd/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/UE01X0Oyg4q50QM8DLRORmvd/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/UE01X0Oyg4q50QM8DLRORmvd/image.png\"></a></div>",
+        "id": 301416764,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664449969
+    },
+    {
+        "content": "<p>I don't know whether the plot files are valid or not. I'm finding it out and updating <em>NURBS Boolean Evaluation Development Guide</em></p>",
+        "id": 301417224,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664450155
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> After switching the base commit to a previous one,  it's much more clear to debug brep and boolean function. The <strong>brep</strong> cmd can introduce trimmed faces. To be more clear, run the same brep command with same data and codes before <strong>8a508c8f</strong> commit in 2021-11-09, the ssx events are recorded. but up-to-date codes won't record ssx events. I'm comparing related code changes and debuging the <strong>8a508c8f</strong> commit.</p>",
+        "id": 302269138,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664892624
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Gdb76dn4B1L8hjKOtNF-fTtf/image.png\">image.png</a> <a href=\"/user_uploads/1549/p46z0SVOrqvRu6eT4VIO_Vn5/image.png\">image.png</a> <br>\nHere are two screenshot to show the difference of two brep objects created using same cmd and same union.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Gdb76dn4B1L8hjKOtNF-fTtf/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Gdb76dn4B1L8hjKOtNF-fTtf/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/p46z0SVOrqvRu6eT4VIO_Vn5/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/p46z0SVOrqvRu6eT4VIO_Vn5/image.png\"></a></div>",
+        "id": 302270369,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664892993
+    },
+    {
+        "content": "<p>I updated some of the <em>NURBS Boolean Evaluation Development Guide</em>. But I'm not sure if the plot files are not valid or not loaded correctly. All the codes related to generate or draw plot files seems correct... I'm still tracking.</p>",
+        "id": 302271209,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1664893244
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/302270369\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/Gdb76dn4B1L8hjKOtNF-fTtf/image.png\">image.png</a> <a href=\"/user_uploads/1549/p46z0SVOrqvRu6eT4VIO_Vn5/image.png\">image.png</a> <br>\nHere are two screenshot to show the difference of two brep objects created using same cmd and same union.</p>\n</blockquote>\n<p>If I'm not mistaken, they both look wrong, correct?</p>",
+        "id": 302781179,
+        "sender_full_name": "Sean",
+        "timestamp": 1665119189
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> will you be writing up a final report?  A brief 1-page summary of everything you did this GSoC would be very valuable to have and a nice showcase of your work.  I'd hope you'd particularly emphasize the work you put on the testing tool as that should be very helpful for identifying the current functionality status.</p>",
+        "id": 302781301,
+        "sender_full_name": "Sean",
+        "timestamp": 1665119295
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/301416625\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/301363391\">said</a>:</p>\n<blockquote>\n<p>welcome back <span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> !  </p>\n<p>The plot interface is entirely for devs, so it's not critical but do you have any more info on why they can't be plotted using the overlay command?  What happens?  Does it crash?  Does it just not render correctly?  Usage error?  Are the plot files valid?</p>\n</blockquote>\n<p>it didn't crash or render. Here is one example: overlay the first file get error and nothing plotted.</p>\n</blockquote>\n<p>Without knowing if the plot files are valid or not, it's almost impossible to debug.  Basically.. finding issues in the plotting isn't going to be terribly helpful unless you debug and understand them enough to also fix them.  There's simply too many other things going on to stop and chase down dev infrastructure issues that might simply be bad input... unless you can figure it out.</p>",
+        "id": 302781492,
+        "sender_full_name": "Sean",
+        "timestamp": 1665119487
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/302781179\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/302270369\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/Gdb76dn4B1L8hjKOtNF-fTtf/image.png\">image.png</a> <a href=\"/user_uploads/1549/p46z0SVOrqvRu6eT4VIO_Vn5/image.png\">image.png</a> <br>\nHere are two screenshot to show the difference of two brep objects created using same cmd and same union.</p>\n</blockquote>\n<p>If I'm not mistaken, they both look wrong, correct?</p>\n</blockquote>\n<p>Yes, the two results are both wrong. For brep boolean function, I have located the error that the trimmed faces are not generated and stored correctly.</p>",
+        "id": 302781856,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665119810
+    },
+    {
+        "content": "<p>If we trim one surface with a closed curve, we should get two subsurfaces,but we only get one now(commit 8a508c8f).</p>",
+        "id": 302781901,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665119881
+    },
+    {
+        "content": "<p>you should definitely document that somewhere so it can be reproduced and inspected in specific detail</p>",
+        "id": 302781913,
+        "sender_full_name": "Sean",
+        "timestamp": 1665119882
+    },
+    {
+        "content": "<p>two subsurfaces?  how is that?</p>",
+        "id": 302781977,
+        "sender_full_name": "Sean",
+        "timestamp": 1665119929
+    },
+    {
+        "content": "<p>Yes. I'm sorting out the work I have done and recording possible problems and solutions.</p>",
+        "id": 302782084,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665120009
+    },
+    {
+        "content": "<p>for example, we trim the black face with red curves, we shall get inner area and outer area. But now we can get one of them. <a href=\"/user_uploads/1549/itF4hAH7XrzWw8hfabMBchPP/image.png\">image.png</a> <a href=\"/user_uploads/1549/Z-ojP3NaRhVwCgaGahjj8q4S/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/itF4hAH7XrzWw8hfabMBchPP/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/itF4hAH7XrzWw8hfabMBchPP/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Z-ojP3NaRhVwCgaGahjj8q4S/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Z-ojP3NaRhVwCgaGahjj8q4S/image.png\"></a></div>",
+        "id": 302782267,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665120224
+    },
+    {
+        "content": "<p>Here is a more intuitive example. I created two arb8 and convert the union to brep form. I keep all the subsurfaces no matter it should be kept or not. If everything works correct, we shall get two arb8 with trim lines.</p>",
+        "id": 302782617,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665120538
+    },
+    {
+        "content": "<p>But know each origin face creates one subface.<a href=\"/user_uploads/1549/JJjeIDhVFBlQDXa7SDHHg1vj/image.png\">image.png</a> <a href=\"/user_uploads/1549/oSY93G7ztxyksPeX59hj038g/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/JJjeIDhVFBlQDXa7SDHHg1vj/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/JJjeIDhVFBlQDXa7SDHHg1vj/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/oSY93G7ztxyksPeX59hj038g/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/oSY93G7ztxyksPeX59hj038g/image.png\"></a></div>",
+        "id": 302782808,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665120669
+    },
+    {
+        "content": "<p>For this case, we have 12 origin faces(two arb8), we shall get 18 trimmed subfaces(8+10). But now we only get 12 trimmed subfaces.</p>",
+        "id": 302783104,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665120863
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/302782808\">said</a>:</p>\n<blockquote>\n<p>But know each origin face creates one subface.<a href=\"/user_uploads/1549/JJjeIDhVFBlQDXa7SDHHg1vj/image.png\">image.png</a> <a href=\"/user_uploads/1549/oSY93G7ztxyksPeX59hj038g/image.png\">image.png</a></p>\n</blockquote>\n<p>I'm now debuging at commit 8a508c8f. The up-to-date code does not trim the surface properly...</p>",
+        "id": 302783260,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665120984
+    },
+    {
+        "content": "<p>I will sort out the work I have done and record possible problems and solutions before final evaluation, and continue to debug boolean funciton after final evaluation. <span aria-label=\"smile\" class=\"emoji emoji-1f642\" role=\"img\" title=\"smile\">:smile:</span></p>",
+        "id": 302783433,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665121106
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Here is my final report. Is there anything to be modified or given more details? Shall I send it to the mailling list? <a href=\"/user_uploads/1549/pC-AgwyrlMsgz2nEZ3Ysta5h/Final_Report.pdf\">Final_Report.pdf</a></p>",
+        "id": 303078993,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665277954
+    },
+    {
+        "content": "<p>I have fixed some of the boolean function. The up-to-date code won't record trimmed faces. Now it can record one of them.</p>",
+        "id": 303137616,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665324512
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/e1x_dsrToYuN45TOYxc77Bs-/image.png\">image.png</a> <a href=\"/user_uploads/1549/HgyIhMYW-GFTs5Mp_RzWfqxl/image.png\">image.png</a> <a href=\"/user_uploads/1549/ZMNE-5__y3O5c__jQFcCLdoa/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/e1x_dsrToYuN45TOYxc77Bs-/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/e1x_dsrToYuN45TOYxc77Bs-/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/HgyIhMYW-GFTs5Mp_RzWfqxl/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/HgyIhMYW-GFTs5Mp_RzWfqxl/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ZMNE-5__y3O5c__jQFcCLdoa/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/ZMNE-5__y3O5c__jQFcCLdoa/image.png\"></a></div>",
+        "id": 303137993,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665324780
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/302781901\">said</a>:</p>\n<blockquote>\n<p>If we trim one surface with a closed curve, we should get two subsurfaces,but we only get one now(commit 8a508c8f).</p>\n</blockquote>\n<p>And I believe the reason for missing subfaces is about trimming face with ssx_curve.  The related source code is <code>split_trimmed_face()</code> function in boolean.cpp.</p>",
+        "id": 303138345,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665325049
+    },
+    {
+        "content": "<p>This is a summary for the function. <a href=\"/user_uploads/1549/bsfeTWHLqf-Hexl6CQGglS7H/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bsfeTWHLqf-Hexl6CQGglS7H/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/bsfeTWHLqf-Hexl6CQGglS7H/image.png\"></a></div>",
+        "id": 303138500,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665325141
+    },
+    {
+        "content": "<p>I think we shall get two subfaces for not closed ssx_curve, as shown at the bottom of the picture.</p>",
+        "id": 303138649,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1665325246
+    },
+    {
+        "content": "<p>Thanks <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> . It's really a great summer to work with you! I will continue to contribute to the community :)</p>",
+        "id": 304651663,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1666089593
+    },
+    {
+        "content": "<p>I'm debugging <code>split_face_into_loops()</code> function these days, hope to get two closed loop instead of one. I believe it will help a lot for boolean function. But I'm busy with school things in the next week or two. I will report on my progress as soon as I get the result :)</p>",
+        "id": 304652295,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1666089851
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I'm glad to tell you I have located the lowest level bug. The <code>ON_PolyCurve::IsClosed()</code> function of OpenNURBS has no tolerance about <code>FindNextGap()</code>.  I simply remove the judgement about <code>IsClosed()</code> of splitted loop, the test case works well!</p>",
+        "id": 306650495,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1666962228
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/ZpC4yjEIWGeI2CKu1T0gnpjo/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ZpC4yjEIWGeI2CKu1T0gnpjo/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/ZpC4yjEIWGeI2CKu1T0gnpjo/image.png\"></a></div>",
+        "id": 306650606,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1666962260
+    },
+    {
+        "content": "<p>I will run previous test intersection cases to see if it works well.</p>",
+        "id": 306651253,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1666962427
+    },
+    {
+        "content": "<p>Is code of OpenNURBS can't be modified? I think we need to add a tolerance to <code>FindNextGap()</code>, or we have to come up with another way to test is the loop closed.</p>",
+        "id": 306651976,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1666962608
+    },
+    {
+        "content": "<p>Hmm.. <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> FindNextGap() utilizes a tolerance that is at least as big as ON_ZERO_TOLERANCE in determining whether there's a gap.  In HasGapAt() it uses that along with some extra logic to take the curvature into account as well, but is fundamentally underpinned by ON_PointsAreCoincident() which is also whether points are within ON_ZERO_TOLERANCE or ON_RELATIVE_TOLERANCE.</p>",
+        "id": 307886365,
+        "sender_full_name": "Sean",
+        "timestamp": 1667539325
+    },
+    {
+        "content": "<p>We should really not be modifying OpenNURBS.  Is it the case that the curve is discontinuous perhaps?  Looking at the screenshot, it appears to be discontinuous (the stair-stepping), and that's a bit unexpected.  Do you know why it's like that?</p>",
+        "id": 307886506,
+        "sender_full_name": "Sean",
+        "timestamp": 1667539451
+    },
+    {
+        "content": "<p>Hi, I had a busy month and need two weeks to deal with my school things. I will check it these days if I have time. I stepped though boolean function and found it's closed. I thought it was caused by some other judgements.</p>",
+        "id": 312295872,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1669441383
+    },
+    {
+        "content": "<p>Hi, I'm back :)<br>\nI tested the brep intersection cases and it seems it haven't be fixed. So I'm trying to finish it these days, and finish my previous PRs.</p>",
+        "id": 338330347,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1677505395
+    },
+    {
+        "content": "<p>Now I can generate all trimmed surfaces by removing wrong judgement (polycurve-&gt;IsClosed() in boolean.cpp), here are something to be done:</p>\n<ol>\n<li>Look into and fix IsClosed() function. Now the test data is correct but get wrong answer.</li>\n<li>The code to decide whether to keep trimmed surfaces is wrong.</li>\n<li>Look into and fix stair-stepping cases.</li>\n</ol>",
+        "id": 339707204,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678028217
+    },
+    {
+        "content": "<p>To generate all trimmed surfaces, some curve of  <strong>outerloop_segs</strong> (in split_face_into_loops(), libbrep/boolean.cpp)  are in dimen 2 while others are 3 dimension. Points on 2d curve only get x y value when evaluating using OpenNURBS though they have 3d info, while 3d curve get x y z value. So it’s a mass to determine whether 2d point and 3d point overlap or not. It leads to we get <strong>false</strong> answer calling <strong>ON_PolyCurve::IsClosed()</strong> with correct data.<br>\nI think simply removing the OpenNURBS judgement is fine because we already have codes that check if it’s closed in boolean.cpp.</p>",
+        "id": 339769397,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678071876
+    },
+    {
+        "content": "<p>Maybe converting 2d curves to 3d curves when generating trimmed surfaces is also a good method, because the 2d curves already have all the 3d infos we need. What do you think? <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 339769530,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678072037
+    },
+    {
+        "content": "<p>You can see my code here. <a href=\"https://github.com/GregoryLi0/brlcad/tree/brep_boolean_debug\">https://github.com/GregoryLi0/brlcad/tree/brep_boolean_debug</a><br>\nBtw, I can compile the latest brlcad code of main branch. But archer crashes as soon as I open it, both on ubuntu and windows...</p>",
+        "id": 339879221,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678112038
+    },
+    {
+        "content": "<p>Just noticed the Archer crash here as well.</p>",
+        "id": 339890019,
+        "sender_full_name": "starseeker",
+        "timestamp": 1678114508
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> I think Archer is working again?</p>",
+        "id": 340007430,
+        "sender_full_name": "starseeker",
+        "timestamp": 1678156517
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/340007430\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> I think Archer is working again?</p>\n</blockquote>\n<p>Yeah, it works well on ubuntu now.</p>",
+        "id": 340008591,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678157248
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/339769397\">said</a>:</p>\n<blockquote>\n<p>To generate all trimmed surfaces, some curve of  <strong>outerloop_segs</strong> (in split_face_into_loops(), libbrep/boolean.cpp)  are in dimen 2 while others are 3 dimension. Points on 2d curve only get x y value when evaluating using OpenNURBS though they have 3d info, while 3d curve get x y z value. So it’s a mass to determine whether 2d point and 3d point overlap or not. It leads to we get <strong>false</strong> answer calling <strong>ON_PolyCurve::IsClosed()</strong> with correct data.<br>\nI think simply removing the OpenNURBS judgement is fine because we already have codes that check if it’s closed in boolean.cpp.</p>\n</blockquote>\n<p>I find it has been solved in the latest edition by standardizing data into 3-d. <a href=\"/user_uploads/1549/oAyto3TjIx-d_GoVoHirR0CC/image.png\">image.png</a> <a href=\"/user_uploads/1549/VF5nTkh-rNRWEYhhCdaUHKQG/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/oAyto3TjIx-d_GoVoHirR0CC/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/oAyto3TjIx-d_GoVoHirR0CC/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/VF5nTkh-rNRWEYhhCdaUHKQG/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/VF5nTkh-rNRWEYhhCdaUHKQG/image.png\"></a></div>",
+        "id": 340282735,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678259541
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/339707204\">said</a>:</p>\n<blockquote>\n<p>Now I can generate all trimmed surfaces by removing wrong judgement (polycurve-&gt;IsClosed() in boolean.cpp), here are something to be done:</p>\n<ol>\n<li>Look into and fix IsClosed() function. Now the test data is correct but get wrong answer.</li>\n<li>The code to decide whether to keep trimmed surfaces is wrong.</li>\n<li>Look into and fix stair-stepping cases.</li>\n</ol>\n</blockquote>\n<p>So it semms the 1st question is fixed now. Running my arb8 test cases will confirm it.</p>",
+        "id": 340283057,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678259721
+    },
+    {
+        "content": "<p>You mean IsClosed() is fixed?  It's possible our openNURBS update introduced some fixes but I thought we were seeing some other issue too (related to the stair-stepping and general book-keeping).</p>",
+        "id": 340539045,
+        "sender_full_name": "Sean",
+        "timestamp": 1678350355
+    },
+    {
+        "content": "<p>I'm looking into stair-stepping, do you mean it like this? <a href=\"/user_uploads/1549/nlyaSGvu9qkIfNHmL5ZsJbqN/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/nlyaSGvu9qkIfNHmL5ZsJbqN/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/nlyaSGvu9qkIfNHmL5ZsJbqN/image.png\"></a></div>",
+        "id": 340774821,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678430366
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  What does book-keeping mean? Is there any test case?</p>",
+        "id": 340775075,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678430497
+    },
+    {
+        "content": "<p>That's not specifically what I was referring to -- just the general issue of having two boxes that align on just their edge evaluating incorrectly.</p>\n<p>As for book-keeping, that refers to how the code keeps track of what it is doing, what it has done, what it needs to do next, etc.  From the failure examples I've seen, it looks like the code sometimes incorrectly determines when two things intersect and/or performs an edit to join/split the surfaces and gets it wrong.</p>",
+        "id": 340959106,
+        "sender_full_name": "Sean",
+        "timestamp": 1678480294
+    },
+    {
+        "content": "<p>Good news! Just fixed the bug that jump over categorize_trimmed_faces(). Now the simple two arb8 union case is correct.</p>",
+        "id": 342284608,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678966726
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/TjWk7cb68D-zt-VcIo5Vk2q3/image.png\">image.png</a> <a href=\"/user_uploads/1549/on9lJkt7-bqqr--jd27JknJw/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/TjWk7cb68D-zt-VcIo5Vk2q3/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/TjWk7cb68D-zt-VcIo5Vk2q3/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/on9lJkt7-bqqr--jd27JknJw/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/on9lJkt7-bqqr--jd27JknJw/image.png\"></a></div>",
+        "id": 342284682,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678966751
+    },
+    {
+        "content": "<p>I will add the arb8 intersection grid to test it. <a href=\"/user_uploads/1549/NO_75w2_WFHhRRNUbiluUAaf/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/NO_75w2_WFHhRRNUbiluUAaf/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/NO_75w2_WFHhRRNUbiluUAaf/image.png\"></a></div>",
+        "id": 342285018,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1678966852
+    },
+    {
+        "content": "<p>Wow, that's great <span class=\"user-mention\" data-user-id=\"491779\">@GregoryLi</span> .. is the error and fix easy to explain?  How'd you figure it out?</p>",
+        "id": 342393672,
+        "sender_full_name": "Sean",
+        "timestamp": 1678991454
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Yeah, it's quite simple. <span aria-label=\"sweat smile\" class=\"emoji emoji-1f605\" role=\"img\" title=\"sweat smile\">:sweat_smile:</span>   One former commit tried to add cache vectors instead of modifying output value, but some judging code is not modified to check the cache vector. This resulted in skipping lots of important codes.<br>\nMore clearly, in <code>get_face_intersection_curves()</code> of <code>boolean.cpp</code>, we use <code>st1</code>&amp;<code>st2</code> as a cache vector for <code>surf_tree1</code>&amp;<code>surf_tree2</code>, but we still use <code>surf_tree2</code> to detect exceptions, causing <code>ON_Intersect()</code> to always be  skipped.</p>",
+        "id": 342456649,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1679017986
+    },
+    {
+        "content": "<p>I created a sheet of arb8 unions. Now we can get all subfaces properly, but miss some of them in the end. It means bug exists in <code>categorize_trimmed_faces()</code> very likely.<br>\n<a href=\"/user_uploads/1549/gNknIguf-_NB50dlw6dcvqrF/image.png\">image.png</a> <a href=\"/user_uploads/1549/3wu1LkFXfapvXVrzhjy8FeI4/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/gNknIguf-_NB50dlw6dcvqrF/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/gNknIguf-_NB50dlw6dcvqrF/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/3wu1LkFXfapvXVrzhjy8FeI4/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/3wu1LkFXfapvXVrzhjy8FeI4/image.png\"></a></div>",
+        "id": 342473666,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1679031002
+    },
+    {
+        "content": "<p>The intersection cases also show missing or redundant subfaces.<br>\n<a href=\"/user_uploads/1549/doCmtlf-F0gdfhyWsqlt5kjN/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/doCmtlf-F0gdfhyWsqlt5kjN/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/doCmtlf-F0gdfhyWsqlt5kjN/image.png\"></a></div>",
+        "id": 342474255,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1679031408
+    },
+    {
+        "content": "<p>It sounds like you're getting more and more familiarized with the issues in the code and how to fix them!  That's excellent progress and understanding.</p>",
+        "id": 342492927,
+        "sender_full_name": "Sean",
+        "timestamp": 1679040488
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/342473666\">said</a>:</p>\n<blockquote>\n<p>I created a sheet of arb8 unions. Now we can get all subfaces properly, but miss some of them in the end. It means bug exists in <code>categorize_trimmed_faces()</code> very likely.<br>\n<a href=\"/user_uploads/1549/gNknIguf-_NB50dlw6dcvqrF/image.png\">image.png</a> <a href=\"/user_uploads/1549/3wu1LkFXfapvXVrzhjy8FeI4/image.png\">image.png</a></p>\n</blockquote>\n<p>Looks like there's a couple other errors in there too.  I see a missing face and all the dark faces have to be wrong too.</p>",
+        "id": 342493130,
+        "sender_full_name": "Sean",
+        "timestamp": 1679040579
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/342493130\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"491779\">GregoryLi</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Boolean.20evaluation/near/342473666\">said</a>:</p>\n<blockquote>\n<p>I created a sheet of arb8 unions. Now we can get all subfaces properly, but miss some of them in the end. It means bug exists in <code>categorize_trimmed_faces()</code> very likely.<br>\n<a href=\"/user_uploads/1549/gNknIguf-_NB50dlw6dcvqrF/image.png\">image.png</a> <a href=\"/user_uploads/1549/3wu1LkFXfapvXVrzhjy8FeI4/image.png\">image.png</a></p>\n</blockquote>\n<p>Looks like there's a couple other errors in there too.  I see a missing face and all the dark faces have to be wrong too.</p>\n</blockquote>\n<p>Yes, I think they are all caused by <code>categorize_trimmed_faces()</code>.</p>",
+        "id": 342699954,
+        "sender_full_name": "GregoryLi",
+        "timestamp": 1679108056
+    }
+]

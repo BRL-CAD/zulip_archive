@@ -1,0 +1,61 @@
+<html>
+<head><meta charset="utf-8"><title>repo migration · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html">repo migration</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="129787791"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129787791" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129787791">(Jul 17 2018 at 01:44)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  When I started taking apart the cvs-git repo, I noticed a rather odd behavior of the conversion in that things were committed to non-master git branches for most of the repo history.  Very odd, and it complicates the analysis somewhat.</p>
+
+
+
+<a name="129787865"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129787865" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129787865">(Jul 17 2018 at 01:46)</a>:</h4>
+<p>huh anything in the tool docs or history that would indicate why that might happen?</p>
+
+
+
+<a name="129788757"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129788757" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129788757">(Jul 17 2018 at 02:17)</a>:</h4>
+<p>Not that I spotted right offhand</p>
+
+
+
+<a name="129788814"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129788814" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129788814">(Jul 17 2018 at 02:18)</a>:</h4>
+<p>well if they're not going to master, what were they going to?</p>
+
+
+
+<a name="129788823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129788823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129788823">(Jul 17 2018 at 02:19)</a>:</h4>
+<p>cvs branches, looks like (rt, rt-2, etc.)</p>
+
+
+
+<a name="129788886"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129788886" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129788886">(Jul 17 2018 at 02:21)</a>:</h4>
+<p>I'm eventually planning on a variation of your original proposal - compare all the diffs (sha1 signatures actually) and try to correct the svn dates, then convert off of that history</p>
+
+
+
+<a name="129789012"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129789012" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129789012">(Jul 17 2018 at 02:24)</a>:</h4>
+<p>The other alternative is to take the git fast export stream from the cvs-git conversion, post-process it to do the commits on master and turn what appear to be full git branches into tags (which is how they look in gitk, to a casual inspection) and then proceed to splice in the svn conversion.  That's my "preferred" approach, but I need to get my steam back up to finish the git side of the parsing logic</p>
+
+
+
+<a name="129789373"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/repo%20migration/near/129789373" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/repo.20migration.html#129789373">(Jul 17 2018 at 02:35)</a>:</h4>
+<p>I don't know the downsides or upsides, so whatever you think is best.  I wouldn't be too concerned whether they are branches or tags -- heck keep branches and tag the ends.  or leave them as branches and we can tag/restructure later.  no info is lost.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

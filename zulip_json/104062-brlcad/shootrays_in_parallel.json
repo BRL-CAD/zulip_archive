@@ -1,0 +1,338 @@
+[
+    {
+        "content": "<p>Hello All<br>\nI was  planning to complete shootrays_in_parallel function  to speed up.  I could not understand \" (while (rays-&gt;ap[i].a_magic != RT_AP_MAGIC)) \"why Magic numbers are neccessary in the shootrays_in_parallel function. struct application has already initilalized with RT_AP_MAGIC so the while loop is already False ?<br>\nIt would be good to get some help <br>\nstay safe</p>",
+        "id": 192803804,
+        "sender_full_name": "scorp08",
+        "timestamp": 1585920713
+    },
+    {
+        "content": "<p>it's a BU_LIST iirc, which is circular and uses that to understand the \"beginning\"/\"end\" somehow</p>",
+        "id": 192818865,
+        "sender_full_name": "Erik",
+        "timestamp": 1585926720
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span>  still could not understand. what is iirc ?</p>",
+        "id": 192820440,
+        "sender_full_name": "scorp08",
+        "timestamp": 1585927334
+    },
+    {
+        "content": "<p>iirc == \"if I recall correctly\". I'm old. it's been a while. I could be wrong.</p>",
+        "id": 192829891,
+        "sender_full_name": "Erik",
+        "timestamp": 1585931405
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span>  why BU_BITSET is neccessary ? to shift bits after the shoot ?</p>",
+        "id": 192831546,
+        "sender_full_name": "scorp08",
+        "timestamp": 1585932078
+    },
+    {
+        "content": "<p>Before the shoot do I need to run rt_prerp_parallel or rt_prep ? I do not know the difference actually...</p>",
+        "id": 193367632,
+        "sender_full_name": "scorp08",
+        "timestamp": 1586374122
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/193367632\" title=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/193367632\">said</a>:</p>\n<blockquote>\n<p>Before the shoot do I need to run rt_prerp_parallel or rt_prep ? I do not know the difference actually...</p>\n</blockquote>\n<p>Any help would be great  :)</p>",
+        "id": 193718952,
+        "sender_full_name": "scorp08",
+        "timestamp": 1586707721
+    },
+    {
+        "content": "<p>if I remember, just one or the other. they both do the same thing, one just does it in parallel (good for smp, not so much for single core). might wanna check the docs, though</p>",
+        "id": 193726139,
+        "sender_full_name": "Erik",
+        "timestamp": 1586719045
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> it's not that BU_BITSET is necessary, but the code must define some way for multiple threads to coordinate, and there needs to be some book keeping.</p>\n<p>BU_BITSET does both, conveniently.</p>",
+        "id": 194526185,
+        "sender_full_name": "Sean",
+        "timestamp": 1587185593
+    },
+    {
+        "content": "<p>it's atomic, or at least close enough to atomic for testing purposes, and it's a set of flags that can help keep track of what's been done.</p>",
+        "id": 194526187,
+        "sender_full_name": "Sean",
+        "timestamp": 1587185637
+    },
+    {
+        "content": "<p>Hello<br>\nI finally got time  yesterday. I tried a couple of stuff, shooted rays without error but  not sure if it is parallel.  Could you pls check and  guide me ?? Here is the file <a href=\"/user_uploads/1549/kVlhHMNoqSh6w_4IWleHGDWf/rt_shootrays_parallel.c\">rt_shootrays_parallel.c</a></p>",
+        "id": 200822438,
+        "sender_full_name": "scorp08",
+        "timestamp": 1592150681
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> at a glance, this looks like it could work in parallel.  I'm just not sure it's right book-keeping without some in-depth testing.  You're loop is centered around the nbits array becoming zero, so it may depend on how the caller initialized the initial threads and ray_num.  It's definitely on the right track for a semaphore-protected approach.  You do want to call rt_shootray outside of semaphore protection, otherwise the threads will all end up waiting on each other.</p>",
+        "id": 200903984,
+        "sender_full_name": "Sean",
+        "timestamp": 1592234554
+    },
+    {
+        "content": "<p>I tested but It seems my loop is not a  proper  way. Could not figure it out, also tried with different ways</p>",
+        "id": 201233579,
+        "sender_full_name": "scorp08",
+        "timestamp": 1592463668
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/201233579\">said</a>:</p>\n<blockquote>\n<p>I tested but It seems my loop is not a  proper  way. Could not figure it out, also tried with different ways</p>\n</blockquote>\n<p>It would  be great to get help :)</p>",
+        "id": 201463259,
+        "sender_full_name": "scorp08",
+        "timestamp": 1592630922
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> Can you post the latest version of your code and any other changes you've made?</p>",
+        "id": 201964277,
+        "sender_full_name": "Sean",
+        "timestamp": 1593089567
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/201964277\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> Can you post the latest version of your code and any other changes you've made?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Hello, and sorry for my late reply , holiday and virus issues. Did not do much changes. Just added an  nray variable  to the struct and while loop inside  the function. I am not sure how to proceed :)</p>",
+        "id": 208075694,
+        "sender_full_name": "scorp08",
+        "timestamp": 1598438353
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> can you share your code here?</p>",
+        "id": 208109033,
+        "sender_full_name": "Sean",
+        "timestamp": 1598456415
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/208109033\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> can you share your code here?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Hello , l Iost the drive but did not do much change than posted  code. I could not  spend time more on it unfortunately. :/</p>",
+        "id": 212221817,
+        "sender_full_name": "scorp08",
+        "timestamp": 1601815529
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/212221817\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/208109033\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> can you share your code here?</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  Hello , l Iost the drive but did not do much change than posted  code. I could not  spend time more on it unfortunately. :/</p>\n</blockquote>\n<p>Any help is great for me :)))</p>",
+        "id": 213900742,
+        "sender_full_name": "scorp08",
+        "timestamp": 1603190444
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> Did you take a look at how the rt* tools shoot rays in parallel?  take a look at src/rt/worker.c</p>",
+        "id": 214079054,
+        "sender_full_name": "Sean",
+        "timestamp": 1603298703
+    },
+    {
+        "content": "<p>understanding how they work is probably a good first step towards making a parallel function as they shoot in parallel</p>",
+        "id": 214079095,
+        "sender_full_name": "Sean",
+        "timestamp": 1603298723
+    },
+    {
+        "content": "<p>one possible approach is to simply do what they're doing in a function.</p>",
+        "id": 214079135,
+        "sender_full_name": "Sean",
+        "timestamp": 1603298742
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214079054\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> Did you take a look at how the rt* tools shoot rays in parallel?  take a look at src/rt/worker.c</p>\n</blockquote>\n<p>Hello, thanks I did some changes and it worked ! I run with 10 million ray (all hit) and got around x8 speed-up with my  old 12 core  laptop (measured with chrono and disabled all log functions  in my bundle_hit function). However at the end rt_clean(rtip) returned with error , probably issue about resource free operation. Could not figure it out.  Can I upload here my bundle.c file here ?</p>",
+        "id": 214297416,
+        "sender_full_name": "scorp08",
+        "timestamp": 1603449565
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> that's amazing, congratulations!  absolutely, can share files here any time without asking.</p>",
+        "id": 214341460,
+        "sender_full_name": "Sean",
+        "timestamp": 1603473884
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214341460\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> that's amazing, congratulations!  absolutely, can share files here any time without asking.</p>\n</blockquote>\n<p>ok, here... <a href=\"/user_uploads/1549/iEFuJCvC7EVEizu0GCpRu_hl/bundle.c\">bundle.c</a></p>",
+        "id": 214347987,
+        "sender_full_name": "scorp08",
+        "timestamp": 1603477000
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214347987\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214341460\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> that's amazing, congratulations!  absolutely, can share files here any time without asking.</p>\n</blockquote>\n<p>ok, here... <a href=\"/user_uploads/1549/iEFuJCvC7EVEizu0GCpRu_hl/bundle.c\">bundle.c</a></p>\n</blockquote>\n<p>is there a good way to shoot 10^7 or more rays , eliminating memory limits. I tried with heap allocation but it is still near limits...</p>",
+        "id": 214475291,
+        "sender_full_name": "scorp08",
+        "timestamp": 1603611205
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> the typical way for shooting massive quantities of rays is to do them in batches.  typically done with something like a streaming queue where rays are added as needed, and rays are bundled together into smaller sets (like 64x64) and evaluated until there are no more.</p>",
+        "id": 214492851,
+        "sender_full_name": "Sean",
+        "timestamp": 1603636923
+    },
+    {
+        "content": "<p>I looked over your bundle.c code .. impressive work from different directions! </p>\n<p>so I see you have one version that is basically the entire guts to rt_shootrays and you have this shootrays_in_parallel version, right?  which one are you working on ?</p>",
+        "id": 214493001,
+        "sender_full_name": "Sean",
+        "timestamp": 1603637096
+    },
+    {
+        "content": "<p>I ask only because it looks like shootrays_in_parallel is disabled.</p>",
+        "id": 214493016,
+        "sender_full_name": "Sean",
+        "timestamp": 1603637120
+    },
+    {
+        "content": "<p>and I don't see the other being used</p>",
+        "id": 214493033,
+        "sender_full_name": "Sean",
+        "timestamp": 1603637142
+    },
+    {
+        "content": "<p>the typical way for shooting massive quantities of rays is to do them in batches. typically done with something like a streaming queue where rays are added as needed, and rays are bundled together into smaller sets (like 64x64) and evaluated until there are no more.<br>\n<span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214493001\">said</a>:</p>\n<blockquote>\n<p>I looked over your bundle.c code .. impressive work from different directions! </p>\n<p>so I see you have one version that is basically the entire guts to rt_shootrays and you have this shootrays_in_parallel version, right?  which one are you working on ?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Thanks It should be active, I worked in shootrays_in_parallel  (putted a #define SHOOTRAYS_IN_PARALLEL).   I could not imagine how to use a queue, could you direct me to a tutorial or any other resource so I understand this kind of streaming proccess ?</p>",
+        "id": 214509050,
+        "sender_full_name": "scorp08",
+        "timestamp": 1603656066
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214492851\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> the typical way for shooting massive quantities of rays is to do them in batches.  typically done with something like a streaming queue where rays are added as needed, and rays are bundled together into smaller sets (like 64x64) and evaluated until there are no more.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  If divided into batches, continously respawning of threads can lead similar time of running as serial shooting(not parallel) ?</p>",
+        "id": 214681123,
+        "sender_full_name": "scorp08",
+        "timestamp": 1603793983
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214341460\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> that's amazing, congratulations!  absolutely, can share files here any time without asking.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <br>\nI did some changes both rt_shootrays and shootrays_in_parallel. Measured the speedup wtih time.h.  It is about x2  , I do not know why it is so low <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span>  <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span>  . I compared with rtcheck which is quite fast with same number of rays.  Is It because I build dll   files and link my exe  (librt and deps.), check all stuff in run time ? Here is the bundle.c <a href=\"/user_uploads/1549/c44r6YSVzCYezr0BSfedOTlK/bundle.c\">bundle.c</a></p>",
+        "id": 215287050,
+        "sender_full_name": "scorp08",
+        "timestamp": 1604303232
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/215287050\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214341460\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> that's amazing, congratulations!  absolutely, can share files here any time without asking.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <br>\nI did some changes both rt_shootrays and shootrays_in_parallel. Measured the speedup wtih time.h.  It is about x2  , I do not know why it is so low <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span>  <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span>  . I compared with rtcheck which is quite fast with same number of rays.  Is It because I build dll   files and link my exe  (librt and deps.), check all stuff in run time ? Here is the bundle.c <a href=\"/user_uploads/1549/c44r6YSVzCYezr0BSfedOTlK/bundle.c\">bundle.c</a></p>\n</blockquote>\n<p>does anybody had a chance to check the file:)) ??</p>",
+        "id": 217967546,
+        "sender_full_name": "scorp08",
+        "timestamp": 1606369016
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/217967546\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/215287050\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/214341460\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> that's amazing, congratulations!  absolutely, can share files here any time without asking.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <br>\nI did some changes both rt_shootrays and shootrays_in_parallel. Measured the speedup wtih time.h.  It is about x2  , I do not know why it is so low <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span>  <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span>  . I compared with rtcheck which is quite fast with same number of rays.  Is It because I build dll   files and link my exe  (librt and deps.), check all stuff in run time ? Here is the bundle.c <a href=\"/user_uploads/1549/c44r6YSVzCYezr0BSfedOTlK/bundle.c\">bundle.c</a></p>\n</blockquote>\n<p>does anybody had a chance to check the file:)) ??</p>\n</blockquote>\n<p>guess no <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span> <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span></p>",
+        "id": 219167017,
+        "sender_full_name": "scorp08",
+        "timestamp": 1607397341
+    },
+    {
+        "content": "<p>Sorry <span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> I haven't had a chance to set up the profiling to see why</p>",
+        "id": 219167082,
+        "sender_full_name": "Sean",
+        "timestamp": 1607397384
+    },
+    {
+        "content": "<p>It's not due to dll linkage</p>",
+        "id": 219167096,
+        "sender_full_name": "Sean",
+        "timestamp": 1607397405
+    },
+    {
+        "content": "<p>I can say that :)</p>",
+        "id": 219167100,
+        "sender_full_name": "Sean",
+        "timestamp": 1607397410
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/219167082\">said</a>:</p>\n<blockquote>\n<p>Sorry <span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> I haven't had a chance to set up the profiling to see why</p>\n</blockquote>\n<p>not a technical issue  I guess</p>",
+        "id": 219167128,
+        "sender_full_name": "scorp08",
+        "timestamp": 1607397468
+    },
+    {
+        "content": "<p>A low rate means you have a bottleneck.  Threads are waiting on something they'll all trying to access simultaneously.</p>",
+        "id": 219167133,
+        "sender_full_name": "Sean",
+        "timestamp": 1607397480
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/219167133\">said</a>:</p>\n<blockquote>\n<p>A low rate means you have a bottleneck.  Threads are waiting on something they'll all trying to access simultaneously.</p>\n</blockquote>\n<p>I actually gained around x3 speedup , measured before and after bu_parallel(), but free struct re  and others after  bu_parallel,  takes too long, thats I guess one of the problem</p>",
+        "id": 219167304,
+        "sender_full_name": "scorp08",
+        "timestamp": 1607397649
+    },
+    {
+        "content": "<p>well it's technical in the sense that it requires setting up profile to see what's going on -- that is something fun you can set up if you're interesting in learning more about performance.  The Intel profiler is free and really quite good.</p>",
+        "id": 219167319,
+        "sender_full_name": "Sean",
+        "timestamp": 1607397668
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/219167319\">said</a>:</p>\n<blockquote>\n<p>well it's technical in the sense that it requires setting up profile to see what's going on -- that is something fun you can set up if you're interesting in learning more about performance.  The Intel profiler is free and really quite good.</p>\n</blockquote>\n<p>Oh, okay I'll look,  V-tune . I dont know it is required a pre- knowledge of architecture or any other technical point of view. It seems very hand to use</p>",
+        "id": 219167598,
+        "sender_full_name": "scorp08",
+        "timestamp": 1607398073
+    },
+    {
+        "content": "<p>It doesn't require knowledge of arch</p>",
+        "id": 219169834,
+        "sender_full_name": "Sean",
+        "timestamp": 1607400933
+    },
+    {
+        "content": "<p>you basically compile and then run from inside vtune and it watches the program.  then it shows you were in the code it spent the most time.</p>",
+        "id": 219169888,
+        "sender_full_name": "Sean",
+        "timestamp": 1607400968
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/219169888\">said</a>:</p>\n<blockquote>\n<p>you basically compile and then run from inside vtune and it watches the program.  then it shows you were in the code it spent the most time.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I did a check with Vtune and bu_parallel seems ok  (all  threads are active) and it is faster than serial shoots but Rtfreeheap in windows seems  the most time spent So in total execution time is longer than  serial shoots. I missed something while free all the memory in parallel. How should I free resources and partion lists etc. after bu_parallel??<br>\nBy the way, Vtune is very handy to use, shows everything you need.</p>",
+        "id": 220469913,
+        "sender_full_name": "scorp08",
+        "timestamp": 1608384566
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/220469913\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/219169888\">said</a>:</p>\n<blockquote>\n<p>you basically compile and then run from inside vtune and it watches the program.  then it shows you were in the code it spent the most time.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I did a check with Vtune and bu_parallel seems ok  (all  threads are active) and it is faster than serial shoots but Rtfreeheap in windows seems  the most time spent So in total execution time is longer than  serial shoots. I missed something while free all the memory in parallel. How should I free resources and partion lists etc. after bu_parallel??<br>\nBy the way, Vtune is very handy to use, shows everything you need.</p>\n</blockquote>\n<p>Any cleanup help ?:))</p>",
+        "id": 221199837,
+        "sender_full_name": "scorp08",
+        "timestamp": 1609319420
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/221199837\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/220469913\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/219169888\">said</a>:</p>\n<blockquote>\n<p>you basically compile and then run from inside vtune and it watches the program.  then it shows you were in the code it spent the most time.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  I did a check with Vtune and bu_parallel seems ok  (all  threads are active) and it is faster than serial shoots but Rtfreeheap in windows seems  the most time spent So in total execution time is longer than  serial shoots. I missed something while free all the memory in parallel. How should I free resources and partion lists etc. after bu_parallel??<br>\nBy the way, Vtune is very handy to use, shows everything you need.</p>\n</blockquote>\n<p>Any cleanup help ?:))</p>\n</blockquote>\n<p>I feel my cleanup help in the box <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span> <span aria-label=\"joy\" class=\"emoji emoji-1f602\" role=\"img\" title=\"joy\">:joy:</span></p>",
+        "id": 224585392,
+        "sender_full_name": "scorp08",
+        "timestamp": 1612013686
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> Sorry I was on vacation when you first wrote and then I've been focused on our github migration since.  If vtune is showing most time in rtfreeheap, that sounds like a problem...</p>",
+        "id": 224970428,
+        "sender_full_name": "Sean",
+        "timestamp": 1612323659
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/224970428\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> Sorry I was on vacation when you first wrote and then I've been focused on our github migration since.  If vtune is showing most time in rtfreeheap, that sounds like a problem...</p>\n</blockquote>\n<p>Is it the free of resource and partion_list the problem ( I guess so)</p>",
+        "id": 226224395,
+        "sender_full_name": "scorp08",
+        "timestamp": 1613188001
+    },
+    {
+        "content": "<p>That would be a good guess.  It should only be freeing the heap when it's all done.  Perhaps you have it re-initializing and releasing/cleaning the rtip every ray or something.</p>",
+        "id": 226772555,
+        "sender_full_name": "Sean",
+        "timestamp": 1613632233
+    },
+    {
+        "content": "<p>try not releasing any memory, does performance improve dramatically?  You don't want that for anything production, but it can help figure out where time is going in parallel.</p>",
+        "id": 226772598,
+        "sender_full_name": "Sean",
+        "timestamp": 1613632278
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/shootrays_in_parallel/near/226772555\">said</a>:</p>\n<blockquote>\n<p>That would be a good guess.  It should only be freeing the heap when it's all done.  Perhaps you have it re-initializing and releasing/cleaning the rtip every ray or something.</p>\n</blockquote>\n<p>after long time :) If I call rt_clean_resource , do I need to call also  RT_FREE_SEG_LIST ? or   rt_clean_resource  also handle it ?</p>",
+        "id": 232086875,
+        "sender_full_name": "scorp08",
+        "timestamp": 1616848087
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> My point earlier was that you may be calling some expensive cleanup too frequently... like cleaning up resources.  You shouldn't need to clean very often and Rtfreeheap shouldn't be where most time is spent.</p>",
+        "id": 232215562,
+        "sender_full_name": "Sean",
+        "timestamp": 1616990671
+    },
+    {
+        "content": "<p>Still, to answer your question, rt_clean_resource is only going to reset the re_seg segments (by simply dropping the pointers), and free the rt_seg_blocks (pool of segments).  If you're not dealing with those, then you very well will likely need to call RT_FREE_SEG_LIST (e.g., on finished_segs).</p>",
+        "id": 232215897,
+        "sender_full_name": "Sean",
+        "timestamp": 1616991004
+    },
+    {
+        "content": "<p>here is a small result  from my experiment. I run with rt and parallel (12 cpu) ,1 cpu. what I did is ,  I generate same nhit counts and arrange the nrays according to nhit since I shoot from the same point in rt_shootrays but it is changing in rt . So basically nray is lower in rt_shootrays than rt but at the end ,  same nhit. <a href=\"/user_uploads/1549/9zJVMpt-TpJtNjz2coXlDPC8/results.dat\">results.dat</a></p>",
+        "id": 244814440,
+        "sender_full_name": "scorp08",
+        "timestamp": 1625331317
+    }
+]

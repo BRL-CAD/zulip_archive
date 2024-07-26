@@ -1,0 +1,92 @@
+[
+    {
+        "content": "<p>I have a rather vexing problem with the POSIX wait(&amp;retcode) function, and I'm not sure how to zero in on it.  I've defined a test for the libbu process wrappers to verify that I can detect a non-zero child exit code:</p>\n<p><a href=\"https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/process.c#L96\">https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/process.c#L96</a><br>\n<a href=\"https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/subprocess.cpp#L62\">https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/subprocess.cpp#L62</a></p>\n<p>It should return 2, but on Linux when I run this via bu_test I get a \"0\" return code.  However, if I run the subprocess exec directly, \"echo $?\" does indeed report \"2\" for an exit code.</p>\n<p>Even more vexing, if I put the bu_test call into gdb and break on bu_process_wait, the program behavior changes and it DOES end up with 2 as the return code.</p>\n<p>Am I setting this up incorrectly somehow?</p>",
+        "id": 406189363,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701824747
+    },
+    {
+        "content": "<p>OK, some progress - closing the stdout and stderr of the child process before waiting was an issue, from the looks of things.</p>",
+        "id": 406194608,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701827290
+    },
+    {
+        "content": "<p>Perhaps not the issue, but you should only use WEXITSTATUS on a return code that passes the WIFEXITED() macro test</p>",
+        "id": 406220885,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701836109
+    },
+    {
+        "content": "<p>And when a program behaves differently when launched in gdb than standalone, what I usually do is to put a sleep() at the top of main(), launch it standalone and attach gdb to it before the sleep() finishes</p>",
+        "id": 406221024,
+        "sender_full_name": "Alexis Naveros",
+        "timestamp": 1701836161
+    },
+    {
+        "content": "<p>It's looking like there are multiple issues at play... it never fails.</p>",
+        "id": 406327317,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701875841
+    },
+    {
+        "content": "<p>I'm commencing to think it's time to dissect CTest and identify the subset of their capabilities that we need for libbu process control - a cursory inspection suggests that they're leveraging libuv and put quite a bit of work into this, so trying to custom roll our own solution without reusing their code is probably going to be both a lot of work and error prone.  The core of what CTest does is almost exactly what we need bu_process to do - launch processes, support timeouts and tracking return codes, and collect output.</p>",
+        "id": 406332553,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701877247
+    },
+    {
+        "content": "<p>Hmm.  Looks like there are also a few small libraries for doing similar things.  Experiment time</p>",
+        "id": 406364759,
+        "sender_full_name": "starseeker",
+        "timestamp": 1701888184
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/wait.20and.20subprocess.20return.20code/near/406364759\">said</a>:</p>\n<blockquote>\n<p>Hmm.  Looks like there are also a few small libraries for doing similar things.  Experiment time</p>\n</blockquote>\n<p>I think I'm running into something similar.. Did anything come of your experiments?</p>",
+        "id": 412150784,
+        "sender_full_name": "Christopher",
+        "timestamp": 1704897001
+    },
+    {
+        "content": "<p>Yes, actually.  One of them worked in the facetize branch.</p>",
+        "id": 412216086,
+        "sender_full_name": "starseeker",
+        "timestamp": 1704919210
+    },
+    {
+        "content": "<p>The subprocess bit is here:  <a href=\"https://github.com/BRL-CAD/brlcad/commit/c3eefb86430b7bb85e586412d0a26bf3e1dd585c\">https://github.com/BRL-CAD/brlcad/commit/c3eefb86430b7bb85e586412d0a26bf3e1dd585c</a></p>",
+        "id": 412216423,
+        "sender_full_name": "starseeker",
+        "timestamp": 1704919412
+    },
+    {
+        "content": "<p><a href=\"https://github.com/sheredom/subprocess.h\">https://github.com/sheredom/subprocess.h</a></p>",
+        "id": 412216443,
+        "sender_full_name": "starseeker",
+        "timestamp": 1704919428
+    },
+    {
+        "content": "<p>I was focused on facetize, so I haven't audited whether it can straight up replace libbu's process bits completely</p>",
+        "id": 412216608,
+        "sender_full_name": "starseeker",
+        "timestamp": 1704919492
+    },
+    {
+        "content": "<p>Gotcha. I'll see if that helps the errors I'm seeing in rtweight.</p>",
+        "id": 412216828,
+        "sender_full_name": "Christopher",
+        "timestamp": 1704919603
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/wait.20and.20subprocess.20return.20code/near/412216608\">said</a>:</p>\n<blockquote>\n<p>I was focused on facetize, so I haven't audited whether it can straight up replace libbu's process bits completely</p>\n</blockquote>\n<p>Should probably set up a test suite for the process stuff's eventually</p>",
+        "id": 412216899,
+        "sender_full_name": "Christopher",
+        "timestamp": 1704919644
+    },
+    {
+        "content": "<p>There is this:  <a href=\"https://github.com/BRL-CAD/brlcad/blob/main/src/libbu/tests/process.c\">https://github.com/BRL-CAD/brlcad/blob/main/src/libbu/tests/process.c</a></p>",
+        "id": 412217051,
+        "sender_full_name": "starseeker",
+        "timestamp": 1704919704
+    }
+]

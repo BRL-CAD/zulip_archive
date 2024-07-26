@@ -1,0 +1,198 @@
+<html>
+<head><meta charset="utf-8"><title>g-stl multicore? · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html">g-stl multicore?</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="188958100"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188958100" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188958100">(Feb 24 2020 at 19:34)</a>:</h4>
+<p>Hi, it seems g-stl might be using 2 cores (I see two processes in top with roughly the same run time of 500+ minutes, but maybe I accidentally started 2 commands without realizing, or forgetting)... is there any way to get it to use more cores? I have a 22 core machine I'd like to use to speed things up, if possible</p>
+
+
+
+<a name="188958216"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188958216" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188958216">(Feb 24 2020 at 19:35)</a>:</h4>
+<p>All of the converters are single-threaded currently.  There's not much technical barrier that would prevent them from running in parallel, but it's definitely something that hasn't been worked on -- area for someone to work on.</p>
+
+
+
+<a name="188958843"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188958843" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188958843">(Feb 24 2020 at 19:43)</a>:</h4>
+<p><span class="user-mention" data-user-id="223864">@Nathan McCorkle</span> 10+ hours for an export is not typical -- the few instances I've seen that happen are when the booleans are repetitive (lots of wasted recomputation) or when a machine is thrashing because it doesn't have enough memory for the task or when there's been an evaluation bug in the triangle boolean evaluator.</p>
+
+
+
+<a name="188958921"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188958921" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188958921">(Feb 24 2020 at 19:44)</a>:</h4>
+<p>And there's not a real good way to distinguish "really long running" conversions from "running forever" conversions</p>
+
+
+
+<a name="188962882"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188962882" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188962882">(Feb 24 2020 at 20:31)</a>:</h4>
+<p>hmm, the G database was generated in about 15-30 seconds and looks fine, even when I raytrace a few frames</p>
+
+
+
+<a name="188962912"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188962912" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188962912">(Feb 24 2020 at 20:31)</a>:</h4>
+<p>I can post the TCL, give me a few mins</p>
+
+
+
+<a name="188968892"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188968892" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188968892">(Feb 24 2020 at 21:38)</a>:</h4>
+<p>here's the G <a href="https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device/tobacco_mesophyll_protoplast_fusion_device.g" target="_blank" title="https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device/tobacco_mesophyll_protoplast_fusion_device.g">https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device/tobacco_mesophyll_protoplast_fusion_device.g</a><br>
+the TCL:<br>
+<a href="https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device/tobacco_mesophyll_protoplast_fusion_device.tcl" target="_blank" title="https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device/tobacco_mesophyll_protoplast_fusion_device.tcl">https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device/tobacco_mesophyll_protoplast_fusion_device.tcl</a><br>
+and the Python that generates the TCL:<br>
+<a href="https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device.py" target="_blank" title="https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device.py">https://github.com/nmz787/microfluidic-cad/blob/master/BRLCAD/tobacco_mesophyll_protoplast_fusion_device.py</a></p>
+
+
+
+<a name="188968913"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188968913" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188968913">(Feb 24 2020 at 21:38)</a>:</h4>
+<p>draw the object "slab_minus_bot_and_io" in mged</p>
+
+
+
+<a name="188992821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188992821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188992821">(Feb 25 2020 at 05:27)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> so I think I might be wasting computation as you put it... how do I clone an object so it doesn't waste computation? What mged/TCL command?</p>
+
+
+
+<a name="188992882"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/188992882" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#188992882">(Feb 25 2020 at 05:28)</a>:</h4>
+<p>for example,  I have 800 of these similar lines in the TCL:<br>
+in brlcad_tcl__tgc1.s tgc 15 350 0  0 0 55 15 0 0 0 10 0 15 10<br>
+in brlcad_tcl__tgc2.s tgc 15 390 0  0 0 55 15 0 0 0 10 0 15 10<br>
+where only the name and first two numbers change</p>
+
+
+
+<a name="189185452"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189185452" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189185452">(Feb 27 2020 at 04:09)</a>:</h4>
+<p><span class="user-mention" data-user-id="223864">@Nathan McCorkle</span> that's pretty cool!   <a href="user_uploads/1549/ieMDingDaL_TgR5Epl9e0IHY/Screen-Shot-2020-02-26-at-11.04.59-PM.png" target="_blank" title="user_uploads/1549/ieMDingDaL_TgR5Epl9e0IHY/Screen-Shot-2020-02-26-at-11.04.59-PM.png">Screen-Shot-2020-02-26-at-11.04.59-PM.png</a></p>
+<div class="message_inline_image"><a href="user_uploads/1549/ieMDingDaL_TgR5Epl9e0IHY/Screen-Shot-2020-02-26-at-11.04.59-PM.png" target="_blank" title="Screen-Shot-2020-02-26-at-11.04.59-PM.png"><img src="user_uploads/1549/ieMDingDaL_TgR5Epl9e0IHY/Screen-Shot-2020-02-26-at-11.04.59-PM.png"></a></div>
+
+
+
+<a name="189185527"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189185527" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189185527">(Feb 27 2020 at 04:11)</a>:</h4>
+<p>And yes, looking at the output database, I suspect that you encountered O(N^3) exponential time</p>
+
+
+
+<a name="189185572"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189185572" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189185572">(Feb 27 2020 at 04:12)</a>:</h4>
+<p>each triangle for each of those tiny cylinders is getting tessellated against the entirety preceding, which gets increasingly slower and slower as it progresses</p>
+
+
+
+<a name="189186453"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189186453" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189186453">(Feb 27 2020 at 04:36)</a>:</h4>
+<p>There are a couple minor changes that would likely speed things up tremendously.  First would be to try changing the tree structure so that the tgc's are all grouped together before being unioned into the larger structure.</p>
+
+
+
+<a name="189186505"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189186505" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189186505">(Feb 27 2020 at 04:38)</a>:</h4>
+<p>So instead of "A u B u C u D ..." you have "A u G1" where G1 is "B u C u D ..." which are clusters of those small cylinders.</p>
+
+
+
+<a name="189186518"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189186518" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189186518">(Feb 27 2020 at 04:39)</a>:</h4>
+<p>that way, the tessellation code will resolve the majority of triangles only once against the larger A structure</p>
+
+
+
+<a name="189189071"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189189071" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189189071">(Feb 27 2020 at 05:53)</a>:</h4>
+<p>Hmm, so I see in the TCL it shows after a set of 100 TGCs being created, a line like this:<br>
+g bifurcated_posts.g brlcad_tcl__tgc1.s brlcad_tcl__tgc2.s brlcad_tcl__tgc3.s ... ...</p>
+
+
+
+<a name="189189112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189189112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189189112">(Feb 27 2020 at 05:54)</a>:</h4>
+<p>So aren't they already grouped before being unioned?</p>
+
+
+
+<a name="189189128"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189189128" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189189128">(Feb 27 2020 at 05:55)</a>:</h4>
+<p>The immediate next line is:<br>
+comb funnel.c  u lengthened_polygon.c - bifurcated_posts.g</p>
+
+
+
+<a name="189189172"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189189172" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189189172">(Feb 27 2020 at 05:56)</a>:</h4>
+<p>It sounds like you're saying to union all the TGCs instead of grouping them, then make the unioned output a group? But I thought objects had to be touching or overlapping for a union operation to work</p>
+
+
+
+<a name="189189174"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189189174" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189189174">(Feb 27 2020 at 05:56)</a>:</h4>
+<p>I'll give it a try though</p>
+
+
+
+<a name="189194232"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189194232" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189194232">(Feb 27 2020 at 08:18)</a>:</h4>
+<p>does this look any better?<br>
+<a href="https://pastebin.com/stBH14Qq" target="_blank" title="https://pastebin.com/stBH14Qq">https://pastebin.com/stBH14Qq</a></p>
+
+
+
+<a name="189194391"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189194391" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189194391">(Feb 27 2020 at 08:22)</a>:</h4>
+<p>I'll need to change my script a bit to further cluster all the groups of sets of small TGCs... at this point there are 10 combinations of the sets of small TGCs unioned</p>
+
+
+
+<a name="189227938"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189227938" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189227938">(Feb 27 2020 at 16:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="223864">Nathan McCorkle</span> <a href="#narrow/stream/104062-general/topic/g-stl.20multicore.3F/near/189189112" title="#narrow/stream/104062-general/topic/g-stl.20multicore.3F/near/189189112">said</a>:</p>
+<blockquote>
+<p>So aren't they already grouped before being unioned?</p>
+</blockquote>
+<p>I thought I saw that they weren't but now you have me doubting what I saw.  I have a facetization going now and it's been crunching for hours, so I should have a better idea soon what's going on.</p>
+
+
+
+<a name="189228013"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189228013" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189228013">(Feb 27 2020 at 16:13)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="223864">Nathan McCorkle</span> <a href="#narrow/stream/104062-general/topic/g-stl.20multicore.3F/near/189189172" title="#narrow/stream/104062-general/topic/g-stl.20multicore.3F/near/189189172">said</a>:</p>
+<blockquote>
+<p>It sounds like you're saying to union all the TGCs instead of grouping them, then make the unioned output a group? But I thought objects had to be touching or overlapping for a union operation to work</p>
+</blockquote>
+<p>It should work either way.  It's also possible they simply need to be nudged off of being co-planar so the evaluation doesn't have to guess the intent.</p>
+
+
+
+<a name="189238109"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189238109" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189238109">(Feb 27 2020 at 17:59)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/g-stl.20multicore.3F/near/189228013" title="#narrow/stream/104062-general/topic/g-stl.20multicore.3F/near/189228013">said</a>:</p>
+<blockquote>
+<p>It should work either way.  It's also possible they simply need to be nudged off of being co-planar so the evaluation doesn't have to guess the intent.</p>
+</blockquote>
+<p>hmm, this would be destined for semiconductor-style nanfabrication... the resolution of the fabrication wouldn't be atomic <em>for this model</em> but certainly some of the things that I plan to do <em>could be</em> single or say &lt;=10 atom layers thick...</p>
+
+
+
+<a name="189304059"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/g-stl%20multicore%3F/near/189304059" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/g-stl.20multicore.3F.html#189304059">(Feb 28 2020 at 12:10)</a>:</h4>
+<p><span class="user-mention" data-user-id="223864">@Nathan McCorkle</span> and that would be fine... I'm referring to the cases where you're combining two shapes with a union, but they're defined as going from  |---A---|---B---|   to define some |--------------| region that's "A u B".  Instead, you'd position the interior face such that they overlap ever so slightly.  that way it can distinguish whether you meant two regions that happen to coincide (i.e., |-------||-------|  ) or clearly one region by overlapping them (even as little as 0.0000000001).</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

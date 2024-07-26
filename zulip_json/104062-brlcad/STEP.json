@@ -1,0 +1,3548 @@
+[
+    {
+        "content": "<p>A good place to talk about all things related to STEP support and STEPcode.</p>",
+        "id": 191053248,
+        "sender_full_name": "Sean",
+        "timestamp": 1584572160
+    },
+    {
+        "content": "<p>things I'm working on:<br>\nsimplified pre-build process<br>\nappveyor powershell based build<br>\nMSVC build compatibilty<br>\nlibexpress</p>\n<ul>\n<li>introducing tests into legacy code base to support safe refactoring</li>\n<li>EXPRESS lexer &amp; parser rewrite (2 pass)<br>\nexp2py rewrite<br>\nbstring<br>\npython p21 re2c module (speed improvement)<br>\nconst correctness, style, improving readability</li>\n</ul>\n<p>things I have in mind<br>\nexp2cxx<br>\npart 28<br>\ntcl</p>",
+        "id": 191182533,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584656435
+    },
+    {
+        "content": "<p>in retrospect, not convinced about p21 re2c - looking at ~150MB step files, a preparse into a sqlite database might be a better solution... testing!</p>",
+        "id": 191292330,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584733082
+    },
+    {
+        "content": "<p>Um.  Not sure sqlite will scale well to something really large - see, for example, <a href=\"https://papers.freebsd.org/2018/bsdcan/schwarze-new_lessons_from_mandoc_development/\" target=\"_blank\" title=\"https://papers.freebsd.org/2018/bsdcan/schwarze-new_lessons_from_mandoc_development/\">https://papers.freebsd.org/2018/bsdcan/schwarze-new_lessons_from_mandoc_development/</a></p>",
+        "id": 191292569,
+        "sender_full_name": "starseeker",
+        "timestamp": 1584733216
+    },
+    {
+        "content": "<p>I'll look in a moment - was my first thought because it's available with Python and TCL</p>",
+        "id": 191292797,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584733350
+    },
+    {
+        "content": "<p>now watching</p>",
+        "id": 191293568,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584733740
+    },
+    {
+        "content": "<p>okay - that's an interesting talk, sqlite is probably overkill - but dbm is not quite enough (I envisage I need 4 columns [id (pk), type_name (ix), args (parsed on demand), lineno].</p>",
+        "id": 191296049,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584734998
+    },
+    {
+        "content": "<p>that said, similar stuff already exists in STEPcode built on top of the libexpress hashing functionality</p>",
+        "id": 191296316,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584735123
+    },
+    {
+        "content": "<p>sqlite should handle &lt;GB no problem.  it's an interesting approach.  Do you actually need query or just storage?</p>",
+        "id": 191298267,
+        "sender_full_name": "Sean",
+        "timestamp": 1584736178
+    },
+    {
+        "content": "<p>primarily query</p>",
+        "id": 191299600,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584736909
+    },
+    {
+        "content": "<p>the reason to move towards a two step parse for Part 21 is to allow on-demand reading of types</p>",
+        "id": 191299718,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584736954
+    },
+    {
+        "content": "<p>testing shows the lexing is not that significant a bottleneck<br>\nand the time is spent creating objects... so only create the objects when you need them is my thinking... and has worked with other tools I've written</p>",
+        "id": 191299840,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584737015
+    },
+    {
+        "content": "<p>wrote preliminary code for lexer, parser and database interface... should be able to push a branch tomorrow after checking performance on real data</p>",
+        "id": 191358018,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584813162
+    },
+    {
+        "content": "<p>Would be really interesting to see how it affects our importer.  It can churn for several minutes on some large step files currently.</p>",
+        "id": 191362401,
+        "sender_full_name": "Sean",
+        "timestamp": 1584819438
+    },
+    {
+        "content": "<p>I verified functional correctness (all stp / p21 files in the stepcode repo), and then on my very large file - it completed, but took longer than expected.  I'm now profiling to try and determine where the bottleneck is in the new code, and the original code.  (both Python)</p>",
+        "id": 191413676,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584907576
+    },
+    {
+        "content": "<p>performance bug fixes to the original parser, and a prototype of an alternative parser are in this branch:<br>\n<a href=\"https://github.com/cshorler/stepcode/tree/python_p21_bugfixes\" target=\"_blank\" title=\"https://github.com/cshorler/stepcode/tree/python_p21_bugfixes\">https://github.com/cshorler/stepcode/tree/python_p21_bugfixes</a><br>\nnext step, profile again on large data and see where the remaining bottle necks are - there could be no point doing anything with re2c, we will see</p>",
+        "id": 191468012,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584967972
+    },
+    {
+        "content": "<p>bug fixes gave a performance increase of around 50x!  (there was some bad quadratic behaviour), then profiling new and old and further improving.  End result - the two Parsers do slightly different things, they both spend collectively about 40% of the time lexing - but drilling into the detail makes me think you'd get no more than a 10% gain by implementing an re2c python lexing module.  Relatively, one runs around 3x faster than the other.</p>",
+        "id": 191518170,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584988885
+    },
+    {
+        "content": "<p>tested with real world data (100+ MB STEP files)</p>",
+        "id": 191518339,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1584988952
+    },
+    {
+        "content": "<p>Aweomse <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> !  Does that only affect parsing from python-bound sdai or does it affect other languages too?</p>",
+        "id": 191571095,
+        "sender_full_name": "Sean",
+        "timestamp": 1585032236
+    },
+    {
+        "content": "<p>currently only the Python part 21 parser, which is not connected to the SDAI.  The classes which exp2py generates today, can be registered with one of the parsers - but today there is still a lot of work to do on exp2py - this was why I've previously rewrote the libexpress part 11 parser / lexer - as the framework for generating those (python) classes needs improvement.</p>",
+        "id": 191607914,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585056186
+    },
+    {
+        "content": "<p>ah, gotcha</p>",
+        "id": 191666128,
+        "sender_full_name": "Sean",
+        "timestamp": 1585080973
+    },
+    {
+        "content": "<p>I noticed the string regex is slightly wrong versus the grammar spec, so I fixed it (not yet pushed).  In the tests, one of the files seems to have an error:<br>\nINFO:__main__:processing /home/chorler/projects/src/stepcode/data/ap214e3/io1-cm-214.stp<br>\nINFO:__main__:db_path: :memory:<br>\nINFO:__main__:db_path: :memory:<br>\nERROR:__main__:Lexer failure: io1-cm-214.stp<br>\nTraceback (most recent call last):<br>\n  File \"cPart21.py\", line 521, in test<br>\n    parse_check(p)<br>\n  File \"cPart21.py\", line 513, in parse_check<br>\n    parser.parse(s)<br>\n  File \"cPart21.py\", line 265, in parse<br>\n    result = self.parser.parse(lexer=self.lexer, **kwargs)<br>\n  File \"/usr/lib/python3.6/site-packages/ply/yacc.py\", line 333, in parse<br>\n    return self.parseopt_notrack(input, lexer, debug, tracking, tokenfunc)<br>\n  File \"/usr/lib/python3.6/site-packages/ply/yacc.py\", line 1063, in parseopt_notrack<br>\n    lookahead = get_token()     # Get the next token<br>\n  File \"cPart21.py\", line 105, in token<br>\n    return self.lexer.token()<br>\n  File \"/usr/lib/python3.6/site-packages/ply/lex.py\", line 396, in token<br>\n    raise LexError(\"Illegal character '%s' at index %d\" % (lexdata[lexpos], lexpos), lexdata[lexpos:])<br>\nply.lex.LexError: Illegal character ''' at index 36830</p>",
+        "id": 192014566,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585314910
+    },
+    {
+        "content": "<p>looking at the line in question, it looks incorrect to me:<br>\n#8350=TEXT_LITERAL('','\\X2\\30D630EC30F330C9\\X0\\ R1',#8250,<br>\n'baseline left',.RIGHT.,#8340);</p>",
+        "id": 192014734,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585314979
+    },
+    {
+        "content": "<p>\\X2\\30 ....\\X0\\R1</p>",
+        "id": 192014783,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585315011
+    },
+    {
+        "content": "<p>\\ is not allowed according to the spec<br>\nanyway, looks like a hex string with the wrong quotes to me - with junk either end</p>",
+        "id": 192015016,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585315131
+    },
+    {
+        "content": "<p>I had it slightly wrong  \\X2\\30 ...\\X0\\ R1  (slash space)</p>",
+        "id": 192015229,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585315213
+    },
+    {
+        "content": "<p>ah....</p>",
+        "id": 192017703,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585316360
+    },
+    {
+        "content": "<p>my mistake<br>\n\\X2\\ is a control directive</p>",
+        "id": 192017732,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585316376
+    },
+    {
+        "content": "<p>Did you figure out what the truth was <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> ?  spec or parser was wrong?  We have found a number of errors in a few of the APs, some that could be fixed, some that could not.  I can get you in touch or help submit a bug report back upstream if you're sure it's an error in the standard.</p>",
+        "id": 192752125,
+        "sender_full_name": "Sean",
+        "timestamp": 1585881503
+    },
+    {
+        "content": "<p>Parser was incomplete</p>",
+        "id": 192823451,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585928684
+    },
+    {
+        "content": "<p>On the branch above - I'm still experimenting on the alternate implementation though, so I haven't pushed it yet.</p>",
+        "id": 192823711,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585928793
+    },
+    {
+        "content": "<p>I didn't check the c/c++ code yet</p>",
+        "id": 192823804,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585928830
+    },
+    {
+        "content": "<p>(I've fixed it)</p>",
+        "id": 192823890,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585928874
+    },
+    {
+        "content": "<p>I've started to improve performance further as well, and written a database plug in... The approach is quite effective for what I'm testing with</p>",
+        "id": 192824177,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585928997
+    },
+    {
+        "content": "<p>I'm now also thinking about compression, something like zpaq</p>",
+        "id": 192824276,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585929033
+    },
+    {
+        "content": "<p>And partial relational rebuilding of files</p>",
+        "id": 192824459,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1585929124
+    },
+    {
+        "content": "<p>Continuing on this topic, I tested roughly the same output requirements with re2c to sqlite (except the parser is considerably more capable).  And I was able improve performance by more than 10 times (again)</p>",
+        "id": 197797438,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1589638292
+    },
+    {
+        "content": "<p>That is awesome <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> ..  how far off do you think it'd be to do everything going on in the parser?</p>",
+        "id": 197817736,
+        "sender_full_name": "Sean",
+        "timestamp": 1589667187
+    },
+    {
+        "content": "<p>I'm refactoring towards a generic parser accepting an arbitrary set of actions.  In C this is working, now checking about what interfaces to expose to python and how to maintain this separation</p>",
+        "id": 197849470,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1589722497
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span><br>\nHNY, can we discuss a master and develop and topic branch policy for stepcode?</p>",
+        "id": 223746017,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611403120
+    },
+    {
+        "content": "<p>I've been working with it the way we work with BRL-CAD - active master, branching at need for things like stabilizing for release...</p>",
+        "id": 223749744,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611408703
+    },
+    {
+        "content": "<p>We do it that way to (among other things) try and avoid long running forks in branches that are difficult to review and merge</p>",
+        "id": 223749825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611408810
+    },
+    {
+        "content": "<p>Did you have a different approach in mind?</p>",
+        "id": 223749971,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611409021
+    },
+    {
+        "content": "<p>The reason I brought it up was last year I did some work on a branch multiple times before it was deemed mature enough to merge to master.  I also had a topic branch (long running) that I'm making more deep changes some not yet shared.  I was pushing the robust bits of this to develop branch, with a view to that being the place to integrate any changes that may break things.  The idea to intermittently merge develop to master, rebase any topic branches.</p>",
+        "id": 223759252,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611421363
+    },
+    {
+        "content": "<p>Then I went back and looked last week and saw you committing on master, I'm a bit concerned we may be duplicating work from the description - I can't now recall if I made cmake changes on develop or master, but there was some modernisation.</p>",
+        "id": 223759366,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611421524
+    },
+    {
+        "content": "<p>I'd like Master to only allow PR / merges and two people (author + 1) to review</p>",
+        "id": 223759429,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611421600
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> what are your thoughts?</p>",
+        "id": 223780938,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611439976
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> My concerns would be that stepcode doesn't have a lot of active development, and if folks don't know where to look for current development they may think nothing is happening.  I initially tried master and thought upstream stepcode was broken for BRL-CAD's purposes, and only later (by accident, more or less) discovered fixes in develop.</p>",
+        "id": 223781109,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611440224
+    },
+    {
+        "content": "<p>I think we can work with any approach for our purposes.  I think the bigger issue is communication and how to go about doing that effectively.  Having one committing to devel and the other to master is definitely a disconnect that should be resolved.</p>",
+        "id": 223781415,
+        "sender_full_name": "Sean",
+        "timestamp": 1611440693
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I'm game to try things a different way, if that will work better for you - typically the only reason I'm working on stepcode is to try to fix something to do with BRL-CAD integration, and that's not a focus that should dictate development style.</p>",
+        "id": 223781642,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611441051
+    },
+    {
+        "content": "<p>Personally I’m fine doing pull requests for stepcode so long as they don’t sit for weeks.  I’m also fine with trunk based development for stepcode if that results in faster collaboration.  How about a middle ground where devel branch could be the de-facto “trunk” with master reserved for PRs.  That way we can continue to directly commit to devel ( or merge to devel from branches ) for day to day and let master have more rigor?</p>",
+        "id": 223781649,
+        "sender_full_name": "Sean",
+        "timestamp": 1611441071
+    },
+    {
+        "content": "<p>That could work, if we can make develop the \"default\" github branch</p>",
+        "id": 223781661,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611441112
+    },
+    {
+        "content": "<p>Right, that’s also resolve the activity issue.</p>",
+        "id": 223781709,
+        "sender_full_name": "Sean",
+        "timestamp": 1611441141
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> thoughts?</p>",
+        "id": 223781724,
+        "sender_full_name": "Sean",
+        "timestamp": 1611441165
+    },
+    {
+        "content": "<p>Fine for me, that's kind of what I was proposing anyway.  So master via PR and develop direct commit.</p>",
+        "id": 223783069,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611443137
+    },
+    {
+        "content": "<p>It doesn't look like I have the permissions to change the default github branch - <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> are you able to?</p>",
+        "id": 223783697,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611444069
+    },
+    {
+        "content": "<p>I think <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> has a good point though about the risk of pull requests lingering too long - we should probably have a rule that if a pull request lingers longer than some time without comment or review, and passes CI tests, it can then be merged.</p>",
+        "id": 223783763,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611444173
+    },
+    {
+        "content": "<p>Ideally we'll figure out some way to do  a full-up \"BRL-CAD integration test\" as part of the process... that should alleviate most of the need I would have to change anything quickly in stepcode  anyway...</p>",
+        "id": 223783859,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611444301
+    },
+    {
+        "content": "<p>I think I can do it, I'll check this afternoon.  It will also be necessary to rebase develop just this once.  Within a week should normally be okay</p>",
+        "id": 223806541,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611483086
+    },
+    {
+        "content": "<p>So we'll have initially old_develop (to be deleted not rebased) , develop (rebased) and master</p>",
+        "id": 223807012,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611483900
+    },
+    {
+        "content": "<p>There are 94k diff lines?!</p>",
+        "id": 223820792,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611504354
+    },
+    {
+        "content": "<p>And you've changed the linkage of some tests, which I wrote and were intentionally not linked to libexpress</p>",
+        "id": 223821222,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611504877
+    },
+    {
+        "content": "<p>I had the (evidently mistaken) impression there wasn't much activity in the stepcode project, so I was focused on shifting the working version of stepcode into a form that would work cross platform as a CAD subbuild and be somewhat simpler for me to keep working with minimal effort.</p>",
+        "id": 223822262,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611506271
+    },
+    {
+        "content": "<p>The diff line count is mostly driven by my switching the astyle used to format the code - I'm not strongly attached to keeping it that way if you wish to simplify matters by reverting to the older style.  I switched it because it is easier for me to read, and I was anticipating having to make more serious adjustments to the codebase than I ended up having to make to fix a Windows issue.  If you want to reduce the diff or prefer the other style, it can be switched back.</p>",
+        "id": 223822411,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611506433
+    },
+    {
+        "content": "<p>The other option would be to simply revert back to the last common point with your branches and proceed to redo the necessary changes in a more acceptable form.</p>",
+        "id": 223822776,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611506864
+    },
+    {
+        "content": "<p>If it's simpler for you to revert-and-reapply, we can do that.  </p>\n<p>I have a number of specific needs I <em>have</em> to meet with the stepcode codebase for BRL-CAD.  Hopefully it can be done with upstream stepcode, so I don't have to maintain a fork, but some of these issues are challenging to test:</p>\n<p>1)  Compilation and execution (step-g converter in BRL-CAD) needs to work with our ExternalProject_Add subbuild  (current work on that is in the extbuild branch of BRL-CAD's svn tree, but is slated to move to trunk in the next few months - if you are interested in testing that I can provide more detailed instructions).</p>\n<p>2)  The above setup has to work cleanly on Windows with MSVC, Linux, *BSD systems and MacOSX.  The version simplification (not incorporating the git hash) and a few other similar changes were driven by obscure failures on one of the platforms (Windows, IIRC).</p>\n<p>The challenging part is that some of the failures aren't easy to reproduce - builds that succeed in a graphical Visual Studio, but fail with a Ninja command line build, or working locally on laptops but failing when tested on Github CI runners.  The OpenBSD platform was another fun case - it has very specific library naming requirements that I didn't hit until I actually tried to find and use installed stepcode libs with a FindSTEPCODE.cmake configure test.</p>",
+        "id": 223823796,
+        "sender_full_name": "starseeker",
+        "timestamp": 1611508003
+    },
+    {
+        "content": "<p>In the end I looked at each commit.  I don't have a problem with most, but anything which touches libexpress or exp2py will give me issues.  I'll see what I can do to satisfy both of us on a separate branch, if we can agree I'll rename it develop</p>",
+        "id": 223832106,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1611518053
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> did you decide how you wanted to proceed?</p>",
+        "id": 244069257,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624803913
+    },
+    {
+        "content": "<p>Branch, rebase and incorporate all of my changes you removed.  It proves not to be so simple last time I checked</p>",
+        "id": 244076423,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1624814929
+    },
+    {
+        "content": "<p>Would it be easier to back up and reapply my changes from the previous starting point?</p>",
+        "id": 244076493,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624815020
+    },
+    {
+        "content": "<p>I'm willing to attempt that if it's the best way to get where we need to go.</p>",
+        "id": 244076497,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624815042
+    },
+    {
+        "content": "<p>What's the sha1 of the last commit where things were \"OK\" from your standpoint?</p>",
+        "id": 244076575,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624815137
+    },
+    {
+        "content": "<p>fwiw, running <code>astyle --options=misc/astyle.cfg --recursive \"src/*.c\" \"src/*.cc\" \"include/*.h\" \"src/*.h\" \"test/*.cc\" \"test/*.h\"</code> with the previous style file does seem to pretty much restore the formatting and reduce the diff a lot in my testing.</p>",
+        "id": 244078206,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624817631
+    },
+    {
+        "content": "<p>(previous astyle.cfg being:)</p>\n<div class=\"codehilite\"><pre><span></span><code>suffix=none   #don&#39;t create backup files\n\nstyle=java    #compact bracket style\n\nindent=spaces=4\n\nindent-classes\nindent-switches\nindent-namespaces\npad-oper                #pad (space) around operators\npad-paren-in            #pad inside parenthesis\nunpad-paren             #remove parenthesis padding other than requested above\n\nadd-brackets            #add brackets on one-line conditionals\nconvert-tabs            #convert all tabs to spaces\nalign-pointer=middle    #char * foo\n\nlineend=linux           #lines end with LF (linux), not CRLF (windows)\n</code></pre></div>",
+        "id": 244078271,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624817667
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> if you think it will help we can go ahead and commit the reversed formatting change to the github repo.</p>",
+        "id": 244097018,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624847937
+    },
+    {
+        "content": "<p>I have a more general question, but I'm going to ask here just because the STEP stuff is mostly what I'm chasing.</p>\n<p>What's the relationship between the svn and github repositories?</p>",
+        "id": 244812615,
+        "sender_full_name": "Jared McLaughlin",
+        "timestamp": 1625328389
+    },
+    {
+        "content": "<p>svn is the legacy repository, now read only.  New development is happening on the github repo</p>",
+        "id": 244826840,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625350545
+    },
+    {
+        "content": "<p>Our step support is still at the AP203 importer stage, and even there we don't have 100% coverage.  There has been some early exploration into other standards, but nothing that can really be called functional.</p>",
+        "id": 244826897,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625350650
+    },
+    {
+        "content": "<p>If you're new to programming, I'd suggest some basic C++ tutorials to get started - the generated code from stepcode would be a pretty steep hill to climb if you're also not familiar with C++.</p>",
+        "id": 244826956,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625350767
+    },
+    {
+        "content": "<p>The list_elements.cpp program is a simple(r) example of working with STEP structures.</p>",
+        "id": 244827019,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625350863
+    },
+    {
+        "content": "<p>Generally speaking AP203 is a subset of AP242, so improvements to AP203 support will also, as a rule, be progress towards AP242.</p>",
+        "id": 244827073,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625350953
+    },
+    {
+        "content": "<p>I did some C++, mostly windows MFC stuff like ... 20 years ago. Then I stopped programming ( and got in to machining ) until about 2 years ago. I remember enough C++ to not be spooked. Just browsing through github makes it appear that it's more complete than what you are saying. </p>\n<p>It looks like this is mostly generated from stepcode? I'll take a look at list_elements.cpp. Thanks for the hint.</p>",
+        "id": 244863334,
+        "sender_full_name": "Jared McLaughlin",
+        "timestamp": 1625410896
+    },
+    {
+        "content": "<p>There are a number of stub programs that hook up the machinery of generating executables from the schemas, but for the most part they're not actually wired up to produce conversions.</p>",
+        "id": 245616681,
+        "sender_full_name": "starseeker",
+        "timestamp": 1626023519
+    },
+    {
+        "content": "<p>There's not really a way for it to produce a default conversion without knowing/picking/providing a default target format.  Since entities are typically intimately intertwined, it does as much as it can giving you the in-memory data (via SDAI) as an object, and then you implement the converter to handle some set of entities.</p>",
+        "id": 245999791,
+        "sender_full_name": "Sean",
+        "timestamp": 1626287116
+    },
+    {
+        "content": "<p>probably could provide some sort of default text dump diagnostic output, but I'm not sure how generally useful that'd be other than as stubs for the real thing</p>",
+        "id": 245999937,
+        "sender_full_name": "Sean",
+        "timestamp": 1626287168
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> did you want me to go ahead and revert the astyle update, or restore the repo back to before my changes started?  I'm OK with either at this point - we need to start moving forward.</p>",
+        "id": 248344234,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628081018
+    },
+    {
+        "content": "<p>Sorry I missed all of the recent messages, I only got an email notification for the last</p>",
+        "id": 248396143,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105059
+    },
+    {
+        "content": "<p>I would suggest this...</p>",
+        "id": 248396218,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105091
+    },
+    {
+        "content": "<p>The last common point between develop branch and master is the good point for master</p>",
+        "id": 248396346,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105145
+    },
+    {
+        "content": "<p>Master should be reverted</p>",
+        "id": 248396431,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105166
+    },
+    {
+        "content": "<p>Develop should have PR submitted for all your changes not impacting express and exp2py... Where I have other branches with prototype work I want to begin to integrate</p>",
+        "id": 248396599,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105245
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 248396680,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105278
+    },
+    {
+        "content": "<p>I also have a part21 parser I've written which is very zippy I'd like to integrate</p>",
+        "id": 248396914,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105367
+    },
+    {
+        "content": "<p>Oh, and more part 11 improvements to support exp2py evolution</p>",
+        "id": 248397076,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105429
+    },
+    {
+        "content": "<p>All right, I'll revert master and we can give it a try...</p>",
+        "id": 248397336,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628105530
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  Looks like that would be commit 548fd82ad7ec37301fde7d889fbd359c86f7f0dc?</p>",
+        "id": 248397528,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628105641
+    },
+    {
+        "content": "<p>git merge-base master develop</p>",
+        "id": 248397676,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105708
+    },
+    {
+        "content": "<p>Tells me this is 548fd82...</p>",
+        "id": 248397717,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105741
+    },
+    {
+        "content": "<p>OK - do you prefer a hard reset or should I just make a commit putting master back into that state?</p>",
+        "id": 248397818,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628105785
+    },
+    {
+        "content": "<p>Good question</p>",
+        "id": 248398000,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105883
+    },
+    {
+        "content": "<p>Best practice for a shared project is a commit to revert</p>",
+        "id": 248398082,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105912
+    },
+    {
+        "content": "<p>So, I guess that would work better for everyone</p>",
+        "id": 248398132,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628105943
+    },
+    {
+        "content": "<p>Does that get you where you need to be?</p>",
+        "id": 248398188,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628105990
+    },
+    {
+        "content": "<p>Yes</p>",
+        "id": 248398270,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628106015
+    },
+    {
+        "content": "<p>Thanks</p>",
+        "id": 248398316,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628106049
+    },
+    {
+        "content": "<p>i.e. git revert</p>",
+        "id": 248398381,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628106097
+    },
+    {
+        "content": "<p>Sure.  We'll need to move out on getting the other changes merged from develop though - master needs to be in a working state, and from what I remember 548fd82a is not.</p>",
+        "id": 248398389,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628106104
+    },
+    {
+        "content": "<p>I thought it was, at least I tested with gcc, msvc 2008,2012,2019 and one other</p>",
+        "id": 248398497,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628106159
+    },
+    {
+        "content": "<p>Happy to apply fixes to develop and help to review / test</p>",
+        "id": 248398671,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628106255
+    },
+    {
+        "content": "<p>Let me figure out the revert and I'll double check, but if I'm remembering correctly when I integrated that version into BRL-CAD's step-g it failed.</p>",
+        "id": 248398680,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628106258
+    },
+    {
+        "content": "<p>Okay, the reason for failure would be useful</p>",
+        "id": 248398727,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628106290
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> All right, I think that's got master in shape</p>",
+        "id": 248400204,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107009
+    },
+    {
+        "content": "<p>Let me see if I can put develop back where it was</p>",
+        "id": 248400230,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107022
+    },
+    {
+        "content": "<p>I guess you only need to split / rebase your changes on develop? And make PR of your branch?</p>",
+        "id": 248400440,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628107108
+    },
+    {
+        "content": "<p>I was figuring to start over - put develop back to 548fd82ad7ec373 as well, and then submit pull requests individually for the various pieces.</p>",
+        "id": 248400556,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107163
+    },
+    {
+        "content": "<p>From what you said earlier, some of my changes were problematic f or you - we'll need to figure out which</p>",
+        "id": 248400598,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107186
+    },
+    {
+        "content": "<p>Actually, first can you confirm master is in an OK state for you?  That revert might not actually be enough - that might have the effect of merging develop up until the point I started working into master.</p>",
+        "id": 248400868,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107282
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I don't think git retains enough info to know for certain what the last state of master was (commits don't store an 'origin' branch - it's caused me a fair bit of annoyance in other contexts)</p>",
+        "id": 248401071,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107380
+    },
+    {
+        "content": "<p>Let me see if the CAD repo happened to store it...</p>",
+        "id": 248401178,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107440
+    },
+    {
+        "content": "<p>Alright, develop is reverted.  Let me see if I can figure out where master was...</p>",
+        "id": 248401497,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107565
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> If you're good with that starting point I am as well - the older state of master was the one that didn't work, and I merged develop because it actually worked better....</p>",
+        "id": 248401910,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107813
+    },
+    {
+        "content": "<p>Figuring out where master was at the point of the original develop-&gt;master merge could be tricky, and I'd rather not bother unless you feel strongly about recovering it.</p>",
+        "id": 248401986,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628107855
+    },
+    {
+        "content": "<p>I think that's okay, looking at the revert commit</p>",
+        "id": 248402536,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108151
+    },
+    {
+        "content": "<p>OK, if that unbreaks things for you we'll proceed from there.  I'll refork and submit a series of pull requests to develop</p>",
+        "id": 248402629,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108188
+    },
+    {
+        "content": "<p>We'll start with develop, but we also need some criteria for when master gets updated.</p>",
+        "id": 248402682,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108224
+    },
+    {
+        "content": "<p>I still don't have the permissions to change the default displayed branch.</p>",
+        "id": 248402733,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108250
+    },
+    {
+        "content": "<p>Thanks, I will rebase my other branches onto it tomorrow evening</p>",
+        "id": 248402769,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108265
+    },
+    {
+        "content": "<p>I can do that</p>",
+        "id": 248402854,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108292
+    },
+    {
+        "content": "<p>Change default displayed</p>",
+        "id": 248402872,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108303
+    },
+    {
+        "content": "<p>And, I will introduce rule that master is only updated via PR</p>",
+        "id": 248402931,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108337
+    },
+    {
+        "content": "<p>OK, thanks - that's important to update - having the wrong one displayed is part of what landed us in this mess...</p>",
+        "id": 248402970,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108358
+    },
+    {
+        "content": "<p>Yep</p>",
+        "id": 248403021,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108387
+    },
+    {
+        "content": "<p>Now for pull requests - how does it work with multiple independent changes?  Do I make local branches in my repo for each one and submit them as develop pull requests, or does that introduce conflicts in merging?</p>",
+        "id": 248403256,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108510
+    },
+    {
+        "content": "<p>This is a foreign workflow for me, so any advice on how not to muck it up any more than necessary is appreciated.</p>",
+        "id": 248403343,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108551
+    },
+    {
+        "content": "<p>Okay I changed default branch to develop</p>",
+        "id": 248403521,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108649
+    },
+    {
+        "content": "<p>Confirmed, looks good.</p>",
+        "id": 248403600,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108701
+    },
+    {
+        "content": "<p>Branch per topic, e.g. compile fixes, another for astyle</p>",
+        "id": 248403658,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108737
+    },
+    {
+        "content": "<p>Assuming you have commits on a local branch, probably you want interactive rebase or cherry-pick</p>",
+        "id": 248403764,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108790
+    },
+    {
+        "content": "<p>OK.  Would you prefer to skip the astyle change?  I only did that because I thought it was going to be just me in the repo - since that's not the case, we can skip it unless other people also want to change.</p>",
+        "id": 248404020,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628108916
+    },
+    {
+        "content": "<p>You can also create branch rebase and select only topic commits</p>",
+        "id": 248404137,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628108987
+    },
+    {
+        "content": "<p>Yes, I think we should keep a style changes on release branches before we merge to master</p>",
+        "id": 248404267,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628109038
+    },
+    {
+        "content": "<p>I mean, did you just want to keep the old style and not change at all?</p>",
+        "id": 248404372,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628109084
+    },
+    {
+        "content": "<p>I'll format to match the old style - that's not a big deal.</p>",
+        "id": 248404968,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628109107
+    },
+    {
+        "content": "<p>I didn't review what you changed in the styles, for me same process PR, review and separate commits for rules changes and formatting updates</p>",
+        "id": 248405869,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628109524
+    },
+    {
+        "content": "<p>I made branch rules for master - PR now required</p>",
+        "id": 248405984,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628109573
+    },
+    {
+        "content": "<p>No style changes on develop</p>",
+        "id": 248406130,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628109648
+    },
+    {
+        "content": "<p>We also need to go through the existing pr list, many are redundant / already fixed or, now to be reevaluated against develop, which we need to configure for build check.  Some time ago I created a new appveyor project, need to check on both new and old, also appveyor can also build Mac now so perhaps we can have one less test tool</p>",
+        "id": 248406683,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628109951
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Do you recall which tests I'd linked against libs you were intending not to link against?  I'm preparing the CMake update pull request, and I'd like to fix those first if I can pinpoint which ones they were.</p>",
+        "id": 248408754,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628110988
+    },
+    {
+        "content": "<p>It was the new tests I made in libexpress folder which use fff.h header</p>",
+        "id": 248506614,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628183317
+    },
+    {
+        "content": "<p>If you have changes to libexpress can you keep them in a separate PR?</p>",
+        "id": 248506685,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628183351
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"273836\">Chris Horler</span> has marked this topic as resolved.</p>",
+        "id": 248526051,
+        "sender_full_name": "Notification Bot",
+        "timestamp": 1628192495
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"273836\">Chris Horler</span> has marked this topic as unresolved.</p>",
+        "id": 248526364,
+        "sender_full_name": "Notification Bot",
+        "timestamp": 1628192653
+    },
+    {
+        "content": "<p>Sure.  The only changes in the source files for the CMake pull request should be to handle the switch in how versioning is done - hopefully they shouldn't break anything (let me know if that's not the case).  Otherwise, I'll try to keep libexpress pull requests separate.</p>",
+        "id": 248607935,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628255392
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> We should be able to set up tests (using Github Actions at least, I don't know about the other options) to check whatever breakage areas you're concerned about on a per-pull-request basis, if that would be helpful.</p>",
+        "id": 248608322,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628255572
+    },
+    {
+        "content": "<p>Did you see the changes I made to re2c version detection, and lemon ?   I'm preparing to replace the parser in libexpress - the reason for introducing tests is to reduce to risk when I remove most of resolve.c which will ultimately no longer be required in that form.</p>",
+        "id": 248703638,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628323261
+    },
+    {
+        "content": "<p>My concerns are ensuring I don't break anything else in stepcode</p>",
+        "id": 248703676,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628323323
+    },
+    {
+        "content": "<p>So I take my parser branch, make some prep changes in develop, test, rebase the parser branch, repeat</p>",
+        "id": 248703716,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628323385
+    },
+    {
+        "content": "<p>This all came about because I was improving exp2py and hit a brick wall due to the parser.  Now I have a 2 pass lexical scan and a completely unambiguous grammar that successfully parses everything in the stepcode repo</p>",
+        "id": 248703800,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628323511
+    },
+    {
+        "content": "<p>I reviewed your pr on github, I wondered if it's possible for you to combine two commits into it - I added them in the discussion</p>",
+        "id": 248710258,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628333353
+    },
+    {
+        "content": "<p>I started to work on a version of the PR to split it into multiple commits, I'm about half way through</p>",
+        "id": 248767898,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628425143
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"273836\">Chris Horler</span> <a href=\"#narrow/stream/104062-general/topic/STEP/near/248703638\">said</a>:</p>\n<blockquote>\n<p>Did you see the changes I made to re2c version detection, and lemon ?   I'm preparing to replace the parser in libexpress - the reason for introducing tests is to reduce to risk when I remove most of resolve.c which will ultimately no longer be required in that form.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Is the parser still re2c+lemon or something else?</p>",
+        "id": 248783920,
+        "sender_full_name": "Sean",
+        "timestamp": 1628449310
+    },
+    {
+        "content": "<p>Re2c and lemon, as previously requested</p>",
+        "id": 248789152,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628457113
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I've pushed the start of reworking your pr 412 as rework_pr412.  Not finished yet - I didn't compile anything yet, there's a couple rebase to do yet, I've tried to first start by splitting each commit by topic, this makes it easier for me.  Also, it's allowed me to see where I still have some questions, there's probably another two commits to go.  Then we should review</p>",
+        "id": 248789294,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628457332
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  hey - sorry, I had some personal issues come up and haven't been able to look at coding for a few days.  I'll try to work on it some more this afternoon and go over your additions.</p>",
+        "id": 248840053,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628513248
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I'd like to set up a test where we build and run the BRL-CAD step converter using stepcode develop - that's the key piece that needs to work from my perspective.  I would normally use Github Actions to do that - did you prefer to use another system?</p>",
+        "id": 248840338,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628513388
+    },
+    {
+        "content": "<p>Github actions - I guess that's fine</p>",
+        "id": 248869914,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628525537
+    },
+    {
+        "content": "<p>Do you want me to submit the changes you requested as commits to the rework_pr412 branch?</p>",
+        "id": 248871208,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628526090
+    },
+    {
+        "content": "<p>I propose you commit on pr412 directly, then I'll rebase it again to clean it up and check it works for me.  Then we'll either update your original pr or create a new one</p>",
+        "id": 248886989,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628533338
+    },
+    {
+        "content": "<p>Sorry, on pr412_rework</p>",
+        "id": 248887010,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628533359
+    },
+    {
+        "content": "<p>I'm starting to look at the lemon simplifications - if we do some of them, I don't think we can use Debian versions of lemon - they relocate lempar.c so it is not in the bin directory with the lemon executable (or at least they did)</p>",
+        "id": 248893759,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628536413
+    },
+    {
+        "content": "<p>I need the perplex_stage target check for the BRL-CAD build - that's a component of our third party management subsystem...</p>",
+        "id": 248894083,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628536549
+    },
+    {
+        "content": "<p>It should be harmless in any other context - that's why its guarded by the if check.</p>",
+        "id": 248894162,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628536576
+    },
+    {
+        "content": "<p>Maybe I can pre-set it ahead of time... hmm...</p>",
+        "id": 248895109,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628537034
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Did you also want me to incorporate the lexsupport.c changes?</p>",
+        "id": 248897301,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628538095
+    },
+    {
+        "content": "<p>OK, I think I got it sorted - see if the rework_pr412 commits look like what you have in mind.</p>",
+        "id": 248905013,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628541548
+    },
+    {
+        "content": "<p>I've not tried any of this with the BRL-CAD build yet, btw - I'll wait a bit until these initial changes settle to see what breaks there.   I'll try to undo the obj lib removal in my fork to get things closer to the current rework_pr412 state.</p>",
+        "id": 248905347,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628541712
+    },
+    {
+        "content": "<p>I had a quick look, I think we're aligned on intent</p>",
+        "id": 249006666,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628614959
+    },
+    {
+        "content": "<p>No to lexsupport.c on develop for the moment,</p>",
+        "id": 249006762,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628615012
+    },
+    {
+        "content": "<p>I'll try to build the rework branch later today or tomorrow</p>",
+        "id": 249006877,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628615057
+    },
+    {
+        "content": "<p>Objlibs and linker scripts might be a way to build dynamic and static libs for only a link time cost as well, it's another thing I'm wondering about cmake</p>",
+        "id": 249007109,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628615159
+    },
+    {
+        "content": "<p>I'll make a separate branch to explore that this weekend</p>",
+        "id": 249007284,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628615238
+    },
+    {
+        "content": "<p>BRL-CAD uses obj libraries, but my recollection is there are some difficult aspects with Windows builds doing that.</p>",
+        "id": 249021947,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628622408
+    },
+    {
+        "content": "<p>I think you have to be really careful about the dll import/export logic</p>",
+        "id": 249022006,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628622433
+    },
+    {
+        "content": "<p>You said you had a few more commits to go to get the initial CMake rework split finished?</p>",
+        "id": 249022265,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628622547
+    },
+    {
+        "content": "<p>They were mostly what you've added, I'll review against what I stashed tomorrow</p>",
+        "id": 249024750,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628623742
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> do you want me to try to add back in the obj libraries in the rework_pr412 branch, or separately?</p>",
+        "id": 249288993,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628800220
+    },
+    {
+        "content": "<p>In the pr412 rework branch</p>",
+        "id": 249291261,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628801494
+    },
+    {
+        "content": "<p>Please</p>",
+        "id": 249291269,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628801497
+    },
+    {
+        "content": "<p>And you want it just for libexpress?</p>",
+        "id": 249297053,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628804633
+    },
+    {
+        "content": "<p>Can I scrap the MD5 checking logic?  That will simplify doing some of the other work.</p>",
+        "id": 249297280,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628804800
+    },
+    {
+        "content": "<p>Also, do we want one OBJECT library per source file (the current state) or one OBJECT library for the various sources that is in turn used by libexpress's shared and static libs?</p>",
+        "id": 249297407,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628804890
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Here's what I'll do - I'll make a series of (possibly not working in incremental state) changes to try and shift this where I'm thinking it should go - if we need to revert and try again that's fine, but I can't justify trying to make a lot of incremental changes work when the end state is going to end up being significantly different.</p>",
+        "id": 249297723,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628805131
+    },
+    {
+        "content": "<p>btw, do we need re2c 1.0.3 or greater for features for your new work?  If so, I'll probably throw in the towel and just make sure newer re2c can build using pre-generated inputs without bison present - BRL-CAD's version of re2c builds with lemon not bison, and is thus self contained, but we never successfully upstreamed that work and it seems they've moved on in the years since.</p>",
+        "id": 249300271,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628806655
+    },
+    {
+        "content": "<p>Phew.  OK, <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I think I've gotten things fairly close - at any rate, ready for you to take a look.  We'll have to hammer on the libexpress build cross platform in particular to make sure that obj logic is robust enough.</p>",
+        "id": 249310197,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628815402
+    },
+    {
+        "content": "<p>On a related point, have you guys seen this bug report?  <a href=\"https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=256166\">https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=256166</a></p>\n<p>Looks like there's a few issues to unpack in that report, potential null derefs (some of which <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> fixed), copies of the complexSupport.h header, unknown source for the nullity (if it even was a null deref -- looked like maybe a 0x8 value to me) converting NIST_MBE_PMI_11.stp, potential fix needing to get pushed upstream, etc..</p>",
+        "id": 249322935,
+        "sender_full_name": "Sean",
+        "timestamp": 1628831025
+    },
+    {
+        "content": "<p>I figured to revisit that once the fixes from the BRL-CAD tree are successfully merged.</p>",
+        "id": 249381310,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628871836
+    },
+    {
+        "content": "<p>I'm hopeful that once <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  is OK with the CMake setup, the other bug fixes from those commits can go in as quick, individual pull requests.</p>",
+        "id": 249381451,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628871904
+    },
+    {
+        "content": "<p>Since Rob is interested in a release with those cleanups too now, there's some fairly strong motivation to get this tied off and get a release out the door...</p>",
+        "id": 249381603,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628871996
+    },
+    {
+        "content": "<p>@starseeker Okay, most of your additional commits are aligned with my thinking.  I built the branch.  There's one issue I found, my cmake interface is not showing the build only express option - which is important when you need to build libexpress without the schemascanner - as you do when rewriting the parser and the library.</p>",
+        "id": 249388304,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628875694
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> no, I hadn't seen that yet</p>",
+        "id": 249388525,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628875820
+    },
+    {
+        "content": "<p>We also have quite a few different versions of cmake_minimum_version</p>",
+        "id": 249388771,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628875947
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 249388795,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628875964
+    },
+    {
+        "content": "<p>Ah, OK - I didn't know that option was in active use.  I'll restore it.</p>",
+        "id": 249388878,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628876003
+    },
+    {
+        "content": "<p>Thsnks</p>",
+        "id": 249389075,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628876088
+    },
+    {
+        "content": "<p>We probably need to check for const correctness in the code base at some point, the typedef are sometimes concealing these</p>",
+        "id": 249389279,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628876182
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Does 92bfdecc4a29235 put back what you need?</p>",
+        "id": 249390626,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628876768
+    },
+    {
+        "content": "<p>Yes, it has to be specified on the command line, but I think that's how it worked before</p>",
+        "id": 249391761,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877345
+    },
+    {
+        "content": "<p>I can not mark it as advanced if you want it to show up by default.</p>",
+        "id": 249391834,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628877370
+    },
+    {
+        "content": "<p>Let me scrub out some of the unused cmake quick files for clarity...</p>",
+        "id": 249391873,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628877394
+    },
+    {
+        "content": "<p>No, I think it's okay as advanced</p>",
+        "id": 249391877,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877398
+    },
+    {
+        "content": "<p>When you're done we should reorder / squash etc with rebase</p>",
+        "id": 249391963,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877460
+    },
+    {
+        "content": "<p>Then suit new pr and merge</p>",
+        "id": 249391981,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877475
+    },
+    {
+        "content": "<p>s/suit/submit/</p>",
+        "id": 249392065,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877508
+    },
+    {
+        "content": "<p>Let me do a check against my clone - while I'm doing that, do you see something else that's concerning/needs/adjustment/etc.?</p>",
+        "id": 249392102,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628877532
+    },
+    {
+        "content": "<p>I'll rebase my parser branch and see how close it is</p>",
+        "id": 249392160,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877570
+    },
+    {
+        "content": "<p>I'd guess there are no more problems</p>",
+        "id": 249392208,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877601
+    },
+    {
+        "content": "<p>OK - I won't know until we're ready to Windows stress test if the every-file-as-obj-lib will be an issue there, and we've got to get some of the other build fixes in before that's practical, so for the moment we'll assume it's workable.  I don't recall for sure, but I think I just smashed it down into one lib for simplicity at the time rather than functional necessity.</p>",
+        "id": 249392491,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628877719
+    },
+    {
+        "content": "<p>OK, I think that's got it - most of the remaining diffs are related to keeping the lib-per-file build and the build-express-only options.</p>",
+        "id": 249392829,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628877861
+    },
+    {
+        "content": "<p>It's okay for me</p>",
+        "id": 249393047,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628877969
+    },
+    {
+        "content": "<p>As far as the CMake minimum version - we have a hard lower limit of 3.12 because of some of the features needed for our 3rd party build system - does that work for you?</p>",
+        "id": 249393081,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628877993
+    },
+    {
+        "content": "<p>If so I'll just change the others to match.</p>",
+        "id": 249393145,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628878036
+    },
+    {
+        "content": "<p>I shouldn't have too much difficulty rebasing my parser branch - only the new parser bits fail now</p>",
+        "id": 249393257,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878085
+    },
+    {
+        "content": "<p>Yes</p>",
+        "id": 249393292,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878101
+    },
+    {
+        "content": "<p>OK, let me update the other minimums.  You say I need to rebase the branch at that point to prepare a pull request from it to develop?</p>",
+        "id": 249393412,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628878168
+    },
+    {
+        "content": "<p>You or I - I was going to squash a few of the commits which were fix up to previous commits, and check if anything was in the wrong place for the commit history / diff view</p>",
+        "id": 249393587,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878254
+    },
+    {
+        "content": "<p>I can preserve author I think there's an option for that with rebase</p>",
+        "id": 249393637,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878293
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> OK, why don't you go ahead - I just pushed the version fix, so that should be the last bit for this stage on my end.</p>",
+        "id": 249393678,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628878320
+    },
+    {
+        "content": "<p>Okay</p>",
+        "id": 249393742,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878336
+    },
+    {
+        "content": "<p>Look out for it later today or tomorrow - got to do dinner now!</p>",
+        "id": 249393780,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878367
+    },
+    {
+        "content": "<p>I'll start going over my other commits to being extracting the warning fixes - did you want one-branch-per-fix, or how did you want to handle it?</p>",
+        "id": 249393801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628878380
+    },
+    {
+        "content": "<p>One commit per topic, linked topics in a branch (e.g. common parent commit, sublib, schéma etc)</p>",
+        "id": 249394315,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628878653
+    },
+    {
+        "content": "<p>OK.  This will take some getting used to - BRL-CAD's SVN history made branches very, very expensive and they were something we only did for really massive, invasive changes - I'll probably get a branch heavy workflow wrong a few times, so please bear with me.</p>",
+        "id": 249395544,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628879223
+    },
+    {
+        "content": "<p>Sure</p>",
+        "id": 249397503,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628880169
+    },
+    {
+        "content": "<p>Is it better to do the branches in a fork on my own account and submit the pull request from there, or do a branch in the main repository like rework_pr412?  (Or does it matter?)</p>",
+        "id": 249400125,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628881549
+    },
+    {
+        "content": "<p>Doesn't matter, all topic branches will eventually disappear.</p>",
+        "id": 249450696,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628933266
+    },
+    {
+        "content": "<p>I've a question about 1 commit, \"grab a couple of trivial cmake list. Txt updates\".  There's one fix up for nullptr, so I split the commit and fixed up the nullptr commit.  What remains is removal of the core target.  I notice in an earlier commit you reworked this - so is that a mistake?  If so I'll drop what remains of that commit</p>",
+        "id": 249450818,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628933442
+    },
+    {
+        "content": "<p>I don't use the core target any more - unless you want it, I'd say go ahead and remove it.  I think it was originally planned in case someone wanted to work just with exp2cxx and check-express, but at this point I doubt the added build system complexity is justified.</p>",
+        "id": 249477025,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628974473
+    },
+    {
+        "content": "<p>Okay, amend the log message</p>",
+        "id": 249477975,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1628976164
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> You want me to amend that commit's log message and push the results up to github?  (sorry, just trying to make sure I understand - I've gotten in trouble a number of times rewriting git history on branches pushed to a shared repo...)</p>",
+        "id": 249483830,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628986600
+    },
+    {
+        "content": "<p>(we almost never rewrite history in the BRL-CAD project - a philosophical position - so I don't really know how to do it for this case...)</p>",
+        "id": 249483849,
+        "sender_full_name": "starseeker",
+        "timestamp": 1628986681
+    },
+    {
+        "content": "<p>I've done it</p>",
+        "id": 249500746,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629017095
+    },
+    {
+        "content": "<p>New pr414 created</p>",
+        "id": 249500752,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629017106
+    },
+    {
+        "content": "<p>Please can you check it? (see pr414) If you need to add fixups, I pushed the branch too - just add to it</p>",
+        "id": 249500825,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629017263
+    },
+    {
+        "content": "<p>I think we should be able to merge this today</p>",
+        "id": 249500867,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629017293
+    },
+    {
+        "content": "<p>And, yes never rewrite history of master or develop.   Topic branches are another matter</p>",
+        "id": 249502004,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629018850
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I (think) I approved the pull request - do I merge it or do you?</p>",
+        "id": 249519627,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629043673
+    },
+    {
+        "content": "<p>I'll do it</p>",
+        "id": 249522908,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629048737
+    },
+    {
+        "content": "<p>Done, develop is updated</p>",
+        "id": 249525305,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629052727
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> For the moment I used the existing code formatting style in the repo for the astyle sweep, rather than trying to change it - if we do want to shfit the style, presumably we should do it after your parser work is merged.  I wanted to homogenize the style as much as possible to make subsequent comparisons simpler while preparing the other pull requests.</p>",
+        "id": 249613738,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629132330
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I commented on the pr as it might be introducing a bug, but what motivated the de-encapsulation of GetAttribute()?</p>",
+        "id": 249628254,
+        "sender_full_name": "Sean",
+        "timestamp": 1629138710
+    },
+    {
+        "content": "<p>That was back when I was doing the ext work with stepcode - I updated our code to use the access methods, and you indicated a preference for keeping direct access.</p>",
+        "id": 249628449,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629138784
+    },
+    {
+        "content": "<p>It's unusual to de-encapsulate, so looking to understand the context..</p>",
+        "id": 249628467,
+        "sender_full_name": "Sean",
+        "timestamp": 1629138788
+    },
+    {
+        "content": "<p>ahh really?  You added Raw() and GetAttr() and such?</p>",
+        "id": 249628596,
+        "sender_full_name": "Sean",
+        "timestamp": 1629138845
+    },
+    {
+        "content": "<p>I do not recall that discussion...</p>",
+        "id": 249628637,
+        "sender_full_name": "Sean",
+        "timestamp": 1629138867
+    },
+    {
+        "content": "<p>No, upstream did.  I was updating our code to be forward compatible with that encapsulation approach, and you indicated (IIRC) you preferred the direct approach.</p>",
+        "id": 249628677,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629138888
+    },
+    {
+        "content": "<p>Hang on, I'm trying to find the history...</p>",
+        "id": 249628710,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629138905
+    },
+    {
+        "content": "<p>I mean when all getters/setters do is literally insert a layer of indirection via a function call, they're not good.</p>",
+        "id": 249628817,
+        "sender_full_name": "Sean",
+        "timestamp": 1629138959
+    },
+    {
+        "content": "<p>Discussion was \"step converter\" around Dec. 8, 2020</p>",
+        "id": 249628864,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629138966
+    },
+    {
+        "content": "<p>found it, reading, thx!</p>",
+        "id": 249629015,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139055
+    },
+    {
+        "content": "<p>I'm not seeing your comment - is it on the pull request in github?</p>",
+        "id": 249629016,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139055
+    },
+    {
+        "content": "<p>Yeah</p>",
+        "id": 249629037,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139065
+    },
+    {
+        "content": "<p>Ah, I see it now - the summary hadn't updated yet.</p>",
+        "id": 249629060,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139077
+    },
+    {
+        "content": "<p>It's quite possible I misinterpreted what you were saying - my focus at that point was hammering stepcode flat enough to work with the ext build logic, so I was looking for the shortest path to functional...</p>",
+        "id": 249629250,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139177
+    },
+    {
+        "content": "<p>now that discussion is coming back to me.  jeesh!  amazing how quick that was shifted off my context plate.</p>",
+        "id": 249629683,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139407
+    },
+    {
+        "content": "<p>&lt;snort&gt; my context stack these days could be mistaken for a mound of spaghetti</p>",
+        "id": 249629791,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139457
+    },
+    {
+        "content": "<p>So yeah, lots to unpack going on.  The original issue was primarily having a commit that changed API under the banner of ext restructuring, but then also calling out Raw() that was a pass through.</p>",
+        "id": 249629889,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139510
+    },
+    {
+        "content": "<p>Honestly didn't look at Raw() in the PR as what jumped out was the set attributes call</p>",
+        "id": 249629966,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139543
+    },
+    {
+        "content": "<p>so if I have this right.. the attribute was private, someone made it protected, you added an accessor, then you removed the accessor and made it public?   I probably have something wrong in that timeline..</p>",
+        "id": 249630152,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139616
+    },
+    {
+        "content": "<p>That sounds about right.</p>",
+        "id": 249630198,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139642
+    },
+    {
+        "content": "<p>It may have been public a while back though - if it came up it was because our converter was already using it somehow.</p>",
+        "id": 249630259,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139672
+    },
+    {
+        "content": "<p>I wasn't adding anything to step-g at that point, so it would have been whatever logic was already there in the original converter work.</p>",
+        "id": 249630367,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139706
+    },
+    {
+        "content": "<p>I know STEPWrapper has a GetAttribute() that returns the SDAI STEPattribute iirc... is that the same entity?</p>",
+        "id": 249630431,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139738
+    },
+    {
+        "content": "<p>Probably?  I'd have to dig.</p>",
+        "id": 249630481,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139756
+    },
+    {
+        "content": "<p>I'm going through my stepcode commit history to make those pull requests, so I don't have all the BRL-CAD context handy...</p>",
+        "id": 249630530,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139781
+    },
+    {
+        "content": "<p>iirc, we use that to get trimming curves, so might be the connection but it is a completely different class so maybe not</p>",
+        "id": 249630612,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139811
+    },
+    {
+        "content": "<p>The modus operandi was to remove our fork of stepcode, drop in whatever vanilla upstream was at that particular point, and see what broke.</p>",
+        "id": 249630756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629139890
+    },
+    {
+        "content": "<p>oh my bad, is is the same class</p>",
+        "id": 249630760,
+        "sender_full_name": "Sean",
+        "timestamp": 1629139891
+    },
+    {
+        "content": "<p>I looked back through the history and deleted/updated my comment on the PR.</p>",
+        "id": 249632452,
+        "sender_full_name": "Sean",
+        "timestamp": 1629140614
+    },
+    {
+        "content": "<p>Knowing that it was previously direct access means the copy constructor issue wouldn't be a new issue, if there is an issue.</p>",
+        "id": 249632680,
+        "sender_full_name": "Sean",
+        "timestamp": 1629140698
+    },
+    {
+        "content": "<p>still think Raw() is not necessary, but can go either way on the STEPattribute getter/setter.  Looks like attribute access was at least partially incomplete when step-g was implemented.  So may still be a memory management issue but it would have been an issue independent of the setter.  I suppose we need to put the converter through a good valgrinding to be sure.</p>",
+        "id": 249633151,
+        "sender_full_name": "Sean",
+        "timestamp": 1629140898
+    },
+    {
+        "content": "<p>I ran it through valgrind a couple months back trying to debug a conversion issue (which I think was ultimately a 214 file issue), but it crashed valgrind on me (mac support is dodgy).</p>",
+        "id": 249633261,
+        "sender_full_name": "Sean",
+        "timestamp": 1629140952
+    },
+    {
+        "content": "<p>/me nods - stepcode is rather difficult to deal with in that respect - if the issue is in generated code, even finding where it came from can be tricky and when you do often times the generator is handling lots of other code as well and you can't just change it for the one case without causing wonky results somewhere else.</p>",
+        "id": 249635749,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629142162
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I've tried to separate out various topics into pull requests - that's probably most but not quite all of the changes.  I wanted to get these resolved before I go too much further, since after this point I may be doing things slightly differently than in my first iteration.  Once we get those handled in some fashion, I'll start trying in earnest to get the Github Actions builds going and address whatever remaining platform specific fixes I've not yet gotten moved over.</p>",
+        "id": 249636123,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629142337
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/STEP/near/249635749\">said</a>:</p>\n<blockquote>\n<p>/me nods - stepcode is rather difficult to deal with in that respect - if the issue is in generated code, even finding where it came from can be tricky and when you do often times the generator is handling lots of other code as well and you can't just change it for the one case without causing wonky results somewhere else.</p>\n</blockquote>\n<p>Yep, and to be expected in general really.  That's why the question is always \"who created it\", \"who owns it\" , and \"who destroys it\".  When in doubt, one can make a copy at the expense of runtime (minor) but that can also have unintended side-effect on hierarchical data as copies are typically shallow (but not always).  That's part what made me leery of a function that was implicitly invoking a copy constructor getting replaced with a call that might not copy (turns out it did too).</p>",
+        "id": 249639334,
+        "sender_full_name": "Sean",
+        "timestamp": 1629143910
+    },
+    {
+        "content": "<p>It can turn into a rats nest fast if it's shotgunned.  I don't like casting shade on c++ unnecessarily, though - the rules are pretty straightforward, just a bit more complicated than we typically deal with in c due to operator overloading, implicit initialization, and copy construction.</p>",
+        "id": 249639769,
+        "sender_full_name": "Sean",
+        "timestamp": 1629144081
+    },
+    {
+        "content": "<p>By the way, commented on another -- commit mentioned line numbers.</p>",
+        "id": 249639788,
+        "sender_full_name": "Sean",
+        "timestamp": 1629144092
+    },
+    {
+        "content": "<p>the line numbers were wrong..</p>",
+        "id": 249639815,
+        "sender_full_name": "Sean",
+        "timestamp": 1629144104
+    },
+    {
+        "content": "<p>I am wondering about STEP converter history, how did BRL start to develop :))</p>",
+        "id": 249643581,
+        "sender_full_name": "scorp08",
+        "timestamp": 1629145930
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span>  We had a temporary lapse of sanity...</p>",
+        "id": 249644254,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629146254
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> I started looking into STEP in the early 2000's before we went open source.  It took a number of years to get going, but eventually was able to get the ISO specifications sponsored so we could have access to the specs and begin working on development.  We came across the NIST STEP Class Libraries (SCL) which was the only open source implementation available.  We took over SCL development and after years putting in effort to modernize, clean it up, and make it useful to others, STEPcode was born.</p>",
+        "id": 249645417,
+        "sender_full_name": "Sean",
+        "timestamp": 1629146863
+    },
+    {
+        "content": "<p>STEPcode forms the basis for BRL-CAD's step-g importer (which currently is AP203 only).</p>",
+        "id": 249645593,
+        "sender_full_name": "Sean",
+        "timestamp": 1629146960
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> updated the line number messages.</p>",
+        "id": 249645923,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629147127
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  On my local copy of stepcode, with all the various changes applied, I just got a fully clean test cycle with the Github Actions setup from <a href=\"https://github.com/stepcode/stepcode/blob/93e7a135183cce0d9d985f5fe2ea4af5538ecaea/.githhub/workflows/build.yml\">https://github.com/stepcode/stepcode/blob/93e7a135183cce0d9d985f5fe2ea4af5538ecaea/.githhub/workflows/build.yml</a></p>\n<p><a href=\"/user_uploads/1549/TN1YTqqUg9oA55_lp5SGITsk/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/TN1YTqqUg9oA55_lp5SGITsk/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/TN1YTqqUg9oA55_lp5SGITsk/image.png\"></a></div>",
+        "id": 249756058,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629223572
+    },
+    {
+        "content": "<p>I was also able to rebase my parser branch successfully with minimal changes, although I didn't test building it yet.</p>",
+        "id": 249763035,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629226701
+    },
+    {
+        "content": "<p>Good to hear tests are go, we should deploy that</p>",
+        "id": 249763085,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629226729
+    },
+    {
+        "content": "<p>Well, they're a go with the various pending pull requests applied - not sure what will happen as is...</p>",
+        "id": 249764786,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629227539
+    },
+    {
+        "content": "<p>Should we go ahead and put it in anyway?  I kinda figured to wait until the other bits were done so we could start off \"clean\" as it were...</p>",
+        "id": 249765144,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629227729
+    },
+    {
+        "content": "<p>Does anybody know if the cdash related files in the toplevel are still working/workable?  I'm thinking we should scrub them out unless they're in active use (we can always put them back later if we end up enabling something else...)</p>",
+        "id": 249774404,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629232032
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> You may need to disable the CI webhooks for the travis and appveyor systems - I don't think I have those permissions for the github project.</p>",
+        "id": 249776584,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629233224
+    },
+    {
+        "content": "<p>I'll have a look later today</p>",
+        "id": 249874182,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629303567
+    },
+    {
+        "content": "<p>Two things!</p>",
+        "id": 249892048,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629311286
+    },
+    {
+        "content": "<p>There are 4 configured webhooks, in addition to the two mentioned... <a href=\"http://circleci.com\">circleci.com</a> and <a href=\"http://scalar.vector.im\">scalar.vector.im</a></p>",
+        "id": 249893002,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629311711
+    },
+    {
+        "content": "<p>W.r.t.  Travis and appveyor, I'm a little concerned with deleting things, we can try instead to stop them - I've deactivated them</p>",
+        "id": 249894097,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629312220
+    },
+    {
+        "content": "<p>Now...</p>",
+        "id": 249894153,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629312240
+    },
+    {
+        "content": "<p>How to test your PR before accepting it?  I couldn't figure this out - I'd assumed by going to the branch we'd be able to do that</p>",
+        "id": 249894318,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629312301
+    },
+    {
+        "content": "<p>But no!</p>",
+        "id": 249894546,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629312388
+    },
+    {
+        "content": "<p>W.r.t.  The PR appveyor messages, they're caused by the organisations appveyor integration... I think.  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   can deactivate it, I don't have access</p>",
+        "id": 249896027,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629313044
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> The pull request is on develop, not master - if it's not easily testing in the PR, my vote would be to just add it and move forward, fixing as necessary.</p>",
+        "id": 249896554,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629313155
+    },
+    {
+        "content": "<p>Although again my advise is to get the other PRs in first, since I only tested with those applied...</p>",
+        "id": 249896680,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629313183
+    },
+    {
+        "content": "<p>Okay, let's focus on the other pr first</p>",
+        "id": 249906487,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629318079
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> oh, bty - am I supposed to add review requests for the PRs?</p>",
+        "id": 250008104,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629389273
+    },
+    {
+        "content": "<p>Normally yes</p>",
+        "id": 250017759,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629393752
+    },
+    {
+        "content": "<p>Shall I do that for the remaining outstanding PRs?</p>",
+        "id": 250018503,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629394088
+    },
+    {
+        "content": "<p>No, I'll try to look them over this weekend</p>",
+        "id": 250040258,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629402801
+    },
+    {
+        "content": "<p>Hi, I would like to contribute to the Project as a Volunteer, is there any scope for me to join the team</p>",
+        "id": 250256282,
+        "sender_full_name": "Fareha Nousheen",
+        "timestamp": 1629610124
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  We're coming up on the 1 week mark for the pull requests - I'll go ahead and merge most of them tomorrow, if there are no objections.  (I can't merge the Github Actions PR myself because I can't disable the other systems.)</p>",
+        "id": 250387366,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629741324
+    },
+    {
+        "content": "<p>I've approved most of them -</p>",
+        "id": 250403941,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629748938
+    },
+    {
+        "content": "<p>I don't see any obvious problems</p>",
+        "id": 250403969,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629748954
+    },
+    {
+        "content": "<p>Maybe I missed a pr or two... I'm checking now</p>",
+        "id": 250404017,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629748984
+    },
+    {
+        "content": "<p>Just the deprecated copy PRs?</p>",
+        "id": 250404233,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749088
+    },
+    {
+        "content": "<p>416, 417, 418, 421, 422, 423, 425</p>",
+        "id": 250404272,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749113
+    },
+    {
+        "content": "<p>There's a bunch of old pr that should be closed / rejected</p>",
+        "id": 250404310,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749142
+    },
+    {
+        "content": "<p>Yep, think that's got it.  For the Github Actions PR,  did you want to experiment with it in a fork in your own account if we can't properly test it in the PR itself?</p>",
+        "id": 250404399,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749166
+    },
+    {
+        "content": "<p>And a few slightly newer that should be reviewed (e.g.  408, I've assigned myself to do this)</p>",
+        "id": 250404480,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749214
+    },
+    {
+        "content": "<p>Yes, I think that's probably a good idea</p>",
+        "id": 250404532,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749247
+    },
+    {
+        "content": "<p>I did notice when reviewing the prs, there's another tab \"checks\" I think this is for the actions</p>",
+        "id": 250404671,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749304
+    },
+    {
+        "content": "<p>Although, I'm still waiting on it loading the page... Perhaps it's a catch-22 - you can't see it until it's configured the first time</p>",
+        "id": 250404768,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749383
+    },
+    {
+        "content": "<p>I'll test in my fork</p>",
+        "id": 250404834,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749408
+    },
+    {
+        "content": "<p>Hmm.  Yeah, I'm getting the same thing here...</p>",
+        "id": 250404847,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749418
+    },
+    {
+        "content": "<p>Okay, I'm done for tonight - I'll try to look at actions tomorrow</p>",
+        "id": 250405041,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749554
+    },
+    {
+        "content": "<p>Sounds good, thanks!  Once we've got Actions merged and functional, I'd appreciate it if you could add logic to test the python side of things - I'm not familiar with that aspect of the system.</p>",
+        "id": 250405111,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749596
+    },
+    {
+        "content": "<p>I also rebased my parser branch, but I've got failing tests to check - although they were broken before rebase</p>",
+        "id": 250405129,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749604
+    },
+    {
+        "content": "<p>Okay will do</p>",
+        "id": 250405176,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1629749630
+    },
+    {
+        "content": "<p>It may be as simple as making sure the correct options are enabled for the test targets, but if it needs more we should turn it on as well... it's looking as if none of the stepcode tests are big enough (at least, at the moment) to overload the Actions CI runners.</p>",
+        "id": 250405324,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749703
+    },
+    {
+        "content": "<p>That being the case, more is better :-)</p>",
+        "id": 250405375,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749727
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"433038\">@Rob McDonald</span> If you've got an equivalent to the step-g test for OpenVSP we could toss in as well, that'd be of interest.</p>",
+        "id": 250405472,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629749769
+    },
+    {
+        "content": "<p>Not at this time.</p>\n<p>OpenVSP does have the ability to do a non-graphical build (greatly simplifying dependencies and speeding up the whole process) and pretty much all functionality is available through a scripting language that can be triggered from the command line.</p>\n<p>Note that OpenVSP does not have any ability to read STEP files -- we are strictly write-only (and only AP203).</p>\n<p>We can write out three 'styles' of files -- the first, un-intersected surfaces as SdaiB_spline_surface_with_knots.   We also perform surface-surface intersection procedures and can then write out a ManifoldShell or BREPSolid.</p>\n<p>So, in addition to testing OpenVSP / STEPCode integration and to a limited extent the functionality of STEPCode, any test we would write would largely be testing OpenVSP behavior -- generation of surfaces and potentially intersection between surfaces.</p>\n<p>We could build tests from simple objects whose code rarely changes, but it is likely that we will continue to work on our surface-surface intersection and BREP exporting capabilities -- so any test based on OpenVSP is going to have to be tolerant of the VSP side of the code changing results...  From a testing standpoint, it isn't quite as tidy as confirming proper import of a standardized test file...</p>",
+        "id": 250415495,
+        "sender_full_name": "Rob McDonald",
+        "timestamp": 1629754668
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"433038\">@Rob McDonald</span> So in that scenario what would be tested is not necessarily the output per say, but the functionality of the integration with stepcode - i.e. does it compile, link and run.  Even if the output is not checked, those tests will catch certain categories of error.  (That's what the BRL-CAD test is currently checking for, in fact - I'm not comparing the .g output of the conversion to a known file, for much the same reasons - if we change our logic the output may change independent of stepcode.)</p>",
+        "id": 250422797,
+        "sender_full_name": "starseeker",
+        "timestamp": 1629759532
+    },
+    {
+        "content": "<p>From that standpoint, I should be able to construct a test using the AP203Min code that simulates OpenVSP's integration and build system -- with much less complexity and cost to the CI system.</p>\n<p>It can't / won't be a perfect test -- but it also greatly reduces the likelihood that some unrelated problem with OpenVSP's build triggers a false positive for STEPCode.</p>",
+        "id": 250425682,
+        "sender_full_name": "Rob McDonald",
+        "timestamp": 1629761570
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"434465\">Fareha Nousheen</span> <a href=\"#narrow/stream/104062-general/topic/STEP/near/250256282\">said</a>:</p>\n<blockquote>\n<p>Hi, I would like to contribute to the Project as a Volunteer, is there any scope for me to join the team</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"434465\">@Fareha Nousheen</span> With open source, there's always scope for people to join the team.  What works best is to just jump in, start learning/doing something, and ask questions.  People are more inclined to respond when you are clearly trying to be productive, have read docs, are trying to compile something, etc.  LOTs of ways you can get involved and figuring that out depends primarily on your interests and experience, not on others'. Welcome! :)</p>",
+        "id": 250444494,
+        "sender_full_name": "Sean",
+        "timestamp": 1629783697
+    },
+    {
+        "content": "<p>Thank you for the response. I would definitely love to be a part of open source projects, however, at this point of time, I wanted to join the GSoD project for which the organization has pitched in for this year. Is there any scope I can contribute for the selected GSoD project? Kindly guide me</p>",
+        "id": 250484361,
+        "sender_full_name": "Fareha Nousheen",
+        "timestamp": 1629811638
+    },
+    {
+        "content": "<p>Also, it would be helpful if you can guide me, how do I begin with, when going forward in the coming months, I want to join any of the open-source projects. I'm completely new to this and would need guidance, to begin with. Kindly help me out.</p>",
+        "id": 250485304,
+        "sender_full_name": "Fareha Nousheen",
+        "timestamp": 1629812081
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> any update on enabling the CI with Github Actions for stepcode?</p>",
+        "id": 251872723,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630672512
+    },
+    {
+        "content": "<p>Sorry I had no time to complete yet, I'll have more spare time this weekend</p>",
+        "id": 251906786,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630686300
+    },
+    {
+        "content": "<p>Testing now, first issue (perhaps on purpose?) is subdir was named githhub (extra h). Anyway, my fork is now building it...</p>",
+        "id": 252011662,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773218
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 252011672,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773229
+    },
+    {
+        "content": "<p>So far all the workflows failed, looks like they're trying to rebuild the parser</p>",
+        "id": 252011836,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773392
+    },
+    {
+        "content": "<p>Anyway, it's a starting point.  I don't see à branch name mentioned in the workflow... I guess I've some reading to do so I can understand exactly what it's attempting to build</p>",
+        "id": 252011944,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773522
+    },
+    {
+        "content": "<p>In fact the failure is due to md5 checksum failure, which I vaguely recall was removed in a previous pr...</p>",
+        "id": 252012170,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773812
+    },
+    {
+        "content": "<p>Although there are 101 warnings about dll linkage too</p>",
+        "id": 252012220,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773848
+    },
+    {
+        "content": "<p>Quite odd really</p>",
+        "id": 252012226,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773857
+    },
+    {
+        "content": "<p>I'd like to see preprocessor output for some of the dll defines</p>",
+        "id": 252012249,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630773901
+    },
+    {
+        "content": "<p>I think the extra h was probably a typo...</p>",
+        "id": 252073490,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630844997
+    },
+    {
+        "content": "<p>The BRL-CAD tests as written aren't targeting the main stepcode repo yet, since at the time it was written we didn't have the updates merged - they're checking out my local stepcode develop branch .  If we want to run the BRL-CAD tests on arbitrary branches, we'll need to adjust those checkout lines to use a variable of some sort for the -b option.</p>",
+        "id": 252073851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630845287
+    },
+    {
+        "content": "<p>I don't know why the \"main\" tests would fail on md5 issues, if you've merged the latest develop updates into the branch...</p>",
+        "id": 252074075,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630845501
+    },
+    {
+        "content": "<p>as you say, that whole logic block should have been removed.  Can you tell where it's getting it from?</p>",
+        "id": 252074220,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630845663
+    },
+    {
+        "content": "<p>Didn't look yet, I checked what commit was being built - appears to be correct.  Next thing will be to see how to debug the action</p>",
+        "id": 252092037,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630865276
+    },
+    {
+        "content": "<p>I checked now, it's fairly obvious - the branch needs rebasing on develop as is now</p>",
+        "id": 252094010,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630867388
+    },
+    {
+        "content": "<p>I'll do it and test</p>",
+        "id": 252094016,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630867399
+    },
+    {
+        "content": "<p>Yep, it's building now</p>",
+        "id": 252094144,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630867558
+    },
+    {
+        "content": "<p>OK, success</p>",
+        "id": 252096605,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630870166
+    },
+    {
+        "content": "<p>I don't think rebasing is correct though - github can do things to preserve the original history on the PR page... I'm checking now</p>",
+        "id": 252096680,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630870234
+    },
+    {
+        "content": "<p>Well I tried to do it the correct way and have the PR tested against the latest, but it refuses - so I'm going to push the rebased to the topic branch.  You may see an error due to this and need to disassociate your remote on the branch, rename the local branch before pulling the topic (if you need to).  Develop will remain stable, so no issue if you're only interested in the result</p>",
+        "id": 252098426,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872069
+    },
+    {
+        "content": "<p>Sounds good, whatever works.</p>",
+        "id": 252098502,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872156
+    },
+    {
+        "content": "<p>The PR is now building, assuming it's successful I'll merge it</p>",
+        "id": 252098544,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872235
+    },
+    {
+        "content": "<p>Assuming the python bits are also working correctly, we should probably start thinking about what criteria and methods to use for the next release.  Any thoughts?</p>",
+        "id": 252098632,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872310
+    },
+    {
+        "content": "<p>For 0.9 release?</p>",
+        "id": 252098792,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872482
+    },
+    {
+        "content": "<p>I've à couple things I would like to integrate - I have a c python extension for reading part21 files, I'd like to add that</p>",
+        "id": 252098888,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872595
+    },
+    {
+        "content": "<p>Sounds good.  I'd just like to have an \"official\" stable release that distros might pick up for packaging which also supports BRL-CAD.</p>",
+        "id": 252099048,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872729
+    },
+    {
+        "content": "<p>I guess you're also talking about things like astyle</p>",
+        "id": 252099064,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872745
+    },
+    {
+        "content": "<p>Not particularly - if you prefer not to mess with that I'm fine.</p>",
+        "id": 252099085,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872772
+    },
+    {
+        "content": "<p>Okay, I prefer not to mess with astyle for the moment</p>",
+        "id": 252099130,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872840
+    },
+    {
+        "content": "<p>The only remaining major(ish) change I'd like to consider at some point is a series of changes I prototyped in a BRL-CAD branch a while back which altered the #include statements in the headers so a client code can include just one stepcode directory rather than needing multiples.</p>",
+        "id": 252099131,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872841
+    },
+    {
+        "content": "<p>IIRC I was also able to eliminate the base library.</p>",
+        "id": 252099179,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872871
+    },
+    {
+        "content": "<p>I'd also like to have a bit of a review over what are public interfaces and macro functions</p>",
+        "id": 252099201,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630872908
+    },
+    {
+        "content": "<p>Let me see if I can find a link to that work - it's not in a form that can be applied to the current tree, it will have to be redone, but it may give you a sense of what I was looking at.</p>",
+        "id": 252099227,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872959
+    },
+    {
+        "content": "<p>(It would be post 0.9 though)</p>",
+        "id": 252099270,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630872973
+    },
+    {
+        "content": "<p>I was thinking to make the base library static internally linked, or remove it.  In the parser branch I build auxlib as an internal library with bstrlib</p>",
+        "id": 252099290,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630873007
+    },
+    {
+        "content": "<p>Ok</p>",
+        "id": 252099306,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630873035
+    },
+    {
+        "content": "<p>I think with the C++11 standard most of  base can either be removed or put specifically with the isolated parts of the code that use particular features.</p>",
+        "id": 252099327,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630873061
+    },
+    {
+        "content": "<p>So, we only have appveyor failures - but these are expected for the first work on github actions.  It's completing now</p>",
+        "id": 252099387,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630873113
+    },
+    {
+        "content": "<p>Ok</p>",
+        "id": 252099398,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630873138
+    },
+    {
+        "content": "<p>Are you wanting to leave appveyor on?</p>",
+        "id": 252099638,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630873412
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> so don't panic about this stepcode tree - I'm not proposing to strip things down this far in the main repo (we'll keep python support, for example  - this was a specific testing scenario on Windows where I was removing all the complexity I could.)   Also, after discussions with <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I'll leave exppp alone as a library.  The thing to focus on is the include/stepcode header relocation and related changes.</p>",
+        "id": 252099912,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630873689
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/brlcad/tree/d5712460c1fdc0ca8b08be9b083835dd9c448230/src/other/ext/stepcode\">https://github.com/BRL-CAD/brlcad/tree/d5712460c1fdc0ca8b08be9b083835dd9c448230/src/other/ext/stepcode</a></p>",
+        "id": 252099924,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630873712
+    },
+    {
+        "content": "<p>In addition to the header shuffle, this also eliminated base.  It's based on a much older stepcode than the current tree though, so if it's a go i'll need to redo the changes using develop as a starting point.</p>",
+        "id": 252099975,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630873800
+    },
+    {
+        "content": "<p>Oh, probably relevant for generalizing the BRL-CAD stepcode integration tests to work with more than just develop branch:  <a href=\"https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions\">https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions</a></p>",
+        "id": 252100173,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630874003
+    },
+    {
+        "content": "<p>I'll have a look, got to stop now - early start tomorrow... Work!</p>",
+        "id": 252100288,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630874132
+    },
+    {
+        "content": "<p>hmm, pull requests may complicate life - need to check out <a href=\"https://github.com/marketplace/actions/github-environment-variables-action\">https://github.com/marketplace/actions/github-environment-variables-action</a></p>",
+        "id": 252100504,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630874362
+    },
+    {
+        "content": "<p>I've merged it</p>",
+        "id": 252101831,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630875862
+    },
+    {
+        "content": "<p>Looks like the appveyor hook is still active/failing, but otherwise awesome.</p>",
+        "id": 252105830,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630880553
+    },
+    {
+        "content": "<p>Yeah, that needs disabling to org level - I don't have access <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 252136868,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630913225
+    },
+    {
+        "content": "<p>I contacted Mark - I think I've got it straight.  Testing now.</p>",
+        "id": 252224565,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630963366
+    },
+    {
+        "content": "<p><span aria-label=\"thumbs up\" class=\"emoji emoji-1f44d\" role=\"img\" title=\"thumbs up\">:thumbs_up:</span></p>",
+        "id": 252225994,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1630964688
+    },
+    {
+        "content": "<p>Well, I removed the webhooks but there's still some kind of weird zombie continuous-integration check listed.  Fortunately it seems to be a no-op that \"succeeds\", so it's not causing breakage reports, but I don't see so far how to get rid of it.</p>",
+        "id": 252234226,
+        "sender_full_name": "starseeker",
+        "timestamp": 1630972770
+    },
+    {
+        "content": "<p>When I looked yesterday pm I didn't see any issue, where are you looking?</p>",
+        "id": 252643699,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1631200669
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/6IdQONTM2kSiyQg2mnH9IRVd/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/6IdQONTM2kSiyQg2mnH9IRVd/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/6IdQONTM2kSiyQg2mnH9IRVd/image.png\"></a></div>",
+        "id": 252771500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1631273438
+    },
+    {
+        "content": "<p>Looks like it only appears on old pr? I just created #426 to test, and it doesn't appear there</p>",
+        "id": 253577845,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1631797530
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"273836\">Chris Horler</span> <a href=\"#narrow/stream/104062-general/topic/STEP/near/252136868\">said</a>:</p>\n<blockquote>\n<p>Yeah, that needs disabling to org level - I don't have access <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span></p>\n</blockquote>\n<p>Oof, yeah --  thanks for the ping.. I'll look at that asap.  Please remind me if I haven't fixed it by next week, but thx for the reminder!  I'll fix the perms while I'm in there.</p>",
+        "id": 253697365,
+        "sender_full_name": "Sean",
+        "timestamp": 1631860727
+    },
+    {
+        "content": "<p>Thanks Sean</p>",
+        "id": 253858264,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1631961052
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  How goes the \"needed for 0.9 stepcode release\" work?</p>",
+        "id": 255293617,
+        "sender_full_name": "starseeker",
+        "timestamp": 1632860933
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I didn't have time in recent weeks to do anything - work and life took precedence.  Hopefully more free time next weekend.  Sorry for not responding more promptly.</p>",
+        "id": 256885676,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1633800857
+    },
+    {
+        "content": "<p>I reviewed the Python PR this evening, there's some rework to do.  Also some additional work required.  I'll start on it one hour each evening this week.</p>",
+        "id": 259801604,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1635705386
+    },
+    {
+        "content": "<p>Just to confirm, we're all agreed to drop Python 2 support?</p>",
+        "id": 259801632,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1635705434
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 259801645,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1635705459
+    },
+    {
+        "content": "<p>I'm not a user of the Python version, so my vote is relatively low weight, but I'm fine with Python 3 only.</p>",
+        "id": 259822917,
+        "sender_full_name": "starseeker",
+        "timestamp": 1635736770
+    },
+    {
+        "content": "<p>I created a branch pr408_rework, and rebased the branch of the PR in it (last night).  I'll do that again to address the points raised on the PR, then push it</p>",
+        "id": 259965848,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1635842319
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> any news on the stepcode front?  Also, were you still planning to redo the lexer/parser setup to avoid the need for re2c/lemon et. al.?</p>",
+        "id": 261988078,
+        "sender_full_name": "starseeker",
+        "timestamp": 1637268330
+    },
+    {
+        "content": "<p>I was busy for a few weeks with other stuff, hope to do some catching up tomorrow</p>",
+        "id": 262178021,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1637406993
+    },
+    {
+        "content": "<p>Still working on lexer / parser, yes I have some new re2c stuff to add for Python</p>",
+        "id": 262178044,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1637407055
+    },
+    {
+        "content": "<p>And ofc the longer term work on the part11 parser</p>",
+        "id": 262178128,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1637407094
+    },
+    {
+        "content": "<p>I finished working my way through the python pr, I've adjusted some of it.  Also there are three key points not addressed, I should get to these tomorrow.  (we're now inconsistant in use of object for inheritance, there is a legacy use of apply to remove, and some other stuff)</p>",
+        "id": 262203438,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1637440771
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> There's apparently some regression in the step-g converter.  This model works in an old release, but the latest appears to run infinitely:  <a href=\"/user_uploads/1549/tT6_TadWGLenSTkXap17AeXe/Cup.STEP\">Cup.STEP</a></p>",
+        "id": 263102283,
+        "sender_full_name": "Sean",
+        "timestamp": 1638248545
+    },
+    {
+        "content": "<p>I had trouble narrowing in on when the regression happened.  Old versions gave me a heck of a time compiling; I couldn't bisect commits easily.  Hoping you have better luck.</p>",
+        "id": 263102323,
+        "sender_full_name": "Sean",
+        "timestamp": 1638248626
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> any news on the stepcode front?</p>",
+        "id": 273167825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645747444
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I reworked / fixed the two pr for python, there's still an outstanding python bug which I didn't get to yet (I've spent recent weekends hacking my dvd rig in emacs) ill update again on Sunday.</p>",
+        "id": 273273663,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645817072
+    },
+    {
+        "content": "<p>Idea would be to merge 3 pr, and assuming they pass test make a release.</p>",
+        "id": 273273911,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645817202
+    },
+    {
+        "content": "<p>Sounds like a plan.  Then post release would the next step be the parser work?</p>",
+        "id": 273273981,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645817241
+    },
+    {
+        "content": "<p>Also, I've been working on the BRL-CAD side to clear some static analyzer warnings - would those be of interest pre-release, or would you prefer to wait?</p>",
+        "id": 273274098,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645817293
+    },
+    {
+        "content": "<p>They'd be of interest for prerelease as well</p>",
+        "id": 273287656,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645824898
+    },
+    {
+        "content": "<p>And yes, afterwards parser work</p>",
+        "id": 273287677,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645824914
+    },
+    {
+        "content": "<p>OK, I'll prepare some pull requests</p>",
+        "id": 273288280,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645825281
+    },
+    {
+        "content": "<p>I'd like to keep the express only build target, it's useful when working on the parser - to be able to build without the schema scanner</p>",
+        "id": 273343163,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645884880
+    },
+    {
+        "content": "<p>I added a couple commits I worked on this morning, whilst looking into bugs.  There were several bugs in exp2py scopeprint function.  I made the code behave a little more like it's intended to behave (Bugfixes!). There is still some more to do, indentation issues in the output point to incorrect tracking of indentation level in the output functions, I've noticed this in the past too.</p>",
+        "id": 273343419,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645885241
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> OK, restored.</p>",
+        "id": 273355099,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645899777
+    },
+    {
+        "content": "<p>I'm working on the initialization and string buffer cleanups, but it looks like somehow there's still formatting differences between the BRL-CAD stepcode copy and the upstream, so I'm having to go through a lot of them by hand.  I'll try  to have something in a few hours.</p>",
+        "id": 273355120,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645899830
+    },
+    {
+        "content": "<p>Okay, note you git diff -w to make this a little easier</p>",
+        "id": 273361641,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645907793
+    },
+    {
+        "content": "<p>I fixed more of the exp2py, now only one schéma failing... lifecycle_integration_schema</p>",
+        "id": 273361673,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645907869
+    },
+    {
+        "content": "<p>I think I've got most of my local changes staged - there's quite a bit more cleanup to do, but it will take a while to get through it all so I figure to just get what I can in, and then proceed further after the release using that version as a new starting point.</p>",
+        "id": 273364057,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645911047
+    },
+    {
+        "content": "<p>Pylint shows many many issues, some are relevant... We should probably start linting all generated python</p>",
+        "id": 273364162,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645911210
+    },
+    {
+        "content": "<p>Found the final schéma problem - entity property, output as class, silently overriding python property decorator.  Most confusing reading the trace output.  We should probably increase the list of reserved words as well!</p>",
+        "id": 273367612,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645915811
+    },
+    {
+        "content": "<p>Tomorrow I'll rebase and cleanup where necessary</p>",
+        "id": 273367623,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645915844
+    },
+    {
+        "content": "<p>I used pylint and fixed a few more issues, there are big issues with where and unique on entities.  And inheritance unitary schema gives mro errors.  Of course it's known that exp2py doesn't generate good code at the moment, so won't worry about this until new parser is in use</p>",
+        "id": 273396138,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645958086
+    },
+    {
+        "content": "<p>Just taking a bit of a détour to look if we can adopt mypy and python3 type hints</p>",
+        "id": 273415342,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1645983053
+    },
+    {
+        "content": "<p>Also realised there's some generated code in one of my commits which shouldn't be there</p>",
+        "id": 273461256,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1646039021
+    },
+    {
+        "content": "<p>I fixed some or all of the attribute issues I noticed in where rules...  As we have a number of pr I'll start to merge some stuff this weekend, or early next week</p>",
+        "id": 275447575,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1647385399
+    },
+    {
+        "content": "<p>Still need to rebase and remove what shouldn't be included</p>",
+        "id": 275447702,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1647385475
+    },
+    {
+        "content": "<p>Rebase done, now building pr 429 and 430.  There was a brlcad failure, perhaps something is configured wrong? <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 285443409,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654717413
+    },
+    {
+        "content": "<p>Checkout failed for brlcad main</p>",
+        "id": 285444160,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654717746
+    },
+    {
+        "content": "<p>Maybe the git protocol is not allowed, also I guess it could be done with checkout action with repo option</p>",
+        "id": 285444715,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654718001
+    },
+    {
+        "content": "<p>Yep, looks like they turned off the git:// support:  <a href=\"https://github.blog/2021-09-01-improving-git-protocol-security-github/\">https://github.blog/2021-09-01-improving-git-protocol-security-github/</a></p>",
+        "id": 285450017,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654720693
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> just switching git:// to https:// should work - how do you want to handle it?  Shall I just update main, and you can merge in the change?  Or some other approach?</p>",
+        "id": 285450100,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654720741
+    },
+    {
+        "content": "<p>PR please - then we'll know it fixes the issue</p>",
+        "id": 285453401,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654722462
+    },
+    {
+        "content": "<p><a href=\"https://github.com/stepcode/stepcode/pull/441\">https://github.com/stepcode/stepcode/pull/441</a></p>",
+        "id": 285461758,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654727600
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Let me know if there are any issues with #441 - I tested the command with https in isolation, but this is one of those things where only success in the full runner environment proves it out fully.</p>",
+        "id": 285526741,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654778143
+    },
+    {
+        "content": "<p>I was reading up on this, I'm testing a slight change to how we launch actions.  If it works I'll rebase your branch to have pr results before merge</p>",
+        "id": 285602755,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654813059
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> please can you submit it again? I think this time it should trigger a workflow</p>",
+        "id": 285606756,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654816112
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  I pulled the updates - looks like that kicked off the test in 441, which I think is what you were after?</p>",
+        "id": 285620769,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654825608
+    },
+    {
+        "content": "<p>Yes</p>",
+        "id": 285664096,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654861650
+    },
+    {
+        "content": "<p>It shows a failure linking on linux</p>",
+        "id": 285722849,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654889617
+    },
+    {
+        "content": "<p>Appears to be a macro or multiple definition or type issue.... I didn't read the source only the error</p>",
+        "id": 285722992,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654889690
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 285723013,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654889703
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Ooo, that's a useful catch.  Adjusted in BRL-CAD main, re-running stepcode action</p>",
+        "id": 285733561,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654895848
+    },
+    {
+        "content": "<p>The Actions now reports clean.  The badge in the readme still shows, failing, but I'm not sure why... maybe we need to re-run all the jobs?</p>",
+        "id": 285734902,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654896617
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> let me know if there's anything else</p>",
+        "id": 285734993,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654896676
+    },
+    {
+        "content": "<p>Thanks, I'll look over the weekend</p>",
+        "id": 285738974,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654899592
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span><br>\nTo fix the checks on the other PR of yours - it's simple.  1.  On your own fork where you have the branches for each PR, checkout develop and git pull the upstream changes.</p>\n<ol start=\"2\">\n<li>Checkout each topic branch (e.g.  output_fixes) and do git rebase develop, then git push --force.<br>\nThis will update your fork, and by synchronisation (automatic), the upstream workflows will kick-off</li>\n</ol>",
+        "id": 285777506,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654951022
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> done, tests running</p>",
+        "id": 285780184,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654954974
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Are we closing in on a 0.9 release?</p>",
+        "id": 285780354,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654955173
+    },
+    {
+        "content": "<p>I think a Bugfix release, the only new feature we have is Py3, the usefulness of the Python code is not production ready though.  For 0.9 I'd like to integrate parser changes and python meta bases.  Also explore the simplification of macros and correction of type masking in some parts of the libraries.</p>",
+        "id": 285782233,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654958050
+    },
+    {
+        "content": "<p>I'd be happy to release 0.8.x - with the view we also need to manage our branch logic for releases</p>",
+        "id": 285782261,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654958123
+    },
+    {
+        "content": "<p>I'd like to start looking at reorganizing the headers into include and reorganizing so calling codes only need to include one directory for the stepcode headers.  How do you want to handle that?</p>",
+        "id": 285782269,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654958144
+    },
+    {
+        "content": "<p>Also, with newer C/C++ standards, I think we can eliminate base</p>",
+        "id": 285782322,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654958191
+    },
+    {
+        "content": "<p>I don't know if those things complicate the python side of the house...</p>",
+        "id": 285782371,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654958275
+    },
+    {
+        "content": "<p>I was also thinking we can eliminate libbase</p>",
+        "id": 285782420,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654958306
+    },
+    {
+        "content": "<p>Agreed about the headers<br>\nI'd like it so if we build a package the user only needs to pass -I/usr/include/stepcode to the compiler.</p>",
+        "id": 285782516,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654958446
+    },
+    {
+        "content": "<p>Exactly.  I did that once in a minimalist fork - it's a bit involved, but doable.  Will it break the python side of the house?</p>",
+        "id": 285782612,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654958586
+    },
+    {
+        "content": "<p>I'd also like to make sure we have all the other pull requests merged into develop before doing that, since the moving will likely complicate merges...</p>",
+        "id": 285782630,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654958637
+    },
+    {
+        "content": "<p>The python part will probably be minimally impacted</p>",
+        "id": 285782917,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654959075
+    },
+    {
+        "content": "<p>I intend to merge everything before proceeding further - I noticed I had one un pushed cmake fix, perhaps there are others too</p>",
+        "id": 285782986,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654959155
+    },
+    {
+        "content": "<p>It's looking like the cmake adjustment to express/CMakeLists.txt may not be agreeing with Windows... let me see if a re-run confirms it.  Nice job setting up the workflows to run on the pull requests, by the way...</p>",
+        "id": 285783475,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654959876
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> OK, forget the CMake PR.  More obnoxious Windows DLL import/export shenanigans, and I don't have time to mess with it now.</p>",
+        "id": 285785722,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654963130
+    },
+    {
+        "content": "<p>If you're still planning to eliminate perplex and friends, that and the header reorg might end up simplifying the DLL business.</p>",
+        "id": 285785743,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654963188
+    },
+    {
+        "content": "<p>I think the other PRs are OK now</p>",
+        "id": 285785846,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654963294
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Let me know if you see any remaining problems.  I should probably hold any additional PRs til after the 0.8.x release tag.</p>",
+        "id": 285785919,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654963385
+    },
+    {
+        "content": "<p>After merging stuff, presumably in the wrong order (I was following the PR number sequence) there's a minimal conflict on the remaining pr for memory management.  Please can you rebase it again and resolve the conflicts in two files?  (they look trivial, probably best you do it though - I'm assuming some of these changes are valgrind prompted and others just reading the code and seeing issues!)</p>",
+        "id": 285788190,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654966568
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 285788194,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654966580
+    },
+    {
+        "content": "<p>I think that's got it - let's see how the tests do</p>",
+        "id": 285789492,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654968417
+    },
+    {
+        "content": "<p>Ah, right - need an adjustment in upstream BRL-CAD for the header renames.  One sec...</p>",
+        "id": 285790416,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654969897
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I think that's got it - tests should be finishing up fairly soon</p>",
+        "id": 285791945,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654972338
+    },
+    {
+        "content": "<p>Well, soon-ish - the Mac test seems to take quite a long time</p>",
+        "id": 285791973,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654972431
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Finally. Tests completed successfully</p>",
+        "id": 285793152,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654974256
+    },
+    {
+        "content": "<p>Once that gets merged I'll take a look at eliminating base, but that'll be post release.</p>",
+        "id": 285793172,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654974342
+    },
+    {
+        "content": "<p>Okay, I'll do it after dinner</p>",
+        "id": 285793423,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654974605
+    },
+    {
+        "content": "<p>Or before dinner, computer was still on and only a cursory review required!</p>",
+        "id": 285793628,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1654974959
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  Awesome - thanks!  Anything else you need from me for a 0.8.1 release?</p>",
+        "id": 285811535,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654996635
+    },
+    {
+        "content": "<p>No, that's all.  Thanks <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 285831616,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1655026258
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> any progress towards the stepcode release?</p>",
+        "id": 289887851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1658068272
+    },
+    {
+        "content": "<p>No, I took a bit of a détour to work on a TCL Debugger for vscode, I also had two weeks holiday... Backpacking, so no computer</p>",
+        "id": 289898056,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1658083125
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> - any word on stepcode release plans?</p>",
+        "id": 294109169,
+        "sender_full_name": "starseeker",
+        "timestamp": 1660836225
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> no,  but you're right it's been too long.   So I'll try to make it happen on Sunday.</p>",
+        "id": 294326861,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1660928846
+    },
+    {
+        "content": "<p>I reviewed the 3 outstanding PR</p>",
+        "id": 294564709,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1661101284
+    },
+    {
+        "content": "<p>Trivial changes needed, if not done by sometime tomorrow I'll do it myself</p>",
+        "id": 294564804,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1661101335
+    },
+    {
+        "content": "<p>I probably should update the contribution guidelines as branches or repo are problems we can avoid when I want to rebase before accepting</p>",
+        "id": 294564874,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1661101406
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span></p>",
+        "id": 294565070,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1661101521
+    },
+    {
+        "content": "<p>Let me take a look (sorry focused on another problem...)</p>",
+        "id": 294578819,
+        "sender_full_name": "starseeker",
+        "timestamp": 1661111255
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span>  Oh, gotcha - I figured to hold off on the base removal until after the release.  Did you want me to do it now for this one?</p>",
+        "id": 294579042,
+        "sender_full_name": "starseeker",
+        "timestamp": 1661111433
+    },
+    {
+        "content": "<p>What do you need me to rebase on?  The latest stepcode develop?</p>",
+        "id": 294579268,
+        "sender_full_name": "starseeker",
+        "timestamp": 1661111645
+    },
+    {
+        "content": "<p>When I look it says I'm not behind the latest upstream develop...</p>",
+        "id": 294579294,
+        "sender_full_name": "starseeker",
+        "timestamp": 1661111689
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> If you have specific guidelines for how you want changes prepared I'd definitely spell them out in detail</p>",
+        "id": 294579394,
+        "sender_full_name": "starseeker",
+        "timestamp": 1661111782
+    },
+    {
+        "content": "<p>Okay, I'll work up guidelines</p>",
+        "id": 294587193,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1661120528
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> was there still stuff you wanted to merge, or are you OK to wait on base elimination until after the release?</p>",
+        "id": 295663451,
+        "sender_full_name": "starseeker",
+        "timestamp": 1661655869
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  I'm packing for holiday, I doubt I'll do anything before I get back now.</p>",
+        "id": 295807605,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1661764744
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> any update?</p>",
+        "id": 299677883,
+        "sender_full_name": "starseeker",
+        "timestamp": 1663643570
+    },
+    {
+        "content": "<p>I got back from my backpacking last week, I had some chores to do this last weekend.  Prospects are better this weekend - although I had my 29byears employment party this Friday</p>",
+        "id": 299811638,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1663695063
+    },
+    {
+        "content": "<p>Made two line change to contribution guidelines</p>",
+        "id": 300663208,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664119872
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> please can you ack and merge if no issue</p>",
+        "id": 300663234,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664119906
+    },
+    {
+        "content": "<p>I plan to merge all 3 remaining PR after rebase / tests.  We should perhaps add a note in the release notes about removing base it could cause some people minor linking issues</p>",
+        "id": 300664526,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664120729
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> merged.  If you want to go ahead and merge the base removal, I agree it probably warrants a release notes mention</p>",
+        "id": 300683677,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664133734
+    },
+    {
+        "content": "<p>Thanks</p>",
+        "id": 300685396,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664135307
+    },
+    {
+        "content": "<p>I rebased your branch, and forced pushed it - the build process / checks have triggered.  It's now occurred to me though, this will invalidate your local branch nobase.  I guess that's not a problem after it's merged.</p>",
+        "id": 300688162,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664137682
+    },
+    {
+        "content": "<p>I'll also add some maintainer guidelines to the contributing document</p>",
+        "id": 300689838,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664138946
+    },
+    {
+        "content": "<p>Github stuff</p>",
+        "id": 300689876,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664138993
+    },
+    {
+        "content": "<p>Sounds good.  Yeah, don't worry about my branches - I'll sort it out.</p>",
+        "id": 300690391,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664139427
+    },
+    {
+        "content": "<p>Merged some more, a few more things to do before release.  Probably on Wednesday as I have to do food shopping tomorrow evening</p>",
+        "id": 300890931,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664222746
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I think I've got a fix for the BRL-CAD integration test failure in place - tests are re-running now.  If that didn't do it I'll go another round this evening</p>",
+        "id": 301820989,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664630740
+    },
+    {
+        "content": "<p>OK, great!</p>",
+        "id": 301831984,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664635927
+    },
+    {
+        "content": "<p>Looks like everything passed - I think you're good to merge now?</p>",
+        "id": 301835539,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664637869
+    },
+    {
+        "content": "<p>Yep, done</p>",
+        "id": 301840300,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664640627
+    },
+    {
+        "content": "<p>I'll check the outstanding PR from me is okay tomorrow or later today</p>",
+        "id": 301840361,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664640674
+    },
+    {
+        "content": "<p>Okay, I'm going to attempt to draft a release</p>",
+        "id": 301949504,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664726084
+    },
+    {
+        "content": "<p>I believe the process is something like this.</p>\n<ol>\n<li>Merge master into develop</li>\n<li>Merge develop into master</li>\n<li>Tag (annotated) master at 0.8.1</li>\n<li>Push branches and tags</li>\n<li>Github webui, draft a release</li>\n</ol>",
+        "id": 301949663,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664726213
+    },
+    {
+        "content": "<p>Idea from here:<br>\n<a href=\"https://stackoverflow.com/a/14168817/1162349\">https://stackoverflow.com/a/14168817/1162349</a></p>",
+        "id": 301951575,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664727313
+    },
+    {
+        "content": "<p>And indeed the first step shows a number of conflicts</p>",
+        "id": 301951632,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664727351
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Is there any reason we shouldn't be defaulting to develop content for this process?</p>",
+        "id": 301954260,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664729018
+    },
+    {
+        "content": "<p>develop has changed significantly from master, so I'm not surprised that merge would be an issue this go around</p>",
+        "id": 301954342,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664729056
+    },
+    {
+        "content": "<p>You might want to use the -Xours option if merging from master to develop, and -Xtheirs when merging develop back into master.</p>",
+        "id": 301954802,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664729375
+    },
+    {
+        "content": "<p>My recommendation for this particular case would be to just merge develop into master with the -Xtheirs option, and then make sure any conflicts are resolved such that master ends up looking like develop.  Going forward we might be able to do the proposed process, but after the earlier mess in master my guess is this first time it's probably not worthwhile to go master-&gt;develop.</p>",
+        "id": 301955268,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664729675
+    },
+    {
+        "content": "<p>There's irony, I just found -X ours, this makes it much easier</p>",
+        "id": 301959206,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664732417
+    },
+    {
+        "content": "<p>Let me test it out a little bit</p>",
+        "id": 301959243,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664732443
+    },
+    {
+        "content": "<p>The reason I wanted a merge commit on develop was to show a point easily in the history where the release was made... And testing it also allows directly no-FF update of master (tested with a locally created aux_master branch).  Next step I think is I push the merge develop commit - and manually run the workflow to check nothing was broken</p>",
+        "id": 301960089,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664733037
+    },
+    {
+        "content": "<p>I pushed a new branch with test_master_release, and manually triggered the workflows on this - something broke... Good job by me!  I guess it pays to be extra cautious like I was!</p>",
+        "id": 301960607,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664733477
+    },
+    {
+        "content": "<p>I'm going to guess like you suggested one of my merge commits was faulty</p>",
+        "id": 301960700,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664733532
+    },
+    {
+        "content": "<p>In fact it was the second merge I think... Checking now</p>",
+        "id": 301960868,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664733660
+    },
+    {
+        "content": "<p>The first merge seems to have ignored the strategy when resolving inside a file</p>",
+        "id": 301961626,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664734267
+    },
+    {
+        "content": "<p>The first merge should be -s ours reading the Man page... Now testing again</p>",
+        "id": 301963008,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664735386
+    },
+    {
+        "content": "<p>5/6 okay, waiting on macos</p>",
+        "id": 301966507,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664737939
+    },
+    {
+        "content": "<p>OK, all were successful.  Locally I've prepared everything now.  One final question before I push it.  The version number in develop is 0.9.1 in the CMakeLists.txt.  When I've merged develop into master locally I've amended the merge commit to set the version number to 0.8.1.  This prevents 0.9.1 ever appearing on master, and avoids odd version bump / unbump on develop.  Any objections to this?</p>",
+        "id": 301970027,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664740894
+    },
+    {
+        "content": "<p>None - that's fine.</p>",
+        "id": 301970139,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664740968
+    },
+    {
+        "content": "<p>Ok</p>",
+        "id": 301970689,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664741462
+    },
+    {
+        "content": "<p>I've pushed Tags and branches</p>",
+        "id": 301970943,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664741736
+    },
+    {
+        "content": "<p>I'll draft the release now and launch a workflow on master</p>",
+        "id": 301971001,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664741767
+    },
+    {
+        "content": "<p>Any ideas for a release title?</p>\n<p>I guess we can collectively edit the draft after I save it</p>",
+        "id": 301971166,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664741972
+    },
+    {
+        "content": "<p>Okay, if you go to the releases page you can edit</p>",
+        "id": 301972166,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664742902
+    },
+    {
+        "content": "<p><a href=\"https://github.com/stepcode/stepcode/releases\">https://github.com/stepcode/stepcode/releases</a></p>",
+        "id": 301972211,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664742950
+    },
+    {
+        "content": "<p>3/6 actions are complete</p>",
+        "id": 301972284,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664743002
+    },
+    {
+        "content": "<p>No reason to think they won't all be successful</p>",
+        "id": 301972301,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664743024
+    },
+    {
+        "content": "<p>Heh - BRL-CAD doesn't title releases - just versions them, so I'm afraid I don't have any clever ideas.</p>",
+        "id": 301974615,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664745276
+    },
+    {
+        "content": "<p>Let me take a quick look at the change set since 2014</p>",
+        "id": 301974729,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664745384
+    },
+    {
+        "content": "<p>Are we still supporting Python 2, or is it 3 only now?</p>",
+        "id": 301974858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664745511
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I took a quick run at it - feel free to adjust.</p>",
+        "id": 301975562,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664746217
+    },
+    {
+        "content": "<p>Once tagged, did you want to upload any binaries?  Personally I'm fine with a source only release, unless linux distros indicate they want binaries...</p>",
+        "id": 301975710,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664746421
+    },
+    {
+        "content": "<p>Looks good, I'm going to press the button!</p>",
+        "id": 301975768,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664746447
+    },
+    {
+        "content": "<p>Done, landmark moment</p>",
+        "id": 301975837,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664746533
+    },
+    {
+        "content": "<p>I'll get that version into BRL-CAD's upstream src/other - quite possibly the first time we'll be using a fully vanilla upstream of stepcode</p>",
+        "id": 301975913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664746636
+    },
+    {
+        "content": "<p>Looking forward to what comes next!</p>",
+        "id": 301976006,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664746727
+    },
+    {
+        "content": "<p>Great!</p>",
+        "id": 301976022,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664746764
+    },
+    {
+        "content": "<p>Good timing too - I'm working in Toulouse this week and next weekend I'm doing my possibly last backpacking trip of the year, before the ski season</p>",
+        "id": 301976143,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664746885
+    },
+    {
+        "content": "<p>Now that we're tagged, I'll put the pull request in for the header shuffle - hoping it will be fairly minimally impacting, but that will depend in part on how it might collide with your parser update work</p>",
+        "id": 301976418,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664747228
+    },
+    {
+        "content": "<p>It's main practical impact is that for client codes, they won't need to specify all the individual library includes just to make the stepcode headers work.  If they use prefixes like \"clstepcore/sdai.h\" in their includes, they'll be able to just include the top level stepcode header directory and have it \"just work\"</p>",
+        "id": 301976618,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664747432
+    },
+    {
+        "content": "<p>I'll try to rebase my parser work on top of it and see what type of issue it gives.  I note there are some failing tests in the PR, I didn't look deeper yet.  I imagine it's trivial</p>",
+        "id": 302155715,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1664834431
+    },
+    {
+        "content": "<p>Looks like a missing header and a problem on the BRL-CAD end with hard coding the stepcode version.  I think I've got those sorted - testing now.</p>",
+        "id": 302180836,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664849905
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Is the header adjustment pull request ready for merge on stepcode?  Also, curious if there's any update on the parser rewrite to get off of perplex/lemon?</p>",
+        "id": 343660347,
+        "sender_full_name": "starseeker",
+        "timestamp": 1679487773
+    },
+    {
+        "content": "<p>Also, would it be a good time to do a PR to get rid of libbase?</p>",
+        "id": 343660469,
+        "sender_full_name": "starseeker",
+        "timestamp": 1679487805
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> Unless there's a reason not to, I'd like to do a 0.8.2 patch release of stepcode so our latest release has the adjustments for newer compilers and the parallel build robustness fix.</p>",
+        "id": 388900339,
+        "sender_full_name": "starseeker",
+        "timestamp": 1693799016
+    },
+    {
+        "content": "<p>I'll create an annotated tag tonight, then the release notes can be drafted in GitHub</p>",
+        "id": 388922389,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1693811248
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> If you haven't tagged yet, I've got one more change I'd like to get in - I realized the FindPERPLEX/LEMON/RE2C scripts in stepcode are a fair bit older than the ones in the BRL-CAD repo, so I went ahead and shifted in the new ones.</p>",
+        "id": 389265483,
+        "sender_full_name": "starseeker",
+        "timestamp": 1693942053
+    },
+    {
+        "content": "<p>As it happens, I didn't do it yet.</p>",
+        "id": 389270340,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1693943954
+    },
+    {
+        "content": "<p>So all ok</p>",
+        "id": 389270351,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1693943963
+    },
+    {
+        "content": "<p>Thanks - I tried the update but hit an issue on Windows, so I've got more digging to do... I closed the first pull request, I'll update if/when I figure out what the issue is.</p>",
+        "id": 389270704,
+        "sender_full_name": "starseeker",
+        "timestamp": 1693944107
+    },
+    {
+        "content": "<p>Okay</p>",
+        "id": 389270790,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1693944130
+    },
+    {
+        "content": "<p>We can tag on Wednesday or Thursday</p>",
+        "id": 389270921,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1693944195
+    },
+    {
+        "content": "<p>Sounds good</p>",
+        "id": 389274100,
+        "sender_full_name": "starseeker",
+        "timestamp": 1693945510
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> if I don't have a pull request by Thursday, go ahead and tag</p>",
+        "id": 389305381,
+        "sender_full_name": "starseeker",
+        "timestamp": 1693959236
+    },
+    {
+        "content": "<p>Will do</p>",
+        "id": 389346207,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1693981357
+    },
+    {
+        "content": "<p>I forgot, and now I'm away until the 18th backpacking</p>",
+        "id": 389938410,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1694201518
+    },
+    {
+        "content": "<p>I'm back now!  (after work!)</p>",
+        "id": 391634670,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695022278
+    },
+    {
+        "content": "<p>I went ahead and added the tag, although I haven't set up the release yet.  Feel free to undo and redo if you prefer.</p>",
+        "id": 391709603,
+        "sender_full_name": "starseeker",
+        "timestamp": 1695046422
+    },
+    {
+        "content": "<p>okay, what you've done is not quite correct - here's why:</p>",
+        "id": 391777218,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695072121
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>chorler@localhost:~/projects/src/stepcode&gt; git for-each-ref refs/tags\ndf87e021276b4d28d792a89aba529d02b4018e4c commit refs/tags/v0.1\n9c2018e1cf1def5ee268459cdb42ac96151ad337 commit refs/tags/v0.2\n35cd701e5200020b21e078a027cbf00ad5bd82ed tag    refs/tags/v0.3\n88a1229a23e844b65d36b2a854a1079f27929a10 commit refs/tags/v0.4\n4d68ec0b19203960ca6df7df86301b906e89e0e9 commit refs/tags/v0.5\n698b9e0371d12978761cdc81289c6fb0ae67d276 commit refs/tags/v0.6\n21fd1ed1e4f158fe185820bb95271508051bc73f tag    refs/tags/v0.7\n953021ec9d3a2ea71cae9ff6bdf5d726e00bb35c commit refs/tags/v0.8\ne6b496412d72a0a1af1cbe7ec11f9c2d28044f8d tag    refs/tags/v0.8.1\n5cf8fc1a8907983365b233280f128566956713fa commit refs/tags/v0.8.2\nchorler@localhost:~/projects/src/stepcode&gt; git describe\nv0.8.1-27-g5cf8fc1a\nchorler@localhost:~/projects/src/stepcode&gt;\n</code></pre></div>",
+        "id": 391777357,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695072187
+    },
+    {
+        "content": "<p>you created a light-weight tag (a private or temporary tag)</p>",
+        "id": 391777562,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695072293
+    },
+    {
+        "content": "<p>this is why git describe doesn't consider it</p>",
+        "id": 391777591,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695072307
+    },
+    {
+        "content": "<p>I'll see if I can replace it</p>",
+        "id": 391777615,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695072318
+    },
+    {
+        "content": "<p>okay I've fixed it</p>",
+        "id": 391778898,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695072971
+    },
+    {
+        "content": "<p>if you git fetch, git pull, git describe - hopefully you should now see this in your local copy</p>",
+        "id": 391778945,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695073000
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>chorler@localhost:~/projects/src/stepcode&gt; git describe\nv0.8.2\nchorler@localhost:~/projects/src/stepcode&gt;\n</code></pre></div>",
+        "id": 391778983,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695073028
+    },
+    {
+        "content": "<p>I added initial draft release notes on github.  <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  it would be good if you could add a minimal example how compiler include flags are likely to differ -e.g. <code>-I/usr/include/stepcode</code></p>",
+        "id": 392849166,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695572957
+    },
+    {
+        "content": "<p>(release notes are draft - so feel free to edit)</p>",
+        "id": 392849185,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695572979
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"273836\">@Chris Horler</span> I added a brief explanation</p>",
+        "id": 392855832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1695578927
+    },
+    {
+        "content": "<p>Okay, I'll publish after work today</p>",
+        "id": 392918484,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695621893
+    },
+    {
+        "content": "<p>done - we have a new release 0.8.2!</p>",
+        "id": 393113923,
+        "sender_full_name": "Chris Horler",
+        "timestamp": 1695677176
+    }
+]

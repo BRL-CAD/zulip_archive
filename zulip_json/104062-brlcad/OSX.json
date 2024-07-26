@@ -1,0 +1,74 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  May be worth giving the Mac another shot.  The X framebuffer issue here doesn't immediately appear to be the Tk stubs - when force them into the Tk build MGED crashes on start, and the include line for gcc doesn't seem to be pulling it in.</p>",
+        "id": 195113680,
+        "sender_full_name": "starseeker",
+        "timestamp": 1587672847
+    },
+    {
+        "content": "<p>Hmm... I wonder if that xlib include was just cargo culted in by me or was needed on Windows</p>",
+        "id": 195119204,
+        "sender_full_name": "starseeker",
+        "timestamp": 1587675735
+    },
+    {
+        "content": "<p>itk definitely needs the x11 headers due to how it peeks into tk, so it would need them on windows</p>",
+        "id": 195119312,
+        "sender_full_name": "Sean",
+        "timestamp": 1587675802
+    },
+    {
+        "content": "<p>Yeah, X embedded framebuffer crashes with both system and local Tcl/Tk builds, even when I completely remove the src/other/tk source directory and build against system - don't see how it could be the xlib include dir.</p>",
+        "id": 195130304,
+        "sender_full_name": "starseeker",
+        "timestamp": 1587683217
+    },
+    {
+        "content": "<p>RELEASE build completed successfully with default cmake options, will try distcheck-full and report out if it fails.</p>",
+        "id": 195146998,
+        "sender_full_name": "Sean",
+        "timestamp": 1587704347
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/OSX/near/195130304\" title=\"#narrow/stream/104062-general/topic/OSX/near/195130304\">said</a>:</p>\n<blockquote>\n<p>Yeah, X embedded framebuffer crashes with both system and local Tcl/Tk builds, even when I completely remove the src/other/tk source directory and build against system - don't see how it could be the xlib include dir.</p>\n</blockquote>\n<p>Yeah, unlikely unless they're getting pulled from somewhere else.  Check otool -L and make sure wish and mged are linking the same libs</p>",
+        "id": 195147229,
+        "sender_full_name": "Sean",
+        "timestamp": 1587704662
+    },
+    {
+        "content": "<p>They are - MGED has more obviously, but all of wish's libs are present in the MGED linkages</p>",
+        "id": 195175836,
+        "sender_full_name": "starseeker",
+        "timestamp": 1587728381
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  are we still busted on the Mac?</p>",
+        "id": 195347179,
+        "sender_full_name": "starseeker",
+        "timestamp": 1587926808
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/OSX/near/195146998\" title=\"#narrow/stream/104062-general/topic/OSX/near/195146998\">said</a>:</p>\n<blockquote>\n<p>RELEASE build completed successfully with default cmake options, will try distcheck-full and report out if it fails.</p>\n</blockquote>\n<p>so looks like distcheck-enableall_release failed .. iges converter crashed.  that's a new on to me.  it's crashing after \"...running ../bin/g-iges -o iges.import3.export.iges iges.import3.g box.nmg\" (and reporting db_lookup(box.nmg) failed: box.nmg does not exist), followed by \"... running diff -I G iges.export.iges iges.import.export.iges\" and<br>\n\"... running ../bin/g-iges -f -o iges.m35.r516.iges iges.m35.g r516\" &lt;-- which is the one that crashed</p>",
+        "id": 195379933,
+        "sender_full_name": "Sean",
+        "timestamp": 1587971634
+    },
+    {
+        "content": "<p>O.o  I didn't realize anything had changed recently with the iges converter...  are you able to slap a debugger on it?</p>",
+        "id": 195421055,
+        "sender_full_name": "starseeker",
+        "timestamp": 1587996068
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> what were you wanting to do about this for the 7.30.8 release?</p>",
+        "id": 195747599,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588183228
+    },
+    {
+        "content": "<p>Let me see what the backtrace looks like</p>",
+        "id": 195747890,
+        "sender_full_name": "Sean",
+        "timestamp": 1588183381
+    }
+]

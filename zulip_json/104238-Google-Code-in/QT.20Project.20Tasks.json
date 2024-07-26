@@ -1,0 +1,878 @@
+[
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-email=\"brlcad@mac.com\" data-user-id=\"102902\">@Sean</span> , is there a reason why I can't get CMake to find the brlcad libraries? I've been at this for a while now and can't get it to work. </p>\n<div class=\"codehilite\"><pre><span></span>cmake_minimum_required(VERSION 2.8)\n\n# Project name: V1(BRL-CAD-QTGUI)\nproject(BRL-CAD-QTGUI)\n\n# Find includes in corresponding build directories\nset(CMAKE_INCLUDE_CURRENT_DIR ON)\n\n# Instruct CMake to run moc automatically when needed\nset(CMAKE_AUTOMOC ON)\n\n# Find the QtWidgets library\nfind_package(Qt5Widgets)\n\n# Find BRLCAD library\nfind_library(brlcadlib brlcad)\n\n# include our .h files located in /include\ninclude_directories(include)\n\n# Find all source files located in /src\nfile(GLOB SOURCES &quot;src/*.cpp&quot;)\n\n# Tell CMake to create the executable\n# TIP: ${SOURCES&gt; are all the .cpp files\n# TIP: Listing all include files is not necessary but\n# will enable a preview for your IDE\nadd_executable(${PROJECT_NAME}\n    ${SOURCES}\n    include/window.h\n    include/splashscreen.h\n    )\n\n# Tell CMake to use the QT 5 Widget module as an external library\ntarget_link_libraries(${PROJECT_NAME}\n    Qt5::Widgets\n    ${brlcadlib})\n</pre></div>\n\n\n<p>Errors : </p>\n<div class=\"codehilite\"><pre><span></span>CMake Error: The following variables are used in this project, but they are set to NOTFOUND.\n</pre></div>",
+        "id": 119194782,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512141612
+    },
+    {
+        "content": "<blockquote>\n<p>Hey <span class=\"user-mention\" data-user-email=\"brlcad@mac.com\" data-user-id=\"102902\">@Sean</span> , is there a reason why I can't get CMake to find the brlcad libraries? I've been at this for a while now and can't get it to work. </p>\n<p># Find BRLCAD library<br>\nfind_library(brlcadlib brlcad)</p>\n</blockquote>\n<p>You probably should use find_package(brlcad) ... I'm not sure about brlcadlib</p>",
+        "id": 119194909,
+        "sender_full_name": "Sean",
+        "timestamp": 1512141871
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> check the CMakeFiles/CMakeError.log to see what's failing</p>",
+        "id": 119194950,
+        "sender_full_name": "Sean",
+        "timestamp": 1512141960
+    },
+    {
+        "content": "<p>you can also totally punt and just manually add BRL-CAD's include directories and libraries to the link line if you need to</p>",
+        "id": 119195061,
+        "sender_full_name": "Sean",
+        "timestamp": 1512142089
+    },
+    {
+        "content": "<p>I've tried the find_package method before and it ends up failing at:<br>\nLinking CXX executable BRL-CAD-QTGUI.exe [33%] <br>\nbecause it can't find -lbrlcad.</p>",
+        "id": 119195065,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512142119
+    },
+    {
+        "content": "<p>That would suck if I chose to expand on this project :\\</p>",
+        "id": 119195079,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512142159
+    },
+    {
+        "content": "<p>Mahdi, can you link me to your task?</p>",
+        "id": 119195136,
+        "sender_full_name": "Sean",
+        "timestamp": 1512142213
+    },
+    {
+        "content": "<p>I'm currently having another task reviewed but I'm looking at BRL-CAD Alternative GUI 2: Hook in a BRL-CAD Library</p>",
+        "id": 119195163,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512142287
+    },
+    {
+        "content": "<p>The whole task is about finding out how to include an external library with CMake.</p>",
+        "id": 119195322,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512142559
+    },
+    {
+        "content": "<p>That's why I hesitate to tell you the answer. You have somehow to add an import library with CMake. Asking Google should be helpful, or the CMake manual.</p>",
+        "id": 119195513,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512142860
+    },
+    {
+        "content": "<p>BTW, there is more than one solution, even one with only minimal changes to the CMakeLists.txt.</p>",
+        "id": 119195771,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512143310
+    },
+    {
+        "content": "<p>ah, my bad <span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> that's why I wanted to know which task -- so yeah... figure it out ;)</p>",
+        "id": 119196115,
+        "sender_full_name": "Sean",
+        "timestamp": 1512143863
+    },
+    {
+        "content": "<p>Ah, fair enough ;)</p>",
+        "id": 119196837,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512144745
+    },
+    {
+        "content": "<p>If you get stuck I'll provide you with some more help, but first you should do some own investigations.</p>",
+        "id": 119197029,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512145074
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> , I've been looking around and I still can't figure out what I'm doing wrong. It's probably something really obvious and I'm just missing it. Could you perhaps point me in the right direction? Like, a clue or hint that wouldn't take away from the integrity of the task but would still allow me to progress. Currently I'm getting this error: </p>\n<div class=\"codehilite\"><pre><span></span>CMakeFiles\\BRL-CAD-QTGUI.dir/objects.a(window.cpp.obj):window.cpp:(.text+0xba): undefined reference to `BRLCAD::ConstDatabase::ConstDatabase()&#39;\n</pre></div>\n\n\n<p>Which is probably an issue with the linker. </p>\n<div class=\"codehilite\"><pre><span></span>target_link_libraries(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/libs/brlcad.lib)\n</pre></div>\n\n\n<p>Could I receive some guidance on how to go about completing this?</p>",
+        "id": 119200690,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512150587
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> I'm not sure how your project looks like. However, including the BRL-CAD library in target_link_libraries() is right. But, you should use it this way:  <code>target_link_libraries(${PROJECT_NAME} brlcad)</code><br>\nThen, there is another CMake command which allows you to specify the directory where it should search for the lib.</p>",
+        "id": 119205857,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512157777
+    },
+    {
+        "content": "<p>My project is sectioned like so: <br>\nBin <br>\n- brlcad.dll<br>\ndb<br>\n- *.g files <br>\ndoc <br>\n- doc files<br>\ninclude <br>\n- brlcad<br>\n   - *.h files <br>\n- QT *.h files <br>\nlib <br>\n- brlcad.lib<br>\nsrc <br>\n- *.cpp files <br>\nCMakeLists</p>",
+        "id": 119208715,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512162253
+    },
+    {
+        "content": "<p>I've tried using find_package, find_library, link_directories, etc...</p>",
+        "id": 119208825,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512162470
+    },
+    {
+        "content": "<p><code>link_directories(lib)</code> should do it, or?</p>",
+        "id": 119208956,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512162644
+    },
+    {
+        "content": "<p>I receive a series of \"undefined reference\" errors through that method.</p>",
+        "id": 119209036,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512162785
+    },
+    {
+        "content": "<p>Can you upload a zip file with your project to the task?</p>",
+        "id": 119209331,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512163203
+    },
+    {
+        "content": "<p>I sent it</p>",
+        "id": 119209413,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512163353
+    },
+    {
+        "content": "<p>And you are working with MS Visual Studio? And your compiler and the DLL have the \"same number of bits\"?</p>",
+        "id": 119209666,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512163743
+    },
+    {
+        "content": "<p>I'm using the MinGW Compiler with QT Creator. I've chosen the 32 bit version of the DLL as MinGW is 32 bit aswell</p>",
+        "id": 119209746,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512163835
+    },
+    {
+        "content": "<p>OK, that's the reason: The handling of C++ is different between Visual Studio and MinGW. They aren't binary compatible. The DLL works only with Visual Studio or other Microsoft compatible compilers.</p>",
+        "id": 119209840,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512163972
+    },
+    {
+        "content": "<p>Now, you could whether use Visual Studio (like you did with PrintTitle,) or build and use the brlcad C++ core interface (which is in principle the same as the brlcad.dll). See the \"Build the <a href=\"http://libbrlcad.so\" target=\"_blank\" title=\"http://libbrlcad.so\">libbrlcad.so</a>\" task. You may want to do this first.</p>",
+        "id": 119209973,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512164175
+    },
+    {
+        "content": "<p>What exactly does \"core interface\" mean? Is it just the source files that were used to create the .dll?</p>",
+        "id": 119210105,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512164464
+    },
+    {
+        "content": "<p>It's an C++ interface layer on top of the BRL-CAD core libraries. And yes, these are the source files which create the DLL, together with the usual BRL-CAD core libraries around librt.</p>",
+        "id": 119210178,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512164573
+    },
+    {
+        "content": "<p>The library with this interface layer can be created on every BRL-CAD OS (e.g. Windows, Linux, FreeBSD, MacOS). For MS Visual Studio there is a compiled compact library, the brlcad.dll. For other environments you have to build it by yourself.</p>",
+        "id": 119210315,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512164764
+    },
+    {
+        "content": "<p>Thanks, I've learned a lot today! Which path would you personally recommend? Should I transfer my work to visual studio or use the core interface?</p>",
+        "id": 119210319,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512164768
+    },
+    {
+        "content": "<p>Well, do you work with Windows? If I remember right, Visual Studio was the only compiler which was able to build BRL-CAD on Windows. Therefore, it could be hard (but maybe not impossible) to build the brlcad.dll with MingW. However, you could try it - it's only the one DLL but not the whole BRL-CAD.<br>\nOn the other side, if you can build Qt programs with Visual Studio too...</p>",
+        "id": 119210500,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512165105
+    },
+    {
+        "content": "<p>The main incentive for using QT Creator was how light weight and specialized the IDE was but I suppose it won't be too hard to transition to Visual Studio. Also, I have a linux and ms workstation but I would prefer to keep gui related files on microsoft. I'll take a look at using Visual Studio :P</p>",
+        "id": 119210774,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512165546
+    },
+    {
+        "content": "<p>You could still use the Qt Creator for the layout, but then compile the program with Visual Studio.</p>",
+        "id": 119211117,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512166026
+    },
+    {
+        "content": "<p>That's actually what I was just working except I'm running in to even more issues. Have you ever been able to use the visual studio compiler with qt creator?</p>",
+        "id": 119211255,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512166255
+    },
+    {
+        "content": "<p>I build the Qt Creator with Visual Studio because I build my whole Qt with it, but I've never used the Creator. It's not my way of programming ;)</p>",
+        "id": 119211324,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512166403
+    },
+    {
+        "content": "<p>;) fair enough. How would I go about integrating my old CMake with visual studio? With QT Creator it allowed me to autorun it with a defined configuration -- can I do that with visual studio? I guess I'm just wondering how to port everything over as smoothly as possible.</p>",
+        "id": 119211519,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512166785
+    },
+    {
+        "content": "<p>Update: Everything is good now.</p>",
+        "id": 119217767,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512179100
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> That's good to hear. I've just commented your work. There happened probable a mistake when you uploaded the source code.</p>",
+        "id": 119240797,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512233532
+    },
+    {
+        "content": "<p>To give you an idea where this could lead to: <a href=\"https://univemo.iabg.de/Download/BrlCadViewer30_setup.exe\" target=\"_blank\" title=\"https://univemo.iabg.de/Download/BrlCadViewer30_setup.exe\">https://univemo.iabg.de/Download/BrlCadViewer30_setup.exe</a><br>\nBut this isn't the only application we think of.</p>",
+        "id": 119243041,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512238402
+    },
+    {
+        "content": "<p>Do some tasks disappear after a certain number of completions?</p>",
+        "id": 119243502,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512239333
+    },
+    {
+        "content": "<p>Yes. Every task has a maximum number of instances. Are you looking for a special one?</p>",
+        "id": 119243569,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512239457
+    },
+    {
+        "content": "<p>I was just about to do the Splash Screen one since I wanted to implement it for the QT Projects. Unfortunately it was removed moments after my last task was completed.</p>",
+        "id": 119243621,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512239548
+    },
+    {
+        "content": "<p>Also, given the repetitive nature of some tasks, is there some mechanism which prevents a competitor from saving tasks from previous years and handing them in?</p>",
+        "id": 119243681,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512239675
+    },
+    {
+        "content": "<p>I increased the number of splash screen task instances. You could choose it now if you want.</p>",
+        "id": 119244012,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512240390
+    },
+    {
+        "content": "<p>Thanks!</p>",
+        "id": 119244025,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512240445
+    },
+    {
+        "content": "<p>Hey, so I'm on QT Task #4 and was wondering what kind of information we have to display after selecting an element? So far I've built the gui to view the database and nodes but as I'm not familiar with BRL-CAD I'm not quite sure what else it needs me to look for. Any tips?</p>",
+        "id": 119283329,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512334064
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> Is there any documentation for the Core Interface?</p>",
+        "id": 119283774,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512334884
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> You could look at <a href=\"https://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface\" target=\"_blank\" title=\"https://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface\">https://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface</a><br>\nThe source code is (e.g.) at <a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/rt%5E3/trunk/include/brlcad/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/rt%5E3/trunk/include/brlcad/\">https://sourceforge.net/p/brlcad/code/HEAD/tree/rt%5E3/trunk/include/brlcad/</a> and <a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/rt%5E3/trunk/src/coreInterface/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/rt%5E3/trunk/src/coreInterface/\">https://sourceforge.net/p/brlcad/code/HEAD/tree/rt%5E3/trunk/src/coreInterface/</a></p>",
+        "id": 119284521,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512336547
+    },
+    {
+        "content": "<p>Thank you!</p>",
+        "id": 119284524,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512336593
+    },
+    {
+        "content": "<p>Maybe you want to \"Learn basic 3D modeling using BRL-CAD...\" before continuing programming it?</p>",
+        "id": 119284577,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512336658
+    },
+    {
+        "content": "<p>Hm, that's probably a good idea. I'll put the project on hold for now.</p>",
+        "id": 119284626,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512336788
+    },
+    {
+        "content": "<p>Just out of curiosity: Why did some of the mentors, such as yourself, decide to work on BRL-CAD?</p>",
+        "id": 119284766,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512337105
+    },
+    {
+        "content": "<p>Just figured out <code>CMake</code> is actually easier than <code>make</code>.<br>\nI think <code>CMake</code> is the best choice for large projects.</p>\n<p>But <code>make</code> is still better for small projects with just a few source files and headers.</p>",
+        "id": 119286593,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512341219
+    },
+    {
+        "content": "<blockquote>\n<p>Just out of curiosity: Why did some of the mentors, such as yourself, decide to work on BRL-CAD?</p>\n</blockquote>\n<p>What a great question.</p>",
+        "id": 119293866,
+        "sender_full_name": "Sean",
+        "timestamp": 1512358297
+    },
+    {
+        "content": "<p>Without getting too philowaxical, I believe solid modeling CAD tools are in their infancy, mired in an entrenched overpricing, and the best way to revolutionize that industry is via Open Source.  To me, BRL-CAD is not yet up to the task of implementing all the complexity required, but it's the best foundation, an amazing codebase, and a great community.</p>",
+        "id": 119294900,
+        "sender_full_name": "Sean",
+        "timestamp": 1512360854
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> : If a Qt GUI will become part of a BRL-CAD distribution it will be linked to Qt 5. We won't build on an old/outdated version.</p>\n</blockquote>\n<p>I did this Qt 4 because it was already installed on my system. I'll use a new version for other tasks.</p>",
+        "id": 119312345,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512397631
+    },
+    {
+        "content": "<p>Your main.cpp should compile with Qt 5 as well.  I.e., you haven't missed something.</p>",
+        "id": 119313235,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512399047
+    },
+    {
+        "content": "<p>So I just have to update the CMake file.</p>",
+        "id": 119317522,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512405439
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> Do you know of a good way to structure the keys &amp; values of a map into a tree?</p>",
+        "id": 119379002,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512516232
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> Do you mean something like QTreeView?</p>",
+        "id": 119392659,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512546832
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> Are there plans for more QT tasks? I remember Sean saying there were going to be more as the Code-In progresses.</p>",
+        "id": 119418501,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512592376
+    },
+    {
+        "content": "<p>Yes.</p>",
+        "id": 119420096,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512594900
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> Please don't use OpenGL. It has never worked for me, and wouldn't provide any benefit here.</p>",
+        "id": 119438407,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512632617
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> Well, I know QString is part of Qt(All begins with a Q), CoreInterface know nothing about it (Why it should?).  OpenFileDIalog returns the file's location as a QString. I have to parse it to load function which requires a char* , I had no idea how to do that,<br>\nI first  used <code>ByteArray</code> to solve this, So I had that comment to describe what I am doing, And then I discorverd <code>c_str()</code>, It made it a lot easier<br>\nI deleted the <code>ByteArray</code> code but kept the comment there. I didn't even knew CoreInterface is in C++, I just thought it was in C like BRL-CAD itself.</p>",
+        "id": 119512192,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512768960
+    },
+    {
+        "content": "<p>BTW It's a really fun task, At first it was very hard. But after working in it for a while, It became so easy. (Maybe because this is my first QT5 application).</p>",
+        "id": 119512257,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512769071
+    },
+    {
+        "content": "<p><strong>pass</strong> not <em>parse</em></p>",
+        "id": 119513399,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512770953
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"abdullah.umar.naseef@gmail.com\" data-user-id=\"104241\">@Naseef</span> The translation of a QString (Unicode) to ab byte sequence can indeed be an issue. This is usually be done by selecting explicitly a conversion with one of the to~() methods. They return usually a buffer which manages the memory of the converted string. That's why you see often these QByteArray there. It's mainly a character array with methods which take care of its memory.<br>\nTherefore, <code>filename.toLocal8Bit().data()</code> or <code>filename.toUtf8().data()</code> could be what you want.</p>",
+        "id": 119544677,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512843337
+    },
+    {
+        "content": "<p>How I plan to proceed with the \"BRL-CAD alternative GUI\" etc. tasks:<br>\nOne direction is to implement more visualization features in the Qt GUI.  These could be zooming, moving, and rotating the view and selecting the elements to display from a tree.  Before I make these tasks, I want to see however how you are doing the \"BRL-CAD Alternative GUI 6: Draw a Ray-Trace\". I want to adjust the tasks descriptions accordingly.</p>\n<p>The other direction is the (Lua) scripting. Michal came up with the idea to have an interface similar to OpenSCAD: A scripting window where you can edit a text which describes the geometry and a viewing window where you can see the scripted geometry.<br>\nThis scripting could be possibly done with the BRL-CAD ASCII file description, with the shortfall of the absence of the usual scripting elements (variables, operators, loops, ...), or TCL, which is a mighty programming language and not easy to deploy (if you want to do it right). That's why I want to do an experiment with Lua. This is a small scripting language, not so powerful as TCL, but possibly with exactly the features we need for this kind of project.<br>\nSo, watch out for \"Lua\" tasks there. Integrating BRL-CAD in Lua requires a steep learning curve, but after implementing the first few functions you'll see that it becomes mostly copy-n-paste. I plan to divide the tasks there in two steps: Implementing a new feature and testing it. This gives you the possibility to rethink your implementations and fix bugs if there are one.</p>\n<p>Any comments?</p>",
+        "id": 119547304,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512849424
+    },
+    {
+        "content": "<p>Why lua?</p>",
+        "id": 119547347,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512849524
+    },
+    {
+        "content": "<p>Okay, So after some googling, Lua looks like the perfect option. It's lightweight, fast, MIT licensed. So yeah, Why not?</p>",
+        "id": 119547454,
+        "sender_full_name": "Naseef",
+        "timestamp": 1512849757
+    },
+    {
+        "content": "<p>To be honest, this isn't my first Lua binding project. That's why Lua was a natural option for me.<br>\nAnd, see it as an experiment: How far can we go during this GCi?</p>",
+        "id": 119548425,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512852071
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"brlcad@mac.com\" data-user-id=\"102902\">@Sean</span>  <span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span> am I not supposed to use OpenGL with QT? I'm so confused about the task... I understand that I have to create a raytrace but there are many ways that could be achieved. I was told that I had to use OpenGL but then told not to... what exactly do I have to use?</p>",
+        "id": 119578531,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512925572
+    },
+    {
+        "content": "<p>For this task a simple 2D widged will do it. A ray-traced image is a simple 2D bitmap.</p>",
+        "id": 119578793,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512926266
+    },
+    {
+        "content": "<p>Would I fail if I used a 3D widget?</p>",
+        "id": 119578839,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512926375
+    },
+    {
+        "content": "<p>It wouldn't mean a fail but I wouldn't use it in the future because OpenGL causes to much trouble for me. It's simple an unnecessary overhead here.</p>",
+        "id": 119579051,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512926846
+    },
+    {
+        "content": "<p>I've dedicated so much time trying to learn it so that's a bit disappointing.</p>",
+        "id": 119579153,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512927080
+    },
+    {
+        "content": "<p>What did Sean mean by using the OpenGL widgets then?</p>",
+        "id": 119579200,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512927198
+    },
+    {
+        "content": "<p>Did I just misinterpret him?</p>",
+        "id": 119579202,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512927206
+    },
+    {
+        "content": "<p>I commented it here already on December 7th. I.e. this isn't new.</p>",
+        "id": 119579204,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512927224
+    },
+    {
+        "content": "<p>Sean loves OpenGL. Maybe he has a computer where it works.</p>",
+        "id": 119579246,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512927275
+    },
+    {
+        "content": "<p>hehe</p>",
+        "id": 119579247,
+        "sender_full_name": "Sean",
+        "timestamp": 1512927288
+    },
+    {
+        "content": "<p>wasn't clear to me which the task intended -- I apparently assumed incorrectly</p>",
+        "id": 119579255,
+        "sender_full_name": "Sean",
+        "timestamp": 1512927325
+    },
+    {
+        "content": "<p>ah...</p>",
+        "id": 119579325,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512927459
+    },
+    {
+        "content": "<p>lol there goes 3 days worth of code</p>",
+        "id": 119579376,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512927551
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span>  Don't be sorry. Now, you may know more about OpenGL than I do. I've fixed some bugs in OpenGL code over the years but never wrote something from scratch.</p>\n<p>My first contact with OpenGL was a rotating cube. It needed some seconds for every step in the rotation (Pentium 90, probable no support by the graphics driver). Now, my new computer has a recent Nvidia graphic card and OpenGL windows on Linux are broken. The driver is known to be not perfect. Similar on another Linux machine. If I activate the desktop effects there some texts are illegible.<br>\nAnd, I've more such stories ...</p>",
+        "id": 119580510,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512930204
+    },
+    {
+        "content": "<p>But nevertheless the task description of GUI 5 is unclear written. Maybe I should precise it to 2D drawing area.</p>\n<p>BTW, using an acceleration structure would be very useful here, at least in the future: Draw to an image and flash this to the widged. This way there isn't another ray-trace necessary when the program window want's a refresh. But this isn't required for this task - maybe this is something for an own task.</p>",
+        "id": 119580709,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512930647
+    },
+    {
+        "content": "<p>Reviewing the extensions of 2D graphics with QT I stumbled upon a new module called QT3D which attempts to provide a high-level option for 3D graphics. I believe we could use this new technology to take advantage of the accelerated graphics of OpenGL without having to get our hands dirty by coding it. Do you think this might be an alternative to the 2D task? It might be a lot more maintainable as QT is moving towards QML and we may need to futureproof.</p>",
+        "id": 119580994,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512931404
+    },
+    {
+        "content": "<p>QT3D has frameworks for c++ and qml so that might be advantageous</p>",
+        "id": 119580995,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512931431
+    },
+    {
+        "content": "<p>If you have 3D data to display this could be a good abstraction layer which hides the OpenGL, Direct 3D, ... behind.</p>\n<p>However, the goal is here to create a 2D image. I'm afraid that this won't become easier with QT3D.</p>",
+        "id": 119581401,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512932387
+    },
+    {
+        "content": "<p>aren't the QT tasks supposed to be about rendering 3D graphics? Similar to what Archer does?</p>",
+        "id": 119581476,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512932476
+    },
+    {
+        "content": "<p>Yes, but the rendered image is 2D. It's a picture.</p>",
+        "id": 119581539,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512932620
+    },
+    {
+        "content": "<p>Another situation would be with the wireframe representation. But I'm afraid that this would go to far for this GCi.</p>",
+        "id": 119581594,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512932753
+    },
+    {
+        "content": "<p>But if we render it in 3D and then calculate the pixel values to create a 2D representation with pixmap it would work, right?</p>",
+        "id": 119581633,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512932781
+    },
+    {
+        "content": "<p>I would love to tackle the challenge if you considered breaking it down into smaller tasks: like getting qt3d setup, simple image rendering, etc... and then eventually reaching more advanced low-level methods.</p>",
+        "id": 119581678,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512932891
+    },
+    {
+        "content": "<p>Ah, I think you don't know what \"render\" means.</p>",
+        "id": 119581681,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512932926
+    },
+    {
+        "content": "<p>Sorry I wasn't referring to it in a graphical context I just meant a general render</p>",
+        "id": 119581691,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512932967
+    },
+    {
+        "content": "<p>as in just displaying it visually</p>",
+        "id": 119581693,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512932980
+    },
+    {
+        "content": "<p>It's already broken in small parts. GUI 5 requires you to add a QtView (I have no Qt manual at hand to check this), which is trivial, and a function for coordinate transformation.</p>",
+        "id": 119581750,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512933085
+    },
+    {
+        "content": "<p>Oh I see I was just suggesting qt3d as a new task sequence</p>",
+        "id": 119581795,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512933166
+    },
+    {
+        "content": "<p>With the GUI 5 it's just a graphicsscene, graphicsview, and then simple conversion of coordinates. I was just thinking about it and thought the QT3D might make for some fun tasks so that's why I suggested it</p>",
+        "id": 119581843,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512933258
+    },
+    {
+        "content": "<p>Then, in GUI 6, you should create a ray-traced image in this widged. I.e. in GUI 5 you don't need to draw anything.</p>\n<p>The result of the ray-tracing in GUI 6  should look similar to the result of rt in the frame buffer.</p>",
+        "id": 119581848,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512933300
+    },
+    {
+        "content": "<p>There's no drawing in GUI 5?</p>",
+        "id": 119581860,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512933344
+    },
+    {
+        "content": "<p>No, only the widged and a function. I tried to make the tasks small <span class=\"emoji emoji-1f609\" title=\"wink\">:wink:</span><br>\nSuch that you can do a lot of them.</p>",
+        "id": 119581951,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512933496
+    },
+    {
+        "content": "<p>That's probably for the best :) Do you think you'll consider adding a QT3D task for GUI 7 or whatever?</p>",
+        "id": 119582002,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512933606
+    },
+    {
+        "content": "<p>I haven't planned it yet. I want to make more for the Lua binding.<br>\n3D would only make sense with the wireframe representation where I haven't prepared anything yet.</p>",
+        "id": 119582118,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512933887
+    },
+    {
+        "content": "<p>Thinking about it would require some time.</p>",
+        "id": 119582127,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512933925
+    },
+    {
+        "content": "<p>Hold up, if the task isn't to create a wire frame what coordinates am I converting? The bounding box? I think I keep over thinking this</p>",
+        "id": 119584859,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512940214
+    },
+    {
+        "content": "<p>Or is it the object coordinates</p>",
+        "id": 119585062,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512940682
+    },
+    {
+        "content": "<p>The image is like a projection of the 3D model. A 2D coordinate from the image plane corresponds to a 3D line in the model space. The directions of all these lines are the same.</p>\n<p>To make it easier you can choose any fixed projection you like. It would be a future task to let the user choose one.</p>",
+        "id": 119585193,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512940993
+    },
+    {
+        "content": "<p>I sort of get how to display the coordinates as an image but what I don't get is how to actually obtain the model coordinates. Say someone decides to choose demonstrations/ant</p>",
+        "id": 119585395,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512941516
+    },
+    {
+        "content": "<p>How would you get the coordinates of the ant? I get how you can get the boundingbox and other attributes like region, color, etc but how do you get the individual coordinates forming the object?</p>",
+        "id": 119585443,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512941622
+    },
+    {
+        "content": "<p>Ah, nvm we have to get the coordinates from the hit/miss -- I see now.</p>",
+        "id": 119586330,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1512943752
+    },
+    {
+        "content": "<blockquote>\n<p>ah...</p>\n</blockquote>\n<p>not necessarily -- there are other tasks that are very explicitly qt-opengl so if you did work there, feel free to claim those tasks and get credit for the work.  it should requires minimal effort on your part.  I believe you can find the tasks if you search on qt or possibly opengl as keywords.</p>",
+        "id": 119601068,
+        "sender_full_name": "Sean",
+        "timestamp": 1512973997
+    },
+    {
+        "content": "<blockquote>\n<p>Ah, nvm we have to get the coordinates from the hit/miss -- I see now.</p>\n</blockquote>\n<p>Not really. The goal is to create a ray-trace image. I.e., you have a 2D array which entries are called pixel and want to know the color of each of it. The colours of the pixels are determined by a kind of \"what you see when you project the model viewing plane\". The projection goes from your eye \"through\" the model on the projection plane. And for the moment, we can assume that all these projection rays are parallel.</p>\n<p>Furthermore, GUI 5 doesn't tell you which projection you shall choose. It's your decision, so take an easy one as the projection on the (x-y) ground plane. Then, your rays are (0, 0, -1) and you only have to determine their start points.</p>\n<p>BTW, QWidged is all you need from Qt to have something where you can draw at.</p>",
+        "id": 119605523,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1512983145
+    },
+    {
+        "content": "<p>I just can't seem to get how you obtain any type of coordinate information from the Object class ;|</p>",
+        "id": 119633784,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513025081
+    },
+    {
+        "content": "<p>You don't need to.</p>",
+        "id": 119633863,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513025215
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/kpP-N_vl_dB0xWdbh5Q6ZBd9/projperspective.gif\" target=\"_blank\" title=\"projperspective.gif\">projperspective.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/kpP-N_vl_dB0xWdbh5Q6ZBd9/projperspective.gif\" target=\"_blank\" title=\"projperspective.gif\"><img src=\"/user_uploads/1549/kpP-N_vl_dB0xWdbh5Q6ZBd9/projperspective.gif\"></a></div>",
+        "id": 119641399,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513037764
+    },
+    {
+        "content": "<p>Something like this?</p>",
+        "id": 119641405,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513037790
+    },
+    {
+        "content": "<p>Not really. First, I would recommend to use a parallel projection. It's easier to start with.</p>\n<p>Then you need to understand how the image generation works. If we talk about a projection one could think of taking a point from the model and searching its image on the projection surface. Unfortunately, it doesn't work this way. Doing so e.g. it would be hard to ensure that every pixel of the drawing surface is covered once.</p>\n<p>It works rather the other way round. You take a pixel from the drawing surface and ask: Which colour has it? I.e., searching for a function like Colour(x, y). (STOP! This is not the function GUI 5 ask for.) So, how do you get the colour of a pixel? The geometry is somehow floating above the projection surface, and from the projection you get a line starting from the pixel through the geometry. In case of a parallel projection all these lines are parallel, i.e. have the same direction. Now, lines, ray-trace, do you see where this will lead to?</p>",
+        "id": 119655005,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513066750
+    },
+    {
+        "content": "<p>So the raytrace would be something like: <br>\nfor each pixel {<br>\nshoot ray <br>\nget level of light in that pixel <br>\nproject pixel onto an image<br>\n}</p>",
+        "id": 119665505,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513090035
+    },
+    {
+        "content": "<p>I'm still unsure of what coordinates the task refers to</p>",
+        "id": 119665616,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513090274
+    },
+    {
+        "content": "<p>Would you get the shape formed by the boundingbox and shoot rays inside its area?</p>",
+        "id": 119665657,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513090347
+    },
+    {
+        "content": "<p>You are getting closer.<br>\nFor every pixel you shoot a ray. This ray hits some component which has a colour which you can assign to the pixel.</p>\n<p>Now you need a function which gives you for each pixel a ray. With parallel projection the direction of the rays is always the same. Left the ray start points.</p>\n<p>BTW, there is no \"project pixel onto an image\". The pixel IS in the image. The image is build from pixels.</p>",
+        "id": 119666004,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513090929
+    },
+    {
+        "content": "<p>Hm, so by setting up a camera which can be transformed or just manually inputting a direction value for the ray you can get different raytraces</p>",
+        "id": 119666345,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513091435
+    },
+    {
+        "content": "<p>So you need a ray origin and direction, right</p>",
+        "id": 119666447,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513091627
+    },
+    {
+        "content": "<p>Exactly. But for GUI 5 it is even easier: You can have a fixed projection (direction) here. No user interaction is required here. The only issue you have to take care for is that the geometry (enclosing box) fits somehow well on the drawing area (QWidged).</p>",
+        "id": 119666517,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513091710
+    },
+    {
+        "content": "<p>To debug this and get this working is GUI 6.</p>",
+        "id": 119666589,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513091801
+    },
+    {
+        "content": "<p>So in the end GUI 5 just has to do with the box formed by the min and max bounding?</p>",
+        "id": 119666597,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513091812
+    },
+    {
+        "content": "<p>In principle yes.<br>\nThe ray direction can be a hard coded one.</p>",
+        "id": 119666618,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513091857
+    },
+    {
+        "content": "<p>I can't believe I've spent an entire week on just that ...</p>",
+        "id": 119666659,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513091885
+    },
+    {
+        "content": "<p>I would recommend to use rays along a coordinate axis.</p>",
+        "id": 119666663,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513091891
+    },
+    {
+        "content": "<p>This task seems to be much more about understanding how 3D geometry, projection, and ray-trace works than I thought.</p>",
+        "id": 119666690,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513091974
+    },
+    {
+        "content": "<p>If it consoles you: You are the first student who went into these regions <span class=\"emoji emoji-1f642\" title=\"simple smile\">:simple_smile:</span></p>",
+        "id": 119666787,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513092117
+    },
+    {
+        "content": "<p>I woke up this morning adamant that I was too dumb for these tasks and should just give up. That really gives me some comfort</p>",
+        "id": 119666859,
+        "sender_full_name": "Mahdi",
+        "timestamp": 1513092234
+    },
+    {
+        "content": "<p>No need to be feel bad. You are outstanding. And, I plan to put your work in our repository, well in the experimental rt^3 branch first.</p>",
+        "id": 119667106,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513092523
+    },
+    {
+        "content": "<p>And, when you are stuck again keep talking with the mentors.</p>",
+        "id": 119667138,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513092568
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-email=\"danielmrossberg@gmail.com\" data-user-id=\"102939\">@Daniel Rossberg</span>. May I have a hint for QT task 4,  what is meant by \"element extends\" and how to get them? I can list all the top level elements in Qt window and read their attributes from *.g database (mostly rgb colors) but I could not find any readable dimensions in it. Shall I convert it to ascii first and recalculate all the included .r and .s elements to get the overall size of the object or is there a simpler way I could not see? Thank you.</p>",
+        "id": 119681636,
+        "sender_full_name": "Michal Hanus",
+        "timestamp": 1513114026
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"mikehanus@protonmail.com\" data-user-id=\"104130\">@Michal Hanus</span> BoundingBoxMinima(), BoundingBoxMaxima() (after selecting the object)</p>",
+        "id": 119682349,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1513115087
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-email=\"cixix@balanc3r.com\" data-user-id=\"104255\">@Mahdi</span> you're tackling one of the hardest and most valuable projects -- you should be proud of what you've already accomplished.  You're doing well. :)</p>",
+        "id": 119696826,
+        "sender_full_name": "Sean",
+        "timestamp": 1513142024
+    },
+    {
+        "content": "<p>Can you help me on \"BRL-CAD Alternative GUI 4: Selection of a Combination\"? I don't understand what I have to do.</p>",
+        "id": 120143797,
+        "sender_full_name": "Naseef",
+        "timestamp": 1514028894
+    },
+    {
+        "content": "<p>What should be on the window?</p>",
+        "id": 120143850,
+        "sender_full_name": "Naseef",
+        "timestamp": 1514028982
+    },
+    {
+        "content": "<p>From the previous task you already have a filled ConstDatabase. Iterate over the top objects (start with FirstTopaObject()) and build a list of them. Select() one of them, get the bounding box minima and maxima, and print these numbers on the window.</p>",
+        "id": 120144527,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1514030676
+    },
+    {
+        "content": "<p>Is there a way to keep history of my code edits? Like SVN, GIT ( Locally)? I frequently get everything messed up, Especially when I have no idea what I am doing.</p>",
+        "id": 120145668,
+        "sender_full_name": "Naseef",
+        "timestamp": 1514033556
+    },
+    {
+        "content": "<p>For local, private use I would recommend git because there is less overhead.  Type <code>git init</code> in your base directory and you are ready to start.</p>",
+        "id": 120150301,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1514044912
+    },
+    {
+        "content": "<p>help, getting <a href=\"/user_uploads/1549/tgSugvUHoENmwTJTFqL08k0Y/undefinedreference.png\" target=\"_blank\" title=\"undefinedreference.png\">undefined references</a> when trying to make <span class=\"emoji emoji-1f615\" title=\"confused\">:confused:</span> . On QT#2.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/tgSugvUHoENmwTJTFqL08k0Y/undefinedreference.png\" target=\"_blank\" title=\"undefined references\"><img src=\"/user_uploads/1549/tgSugvUHoENmwTJTFqL08k0Y/undefinedreference.png\"></a></div>",
+        "id": 120154420,
+        "sender_full_name": "Jeff Sieu",
+        "timestamp": 1514054536
+    },
+    {
+        "content": "<p>You have to link with the coreinterface library.</p>",
+        "id": 120155440,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1514056871
+    }
+]

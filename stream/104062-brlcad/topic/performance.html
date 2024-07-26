@@ -1,0 +1,1390 @@
+<html>
+<head><meta charset="utf-8"><title>performance · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html">performance</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="121763112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/121763112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#121763112">(Jan 30 2018 at 02:46)</a>:</h4>
+<p>@Cezar the overarching goal is to speed up ray tracing performance which has lots of potential sub-projects including conversion to opencl, optimization of specific routines, and developing a new interactive GUI based on ray tracing</p>
+
+
+
+<a name="121763114"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/121763114" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#121763114">(Jan 30 2018 at 02:46)</a>:</h4>
+<p>there's also performance of libged commands, which completely span the gamut, and performance of our lowest utility containers in libbu (which will likely involve profiling and replacement with C++ containers)</p>
+<p>specific performance hot spots (priorities) include A) the raytrace pipeline needing to dispatch sets of rays (64x64 postage stamps that subdivide into packets of 8 rays), B) boolean evaluation conversion to spmd/simd, C) optimization/elimination of libbu pointer tables (bu_pbtl_* calls) and bit vectors, and D) elimination of libbu container aliasing (primarily elimination of struct bu_list iteration)</p>
+
+
+
+<a name="122330699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122330699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122330699">(Feb 12 2018 at 03:33)</a>:</h4>
+<p><span class="user-mention" data-user-email="cezar.elnazli2@gmail.com" data-user-id="106398">@Cezar</span> there's definitely faster ways to search for a pointer (or we could try and eliminate the need to search for a pointer in the first place) -- even a std::ordered_hash may be faster.  what was meant about the bu_list elimination in D was a more efficient implementation, a different way that doesn't involve pointer aliasing.  for B, not so much parallelism (though that would be a fine project for some specific commands) as commands that quickly fall apart (e.g., a database with 1M items).  postage stamps are simply rendering subsections of an image, e.g., in 64x64 pixel tiles, instead of pixel or line at a time.</p>
+
+
+
+<a name="122397332"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122397332" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rahul Saxena <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122397332">(Feb 13 2018 at 13:06)</a>:</h4>
+<p>Hi,I am a gsoc aspirant interested in CAD design.Please guide me how to contribute to this project.</p>
+
+
+
+<a name="122399321"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122399321" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122399321">(Feb 13 2018 at 14:08)</a>:</h4>
+<p><span class="user-mention" data-user-email="codeiitrahul@gmail.com" data-user-id="109238">@Rahul Saxena</span> welcome, your best guide is yourself, demonstrating independent productivity and interest ;)</p>
+
+
+
+<a name="122401115"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122401115" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122401115">(Feb 13 2018 at 15:01)</a>:</h4>
+<p>regarding B, i was wondering what you meant by conversion to SIMD/SPMD, if not parallelism. also, i'm wondering why it's called boolean evaluation, to me it looks more like set theory, at least the operations. i've also tried to find the code doing the evaluation, it seems to be in <code>libnmg/nmg_bool/bool.c:nmg_bool</code>, and i think the expression tree is constructed in <code>libged/comb.c</code>. do i get this right?</p>
+
+
+
+<a name="122401196"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122401196" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122401196">(Feb 13 2018 at 15:03)</a>:</h4>
+<p>also, for large dbs, is evaluation too slow because of an inefficient algorithm, or does it just not happen?</p>
+
+
+
+<a name="122401238"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122401238" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122401238">(Feb 13 2018 at 15:04)</a>:</h4>
+<p>i think i could try creating a large db to test that, unless one already exists</p>
+
+
+
+<a name="122430114"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122430114" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122430114">(Feb 14 2018 at 05:38)</a>:</h4>
+<p><span class="user-mention" data-user-email="cezar.elnazli2@gmail.com" data-user-id="106398">@Cezar</span> conversion to simd/spmd is using vector units to do some things 4 at a time for the price of 1</p>
+
+
+
+<a name="122430137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122430137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122430137">(Feb 14 2018 at 05:40)</a>:</h4>
+<p>boolean evaluation is not libnmg (that's a specific subset of polygonal geometry) -- boolean evaluation is in librt/bool.c (more specifically rt_boolweave() and rt_boolfinal()).</p>
+
+
+
+<a name="122430340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122430340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122430340">(Feb 14 2018 at 05:46)</a>:</h4>
+<p>for large db's, it's not that <em>evaluation</em> is slow -- it's that some algorithms are O(N^2), that is they get exponentially slower as there are more items.  so for example if some command (e.g., facetize) takes 20 seconds with 20 booleans, how long will it take with 40 booleans?  you'd hope it'd take 40 seconds or better, but some algorithms don't work that way and 20 seconds might become 400 seconds.  so a good project would be identifying which commands slow down exponentially and then working to fix them.</p>
+
+
+
+<a name="122755244"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/122755244" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Naseef <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#122755244">(Feb 20 2018 at 20:11)</a>:</h4>
+<p>(deleted)</p>
+
+
+
+<a name="124055833"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124055833" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124055833">(Mar 22 2018 at 10:59)</a>:</h4>
+<p>i've run <code>rt -B -s512 -H127 -J0 -o h.p havoc.g havoc</code> under a profiler, it took 6.12 min with most of that spent in <code>bool_eval</code> (1.76 min, and 1/5 of that iterating through a bu_list) and <code>bu_ptbl_cat_uniq</code> (17.68 sec)</p>
+
+
+
+<a name="124055839"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124055839" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124055839">(Mar 22 2018 at 10:59)</a>:</h4>
+<p>i was wondering if there is anything else i should benchmark?</p>
+
+
+
+<a name="124062344"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124062344" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124062344">(Mar 22 2018 at 14:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> you found three priority performance areas right there (bu_pbtl, bu_list, and boolean evaluation) -- perhaps some of the earlier comments will make more sense to you now.  just addressing all three of those is a lot to tackle for gsoc, but definitely all priority.  things to think about when optimizing should generally go top-down like can some of the boolean evals be eliminated, for those that can't can they be made more efficient like eliminating bu_list traversals, for those that can't maybe the container can be changed (e.g., from a list to an array), or maybe changing it so we don't need to store pointers, and finally changing the way pointers are being stored (e.g., using a c++ hash or map container)</p>
+
+
+
+<a name="124070437"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124070437" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124070437">(Mar 22 2018 at 17:27)</a>:</h4>
+<p>is it fine using c++? HACKING says that it's "no prohibited", but also that the projects aims to be C89-compliant?</p>
+
+
+
+<a name="124070488"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124070488" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124070488">(Mar 22 2018 at 17:28)</a>:</h4>
+<p>also, i was looking at set data structures (for bool eval), and union-find looks like a good choice. has it been considered and discarded before?</p>
+
+
+
+<a name="124070614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124070614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124070614">(Mar 22 2018 at 17:31)</a>:</h4>
+<p>i think i've asked about this before, but "bool eval" seems like a misnomer, but maybe i'm missing something? it looks more like sets to me than boolean anything</p>
+
+
+
+<a name="124072966"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124072966" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124072966">(Mar 22 2018 at 18:33)</a>:</h4>
+<p>C++ is fine except for in public API of C libraries</p>
+
+
+
+<a name="124072974"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124072974" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124072974">(Mar 22 2018 at 18:33)</a>:</h4>
+<p>It's looking like we'll be doing our last c89-compliant release here soon (in the next couple weeks hopefully) after which we will be requiring c++11, so that can be part of a gsoc plan</p>
+
+
+
+<a name="124073058"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124073058" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124073058">(Mar 22 2018 at 18:35)</a>:</h4>
+<p>as for union-find, the results of boolean evaluation are not necessarily disjoint sets</p>
+
+
+
+<a name="124073128"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124073128" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124073128">(Mar 22 2018 at 18:37)</a>:</h4>
+<blockquote>
+<p>i think i've asked about this before, but "bool eval" seems like a misnomer, but maybe i'm missing something? it looks more like sets to me than boolean anything</p>
+</blockquote>
+<p>CSG combines elements of set theory and boolean algebra, read <a href="https://en.wikipedia.org/wiki/Constructive_solid_geometry" target="_blank" title="https://en.wikipedia.org/wiki/Constructive_solid_geometry">https://en.wikipedia.org/wiki/Constructive_solid_geometry</a></p>
+
+
+
+<a name="124105272"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124105272" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124105272">(Mar 23 2018 at 12:14)</a>:</h4>
+<p>thanks for the answers. i have another question :D previously, you mentioned pointer aliasing in bu_list, but looking through <code>src/libbu/list.c</code>, i can't find any function where pointer aliasing is involved. i was wondering where i could find an example of PA</p>
+
+
+
+<a name="124136061"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124136061" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124136061">(Mar 24 2018 at 02:34)</a>:</h4>
+<p>this is a somewhat advanced topic.  you should read up more on what exactly pointer aliasing is.  it's not something you'd find in a list.c function -- you find it in all the places the struct is used</p>
+
+
+
+<a name="124144489"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/124144489" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#124144489">(Mar 24 2018 at 08:29)</a>:</h4>
+<p>i did read up on it, but i misunderstood and thought that it could only occur with function arguments (i see why that's not true now)</p>
+
+
+
+<a name="126305486"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126305486" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126305486">(May 09 2018 at 08:42)</a>:</h4>
+<p>i created two plots of calls to bool_eval during the raytracing of havoc.g. <a href="https://cezarelnazli.github.io/plots/seg.svg" target="_blank" title="https://cezarelnazli.github.io/plots/seg.svg">the first one</a> has the number of segments in the partition given as argument (which is iterated when looking for seek_stp) and <a href="https://cezarelnazli.github.io/plots/sol.svg" target="_blank" title="https://cezarelnazli.github.io/plots/sol.svg">the second one</a> is the number of times the OP_SOLID case is taken in the switch</p>
+
+
+
+<a name="126305540"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126305540" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126305540">(May 09 2018 at 08:44)</a>:</h4>
+<p>it seems that iterating through the list of segments isn't <em>that</em> expensive since there are usually 2 or 4 segments in the list, but the search happens a lot of times so it adds up</p>
+
+
+
+<a name="126305596"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126305596" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126305596">(May 09 2018 at 08:46)</a>:</h4>
+<p>it also tells me that a replacement data structure should have low constant factor, else it will likely perform worse despite having better asymptotic complexity (N is very small in this case)</p>
+
+
+
+<a name="126305656"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126305656" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126305656">(May 09 2018 at 08:49)</a>:</h4>
+<p>it might also be that havoc isn't really representative of cases where the list of segments is huge :-? i used it because it's the largest example geometry, but if other examples are better, i'll look at those as well</p>
+
+
+
+<a name="126311562"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126311562" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126311562">(May 09 2018 at 12:08)</a>:</h4>
+<blockquote>
+<p>i created two plots of calls to bool_eval during the raytracing of havoc.g. <a href="https://cezarelnazli.github.io/plots/seg.svg" target="_blank" title="https://cezarelnazli.github.io/plots/seg.svg">the first one</a> has the number of segments in the partition given as argument (which is iterated when looking for seek_stp) and <a href="https://cezarelnazli.github.io/plots/sol.svg" target="_blank" title="https://cezarelnazli.github.io/plots/sol.svg">the second one</a> is the number of times the OP_SOLID case is taken in the switch</p>
+</blockquote>
+<p>Very cool graphs!  <span class="user-mention" data-user-id="106398">@Cezar</span> if you keep these images somewhere, you could probably publish a formal report later into the project.  Glad to help you submit it somewhere if that's something interesting to you. </p>
+<p>Another insight from usually having 2 or 4 segments in the list is that there's probably a structure that could be devised that treats them in pairs that would do better (or be more vectorizable potentially).  It's also significant that there are "relatively few" in each partition, though we do have to be wary that the number of segments could be unlimited in the worst case.</p>
+
+
+
+<a name="126311686"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126311686" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126311686">(May 09 2018 at 12:12)</a>:</h4>
+<p>havoc is fairly representative of a traditionally constructed csg model.  other common types are imported geometries which will typically be mostly BoT meshes or NURBS, often with just a few (expensive) csg operations sprinkled throughout (e.g., a handful of subtractions to fix overlaps).</p>
+
+
+
+<a name="126313131"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126313131" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126313131">(May 09 2018 at 12:52)</a>:</h4>
+<p>With the list of elements being as low as they are, one of the things I've thought would probably help is setting up a sorting network for the &lt; N case</p>
+
+
+
+<a name="126326312"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126326312" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126326312">(May 09 2018 at 17:59)</a>:</h4>
+<p>didn't think about vectorization. i haven't written any vectorized code before, but i'll write some this week, since it seems to pop up rather often around this project</p>
+
+
+
+<a name="126326372"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126326372" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126326372">(May 09 2018 at 18:00)</a>:</h4>
+<p>regarding "setting up a sorting network for the &lt; N case", i suppose you mean determining a certain number N, and if there are less than N segments, set up a sorting network?</p>
+
+
+
+<a name="126326674"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126326674" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126326674">(May 09 2018 at 18:06)</a>:</h4>
+<p>you shouldn't need to worry about vectorization too much directly as there is some compiler support (for automatic vectorization) and several good abstractions available.  we're more interested in OpenCL and TBB right now</p>
+
+
+
+<a name="126326691"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126326691" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126326691">(May 09 2018 at 18:07)</a>:</h4>
+<blockquote>
+<p>regarding "setting up a sorting network for the &lt; N case", i suppose you mean determining a certain number N, and if there are less than N segments, set up a sorting network?</p>
+</blockquote>
+<p>yes, using a sorting network when the number of items to be sorted is small, falling back to something more general when it's larger</p>
+
+
+
+<a name="126326877"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126326877" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126326877">(May 09 2018 at 18:10)</a>:</h4>
+<p>and having a sorting network in place, i would be able to find seek_stp in O(1)  using the comparators?</p>
+
+
+
+<a name="126326967"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126326967" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126326967">(May 09 2018 at 18:13)</a>:</h4>
+<p>actually i think at least O(log N)</p>
+
+
+
+<a name="126327014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126327014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126327014">(May 09 2018 at 18:14)</a>:</h4>
+<p>and i suppose it would not work for (very) large N because of the space complexity?</p>
+
+
+
+<a name="126327375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126327375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126327375">(May 09 2018 at 18:23)</a>:</h4>
+<p>you could definitely get to O(logN) just by using a std::unordered_map for ptbl</p>
+
+
+
+<a name="126327451"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126327451" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126327451">(May 09 2018 at 18:24)</a>:</h4>
+<p>I'm not sure what exactly the bool_eval() logic is doing for OP_SOLID, would have to study the code more to understand why it's scanning for that tree solid in partition list</p>
+
+
+
+<a name="126329474"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126329474" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126329474">(May 09 2018 at 19:11)</a>:</h4>
+<p>i'm not familiar with sorting networks. i read about them now, and i don't get where they fit in, if not for the logN search :-?</p>
+
+
+
+<a name="126360157"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126360157" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126360157">(May 10 2018 at 11:12)</a>:</h4>
+<p>i was looking at a profile and noticed that bu_bitv_clear took a lot of time (Debug build). BU_BITV_ZEROALL is a macro that zeroes the bytes in the bit vector using a while loop. i replaced the loop with a call to memset and one call to the macro in rt_shootray went from 5.21 s to 248 ms. i was wondering what the reason for the loop was initially</p>
+
+
+
+<a name="126360291"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126360291" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126360291">(May 10 2018 at 11:16)</a>:</h4>
+<p>although i expect that the improvements would be smaller on a release build, i think they would still exist</p>
+
+
+
+<a name="126362780"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126362780" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126362780">(May 10 2018 at 12:34)</a>:</h4>
+<p>looks like on release, the compiler makes this change itself, so it's useless</p>
+
+
+
+<a name="126362914"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126362914" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126362914">(May 10 2018 at 12:38)</a>:</h4>
+<p>regarding what you said before, that bitv functions shouldn't show up in profiles, i think it's fine. the only one i'm seeing is bitv_clear, and for 1 M bits, you still have to write 125,000 zeroes to memory</p>
+
+
+
+<a name="126362978"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126362978" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126362978">(May 10 2018 at 12:40)</a>:</h4>
+<p>assuming you can't remove the bitv altogether</p>
+
+
+
+<a name="126363239"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126363239" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126363239">(May 10 2018 at 12:49)</a>:</h4>
+<p>i'm thinking of pre-alloc'ing a large number of bytes for rt_shootray itself, and whenever a bitv is needed, just return a position within this buffer with enough bytes to fulfil the request. only zero it when a request can't be satisfied</p>
+
+
+
+<a name="126363381"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126363381" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126363381">(May 10 2018 at 12:53)</a>:</h4>
+<p>although bitv_clear amounts to very little, i'm not sure it's worth doing this</p>
+
+
+
+<a name="126388315"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126388315" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126388315">(May 10 2018 at 22:44)</a>:</h4>
+<p>although for large number of bitv_clear's with large number of elements, it would most likely matter</p>
+
+
+
+<a name="126388330"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126388330" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126388330">(May 10 2018 at 22:44)</a>:</h4>
+<p>i did some comparisons with std::unordered_set, it's way faster</p>
+
+
+
+<a name="126388462"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126388462" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126388462">(May 10 2018 at 22:49)</a>:</h4>
+<p>if i start with replacing bu_ptbl, i still think testing existence in O(1) using bit vectors or stl is where i should begin</p>
+
+
+
+<a name="126644755"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126644755" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126644755">(May 16 2018 at 13:22)</a>:</h4>
+<blockquote>
+<p>if i start with replacing bu_ptbl, i still think testing existence in O(1) using bit vectors or stl is where i should begin</p>
+</blockquote>
+<p>sounds reasonable to me too!</p>
+
+
+
+<a name="126735221"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126735221" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126735221">(May 18 2018 at 06:38)</a>:</h4>
+<p>as i've written in my dev log, i replaced the bu_ptbl iteration inside bool_eval with bu_bitv. now rt_boolfinal is slower because of bit vector initialisation, but bool_final went from 14 seconds to 12 seconds. a lot of time is still spent checking if the solid is inside the partition (as expected from previous graphs), but each check is faster.</p>
+
+
+
+<a name="126736008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126736008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126736008">(May 18 2018 at 07:04)</a>:</h4>
+<p>i guess the next step would be to replace bu_bitv with std::bitset in this specific instance and see what happens then</p>
+
+
+
+<a name="126736455"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126736455" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126736455">(May 18 2018 at 07:17)</a>:</h4>
+<p>but i don't think it's worth it. the main problem with bool_eval is that there are lots of nodes in the tree, and each operation is already o(1),  except the bu_ptbl iteration, in which there are few elements (most of the time just 1, in the worst case ~60; but even then, i would trade iterating over 60 elements for initialising a huge bit vector a lot of the time; even if i use std::bitset, i don't see it being worth it)</p>
+
+
+
+<a name="126739498"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126739498" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126739498">(May 18 2018 at 08:54)</a>:</h4>
+<p>(deleted)</p>
+
+
+
+<a name="126740381"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126740381" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126740381">(May 18 2018 at 09:20)</a>:</h4>
+<p>i tried with std::bitset. it seems to be consistently 2 seconds faster on Debug, which is what i would expect :-?</p>
+
+
+
+<a name="126740703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126740703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126740703">(May 18 2018 at 09:30)</a>:</h4>
+<p>if you think it's enough for a patch, i'll submit one</p>
+
+
+
+<a name="126741605"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126741605" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126741605">(May 18 2018 at 09:56)</a>:</h4>
+<p>on Release, it's more like 0.5–1 seconds faster. it's consistently faster, but the impact is smaller</p>
+
+
+
+<a name="126744313"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126744313" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126744313">(May 18 2018 at 11:22)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> Go ahead and submit the std::bitset patch, since you've done the work - if it's consistently faster I don't see any particular reason not to use it, and even if we don't end up doing so it will be available to others for future testing.</p>
+
+
+
+<a name="126747722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126747722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126747722">(May 18 2018 at 12:58)</a>:</h4>
+<p>i submitted the patch <a href="https://sourceforge.net/p/brlcad/patches/486/" target="_blank" title="https://sourceforge.net/p/brlcad/patches/486/">https://sourceforge.net/p/brlcad/patches/486/</a>. i used vector&lt;bool&gt; instead of bitset because bitset requires specifying the size at compile time.</p>
+
+
+
+<a name="126781502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126781502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126781502">(May 19 2018 at 03:39)</a>:</h4>
+<blockquote>
+<p>as i've written in my dev log, i replaced the bu_ptbl iteration inside bool_eval with bu_bitv. now rt_boolfinal is slower because of bit vector initialisation, but bool_final went from 14 seconds to 12 seconds. a lot of time is still spent checking if the solid is inside the partition (as expected from previous graphs), but each check is faster.</p>
+</blockquote>
+<p>how much slower? how did you measure?</p>
+
+
+
+<a name="126781556"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126781556" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126781556">(May 19 2018 at 03:41)</a>:</h4>
+<blockquote>
+<p>i tried with std::bitset. it seems to be consistently 2 seconds faster on Debug, which is what i would expect :-?</p>
+</blockquote>
+<p>What's it look like in Release?  Debug is fairly insignificant for performance testing... lots of things we have intentionally run slower when compiled as Debug so that they will be accessible within a debugger.</p>
+
+
+
+<a name="126781836"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126781836" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126781836">(May 19 2018 at 03:53)</a>:</h4>
+<p>I'd make sure it is consistently faster in Release mode before applying the change -- <span class="user-mention" data-user-id="106398">@Cezar</span>  your intuition about initializing repeatedly being more expensive than short list iterations could be true when optimized.  it's worth being more certain across models on both ends of the spectrum.</p>
+
+
+
+<a name="126828662"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126828662" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126828662">(May 20 2018 at 11:10)</a>:</h4>
+<blockquote>
+<p>[...]  it's worth being more certain across models on both ends of the spectrum.</p>
+</blockquote>
+<p>i'm currently running <code>bench/run.sh</code> with my changes, on release. after that i'll run it with trunk and post the results</p>
+
+
+
+<a name="126838129"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126838129" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126838129">(May 20 2018 at 17:13)</a>:</h4>
+<p>i ran the benchmarks and they actually display a slowdown across all models. <a href="https://cezarelnazli.github.io/run-trunk.log" target="_blank" title="https://cezarelnazli.github.io/run-trunk.log">here is trunk</a> and <a href="https://cezarelnazli.github.io/run-vector.log" target="_blank" title="https://cezarelnazli.github.io/run-vector.log">here are my changes</a>. i ran a debug build inside a profiler, and the destructor for <code>vector</code> shows up in there, which isn't salutary</p>
+
+
+
+<a name="126838312"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126838312" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126838312">(May 20 2018 at 17:19)</a>:</h4>
+<p>one mistake i think i'm making is that i'm initialising (and then destroying, too) an <code>ap-&gt;a_rt_i-&gt;nsolids</code>-long bit vector for each partition, and i could do that once outside the loop, and then just set the bits at each iteration.</p>
+
+
+
+<a name="126838761"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126838761" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126838761">(May 20 2018 at 17:36)</a>:</h4>
+<p>actually, i don't think there's any way around it. basically what i'm doing is introducing <code>nsolids</code> operations for each partition, which previously did not exist.</p>
+
+
+
+<a name="126838818"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126838818" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126838818">(May 20 2018 at 17:38)</a>:</h4>
+<p>i think a smarter approach is to store the results of the search in OP_SOLID in <code>bool_eval</code>. first time through the list, it would be just as expensive, but subsequent searches would become o(1)</p>
+
+
+
+<a name="126894007"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126894007" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126894007">(May 21 2018 at 21:40)</a>:</h4>
+<p>i've tried things with <code>std::map</code> and <code>std::unordered_map</code> these days, they seem to slow down raytracing significantly. i think this is because the containers need to be constructed/destructed;  there are few elements in the bu_ptbl; accessing an element in a map is more expensive than in an array; and locality (maps are trees, unordered_maps use linked lists for buckets, elements in bu_ptbls are contiguous)</p>
+
+
+
+<a name="126894139"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126894139" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126894139">(May 21 2018 at 21:43)</a>:</h4>
+<p>another thing i found out is that there are a lot of partitions (&gt; 100k). previously, i imagined there were ~100 partitions with huge trees</p>
+
+
+
+<a name="126904852"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126904852" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126904852">(May 22 2018 at 03:36)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> Is there any way you can re-use the map/unordered_map rather than creating/destroying it? (no idea if that makes sense or is practical in this context, just a thought...)</p>
+
+
+
+<a name="126904860"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126904860" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126904860">(May 22 2018 at 03:37)</a>:</h4>
+<p>That won't help the locality problem, of course...</p>
+
+
+
+<a name="126918118"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126918118" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126918118">(May 22 2018 at 11:19)</a>:</h4>
+<p>i ran it under a profiler and it looked like most of the time was spent accessing elements (inside operator[])</p>
+
+
+
+<a name="126918171"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126918171" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126918171">(May 22 2018 at 11:20)</a>:</h4>
+<p>in the case of map, i also saw the recursive calls made when walking the tree</p>
+
+
+
+<a name="126929631"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126929631" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126929631">(May 22 2018 at 15:42)</a>:</h4>
+<p>i tried using hashes when the number of segments in a partition is bigger than a threshold. performance degraded now as well, probably because of all the conditionals in addition to the previous logic</p>
+
+
+
+<a name="126929905"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126929905" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126929905">(May 22 2018 at 15:48)</a>:</h4>
+<p>i'm not sure how the "space" is split into partitions (if that's what those partitions mean), but it seems like the bu_ptbl iteration was written to work well with it. in ~30 M calls to bool_eval when tracing havoc, there are &lt; 10 segments in a partition. so it seems to have lots of partitions with few segments, and in this case, i don't think whatever data structure i use will pay off, since at the very least, i'll have to initialise it for each partition (for example zeroing the array)</p>
+
+
+
+<a name="126930008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126930008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126930008">(May 22 2018 at 15:51)</a>:</h4>
+<p>i tried a simple array hash, with a dumb/fast function (address of soltab mod 67), and it was still 3 seconds slower</p>
+
+
+
+<a name="126930188"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126930188" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126930188">(May 22 2018 at 15:54)</a>:</h4>
+<p>i tested using <code>rt -B -H31 -P1 -o havoc.png havoc.g havoc</code>, and got ~18 sec on trunk and ~21 sec with my changes</p>
+
+
+
+<a name="126966194"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126966194" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126966194">(May 23 2018 at 08:24)</a>:</h4>
+<p>so i think the next step would be to replace the bu_ptbl of struct soltabs altogether, instead of augmenting it. there is little work done when calling bool_eval once, and i think adding work there for bookkeeping will only make it slower no matter what</p>
+
+
+
+<a name="126969452"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126969452" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126969452">(May 23 2018 at 09:55)</a>:</h4>
+<p>Sounds reasonable</p>
+
+
+
+<a name="126971922"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/126971922" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#126971922">(May 23 2018 at 11:13)</a>:</h4>
+<p>by the way, i guess i should have asked this sooner, but do you have a (measurable) performance goal in mind? i'm currently running <code>bench/run.sh</code> and comparing rays/sec between runs to determine if it's improving, but i was wondering if there is a goal like "at least 5.5 M rays/sec when benchmarking moss"</p>
+
+
+
+<a name="127173544"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127173544" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127173544">(May 27 2018 at 18:48)</a>:</h4>
+<p>we haven't quantified the goals, and a naive attempt would likely be unusefully arbitrary (e.g., 2x faster).</p>
+
+
+
+<a name="127173640"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127173640" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127173640">(May 27 2018 at 18:52)</a>:</h4>
+<p>it would be good if we could figure out an objective metric, like having a render targets for an implicit object, triangle, and nurbs/brep version that have sufficient quality that they converge to the same image (within some specified pixel deviation tolerance).</p>
+
+
+
+<a name="127173649"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127173649" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127173649">(May 27 2018 at 18:53)</a>:</h4>
+<p>then we could at least talk about relative costs in a more meaningful manner.  it might be the start of defining on OCH (similar to SAR used by kd-tree, but not misnomered)</p>
+
+
+
+<a name="127173689"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127173689" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127173689">(May 27 2018 at 18:54)</a>:</h4>
+<p>realistically, we know there's a solid order of magnitude possible through data coherency alone, simd should give a similar order of magnitude boost -- so something that is currently 1M rays/s might attain 100M rays/s</p>
+
+
+
+<a name="127174854"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127174854" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127174854">(May 27 2018 at 19:43)</a>:</h4>
+<p>so i've finished fixing my build errors and ran benchmarks using <code>std::vector</code>. they're better on all models, but not by much. however, i am now able to more easily test other stl containers. what i did was 1) change the <code>struct bu_ptbl pt_seglist</code> member of <code>struct partition</code> to <code>std::vector&lt;struct seg *&gt; pt_seglist</code> (and implemented the operations used in <code>bool.cpp</code> with the new structure); 2) split <code>rt/ray_partition.h</code> from <code>raytrace.h</code> and included it separately where it's needed; and 3) converted the files where the header is needed to C++ (with C linkage). what this means though is that you can no longer iterate the segments list from C, and i've also had to change a lot of files. the performance improvements so far are a bit underwhelming maybe, so i'm wondering if the trade offs are worth it</p>
+
+
+
+<a name="127174858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127174858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127174858">(May 27 2018 at 19:43)</a>:</h4>
+<div class="codehilite"><pre><span></span>gsoc/bench % cat summary-trunk-*
+Abs  rmbp 4041636.94    1714565.15  1734933.19  1348127.28  1830646.00  2287836.14  2159624.11  Thu May 24 01:01:31 EEST 2018
+*vgr rmbp 29498.84  25567.62    30942.27    25264.75    25896.81    154.35  22887.44
+Abs  rmbp 4168024.50    1761264.50  1715300.76  1403866.97  1816805.40  2308539.52  2195633.60  Thu May 24 01:17:52 EEST 2018
+*vgr rmbp 30421.31  26264.00    30592.13    26309.35    25701.02    155.75  23240.59
+Abs  rmbp 4191027.14    1735223.93  1774402.02  1391472.34  1786512.82  2302579.43  2196869.61  Thu May 24 01:37:09 EEST 2018
+*vgr rmbp 30589.20  25875.69    31646.19    26077.06    25272.49    155.35  23269.33
+Abs  rmbp 4194157.90    1708366.28  1768637.50  1422026.54  1912957.40  2312326.89  2219745.41  Thu May 24 01:56:24 EEST 2018
+*vgr rmbp 30612.05  25475.19    31543.38    26649.67    27061.21    156.01  23582.91
+Abs  rmbp 4252770.44    1786723.23  1836428.96  1419499.54  1919978.36  2304439.92  2253306.74  Thu May 24 02:14:48 EEST 2018
+*vgr rmbp 31039.85  26643.65    32752.43    26602.31    27160.53    155.47  24059.04
+gsoc/bench % cat summary-vector-*
+Abs  rmbp 4684937.42    2031225.42  2025885.21  1557917.44  2090030.01  2569718.32  2493285.63  Sun May 27 21:15:55 EEST 2018
+*vgr rmbp 34194.12  30289.67    36131.35    29196.35    29566.13    173.37  26591.83
+Abs  rmbp 4638519.22    1932765.21  1975258.83  1554311.46  2033613.46  2507226.39  2440282.42  Sun May 27 21:33:41 EEST 2018
+*vgr rmbp 33855.33  28821.43    35228.44    29128.77    28768.05    169.16  25995.19
+Abs  rmbp 4605819.18    1986518.42  2022192.86  1557950.64  2083347.79  2540601.93  2466071.80  Sun May 27 21:49:56 EEST 2018
+*vgr rmbp 33616.66  29623.00    36065.50    29196.97    29471.60    171.41  26357.52
+Abs  rmbp 4681758.44    2003582.74  2061324.01  1560023.33  2034590.59  2532082.09  2478893.53  Sun May 27 22:05:59 EEST 2018
+*vgr rmbp 34170.92  29877.46    36763.40    29235.81    28781.87    170.83  26500.04
+Abs  rmbp 4581822.58    2019161.52  2035468.56  1575925.77  2070459.65  2589455.33  2478715.56  Sun May 27 22:22:35 EEST 2018
+*vgr rmbp 33441.51  30109.77    36302.27    29533.84    29289.28    174.70  26475.22
+</pre></div>
+
+
+
+<a name="127174860"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127174860" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127174860">(May 27 2018 at 19:43)</a>:</h4>
+<p>here are the numbers, hopefully the formatting is fine</p>
+
+
+
+<a name="127174995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127174995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127174995">(May 27 2018 at 19:48)</a>:</h4>
+<blockquote>
+<p>[...] like having a render targets for an implicit object, triangle, and nurbs/brep version that have sufficient quality that they converge to the same image (within some specified pixel deviation tolerance).</p>
+</blockquote>
+<p>hmm... i'm not familiar with what a render target and an implicit object are</p>
+
+
+
+<a name="127175000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175000">(May 27 2018 at 19:49)</a>:</h4>
+<p>nice... that's about a 10% improvement...</p>
+
+
+
+<a name="127175052"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175052" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175052">(May 27 2018 at 19:50)</a>:</h4>
+<blockquote>
+<p>[...] it might be the start of defining on OCH (similar to SAR used by kd-tree, but not misnomered)</p>
+</blockquote>
+<p>i'm not familiar with those terms either :D i found this (<a href="http://pl887.pairlitesite.com/papers/rt06-fast-kd/fast-kd-construction-RT06.pdf" target="_blank" title="http://pl887.pairlitesite.com/papers/rt06-fast-kd/fast-kd-construction-RT06.pdf">http://pl887.pairlitesite.com/papers/rt06-fast-kd/fast-kd-construction-RT06.pdf</a>) searching for "SAR kd-tree", but i'll have to read up</p>
+
+
+
+<a name="127175053"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175053" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175053">(May 27 2018 at 19:50)</a>:</h4>
+<p>considering ptbl's were only amounting to about 20-30% of the overall time, you cut it way down</p>
+
+
+
+<a name="127175055"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175055" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175055">(May 27 2018 at 19:50)</a>:</h4>
+<p>sar is surface area heuristic</p>
+
+
+
+<a name="127175061"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175061" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175061">(May 27 2018 at 19:51)</a>:</h4>
+<p>it's a way to split up geometry (whether with a kd-tree or bsp or other spatial partition method) where you want to try and balance the amount of work on both sides of a split so they're roughly even</p>
+
+
+
+<a name="127175101"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175101" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175101">(May 27 2018 at 19:52)</a>:</h4>
+<p>if everything is a triangle, then surface area tends to be a reasonable metric for that ... the amount of geometry surface over here equals the amount over there, so this is a good split point</p>
+
+
+
+<a name="127175103"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175103" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175103">(May 27 2018 at 19:52)</a>:</h4>
+<p>when you don't have triangles, SAH is just stupid and the wrong term</p>
+
+
+
+<a name="127175106"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175106" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175106">(May 27 2018 at 19:53)</a>:</h4>
+<p>the generalization is some form of an object complexity or object cost metric / heuristic</p>
+
+
+
+<a name="127175357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127175357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127175357">(May 27 2018 at 20:02)</a>:</h4>
+<p>ok, i think i understand what that means. i'm also curious what a render target is. something like "a target number of operations", or something else? and regarding data coherency, is that cache coherency, or something else/more?</p>
+
+
+
+<a name="127176678"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176678" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176678">(May 27 2018 at 20:56)</a>:</h4>
+<p>in what context?  a render target is typically an image being made or a particular type of image</p>
+
+
+
+<a name="127176686"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176686" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176686">(May 27 2018 at 20:57)</a>:</h4>
+<p>oh, you said previously "it would be good if we could figure out an objective metric, like having a render targets for an implicit object"</p>
+
+
+
+<a name="127176727"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176727" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176727">(May 27 2018 at 20:58)</a>:</h4>
+<p>data coherence does refer to cache coherency or more generally to coherency in memory and across memory boundaries -- for example, if something is on disk, you obviously want to only read from disk once and do all your processing on it (as opposed to reading it from disk repeatedly)</p>
+
+
+
+<a name="127176737"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176737" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176737">(May 27 2018 at 20:59)</a>:</h4>
+<p>same thing applies for things read into main memory that end up on the cpu or gpu memory, like if on the cpu, keep things in l3 as long as possible, in l2 as long as possible, etc</p>
+
+
+
+<a name="127176789"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176789" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176789">(May 27 2018 at 21:01)</a>:</h4>
+<p>oh, i see. is reading repeatedly from disk a problem that exists right now in the codebase, or was it a hypothetical example?</p>
+
+
+
+<a name="127176790"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176790" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176790">(May 27 2018 at 21:01)</a>:</h4>
+<p>yeah, previous comment about render target was to have a desired image (e.g., a 1024x1024 rendering of a sphere) that you would get when you run (for example) rt on a sph object, or on a sph.bot object or a sph.brep object -- the "target" aka desired image would be the same for all three</p>
+
+
+
+<a name="127176792"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176792" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176792">(May 27 2018 at 21:01)</a>:</h4>
+<p>hypothetical example</p>
+
+
+
+<a name="127176839"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176839" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176839">(May 27 2018 at 21:03)</a>:</h4>
+<p>typically, coherency is disk &lt; net &lt; main memory &lt; l3 cache &lt; l2 cache &lt; l1 cache || gpu cache</p>
+
+
+
+<a name="127176888"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127176888" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127176888">(May 27 2018 at 21:05)</a>:</h4>
+<p>i'm aware, although i refer to it as memory hierarchy</p>
+
+
+
+<a name="127177058"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127177058" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127177058">(May 27 2018 at 21:11)</a>:</h4>
+<p>yes!  it is also memory hierarchy, coherency is simply a data-centric view (as opposed to a memory architecture perspective) where you keep related memory items together, so you can do what you need on the data without reaching down the hierarchy for more data (thus incurring a stall)</p>
+
+
+
+<a name="127177349"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127177349" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127177349">(May 27 2018 at 21:23)</a>:</h4>
+<p>here's an interesting gist on someone rewriting a simple algorithm with l1/l2 in mind: <a href="https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0" target="_blank" title="https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0">https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0</a></p>
+
+
+
+<a name="127208988"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127208988" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127208988">(May 28 2018 at 14:50)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> was the winner std::vector then?</p>
+
+
+
+<a name="127211740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127211740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127211740">(May 28 2018 at 15:59)</a>:</h4>
+<p>i didn't get to test the others. i'll start today</p>
+
+
+
+<a name="127214291"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127214291" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127214291">(May 28 2018 at 17:22)</a>:</h4>
+<p>so while modifying the code to use <code>std::set</code>, i noticed that i can't actually remove the iteration in <code>bool_eval</code> because in there, it's searching for a <code>soltab</code>, while the container holds  <code>seg</code>s, so i have to access <code>seg_stp</code>. i also can't change it to hold <code>soltab</code>s because somewhere else in the code, it requires a seg's other members and there's no pointer from a soltab to a seg</p>
+
+
+
+<a name="127219565"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127219565" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127219565">(May 28 2018 at 20:04)</a>:</h4>
+<p>i tried <code>unordered_set</code>, but stopped quickly. after a few seconds, it was still not done with the first item in the benchmark (which takes 0.06 sec with bu_ptbl). i profiled it and most (all?) of the time is spent in the container's <code>rehash</code> method, so i don't think there's much to do here</p>
+
+
+
+<a name="127220230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127220230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127220230">(May 28 2018 at 20:28)</a>:</h4>
+<p>also related to my previous message, i can't use bit vectors either. and since maps are similar to sets (buckets and rehashing), i don't think they'll yield good results</p>
+
+
+
+<a name="127226583"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127226583" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127226583">(May 29 2018 at 00:18)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> Out of curiosity, what do you think about maybe trying a C implementation of red black trees?  We've got one in libbu, and if it has problems there are a few others out there we could replace it with.</p>
+
+
+
+<a name="127239636"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127239636" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127239636">(May 29 2018 at 08:05)</a>:</h4>
+<p>i think std::set and std::map use rb trees. i didn't get to test them yesterday because i kept getting seg faults and postponed fixing them, but i'll get to it today. after that, i'll try the libbu implementation as well. also, i think i can test for membership in O(log N) in bool_eval with std::map</p>
+
+
+
+<a name="127244172"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127244172" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127244172">(May 29 2018 at 10:13)</a>:</h4>
+<p>i got set to work, but it's worse than trunk (moss, frame 8, 3.3 M rays/sec vs 4.5 and 5.2). i'll try map next, and then the rb tree in libbu</p>
+
+
+
+<a name="127248747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127248747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127248747">(May 29 2018 at 12:22)</a>:</h4>
+<p>tried map, it's still slow. profiled it, spends 9 seconds (out of 1.25 minutes on Debug) in bool_eval finding the soltab with .count(). i think it's because of locality + expensive operations. it's log N, but when searching for &lt; 5 elements, the constant factors matter</p>
+
+
+
+<a name="127249013"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127249013" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127249013">(May 29 2018 at 12:28)</a>:</h4>
+<p>i'll try libbu's implementation as well. as for other implementations, i remember the linux kernel having one. maybe there are a few tricks there. there's also the matter of licensing :-?</p>
+
+
+
+<a name="127255130"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127255130" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127255130">(May 29 2018 at 14:43)</a>:</h4>
+<p>although if i’m trying other implementations, i can try different packages for hashes, too</p>
+
+
+
+<a name="127290877"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127290877" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127290877">(May 30 2018 at 05:21)</a>:</h4>
+<p>Shouldn’t need to worry about licensing.  Typically only problems are with gpl and academic codes that have a discriminatory clause like cc-by-nc making it not Open Source.</p>
+
+
+
+<a name="127291050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127291050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127291050">(May 30 2018 at 05:27)</a>:</h4>
+<p>I think you are seeing a clear pattern that init constant is dominant on the O(logN) methods so either need a diff init or change the algorithm...</p>
+
+
+
+<a name="127291104"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127291104" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127291104">(May 30 2018 at 05:28)</a>:</h4>
+<p>Can you briefly summarize everything you’ve tried and the timings into a table?  If the data is handy....</p>
+
+
+
+<a name="127296791"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127296791" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127296791">(May 30 2018 at 08:29)</a>:</h4>
+<blockquote>
+<p>Can you briefly summarize everything you’ve tried and the timings into a table?  If the data is handy....</p>
+</blockquote>
+<p>That was my initial plan, but after seeing the poor performance of other containers, I stopped the benchmarking suite before completing. For example, using <code>map</code>, it went from ~2.2 M for world to ~1.2 M, so I figured it's not worth running further.</p>
+
+
+
+<a name="127296936"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127296936" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127296936">(May 30 2018 at 08:32)</a>:</h4>
+<p>But I'm curious why <code>vector</code> is faster than <code>bu_ptbl</code>. I want to try adjusting the initial capacity and see if this improves performance.</p>
+
+
+
+<a name="127302576"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127302576" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127302576">(May 30 2018 at 11:14)</a>:</h4>
+<p>i set bu_ptbl's initial capacity to 16 (down from 64) and the numbers are actually close to <code>vector</code>. it still has a slight edge, but the upside is that there's no need to switch to C++</p>
+
+
+
+<a name="127302577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127302577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127302577">(May 30 2018 at 11:14)</a>:</h4>
+<div class="codehilite"><pre><span></span>gsoc/bench % cat summary-trunk-*
+Abs  rmbp 4041636.94    1714565.15  1734933.19  1348127.28  1830646.00  2287836.14  2159624.11  Thu May 24 01:01:31 EEST 2018
+*vgr rmbp 29498.84  25567.62    30942.27    25264.75    25896.81    154.35  22887.44
+Abs  rmbp 4168024.50    1761264.50  1715300.76  1403866.97  1816805.40  2308539.52  2195633.60  Thu May 24 01:17:52 EEST 2018
+*vgr rmbp 30421.31  26264.00    30592.13    26309.35    25701.02    155.75  23240.59
+Abs  rmbp 4191027.14    1735223.93  1774402.02  1391472.34  1786512.82  2302579.43  2196869.61  Thu May 24 01:37:09 EEST 2018
+*vgr rmbp 30589.20  25875.69    31646.19    26077.06    25272.49    155.35  23269.33
+Abs  rmbp 4194157.90    1708366.28  1768637.50  1422026.54  1912957.40  2312326.89  2219745.41  Thu May 24 01:56:24 EEST 2018
+*vgr rmbp 30612.05  25475.19    31543.38    26649.67    27061.21    156.01  23582.91
+Abs  rmbp 4252770.44    1786723.23  1836428.96  1419499.54  1919978.36  2304439.92  2253306.74  Thu May 24 02:14:48 EEST 2018
+*vgr rmbp 31039.85  26643.65    32752.43    26602.31    27160.53    155.47  24059.04
+gsoc/bench % cat summary-ptbl16-*
+Abs  rmbp 4680155.95    1927090.59  1999106.16  1550430.99  2071242.81  2599398.72  2471237.53  Wed May 30 12:53:31 EEST 2018
+*vgr rmbp 34159.22  28736.81    35653.75    29056.05    29300.36    175.38  26180.26
+Abs  rmbp 4662057.95    1932794.89  1932672.45  1539780.22  2089337.31  2568054.50  2454116.22  Wed May 30 13:11:15 EEST 2018
+*vgr rmbp 34027.13  28821.87    34468.92    28856.45    29556.33    173.26  25983.99
+Abs  rmbp 4483025.56    1959477.52  1968239.40  1534994.64  2065281.19  2589953.44  2433495.29  Wed May 30 13:29:25 EEST 2018
+*vgr rmbp 32720.42  29219.76    35103.25    28766.76    29216.03    174.74  25866.82
+Abs  rmbp 4582552.38    1887762.28  2002007.33  1554848.10  2082253.88  2560400.25  2444970.70  Wed May 30 13:46:10 EEST 2018
+*vgr rmbp 33446.84  28150.34    35705.49    29138.83    29456.13    172.74  26011.72
+Abs  rmbp 4602999.06    1911004.39  1992763.36  1525482.72  2079252.77  2585297.14  2449466.57  Wed May 30 14:02:18 EEST 2018
+*vgr rmbp 33596.08  28496.93    35540.63    28588.50    29413.67    174.42  25968.37
+gsoc/bench % cat summary-vector-*
+Abs  rmbp 4684937.42    2031225.42  2025885.21  1557917.44  2090030.01  2569718.32  2493285.63  Sun May 27 21:15:55 EEST 2018
+*vgr rmbp 34194.12  30289.67    36131.35    29196.35    29566.13    173.37  26591.83
+Abs  rmbp 4638519.22    1932765.21  1975258.83  1554311.46  2033613.46  2507226.39  2440282.42  Sun May 27 21:33:41 EEST 2018
+*vgr rmbp 33855.33  28821.43    35228.44    29128.77    28768.05    169.16  25995.19
+Abs  rmbp 4605819.18    1986518.42  2022192.86  1557950.64  2083347.79  2540601.93  2466071.80  Sun May 27 21:49:56 EEST 2018
+*vgr rmbp 33616.66  29623.00    36065.50    29196.97    29471.60    171.41  26357.52
+Abs  rmbp 4681758.44    2003582.74  2061324.01  1560023.33  2034590.59  2532082.09  2478893.53  Sun May 27 22:05:59 EEST 2018
+*vgr rmbp 34170.92  29877.46    36763.40    29235.81    28781.87    170.83  26500.04
+Abs  rmbp 4581822.58    2019161.52  2035468.56  1575925.77  2070459.65  2589455.33  2478715.56  Sun May 27 22:22:35 EEST 2018
+*vgr rmbp 33441.51  30109.77    36302.27    29533.84    29289.28    174.70  26475.22
+</pre></div>
+
+
+
+<a name="127304541"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127304541" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127304541">(May 30 2018 at 12:14)</a>:</h4>
+<p>is there any way to run the benchmark on windows?</p>
+
+
+
+<a name="127329737"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127329737" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127329737">(May 30 2018 at 21:15)</a>:</h4>
+<p>i <a href="https://cezarelnazli.github.io/plots/ds_diff.svg" target="_blank" title="https://cezarelnazli.github.io/plots/ds_diff.svg">plotted the data here</a> and <a href="https://cezarelnazli.github.io/ds_diff_results.txt" target="_blank" title="https://cezarelnazli.github.io/ds_diff_results.txt">dumped the results here</a></p>
+
+
+
+<a name="127431679"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127431679" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127431679">(Jun 01 2018 at 18:53)</a>:</h4>
+<p>i tried running with the rb tree implementation in libbu. it's super slow (tens of seconds where trunk takes 0.06) and that's because of acquiring and releasing semaphores. running with <code>-P 1</code> makes it faster. it could be an implementation problem, maybe locking isn't required. i still think it has worse locality and initialisation, which should matter for small lists. but if you want me to try other implementations, i will do so. if you want to see my code (maybe i'm doing it wrong), i'll submit a patch</p>
+
+
+
+<a name="127432853"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127432853" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127432853">(Jun 01 2018 at 19:16)</a>:</h4>
+<p>i've spammed <a href="https://sourceforge.net/p/brlcad/patches/493/" target="_blank" title="https://sourceforge.net/p/brlcad/patches/493/">some patches here</a></p>
+
+
+
+<a name="127441049"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127441049" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127441049">(Jun 01 2018 at 22:21)</a>:</h4>
+<p>libbu semaphores are used because of <code>MALLOC_NOT_MP_SAFE</code>, which i think is not needed nowadays (?). i undefined it and performance increased significantly, but it's still ~3x slower than bu_ptbl. insertions (due to allocating new nodes) and the <code>OP_SOLID</code> case in <code>bool_eval</code> are the hotspots. i could try to keep a pool of nodes and allocate from that</p>
+
+
+
+<a name="127446992"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127446992" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127446992">(Jun 02 2018 at 01:11)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> I'd be curious about <a href="https://github.com/jstimpfle/sil/tree/master/rb3ptr" target="_blank" title="https://github.com/jstimpfle/sil/tree/master/rb3ptr">https://github.com/jstimpfle/sil/tree/master/rb3ptr</a> but I have no idea how much work that would be, or even if it makes sense for this case...</p>
+
+
+
+<a name="127447059"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127447059" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127447059">(Jun 02 2018 at 01:13)</a>:</h4>
+<p>the "memory allocation done by client" bit intrigues me, since your testing is indicating initialization costs are an issue...  makes me wonder if we could pre-allocate...</p>
+
+
+
+<a name="127447138"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127447138" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127447138">(Jun 02 2018 at 01:15)</a>:</h4>
+<p>I'm not surprised our redblack tree in libbu has issues - to the best of my knowledge its not been stressed much</p>
+
+
+
+<a name="127447545"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127447545" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127447545">(Jun 02 2018 at 01:28)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> might also try a few other containers like a splay tree and see if they do anything interesting...</p>
+
+
+
+<a name="127447656"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127447656" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127447656">(Jun 02 2018 at 01:30)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> any sense of whether something like a memory pool might be helpful?</p>
+
+
+
+<a name="127455844"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127455844" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127455844">(Jun 02 2018 at 06:36)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> I'd be curious about <a href="https://github.com/jstimpfle/sil/tree/master/rb3ptr" target="_blank" title="https://github.com/jstimpfle/sil/tree/master/rb3ptr">https://github.com/jstimpfle/sil/tree/master/rb3ptr</a> but I have no idea how much work that would be, or even if it makes sense for this case...</p>
+</blockquote>
+<p>i could try it, but looking at the readme, i see that it's "Not thread safe". this seems like a big problem :-?</p>
+
+
+
+<a name="127455896"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127455896" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127455896">(Jun 02 2018 at 06:39)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> any sense of whether something like a memory pool might be helpful?</p>
+</blockquote>
+<p>since most of the time is spent allocating nodes during insertions, i think a memory pool would be helpful. i was considering it, but my thinking is that i would still need a list to manage the pool, i'd still iterate over it, and it would be bigger still than the current lists (of segments). so it might harm performance in the end</p>
+
+
+
+<a name="127477761"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127477761" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127477761">(Jun 02 2018 at 20:55)</a>:</h4>
+<p>Hmm.  Is bu_ptbl insertion currently thread safe?</p>
+
+
+
+<a name="127534224"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127534224" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127534224">(Jun 04 2018 at 08:15)</a>:</h4>
+<p>i think so, since it doesn't hold any global state, and the way it's used is contained to a single thread. so if thread A creates a bu_ptbl, only thread A will read/modify it</p>
+
+
+
+<a name="127534354"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127534354" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127534354">(Jun 04 2018 at 08:18)</a>:</h4>
+<p>but rb3ptr looks to be the same, i hadn't thought about it before pasting the "not thread safe" comment</p>
+
+
+
+<a name="127580962"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127580962" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127580962">(Jun 05 2018 at 04:05)</a>:</h4>
+<blockquote>
+<p>i set bu_ptbl's initial capacity to 16 (down from 64) and the numbers are actually close to <code>vector</code>. it still has a slight edge, but the upside is that there's no need to switch to C++</p>
+</blockquote>
+<p>On the surface, that was a shocking discovery but in retrospect it makes complete sense if static init is dominating the timing.  Did you test any other sizes like 8 or 0 or 24?</p>
+
+
+
+<a name="127581228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127581228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127581228">(Jun 05 2018 at 04:14)</a>:</h4>
+<p>I think you've just about killed all the ptbl replacement options.  you found a way to make it considerably faster, great -- I suggest moving on to the next profile hot point.  if ptbl is still high on the profile for specific cases, it might make sense to use a hybrid strategy (like plain array for first 8 entries, then some logN method for additional).</p>
+
+
+
+<a name="127581252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127581252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127581252">(Jun 05 2018 at 04:16)</a>:</h4>
+<p>otherwise, diminishing returns ... lots of other room for improvement ;)</p>
+
+
+
+<a name="127586176"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127586176" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127586176">(Jun 05 2018 at 07:08)</a>:</h4>
+<blockquote>
+<p>On the surface, that was a shocking discovery but in retrospect it makes complete sense if static init is dominating the timing.  Did you test any other sizes like 8 or 0 or 24?</p>
+</blockquote>
+<p>I tried 8 and that's better than trunk as well, but worse than 16. I think 16 is a sweet spot because there are usually between 8 and 16 segments in a partition, so no resizing is needed and no time is wasted zeroing unused elements</p>
+
+
+
+<a name="127586340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127586340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127586340">(Jun 05 2018 at 07:12)</a>:</h4>
+<blockquote>
+<p>I think you've just about killed all the ptbl replacement options.  you found a way to make it considerably faster, great -- I suggest moving on to the next profile hot point.  if ptbl is still high on the profile for specific cases, it might make sense to use a hybrid strategy (like plain array for first 8 entries, then some logN method for additional).</p>
+</blockquote>
+<p>you previously mentioned data coherency, bu_list pointer aliasing and simd offering big performance improvements. i would like to look at those next, but i'm not sure where to begin</p>
+
+
+
+<a name="127586352"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127586352" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127586352">(Jun 05 2018 at 07:13)</a>:</h4>
+<p>also, i asked if there is a way to run the benchmark suite on windows (i don't see any). if there isn't, would it be worth it if i ported the <code>run.sh</code> script to python?</p>
+
+
+
+<a name="127673885"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127673885" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127673885">(Jun 06 2018 at 19:41)</a>:</h4>
+<p>i was looking at vectorization, and what i want to try next is to compile with clang's vectorization reports, see what couldn't be vectorized and why, and try to rewrite the code. does this sound good?</p>
+
+
+
+<a name="127674233"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127674233" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127674233">(Jun 06 2018 at 19:47)</a>:</h4>
+<p>also, while going through cmakelists, i noticed <a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720" target="_blank" title="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720">some SSE flags commented out</a> due to invalid instructions. is there more context around it?</p>
+
+
+
+<a name="127692880"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127692880" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127692880">(Jun 07 2018 at 04:07)</a>:</h4>
+<blockquote>
+<p>also, i asked if there is a way to run the benchmark suite on windows (i don't see any). if there isn't, would it be worth it if i ported the <code>run.sh</code> script to python?</p>
+</blockquote>
+<p>there's not, but not worth porting to python at this time -- there are other plans for it already in the works</p>
+
+
+
+<a name="127693159"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127693159" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127693159">(Jun 07 2018 at 04:17)</a>:</h4>
+<blockquote>
+<p>you previously mentioned data coherency, bu_list pointer aliasing and simd offering big performance improvements. i would like to look at those next, but i'm not sure where to begin</p>
+</blockquote>
+<p>I suggest finding something relatively simple and isolated.  see what it takes to change it.  the most egregious cases are functions that take/pass bu_list as a function parameter.  looking quickly at public headers, wdb.h stands out as just having a couple and it's a fairly isolated library -- maybe start there as a test.</p>
+
+
+
+<a name="127695546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127695546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127695546">(Jun 07 2018 at 05:22)</a>:</h4>
+<blockquote>
+<p>also, while going through cmakelists, i noticed <a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720" target="_blank" title="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/CMakeLists.txt#l1720">some SSE flags commented out</a> due to invalid instructions. is there more context around it?</p>
+</blockquote>
+<p>It's hard to test for SSE without causing a runtime crash.   We need both build-time and (if not more importantly) runtime sse detection that doesn't crash when you don't have sse.</p>
+
+
+
+<a name="127697514"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127697514" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127697514">(Jun 07 2018 at 06:14)</a>:</h4>
+<blockquote>
+<p>there's not, but not worth porting to python at this time -- there are other plans for it already in the works</p>
+</blockquote>
+<p>oh, ok :D is there anything i can read on the plans? the reason i wanted to test on windows is that it is the most downloaded version on sf, and figured it is important to benchmark there as well</p>
+
+
+
+<a name="127697586"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127697586" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127697586">(Jun 07 2018 at 06:16)</a>:</h4>
+<blockquote>
+<p>It's hard to test for SSE without causing a runtime crash.   We need both build-time and (if not more importantly) runtime sse detection that doesn't crash when you don't have sse.</p>
+</blockquote>
+<p>i think <code>cpuid</code> would be enough here, at least on intel/amd</p>
+
+
+
+<a name="127697591"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127697591" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127697591">(Jun 07 2018 at 06:16)</a>:</h4>
+<blockquote>
+<p>I suggest finding something relatively simple and isolated.  see what it takes to change it.  the most egregious cases are functions that take/pass bu_list as a function parameter.  looking quickly at public headers, wdb.h stands out as just having a couple and it's a fairly isolated library -- maybe start there as a test.</p>
+</blockquote>
+<p>ok, i'll do this today</p>
+
+
+
+<a name="127714803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127714803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127714803">(Jun 07 2018 at 12:06)</a>:</h4>
+<p>i want to see if i get this right. in <code>int mk_pipe(struct rt_wdb *fp, const char *name, struct bu_list *headp)</code>, is the reason for pointer aliasing that <code>struct rt_wdb</code>'s first member is a <code>struct bu_list</code>, and the compiler can't be sure that <code>fp</code> and <code>headp</code> point to disjoint memory?</p>
+
+
+
+<a name="127714811"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127714811" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127714811">(Jun 07 2018 at 12:07)</a>:</h4>
+<p><a href="https://docs.oracle.com/cd/E24457_01/html/E21990/bjafa.html#bjafb" target="_blank" title="https://docs.oracle.com/cd/E24457_01/html/E21990/bjafa.html#bjafb">i'm using this</a> as the definition of pointer aliasing</p>
+
+
+
+<a name="127714868"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127714868" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127714868">(Jun 07 2018 at 12:08)</a>:</h4>
+<p>i thought that if the parameters have different types, they're assumed to not be aliases of one another, so i guess that's why i don't understand why aliasing takes place in the example i gave</p>
+
+
+
+<a name="127717018"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127717018" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127717018">(Jun 07 2018 at 13:07)</a>:</h4>
+<blockquote>
+<p>oh, ok :D is there anything i can read on the plans? the reason i wanted to test on windows is that it is the most downloaded version on sf, and figured it is important to benchmark there as well</p>
+</blockquote>
+<p>There's nothing to read up on, nothing fancy.  It's just being reworked in another way and being used as a testing framework for another performance code (i.e., being slightly generalized).  I can let you know if there's bits you can tackle since it is performance related, but don't want to spread you out too thin!</p>
+
+
+
+<a name="127717251"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127717251" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127717251">(Jun 07 2018 at 13:12)</a>:</h4>
+<blockquote>
+<p>i think <code>cpuid</code> would be enough here, at least on intel/amd</p>
+</blockquote>
+<p>it should be and that's essentially what we have now (see src/libbu/simd.c) but then there are outliers doing different things (e.g., include/bn/dvec.h)</p>
+
+
+
+<a name="127718082"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127718082" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127718082">(Jun 07 2018 at 13:33)</a>:</h4>
+<blockquote>
+<p>i want to see if i get this right. in <code>int mk_pipe(struct rt_wdb *fp, const char *name, struct bu_list *headp)</code>, is the reason for pointer aliasing that <code>struct rt_wdb</code>'s first member is a <code>struct bu_list</code>, and the compiler can't be sure that <code>fp</code> and <code>headp</code> point to disjoint memory?</p>
+</blockquote>
+<p>So this is a little complicated to explain because the aliasing typically happens in non-obvious and in unlocalized places.  There's no problem with fp in that function signature.  There's technically (not yet) a problem with headp either except that it's a generic bu_list -- meaning "it's a list of something".  </p>
+<p>If you look in src/libwdb/pipe.c, you'll find that function and sure enough mk_pipe() doesn't really do anything other than add that headp bu_list to another bu_list (i.e., pipe_segs_head).  But if we look at the places pipe_segs_head is used, we start to find aliasing in action that screws with performance.  Consider the destructor function for example: mk_pipe_free() </p>
+<p>In there, it's iterating over a generic "list of something" headp, but casting each list element to a struct wdb_pipept, unlinking it from the list (i.e., dequeue wp-&gt;l), and releasing the memory.  That only worked because wdb_pipept has a bu_list as the first byte in its structure.</p>
+<p>With <em>strict</em> pointer aliasing, the compiler could know that the next element in the bu_list is += sizeof(struct bu_list) bytes ahead... but it's not in our case because it's really += sizeof(struct wdb_pipept) bytes ahead.  And if the compiler assumes wrongly, trying to optimize aggressively, it will end up prefetching the wrong bytes, and it'll typically crash eventually.  When we turn strict aliasing off, it tells the compiler to not do any lookahead optimization, use the manual cast sizes that switch from one thing to another depending on which function we are in.</p>
+<p>Make sense?? :)</p>
+
+
+
+<a name="127718347"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127718347" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127718347">(Jun 07 2018 at 13:38)</a>:</h4>
+<p>So the issue really is bu_list's entire existence because it was implemented specifically to take advantage of non-strict aliasing, for code simplicity, brevity.  The "fix" requires re-evaluating the container being used, and figuring out a different container -- like A) passing a struct wdb_pipept with traditional forw/next pointers in it (so that structure is a list), B) passing a plain NULL-terminated array of wdb_pipept structures, C) using some other generic C container (akin to using a std::vector&lt;struct wdb_pipept&gt;), D) ...</p>
+
+
+
+<a name="127718505"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127718505" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127718505">(Jun 07 2018 at 13:42)</a>:</h4>
+<p>yep, it makes sense now. what i was missing was the part about prefetching the wrong bytes</p>
+
+
+
+<a name="127719060"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127719060" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127719060">(Jun 07 2018 at 13:55)</a>:</h4>
+<p>Great!</p>
+
+
+
+<a name="127719366"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127719366" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127719366">(Jun 07 2018 at 14:03)</a>:</h4>
+<p>For what it’s worth, the answer should be to convert a bu_list to either an array of structs or a struct with array(s) in it.  If you read up and see terms like AoS or SoA or AoSoA, that’s what the typical performance pattern is.  Linked lists should basically never be used any more except underpinning more complex containers like std::map</p>
+
+
+
+<a name="127719633"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127719633" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127719633">(Jun 07 2018 at 14:09)</a>:</h4>
+<p>because of locality, right?</p>
+
+
+
+<a name="127720948"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127720948" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127720948">(Jun 07 2018 at 14:33)</a>:</h4>
+<p>oh, i just looked up SoA and AoS, i've done similar things when implementing graphs, but didn't know they had a name, or their performance implications :D</p>
+
+
+
+<a name="127721782"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127721782" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127721782">(Jun 07 2018 at 14:49)</a>:</h4>
+<p>Yes, memory locality dominates.  When a page of memory is loaded and you access a structure, it’s very likely that the next structure you’ll need is on that same page of memory, so you avoid having to refetch if it’s an array.  With linked list pointers, it’s possible for every structure to live on different pages and always or frequently incur a page fault.</p>
+
+
+
+<a name="127782996"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127782996" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127782996">(Jun 08 2018 at 17:24)</a>:</h4>
+<p>i got two questions :D 1) i profiled rt(1) again, and i can't find hotspots involving bu_list. i understand what the problem is conceptually, but is there anything i can do to convince myself that it is a problem in practice? am i missing something in the rt profile, or do i have to profile something else?; 2) if i do have to replace bu_list with an array-based structure, i'll have to implement (or find something already done — i see that bu/list.h mentions some candidates for replacement) something similar to bu_ptbl, but which holds elements of arbitrary size, and change the entire code base to use this new structure. or are there specific libraries which i should focus on (but if there are, i suppose this ties into my first question — how do i identify them?)?</p>
+
+
+
+<a name="127803396"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127803396" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127803396">(Jun 09 2018 at 02:11)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> did you run rt with -F/dev/null to avoid overhead generated by image writing?</p>
+
+
+
+<a name="127803494"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127803494" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127803494">(Jun 09 2018 at 02:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> I don't know if you'll have to completely replace bu_list everywhere, but any substantial change to bu_list's use in librt I would expect to touch a lot of code.  My advice would be to set up "parallel" implementation files and API calls which replicate functionality using the new replacement for bu_list.  That way, you can instrument things up to do an apples to apples comparison on output accuracy in the old code vs. the rewritten code.  And if (as I suspect) we would have to leave the old code in place while deprecating it in favor of a de-bu_list-ified API, that would position the code well to handle/manage that process.</p>
+
+
+
+<a name="127803590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127803590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127803590">(Jun 09 2018 at 02:19)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> an unrelated point, but something I am curious about - are there any places in the code where our use of bu_ptbl_ins_uniq show up as any sort of performance bottleneck?  The uniqueness guarantee of bu_ptbl_ins_uniq I would expect to get expensive quickly as table sizes grow...  Or, if it doesn't immediately show up in our code, could you try setting up some sort of unit test to get a sense of when bu_ptbl_ins_uniq starts to get problematic performance wise for both random and worst-case uniqueness searching?</p>
+
+
+
+<a name="127803679"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127803679" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127803679">(Jun 09 2018 at 02:22)</a>:</h4>
+<p>It may not matter greatly for raytracing (based on your work to date) but since bu_ptbl seems to perform well enough to keep around I'd like to at least have some sense of what we might do (and when we might need/want to do it) to avoid very high performance penalties for uniq insertion into large bu_ptbl arrays, if it's a test you can do easily and quickly...</p>
+
+
+
+<a name="127803729"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127803729" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127803729">(Jun 09 2018 at 02:24)</a>:</h4>
+<p>e.g. could we "switch" the backend container to a red-black tree implementation or something similar when the bu_ptbl size gets past some size threshold, and keep the current fast behavior at smaller array sizes when the uniq test is cheap enough to not be a concern?</p>
+
+
+
+<a name="127811446"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127811446" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127811446">(Jun 09 2018 at 07:28)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> did you run rt with -F/dev/null to avoid overhead generated by image writing?</p>
+</blockquote>
+<p>no, i was doing <code>-o file.png</code>. i was looking for something like -F when profiling, but i missed it when skimming through the man pages</p>
+
+
+
+<a name="127811451"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127811451" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127811451">(Jun 09 2018 at 07:29)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> I don't know if you'll have to completely replace bu_list everywhere, but any substantial change to bu_list's use in librt I would expect to touch a lot of code.  My advice would be to set up "parallel" implementation files and API calls which replicate functionality using the new replacement for bu_list.  That way, you can instrument things up to do an apples to apples comparison on output accuracy in the old code vs. the rewritten code.  And if (as I suspect) we would have to leave the old code in place while deprecating it in favor of a de-bu_list-ified API, that would position the code well to handle/manage that process.</p>
+</blockquote>
+<p>sounds good</p>
+
+
+
+<a name="127811596"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127811596" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127811596">(Jun 09 2018 at 07:35)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> an unrelated point, but something I am curious about - are there any places in the code where our use of bu_ptbl_ins_uniq show up as any sort of performance bottleneck?  The uniqueness guarantee of bu_ptbl_ins_uniq I would expect to get expensive quickly as table sizes grow...  Or, if it doesn't immediately show up in our code, could you try setting up some sort of unit test to get a sense of when bu_ptbl_ins_uniq starts to get problematic performance wise for both random and worst-case uniqueness searching?</p>
+</blockquote>
+<p><code>bu_ptbl_ins/cat_uniq</code> do show up when profiling, but i can't tell if it's a bottleneck. they show up in <code>rt_boolfinal</code> when iterating over the ~150k partitions, so i think it's because they're called a lot of times, not because the calls themselves are expensive. i drew some graphs a few weeks back showing that the number of segments in the list is &lt;= 12</p>
+
+
+
+<a name="127811795"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127811795" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127811795">(Jun 09 2018 at 07:42)</a>:</h4>
+<blockquote>
+<p>It may not matter greatly for raytracing (based on your work to date) but since bu_ptbl seems to perform well enough to keep around I'd like to at least have some sense of what we might do (and when we might need/want to do it) to avoid very high performance penalties for uniq insertion into large bu_ptbl arrays, if it's a test you can do easily and quickly...</p>
+</blockquote>
+<p>that should be easy to test, but i'm wondering if it's not "premature optimisation", since large bu_ptbls don't seem to show up anywhere. theoretically they can get huge, and i think even for ~10k elements a rb tree would be faster in the worst case, but if that's never exhibited, what's the point? also, i'm not familiar with the particulars of the raytracer, but i think it's splitting the space into lots (~150k) of small (~16 segments) partitions, which works well with the bu_ptbl implementation. or maybe it's a coincidence i've noticed</p>
+
+
+
+<a name="127819322"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127819322" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127819322">(Jun 09 2018 at 12:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> fair enough.  libged's search command uses bu_ptbl, and that was actually the use case I had in mind where bu_ptbl_ins_uniq might end up expensive, but you're correct that that's not the focus for this project.</p>
+
+
+
+<a name="127819377"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/127819377" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#127819377">(Jun 09 2018 at 12:31)</a>:</h4>
+<p>I can always throw it together later if needed, and if you're going to tackle the bu_list question that's going to demand full attention ;-)</p>
+
+
+
+<a name="128010220"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128010220" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128010220">(Jun 13 2018 at 14:07)</a>:</h4>
+<p>i started working on moving <code>struct region</code> to SoA. i should look at the code and see how the structure is used and see if AoSoA is worth trying as well (for example, i've seen loops where only the <code>reg_name</code>member is used, but there are also places where two or more members are used)</p>
+
+
+
+<a name="128010279"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128010279" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128010279">(Jun 13 2018 at 14:08)</a>:</h4>
+<p>i'm also thinking of using xxhash when inserting/updating an element for fast equality check (is this region equal to this other region?). but this should make working with these structs a bit more complicated</p>
+
+
+
+<a name="128010416"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128010416" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128010416">(Jun 13 2018 at 14:10)</a>:</h4>
+<p>a problem i'm currently having is that when inserting/updating, i have to update a lot of arrays (15 in this case). this means at least 30 lines of code (15 if the array needs to be realloc'd and 15 for updating the data), and i'm looking for ways of making this shorter. i was thinking of making the struct a void * array of arrays, where each outer line is a member. then i need to <code>#define</code> the names of the members like <code>#define reg_name el[0]</code> (like tree.h does, i think). but then i think that when using the structure, the members will have to be casted to their actual type. this seems cumbersome. if i can't find a proper solution, i'll just write the code to update each element (maybe generate it with python, outside trunk)</p>
+
+
+
+<a name="128010673"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128010673" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128010673">(Jun 13 2018 at 14:15)</a>:</h4>
+<p>i also still don't know how to measure the impact the data organisation has on the cache. using PMCs, i've determined there are ~1.7x as many "no execute" cycles (waiting for memory) as execute cycles. but i don't know how to measure the impact of each line of code (i think it should be possible). i think this is important because there is a lot of code to change when moving to SoA, and i would prefer to have a way to measure this at the onset</p>
+
+
+
+<a name="128637055"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128637055" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128637055">(Jun 26 2018 at 03:35)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  <span class="user-mention" data-user-id="102902">@Sean</span>  any thoughts on the above? :D i also ran cachegrind on <code>rt</code> inside a debian VM and <a href="https://cezarelnazli.github.io/cg_bool.html" target="_blank" title="https://cezarelnazli.github.io/cg_bool.html">created a table</a> with the results, sorted by L1d misses</p>
+
+
+
+<a name="128637110"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128637110" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128637110">(Jun 26 2018 at 03:37)</a>:</h4>
+<p>the tree structure is responsible for quite a lot of those misses, so i think it's worth looking into? i remember looking at it a few weeks back and it seemed like the addresses of the nodes were close together in memory</p>
+
+
+
+<a name="128685164"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128685164" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128685164">(Jun 26 2018 at 22:52)</a>:</h4>
+<blockquote>
+<p>a problem i'm currently having is that when inserting/updating, i have to update a lot of arrays (15 in this case). this means at least 30 lines of code (15 if the array needs to be realloc'd and 15 for updating the data), and i'm looking for ways of making this shorter. </p>
+</blockquote>
+<p>Why?  Lines of code isn't really a relevant measure.</p>
+<blockquote>
+<p>i was thinking of making the struct a void * array of arrays</p>
+</blockquote>
+<p>If you're type punning, automatic vectorization will not be possible.  Anything getting converted to arrays needs to be non-void, non-pointer arrays.</p>
+<blockquote>
+<p>then i need to <code>#define</code> the names of the members like <code>#define reg_name el[0]</code> (like tree.h does, i think).</p>
+</blockquote>
+<p>Existing #defines are indirections that are no longer best practice and should be avoided.</p>
+<p>In general, I think you jumped on one that is WAY too complicated with struct region... there are tons of considerations, problems, and really hard complexities with most of the core structures.  that's why the original suggestion was to simply pick a bu_list somewhere/anywhere, and convert it to an array (or some other container).  experience with doing a few of those will greatly help solve the harder problems down the road (and much will be learned along the way).  Have you looked at any of the lists?</p>
+
+
+
+<a name="128685364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128685364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128685364">(Jun 26 2018 at 22:57)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  <span class="user-mention" data-user-id="102902">@Sean</span>  any thoughts on the above? :D i also ran cachegrind on <code>rt</code> inside a debian VM and <a href="https://cezarelnazli.github.io/cg_bool.html" target="_blank" title="https://cezarelnazli.github.io/cg_bool.html">created a table</a> with the results, sorted by L1d misses</p>
+</blockquote>
+<p>These results are amplified by incoherent pointer chasing.  Even doing something as simple as shooting rays in bundles should have a major impact on L1/L2 hits.</p>
+<p>Note from an optimization strategy perspective, you want to first look at main memory access stalls, then L3 stalls, then L2, then L1.  If you jump straight to L1, you'll end up injecting complexity that will likely get thrown away (completely) when you then look at other stalls (that are orders of magnitude bigger).</p>
+
+
+
+<a name="128767642"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/128767642" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#128767642">(Jun 28 2018 at 11:41)</a>:</h4>
+<p>ok, i see what you mean. i've found struct temp_file_list inside libbu/temp.c, that looks self-contained. i'll start working on that one</p>
+
+
+
+<a name="189403908"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189403908" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189403908">(Feb 29 2020 at 20:18)</a>:</h4>
+<p>is this any good?</p>
+<div class="codehilite"><pre><span></span>#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+Benchmark results indicate an approximate VGR performance metric of 134454
+Logarithmic VGR metric is 5.13  (natural logarithm is 11.81)
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+</pre></div>
+
+
+
+<a name="189410344"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189410344" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189410344">(Feb 29 2020 at 23:42)</a>:</h4>
+<p>woah.  yeah, that's good.</p>
+
+
+
+<a name="189410345"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189410345" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189410345">(Feb 29 2020 at 23:42)</a>:</h4>
+<p>24 core machine?</p>
+
+
+
+<a name="189410598"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189410598" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189410598">(Feb 29 2020 at 23:50)</a>:</h4>
+<p>40 xeon 4114's @ 2.2, 92g ram, just a ti2080 right now... office workstation...</p>
+
+
+
+<a name="189410627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189410627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189410627">(Feb 29 2020 at 23:51)</a>:</h4>
+<p>40? nice!  might be able to get a higher number then, but that's still pretty outstanding.</p>
+
+
+
+<a name="189410681"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189410681" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189410681">(Feb 29 2020 at 23:53)</a>:</h4>
+<p>I'm sure, I only did =Release, probably lots of other fun flags and minor tweaks to do... mebbe I'll hit it with 'vtune' to learn vtune :D</p>
+
+
+
+<a name="189423633"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189423633" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189423633">(Mar 01 2020 at 07:33)</a>:</h4>
+<p>used vtune for the first time a couple years ago, it's nice and intuitive, bit of a learning curve.</p>
+
+
+
+<a name="189423672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/189423672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#189423672">(Mar 01 2020 at 07:34)</a>:</h4>
+<p>perf works great in a pinch though, super easy and just as good metrics (just without the nice gui)</p>
+
+
+
+<a name="197792565"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/performance/near/197792565" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/performance.html#197792565">(May 16 2020 at 12:05)</a>:</h4>
+<p>Abs  <strong>*</strong>*** 3402463.46        1380366.82      1359886.60      1030002.51      1221374.29      1546660.32      1656792.33      Fri May 15 22:28:48 EDT 2020</p>
+<p>brand new ryzen 3 running minimal ubuntu.<br>
+ryzen 3 3200G 4core 3.6ghz<br>
+16gb ddr4 2400<br>
+'asus tuff b450-plus' motherboard and a slow assed wd spinning platter<br>
+(odd duck, ainnit? it's an anti-gaming desktop that can be turned into a gaming rig, for my oldest. Homework first.)</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

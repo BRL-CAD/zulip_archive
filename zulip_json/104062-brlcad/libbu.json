@@ -1,0 +1,200 @@
+[
+    {
+        "content": "<p>Someone modified the signature of some function and that did this:</p>\n<div class=\"codehilite\"><pre><span></span>[ 33%] Building C object src/libbu/CMakeFiles/libbu-obj.dir/heap.c.o\n/home/rain/Sync/gsoc/brlcad-code/src/libbu/heap.c: In function ‘bu_heap_log’:\n/home/rain/Sync/gsoc/brlcad-code/src/libbu/heap.c:99:38: error: cast between incompatible function types from ‘void (*)(const char *, ...)’ to ‘int (*)(const char *, ...)’ [-Werror=cast-function-type]\n     static bu_heap_func_t heap_log = (bu_heap_func_t)&amp;bu_log;\n                                      ^\n/home/rain/Sync/gsoc/brlcad-code/src/libbu/heap.c: At top level:\ncc1: error: unrecognized command line option ‘-Wno-c11-extensions’ [-Werror]\n</pre></div>",
+        "id": 126560262,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526334773
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> so, I have this problem and idk how to fix it and I can't build mged because of it, did I do something wrong? I try to keep my local gsoc branch up to date with the master, maybe I shouldn't??</p>",
+        "id": 126602093,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526404963
+    },
+    {
+        "content": "<p>well. that was a gcc bug.</p>",
+        "id": 126612939,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526419283
+    },
+    {
+        "content": "<p>What compiler/version are you trying with?  And did you have a working build broken by a recent commit?</p>",
+        "id": 126620655,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526431148
+    },
+    {
+        "content": "<p>I'm using the archlinux packages, the gcc and gcc-libs versions were 8.1.0 and I rolled back to 7.3.1<br>\nI could build it a few commits ago, I even wrote a script that tried to go back further and further to find a commit that would work, but it didn't find any, so that pretty much proved that the error was not in the code. Clang could also build that part of the code (but not some C++ parts), so that was also suspicious.</p>",
+        "id": 126623484,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526437232
+    },
+    {
+        "content": "<p>(corr: it didn't find any within a reasonable timeframe, obviously I didn't wait for it to go back into the 80's)</p>",
+        "id": 126623490,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526437279
+    },
+    {
+        "content": "<p>8.1 is pretty new - I don't know if we're tested there yet</p>",
+        "id": 126625694,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526442055
+    },
+    {
+        "content": "<p>If your main distro is too unstable, an alternative might be to set up a VM - you don't want to spend too much time fighting your build environment</p>",
+        "id": 126625704,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526442113
+    },
+    {
+        "content": "<p>I don't have too much space on my machine, but I'll try to figure something out.<br>\nSo far I had a much better experience with clang, so I'd use that if the C++ parts of the code worked with it. I'm pretty sure Clang also has bugs but GCC did something completely crazy for the second time (I had a uni assignment that it crashed on), so I trust Clang way more.</p>",
+        "id": 126643230,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526474655
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> so, I have this problem and idk how to fix it and I can't build mged because of it, did I do something wrong? I try to keep my local gsoc branch up to date with the master, maybe I shouldn't??</p>\n</blockquote>\n<p>if you run \"svn diff\" what are your changes?  that error is a strictness warning (we turn warnings into errors) that we don't seem to see anywhere else just yet -- what's your compiler version?  confirm what changes you have locally -- nothing changed recently that I\"m aware of that would affect that</p>",
+        "id": 126645137,
+        "sender_full_name": "Sean",
+        "timestamp": 1526477520
+    },
+    {
+        "content": "<blockquote>\n<p>well. that was a gcc bug.</p>\n</blockquote>\n<p>i wouldn't be so sure -- the message is true</p>",
+        "id": 126645204,
+        "sender_full_name": "Sean",
+        "timestamp": 1526477609
+    },
+    {
+        "content": "<blockquote>\n<p>8.1 is pretty new - I don't know if we're tested there yet</p>\n</blockquote>\n<p>ah that would probably explain it -- it's likely a new compiler check that we're getting tripped up on.  the fix would be to either change the signature or wrap bu_log in a function matching the callback</p>",
+        "id": 126645262,
+        "sender_full_name": "Sean",
+        "timestamp": 1526477687
+    },
+    {
+        "content": "<p>I'm using git svn, I compared my branch with master, there was nothing that touched the relevant files. I tried to build master on its own, I wrote that script that went back further and further, and it always failed.</p>",
+        "id": 126646471,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526479383
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  Try compiling with -DBRLCAD_ENABLE_STRICT=OFF and see if that lets you get a working build.</p>",
+        "id": 126675294,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526520709
+    },
+    {
+        "content": "<p>(option to CMake)</p>",
+        "id": 126675309,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526520722
+    },
+    {
+        "content": "<p>I'll try that tomorrow, but I gotta get some shuteye</p>",
+        "id": 126675345,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526520835
+    },
+    {
+        "content": "<p>Sounds good.  Oh, can you upload a version of your patch that doesn't use git formatting for the diff?  Right now we need to apply it in SVN</p>",
+        "id": 126675485,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526521110
+    },
+    {
+        "content": "<p>I'll see if I can take gcc 8.1 for a spin, since it's adding new checks</p>",
+        "id": 126675845,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526521993
+    },
+    {
+        "content": "<p>Urk.  This will take longer than I thought...</p>",
+        "id": 126677182,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526525065
+    },
+    {
+        "content": "<blockquote>\n<p>Urk.  This will take longer than I thought...</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> patch isn't right -- we either need to introduce a bu_vlog function that takes a va_list, expand the wrapper, eliminate the logger, or change bu_log and friends to return an int</p>",
+        "id": 126678692,
+        "sender_full_name": "Sean",
+        "timestamp": 1526528299
+    },
+    {
+        "content": "<p>fixed, expanded the wrapper</p>",
+        "id": 126678955,
+        "sender_full_name": "Sean",
+        "timestamp": 1526528940
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> it should be fixed now -- give it a try (without disabling strict)</p>",
+        "id": 126678967,
+        "sender_full_name": "Sean",
+        "timestamp": 1526528993
+    },
+    {
+        "content": "<p>OK, thanks Sean.  (Yeesh - I did the same sort of thing in nirt, looked at that for an example, and totally zoned on bu_log not being va_list based.   Apparently trying to do more than three things at once is a bad idea...)</p>",
+        "id": 126693162,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526556534
+    },
+    {
+        "content": "<p>I managed to try a gcc 8 build on another machine, and there are several more errors of the function pointer casting variety (at at least one other new one about memsetting a complex data structure.)</p>",
+        "id": 126693224,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526556638
+    },
+    {
+        "content": "<p>it fails to compile a different part:</p>\n<div class=\"codehilite\"><pre><span></span>/home/rain/Sync/gsoc/brlcad-code/src/libbu/parallel.c: In function ‘bu_parallel’:\n/home/rain/Sync/gsoc/brlcad-code/src/libbu/parallel.c:696:38: error: cast between incompatible function types from ‘void (*)(struct thread_data *)’ to ‘void * (*)(void *)’ [-Werror=cast-function-type]\n  if (pthread_create(&amp;thread, &amp;attrs, (void *(*)(void *))parallel_interface_arg, &amp;thread_context[x])) {\n                                      ^\n/home/rain/Sync/gsoc/brlcad-code/src/libbu/parallel.c: At top level:\ncc1: error: unrecognized command line option ‘-Wno-c11-extensions’ [-Werror]\ncc1: all warnings being treated as errors\n</pre></div>",
+        "id": 126705863,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526574656
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> does compiling non-strict work?</p>",
+        "id": 126727339,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526607733
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> yep, but it shows a few other warnings too, idk if those are bad??? they are abour a GNU specific printf format</p>",
+        "id": 126727348,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526607809
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> worth fixing, but if they're not in your immediate code path don't worry about it yet - we need to check what we want to do about the new error category</p>",
+        "id": 126727391,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526607887
+    },
+    {
+        "content": "<p>Yep, patch applied - committed as revision 70970</p>",
+        "id": 126727538,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526608216
+    },
+    {
+        "content": "<p>in <code>malloc.h</code>, i think <code>bu_prmem</code> and <code>bu_mem_barriercheck</code> are useless/broken. in <code>bu_prmem</code>, there two checks before any work happens. one is <code>if (bu_memdebug_len &gt; 0)</code>, and the other is <code>if (bu_memq != BU_LIST_NULL)</code>. however, they are initially set to 0/BU_LIST_NULL and never modified, so the conditions are never true and nothing really happens in that function, except for a few prints. am i missing anything?</p>",
+        "id": 128795111,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530220655
+    },
+    {
+        "content": "<p>and i think <code>bu_mem_barriercheck</code> has a segfault in there. it's doing <code>&amp;bu_memdebug[bu_memdebug_len-1]</code>, but <code>bu_memdebug_len</code> is never greater than 0. and even if it were, it's not doing any checks before the access. it's actually the first line in that function</p>",
+        "id": 128795320,
+        "sender_full_name": "Cezar",
+        "timestamp": 1530220887
+    },
+    {
+        "content": "<blockquote>\n<p>in <code>malloc.h</code>, i think <code>bu_prmem</code> and <code>bu_mem_barriercheck</code> are useless/broken. in <code>bu_prmem</code>, there two checks before any work happens. one is <code>if (bu_memdebug_len &gt; 0)</code>, and the other is <code>if (bu_memq != BU_LIST_NULL)</code>. however, they are initially set to 0/BU_LIST_NULL and never modified, so the conditions are never true and nothing really happens in that function, except for a few prints. am i missing anything?</p>\n</blockquote>\n<p>I committed a removal of all our old barrier check code a couple weeks ago.  I may have missed some details, but there were two public functions that couldn't be directly removed without going through deprecation (bu_ck_malloc_ptr, bu_mem_barriercheck -- see CHANGES).  so their implementations now seem silly, but they're basically no-op functions until we can remove them.</p>",
+        "id": 129063692,
+        "sender_full_name": "Sean",
+        "timestamp": 1530679649
+    },
+    {
+        "content": "<p>sounds like I probably didn't make bu_mem_barriercheck too safe for no-op -- feel free to fix or reduce it further or ignore it. ;)</p>",
+        "id": 129063741,
+        "sender_full_name": "Sean",
+        "timestamp": 1530679697
+    }
+]

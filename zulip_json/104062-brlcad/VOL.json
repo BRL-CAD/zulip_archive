@@ -1,0 +1,530 @@
+[
+    {
+        "content": "<p>Regarding the p command, I've been trying to create a VOL primitive but this command doesn't seem to be working for me: <code>cv hu16 nuc scandata16 scandata8</code>, scandata8 ends up with no data. Do you know why this is happening? I'm almost positive I followed the wiki steps exactly.</p>",
+        "id": 187723282,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581180554
+    },
+    {
+        "content": "<p>Nothing comes to mind <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span></p>",
+        "id": 187726117,
+        "sender_full_name": "Sean",
+        "timestamp": 1581185480
+    },
+    {
+        "content": "<p>does cv have a debug flag?  if it does, that might help figure out what its doing</p>",
+        "id": 187726123,
+        "sender_full_name": "Sean",
+        "timestamp": 1581185500
+    },
+    {
+        "content": "<p>I just tried it on a data file and it definitely downsampled 16bit data to 8bit for me</p>",
+        "id": 187726173,
+        "sender_full_name": "Sean",
+        "timestamp": 1581185585
+    },
+    {
+        "content": "<p>what's scandata16 have in it?</p>",
+        "id": 187726176,
+        "sender_full_name": "Sean",
+        "timestamp": 1581185601
+    },
+    {
+        "content": "<p>I was just following the wiki, and scandata16 had a couple megabytes.</p>",
+        "id": 187727603,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581188347
+    },
+    {
+        "content": "<p>For now, would it be possible for you to send me the scandata8 file? I'd like to use it to test the p command on VOL.</p>",
+        "id": 187727610,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581188391
+    },
+    {
+        "content": "<p>does it give you nothing if you try other types too?</p>",
+        "id": 187727613,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188401
+    },
+    {
+        "content": "<p>like  huc to nuc or something similar that is a pass-through</p>",
+        "id": 187727662,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188422
+    },
+    {
+        "content": "<p>I can't test it at the moment but if I recall correctly, it was fine when I converted a bw to a dsp</p>",
+        "id": 187727676,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581188471
+    },
+    {
+        "content": "<p>try to isolate what exactly isn't working, if other cases do work</p>",
+        "id": 187727719,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188533
+    },
+    {
+        "content": "<p>e.g., does hu16 to nu16 work or nu16 to hu16 or nuc to huc or huc to nuc etc</p>",
+        "id": 187727726,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188578
+    },
+    {
+        "content": "<p>those labels are basically just telling cv how to handle the bytes in the file</p>",
+        "id": 187727734,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188608
+    },
+    {
+        "content": "<p>so for hu16 to nu16, it convert pairs of bytes like ABABABAB...  to BABABABA...</p>",
+        "id": 187727783,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188677
+    },
+    {
+        "content": "<p>hu16 to nuc should be downsampling so ABABABAB... becomes CCCC...</p>",
+        "id": 187727800,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188732
+    },
+    {
+        "content": "<p>it's curious that the tutorial is suggesting network order on the unsigned chars.. I'd suggest trying hu16 to huc, see if that results in data</p>",
+        "id": 187727850,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188805
+    },
+    {
+        "content": "<p>complete guess, but what could be happening is there may be some bug on Windows (I assume you're doing this on Windows) related to network-order and host-order bytes.</p>",
+        "id": 187727859,
+        "sender_full_name": "Sean",
+        "timestamp": 1581188864
+    },
+    {
+        "content": "<p>Hm, using different combinations of '16' and 'c', only \"huc\" to \"nu16\" results in any data. It probably is a Windows thing though...</p>",
+        "id": 187783277,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581299419
+    },
+    {
+        "content": "<p>Ok so the conversion worked in Linux, and then I tried the \"p\" command that applied to VOL. Out of the three commands included (ECMD_VOL_THRESH_LO, ECMD_VOL_THRESH_HI, and ECM_VOL_CSIZE), the two threshold changing commands work, but changing the voxel size doesn't (but I think it would if I removed the <code>es_edflag == ECMD_VOL_CSIZE</code> conditional from the SEDIT_SCALE)</p>",
+        "id": 187787887,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581308469
+    },
+    {
+        "content": "<p>hm, so sounds like cv is outright broken on Windows</p>",
+        "id": 187787930,
+        "sender_full_name": "Sean",
+        "timestamp": 1581308557
+    },
+    {
+        "content": "<p>cv is a relatively simple program.  almost certainly something basic is failing like endianneess detection or file I/O in text vs binary or something similar</p>",
+        "id": 187787939,
+        "sender_full_name": "Sean",
+        "timestamp": 1581308630
+    },
+    {
+        "content": "<p>So I tested the 'p' fix again by removing that one conditional from SEDIT_SCALE and it worked, but it doesn't seem like the best idea since I have no idea where else the macro is used for... That is unfortunate though, because the rest of the things all work since they only require a single argument while this one requires three.</p>",
+        "id": 187788369,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581309457
+    },
+    {
+        "content": "<p>^ What I mean by that is my change involved checking EDIT_SCALE instead of just PSCALE and SSCALE, and it works for the most part (the \"three arguments needed\" no longer appears when trying to scale EBM, DSP, or VOL), but that one voxel size conditional isn't working</p>",
+        "id": 187788619,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581309985
+    },
+    {
+        "content": "<p>If that doesn't work, then using the EDIT_SCALE check won't work. The only other alternative I can think of would be to sImply include the necessary checks in the conditional by adding more ORs. I don't see anything wrong with that, except for the fact that it's a lot messier than using a single macro.</p>",
+        "id": 187788824,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581310426
+    },
+    {
+        "content": "<p>ah, hm</p>",
+        "id": 187833279,
+        "sender_full_name": "Sean",
+        "timestamp": 1581353197
+    },
+    {
+        "content": "<p>yeah, I think the problem is that we really need macros categorized by the number of parameters instead of by type of operation</p>",
+        "id": 187834059,
+        "sender_full_name": "Sean",
+        "timestamp": 1581353726
+    },
+    {
+        "content": "<p>since they ultimately seem to be describing how the 'p' command is to validate/behave</p>",
+        "id": 187834108,
+        "sender_full_name": "Sean",
+        "timestamp": 1581353755
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> would it make sense to change/replace them like that (at least the higher-level macros like EDIT SCALE)</p>",
+        "id": 187834197,
+        "sender_full_name": "Sean",
+        "timestamp": 1581353789
+    },
+    {
+        "content": "<p>Actually, I had the same idea in mind and was planning on asking - maybe not change or replace the macro entirely because other code also makes use of it (unless that's fine), but add new #defines for something like ONE_ARG, TWO_ARG, etc?</p>",
+        "id": 187877758,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581387271
+    },
+    {
+        "content": "<p>well you'd have to briefly look at what the other code is doing with those macros to decide whether to keep them or add to them.</p>",
+        "id": 187879459,
+        "sender_full_name": "Sean",
+        "timestamp": 1581389943
+    },
+    {
+        "content": "<p>I wouldn't just add to them without looking as adding more symbols will be an increase in overall complexity, especially if they only get used in one place.  that'd be motivation to just add more ORs using the existing symbols.</p>",
+        "id": 187879521,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390015
+    },
+    {
+        "content": "<p>Ok, that makes sense - I'll take a closer look at where they're being used when I get the chance. I searched it once through the entire solution, and if I recall correctly, they were used maybe around 3-4 times (that estimate may be low).</p>",
+        "id": 187879776,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581390587
+    },
+    {
+        "content": "<p>+1</p>",
+        "id": 187879819,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390608
+    },
+    {
+        "content": "<p>any symbols that only get used once, unless they're part of a set, are typically good candidates for removal (to reduce complexity)</p>",
+        "id": 187879823,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390636
+    },
+    {
+        "content": "<p>Hm, in that case, if that's the only place where some sort of parameter count categorization is needed, then maybe it would just be better to add more ORs?</p>",
+        "id": 187879834,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581390688
+    },
+    {
+        "content": "<p>unless you make a set like ONE_ARG, TWO_ARG, etc that simplify understanding ;)</p>",
+        "id": 187879881,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390730
+    },
+    {
+        "content": "<p>So, if I understand correctly, new macros could be defined if simply editing EDIT_SCALE is not an option?</p>",
+        "id": 187879945,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581390890
+    },
+    {
+        "content": "<p>sure</p>",
+        "id": 187879960,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390934
+    },
+    {
+        "content": "<p>there's not hard rules</p>",
+        "id": 187879963,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390941
+    },
+    {
+        "content": "<p>just a desire to keep the code / API as simple as possible for the next person reading the code, but as complex as it needs to be today is fine too</p>",
+        "id": 187880007,
+        "sender_full_name": "Sean",
+        "timestamp": 1581390978
+    },
+    {
+        "content": "<p>It looks like all the other occurences of SEDIT_SCALE appear in cases like this:</p>\n<div class=\"codehilite\"><pre><span></span>if (!SEDIT_SCALE)\n            es_edflag = SSCALE;\n</pre></div>\n\n\n<p>that are all in a switch case for am_mode. Not really sure exactly what the switch case means/does, but the usage seems important to say the least?</p>",
+        "id": 187880396,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581391573
+    },
+    {
+        "content": "<p>Oh sorry, it's used much more than that - I was only looking in a single file. I think that with this many occurences, editing that macro may have some undesired side effects.</p>",
+        "id": 187880597,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581391949
+    },
+    {
+        "content": "<p>Yeah, turns out it's being used 9 times in chgview.c, doevent.c, edsol.c, mged.c, and usepen.c. I haven't looked deeply into each use case, but I definitely think that it might be simpler to create a set of ONE_ARG, TWO_ARG, etc.</p>",
+        "id": 187880913,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581392517
+    },
+    {
+        "content": "<p>Also, in order to categorize macros by parameter count, even if SEDIT_SCALE was modified to accomodate for single parameter commands, wouldn't new defines be needed for TWO_ARG and THREE_ARG? And in that case, I feel like it would be simpler to just leave SEDIT_SCALE as be and then create a separate ONE_ARG macro.</p>",
+        "id": 187881034,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581392722
+    },
+    {
+        "content": "<p>sounds good, analysis performed ;)</p>",
+        "id": 187881040,
+        "sender_full_name": "Sean",
+        "timestamp": 1581392758
+    },
+    {
+        "content": "<p>Cool, so I'll add the set in sedit.h. Thanks so much for your advice! I was a little stuck there, macros still are pretty confusing to me.</p>",
+        "id": 187881097,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581392840
+    },
+    {
+        "content": "<p>yeah, I think you're probably right.  new macros sound like they're in order.</p>",
+        "id": 187881098,
+        "sender_full_name": "Sean",
+        "timestamp": 1581392842
+    },
+    {
+        "content": "<p>you will want to give them a proper prefix so they're consistent with other defines.  for example, if they're only used in sedit.c, then something like SEDIT_1ARG, SEDIT_2ARG, etc or SEDIT_1PARAM or PARAM_1ARG, etc may make sense.</p>",
+        "id": 187881155,
+        "sender_full_name": "Sean",
+        "timestamp": 1581392977
+    },
+    {
+        "content": "<p>Oh wait, so if they're being used in edsol.c (where the check is happening), should I just define it there instead of in sedit.h? I guess that makes more sense now that I think about it...</p>",
+        "id": 187881286,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581393182
+    },
+    {
+        "content": "<p>Alright, here's my changes with the macros. I basically just transferred what was needed from the conditionals, so let me know if it's missing anything: <a href=\"/user_uploads/1549/A3mBGi-XSYM8bgBI-dHw1DLI/p_command.patch\" target=\"_blank\" title=\"p_command.patch\">p_command.patch</a></p>",
+        "id": 188073239,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581561558
+    },
+    {
+        "content": "<p>I tested it with the EBM, DSP, and VOL scaling and it's worked for everything that I've tried so far.</p>",
+        "id": 188073254,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581561599
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> That looks like a perfect patch!  Very cool, well done.</p>",
+        "id": 188228303,
+        "sender_full_name": "Sean",
+        "timestamp": 1581702258
+    },
+    {
+        "content": "<p>That being your second flawless change also means something special too... you now have been promoted with direct commit privileges.</p>",
+        "id": 188228392,
+        "sender_full_name": "Sean",
+        "timestamp": 1581702334
+    },
+    {
+        "content": "<p>Please read in HACKING what that means in terms of expectations, but it also means you can apply this latest patch yourself.  That's also a good test just to make sure your checkout and account is set up correctly.  You shouldn't need to do anything special other than \"svn commit path/to/file\" or run svn diff to make sure that's the only changes you've made and \"svn commit\" .</p>",
+        "id": 188228520,
+        "sender_full_name": "Sean",
+        "timestamp": 1581702430
+    },
+    {
+        "content": "<p>Thank you for all your work on this!</p>",
+        "id": 188229048,
+        "sender_full_name": "Sean",
+        "timestamp": 1581702795
+    },
+    {
+        "content": "<p>Wow, that's awesome!! Thanks so much - I will definitely use this privilege as wisely as I can :)</p>",
+        "id": 188235727,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581707150
+    },
+    {
+        "content": "<p>s/wisely/frequently/  :-D</p>",
+        "id": 188245485,
+        "sender_full_name": "Sean",
+        "timestamp": 1581713587
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> You definitely earned it.  Thank you for all your efforts improving ebm, dsp, and vol</p>",
+        "id": 188245649,
+        "sender_full_name": "Sean",
+        "timestamp": 1581713703
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> how's it going?  problems getting the commit to post?</p>",
+        "id": 188313048,
+        "sender_full_name": "Sean",
+        "timestamp": 1581829798
+    },
+    {
+        "content": "<p>Sorry, I was a bit busy over the weekend but I just read over HACKING again and then committed my changes. I think it worked, but let me know if I did anything wrong.</p>",
+        "id": 188416015,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581986947
+    },
+    {
+        "content": "<p>HACKING was quite long though, I think I'll need to refer to it several more times...</p>",
+        "id": 188416029,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581986993
+    },
+    {
+        "content": "<p>That's normal - we refer to it ourselves</p>",
+        "id": 188417266,
+        "sender_full_name": "starseeker",
+        "timestamp": 1581989088
+    },
+    {
+        "content": "<p>Yikes sorry about the bracket thing... I had some other unrelated changes to edsol.c, so I cloned the repository again elsewhere and tried to transfer the relevant changes over to the new untouched version before committing. I guess I missed something though - would there have been a better way to do it?</p>",
+        "id": 188419914,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1581994161
+    },
+    {
+        "content": "<p>The best way to catch  those is to do a build test before committing</p>",
+        "id": 188507134,
+        "sender_full_name": "starseeker",
+        "timestamp": 1582073788
+    },
+    {
+        "content": "<p>Right - my fault, don't know why VS didn't catch something like that though</p>",
+        "id": 188543339,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1582118756
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"250111\">Jeffrey Liu</span> <a href=\"#narrow/stream/104062-general/topic/VOL/near/188416015\" title=\"#narrow/stream/104062-general/topic/VOL/near/188416015\">said</a>:</p>\n<blockquote>\n<p>Sorry, I was a bit busy over the weekend but I just read over HACKING again and then committed my changes. I think it worked, but let me know if I did anything wrong.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> looked good to me other than you probably skipped compiling before committing given that one curly brace was missing, but otherwise it still looks like you're set up correctly and ready to commit  with rest of us as you like</p>",
+        "id": 188824801,
+        "sender_full_name": "Sean",
+        "timestamp": 1582390996
+    },
+    {
+        "content": "<p>if you have any other patches pending, feel free to get them merged in and committed too.  don't be like me and have 20 branches with uncommitted work that goes stale ;)</p>",
+        "id": 188824874,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391063
+    },
+    {
+        "content": "<p>Cool! I think all my other work is still a WIP (Appleseed and the GUI), so I don't think it's ready to be committed.</p>",
+        "id": 188824975,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1582391208
+    },
+    {
+        "content": "<p>it's okay to commit works in progress as long as you protect them AND document them</p>",
+        "id": 188824989,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391237
+    },
+    {
+        "content": "<p>for example, you can wrap them in #ifdef WORK_IN_PROGRESS ... if it's changes to existing published+documented code</p>",
+        "id": 188825048,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391298
+    },
+    {
+        "content": "<p>in the case of 'art, though, that's completely new development and hasn't been announced, so there is no problem committing anything to art.cpp for example so long as you don't break compilation for others</p>",
+        "id": 188825068,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391338
+    },
+    {
+        "content": "<p>whenever something is in-progress/incomplete, it's also good to leave a comment as to that status, though we try to keep that to a minimum and commit the smallest working steps that won't affect others negatively</p>",
+        "id": 188825160,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391421
+    },
+    {
+        "content": "<p>can't commit too frequently ;)</p>",
+        "id": 188825163,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391426
+    },
+    {
+        "content": "<p>Ah ok, that makes sense. I'll try to commit them when I get the time. Sorry about the Appleseed light testing and stuff, I've been pretty busy with school recently.</p>",
+        "id": 188825240,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1582391546
+    },
+    {
+        "content": "<p>it's okay, school's important :)</p>",
+        "id": 188825251,
+        "sender_full_name": "Sean",
+        "timestamp": 1582391575
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"250111\">Jeffrey Liu</span> <a href=\"#narrow/stream/104062-general/topic/VOL/near/188416029\" title=\"#narrow/stream/104062-general/topic/VOL/near/188416029\">said</a>:</p>\n<blockquote>\n<p>HACKING was quite long though, I think I'll need to refer to it several more times...</p>\n</blockquote>\n<p>Any feedback on HACKING?  Did any parts of it seem unnecessary or irrelevant or a bore or annoying or fantastic or just right or all wrong or ...   Any suggestions for improving it?</p>",
+        "id": 189227536,
+        "sender_full_name": "Sean",
+        "timestamp": 1582819757
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> My Ultimate VOL Masterpiece, putting my skills to an ultimate test, <br>\nOriginal Picture, <a href=\"/user_uploads/1549/4kQxa4W5W6Rn2mdBNOn8QfOK/image.png\">image.png</a> <br>\nWireframe, <a href=\"/user_uploads/1549/m2ooVkdAzf3FsMfiyXS2pvMH/image.png\">image.png</a> <br>\nRay Traced,  <a href=\"/user_uploads/1549/0De_wztzYUk24cKKkWhqR2IG/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/4kQxa4W5W6Rn2mdBNOn8QfOK/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/4kQxa4W5W6Rn2mdBNOn8QfOK/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/m2ooVkdAzf3FsMfiyXS2pvMH/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/m2ooVkdAzf3FsMfiyXS2pvMH/image.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/0De_wztzYUk24cKKkWhqR2IG/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/0De_wztzYUk24cKKkWhqR2IG/image.png\"></a></div>",
+        "id": 205690716,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596303203
+    },
+    {
+        "content": "<p>Took me 24 layers.</p>",
+        "id": 205690722,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596303227
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/JBwFxwYyK5WM73GWjnBH3H6a/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/JBwFxwYyK5WM73GWjnBH3H6a/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/JBwFxwYyK5WM73GWjnBH3H6a/image.png\"></a></div>",
+        "id": 205690769,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596303257
+    },
+    {
+        "content": "<p>I tried to assign colors also but didn't work out.</p>",
+        "id": 205690793,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596303330
+    },
+    {
+        "content": "<p><span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>",
+        "id": 205690797,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596303339
+    },
+    {
+        "content": "<p>looks like the original picture's base is 17x17, but yours is 11x11 ... :)</p>",
+        "id": 205708343,
+        "sender_full_name": "Sean",
+        "timestamp": 1596336286
+    },
+    {
+        "content": "<p>otherwise, nicely done!</p>",
+        "id": 205708344,
+        "sender_full_name": "Sean",
+        "timestamp": 1596336292
+    },
+    {
+        "content": "<p>Yeah, I set it to 19x11. That's why.</p>",
+        "id": 205708352,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596336323
+    },
+    {
+        "content": "<p>I could make the base bigger, but I just went for the original picture's pattern. That's why, the base was small.</p>",
+        "id": 205708396,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596336384
+    },
+    {
+        "content": "<p>I don't understand.</p>",
+        "id": 205708399,
+        "sender_full_name": "Sean",
+        "timestamp": 1596336408
+    },
+    {
+        "content": "<p>The base was so small, because I didn't thought about the size of the base, I thought about the trophy's hands, So I set the maximum dimensions as 19x11. That's why I have to made that base small.</p>",
+        "id": 205708451,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596336529
+    },
+    {
+        "content": "<p>But, I could make it bigger.</p>",
+        "id": 205708455,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1596336542
+    }
+]

@@ -1,0 +1,474 @@
+<html>
+<head><meta charset="utf-8"><title>Arbalest V&amp;V · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html">Arbalest V&amp;V</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="307885023"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/307885023" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#307885023">(Nov 04 2022 at 05:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> There's been a team of students working on a V&amp;V interface for geometry that is built on top of Arbalest.  From a user's perspective, they've added a "compile" button next to the rendering button that presents the user with a suite of tests that can be run (e.g., are there overlaps; is there a title set; are there any region ID, los, aircode mismatches; are there regions within regions; etc).  Results display in a table view similar to how warnings are displayed in MSVC.</p>
+
+
+
+<a name="307885039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/307885039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#307885039">(Nov 04 2022 at 05:07)</a>:</h4>
+<p>What are your thoughts on either keeping it separate or integrating it back?</p>
+
+
+
+<a name="307885373"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/307885373" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#307885373">(Nov 04 2022 at 05:10)</a>:</h4>
+<p>I'd like to integrate it back so it continues to benefit from the improvements you and <span class="user-mention" data-user-id="252475">@Himanshu Sekhar Nayak</span> have been making, and would likely be a tool that will continue to receive attention as this is intended to become a new production capability that can audit, report on, help visualize, and (later) potentially fix geometry issues.</p>
+
+
+
+<a name="307908623"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/307908623" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#307908623">(Nov 04 2022 at 08:59)</a>:</h4>
+<p>I like the idea of integrating it back. What is this V&amp;V compilation based on? Before, you said libged. This would however have the touch of a bad hack (based on what was available to them). Not a show stopper, but doing it right would need some additional work.</p>
+<p>In addition, a plugin like architecture for including such extensions in arbalest would be desirable. Hacking is easy, but hard to maintain.</p>
+
+
+
+<a name="309243392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/309243392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#309243392">(Nov 11 2022 at 18:34)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Yes, it's still based on calls into libged, specifically just ged_exec(), calling commands for which there is no other API or mechanism available to do the testing it's doing (e.g., running "lc -m" to detect mismatches or sifting through gqa output to see if objects are unhittable or testing conversion via facetize, etc).  The calls are encapsulated through a single call site -- essentially calls ged_exec() and parses what a given test needs out of the results, which varies from command to command and is expected to change (and get expanded to other tests+parsings).</p>
+
+
+
+<a name="309243563"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/309243563" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#309243563">(Nov 11 2022 at 18:35)</a>:</h4>
+<p>Here's a few screenshots of the current progress:  <br>
+<a href="/user_uploads/1549/3dP2V-ifSEHt21pQ1b95nldk/Screen-Shot-2022-11-10-at-8.37.05-PM.png">Screen-Shot-2022-11-10-at-8.37.05-PM.png</a> <a href="/user_uploads/1549/oz_qr4iuhNIGjpPwFslMqrII/Screen-Shot-2022-11-10-at-8.39.54-PM.png">Screen-Shot-2022-11-10-at-8.39.54-PM.png</a> <a href="/user_uploads/1549/6LRkYOGhtoPhpiC7EloNs-fu/Screen-Shot-2022-11-10-at-8.41.00-PM.png">Screen-Shot-2022-11-10-at-8.41.00-PM.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/3dP2V-ifSEHt21pQ1b95nldk/Screen-Shot-2022-11-10-at-8.37.05-PM.png" title="Screen-Shot-2022-11-10-at-8.37.05-PM.png"><img src="/user_uploads/1549/3dP2V-ifSEHt21pQ1b95nldk/Screen-Shot-2022-11-10-at-8.37.05-PM.png"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/oz_qr4iuhNIGjpPwFslMqrII/Screen-Shot-2022-11-10-at-8.39.54-PM.png" title="Screen-Shot-2022-11-10-at-8.39.54-PM.png"><img src="/user_uploads/1549/oz_qr4iuhNIGjpPwFslMqrII/Screen-Shot-2022-11-10-at-8.39.54-PM.png"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/6LRkYOGhtoPhpiC7EloNs-fu/Screen-Shot-2022-11-10-at-8.41.00-PM.png" title="Screen-Shot-2022-11-10-at-8.41.00-PM.png"><img src="/user_uploads/1549/6LRkYOGhtoPhpiC7EloNs-fu/Screen-Shot-2022-11-10-at-8.41.00-PM.png"></a></div>
+
+
+
+<a name="309243744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/309243744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#309243744">(Nov 11 2022 at 18:37)</a>:</h4>
+<p>There's a new button next to the render button that kicks off the test.  The menu option still needs to go away / get hidden under a settings section.</p>
+
+
+
+<a name="309243973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/309243973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#309243973">(Nov 11 2022 at 18:38)</a>:</h4>
+<p>I have a binary build ready for testing if you or anyone else wants to try it out.  They would love to have feedback (scope is fixed, but they have a couple weeks remaining to make changes).</p>
+
+
+
+<a name="309244005"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/309244005" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#309244005">(Nov 11 2022 at 18:38)</a>:</h4>
+<p>It can also be compiled from their fork of the arbalest repo.</p>
+
+
+
+<a name="309922918"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/309922918" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#309922918">(Nov 14 2022 at 18:25)</a>:</h4>
+<p>It would be interesting to see how it was done, even if the code is not suited to be integrated back. Himanshu wants to port arbalest to MOOSE after his GSoC project. This would make <code>CommandString</code> available there.</p>
+
+
+
+<a name="310132741"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310132741" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310132741">(Nov 15 2022 at 06:01)</a>:</h4>
+<p>I would actually hope it's suitable to be integrated back or get a list of issues preventing integration.  I have a binary for Windows that can be tested and the code is at <a href="http://github.com/isaacy13/arbalest">http://github.com/isaacy13/arbalest</a></p>
+
+
+
+<a name="310133359"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310133359" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310133359">(Nov 15 2022 at 06:09)</a>:</h4>
+<p>A binary is available at <a href="https://brlcad.org/~sean/tmp/GeometryV&amp;V.zip">https://brlcad.org/~sean/tmp/GeometryV&amp;V.zip</a>   (570MB)</p>
+
+
+
+<a name="310133832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310133832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310133832">(Nov 15 2022 at 06:15)</a>:</h4>
+<p>On a related note -- any idea why the OpenGL context wouldn't be working once deployed/copied to another system?  I tried QT_OPENGL=desktop, angle, and software to no avail.  Tried setting QT_OPENGL_DLL too.  It raytraces to a window (and displays that image just fine), so it's something specific to the context I presume.</p>
+
+
+
+<a name="310266312"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310266312" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310266312">(Nov 15 2022 at 18:47)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/310132741">said</a>:</p>
+<blockquote>
+<p>I would actually hope it's suitable to be integrated back or get a list of issues preventing integration.  I have a binary for Windows that can be tested and the code is at <a href="http://github.com/isaacy13/arbalest">http://github.com/isaacy13/arbalest</a></p>
+</blockquote>
+<p>I'll have a look at it.</p>
+
+
+
+<a name="310268000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310268000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310268000">(Nov 15 2022 at 18:56)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/310133832">said</a>:</p>
+<blockquote>
+<p>On a related note -- any idea why the OpenGL context wouldn't be working once deployed/copied to another system?  I tried QT_OPENGL=desktop, angle, and software to no avail.  Tried setting QT_OPENGL_DLL too.  It raytraces to a window (and displays that image just fine), so it's something specific to the context I presume.</p>
+</blockquote>
+<p>Do you have dynamical run-time-library linkage? The are probably more DLLs needed than just the C-runtime. You could try to install the Visual C++ Redistributable at the target systems. Or is a Qt-plugin needed? Have you checked it wit a dependency walker?</p>
+<p>I prefer however the static linkage of the Visual Studio and Qt libraries. I had no issues with OpenGL with it so far.</p>
+
+
+
+<a name="310518012"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310518012" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310518012">(Nov 16 2022 at 23:08)</a>:</h4>
+<p>Unless something was missed, the zip includes the c++ redistributable dll's -- and since it's a debug mode compile, it throws up a dialog for dll's that are missing.  They're using arbalest's existing build files and just added their new files, so whatever linkage it was doing is what it should still be doing.  I think the only library added in addition to Qt was sqlite, which is used as a results storage mechanism. </p>
+<p>I'm not familiar with any dependency walkers on Windows.  What's the equivalent of ldd or otool ?</p>
+
+
+
+<a name="310518251"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310518251" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310518251">(Nov 16 2022 at 23:10)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/310266312">said</a>:</p>
+<blockquote>
+<p>I'll have a look at it.</p>
+</blockquote>
+<p>If you can provide feedback before Tuesday, that would be awesome.  App or source code feedback.  They'd really appreciate it.</p>
+
+
+
+<a name="310678939"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/310678939" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#310678939">(Nov 17 2022 at 19:05)</a>:</h4>
+<blockquote>
+<p>If you can provide feedback before Tuesday, that would be awesome.  App or source code feedback.  They'd really appreciate it.</p>
+</blockquote>
+<p>I'm away these days, but I'll see what I can do. Maybe next weekend.</p>
+
+
+
+<a name="311140109"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311140109" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311140109">(Nov 20 2022 at 13:29)</a>:</h4>
+<p><a href="https://en.wikipedia.org/wiki/Dependency_Walker">Dependency Walker</a> is like ldd.</p>
+
+
+
+<a name="311157430"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311157430" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311157430">(Nov 20 2022 at 16:08)</a>:</h4>
+<p>There are at least two showstoppers for a direct integration back:</p>
+<ul>
+<li>It requires a BRL-CAD standard installation. Beside the simplification, the C++ API aims to create a set of libraries and applications which could be integrated in a usual Linux distribution.</li>
+<li>Even worse, it doesn't work on the Arbalest document. It requires to save it first.</li>
+</ul>
+<p>I think that it would make more sense to integrate these V&amp;V routines in qged. As far as I understood, this is a (kind of a) port of Arbalest to BRL-CAD's basic C API. There, the standard BRL-CAD installation will always be around and you have access to the internal database handles, e.g. rt_wdb. In the original Arbalest the routines feel out of place.</p>
+
+
+
+<a name="311468237"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311468237" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311468237">(Nov 21 2022 at 20:22)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I certainly understand the first bullet, though I think the scope could probably be limited to libged and the libged plugins that it calls into.  I think there are some libbu directory management routines (e.g., where's the system cache) it's calling that could potentially be integrated under the C++ api.</p>
+
+
+
+<a name="311468353"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311468353" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311468353">(Nov 21 2022 at 20:23)</a>:</h4>
+<p>At least originally, my thinking was that the V&amp;V modifications would be plugin extension(s), using arbalest as an app platform so it can leverage from the GUI infrastructure, display/selection features, and the Qt facilities.</p>
+
+
+
+<a name="311468591"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311468591" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311468591">(Nov 21 2022 at 20:24)</a>:</h4>
+<p>I'm not sure I understand the second bullet about not working on the Arbalest document though -- can you elaborate?  The V&amp;V checks are performed read-only.  The only thing written out should be a corresponding sqlite database that is stored in the cache folder (so when you return to that .g later, it can keep track of any changes made).</p>
+
+
+
+<a name="311469705"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311469705" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311469705">(Nov 21 2022 at 20:33)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/311157430">said</a>:</p>
+<blockquote>
+<p>I think that it would make more sense to integrate these V&amp;V routines in qged. As far as I understood, this is a (kind of a) port of Arbalest to BRL-CAD's basic C API. There, the standard BRL-CAD installation will always be around and you have access to the internal database handles, e.g. rt_wdb. In the original Arbalest the routines feel out of place.</p>
+</blockquote>
+<p>Personally, I'm not happy with there being two Qt efforts as they're highly duplicitous.  I really don't think it's helpful to split up development capacity like that..  I'd like to move towards the architecture plan I'd shared a while back where there's a new (Qt) GUI built on top of the C++ API but is also able to access ged commands.  Basically, the merge of qged+arbalest.  qged has a fantastic CLI and 3D display, but not as good on the overall appearance, usability, and cleanliness of the document management and underlying architecture encapsulation.  We have talked a bit about what it'd take to merge them, leverage the best of both.  I think there's real potential there.</p>
+
+
+
+<a name="311470449"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311470449" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311470449">(Nov 21 2022 at 20:37)</a>:</h4>
+<p>If I'm alone in that, c'est la vie I suppose... but I feel compelled to try!   I really do think we finally have all the underlying pieces needed to replace mged in a big way, and they're currently spread across arbalest, rt^3/coreInterface, qged, libged, librt, and ospray.</p>
+
+
+
+<a name="311470644"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311470644" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311470644">(Nov 21 2022 at 20:38)</a>:</h4>
+<p>A naive question about Arbalest's intent longer term - is it intended to eventually replace MGED?</p>
+
+
+
+<a name="311470821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311470821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311470821">(Nov 21 2022 at 20:39)</a>:</h4>
+<p>The talk about "Documents" sounded rather awkward for things like command line scripted processing, but that may just be my own limited understanding.</p>
+
+
+
+<a name="311471258"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311471258" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311471258">(Nov 21 2022 at 20:42)</a>:</h4>
+<p>In this context, document refers to the MDI model that arbalest is leveraging in Qt.  It's a standard app model for discretely managing separately open contexts.</p>
+
+
+
+<a name="311471650"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311471650" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311471650">(Nov 21 2022 at 20:44)</a>:</h4>
+<p>Basically "document" is an open .g file.  Has nothing to do with the type of the file and doesn't imply documentation or a text file and such.</p>
+
+
+
+<a name="311472260"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311472260" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311472260">(Nov 21 2022 at 20:46)</a>:</h4>
+<p>When we have more time I guess we should do an in-depth discussion about the details of the various interfaces' design features of qged and Arbalest.</p>
+
+
+
+<a name="311473414"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311473414" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311473414">(Nov 21 2022 at 20:55)</a>:</h4>
+<p>The two biggest differences, in my view, is that arbalest has clean classes (clean code) and encapsulation.  There's no data being accessed without going through an object that is responsible for or represents that data.  That is, clean object-oriented definitions.</p>
+<p>That makes it super easy to follow from a CS perspective.  No side effects, no gotchas.  It's almost text-book.</p>
+
+
+
+<a name="311473566"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311473566" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311473566">(Nov 21 2022 at 20:56)</a>:</h4>
+<p>I've put a fair bit of effort into developing a Qt-style model for the .g file state - has Arbalest done that?</p>
+
+
+
+<a name="311473755"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311473755" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311473755">(Nov 21 2022 at 20:57)</a>:</h4>
+<p>qged is much more procedural in design.  There are classes by necessity where interfacing with Qt, but data is not encapsulated as much, and definitely not in a classical OO paradigm.</p>
+
+
+
+<a name="311475462"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311475462" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311475462">(Nov 21 2022 at 21:09)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/311473566">said</a>:</p>
+<blockquote>
+<p>I've put a fair bit of effort into developing a Qt-style model for the .g file state - has Arbalest done that?</p>
+</blockquote>
+<p>I'm not sure what you mean by that.  I think the answer is a strict yes -- that's fully encapsulated in the aforementioned C++ api (rt^3/coreInterface) and a class representing that object.</p>
+
+
+
+<a name="311475744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311475744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311475744">(Nov 21 2022 at 21:11)</a>:</h4>
+<p>I mean you can see some stark differences of the clean oo vs procedural that I'm referring to simply by looking at main() in both.  It extends throughout the code base, in general.</p>
+
+
+
+<a name="311475928"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311475928" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311475928">(Nov 21 2022 at 21:12)</a>:</h4>
+<p>So if the command line adds or removes comb tree elements, the Arbalest tree is automatically updated?</p>
+
+
+
+<a name="311476317"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311476317" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311476317">(Nov 21 2022 at 21:15)</a>:</h4>
+<p>For example, in arbalest, the window is all encapsulated within a MainWindow class.  Main is short and sweet, and would be not much changed even if we introduced a CLI-only mode or made it support settings/options/etc.</p>
+<p>In qged, there's a BRLCAD_MainWindow (and CADapp, both expected) also.   But most of the rest is de-encapsulation.  There's procedural handling of console (instead of having a Console and GUI app classes that inherit from a base), procedural option handling (which should be handled by the app), some hard-insertion of settings for QOpenGLWidget that doesn't belong there, some theming  stuff (that probably belonged in the window class), settings ... and more, but you get the idea (hopefully?).</p>
+<p>It's not a critique, it's simply very different technical approach and has different coding practices.</p>
+
+
+
+<a name="311477202"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311477202" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311477202">(Nov 21 2022 at 21:21)</a>:</h4>
+<p>&lt;nod&gt;  I think I do.  I guess I gravitate towards that approach at this stage because I'm still figuring out what the necessary pieces of the puzzle are, and it's easier (at least for me) to be able to adjust and tweak the procedural flows in a few pieces rather than having to unpack (and potentially re-design) the encapsulations during the design iterations.   Probably says more about my own limitations than anything else... it may be that qged simply ends up informing another design, in the end.</p>
+
+
+
+<a name="311477453"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311477453" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311477453">(Nov 21 2022 at 21:23)</a>:</h4>
+<p>That said, there are some very specific things that qged can currently do in a technical sense, that from my perspective would absolutely have to be present and working at scale in an alternative solution before it I could regard it as a viable alternative.</p>
+
+
+
+<a name="311478124"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311478124" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311478124">(Nov 21 2022 at 21:30)</a>:</h4>
+<p>The issue from a coding perspective is that style of procedural is very much like having a messy desk and saying "I know where everything is" ... that only works for one person.</p>
+<p>It's also still procedural and that does not translate to good OO.</p>
+
+
+
+<a name="311478387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311478387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311478387">(Nov 21 2022 at 21:31)</a>:</h4>
+<p>Moreover, if there wasn't perceived value keeping it neat and tidy in the first place, that's demonstrably not likely to change and is still an issue for anyone else regardless.  When that's done across dozens of files, the learning curve becomes increasingly difficult with every de-encapsulated chunk of code.</p>
+
+
+
+<a name="311478700"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311478700" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311478700">(Nov 21 2022 at 21:33)</a>:</h4>
+<p>Just looking at qged's main, we could probably talk for hours to transfer understanding for everything going on in there, why it's in there, where it possibly belonged if it were done properly, etc., and that's all on top of whatever effort that would be and hoping there's no side-effects for data tangled or implied.</p>
+
+
+
+<a name="311478792"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311478792" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311478792">(Nov 21 2022 at 21:34)</a>:</h4>
+<p>That conversation literally doesn't exist in arbalest's main (or any of the other classes for that matter).  The learning curve is flat.</p>
+
+
+
+<a name="311479016"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311479016" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311479016">(Nov 21 2022 at 21:36)</a>:</h4>
+<p>That's also why the capstone team was able to run with it.  I had them look at both.</p>
+
+
+
+<a name="311479293"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311479293" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311479293">(Nov 21 2022 at 21:38)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/311477453">said</a>:</p>
+<blockquote>
+<p>That said, there are some very specific things that qged can currently do in a technical sense, that from my perspective would absolutely have to be present and working at scale in an alternative solution before it I could regard it as a viable alternative.</p>
+</blockquote>
+<p>I definitely agree with you there as well.  The command line and graphics displaying is superior from an end-user functionality perspective.  The hierarchy view might have a leg up too, but I've not looked as closely.  That is part why I was asking a few weeks ago how encapsulated/encapsulatable they are those.</p>
+
+
+
+<a name="311479408"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311479408" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311479408">(Nov 21 2022 at 21:39)</a>:</h4>
+<p>They're definitely not OO, but it might not be terribly difficult to bridge what they use down through the same classes.</p>
+
+
+
+<a name="311479613"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311479613" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311479613">(Nov 21 2022 at 21:41)</a>:</h4>
+<p>Here's a quick example of the draw_rework ability to integrate selection behavior from command line and GUI with drawing highlighting and tree highlighting:  <a href="/user_uploads/1549/H6LTdzeLWimavgDIiWPmEo4k/qged_select.gif">qged_select.gif</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/H6LTdzeLWimavgDIiWPmEo4k/qged_select.gif" title="qged_select.gif"><img src="/user_uploads/1549/H6LTdzeLWimavgDIiWPmEo4k/qged_select.gif"></a></div>
+
+
+
+<a name="311480361"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311480361" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311480361">(Nov 21 2022 at 21:47)</a>:</h4>
+<p>I don't understand everything going on there, but I like the rect and point select.  Those would be good to have as default shift key bindings instead of having GUI widgetery.</p>
+
+
+
+<a name="311480552"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311480552" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311480552">(Nov 21 2022 at 21:49)</a>:</h4>
+<p>What did select collapse and select expand do?</p>
+
+
+
+<a name="311480678"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311480678" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311480678">(Nov 21 2022 at 21:50)</a>:</h4>
+<p>Change what particular level of selection was active in the tree paths.  A graphical selection always selects the full path - i.e. /a/b/c.s  This is the case even if every solid under b is selected.</p>
+
+
+
+<a name="311480745"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311480745" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311480745">(Nov 21 2022 at 21:51)</a>:</h4>
+<p>So if we have /a/b/c.s and a/b/d.s both selected, but don't have /a/e selected, a collapse can shift the selection "up" the tree to /a/b since all of b's components are active.</p>
+
+
+
+<a name="311480915"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311480915" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311480915">(Nov 21 2022 at 21:52)</a>:</h4>
+<p>If  the full definition of /a is /a/b and /a/e, and all of /a/b and /a/e 's child solids are selected, we can collapse the selection to /a</p>
+
+
+
+<a name="311480920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311480920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311480920">(Nov 21 2022 at 21:52)</a>:</h4>
+<p>Why wouldn't you always want to collapse?  Or always not collapse?</p>
+
+
+
+<a name="311481002"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481002" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481002">(Nov 21 2022 at 21:53)</a>:</h4>
+<p>For editing purposes, you may specifically want your matrix applications to be at lower levels.</p>
+
+
+
+<a name="311481036"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481036" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481036">(Nov 21 2022 at 21:53)</a>:</h4>
+<p>As a general design principle, you want to be able to select any instance at any level of the hierarchy, or sets of them.</p>
+
+
+
+<a name="311481147"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481147" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481147">(Nov 21 2022 at 21:54)</a>:</h4>
+<p>With multiple applications of select and remove operations, you can zero in on comb instances graphically</p>
+
+
+
+<a name="311481247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481247">(Nov 21 2022 at 21:55)</a>:</h4>
+<p>Sorry, I'm acting as a distraction.</p>
+
+
+
+<a name="311481295"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481295" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481295">(Nov 21 2022 at 21:55)</a>:</h4>
+<p>I can see that I guess, it's just the usability seems awkward.  It's a degree of freedom that seems like will have many edge cases .. especially assuming you allow expanding down to primitives..</p>
+
+
+
+<a name="311481469"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481469" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481469">(Nov 21 2022 at 21:57)</a>:</h4>
+<p>btw, 'collapse' and 'expand' don't sound intuitive to me, maybe another verb describing the action</p>
+
+
+
+<a name="311481703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481703">(Nov 21 2022 at 21:59)</a>:</h4>
+<p>maybe lift and lower  ?</p>
+
+
+
+<a name="311481772"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311481772" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311481772">(Nov 21 2022 at 22:00)</a>:</h4>
+<p>or even maybe push/pull if that doesn't conflict</p>
+
+
+
+<a name="311482342"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311482342" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311482342">(Nov 21 2022 at 22:04)</a>:</h4>
+<p>when in selection mouse mode, could make shift+mouse do select and shift+drag do band select, both adding to the selection set.  creo does that and uses shift+double-click to deselect.  select nothing or hit esc to deselect all.</p>
+
+
+
+<a name="311550356"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311550356" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311550356">(Nov 22 2022 at 09:22)</a>:</h4>
+<p>Phew, that's a long thread. I want however start with this one:<br>
+<span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/311470644">said</a>:</p>
+<blockquote>
+<p>A naive question about Arbalest's intent longer term - is it intended to eventually replace MGED?</p>
+</blockquote>
+<p>From my perspective, Arbalest is a test case for an application build on top of the C++ interface. I don't have the time to build an mged replacement. Instead, I'm interested in perfecting this API. It works well for my day job, but there may be others who would want to use it too, if it provides the functionality they need. Regarding this aspect, this V&amp;V effort was unfortunately a failure.</p>
+<p>For an alternative way of doing this V&amp;V stuff, look at CommandString in MOOSE.</p>
+
+
+
+<a name="311552538"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311552538" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311552538">(Nov 22 2022 at 09:35)</a>:</h4>
+<p>Some additional words about "perfecting" the interface: There is of course the API side: Headers, classes, ... But, I consider the system architecture (is this the right word?) too. I.e., the files necessary to provide the functionality. For example, it shall be possible to provide Debian libbrlcad and libbrlcad-dev packages which are doing just this: Providing a shared object and the header files to use it.</p>
+
+
+
+<a name="311555132"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311555132" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311555132">(Nov 22 2022 at 09:50)</a>:</h4>
+<p>Document orientation: Arbalest shall show a behavior like people familiar with an office suite would expect: They can open a file, view its content, change it, save the changes or discard them. Most other programs behave the same way. vi doesn't write the file after each key press but after the !w command. To achieve this, Archer works on in-memory databases.</p>
+
+
+
+<a name="311558602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311558602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311558602">(Nov 22 2022 at 10:12)</a>:</h4>
+<p>I.e., I see Arbalest more as a technology demonstrator. In this spirit, the MouseAction class was introduced too. It implements a design pattern which allows you to manage the different kinds of interactions you can have with the geometry: Changing the view (zooming, shifting, rotating, ...), changing the geometry (resizing, moving, create and delete something, ...), selecting, ...</p>
+<p>This doesn't however mean that nobody else can have bigger intentions with Arbalest. As long as they don't  collide with my goals, I'll support them. If they collide - well, it's open source.</p>
+
+
+
+<a name="311559821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311559821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311559821">(Nov 22 2022 at 10:19)</a>:</h4>
+<p>My and/or Himanshu's next steps will be to integrate the open pull requests in Arbalest (nothing is forgotten there, just short in time) and to port the program to MOOSE then. I see MOOSE as the attempt to make an own "product" from rt-cubed's coreIntercace "prototype".</p>
+
+
+
+<a name="311561381"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Arbalest%20V%26V/near/311561381" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Arbalest.20V.26V.html#311561381">(Nov 22 2022 at 10:29)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Arbalest.20V.26V/near/311468591">said</a>:</p>
+<blockquote>
+<p>I'm not sure I understand the second bullet about not working on the Arbalest document though -- can you elaborate?  The V&amp;V checks are performed read-only.  The only thing written out should be a corresponding sqlite database that is stored in the cache folder (so when you return to that .g later, it can keep track of any changes made).</p>
+</blockquote>
+<p>See lines 570ff in isaacy13's MainWindow.cpp. Arbalest works with in-memory databases, but the V&amp;V tool want's to use ged_open with a file path.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,116 @@
+[
+    {
+        "content": "<p>/me attempts to revive adrt_slave</p>\n<p>Our simulation needs are starting to exceed rt's current capabilities... need a working path tracer...</p>",
+        "id": 220412178,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316904
+    },
+    {
+        "content": "<p>oh and related, <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> any way to get facetize to not decimate the heck out of what it's working on when it's in a fallback mode?</p>",
+        "id": 220412318,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316971
+    },
+    {
+        "content": "<p>--decimation-feature-size can be used, but I don't recall the semantics of how it behaves offhand.  I think it's a scale factor compared to feature size...</p>",
+        "id": 220412556,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608317087
+    },
+    {
+        "content": "<p>let me do a quick test... stand by</p>",
+        "id": 220412579,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608317101
+    },
+    {
+        "content": "<p>I'm currently running things like: facetize --feature-size .0003 --max-time 9999 newbot region</p>",
+        "id": 220412594,
+        "sender_full_name": "Sean",
+        "timestamp": 1608317108
+    },
+    {
+        "content": "<p>I usually just get \"Continuous Meshing: Fatal error, could not find crossing!\"<br>\nCM: surface reconstruction failed: region<br>\nCM: continuation polygonization surface build failed.</p>",
+        "id": 220412731,
+        "sender_full_name": "Sean",
+        "timestamp": 1608317178
+    },
+    {
+        "content": "<p>No feature size succeeds, but I go from 200k poly to like 5k poly and it's unusable</p>",
+        "id": 220412789,
+        "sender_full_name": "Sean",
+        "timestamp": 1608317209
+    },
+    {
+        "content": "<p>OK, --decimation-feature-size with smaller values should produce bigger meshes.</p>",
+        "id": 220415057,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608318301
+    },
+    {
+        "content": "<p>different from --feature-size?</p>",
+        "id": 220415103,
+        "sender_full_name": "Sean",
+        "timestamp": 1608318321
+    },
+    {
+        "content": "<p>Yes.  This was my test:</p>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; facetize --CM --feature-size 0.06 --decimation-feature-size 2.0 ellipse.r ell_06.bot\nCM: completed in 16 seconds with size 0.06\nCM: completed in 23 seconds with size 0.054\nCM: timed out after 30 seconds with size 0.0486\nCM: successfully created 6960500 faces, feature size 0.054\nCM: decimation succeeded, final BoT has 104 faces\n</code></pre></div>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; facetize --CM --feature-size 0.06 --decimation-feature-size .01 ellipse.r ell_06.bot\nCM: completed in 16 seconds with size 0.06\nCM: completed in 23 seconds with size 0.054\nCM: timed out after 30 seconds with size 0.0486\nCM: successfully created 6960500 faces, feature size 0.054\nCM: decimation succeeded, final BoT has 247642 faces\n</code></pre></div>",
+        "id": 220415156,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608318353
+    },
+    {
+        "content": "<p>Frankly I really don't like those settings - they're just direct exposures of numerical inputs in the underlying code, IIRC, and they're both sensitive and unintuitive.</p>",
+        "id": 220415328,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608318427
+    },
+    {
+        "content": "<p>IIRC \"decimation-feature-size\" is the one from the \"new\" decimation routine - I should probably go read the paper to try and get a better feel for what it's doing</p>",
+        "id": 220415524,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608318515
+    },
+    {
+        "content": "<p>In the long run, once we've got proper plugins-as-executables in place, I'd like to look at setting up some of the alternatives (CGAL, libigl) that might be slower but useful fallbacks - license considerations are a stopper for CGAL as-is, but with plugins as executables we might have more options.</p>",
+        "id": 220416081,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608318819
+    },
+    {
+        "content": "<p>I'll give that a try, thank you</p>",
+        "id": 220416997,
+        "sender_full_name": "Sean",
+        "timestamp": 1608319339
+    },
+    {
+        "content": "<p>I think if you're looking for the distributed aspect, it may be worth reconsidering mpi. Particularly if it's going to run on ib equipped clusters.</p>",
+        "id": 220652155,
+        "sender_full_name": "Erik",
+        "timestamp": 1608602865
+    },
+    {
+        "content": "<p>we're just trying to get something that reliably doesn't result in error.</p>",
+        "id": 220734504,
+        "sender_full_name": "Sean",
+        "timestamp": 1608671355
+    },
+    {
+        "content": "<p>I didn't mind it taking 24 hours the first pass, more impressed that it was initially a good result.  Its this second pass that's destroying it via decimation.</p>",
+        "id": 220734612,
+        "sender_full_name": "Sean",
+        "timestamp": 1608671424
+    },
+    {
+        "content": "<p>/me tried facetize --CM --feature-size .006 --decimation-feature-size .001 tip2.r <a href=\"http://tip3.bot\">tip3.bot</a>  ... actually fails very quickly now</p>",
+        "id": 220734854,
+        "sender_full_name": "Sean",
+        "timestamp": 1608671612
+    },
+    {
+        "content": "<p>oh, promising, .0006/.0001 ...</p>",
+        "id": 220734919,
+        "sender_full_name": "Sean",
+        "timestamp": 1608671648
+    }
+]

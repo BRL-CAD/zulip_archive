@@ -1,0 +1,110 @@
+[
+    {
+        "content": "<p>what gcc versions are known to work? I keep getting compile errors. I've tried 2 gcc versions (7.3,8.3) and 2 brlcad versions (latest release, HEAD) with cmake 3.14.3</p>\n<div class=\"codehilite\"><pre><span></span>mkdir brlcad/build<span class=\"p\">;</span> <span class=\"nb\">cd</span> brlcad/build\ncmake .. -DBRLCAD_BUNDLED_LIBS<span class=\"o\">=</span>BUNDLED -DBRLCAD_ENABLE_OPENGL<span class=\"o\">=</span>ON -DENABLE_ALL_CXX_COMPILE<span class=\"o\">=</span>ON -DBRLCAD_EXTRADOCS<span class=\"o\">=</span>ON -DCMAKE_BUILD_TYPE<span class=\"o\">=</span>Release -DBRLCAD_ENABLE_QT<span class=\"o\">=</span>ON -DCMAKE_INSTALL_PREFIX<span class=\"o\">=</span>/opt/brlcad/git -DBRLCAD_ENABLE_STRICT<span class=\"o\">=</span>OFF\nmake\n</pre></div>\n\n\n<div class=\"codehilite\"><pre><span></span>...\n[ 33%] Building CXX object src/libbu/CMakeFiles/libbu-obj.dir/uuid.c.o\nIn file included from /path/to/brlcad/src/libbu/uuid.c:25:\n/path/to/brlcad/include/bu/uuid.h:42:27: error: expected primary-expression before &#39;static&#39;\n #  define STATIC_ARRAY(x) static (x)\n                           ^~~~~~\n/path/to/brlcad/include/bu/uuid.h:58:29: note: in expansion of macro &#39;STATIC_ARRAY&#39;\n bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);\n                             ^~~~~~~~~~~~\n/path/to/brlcad/include/bu/uuid.h:58:29: error: expected &#39;]&#39; before &#39;static&#39;\n bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);\n                             ^\n                             ]\n/path/to/brlcad/include/bu/uuid.h:58:29: error: expected &#39;)&#39; before &#39;static&#39;\n bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);\n               ~             ^\n                             )\n/path/to/brlcad/include/bu/uuid.h:42:27: error: expected initializer before &#39;static&#39;\n #  define STATIC_ARRAY(x) static (x)\n                           ^~~~~~\n/path/to/brlcad/include/bu/uuid.h:58:29: note: in expansion of macro &#39;STATIC_ARRAY&#39;\n bu_uuid_create(uint8_t uuid[STATIC_ARRAY(16)], size_t nbytes, const uint8_t *bytes, const uint8_t namespace_uuid[STATIC_ARRAY(16)]);\n                             ^~~~~~~~~~~~\n...\n</pre></div>",
+        "id": 166674667,
+        "sender_full_name": "mark999",
+        "timestamp": 1559005428
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"223247\">@mark999</span> Set <code>-DENABLE_ALL_CXX_COMPILE=OFF</code>. It's courageous to compile the C code as if it would be C++ ;)</p>",
+        "id": 166750097,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1559071223
+    },
+    {
+        "content": "<p>Ah, didn't realize what that flag did. I assumed it enabled extra stuff that was c++, as opposed to building everything as if it's c++. No wonder the compiler got indigestion :)</p>",
+        "id": 166925737,
+        "sender_full_name": "mark999",
+        "timestamp": 1559235631
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"223247\">@mark999</span> Was your compile successful?  (that's pretty funny -- we should perhaps document that option better)</p>",
+        "id": 166997613,
+        "sender_full_name": "Sean",
+        "timestamp": 1559309987
+    },
+    {
+        "content": "<p>At least for MS Visual Studio 2019, src/libbu/process.h conflicts with a system header with same name.</p>",
+        "id": 178107491,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1571063094
+    },
+    {
+        "content": "<p>The current trunk compiles now with MS Visual Studio 2019 - except the libbrep test brep_cdt_mesh. This program uses a private (not DLL-exported) class, which results in linkage errors.</p>",
+        "id": 178195703,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1571147895
+    },
+    {
+        "content": "<p>I defined somefunctions and declared in a .h (extern or extern \"C\") file , include &amp; built both .dll and .lib to use from another project. Altough I did all the linking libs (librt) and sent dll files to myproject.exe dir, could not build myproject.  If I  link static.libs , I got so many unresolved linkage errors &amp; I do not know which libraries to link.  If I add non_static libs,  myproject.exe returns with runtime error.<br>\nWhat am I missing ?</p>",
+        "id": 178549781,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571497166
+    },
+    {
+        "content": "<p>Your application is probably missing a DLL. I.e., the DLL are all created, but are in a directory where your executable can't find them. Copying all (*.exe and *.dll) into the same directory could help.</p>\n<p>However, if you want simply write a program, which can create, read, write, explore and change a BRL-CAD database on Windows, you could consider to use the brlcad.dll. See <a href=\"http://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface\" target=\"_blank\" title=\"http://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface\">http://brlcad.org/wiki/BRL-CAD%27s_core_C%2B%2B_interface</a> for a quick start. The <em>devel</em> file in <a href=\"https://sourceforge.net/projects/brlcad/files/BRL-CAD%20Runtime%20Libraries/7.26.0/\" target=\"_blank\" title=\"https://sourceforge.net/projects/brlcad/files/BRL-CAD%20Runtime%20Libraries/7.26.0/\">https://sourceforge.net/projects/brlcad/files/BRL-CAD%20Runtime%20Libraries/7.26.0/</a> contains everything you need. It contains the already compiles brlcad.dll for 32 and 64 bit programs.</p>",
+        "id": 178557552,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1571509660
+    },
+    {
+        "content": "<p>yes, that would help but I was thinking to add some functions to fortray, compile and use from another app. I added all the required dll files.  Linking librt.lib and got 0xc000007b error. I read it is related with x64,x86 difference of compilers but I build both brlcad and clientapp as x64.</p>",
+        "id": 178581129,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571554888
+    },
+    {
+        "content": "<p>tried in another computer and it worked :))</p>",
+        "id": 178643529,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571654618
+    },
+    {
+        "content": "<p>did not understand bu_list functionality in structs. When bu_list_append, seems like is appending as circular fashion but what it stores (address of e.g. xrays)?</p>",
+        "id": 178724688,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571723040
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> it stores whatever you list element you provide to it.  bu_lists are a bit \"backwards\" in traditional list sense in that they leverage a feature of C that isn't utilized very often any more (type punning).  You can turn any C struct into a singly or doubly linked list trivially, very easily.</p>",
+        "id": 178816832,
+        "sender_full_name": "Sean",
+        "timestamp": 1571796513
+    },
+    {
+        "content": "<p>the lists are circular whether you need them to be or not.  it all depends on which functions you use to access the list which determines whether it's a single linked list, a double, a deque, a queue, etc.</p>",
+        "id": 178816939,
+        "sender_full_name": "Sean",
+        "timestamp": 1571796646
+    },
+    {
+        "content": "<p>thanks. Why buparallel takes \"0\" as ncpu in rtshootrays ?</p>",
+        "id": 179030505,
+        "sender_full_name": "scorp08",
+        "timestamp": 1571991440
+    },
+    {
+        "content": "<p>autodetects the number of cores</p>",
+        "id": 179043780,
+        "sender_full_name": "Erik",
+        "timestamp": 1572005749
+    },
+    {
+        "content": "<p>yes, you can either provide the number of cores of parallelism you want it to use or you can specify \"0\" to use all of them</p>",
+        "id": 179072941,
+        "sender_full_name": "Sean",
+        "timestamp": 1572025768
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> is the magic numbers used to prevent memory leaks, could not understand exactly their purpose ?</p>",
+        "id": 179507182,
+        "sender_full_name": "scorp08",
+        "timestamp": 1572506257
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> They are a platform agnostic way of detecting memory errors, ideally before corruption affects data, so applications can quit as quickly as possible if there is a problem.</p>",
+        "id": 179877347,
+        "sender_full_name": "Sean",
+        "timestamp": 1572902105
+    }
+]

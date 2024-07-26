@@ -1,0 +1,26 @@
+[
+    {
+        "content": "<p>Observation on the ged_exec changes - going that route, we're basically down to runtime-only detection of any errors in programmatic usage of libged.  I was originally hesitant to go ged_exec only, on the theory that at least with ged_zap et. al. being explicitly called out we would have a modicum of validation that the code was calling something that is intended to be present in libged.  I'm not opposed to going with the simpler route, but I just want to make sure and call out that we are moving to a runtime-only-validation configuration.  I know we already had that anyway with GED argc/argv argument processing, so in one sense it's not a huge change, but since it does lose us that \"compiler checking the command name is valid\" insight I wanted to mention it.</p>",
+        "id": 272030392,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644955436
+    },
+    {
+        "content": "<p>I think with everything being dynamically loaded, it really makes the most sense.  Otherwise, it's already really a dynamic call and the only saving grace is that we had to violate modularity to expose it.</p>",
+        "id": 272032424,
+        "sender_full_name": "Sean",
+        "timestamp": 1644956463
+    },
+    {
+        "content": "<p>They're technically already dynamic in a sense because of the automatic wrapper calling into ged_exec(), the only difference being the wrapper serving as a potential debugger breakpoint, but the actual call was still subject to whatever was put into argv[0].  architecturally the work was still happening dynamically.</p>",
+        "id": 272032494,
+        "sender_full_name": "Sean",
+        "timestamp": 1644956507
+    },
+    {
+        "content": "<p>I think the big win is modularity.  Having every plugin have to be defined inside libged really defeats having everything in one place and propagates solutions like the mged/setup.c and tclcad/commands.c listings when they can/should just call exec. </p>\n<p>Plus the plugins themselves can still define a public ged_cmd function now if they want, and that will work.  They can be prebound into one library or linked against individually.</p>",
+        "id": 272032937,
+        "sender_full_name": "Sean",
+        "timestamp": 1644956739
+    }
+]

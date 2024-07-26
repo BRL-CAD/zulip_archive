@@ -1,0 +1,356 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   I'm having a hard time figuring out how to get pkg_permserver to just pick a random usable ephemeral port - it seems to either want a specific number or a string input for getservbyname.</p>",
+        "id": 197976218,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589826156
+    },
+    {
+        "content": "<p>Hopefully I'm missing something obvious...</p>",
+        "id": 197976264,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589826179
+    },
+    {
+        "content": "<p>IP doesn't work that way.  servers must open a specific port.  best you can do is to try a specific port number and then incrementally try ports above it to a specific brief range like 7000-7005.  you'll want to make sure whichever port you pick is not in /etc/services as a registered port, which would tell you 7000-7005 is reserved (and thus shouldn't be one you use)</p>",
+        "id": 197978760,
+        "sender_full_name": "Sean",
+        "timestamp": 1589827289
+    },
+    {
+        "content": "<p>I must be misunderstanding what ephemeral ports are for... <a href=\"https://www.cymru.com/jtk/misc/ephemeralports.html\">https://www.cymru.com/jtk/misc/ephemeralports.html</a></p>",
+        "id": 197979142,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589827485
+    },
+    {
+        "content": "<p>A little knowledge is leading you astray... they're not something you specify.  For example, ssh into .bz and run netstat -n | grep 22 and you'll see that the server is on port 22 and your ssh client is on some other port like 59382.  That's an ephemeral port.</p>",
+        "id": 197980147,
+        "sender_full_name": "Sean",
+        "timestamp": 1589827977
+    },
+    {
+        "content": "<p>What I'm trying to do is have that libpkg test pick a random, not utilized port so I can run multiple separate client/server pairs simultaneously.  The only other notion I've been able to come up with is having the server keep trying increments until it finds one that works, which just seems... crude</p>",
+        "id": 197980465,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589828134
+    },
+    {
+        "content": "<p>I don't know if that's why it failed on your side, but I know on mine it caused a distcheck failure when one of the tests tried to run when another build already had a server up and running</p>",
+        "id": 197980619,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589828195
+    },
+    {
+        "content": "<p>Ultimately it doesn't matter too much - I mostly threw that in to make it easier to test the IPC on Windows to set the stage for trying to figure out why we've got Windows and non-Windows specific fbserv communications code going on.</p>",
+        "id": 197980862,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589828301
+    },
+    {
+        "content": "<p>The basic libpkg back and forth looks like it is succeeding with any Tcl_Channel help, so I'll have to dig deeper.</p>",
+        "id": 197981107,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589828432
+    },
+    {
+        "content": "<p>FWIW, I was looking at the Capt'n Proto calculator example to see what it does about ports:  <a href=\"https://github.com/capnproto/capnproto/tree/master/c%2B%2B/samples\">https://github.com/capnproto/capnproto/tree/master/c%2B%2B/samples</a><br>\n If you don't specify a port, it (or rather the libraries it calls) get one from the OS by setting  the sockaddr_in field sin_port to 0.  The calculator client then needs to be pointed at that same port of course, but once it does things seem to work...</p>",
+        "id": 197982200,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589828917
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libpkg/near/197980465\">said</a>:</p>\n<blockquote>\n<p>What I'm trying to do is have that libpkg test pick a random, not utilized port so I can run multiple separate client/server pairs simultaneously.  The only other notion I've been able to come up with is having the server keep trying increments until it finds one that works, which just seems... crude</p>\n</blockquote>\n<p>Can't pick random, but incrementally checking is common.  Note that bad/buggy applications can also lock up a port if it doesn't clean up after itself properly or if it crashes while a port is in use.  The OS will eventually harvest the port, but it can leave a port unusable for a while.</p>",
+        "id": 197982453,
+        "sender_full_name": "Sean",
+        "timestamp": 1589829059
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libpkg/near/197980862\">said</a>:</p>\n<blockquote>\n<p>Ultimately it doesn't matter too much - I mostly threw that in to make it easier to test the IPC on Windows to set the stage for trying to figure out why we've got Windows and non-Windows specific fbserv communications code going on.</p>\n</blockquote>\n<p>When Bob first ported to Windows, pkg was not fully compiled and working on Windows, so he had to help the socket initialization.  A short while later, pkg porting was finished (I think it just needed a single winsock init call), but he never went back to clean things up.</p>",
+        "id": 197982732,
+        "sender_full_name": "Sean",
+        "timestamp": 1589829208
+    },
+    {
+        "content": "<p>Ah.  I take it if I'm going to muck around in there I should probably be in a branch?</p>",
+        "id": 197982957,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589829321
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libpkg/near/197982200\">said</a>:</p>\n<blockquote>\n<p>If you don't specify a port, it (or rather the libraries it calls) get one from the OS by setting  the sockaddr_in field sin_port to 0.  The calculator client then needs to be pointed at that same port of course, but once it does things seem to work...</p>\n</blockquote>\n<p>That should work with libpkg too, definitely not anything specific to them.  sin_port is ultimately passed to bind(), which is how one requests a port from the operating system.  Client and server ultimately have to know what port to listen on and connect to.  More concerning, however, is why you can't just specify a high port not in use with a fallback when it is in use?  For that matter, you could use the same port as rt so existing firewalls won't trigger (which they will otherwise.)</p>",
+        "id": 197984098,
+        "sender_full_name": "Sean",
+        "timestamp": 1589829968
+    },
+    {
+        "content": "<p>As long as we have more valid fallbacks than potential parallel executions of the regress-pkg test that should work.</p>",
+        "id": 197984237,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830069
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libpkg/near/197982957\">said</a>:</p>\n<blockquote>\n<p>Ah.  I take it if I'm going to muck around in there I should probably be in a branch?</p>\n</blockquote>\n<p>Not unless you start to modify libpkg, I'd think.  any app changes are above the platform code or specific to the platform you're testing on (e.g., the windows-specific port code).</p>",
+        "id": 197984240,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830071
+    },
+    {
+        "content": "<p>There a real risk I'll break the embedded fb display in MGED while working though - I already did that once the last time I tried using the Tcl_Channel code everywhere...</p>",
+        "id": 197984371,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830134
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libpkg/near/197984237\">said</a>:</p>\n<blockquote>\n<p>As long as we have more valid fallbacks than potential parallel executions of the regress-pkg test that should work.</p>\n</blockquote>\n<p>that's also addressable in code.  think about how an http server supports hundreds of connections per second on port 80.</p>",
+        "id": 197984376,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830136
+    },
+    {
+        "content": "<p>try NOT using the tcl channel code everywhere ;)</p>",
+        "id": 197984427,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830164
+    },
+    {
+        "content": "<p>there should be zero reason to use it any more</p>",
+        "id": 197984475,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830191
+    },
+    {
+        "content": "<p>heh - that was my plan/hope - it's the last remaining use of Tcl in the dm/fb merge, not to mention a headache to read</p>",
+        "id": 197984493,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830199
+    },
+    {
+        "content": "<p>I've never tried - can multiple http servers run on the same machine at the same time and share port 80?</p>",
+        "id": 197984623,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830256
+    },
+    {
+        "content": "<p>nope, that's not how it works</p>",
+        "id": 197984773,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830324
+    },
+    {
+        "content": "<p>there's always just one process on a port</p>",
+        "id": 197984800,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830342
+    },
+    {
+        "content": "<p>&lt;nod&gt; that's what I thought.  The analogy here, then, is that each regress-pkg server is an http server program and will need its own port</p>",
+        "id": 197984825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830364
+    },
+    {
+        "content": "<p>why are there multiples though?  you thinking like distcheck-full running multiple copies or something else?</p>",
+        "id": 197984926,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830426
+    },
+    {
+        "content": "<p>yep</p>",
+        "id": 197984935,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830434
+    },
+    {
+        "content": "<p>which is it? :)</p>",
+        "id": 197985006,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830455
+    },
+    {
+        "content": "<p>distcheck-full - exact same scenario that keeps me from enabling the rtwizard tests</p>",
+        "id": 197985008,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830455
+    },
+    {
+        "content": "<p>or running the various individual rtwizard tests in parallel, for that matter</p>",
+        "id": 197985087,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830505
+    },
+    {
+        "content": "<p>sure, though rtwizard also has file ops in the way</p>",
+        "id": 197985138,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830534
+    },
+    {
+        "content": "<p>so there's a couple issues</p>",
+        "id": 197985171,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830555
+    },
+    {
+        "content": "<p>I'd have to double check - I think as currently implemented under the hood the various intermediate stages are always talking to a framebuffer via a port, but I could be wrong - it's been a while.</p>",
+        "id": 197985347,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830629
+    },
+    {
+        "content": "<p>the biggest is that each port we utilize is (actually, not just theoretically) a not-insignificant security issue from the operating system's standpoint and from a configuration perspective.  We have a little liberty during distcheck as the burden will mostly be on ourselves, but best practice is still that all ports must be documented and managed.</p>",
+        "id": 197985570,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830744
+    },
+    {
+        "content": "<p>consider brl-cad's certificate of networthiness, for example, where we had to spell out every application that opens a port, which port numbers it uses (including any fallback ports), and what protocols are on those ports.</p>",
+        "id": 197985635,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830790
+    },
+    {
+        "content": "<p>it's also common now that the latest default security profiles for windows and linux have firewalling enabled that prevents starting up unregistered servers (i.e., every server must be formally registered during install)</p>",
+        "id": 197985770,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830847
+    },
+    {
+        "content": "<p>&lt;nod&gt;  I still (eventually) plan to get rtwizard rendered down to library calls to fb/rt/icv.  That won't work for a libpkg test though - the whole point is communication over ports.</p>",
+        "id": 197985796,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830859
+    },
+    {
+        "content": "<p>this is quite the hot topic these days</p>",
+        "id": 197985799,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830861
+    },
+    {
+        "content": "<p>what libpkg really could benefit from is using a local named port instead of socket communication</p>",
+        "id": 197985878,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830901
+    },
+    {
+        "content": "<p>they're WAY faster and compatible with how we typically use them and think about them (i.e., as a general IPC mechanism)</p>",
+        "id": 197985968,
+        "sender_full_name": "Sean",
+        "timestamp": 1589830934
+    },
+    {
+        "content": "<p>hmm.  How tricky would that be to pull off?</p>",
+        "id": 197986008,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589830961
+    },
+    {
+        "content": "<p>I'm not sure, honestly.  probably would take a few days but you could also probably address distcheck-full by making sure the test doesn't linger and fully cleans up after itself.</p>",
+        "id": 197986089,
+        "sender_full_name": "Sean",
+        "timestamp": 1589831013
+    },
+    {
+        "content": "<p>i.e., if the server is short lived, then you can poll on opening the socket for 1-2 seconds, and then run the server</p>",
+        "id": 197986182,
+        "sender_full_name": "Sean",
+        "timestamp": 1589831043
+    },
+    {
+        "content": "<p>select() will tell you if it's in use reliably and with a timer</p>",
+        "id": 197986213,
+        "sender_full_name": "Sean",
+        "timestamp": 1589831062
+    },
+    {
+        "content": "<p>take a bit to find a better example, but here's a snippet of python that does what I'm thinking in the probe() method: <a href=\"https://github.com/Apstra/aeon-venos/blob/master/pylib/aeon/base/device.py\">https://github.com/Apstra/aeon-venos/blob/master/pylib/aeon/base/device.py</a></p>",
+        "id": 197986723,
+        "sender_full_name": "Sean",
+        "timestamp": 1589831327
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I'm seeing some references to \"named pipes\" but not much for \"named ports\" - can you point me to what you're referring to there?</p>",
+        "id": 197989297,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589832616
+    },
+    {
+        "content": "<p>I meant a pipe</p>",
+        "id": 197990203,
+        "sender_full_name": "Sean",
+        "timestamp": 1589833147
+    },
+    {
+        "content": "<p>named or unnamed, really</p>",
+        "id": 197990214,
+        "sender_full_name": "Sean",
+        "timestamp": 1589833155
+    },
+    {
+        "content": "<p>Hmm.  I'd have to check the libpkg API - are we generic enough in the public API that we could actually swap mechanisms behind the scenes?  I guess we'd have to translate specified \"port numbers\" into pipes somehow?</p>",
+        "id": 197990626,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589833367
+    },
+    {
+        "content": "<p>it's for local communication, doesn't typically go through the network stack<br>\nfor example, \"ls | grep foo\" creates a pipe between the ls and grep processes where ls writes data to a pipe and grep reads from the pipe.  <br>\na named pipe lets you create a persistent communication context. apps usually use that method to perform some communication protocol within it, especially if dealing with multiple writers or readers.  an unnamed pipe is shorter-lived, life of the apps.</p>",
+        "id": 197990635,
+        "sender_full_name": "Sean",
+        "timestamp": 1589833372
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/libpkg/near/197990626\">said</a>:</p>\n<blockquote>\n<p>Hmm.  I'd have to check the libpkg API - are we generic enough in the public API that we could actually swap mechanisms behind the scenes?  I guess we'd have to translate specified \"port numbers\" into pipes somehow?</p>\n</blockquote>\n<p>I would expect a different call or two to be introduced like pkg_popen() or pkg_perm_pipeserver or something similar ... haven't thought through it in detail honestly.  it couldn't reliably be completely transparent because you only know it's local after you have both processes wanting to talk.</p>",
+        "id": 197990989,
+        "sender_full_name": "Sean",
+        "timestamp": 1589833534
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Have we ever considered making the pkg_conn struct a PIMPL container?  At a naive first glance I'm wondering if it could be made opaque in order to allow for multiple communications mechanisms (a.l.a. libuv) to be hidden under the hood...</p>",
+        "id": 375266727,
+        "sender_full_name": "starseeker",
+        "timestamp": 1689341927
+    },
+    {
+        "content": "<p>This is an initial stab at making pkg_conn opaque - interested in whether it's a viable approach or not:  <a href=\"https://github.com/BRL-CAD/brlcad/commit/b11f84b1ed8e2d77512606c65991bc303d86d2ce\">https://github.com/BRL-CAD/brlcad/commit/b11f84b1ed8e2d77512606c65991bc303d86d2ce</a></p>",
+        "id": 375324847,
+        "sender_full_name": "starseeker",
+        "timestamp": 1689352413
+    },
+    {
+        "content": "<p>Short and sweet summary is I just moved all the data slots to a private impl struct and added accessor functions for the bits being accessed beyond libpkg itself.  No intentional logic changes.</p>",
+        "id": 375326753,
+        "sender_full_name": "starseeker",
+        "timestamp": 1689352891
+    },
+    {
+        "content": "<p>@starseeker really like the pimpl encapsulation as that's good practice in general, but I don't think that will really work well for strapping another library underneath.</p>",
+        "id": 375454990,
+        "sender_full_name": "Sean",
+        "timestamp": 1689401353
+    },
+    {
+        "content": "<p>libpkg is barely a wrapper around tcp.</p>",
+        "id": 375455009,
+        "sender_full_name": "Sean",
+        "timestamp": 1689401365
+    },
+    {
+        "content": "<p>that said, welcome to try.  </p>\n<p>it's such a low-level library that it's almost certainly a mismatch (e.g., pkg expects you to manually select() and read() etc), which means you'll likely end up adding awkward options and/or additional API that simply won't make sense for some connection types, or won't make sense when using  a different backend.  it's probably gonna be fugly and/or buggy.</p>\n<p>but MAYBE NOT... if you stick to libpkg's existing calls and options and just make it work. </p>\n<p>FWIW, I would not be opposed to replacing libpkg with libuv.  It's proven to be a very capable I/O library and it has tcp support (and then some) so it probably wouldn't be too terribly difficult to supplant pkg with it.  just would have to be VERY careful and test test test.  I do believe there's pkg calls in our beloved analytic codes too, so we'd probably need a huge (multi-year) deprecation window with runtime notification and in-person hand-holding.</p>",
+        "id": 375456349,
+        "sender_full_name": "Sean",
+        "timestamp": 1689402121
+    },
+    {
+        "content": "<p>Hmm.  I hadn't thought too hard about whether we could directly use libuv, actually...  The main reason I was wanting to see about sticking it under libpkg (aside from not changing our existing codes any more than necessary) was to determine if we could hide the pipe vs. tcp communication selection from the calling codes.  I suppose that's probably unlikely, unfortunately - I've noticed most of the codes I've looked at that support both pipes and tcp don't seem to wrap them in that fashion, and I imagine there's a reason they don't try to abstract it...</p>",
+        "id": 376019400,
+        "sender_full_name": "starseeker",
+        "timestamp": 1689599627
+    },
+    {
+        "content": "<p>Yeah they seem like they’re the same thing but they’re really not., at least on the initiation side of things.  I have seen plenty of libels that wrap the same once the connection is made (for the most part).  Capnproto does that iirc.  You det up as tcp or Port, but then it’s the same until shutdown.</p>",
+        "id": 376210145,
+        "sender_full_name": "Sean",
+        "timestamp": 1689648442
+    }
+]

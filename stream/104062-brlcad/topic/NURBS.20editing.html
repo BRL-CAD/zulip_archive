@@ -1,0 +1,1407 @@
+<html>
+<head><meta charset="utf-8"><title>NURBS editing · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html">NURBS editing</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="342213083"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213083" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213083">(Mar 16 2023 at 04:13)</a>:</h4>
+<p>I am doing research on project NURBS Editing Support in BRL-CAD</p>
+
+
+
+<a name="342213117"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213117" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213117">(Mar 16 2023 at 04:13)</a>:</h4>
+<p>okay, so for that you don't really need to install anything, you just need to compile.  the tools exist in the build tree and can be run from there on the command line</p>
+
+
+
+<a name="342213207"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213207" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213207">(Mar 16 2023 at 04:15)</a>:</h4>
+<p>the primary GUIs of the main repo are called MGED and Archer in src/mged and src/archer respectively.  there's also other experimental GUI work in src/qged and in another separate repository called arbalest</p>
+
+
+
+<a name="342213243"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213243" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213243">(Mar 16 2023 at 04:15)</a>:</h4>
+<p>nurbs logic is in src/libbrep and src/other/ext/openNURBS, and all editing commands are in src/libged</p>
+
+
+
+<a name="342213249"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213249" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213249">(Mar 16 2023 at 04:15)</a>:</h4>
+<p>yes I go through it</p>
+
+
+
+<a name="342213317"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213317" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213317">(Mar 16 2023 at 04:16)</a>:</h4>
+<p>so for that project, you have to understand the code well enough to figure out a propopsal</p>
+
+
+
+<a name="342213370"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213370" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213370">(Mar 16 2023 at 04:16)</a>:</h4>
+<p>ok first I will go through the code</p>
+
+
+
+<a name="342213372"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213372" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213372">(Mar 16 2023 at 04:16)</a>:</h4>
+<p>but the general idea expected would probably be to first create basic editing commands (CLI) in src/libged which becomes command-line commands in mged and archer</p>
+
+
+
+<a name="342213399"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342213399" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342213399">(Mar 16 2023 at 04:17)</a>:</h4>
+<p>then if you got that working, the next step would be to figure out what GUI to integrate that with, whether mged or archer or qged or arbalest</p>
+
+
+
+<a name="342219784"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342219784" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342219784">(Mar 16 2023 at 05:42)</a>:</h4>
+<p>sir , figure out a whole code , that is hard for me</p>
+
+
+
+<a name="342220973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342220973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342220973">(Mar 16 2023 at 05:55)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342213243">said</a>:</p>
+<blockquote>
+<p>nurbs logic is in src/libbrep and src/other/ext/openNURBS, and all editing commands are in src/libged</p>
+</blockquote>
+<p>Are you looking here for code, right? <span class="user-mention" data-user-id="598883">@Neeraj Sharma</span></p>
+
+
+
+<a name="342221145"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342221145" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342221145">(Mar 16 2023 at 05:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="252475">Himanshu Sekhar Nayak</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342220973">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342213243">said</a>:</p>
+<blockquote>
+<p>nurbs logic is in src/libbrep and src/other/ext/openNURBS, and all editing commands are in src/libged</p>
+</blockquote>
+<p>Are you looking here for code, right? <span class="user-mention silent" data-user-id="598883">Neeraj Sharma</span></p>
+</blockquote>
+<p>yes  sir</p>
+
+
+
+<a name="342251599"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342251599" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342251599">(Mar 16 2023 at 09:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="598883">Neeraj Sharma</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342221145">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="252475">Himanshu Sekhar Nayak</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342220973">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342213243">said</a>:</p>
+<blockquote>
+<p>nurbs logic is in src/libbrep and src/other/ext/openNURBS, and all editing commands are in src/libged</p>
+</blockquote>
+<p>Are you looking here for code, right? <span class="user-mention silent" data-user-id="598883">Neeraj Sharma</span></p>
+</blockquote>
+<p>yes  sir</p>
+</blockquote>
+<p>so any other option for familiar with the NUBRS base code</p>
+
+
+
+<a name="342392629"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342392629" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342392629">(Mar 16 2023 at 18:26)</a>:</h4>
+<p>There's not a better option than reading the code as that is the latest status of the implementation, but there are certainly books and websites that explain what NURBS are and how to work with them.  There IS a NURBS development guide in BRL-CAD, but that's not particularly relevant for editing -- still you can see it in doc/docbook/devguides/bool_eval_development.xml</p>
+
+
+
+<a name="342501183"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342501183" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342501183">(Mar 17 2023 at 08:55)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342392629">said</a>:</p>
+<blockquote>
+<p>There's not a better option than reading the code as that is the latest status of the implementation, but there are certainly books and websites that explain what NURBS are and how to work with them.  There IS a NURBS development guide in BRL-CAD, but that's not particularly relevant for editing -- still you can see it in doc/docbook/devguides/bool_eval_development.xml</p>
+</blockquote>
+<p>can you exactly share location ,where the base code of implementing of NURBS</p>
+
+
+
+<a name="342703601"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342703601" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342703601">(Mar 18 2023 at 03:45)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="598883">Neeraj Sharma</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342501183">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342392629">said</a>:</p>
+<blockquote>
+<p>There's not a better option than reading the code as that is the latest status of the implementation, but there are certainly books and websites that explain what NURBS are and how to work with them.  There IS a NURBS development guide in BRL-CAD, but that's not particularly relevant for editing -- still you can see it in doc/docbook/devguides/bool_eval_development.xml</p>
+</blockquote>
+<p>can you exactly share location ,where the base code of implementing of NURBS</p>
+</blockquote>
+<ul>
+<li>NURBS curve: src/other/openNURBS/opennurbs_nurbscurve.cpp</li>
+<li>NURBS surface: src/other/openNURBS/opennurbs_nurbssurface.cpp<br>
+If you want to understand every aspect of  NURBS, <em>the NURBS book</em> is a good choice, but it has too much content... I suggest you can read other blogs as a beginning. You can follow this route:</li>
+</ul>
+<ol>
+<li>learn curves: <code>bezier curve</code> -&gt; <code>B-Spline curve</code> -&gt; <code>rational B-Spline curve</code></li>
+<li>learn surface: <code>bezier surface</code> -&gt; <code>B-Spline surface</code> -&gt; <code>rational B-Spline surface</code><br>
+I think as long as you are familar with "tensor product" "control points" "knot vector" "homogeneous coordinates", you get the basics of NURBS. One week is enough to achieve it and shorter if you have a foundation. <span aria-label="smile" class="emoji emoji-1f642" role="img" title="smile">:smile:</span></li>
+</ol>
+
+
+
+<a name="342704397"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342704397" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342704397">(Mar 18 2023 at 03:59)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="598883">Neeraj Sharma</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342501183">said</a>:</p>
+<blockquote>
+<p>can you exactly share location ,where the base code of implementing of NURBS</p>
+</blockquote>
+<p>The location information was already provided earlier the first time you asked where -- it's a lot of code spanning multiple directories and those directories were itemized.  Honestly if that wasn't enough information, then you may be attempting to propose a topic far too complex for your abilities.  NURBS is an advanced topic.  I would suggest focusing on a different project proposal that is a bit easier to navigate.</p>
+
+
+
+<a name="342704523"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342704523" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Notification Bot <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342704523">(Mar 18 2023 at 04:00)</a>:</h4>
+<p>17 messages were moved here from <a class="stream-topic" data-stream-id="104062" href="/#narrow/stream/104062-general/topic/Compiling.20BRL-CAD">#general &gt; Compiling BRL-CAD</a> by <span class="user-mention silent" data-user-id="102902">Sean</span>.</p>
+
+
+
+<a name="342704565"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342704565" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342704565">(Mar 18 2023 at 04:01)</a>:</h4>
+<p>I also moved this topic thread since you had hijacked the thread about compiling BRL-CAD with unrelated discussion about NURBS.  Both remain accessible.</p>
+
+
+
+<a name="342705530"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342705530" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Neeraj Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342705530">(Mar 18 2023 at 04:15)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/342704397">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="598883">Neeraj Sharma</span> <a href="#narrow/stream/104062-general/topic/Compiling.20BRL-CAD/near/342501183">said</a>:</p>
+<blockquote>
+<p>can you exactly share location ,where the base code of implementing of NURBS</p>
+</blockquote>
+<p>The location information was already provided earlier the first time you asked where -- it's a lot of code spanning multiple directories and those directories were itemized.  Honestly if that wasn't enough information, then you may be attempting to propose a topic far too complex for your abilities.  NURBS is an advanced topic.  I would suggest focusing on a different project proposal that is a bit easier to navigate.</p>
+</blockquote>
+<p>BRLCAD issue section contain the project list or there another list of projects <br>
+ can you tell me easier project or all project list those are mentioned in GSOC'23</p>
+
+
+
+<a name="342705814"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342705814" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342705814">(Mar 18 2023 at 04:20)</a>:</h4>
+<p>All the project ideas have a difficulty rating.</p>
+
+
+
+<a name="342705837"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342705837" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342705837">(Mar 18 2023 at 04:20)</a>:</h4>
+<p>They're all listed at <a href="https://github.com/opencax/GSoC/issues?q=is%3Aopen+sort%3Aupdated-desc+label%3A%22GSoC+2023%22+label%3A%22Project%3A+BRL-CAD%22">https://github.com/opencax/GSoC/issues?q=is%3Aopen+sort%3Aupdated-desc+label%3A%22GSoC+2023%22+label%3A%22Project%3A+BRL-CAD%22</a></p>
+
+
+
+<a name="342705892"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/342705892" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#342705892">(Mar 18 2023 at 04:21)</a>:</h4>
+<p>We're an umbrella org, so each project has a separate list: <a href="https://opencax.github.io">https://opencax.github.io</a></p>
+
+
+
+<a name="343073829"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343073829" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343073829">(Mar 20 2023 at 10:14)</a>:</h4>
+<p>I'm wondering how do we use NURBS editing operations? I have not find how to create a NURBS curve or surface directly in mged or archer. I see we can get the NURBS form of some primitives. Do we need additional cmd to create and modify NURBS directly?<br>
+I noticed some CAD software have a unique tool for creating NURBS.<br>
+<a href="/user_uploads/1549/fsSb3yUGq6bDzbU01SfeT2qd/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/fsSb3yUGq6bDzbU01SfeT2qd/image.png" title="image.png"><img src="/user_uploads/1549/fsSb3yUGq6bDzbU01SfeT2qd/image.png"></a></div>
+
+
+
+<a name="343076203"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343076203" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343076203">(Mar 20 2023 at 10:24)</a>:</h4>
+<p>I don't understand what "wrapping the openNURBS library by a scripting language" means here <a href="https://github.com/opencax/GSoC/issues/32">NURBS Editing Support in BRL-CAD</a>. Are commands of <a href="https://brlcad.org/wiki/MGED_Commands">mged command</a> form suffice? Or do we need to wrap it for other purposes?</p>
+
+
+
+<a name="343194518"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343194518" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343194518">(Mar 20 2023 at 18:17)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/343073829">said</a>:</p>
+<blockquote>
+<p>I have not find how to create a NURBS curve or surface directly in mged or archer.</p>
+</blockquote>
+<p>That's the point: There is no such functionality. The only way to create (openNURBS) NURBS, is by importing Rhino files as BLOBs.</p>
+
+
+
+<a name="343196867"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343196867" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343196867">(Mar 20 2023 at 18:28)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/343076203">said</a>:</p>
+<blockquote>
+<p>I don't understand what "wrapping the openNURBS library by a scripting language" means here <a href="https://github.com/opencax/GSoC/issues/32">NURBS Editing Support in BRL-CAD</a>. Are commands of <a href="https://brlcad.org/wiki/MGED_Commands">mged command</a> form suffice? Or do we need to wrap it for other purposes?</p>
+</blockquote>
+<p>The mged commands trigger functions in libged, which call functions in other libraries. So, the "other purposes" could do something similar than the function in libged. I.e., it would be sufficient to implement it up to the libged TCL hooks.</p>
+<p>BTW, the main primitive creation command is <a href="https://brlcad.org/wiki/MGED_CMD_in"><code>in</code></a>, implemented in src/libged/typein/typein.c.</p>
+
+
+
+<a name="343257698"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343257698" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343257698">(Mar 21 2023 at 01:25)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/343194518">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/343073829">said</a>:</p>
+<blockquote>
+<p>I have not find how to create a NURBS curve or surface directly in mged or archer.</p>
+</blockquote>
+<p>That's the point: There is no such functionality. The only way to create (openNURBS) NURBS, is by importing Rhino files as BLOBs.</p>
+</blockquote>
+<p>OK, I think <strong>create NURBS curve &amp; surface using mged command</strong> is be a good target to start with.</p>
+
+
+
+<a name="343279452"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343279452" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343279452">(Mar 21 2023 at 05:48)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span>  Nearly all of BRL-CAD's non-NURBS implicit solids (e.g., ell, torus, arb8, tgc, etc) have function implementations that express them in NURBS form (like in your screenshot they show torus and some other starter shapes in addition to curve and surface creation).  It's the rt_<em>_brep() callback which you can see in all the src/librt/primitives/</em>/*.cpp subdir files.  As mentioned, conversion is one current way to get NURBS brep entities, but also a way is the mged "brep" command.  That converts an existing solid into a brep solid.</p>
+
+
+
+<a name="343279848"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343279848" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343279848">(Mar 21 2023 at 05:52)</a>:</h4>
+<p>That said, you're on the right track thinking about how to create them first.  That's why I mentioned src/proc-db/brep_simple.cpp and friends where you can see examples how they're created in code, one curve, edge, trim, and surface at a time.</p>
+
+
+
+<a name="343816981"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343816981" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343816981">(Mar 23 2023 at 02:26)</a>:</h4>
+<p>I created one cylindrical side in proc-db.<br>
+<a href="/user_uploads/1549/OETF3zwLfWkrLqn3QHs9QGSZ/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/OETF3zwLfWkrLqn3QHs9QGSZ/image.png" title="image.png"><img src="/user_uploads/1549/OETF3zwLfWkrLqn3QHs9QGSZ/image.png"></a></div>
+
+
+
+<a name="343817322"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343817322" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343817322">(Mar 23 2023 at 02:32)</a>:</h4>
+<p>I noticed we have <strong>bspline_brep.cpp</strong> in <strong>librt/primitives/bspline</strong>, but it seems we have no corresponding option of <code>in</code> command. Maybe we should call the function through <code>in</code> command to create NURBS?</p>
+
+
+
+<a name="343879488"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343879488" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343879488">(Mar 23 2023 at 07:08)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> Note that there are two boundary representation implementations in librt.  One is  the 'bspline' entity and the other is the 'brep' entity.  What you're looking at there is the older bspline which implements boundaries  by defining  bspline patches.  It works, but it's a slow 1980's approach and yes it also lacks an 'in' interface.  The 'brep' entity (see src/librt/primitives/brep and src/other/ext/openNURBS) is the modern approach.</p>
+
+
+
+<a name="343879832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343879832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343879832">(Mar 23 2023 at 07:09)</a>:</h4>
+<p>There's very likely code and algorithms in 'bspline' that should/could be migrated to 'brep', particularly for boolean evaluation, but the datastructures are different so any utilization will require some work.</p>
+
+
+
+<a name="343952863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343952863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343952863">(Mar 23 2023 at 11:53)</a>:</h4>
+<p>Yeah, I'm trying to generate the 'brep' form NURBS surface. I think the difference is that 'brep' form need to create vertex, curve, edge, trim compared to 'bspline' form. Am I right?</p>
+
+
+
+<a name="343954119"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/343954119" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#343954119">(Mar 23 2023 at 11:59)</a>:</h4>
+<p>Besides, I find one possible problem... If a 'brep' object have a edge which is a loop in Cartesian space but not a loop topologically, the 'brep' is not valid(b-&gt;IsValid()=false). And the code belongs to  openNURBS. Just like the cylindrical side. <br>
+<a href="/user_uploads/1549/1J9FJrFs477N4Ajo-DWi-xgw/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/1J9FJrFs477N4Ajo-DWi-xgw/image.png" title="image.png"><img src="/user_uploads/1549/1J9FJrFs477N4Ajo-DWi-xgw/image.png"></a></div>
+
+
+
+<a name="344017500"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344017500" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344017500">(Mar 23 2023 at 15:34)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/343952863">said</a>:</p>
+<blockquote>
+<p>Yeah, I'm trying to generate the 'brep' form NURBS surface. I think the difference is that 'brep' form need to create vertex, curve, edge, trim compared to 'bspline' form. Am I right?</p>
+</blockquote>
+<p>Well the API is different because 'brep' uses the openNURBS API.  They both create parametric surfaces that are stitched together with vertices, curves, and edges.  'bspline' doesn't to trimming curves whereas 'brep' does use trimming curves is probably the biggest practical difference in construction.</p>
+
+
+
+<a name="344018090"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344018090" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344018090">(Mar 23 2023 at 15:36)</a>:</h4>
+<p>somewhere in the code is a function that converts a bspline to a brep.  I think that might even be what I did to fix ray tracing for bspline.  The only reason the bspline code is still there is for reading/writing old .g files with them and as a reference if there are functions in there that might be useful for migrating to 'brep'</p>
+
+
+
+<a name="344019173"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344019173" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344019173">(Mar 23 2023 at 15:40)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/343954119">said</a>:</p>
+<blockquote>
+<p>Besides, I find one possible problem... If a 'brep' object have a edge which is a loop in Cartesian space but not a loop topologically, the 'brep' is not valid(b-&gt;IsValid()=false). And the code belongs to  openNURBS. Just like the cylindrical side. <br>
+<a href="/user_uploads/1549/1J9FJrFs477N4Ajo-DWi-xgw/image.png">image.png</a></p>
+</blockquote>
+<p>Yes the topological structure of brep can be valid/invalid and really unrelated to the geometric structure.  It's our job to make sure they match and form a valid definition.</p>
+<p>Your cylinder is a valid surface but is not a valid brep because it doesn't enclose a volume.</p>
+
+
+
+<a name="344134427"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344134427" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344134427">(Mar 24 2023 at 01:13)</a>:</h4>
+<p>Thanks! Very detailed and interesting distinction.</p>
+
+
+
+<a name="344411528"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344411528" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344411528">(Mar 25 2023 at 04:36)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  I'm wondering if we wrap nurbs in <code>brep</code> format, what format should users edit them in?</p>
+<p>For example, One user want to 'attach' two spline curves. So he/she should have two curve in brep format like <code>curve1.brep</code> and <code>curve2.brep</code>, then run mged command like <code>attach curve1.brep curve2.brep [other parameters]</code>. BRL-CAD core will check if <code>curve1.brep</code> and <code>curve2.brep</code> each owns a single curve. If not, the operation is illegal. Otherwise BRL-CAD core will perform attach operation. Am I right?</p>
+
+
+
+<a name="344412980"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344412980" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344412980">(Mar 25 2023 at 04:53)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> you might have some misunderstanding.  You're not "wrapping" nurbs in brep format.  nurbs are defined using a boundary representation format so for all intents and purposes nurbs==brep.  I also don't think it would make any sense to put curves into separate breps if the point is to join them.   What you'd probably do is create a brep, add a curve to it, add another curve to it, join them.</p>
+
+
+
+<a name="344413038"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344413038" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344413038">(Mar 25 2023 at 04:53)</a>:</h4>
+<p>Did you read the the src/proc-db/brep_simple.cpp ?</p>
+
+
+
+<a name="344413130"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344413130" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344413130">(Mar 25 2023 at 04:54)</a>:</h4>
+<p>Run that and look at the model it produces in mged.  Now imagine wanting to edit it in mged to move a vertex.  What would that command look like.  That's a first step.</p>
+
+
+
+<a name="344413442"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344413442" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344413442">(Mar 25 2023 at 04:58)</a>:</h4>
+<p>Once you can move a vertex, then try moving an edge.  After you can move a vertex and an edge, now what about moving a face.  Figure out what that looks like from an editing perspective.  Once you can move those pieces around, what about deleting a vertex, or deleting an edge, or even deleting a face?  What about adding a vertex in the middle of an edge?  What about the middle of a face?  And so on... that's the general idea for building up a command that will let you do all of that in a user-friendly way.</p>
+
+
+
+<a name="344413671"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344413671" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344413671">(Mar 25 2023 at 05:00)</a>:</h4>
+<p>Once you can do all that, how about generating that same brep_simple object on the command line.. figure out what that looks like.</p>
+
+
+
+<a name="344413715"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344413715" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344413715">(Mar 25 2023 at 05:01)</a>:</h4>
+<p>At that point, you'll need to figure out how to deal with trimming curves, control points, and knot values too.</p>
+
+
+
+<a name="344415294"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344415294" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344415294">(Mar 25 2023 at 05:17)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/344413130">said</a>:</p>
+<blockquote>
+<p>Run that and look at the model it produces in mged.  Now imagine wanting to edit it in mged to move a vertex.  What would that command look like.  That's a first step.</p>
+</blockquote>
+<p>Yeah, I can imagine that. So what we want to do is editing nurbs that belongs to brep, not separate nurbs?</p>
+
+
+
+<a name="344494786"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344494786" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344494786">(Mar 25 2023 at 14:01)</a>:</h4>
+<p>there are no separate nurbs... brep==nurbs</p>
+
+
+
+<a name="344495210"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344495210" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344495210">(Mar 25 2023 at 14:03)</a>:</h4>
+<p>they're one in the same.  so if we have a brep, we want to edit the "brep nurbs" structures it contains.  we need the ability to add those structures to an empty or existing brep too (so we can manually create things like brep_simple does, but as a user).</p>
+
+
+
+<a name="344833251"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344833251" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344833251">(Mar 27 2023 at 11:20)</a>:</h4>
+<p>As far as my understanding from openNURBS, one brep contains curves, surfaces(geometry) and vertexes, edges, trims, loops, faces(topology) info, where curves and surfaces may be NURBS. So maybe a more precise description would be there is no separate NURBS, they shall be geometries of brep?</p>
+
+
+
+<a name="344834897"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344834897" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344834897">(Mar 27 2023 at 11:28)</a>:</h4>
+<p>I want to understand how to use NURBS editing operations from user perspective. <br>
+For operation like "move a vertex":</p>
+<ol>
+<li>users may select the vertex to be moved though command <code>brep *.brep plot  V *</code> or other operation</li>
+<li>run command(to be developed) like <code>MoveVertex [brep name] [vertexid] [position to be moved]</code></li>
+</ol>
+
+
+
+<a name="344836262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344836262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344836262">(Mar 27 2023 at 11:34)</a>:</h4>
+<p>For operation like "create and attach two spline curve":</p>
+<ol>
+<li>users may create one empty brep object</li>
+<li>run command(to be developed) like <code>AddCurve [brep_name] [curve info]</code> twice to add two spline curve into the brep object.</li>
+<li>run command(to be developed) like <code>AttachSpline [brep name] [curveid_1] [curveid_2]</code> to attach the two spline</li>
+</ol>
+
+
+
+<a name="344839567"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344839567" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344839567">(Mar 27 2023 at 11:49)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  I looked though the structure of brep and how to create a brep object. And I'm trying to figure out how users use the NURBS editing.  I checked blender and some other softwares and libs. I think our operating logic is different from theirs. They are editing one separate NURBS curve/surface directly. Am I right? <span aria-label="grinning face with smiling eyes" class="emoji emoji-1f601" role="img" title="grinning face with smiling eyes">:grinning_face_with_smiling_eyes:</span></p>
+
+
+
+<a name="344931482"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344931482" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344931482">(Mar 27 2023 at 17:48)</a>:</h4>
+<p>I think, you are on the right way. The details depend on how the data is stored in openNURBS. Do the curves and/or points have an ID? Or just an index in an array? Etc..</p>
+<p>What I had in mind, was a command like <code>in myNurbs.s brep &lt;parameters&gt;</code>. <strong>&lt;parameters&gt;</strong> being something like <strong>"[curve 1 info] u [curve 2 info] ..."</strong>. I.e., the real task would be to draft a concept for <strong>[curve info]</strong> and implement it.</p>
+
+
+
+<a name="344932168"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344932168" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344932168">(Mar 27 2023 at 17:52)</a>:</h4>
+<p>The task of editing NURBS is not important at this level/stage. E.g., at the lower level, a vertex doesn't need to be movable. It would be good too, if the curve, the vertex belongs to, could be replaced by another curve (with the vertex moved).</p>
+
+
+
+<a name="344932426"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/344932426" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#344932426">(Mar 27 2023 at 17:53)</a>:</h4>
+<p>Then, it would be a task of the GUI, to take the original curve, move a vertex there, and replace the original curve with the changed one.</p>
+
+
+
+<a name="345007595"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345007595" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345007595">(Mar 28 2023 at 01:55)</a>:</h4>
+<p>Yeah, I think I get the point! I'm writing my proposal.</p>
+
+
+
+<a name="345025339"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345025339" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Ajay Pal <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345025339">(Mar 28 2023 at 05:07)</a>:</h4>
+<p>..</p>
+
+
+
+<a name="345033679"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345033679" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345033679">(Mar 28 2023 at 06:05)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> you're on the right track thinking about what a CLI might look like.   Editing can happen in a variety of ways as noted.  Could be a write/overwrite/delete interface like daniel mentioned where you just replace entities with different entities the have the edit.  Could propose a set of relevant subcommands to an existing command (e.g.,  "brep translate mybrep.edge[54] 100 0 0".  Could be something hooked into the existing 'adjust' command.  There are tradeoff considerations with all of them.  You'd probably want to budget some time to study options during the bonding phase to finalize exactly what approach will be taken, but you should understand what those options are and explain them in your proposal so you can demonstrate you've thought about this some.</p>
+
+
+
+<a name="345281485"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345281485" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345281485">(Mar 29 2023 at 02:52)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  What's the difference between 'attach' and 'connect' two NURBS curve? I can imagine two cases:</p>
+<ol>
+<li>generate one spline curve after operation. Just like <a href="https://ayam.sourceforge.net/docs/ayam-4.html#concatncobj"><code>ConcatNC</code> in Ayam</a></li>
+<li>get two spline curve share some control vertexes. This is strange..</li>
+</ol>
+
+
+
+<a name="345283306"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345283306" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345283306">(Mar 29 2023 at 03:10)</a>:</h4>
+<p>The points/curves/surface only have an index in an array of brep, without a name. So it is not easy to perform nurbs editing operations for users. They should find the index by drawing and NURBS operation will change the index.</p>
+
+
+
+<a name="345283307"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345283307" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345283307">(Mar 29 2023 at 03:10)</a>:</h4>
+<p>And I'm thinking about if it's proper to do NURBS operation in brep. For example, we have a cube 'brep' in brep format, and we just perform 'trim' operation on one edge curve or 'connect' two edge curve. This will make the 'brep' object irregular(mass up topology and relationship between topology and geometry entities of the cube). Shall we check if the operation is legal to keep some property of the brep valid?</p>
+
+
+
+<a name="345316704"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345316704" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345316704">(Mar 29 2023 at 07:34)</a>:</h4>
+<p>I'm a bit confused about the definition and implementation of some operations.</p>
+
+
+
+<a name="345317056"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345317056" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345317056">(Mar 29 2023 at 07:35)</a>:</h4>
+<ol>
+<li>the first one is 'attach' and 'connect' for NURBS curve.</li>
+</ol>
+
+
+
+<a name="345318683"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345318683" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345318683">(Mar 29 2023 at 07:43)</a>:</h4>
+<ol start="2">
+<li><code>projection</code> for <code>curve to surface operation</code><br>
+    Is it accessable for users? As its <a href="https://brlcad.org/wiki/Vector_Drawings_from_NURBS">usage</a> tells, maybe it shall be a function in libbrep core for viewing.<br>
+    How to achieve it?  My understanding is that this function will get projection(planar spline curve format) of the selected spline curve onto a plane. We can sample points on the curve, perform raytracing to get the projection points on the plane, then fit 2D curve on the plane.</li>
+</ol>
+
+
+
+<a name="345320192"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345320192" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345320192">(Mar 29 2023 at 07:50)</a>:</h4>
+<ol start="3">
+<li><code>Rebuild/Simplify(remove unnecessary control points)</code> function in <code>surface operations</code><br>
+     I don't know what it refers to. Does it mean decrease order/coarsen of the surface within a tolerance value or discard the trimmed part?</li>
+</ol>
+
+
+
+<a name="345321379"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345321379" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345321379">(Mar 29 2023 at 07:56)</a>:</h4>
+<ol start="4">
+<li><code>Trim (evaluate to untrimmed)</code> in <code>surface operations</code><br>
+   Does it mean split surface into two spline surface or trim like <a href="https://ayam.sourceforge.net/docs/ayam-4.html#trimobj">Ayam trim</a>? For the latter, I think it's not easy to implement.</li>
+</ol>
+
+
+
+<a name="345484652"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345484652" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345484652">(Mar 29 2023 at 18:24)</a>:</h4>
+<p>I had hoped that you would tell me that <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span><br>
+I didn't looked at the openNURBS/brep internals yet.</p>
+
+
+
+<a name="345572283"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345572283" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345572283">(Mar 30 2023 at 06:11)</a>:</h4>
+<p>I thought we have a detailed description and goal about operations in <a href="https://brlcad.org/wiki/NURBS_Editing_Support">NURBS Editing Support</a>.<span aria-label="sweat smile" class="emoji emoji-1f605" role="img" title="sweat smile">:sweat_smile:</span> <br>
+It's okay if not! I think the operations may not be limited to the wiki, we need NURBS editing operations just like any other lib such as Ayam and Blender. I have describled these NURBS editing operations in detail and hope to extend the operations as one part of my proposal. My proposal will be relatively long, so I will send out the first half of it as soon as possible to discuss with you.</p>
+
+
+
+<a name="345584238"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345584238" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345584238">(Mar 30 2023 at 07:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/345316704">said</a>:</p>
+<blockquote>
+<p>I'm a bit confused about the definition and implementation of some operations.</p>
+</blockquote>
+<p>you can certainly propose changing what was written up on the wiki.  I think it's mostly taking a very low-level approach of operations that could be performed on specified curves and surfaces, but it's certainly not the only approach possible.</p>
+
+
+
+<a name="345584642"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345584642" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345584642">(Mar 30 2023 at 07:25)</a>:</h4>
+<p>I don't personally see operations #2 or #3 being important and #4 is a "nice to have" but not strictly necessary for editing either.</p>
+
+
+
+<a name="345584955"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345584955" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345584955">(Mar 30 2023 at 07:26)</a>:</h4>
+<p>They won't/don't need to be limited to what's on the wiki.  I think that was just envisioned as a potential starting point approach.</p>
+
+
+
+<a name="345586326"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345586326" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345586326">(Mar 30 2023 at 07:32)</a>:</h4>
+<p>Myself, I would approach it the way I mentioned a few days ago.  Assume you have the brep_simple object.  Now make it so you can move any of the vertices, edges, or surfaces (maintaining connectivity/topology) of that cube.  Once that's all working, and that'd likely take a month, then focus on creating that brep_simple cube on the command-line (<em>however</em> you can achieve that easily).  That'd be basic construction and another month.  With those two achieved, just about any edit operation should be possible and it stays focused on the end-user's perspective, not the data structure. </p>
+<p>Basically keep it simple.  Do the simplest things first like moving existing things around, and tackle the harder problems when nothing simpler remains.</p>
+
+
+
+<a name="345608106"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345608106" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345608106">(Mar 30 2023 at 09:06)</a>:</h4>
+<p>OK, I will start with simple operations like create, move vertices as you said. Think of the wiki as a borader suggestion.</p>
+
+
+
+<a name="345608765"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345608765" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345608765">(Mar 30 2023 at 09:09)</a>:</h4>
+<p>I give a detailed description about operations on wiki. I will update the wiki if my description meets our expectations about NURBS editing. <a href="https://drive.google.com/file/d/1mKVNlSQXQT6YlFb-OBPjw9mGGKBoPo4W/view?usp=sharing">detailed description</a></p>
+
+
+
+<a name="345617783"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345617783" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345617783">(Mar 30 2023 at 09:45)</a>:</h4>
+<p>The most important point from the task description is for me:</p>
+<blockquote>
+<p>The key-feature would be to have ged command(s) that lets you build NURBS objects from scratch. This could be done by having a declarative ASCII description of these entities and/or wrapping the openNURBS library by a scripting language.</p>
+</blockquote>
+<p>It comes from the need to convert NURBS-like entities from another program. The project, this was part of, ended however some years ago. Nevertheless, I would like to have it, in case I need it again.</p>
+
+
+
+<a name="345618653"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345618653" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345618653">(Mar 30 2023 at 09:49)</a>:</h4>
+<p>This can be read as "<em>The key-feature would be to have a ged command that lets you build NURBS objects from scratch. This could be done by having a declarative ASCII description of these entities.</em>" too</p>
+
+
+
+<a name="345640738"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345640738" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345640738">(Mar 30 2023 at 11:27)</a>:</h4>
+<p>I can imagine two approaches, I think these are what we want to do.</p>
+<ol>
+<li>Create a primitive and turn it into brep format. Then modify geometry(vertices,curves,surfaces) and topology(trim,edge..) Just like make changes based on the blueprint.</li>
+<li>Make an empty brep, then add geometry and topology infomation into it.</li>
+</ol>
+
+
+
+<a name="345641346"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345641346" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345641346">(Mar 30 2023 at 11:30)</a>:</h4>
+<p>For #1, we have implemented the first half of it.</p>
+
+
+
+<a name="345642876"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345642876" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345642876">(Mar 30 2023 at 11:36)</a>:</h4>
+<p>So in general we need to <strong>create and modify geometry and topology</strong> of a brep using command line or interface. I hope I'm right.</p>
+
+
+
+<a name="345838361"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/345838361" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#345838361">(Mar 31 2023 at 04:57)</a>:</h4>
+<p>Yes, I think what you've described is basically edit existing brep vs create brep from scratch.  Both have strong use cases, and both are non-capabilities at the moment.  Their need is far greater than higher level operations like lofting, fillets/bevels, reparameterization, etc.</p>
+
+
+
+<a name="346094095"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/346094095" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#346094095">(Apr 01 2023 at 02:29)</a>:</h4>
+<p>Hi, I have made a draft of my proposal. Please review my proposal <span aria-label="smile" class="emoji emoji-1f642" role="img" title="smile">:smile:</span> <span class="user-mention" data-user-id="102902">@Sean</span> <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <br>
+<a href="https://drive.google.com/file/d/1NUOx-cnQrl5c9-W_k8_a8bqZ7xmJxEpW/view?usp=sharing">https://drive.google.com/file/d/1NUOx-cnQrl5c9-W_k8_a8bqZ7xmJxEpW/view?usp=sharing</a></p>
+
+
+
+<a name="346277141"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/346277141" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#346277141">(Apr 02 2023 at 01:23)</a>:</h4>
+<p>I think "brep editing" is a better name than "NURBS editing". Brep involves geometry and topology. NURBS is a part of geometry. What do you think?</p>
+
+
+
+<a name="346297039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/346297039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#346297039">(Apr 02 2023 at 05:41)</a>:</h4>
+<p>while we call the entity "brep" and currently only store nurbs in them, boundary representation is a broad term and can refer to polygonal meshes, NURBS, sketches (but not extrudes), and a few others.</p>
+
+
+
+<a name="346308606"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/346308606" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#346308606">(Apr 02 2023 at 07:31)</a>:</h4>
+<p>Yeah, 'brep' is too broad for the project.</p>
+
+
+
+<a name="346309089"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/346309089" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#346309089">(Apr 02 2023 at 07:35)</a>:</h4>
+<p>I think some plot functions are needed to help users to select control vertex etc. Just like blender draw a control vertex mesh of NURBS surface.<br>
+<a href="/user_uploads/1549/OEoZrI9NzCUWjVHbn0RWPXSQ/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/OEoZrI9NzCUWjVHbn0RWPXSQ/image.png" title="image.png"><img src="/user_uploads/1549/OEoZrI9NzCUWjVHbn0RWPXSQ/image.png"></a></div>
+
+
+
+<a name="346361522"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/346361522" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#346361522">(Apr 02 2023 at 13:40)</a>:</h4>
+<p>I updated my proposal with few changes. <a href="https://drive.google.com/file/d/1o5IfQQSHajEZSZsXUkGBWlmw7JZtjbJO/view?usp=sharing">https://drive.google.com/file/d/1o5IfQQSHajEZSZsXUkGBWlmw7JZtjbJO/view?usp=sharing</a></p>
+
+
+
+<a name="347326770"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/347326770" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#347326770">(Apr 06 2023 at 07:48)</a>:</h4>
+<p><a href="/user_uploads/1549/6QzFCm3tTHnjweXWrHya_6ps/image.png">image.png</a> <a href="/user_uploads/1549/F9Qm2JE0hWrnHWoWAWe13JuT/image.png">image.png</a><br>
+I can move curves through cmd now. <span aria-label="grinning" class="emoji emoji-1f600" role="img" title="grinning">:grinning:</span></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/6QzFCm3tTHnjweXWrHya_6ps/image.png" title="image.png"><img src="/user_uploads/1549/6QzFCm3tTHnjweXWrHya_6ps/image.png"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/F9Qm2JE0hWrnHWoWAWe13JuT/image.png" title="image.png"><img src="/user_uploads/1549/F9Qm2JE0hWrnHWoWAWe13JuT/image.png"></a></div>
+
+
+
+<a name="347328600"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/347328600" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#347328600">(Apr 06 2023 at 07:58)</a>:</h4>
+<p>I wrote this function by imitating <code>_brep_cmd_flip</code>. When we modify a brep object, we copy a new one ande delete the old object. I feel it's strange to do it this way. Won't this reduce efficiency?</p>
+
+
+
+<a name="352182377"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/352182377" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#352182377">(Apr 24 2023 at 07:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> depends on the nature and size of the edit.  a very large brep with lots of data will be inefficient, but whether that matters or is even noticeable by users remains to be seen.  by doing the edit on a separate copy, that at least avoids a slew of validation code that'd be needed otherwise if/when an edit fails or cannot be applied.</p>
+
+
+
+<a name="352182544"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/352182544" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#352182544">(Apr 24 2023 at 07:07)</a>:</h4>
+<p>worth noting that approach is also consistent with bot editing, which are typically as big or bigger than nurbs, with minimal impact.</p>
+
+
+
+<a name="357043491"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357043491" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Amanjot Singh <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357043491">(May 09 2023 at 16:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span>  Congratulations on getting selected in GSoC 2023. Looking forward to work with you <span aria-label="tada" class="emoji emoji-1f389" role="img" title="tada">:tada:</span></p>
+
+
+
+<a name="357122317"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357122317" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357122317">(May 10 2023 at 00:01)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="403746">Amanjot Singh</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/357043491">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span>  Congratulations on getting selected in GSoC 2023. Looking forward to work with you <span aria-label="tada" class="emoji emoji-1f389" role="img" title="tada">:tada:</span></p>
+</blockquote>
+<p>thanks! I'm very excited to be selected <span aria-label="smile" class="emoji emoji-1f642" role="img" title="smile">:smile:</span> I will check up the checklist :)</p>
+
+
+
+<a name="357122828"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357122828" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357122828">(May 10 2023 at 00:06)</a>:</h4>
+<p>I'm trying to create an empty brep using command line, but I can't access <code>ON_brep</code> in <code>make.c</code>. I can only access <code>_on_brep_placeholder</code> in include/brep/defines.h, a placeholder when compiling with a C compiler.</p>
+
+
+
+<a name="357123378"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357123378" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357123378">(May 10 2023 at 00:10)</a>:</h4>
+<p>Now I add a <code>brep_create</code> command. I can create an empty brep using "brep_create &lt;brep_name&gt;". But I think a subcommad of make like "make  &lt;brep_name&gt;  brep" is more suitable. Can you tell me what shall I do?</p>
+
+
+
+<a name="357191264"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357191264" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357191264">(May 10 2023 at 07:46)</a>:</h4>
+<p>Did you had a look at libwdb? There is a brep.cpp with a <code>mk_brep</code> function. The low level database object creation functions should go to libwdb.</p>
+
+
+
+<a name="357195830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357195830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357195830">(May 10 2023 at 08:03)</a>:</h4>
+<p>Regarding the methodology used in make.c: Maybe, you can use the NMGs in libnmg as a kind of template. E.g., there is a function <code>nmg_mm()</code>, which creates a new empty NMG. Can you do something similar in libbrep?</p>
+
+
+
+<a name="357408871"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357408871" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357408871">(May 10 2023 at 21:39)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/357122828">said</a>:</p>
+<blockquote>
+<p>I'm trying to create an empty brep using command line, but I can't access <code>ON_brep</code> in <code>make.c</code>. I can only access <code>_on_brep_placeholder</code> in include/brep/defines.h, a placeholder when compiling with a C compiler.</p>
+</blockquote>
+<p>ON_brep is a C++ class, so any code that accesses, creates, inspects, or otherwise uses one needs to be from within a C++ source file.  For C files, it resolves to a pointer placeholder that you can't do anything with.</p>
+
+
+
+<a name="357409016"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357409016" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357409016">(May 10 2023 at 21:40)</a>:</h4>
+<p>Basically, add a new c++ file, and access code through C functions if you need to bridge to an existing C file like make.c</p>
+
+
+
+<a name="357725892"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357725892" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357725892">(May 12 2023 at 01:02)</a>:</h4>
+<p>I'm using <code>mk_brep</code> in my 'brep_create` command. I hope to call 'brep_create' command in 'make.c' using 'ged_exec()'. 'brep_create' command run but error occurs. I have checked and verified that all the parameters in 'brep_create' are correct.<br>
+Log info:</p>
+<div class="codehilite"><pre><span></span><code>rt_db_cvt_to_external5(A_b):  ft_export5 failure
+rt_db_put_internal5(A_b):  export failure
+</code></pre></div>
+
+
+
+<a name="357726123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/357726123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#357726123">(May 12 2023 at 01:04)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/357409016">said</a>:</p>
+<blockquote>
+<p>Basically, add a new c++ file, and access code through C functions if you need to bridge to an existing C file like make.c</p>
+</blockquote>
+<p>I'll try to make a bridge to call <code>mk_brep</code> function. Thanks!</p>
+
+
+
+<a name="359352327"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359352327" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359352327">(May 18 2023 at 10:11)</a>:</h4>
+<p>I tried two methods to call <code>mk_brep</code>, but both had problems.</p>
+
+
+
+<a name="359353715"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359353715" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359353715">(May 18 2023 at 10:19)</a>:</h4>
+<ol>
+<li>I made a command to create an empty brep object: <code>brep_create [brep_name]</code> and it works well. Then I add a subcommand in <code>make</code> like <code>make [brep_name] brep</code> to call <code>brep_create</code> command using <code>ged_exec()</code>.<br>
+When I run <code>make [brep_name] brep</code>, I get this error message: <code>Error: Database write failure</code>. But if I add or delete any other object, the brep object occurs, which means it's created but didn't display.<br>
+I am certain that the parameters passed in through direct calling and through invoking <code>make [brep_name]  brep</code> are the same.</li>
+</ol>
+
+
+
+<a name="359354228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359354228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359354228">(May 18 2023 at 10:21)</a>:</h4>
+<ol start="2">
+<li>The second method is to call <code>mk_brep()</code> directly in <code>make</code>. The problem that appeared is exactly the same.</li>
+</ol>
+
+
+
+<a name="359354652"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359354652" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359354652">(May 18 2023 at 10:23)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <span class="user-mention" data-user-id="403746">@Amanjot Singh</span>  Where do you think the problem lies? Could it be due to the addition of locks or something similar in the <code>make</code> command?</p>
+
+
+
+<a name="359411863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359411863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359411863">(May 18 2023 at 14:26)</a>:</h4>
+<p>Can you show us your code? Do you have a github account?</p>
+
+
+
+<a name="359523874"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359523874" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359523874">(May 19 2023 at 00:57)</a>:</h4>
+<p>Yes, it's quite simple. <a href="https://github.com/GregoryLi0/brlcad/commit/97dfd3b85f1dc68a23627fdcc4ae22c67b0db7ab">https://github.com/GregoryLi0/brlcad/commit/97dfd3b85f1dc68a23627fdcc4ae22c67b0db7ab</a></p>
+
+
+
+<a name="359524388"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359524388" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359524388">(May 19 2023 at 01:04)</a>:</h4>
+<p>For comparison, <code>brep_craete</code> command is here. <a href="https://github.com/BRL-CAD/brlcad/commit/4ac8818438ac0f3fbb2f830a22d89fc71ebfc093">https://github.com/BRL-CAD/brlcad/commit/4ac8818438ac0f3fbb2f830a22d89fc71ebfc093</a></p>
+
+
+
+<a name="359759711"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359759711" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359759711">(May 19 2023 at 20:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> What's getting written to disk is &amp;internal, which you don't set/initialize</p>
+
+
+
+<a name="359760179"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359760179" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359760179">(May 19 2023 at 20:19)</a>:</h4>
+<p>It's also strange to me that you'd call wdb_dbopen().. I see that hyp is also calling that, but I think that's "a mistake" of sorts -- someone was being lazy and I think creating a memory issue (they don't call close).</p>
+
+
+
+<a name="359760700"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/359760700" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#359760700">(May 19 2023 at 20:23)</a>:</h4>
+<p>You'll want to initialize the &amp;internal like the other primitives.  The only complication you have is that you need the pointer to the brep.  I don't think you want to call mk_brep().  Probably better to make a function that returns a void* to the brep -- can make mk_brep() call that as well as in ged_make_core().</p>
+
+
+
+<a name="360451820"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/360451820" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#360451820">(May 23 2023 at 07:39)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/359760700">said</a>:</p>
+<blockquote>
+<p>You'll want to initialize the &amp;internal like the other primitives.  The only complication you have is that you need the pointer to the brep.  I don't think you want to call mk_brep().  Probably better to make a function that returns a void* to the brep -- can make mk_brep() call that as well as in ged_make_core().</p>
+</blockquote>
+<p>It works! Thanks <span aria-label="smiley" class="emoji emoji-1f603" role="img" title="smiley">:smiley:</span></p>
+
+
+
+<a name="361217065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/361217065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#361217065">(May 26 2023 at 05:09)</a>:</h4>
+<p>Now, I am able to create an empty BREP object and generate new curves within it. However, it should be noted that only a limited number of parameters can be configured now.</p>
+
+
+
+<a name="361217075"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/361217075" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#361217075">(May 26 2023 at 05:09)</a>:</h4>
+<p><a href="/user_uploads/1549/WoDCu6_0wTaR4CElRq3iUr06/2023-05-26_12-51.png">2023-05-26_12-51.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/WoDCu6_0wTaR4CElRq3iUr06/2023-05-26_12-51.png" title="2023-05-26_12-51.png"><img src="/user_uploads/1549/WoDCu6_0wTaR4CElRq3iUr06/2023-05-26_12-51.png"></a></div>
+
+
+
+<a name="361217570"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/361217570" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#361217570">(May 26 2023 at 05:14)</a>:</h4>
+<p>I think users can input simple information such as the dimensions and degree of the curve using "brep [name] create_curve [curve_info]", while the specific information on controlling point positions could be set by other commands. You think it's a good idea?</p>
+
+
+
+<a name="361217945"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/361217945" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#361217945">(May 26 2023 at 05:18)</a>:</h4>
+<p>Well, I have researched some alternative libraries... NURBS-Python, blender-python requires lots of codes to create a curve.</p>
+
+
+
+<a name="361218204"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/361218204" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#361218204">(May 26 2023 at 05:21)</a>:</h4>
+<p>The Python script for creating nurbs curves in Blender is more concise.<br>
+<a href="/user_uploads/1549/FVSw6RR2WI8-ELxfwm7LJ63A/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/FVSw6RR2WI8-ELxfwm7LJ63A/image.png" title="image.png"><img src="/user_uploads/1549/FVSw6RR2WI8-ELxfwm7LJ63A/image.png"></a></div>
+
+
+
+<a name="361218499"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/361218499" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#361218499">(May 26 2023 at 05:24)</a>:</h4>
+<p>Btw, is there a plugin in VScode that can automatically format our code? The auto-formatting tool in VScode tends to mass up the existing code.</p>
+
+
+
+<a name="363422404"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363422404" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363422404">(Jun 04 2023 at 05:11)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  Hi, I updated codes about <code>make [name] brep</code>. I created function <code>brep_create_empty_brep()</code> in libbrep to create <code>rt_brep_internal</code>.</p>
+
+
+
+<a name="363422407"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363422407" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363422407">(Jun 04 2023 at 05:11)</a>:</h4>
+<p><a href="/user_uploads/1549/6b4PSCfqSAcBQ4E3D1G29i1F/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/6b4PSCfqSAcBQ4E3D1G29i1F/image.png" title="image.png"><img src="/user_uploads/1549/6b4PSCfqSAcBQ4E3D1G29i1F/image.png"></a></div>
+
+
+
+<a name="363422506"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363422506" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363422506">(Jun 04 2023 at 05:13)</a>:</h4>
+<p>It seems to be running well.</p>
+
+
+
+<a name="363513334"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363513334" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363513334">(Jun 04 2023 at 14:48)</a>:</h4>
+<p>Nice <span aria-label="smile" class="emoji emoji-1f642" role="img" title="smile">:smile:</span></p>
+
+
+
+<a name="363516912"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363516912" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363516912">(Jun 04 2023 at 15:09)</a>:</h4>
+<p>Some comments regarding your code:</p>
+<ul>
+<li>You created the edit.h and edit.cpp files with copy-n-paste. There is nothing wrong with it, as long as you read carefully through them:<ul>
+<li>Adapt the header to the new purpose: File name, copyright, ...</li>
+<li>Recreate the includes, include those headers only, which are really needed.</li>
+</ul>
+</li>
+<li>In my opinion, <code>brep_create_empty_brep()</code> is an unusual long function name, for what it does. How about<ul>
+<li><code>brep_create()</code> for constructing a new rt_brep_internal?</li>
+<li><code>brep_add_~</code>, <code>brep_insert_~</code> for adding new curves, etc.?</li>
+<li><code>brep_remove_~</code> for deleting features?</li>
+<li>...</li>
+</ul>
+</li>
+</ul>
+
+
+
+<a name="363539726"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363539726" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363539726">(Jun 04 2023 at 17:19)</a>:</h4>
+<p>I'm getting a compilation warning/error:</p>
+<div class="codehilite"><pre><span></span><code>/home/rossberg/Devel/BRL-CAD/brlcad.GregoryLi0/src/libged/make/make.c:75:27: error: unused variable ‘brep_ip’ [-Werror=unused-variable]
+   75 |  struct rt_brep_internal *brep_ip;
+      |                           ^~~~~~~
+cc1: all warnings being treated as errors
+</code></pre></div>
+
+
+
+<a name="363589059"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363589059" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363589059">(Jun 05 2023 at 01:06)</a>:</h4>
+<p>Thanks! I will shorten the names of these functions and fix the error.</p>
+
+
+
+<a name="363589340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363589340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363589340">(Jun 05 2023 at 01:09)</a>:</h4>
+<p>And now I think <code>brep_create()</code> in libbrep should create an <code>ON_Brep</code> instead of <code>rt_brep_internal</code> like other primitives in <code>make.c</code>.</p>
+
+
+
+<a name="363680129"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363680129" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363680129">(Jun 05 2023 at 10:39)</a>:</h4>
+<p>Does rt means ray tracing? I tracked <code>boolean</code> subcommand of <code>brep</code>, the function call stack is <code>libged/_brep_cmd_boolean() </code>→ <code>librt/rt_brep_boolean()</code> → <code>libbrep/ON_Boolean()</code>. I'm not sure why we shall go through librt..</p>
+
+
+
+<a name="363680659"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363680659" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363680659">(Jun 05 2023 at 10:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  I think the brep editing operations shall be implemented in <code>libbrep</code>, and we can access them directly in <code>libged</code>?</p>
+
+
+
+<a name="363801867"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/363801867" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#363801867">(Jun 05 2023 at 17:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/363680129">said</a>:</p>
+<blockquote>
+<p>Does rt means ray tracing? I tracked <code>boolean</code> subcommand of <code>brep</code>, the function call stack is <code>libged/_brep_cmd_boolean() </code>→ <code>librt/rt_brep_boolean()</code> → <code>libbrep/ON_Boolean()</code>. I'm not sure why we shall go through librt..</p>
+</blockquote>
+<p><strong>rt</strong> stands for "ray-trace", and it is the prefix of librt's symbols. The point is that both the librt ray-tracing as well as the libged brep bool sub-command need the functionality in rt_brep_boolean(). See the comment for the include of this function in src/libged/brep/brep.c: librt may not be the final place/rt_brep_boolean not the final name of this function.</p>
+<p>However, editing the breps (NURBS) is not directly connected with ray-tracing, and the low level code should go to <code>libbrep</code>, where it can be accessed from <code>libged</code>.</p>
+
+
+
+<a name="364172999"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/364172999" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#364172999">(Jun 07 2023 at 06:14)</a>:</h4>
+<p>Yeah, thanks. Now the development is going well, slightly ahead of schedule.</p>
+
+
+
+<a name="369072299"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369072299" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369072299">(Jun 24 2023 at 04:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  Hi, I have just submitted the PR for Milestone 1 as schedule. (<a href="https://github.com/BRL-CAD/brlcad/pull/80">https://github.com/BRL-CAD/brlcad/pull/80</a>). Let me know if you have any feedback, suggestions, or questions :)</p>
+
+
+
+<a name="369072489"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369072489" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369072489">(Jun 24 2023 at 04:18)</a>:</h4>
+<p>Actually, some of the tasks for Milestone 2 have already been completed. I'm planning to conduct further research and define the required function functionalities.</p>
+
+
+
+<a name="369227863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369227863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369227863">(Jun 24 2023 at 16:35)</a>:</h4>
+<p>Do you have some examples and/or advice about how to test the new features?</p>
+
+
+
+<a name="369282123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369282123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369282123">(Jun 25 2023 at 00:37)</a>:</h4>
+<p>I will write a shell script to test them, as well as change my code styles.</p>
+
+
+
+<a name="369296468"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369296468" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369296468">(Jun 25 2023 at 02:52)</a>:</h4>
+<p><a href="/user_uploads/1549/CUHb-bcUa0ttAhHcXHtIEMGK/brep_curve_edit.sh">brep_curve_edit.sh</a><br>
+<a href="/user_uploads/1549/v3eYIhN9ruBFUtr5-XktdJ3K/brep_surface_edit.sh">brep_surface_edit.sh</a><br>
+I made two shell scripts to perfrom curves &amp; surfaces operations. You can also execute these commands step by step and monitor the changes in data using the "brep .. info" command. <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span></p>
+
+
+
+<a name="369464734"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369464734" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369464734">(Jun 25 2023 at 17:05)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span>, please, consider my comment on <a href="https://github.com/BRL-CAD/brlcad/pull/80">https://github.com/BRL-CAD/brlcad/pull/80</a> too.</p>
+
+
+
+<a name="369474209"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369474209" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369474209">(Jun 25 2023 at 17:49)</a>:</h4>
+<p>I see <span aria-label="smile" class="emoji emoji-1f642" role="img" title="smile">:smile:</span><br>
+<a href="/user_uploads/1549/Jrxk96Fck6tTeEYK3SEu-BM8/Screenshot.png">Screenshot.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Jrxk96Fck6tTeEYK3SEu-BM8/Screenshot.png" title="Screenshot.png"><img src="/user_uploads/1549/Jrxk96Fck6tTeEYK3SEu-BM8/Screenshot.png"></a></div>
+
+
+
+<a name="369527417"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369527417" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369527417">(Jun 26 2023 at 00:49)</a>:</h4>
+<p>Yes, I'm checking and modifying my codes.</p>
+
+
+
+<a name="369930823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369930823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369930823">(Jun 27 2023 at 06:52)</a>:</h4>
+<p>Thanks, I saw your modifications. I may need however some days to review them...</p>
+
+
+
+<a name="369945288"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/369945288" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#369945288">(Jun 27 2023 at 07:43)</a>:</h4>
+<p>That's alright :) I'm now implementing local cubic curve interpolation, to support functions like <em>InterpCrv</em> in <em>Rhino</em>.</p>
+
+
+
+<a name="373792581"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/373792581" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#373792581">(Jul 09 2023 at 23:19)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> can you show me an example for making a brep cone?</p>
+
+
+
+<a name="373798002"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/373798002" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#373798002">(Jul 10 2023 at 00:25)</a>:</h4>
+<p>(deleted)</p>
+
+
+
+<a name="373798128"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/373798128" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#373798128">(Jul 10 2023 at 00:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/373792581">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> can you show me an example for making a brep cone?</p>
+</blockquote>
+<p>I'm currently unable to create a brep cone using the mged command. While NURBS curve/surface editing operations are now supported, topology operations are not yet supported. I can make it by cpp code.</p>
+
+
+
+<a name="373799105"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/373799105" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#373799105">(Jul 10 2023 at 00:34)</a>:</h4>
+<p>The topology modification function belongs to milestone3(July 25 - August 21) in the schedule. But the current progress is about one week ahead of schedule,I plan to handle topology operations after writing the NURBS editing operation documentation.</p>
+
+
+
+<a name="373800592"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/373800592" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#373800592">(Jul 10 2023 at 00:44)</a>:</h4>
+<p>And I am also considering and looking at other software about brep operations. I think it is inappropriate to wrap all NURBS operations into mged command lines for users. Maybe the topology operations shall be implicitly included in. For example:<br>
+If we want to make a cylinder by a circle and a line. We can run 'extrude' cmd. Topology operations are implicitly included in.</p>
+
+
+
+<a name="378316182"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/378316182" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#378316182">(Jul 25 2023 at 01:53)</a>:</h4>
+<p>Hi, I was one week away to join a meeting :) The current project schedule and timeline are aligned. I'm going to submit PR of Milestone 2 this weekend. PR 2 includes advanced NURBS geometry operations: curve/surface interpolation, create surface by tensor product and rotating a curve.</p>
+
+
+
+<a name="380004176"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/380004176" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#380004176">(Jul 30 2023 at 11:26)</a>:</h4>
+<p>There are still some issues with the last feature <strong>Surface interpolation</strong>. I want to achieve higher continuity with fewer control points following <strong>The NURBS Book</strong>. This is quite different with the already realized <strong>local curve interpolation</strong>. I do apologize for being confused by the complexity of the math formula. <span aria-label="face with spiral eyes" class="emoji emoji-1f635-200d-1f4ab" role="img" title="face with spiral eyes">:face_with_spiral_eyes:</span><br>
+I should need another two or three days to implement it and prepare PR2.</p>
+
+
+
+<a name="380092452"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/380092452" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#380092452">(Jul 30 2023 at 17:26)</a>:</h4>
+<p>This can happen that problems turn out to be harder than expected. And, NURBS have some heavy math. Therefore, thanks for letting us know. I'm optimistic that you will overcome the difficulties. A few day more doesn't matter there.</p>
+
+
+
+<a name="380592721"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/380592721" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#380592721">(Aug 01 2023 at 08:00)</a>:</h4>
+<p>Hi, I just submit PR of milestone 2 :).  <a href="https://github.com/BRL-CAD/brlcad/pull/92">https://github.com/BRL-CAD/brlcad/pull/92</a><br>
+There are some potential threats to the ''remove'' operation now as my comment in github PR.</p>
+
+
+
+<a name="380592911"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/380592911" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#380592911">(Aug 01 2023 at 08:00)</a>:</h4>
+<p><a href="/user_uploads/1549/PspvB6vEmOgnEeQ680gHpTvi/brep_curve_edit.sh">brep_curve_edit.sh</a><br>
+<a href="/user_uploads/1549/BEi7fM2kaaAlN5loZmKHVCrM/brep_surface_edit.sh">brep_surface_edit.sh</a><br>
+Here are two shell script  to test new features of milestone 2.</p>
+
+
+
+<a name="382689930"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/382689930" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#382689930">(Aug 07 2023 at 16:08)</a>:</h4>
+<p>Hi Daniel, I'm working on the issues you pointed out. But I didn't have the environment to compile the code until the day after tomorrow. Sorry about that :(</p>
+
+
+
+<a name="383776950"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/383776950" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#383776950">(Aug 10 2023 at 23:04)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/373799105">said</a>:</p>
+<blockquote>
+<p>The topology modification function belongs to milestone3(July 25 - August 21) in the schedule. But the current progress is about one week ahead of schedule,I plan to handle topology operations after writing the NURBS editing operation documentation.</p>
+</blockquote>
+<p>How's the topology operations coming along? :)</p>
+
+
+
+<a name="383957881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/383957881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#383957881">(Aug 11 2023 at 13:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  I've been working with Daniel on the PR2 merge recently. It's about a week or two behind schedule.</p>
+
+
+
+<a name="383958562"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/383958562" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#383958562">(Aug 11 2023 at 13:17)</a>:</h4>
+<p>Regarding the topology operations, I was able to and plan to simply wrap topology operations into command line operations, although these commands will look very weird and require a lot of parameters.</p>
+
+
+
+<a name="383958738"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/383958738" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#383958738">(Aug 11 2023 at 13:17)</a>:</h4>
+<p>I had previously planned to make the topology operations implicit in the higher order operations. For example, having a line rotate around an axis while encapsulating the top and bottom sides and establishing topological relationships. But these operations are not very popular. So I am wrapping the basic topological operations in the command line.</p>
+
+
+
+<a name="385845077"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/385845077" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#385845077">(Aug 18 2023 at 07:40)</a>:</h4>
+<p>Yeah, I don't think you should focus on anything higher order, without something low-level in place first.  I mean a really basic goal should be creating a sphere from one surface and/or creating a tetra, box, or sphere from multiple surfaces.</p>
+
+
+
+<a name="385855250"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/385855250" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#385855250">(Aug 18 2023 at 08:19)</a>:</h4>
+<p>Doesn't matter if it's verbose or not.   I think the subcommand structure you have is probably halfway there already.    For example, could be something like this:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>brep mycube create
+brep mycube create_surface -name bottom -u 1 -v 1 -control_points "0,0,0 1,0,0 0,1,0 1,1,0" -weights "1 1 1 1" -knots_u "0 1" -knots_v "0 1"
+brep mycube create_surface -name top -u 1 -v 1 -control_points "0,0,1 1,0,1 0,1,1 1,1,1" -weights "1 1 1 1" -knots_u "0 1" -knots_v "0 1"
+brep mycube create_surface -name left -u 1 -v 1 -control_points "0,0,0 0,0,1 0,1,0 0,1,1" -weights "1 1 1 1" -knots_u "0 1" -knots_v "0 1"
+brep mycube create_surface -name right -u 1 -v 1 -control_points "1,0,0 1,0,1 1,1,0 1,1,1" -weights "1 1 1 1" -knots_u "0 1" -knots_v "0 1"
+brep mycube create_surface -name front -u 1 -v 1 -control_points "0,0,0 1,0,0 0,0,1 1,0,1" -weights "1 1 1 1" -knots_u "0 1" -knots_v "0 1"
+brep mycube create_surface -name back -u 1 -v 1 -control_points "0,1,0 1,1,0 0,1,1 1,1,1" -weights "1 1 1 1" -knots_u "0 1" -knots_v "0 1"
+
+# some command that figures out topology automatically
+brep mycube sew_surfaces -surfaces "bottom,top,left,right,front,back"
+</code></pre></div>
+<p>Or  a diff entirely manual approach with indices:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>brep mycube add_point 0 0 0    # Point 0
+brep mycube add_point 1 0 0    # Point 1
+brep mycube add_point 0 1 0    # Point 2
+brep mycube add_point 1 1 0    # Point 3
+brep mycube add_point 0 0 1    # Point 4
+brep mycube add_point 1 0 1    # Point 5
+brep mycube add_point 0 1 1    # Point 6
+brep mycube add_point 1 1 1    # Point 7
+brep mycube create_edge 0 1   # Edge 0
+brep mycube create_edge 2 3   # Edge 1
+brep mycube create_edge 4 5   # Edge 2
+brep mycube create_edge 6 7   # Edge 3
+...
+brep mycube create_surface -u 1 -v 1 -points "0,1,2,3"  # Surface 0
+brep mycube create_surface -u 1 -v 1 -points "4,5,6,7"  # Surface 1
+brep mycube create_surface -u 1 -v 1 -points "0,4,2,6"  # Surface 2
+brep mycube create_surface -u 1 -v 1 -points "1,5,3,7"  # Surface 3
+brep mycube create_surface -u 1 -v 1 -points "0,4,1,5"  # Surface 4
+brep mycube create_surface -u 1 -v 1 -points "2,6,3,7"  # Surface 5
+
+brep mycube create_face -surface 0 -edges "0,1,2,3" # Face 0
+brep mycube create_face -surface 1 -edges "0,1,2,3" # Face 1
+brep mycube create_face -surface 2 -edges "0,1,2,3" # Face 2
+brep mycube create_face -surface 3 -edges "0,1,2,3" # Face 3
+brep mycube create_face -surface 4 -edges "0,1,2,3" # Face 4
+brep mycube create_face -surface 5 -edges "0,1,2,3" # Face 5
+
+brep mycube assemble -faces "0,1,2,3,4,5"
+</code></pre></div>
+
+
+
+<a name="385941870"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/385941870" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#385941870">(Aug 18 2023 at 15:25)</a>:</h4>
+<p>Yeah, I can create a geometry face and indicates its topology info using <strong>mged</strong> commands just now. Although the topology commands seems not easy to use. For example, you have to type in edge ids and if they shall be flipped or not.</p>
+
+
+
+<a name="385942439"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/385942439" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#385942439">(Aug 18 2023 at 15:29)</a>:</h4>
+<p>I plan to implement geometrical and topological representation for the polyhedron within a week. And I need to rearrange the geometry and topology editing operations.</p>
+
+
+
+<a name="386890072"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/386890072" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#386890072">(Aug 23 2023 at 14:52)</a>:</h4>
+<p><a href="/user_uploads/1549/7gDoPm63WG5OxDg7CbQNQe7N/image.png">image.png</a><br>
+<a href="/user_uploads/1549/2tDk_lXZO3yjYay6yNxoMHeC/image.png">image.png</a><br>
+Hi, I'm able to create valid brep object though mged commands with shell scripts, and I rearranged brep editing operations into <em>geometry</em> and <em>topology</em> two parts.</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/7gDoPm63WG5OxDg7CbQNQe7N/image.png" title="image.png"><img src="/user_uploads/1549/7gDoPm63WG5OxDg7CbQNQe7N/image.png"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/2tDk_lXZO3yjYay6yNxoMHeC/image.png" title="image.png"><img src="/user_uploads/1549/2tDk_lXZO3yjYay6yNxoMHeC/image.png"></a></div>
+
+
+
+<a name="386890299"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/386890299" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#386890299">(Aug 23 2023 at 14:52)</a>:</h4>
+<p><a href="/user_uploads/1549/nHbi_QR-dnwtxGKU8huC3PMx/image.png">image.png</a><br>
+<a href="/user_uploads/1549/2GIbnT21WPzKsFgI09rL-baj/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/nHbi_QR-dnwtxGKU8huC3PMx/image.png" title="image.png"><img src="/user_uploads/1549/nHbi_QR-dnwtxGKU8huC3PMx/image.png"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/2GIbnT21WPzKsFgI09rL-baj/image.png" title="image.png"><img src="/user_uploads/1549/2GIbnT21WPzKsFgI09rL-baj/image.png"></a></div>
+
+
+
+<a name="386891401"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/386891401" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#386891401">(Aug 23 2023 at 14:56)</a>:</h4>
+<p>I'm preparing for my final submission and list possible problems and areas that need to be developed. I expect to be able to continue to contribute to this module :)</p>
+
+
+
+<a name="387080658"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/387080658" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#387080658">(Aug 24 2023 at 13:55)</a>:</h4>
+<p>Hi, I just committed my PR of milestone 3. (<a href="https://github.com/BRL-CAD/brlcad/pull/97">https://github.com/BRL-CAD/brlcad/pull/97</a>)</p>
+
+
+
+<a name="387080899"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/387080899" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#387080899">(Aug 24 2023 at 13:56)</a>:</h4>
+<p><a href="/user_uploads/1549/gZLHwGQpNAhYNZLnOHB2a-G4/seven_eighths_cube.sh">seven_eighths_cube.sh</a><br>
+<a href="/user_uploads/1549/v1hi6VaBc9FStCYtyummAh_m/triangular_prism.sh">triangular_prism.sh</a><br>
+These are the shell scripts that reproduce the above test cases.</p>
+
+
+
+<a name="387100710"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/387100710" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#387100710">(Aug 24 2023 at 15:08)</a>:</h4>
+<p><span aria-label="+1" class="emoji emoji-1f44d" role="img" title="+1">:+1:</span> I'll have a look at it <span aria-label="smile" class="emoji emoji-1f642" role="img" title="smile">:smile:</span></p>
+
+
+
+<a name="387439409"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/387439409" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#387439409">(Aug 26 2023 at 16:10)</a>:</h4>
+<p>After creating faces with <code>brep brep_t topo f_create</code> I'm getting</p>
+<div class="codehilite"><pre><span></span><code>face 0 is not valid, skippingface 1 is not valid, skippingface 2 is not valid, skippingface 3 is not valid, skippingface 4 is not valid, skipping
+</code></pre></div>
+<p>with <code>brep brep_t plot F</code>. Is this expected?</p>
+
+
+
+<a name="387779656"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/387779656" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#387779656">(Aug 29 2023 at 00:31)</a>:</h4>
+<p>A face is invalid if it does not have a valid loop. So this is expected.</p>
+
+
+
+<a name="388024573"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388024573" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388024573">(Aug 30 2023 at 03:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="491779">@GregoryLi</span> so why are the loops not valid?  the count of them appears to be correct.  are they not going in the right directions?</p>
+
+
+
+<a name="388025497"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388025497" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388025497">(Aug 30 2023 at 03:50)</a>:</h4>
+<p>Did you get the logs running the shell scripts?</p>
+
+
+
+<a name="388025605"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388025605" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388025605">(Aug 30 2023 at 03:51)</a>:</h4>
+<p>A loop is valid if the edges of the loop are connected to form a circle.</p>
+
+
+
+<a name="388026350"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388026350" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388026350">(Aug 30 2023 at 03:58)</a>:</h4>
+<p>That means, if we want to get a valid face, we need to:</p>
+<ol>
+<li>Create a geometry surface</li>
+<li>Create several geometry vertices on the surface</li>
+<li>Create several geometry 3D curves on the surface to connect the vertices</li>
+<li>Create several geometry 2D curves on the parameter space of the surface. The parameter curves correspond to geometric curves in 3D space.</li>
+<li>Create the topology face of the surface</li>
+<li>Create a topology loop on the face</li>
+<li>Create and add topology trims to the loop, using geometry curves and parameter curves<br>
+If every step is correct, the face is valid.</li>
+</ol>
+
+
+
+<a name="388026545"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388026545" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388026545">(Aug 30 2023 at 04:00)</a>:</h4>
+<blockquote>
+<p>After creating faces with <code>brep brep_t topo f_create</code> I'm getting</p>
+<div class="codehilite"><pre><span></span><code>face 0 is not valid, skippingface 1 is not valid, skippingface 2 is not valid, skippingface 3 is not valid, skippingface 4 is not valid, skipping
+</code></pre></div>
+<p>with <code>brep brep_t plot F</code>. Is this expected?</p>
+</blockquote>
+<p>I think that this operation is only up to step 5,  it hasn't created a VALID loop on the face yet</p>
+
+
+
+<a name="388569710"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388569710" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388569710">(Sep 01 2023 at 17:33)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="491779">@GregoryLi</span>, please add links to your pull requests to <a href="https://brlcad.org/wiki/User:GregoryLi/GSoC2023/DevLog">https://brlcad.org/wiki/User:GregoryLi/GSoC2023/DevLog</a>. Otherwise, I cannot confirm that the link points to your work.</p>
+
+
+
+<a name="388637168"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/388637168" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#388637168">(Sep 02 2023 at 02:43)</a>:</h4>
+<p>Thanks! I have attached PR links to the DevLog, and wrote a final report <a href="https://brlcad.org/wiki/User:GregoryLi/GSoC2023/FinalReport">here</a>. I will continue to refine the future expectations of brep operations.</p>
+
+
+
+<a name="389069286"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/389069286" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#389069286">(Sep 05 2023 at 00:05)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <span class="user-mention" data-user-id="102902">@Sean</span>, thank you very much for your guidance! I have received the Final Evaluation. I will keep contributing to BRL-CAD <span aria-label="grinning" class="emoji emoji-1f600" role="img" title="grinning">:grinning:</span></p>
+
+
+
+<a name="389070049"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/389070049" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#389070049">(Sep 05 2023 at 00:12)</a>:</h4>
+<p>My next step is NURBS editing using surface-surface intersection. For brep entities with NURBS surfaces, manually inputting all the geometric and topologic objects is quite hard. Getting those objects through surface-surface-intersection will help a lot.</p>
+
+
+
+<a name="389143875"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/389143875" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#389143875">(Sep 05 2023 at 09:29)</a>:</h4>
+<p>The ability to create and modify NURBS makes BRL-CAD much more powerful. Therefore, thank you Gregory <span aria-label="smiley" class="emoji emoji-1f603" role="img" title="smiley">:smiley:</span></p>
+
+
+
+<a name="394585163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/394585163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#394585163">(Oct 03 2023 at 08:30)</a>:</h4>
+<p>Hi, I created lots of test shell scripts for NURBS editing. I think they can be used over time. Do you think they should be uploaded? What directory do you think they should be uploaded to? <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <span class="user-mention" data-user-id="102902">@Sean</span></p>
+
+
+
+<a name="394585385"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/394585385" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#394585385">(Oct 03 2023 at 08:32)</a>:</h4>
+<p>By the way, I'm adding the Surface-Surface intersection function to the NURBS editing module.</p>
+
+
+
+<a name="394882845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/394882845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#394882845">(Oct 04 2023 at 17:07)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="491779">GregoryLi</span> <a href="#narrow/stream/104062-general/topic/NURBS.20editing/near/394585163">said</a>:</p>
+<blockquote>
+<p>Hi, I created lots of test shell scripts for NURBS editing. I think they can be used over time. Do you think they should be uploaded? What directory do you think they should be uploaded to? <span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <span class="user-mention silent" data-user-id="102902">Sean</span></p>
+</blockquote>
+<p>They should definitely be saved somewhere. What came into my mind is <code>src/libbrep/tests/tcl</code>. If the scripts are a good how-to for NURBS editing, <a href="https://brlcad.org/wiki/NURBS">https://brlcad.org/wiki/NURBS</a> would be possible too.</p>
+
+
+
+<a name="395649080"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/395649080" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#395649080">(Oct 09 2023 at 08:49)</a>:</h4>
+<p>I found “brep .. intersect .. SS” crashes. the <code>dplot</code> object is nullptr while running. If you want to reproduce the problem, you can simply run:</p>
+<div class="codehilite"><pre><span></span><code>make b brep
+brep b geo c3_create
+brep b geo c3_in 0 3 3  0 1 0  1 0 0  2 1 0
+brep b geo c3_in 0 3 3  1 1 -1  1 1.5 0  1 1 1
+brep b geo s_tensor 0 1
+brep b geo s_tensor 2 1
+brep b intersect b 0 1 SS
+</code></pre></div>
+
+
+
+<a name="395649407"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NURBS%20editing/near/395649407" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> GregoryLi <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NURBS.20editing.html#395649407">(Oct 09 2023 at 08:51)</a>:</h4>
+<p>I solved it here: <a href="https://github.com/GregoryLi0/brlcad/commit/6705abd669be63adfddbeb61f9d32980b7f929de">https://github.com/GregoryLi0/brlcad/commit/6705abd669be63adfddbeb61f9d32980b7f929de</a><br>
+<a href="/user_uploads/1549/NUBX0LOVi9eGN7w0WbR6sZk8/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/NUBX0LOVi9eGN7w0WbR6sZk8/image.png" title="image.png"><img src="/user_uploads/1549/NUBX0LOVi9eGN7w0WbR6sZk8/image.png"></a></div>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

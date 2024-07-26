@@ -1,0 +1,71 @@
+<html>
+<head><meta charset="utf-8"><title>mesh in comb with matrix · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html">mesh in comb with matrix</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="408232255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/408232255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#408232255">(Dec 15 2023 at 18:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> seeing something surprising and could use your insight.  When working with meshing in Goliath, I was seeing dark meshes that appear to be due to the faces being flipped.  After a lot of digging, I boiled down a case independent of the meshing itself:  <a href="http://brlcad.org/~starseeker/oflip.g">http://brlcad.org/~starseeker/oflip.g</a></p>
+<p>What I'm seeing - both of these combs are using the same BoT solid, and placing it in different locations via matrices.  One of them shows the correct orientation in space, but the other is inside out.  The only thing I can figure is that the matrix is turning the mesh inside out when its being read in during the tree walk, but a) should it be able to do that at all and b) if that's OK, shouldn't we be detecting it somehow and flipping the orientation flag for the internal representation?</p>
+
+
+
+<a name="408239281"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/408239281" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#408239281">(Dec 15 2023 at 18:50)</a>:</h4>
+<p>The value that turns it inside out is element 5 (counting from 0-15) in the matrix (-1 is inside out vs 1 being normal)</p>
+
+
+
+<a name="411963656"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/411963656" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#411963656">(Jan 09 2024 at 15:57)</a>:</h4>
+<p>@starseeker That sounds like a reflection matrix.</p>
+
+
+
+<a name="411963715"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/411963715" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#411963715">(Jan 09 2024 at 15:57)</a>:</h4>
+<p>I'm guessing introduced by the mirror command or some similar procedure.</p>
+
+
+
+<a name="411963976"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/411963976" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#411963976">(Jan 09 2024 at 15:58)</a>:</h4>
+<p>I do believe the ray tracing path handles it correctly already just because there's a bit of code both in the boolean evaluator and in the ray tracer that detects when normals are going the wrong way and they get flipped on the fly.</p>
+
+
+
+<a name="411964158"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/411964158" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#411964158">(Jan 09 2024 at 15:59)</a>:</h4>
+<p>For facetization, though, that is a conundrum.  I would probably expect the tree walking code to detect it -- since that's where the matrix is defined and applied.  NOT flipping the orientation flag as the primitive itself is not flipped, only the instance via comb.</p>
+
+
+
+<a name="412215936"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/412215936" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#412215936">(Jan 10 2024 at 20:39)</a>:</h4>
+<p>That's more or less what I ended up doing - at least for the Goliath test case, I did get facetize to work.  However, there is an issue with that matrix and BoT primitives for raytracing - IIRC the CSG version of that comb does raytrace, but replacing it with a BoT geometry it vanishes.</p>
+
+
+
+<a name="412216327"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/412216327" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#412216327">(Jan 10 2024 at 20:42)</a>:</h4>
+<p><a href="https://github.com/BRL-CAD/brlcad/commit/38c20325acac1e4192199b63866e9ad0d4a2b564">https://github.com/BRL-CAD/brlcad/commit/38c20325acac1e4192199b63866e9ad0d4a2b564</a> commit comment has more details on which part of Goliath in what configurations triggers the issue.</p>
+
+
+
+<a name="417693568"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/mesh%20in%20comb%20with%20matrix/near/417693568" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kampanat Thumwong <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/mesh.20in.20comb.20with.20matrix.html#417693568">(Jan 24 2024 at 17:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/mesh.20in.20comb.20with.20matrix/near/412216327">said</a>:</p>
+<blockquote>
+<p><a href="https://github.com/BRL-CAD/brlcad/commit/38c20325acac1e4192199b63866e9ad0d4a2b564">https://github.com/BRL-CAD/brlcad/commit/38c20325acac1e4192199b63866e9ad0d4a2b564</a> commit comment has more details on which part of Goliath in what configurations triggers the issue.</p>
+</blockquote>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,344 @@
+<html>
+<head><meta charset="utf-8"><title>tcl ExternalProject_Add and odd pathnames · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html">tcl ExternalProject_Add and odd pathnames</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="216263865"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216263865" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216263865">(Nov 10 2020 at 19:43)</a>:</h4>
+<p>OK, one was resolvable but I don't think the other is - the tcl autotools build doesn't seem to like our crazy pathnames test.</p>
+
+
+
+<a name="216264423"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216264423" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216264423">(Nov 10 2020 at 19:48)</a>:</h4>
+<p>Even when I try to boil it down outside of CMake with those paths, it wants an absolute path for --prefix but doesn't like the path we need to give it:</p>
+<div class="codehilite"><pre><span></span><code>../TCL_BLD/unix/configure --prefix=/home/cyapp/extbuild/build/distcheck-odd_pathnames/1\ Odd_\ build\ dir\ ++/extinstall/tcl
+
+../TCL_BLD/unix/configure: line 18844: test: too many arguments
+../TCL_BLD/unix/configure: line 18857: Odd_: command not found
+configure: creating ./config.status
+./config.status: line 305: Odd_: command not found
+config.status: creating Makefile
+config.status: error: cannot find input file: ../unix/Makefile.in
+../TCL_BLD/unix/configure: eval: line 37: unexpected EOF while looking for matching `&quot;&#39;
+../TCL_BLD/unix/configure: eval: line 38: syntax error: unexpected end of file
+</code></pre></div>
+
+
+
+<a name="216272102"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216272102" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216272102">(Nov 10 2020 at 20:48)</a>:</h4>
+<p>That's fairly annoying, actually... it means that test can't be reliably run, since there is no guarantee a user's home directory will be in a path that's free of spaces.</p>
+
+
+
+<a name="216272169"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216272169" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216272169">(Nov 10 2020 at 20:48)</a>:</h4>
+<p>/me wonders if the Tcl irc channel has any useful insights...</p>
+
+
+
+<a name="216297801"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216297801" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216297801">(Nov 11 2020 at 01:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  I may need to disable the odd pathnames distcheck, if the tcl build can't handle it</p>
+
+
+
+<a name="216306811"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216306811" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216306811">(Nov 11 2020 at 04:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> you may not recall, but we when through phases struggling with support for spaces with our autotools build</p>
+
+
+
+<a name="216306862"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216306862" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216306862">(Nov 11 2020 at 04:30)</a>:</h4>
+<p>it's doable, but just like anything, it has to be intentionally accommodated and it's easy to break when there's not a test for it.  I know some communities that just dismiss paths with spaces as "don't care"</p>
+
+
+
+<a name="216306939"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216306939" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216306939">(Nov 11 2020 at 04:32)</a>:</h4>
+<p>I'd say file a bug report on it.  that's the kind of thing they'd likely fix right away or dismiss.</p>
+
+
+
+<a name="216307948"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216307948" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216307948">(Nov 11 2020 at 04:58)</a>:</h4>
+<p>looking at their code, it actually looks like they try hard to quote everything correctly.  just found one issue that was probably a recent change.</p>
+
+
+
+<a name="216308076"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216308076" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216308076">(Nov 11 2020 at 05:00)</a>:</h4>
+<p>just committed a fix, and a manual build with the odd-pathnames path as the prefix seems to have worked</p>
+
+
+
+<a name="216343927"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216343927" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216343927">(Nov 11 2020 at 13:16)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  Ah, nice catch!  I had forgotten (my memories of autotools are dominated by the libpng difficulties that were the straw that broke the camel's back as far as switching to CMake).</p>
+
+
+
+<a name="216345877"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216345877" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216345877">(Nov 11 2020 at 13:34)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Looks like that's just the first of a number of issues.  Trying to turn back on the odd pathnames distcheck, the Tcl configure blows up quickly in several ways.  Testing manually (CPPFLAGS and LDFLAGS var setting quotes is a separate issue from the Tcl build but is also a problem) I can go through and quote some stuff in the configure script to get by a few more errors but then I get to the gcc test failing:</p>
+<div class="codehilite"><pre><span></span><code>gcc version 9.3.0 (Ubuntu 9.3.0-17ubuntu1~20.04)
+configure:1780: $? = 0
+configure:1782: gcc -V &lt;/dev/null &gt;&amp;5
+gcc: error: unrecognized command line option &#39;-V&#39;
+gcc: fatal error: no input files
+compilation terminated.
+configure:1785: $? = 1
+configure:1808: checking for C compiler default output file name
+configure:1811: gcc  -I/home/user/extbuild/build/distcheck-odd_pathnames/1 Odd_ build dir ++/include -L/home/user/extbuild/build/distcheck-odd_pathnames/1 Odd_ build dir ++/lib conftest.c  &gt;&amp;5
+gcc: error: Odd_: No such file or directory
+gcc: error: build: No such file or directory
+gcc: error: dir: No such file or directory
+gcc: error: ++/include: No such file or directory
+gcc: error: Odd_: No such file or directory
+gcc: error: build: No such file or directory
+gcc: error: dir: No such file or directory
+gcc: error: ++/lib: No such file or directory
+configure:1814: $? = 1
+configure: failed
+</code></pre></div>
+
+
+
+<a name="216346375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216346375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216346375">(Nov 11 2020 at 13:38)</a>:</h4>
+<p>That one is clearly the CPPFLAGS="-I/home/user/extbuild/build/distcheck-odd_pathnames/1 Odd_ build dir ++/include" value not propagating correctly, but even if I don't set that (which won't work long term) I still get a series of other errors.</p>
+
+
+
+<a name="216346646"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216346646" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216346646">(Nov 11 2020 at 13:41)</a>:</h4>
+<p>I get the feeling they've not tested this sort of scenario in a while...</p>
+
+
+
+<a name="216346793"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216346793" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216346793">(Nov 11 2020 at 13:42)</a>:</h4>
+<p>Do we try to go through and fix all of it?</p>
+
+
+
+<a name="216473655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216473655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216473655">(Nov 12 2020 at 14:19)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>   The quick alternative would be for me to put back my CMake Tcl build until we can sort it out with upstream (if they're included to fix it)</p>
+
+
+
+<a name="216476856"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216476856" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216476856">(Nov 12 2020 at 14:44)</a>:</h4>
+<p>Per IRC recommendation, issue filed with Tcl at <a href="https://core.tcl-lang.org/tcl/tktview/888c1a8c9d84c1f5da4a46352bbf531424fe7126">https://core.tcl-lang.org/tcl/tktview/888c1a8c9d84c1f5da4a46352bbf531424fe7126</a></p>
+
+
+
+<a name="216535027"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216535027" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216535027">(Nov 12 2020 at 21:56)</a>:</h4>
+<p>Grrrr.  Tk CMake logic isn't working properly on Windows in stand-alone mode, needed for ExternalProject_Add use.  No easy answers...</p>
+
+
+
+<a name="216535214"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216535214" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216535214">(Nov 12 2020 at 21:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I don't have confidence in my own ability to identify and fix the quoting issues in autoconf.  I can try if necessary, but is there any chance you could take a look at it?  This is the stand-alone test that should (hopefully) trip most of the same wires as the odd-pathnames build:</p>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+mkdir <span class="s2">&quot;1 Odd_ source dir++&quot;</span>
+mkdir <span class="s2">&quot;1 Odd_ build dir++&quot;</span>
+mkdir <span class="s2">&quot;1 Odd_ install dir++&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;1 Odd_ source dir++&quot;</span>
+tar -xvf ~/Downloads/tcl8.6.10-src.tar.gz
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/1 Odd_ build dir++&quot;</span>
+<span class="nb">export</span> <span class="nv">CPPFLAGS</span><span class="o">=</span><span class="s2">&quot;-I</span><span class="nv">$HOME</span><span class="s2">/1 Odd_ install dir++/include&quot;</span>
+<span class="nb">export</span> <span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-L</span><span class="nv">$HOME</span><span class="s2">/1 Odd_ install dir++/lib&quot;</span>
+<span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/1 Odd_ source dir++/tcl8.6.10/unix/configure&quot;</span> --prefix<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/1 Odd_ install dir++&quot;</span>
+</code></pre></div>
+
+
+
+<a name="216535526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216535526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216535526">(Nov 12 2020 at 22:01)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames/near/216346793">said</a>:</p>
+<blockquote>
+<p>Do we try to go through and fix all of it?</p>
+</blockquote>
+<p>erm, I dunno -- I got a successful build on Mac after the change I made</p>
+
+
+
+<a name="216535673"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216535673" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216535673">(Nov 12 2020 at 22:02)</a>:</h4>
+<p>I can give that script a try, but just at a glance, those flags look wrong  to me already</p>
+
+
+
+<a name="216535932"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216535932" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216535932">(Nov 12 2020 at 22:05)</a>:</h4>
+<p>those spaces need to be escaped or the whole thing quoted, like export CPPFLAGS="-I\"$HOME/1 Odd_ install dir++/include\""<br>
+or better, export CPPFLAGS="\"-I$HOME/1 Odd_ install dir++/include\""</p>
+
+
+
+<a name="216535965"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216535965" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216535965">(Nov 12 2020 at 22:05)</a>:</h4>
+<p>/me's eyes cross</p>
+
+
+
+<a name="216536016"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536016" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536016">(Nov 12 2020 at 22:06)</a>:</h4>
+<p>not as good, but should also work so long as HOME doesn't have spaces: export CPPFLAGS="-I$HOME/1\ Odd_\ install\ dir++/include"</p>
+
+
+
+<a name="216536117"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536117" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536117">(Nov 12 2020 at 22:06)</a>:</h4>
+<p>Maybe the better thing to do is define a couple scripts to trigger the configure and build stages, have CMake configure_file them, and then just run them - between shell itself and CMake this is a quoting nightmare</p>
+
+
+
+<a name="216536178"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536178" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536178">(Nov 12 2020 at 22:07)</a>:</h4>
+<p>(which also means it will be a maintainability nightmare...)</p>
+
+
+
+<a name="216536215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536215">(Nov 12 2020 at 22:08)</a>:</h4>
+<p>er, so try it without first then.... :)</p>
+
+
+
+<a name="216536216"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536216" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536216">(Nov 12 2020 at 22:08)</a>:</h4>
+<p>Does the Mac build work for you with that script if you take out the flag setting?</p>
+
+
+
+<a name="216536401"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536401" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536401">(Nov 12 2020 at 22:09)</a>:</h4>
+<p>you mean without the flags?  IIRC I had to add them (or some version of them) for Tcl to pick up our local copy of zlib</p>
+
+
+
+<a name="216536603"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536603" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536603">(Nov 12 2020 at 22:10)</a>:</h4>
+<p>the quoting rules are pretty straight forward.  if a var is within double-quotes, it's going to be expanded.  the cppflags and ldflags you have there are invalid pretty much everywhere not because of shell/cmake behavior but because Odd_ is not a flag and "install" is not a flag... etc.</p>
+
+
+
+<a name="216536648"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536648" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536648">(Nov 12 2020 at 22:11)</a>:</h4>
+<p>yes, I just ran configure with the odd prefix and it worked fine after the one fix</p>
+
+
+
+<a name="216536788"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536788" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536788">(Nov 12 2020 at 22:12)</a>:</h4>
+<p>Alright, let me try that...</p>
+
+
+
+<a name="216536878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216536878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216536878">(Nov 12 2020 at 22:13)</a>:</h4>
+<p>if you have to set LDFLAGS, then you should expect to need more than -L for runtime lookup to work.  but should definitely try without it first and see.</p>
+
+
+
+<a name="216537257"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537257" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537257">(Nov 12 2020 at 22:16)</a>:</h4>
+<p>/home/user/1 Odd_ source dir++/tcl8.6.10/unix/configure: line 721: test: too many arguments<br>
+/home/user/1 Odd_ source dir++/tcl8.6.10/unix/configure: line 727: test: too many arguments<br>
+configure: error: sources are in /home/user/1 Odd_ source dir++/tcl8.6.10/unix, but `cd /home/user/1 Odd_ source dir++/tcl8.6.10/unix' does not work</p>
+
+
+
+<a name="216537369"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537369" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537369">(Nov 12 2020 at 22:17)</a>:</h4>
+<p>/me looks</p>
+
+
+
+<a name="216537496"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537496" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537496">(Nov 12 2020 at 22:19)</a>:</h4>
+<p>that's because srcdir has spaces, I only fixed destination having spaces</p>
+
+
+
+<a name="216537575"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537575" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537575">(Nov 12 2020 at 22:19)</a>:</h4>
+<p>Right - that's why the script is set up the way it is - to try and introduce spaces everywhere we might hit them (do hit them, in distcheck-odd_pathnames)</p>
+
+
+
+<a name="216537706"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537706" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537706">(Nov 12 2020 at 22:20)</a>:</h4>
+<p>I'll have to check if that's fixable -- autotools lets you target any path, but I'm not sure about configuring from any path</p>
+
+
+
+<a name="216537735"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537735" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537735">(Nov 12 2020 at 22:21)</a>:</h4>
+<p>can certainly fix the configure script manually easily enough -- it's only used in a few places</p>
+
+
+
+<a name="216537777"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537777" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537777">(Nov 12 2020 at 22:21)</a>:</h4>
+<p>it's just that may be generated code, a possible limitation of autotools.  lemme check.</p>
+
+
+
+<a name="216537832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216537832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216537832">(Nov 12 2020 at 22:22)</a>:</h4>
+<p>Yeah, even if I quote those config.status isn't happy</p>
+
+
+
+<a name="216538155"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216538155" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216538155">(Nov 12 2020 at 22:25)</a>:</h4>
+<p>If true (i.e. it's an innate autotools limitation) that pretty much restricts us to requiring a system Tcl/Tk install for distcheck-odd_pathnames...</p>
+
+
+
+<a name="216542853"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216542853" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216542853">(Nov 12 2020 at 23:11)</a>:</h4>
+<p>it is an autotools limitation, documented even.  they say outright that paths with special chars are not supported for source, build, or destination dirs.  reading people's experience, looks like source and destination dirs can have spaces, but the build dir is a bit more ingrained.</p>
+
+
+
+<a name="216543000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216543000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216543000">(Nov 12 2020 at 23:12)</a>:</h4>
+<p>so I think we either just  add detection to our cmakelists to warn and/or make sure we build from a path without spaces when building ext</p>
+
+
+
+<a name="216564611"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216564611" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216564611">(Nov 13 2020 at 04:00)</a>:</h4>
+<p>I think I've got something workable in r77736.</p>
+
+
+
+<a name="216605670"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216605670" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216605670">(Nov 13 2020 at 12:52)</a>:</h4>
+<p>sounds good</p>
+
+
+
+<a name="216606125"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/tcl%20ExternalProject_Add%20and%20odd%20pathnames/near/216606125" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/tcl.20ExternalProject_Add.20and.20odd.20pathnames.html#216606125">(Nov 13 2020 at 12:56)</a>:</h4>
+<p>on a barely related topic, I was happy to see cmake has support for non-failure test codes, i.e., a way to run a test that figures out some testing condition isn't satisfied, so it can report a different code that makes the test actually report as skipped instead of blankly claiming it failed or falsely making it appear to have passed.   no action, just thought it was a nice discovery.  I put it to use on the bigdb test which can't run on low-memory systems.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

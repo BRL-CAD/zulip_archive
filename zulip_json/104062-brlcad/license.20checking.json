@@ -1,0 +1,134 @@
+[
+    {
+        "content": "<p>I finally got to looking into the new license checking feature <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>.</p>",
+        "id": 197444427,
+        "sender_full_name": "Sean",
+        "timestamp": 1589389625
+    },
+    {
+        "content": "<p>It's looking good on the whole, obviously seems to be doing something and if anything, it's a catalog of 3rd party licenses.</p>",
+        "id": 197444542,
+        "sender_full_name": "Sean",
+        "timestamp": 1589389675
+    },
+    {
+        "content": "<p>From a code standpoint, I am a little baffled as to why you went with that particular implementation method (invoking a cmake script instead of calling a function)... was there a reason for that?  Necessary?  Seems like a bit of complexity that could be eliminated.</p>\n<p>There's also complexity and maintenance overhead  (non-local undocumented variables in particular) that are concerning.  The only docs appear to be the usage statement, which is understandable given you just got it working, but I think it's needed for this to survive given the way it's implemented is all over the place.</p>\n<p>The whole processing seems to result from non-local assumptions (e.g., took a while to figure out where embedded_licenses.txt came from).  The format of the license files is a mystery too (some unknown format tightly coupled to an undocumented source file.  I honestly don't know what to make of it as that knowledge only exists in your head. :)</p>",
+        "id": 197445116,
+        "sender_full_name": "Sean",
+        "timestamp": 1589389891
+    },
+    {
+        "content": "<p>That's all to say that you clearly seem to have gotten it working, which is great, it will have value in the near term.</p>",
+        "id": 197445571,
+        "sender_full_name": "Sean",
+        "timestamp": 1589390046
+    },
+    {
+        "content": "<p>For what it's worth, I just came across this today: <a href=\"https://reuse.software/\">https://reuse.software/</a>  </p>\n<p>They have some interesting concepts, most I don't think we should adapt right now, but their file format is standardized.  It might be a good way to document the embedded license description files:   <a href=\"https://reuse.software/faq/#bulk-license\">https://reuse.software/faq/#bulk-license</a></p>",
+        "id": 197446691,
+        "sender_full_name": "Sean",
+        "timestamp": 1589390496
+    },
+    {
+        "content": "<p>The invocation of the cmake script is to allow for some pathname cleanup before invoking the final C++ program, manage cross-platform capture of stdout and stderror into log files, and other housekeeping details mostly.</p>\n<p>(A lot of those pieces evolved over time trying to deal with things like robustness to parallel building, odd pathnames tests, and other such fun.  It may be that some of it could be simplified but usually when I try I end up finding obscure breakage in one of the distcheck-full tests a week later...)</p>\n<p>As for the formatting I'm open to suggestions - that was just the shortest/simplest path to associating a doc/license/embedded license file with particular source files.  Could just as well be URIs to the files.</p>",
+        "id": 197475090,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589402608
+    },
+    {
+        "content": "<p>I liked (and still like) the idea that the license files themselves in doc/legal/embedded  are the ones that assert a particular source file comes under that license.  I'm not currently cross checking the contents themselves (for example, checking that a copyright reference in the src file matches the one in the license file for 3rd party sources) but in principle that's possible if we want to go to the trouble.</p>",
+        "id": 197476660,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589403468
+    },
+    {
+        "content": "<p>FWIW - I moved the embedded_licenses.txt generation to the regress/licenses CMakeLists.txt file</p>",
+        "id": 197479709,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589405002
+    },
+    {
+        "content": "<p>(btw - the doc/legal/embedded directory and files weren't created for this - they date back to  2018)</p>",
+        "id": 197480958,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589405800
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> which file format were you not liking?  The cmakefiles.cmake input is strictly a list of paths - we use that same file  in a number of places, it's the full list of everything the build system knows about.  The license files themselves I'm just adding file paths at the end of the license files - I updated it so they're valid file:/ URI lines relative to the source tree root, but beyond that there's not really much format involved...</p>",
+        "id": 197499045,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589421012
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  Didn't say I didn't like the format -- I have no idea what it is.   :)  Nobody has a way of knowing beyond knowing that  some code in a distant directory is going to read it, hopefully finding and understanding what it does with it.  Mind you, I was referring to the doc/legal/embedded files containing paths, notes, and license text.  You say there's not much format involved, but unless none of the contents matter at all, there's a format and it matters to something.  that's where the reuse.software link might be a solution.</p>\n<p>as for the \"input\", it's technically not just a list of paths...  it's a specifically named file.  it's a file generated by somewhere else in the build system (this is discoverable, but that definitely adds to the complexity and understanding for anyone needing to understand what's going on.</p>",
+        "id": 197506535,
+        "sender_full_name": "Sean",
+        "timestamp": 1589432653
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/license.20checking/near/197475090\">said</a>:</p>\n<blockquote>\n<p>The invocation of the cmake script is to allow for some pathname cleanup before invoking the final C++ program, manage cross-platform capture of stdout and stderror into log files, and other housekeeping details mostly.</p>\n</blockquote>\n<p>So is that to say it's not necessary?  as a function, paths could still be cleaned up inside the function just like they are now and the variables wouldn't need to be remarshalled.  avoiding hitting log files would make it better for parallel too.</p>",
+        "id": 197506647,
+        "sender_full_name": "Sean",
+        "timestamp": 1589432865
+    },
+    {
+        "content": "<p>Well, the only contents that matter for processing are the file:/ lines - everything else is ignored.  I was hoping it was self evident - license text/explanation and list of files, mostly for humans, but readable for the scanner because of the file:/ prefix.  I haven't looked at reuse.software yet, but I'm really wary of anything really complicated here...</p>",
+        "id": 197506650,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589432878
+    },
+    {
+        "content": "<p>By \"a function\" are you referring to a C++ function, or a  CMake function?  The latter won't work, and the former needs reliable information to be supplied to it.  That's hard to do as command line args from CMake - configure_file does better, but then all the files are .cpp.in files.</p>",
+        "id": 197506708,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589432950
+    },
+    {
+        "content": "<p>I'm not promoting it, just an option.  it definitely didn't look complicated, it's a simple format match like you're doing, but the format is documented and in effect standardized.</p>",
+        "id": 197506714,
+        "sender_full_name": "Sean",
+        "timestamp": 1589432989
+    },
+    {
+        "content": "<p>there's no way for a reader to discern anything self-evident about the format... without reading the thing that parses them.  that's the point. :)</p>",
+        "id": 197506762,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433049
+    },
+    {
+        "content": "<p>The cmakefiles.cmake list was originally written for distcheck internal use, but I've ended up using it elsewhere.  I'm open to suggestions, but it is in effect a \"magic\" file since it's a product of the extensive bookkeeping we're doing in the CMake logic.  A better name is in order certainly, but beyond that I'm not sure what to do.</p>",
+        "id": 197506774,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433087
+    },
+    {
+        "content": "<p>of course, that could also be fixed with a templatized example file or a readme file</p>",
+        "id": 197506775,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433090
+    },
+    {
+        "content": "<p>I'm not sure we're talking about the same thing...  I've not referred to cmakefiles.cmake</p>",
+        "id": 197506833,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433206
+    },
+    {
+        "content": "<p>You said a specifically named file.  You mean embedded_lists.txt?  I moved the generation of that in with the rest of the logic, if that helps...</p>",
+        "id": 197506895,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433285
+    },
+    {
+        "content": "<p>embedded_licenses.txt rather</p>",
+        "id": 197506904,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589433299
+    },
+    {
+        "content": "<p>that definitely helps</p>",
+        "id": 197506912,
+        "sender_full_name": "Sean",
+        "timestamp": 1589433320
+    }
+]

@@ -1,0 +1,650 @@
+[
+    {
+        "content": "<p>Ouch.  This is going to be a job - my using CPP_DLL_DEFINES instead of MSVC to denote a Visual Studio compile is going to boomerang big time.  Will actually have to go back and put the proper MSVC symbols in.</p>\n<p>Also, at first look gcc doesn't really support the Windows syntax:</p>\n<div class=\"codehilite\"><pre><span></span><code>include/brlcad/bu/defines.h:43:33: error: expected constructor, destructor, or type conversion before ‘(’ token\n   43 | #    define BU_EXPORT __declspec(dllimport)\n      |                                 ^\ninclude/brlcad/bu/app.h:54:1: note: in expansion of macro ‘BU_EXPORT’\n   54 | BU_EXPORT extern const char *bu_argv0_full_path(void);\n      | ^~~~~~~~~\n</code></pre></div>",
+        "id": 198271626,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590018817
+    },
+    {
+        "content": "<p>This example makes me think they're not a 1-1 swap:</p>\n<div class=\"codehilite\"><pre><span></span><code>// Generic helper definitions for shared library support\n#if defined _WIN32 || defined __CYGWIN__\n  #define FOX_HELPER_DLL_IMPORT __declspec(dllimport)\n  #define FOX_HELPER_DLL_EXPORT __declspec(dllexport)\n  #define FOX_HELPER_DLL_LOCAL\n#else\n  #if __GNUC__ &gt;= 4\n    #define FOX_HELPER_DLL_IMPORT __attribute__ ((visibility (&quot;default&quot;)))\n    #define FOX_HELPER_DLL_EXPORT __attribute__ ((visibility (&quot;default&quot;)))\n    #define FOX_HELPER_DLL_LOCAL  __attribute__ ((visibility (&quot;hidden&quot;)))\n  #else\n    #define FOX_HELPER_DLL_IMPORT\n    #define FOX_HELPER_DLL_EXPORT\n    #define FOX_HELPER_DLL_LOCAL\n  #endif\n#endif\n</code></pre></div>",
+        "id": 198272273,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590019301
+    },
+    {
+        "content": "<p>The BU_EXPORT/BU_IMPORT definitions didn't seem to work - the only thing that actually succeeded was putting  __attribute__ ((visibility (\"default\"))) before the actual implementations in the .c files.   I must be missing something...</p>",
+        "id": 198273380,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590020208
+    },
+    {
+        "content": "<p>Ah - the definitions aren't making it to the command line.  Why....</p>",
+        "id": 198273591,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590020420
+    },
+    {
+        "content": "<p>Bingo.  the ${libname}-obj target needs it as well.</p>",
+        "id": 198273771,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590020622
+    },
+    {
+        "content": "<p>Based on that GCC page, we're looking at something like:</p>\n<div class=\"codehilite\"><pre><span></span><code>#ifndef BU_EXPORT\n#  if defined(BU_DLL_EXPORTS) &amp;&amp; defined(BU_DLL_IMPORTS)\n#    error &quot;Only BU_DLL_EXPORTS or BU_DLL_IMPORTS can be defined, not both.&quot;\n#  elif defined(BU_DLL_EXPORTS)\n#      if defined(_WIN32)\n#        define BU_EXPORT __declspec(dllexport)\n#      else\n#        define BU_EXPORT __attribute__ ((visibility (&quot;default&quot;)))\n#      endif\n#  elif defined(BU_DLL_IMPORTS)\n#      if defined(_WIN32)\n#        define BU_EXPORT __declspec(dllimport)\n#      else\n#        define BU_EXPORT __attribute__ ((visibility (&quot;default&quot;)))\n#      endif\n#  else\n#    define BU_EXPORT\n#  endif\n#endif\n</code></pre></div>",
+        "id": 198274049,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590020871
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Assuming it doesn't break any rules, my vote would be to do something like this once in common.h:</p>\n<div class=\"codehilite\"><pre><span></span><code>#if defined(_WIN32)\n# define DLLEXPORT __declspec(dllexport)\n# define DLLIMPORT __declspec(dllimport)\n#else\n# define DLLEXPORT __attribute__ ((visibility (&quot;default&quot;)))\n# define DLLIMPORT __attribute__ ((visibility (&quot;default&quot;)))\n#endif\n</code></pre></div>\n\n\n<p>And then rework our existing defines.h headers to do:</p>\n<div class=\"codehilite\"><pre><span></span><code>#ifndef BU_EXPORT\n#  if defined(BU_DLL_EXPORTS) &amp;&amp; defined(BU_DLL_IMPORTS)\n#    error &quot;Only BU_DLL_EXPORTS or BU_DLL_IMPORTS can be defined, not both.&quot;\n#  elif defined(BU_DLL_EXPORTS)\n#    define BU_EXPORT DLLEXPORT\n#  elif defined(BU_DLL_IMPORTS)\n#    define BU_EXPORT DLLIMPORT\n#  else\n#    define BU_EXPORT\n#  endif\n#endif\n</code></pre></div>",
+        "id": 198274614,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590021410
+    },
+    {
+        "content": "<p>The bioh branch r75860 has a build that works with Ubuntu gcc 9.3.0 -fvisibility=hidden.  I've not tested it extensively, and not tried it with clang at all, but it should be a reasonable approximation of what will be needed to make this work...</p>",
+        "id": 198280741,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590028932
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198271626\">said</a>:</p>\n<blockquote>\n<p>Ouch.  This is going to be a job - my using CPP_DLL_DEFINES instead of MSVC to denote a Visual Studio compile is going to boomerang big time.  Will actually have to go back and put the proper MSVC symbols in.</p>\n</blockquote>\n<p>Yuck, using MSVC or _WIN32 is never proper...  Should be keyed on a feature test from the build system, like a HAVE_DECLSPEC test.  Even better if conditionals can be eliminated so it all turns into a build provision, otherwise it's usually best to leave things obvious and direct.</p>\n<blockquote>\n<p>Also, at first look gcc doesn't really support the Windows syntax:</p>\n</blockquote>\n<p>From the comment, must have only been gcc on windows then.</p>",
+        "id": 198285698,
+        "sender_full_name": "Sean",
+        "timestamp": 1590035639
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198274614\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  Assuming it doesn't break any rules, my vote would be to do something like this once in common.h:</p>\n</blockquote>\n<p>Doesn't break any rules, and common.h mod looks good except for the usage of _WIN32.</p>\n<blockquote>\n<p>And then rework our existing defines.h headers to do:</p>\n<div class=\"codehilite\"><pre><span></span><code>#ifndef BU_EXPORT\n#  if defined(BU_DLL_EXPORTS) &amp;&amp; defined(BU_DLL_IMPORTS)\n#    error &quot;Only BU_DLL_EXPORTS or BU_DLL_IMPORTS can be defined, not both.&quot;\n#  elif defined(BU_DLL_EXPORTS)\n#    define BU_EXPORT DLLEXPORT\n#  elif defined(BU_DLL_IMPORTS)\n#    define BU_EXPORT DLLIMPORT\n#  else\n#    define BU_EXPORT\n#  endif\n#endif\n</code></pre></div>\n\n\n</blockquote>\n<p>This is an improvement!  If you can get an export/import define written out into the config header after testing for it, you won't need anything in common.h too.</p>",
+        "id": 198286029,
+        "sender_full_name": "Sean",
+        "timestamp": 1590036061
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> OK, I've gotten it doing a configure test and using brlcad_config.h instead of common.h.  It's probably worth testing the bioh branch on the Mac now to see how it reacts.  I'm testing Windows (which for once is the platform where nothing should change if we're good) and if everything passes I'd like to merge back to trunk.</p>",
+        "id": 198334793,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590074896
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> awesome, okay will test it on mac tonight.</p>",
+        "id": 198401072,
+        "sender_full_name": "Sean",
+        "timestamp": 1590115065
+    },
+    {
+        "content": "<p>mged is crashing inside libdm initialization:</p>\n<div class=\"codehilite\"><pre><span></span><code>Call location:\n2020-05-23 02:20:18.432190-0400 mged[11937:31932533] 0   CarbonCore                          0x00007fff40f58fee ___Gestalt_SystemVersion_block_invoke + 112\n2020-05-23 02:20:18.432202-0400 mged[11937:31932533] 1   libdispatch.dylib                   0x00007fff6bb8263d _dispatch_client_callout + 8\n2020-05-23 02:20:18.432212-0400 mged[11937:31932533] 2   libdispatch.dylib                   0x00007fff6bb83d4b _dispatch_once_callout + 20\n2020-05-23 02:20:18.432222-0400 mged[11937:31932533] 3   CarbonCore                          0x00007fff40efa992 _Gestalt_SystemVersion + 945\n2020-05-23 02:20:18.432231-0400 mged[11937:31932533] 4   CarbonCore                          0x00007fff40ef3e7c Gestalt + 149\n2020-05-23 02:20:18.432237-0400 mged[11937:31932533] 5   Tk                                  0x00007fff4ba9ca53 TkpOpenDisplay + 573\n2020-05-23 02:20:18.432247-0400 mged[11937:31932533] 6   Tk                                  0x00007fff4ba07d33 TkCreateMainWindow + 1178\nProcess 11937 stopped\n* thread #1, queue = &#39;com.apple.main-thread&#39;, stop reason = EXC_BAD_ACCESS (code=1, address=0x28)\n    frame #0: 0x0000000102ea1b48 libX11.6.dylib`XGetVisualInfo + 299\nlibX11.6.dylib`XGetVisualInfo:\n-&gt;  0x102ea1b48 &lt;+299&gt;: cmpl   $0x0, 0x28(%rax,%rcx)\n    0x102ea1b4d &lt;+304&gt;: jle    0x102ea1d2d               ; &lt;+784&gt;\n    0x102ea1b53 &lt;+310&gt;: leaq   0x30(%rax,%rcx), %rdx\n    0x102ea1b58 &lt;+315&gt;: movq   %rdx, -0x88(%rbp)\nTarget 0: (mged) stopped.\n(lldb) up\nframe #1: 0x00000001007024de libdm.20.dylib`ogl_choose_visual(dmp=0x0000000105a21e40, tkwin=0x00000001060f6010) at dm-ogl.c:496:14\n   493      /* Try to satisfy the above desires with a color visual of the\n   494       * greatest depth */\n   495\n-&gt; 496      vibase = XGetVisualInfo(((struct dm_xvars *)dmp-&gt;dm_vars.pub_vars)-&gt;dpy,\n   497                  0, &amp;vitemp, &amp;num);\n</code></pre></div>",
+        "id": 198521239,
+        "sender_full_name": "Sean",
+        "timestamp": 1590215073
+    },
+    {
+        "content": "<p>here's the relevant backtrace: </p>\n<div class=\"codehilite\"><pre><span></span><code>* thread #1, queue = &#39;com.apple.main-thread&#39;, stop reason = EXC_BAD_ACCESS (code=1, address=0x28)\n    frame #0: 0x0000000102ea1b48 libX11.6.dylib`XGetVisualInfo + 299\n  * frame #1: 0x00000001007024de libdm.20.dylib`ogl_choose_visual(dmp=0x0000000105a21e40, tkwin=0x00000001060f6010) at dm-ogl.c:496:14\n    frame #2: 0x0000000100701c59 libdm.20.dylib`ogl_open(interp=0x0000000107010a10, argc=6, argv=0x0000000107015b78) at dm-ogl.c:859:23\n    frame #3: 0x0000000100711428 libdm.20.dylib`dm_open(interp=0x0000000107010a10, type=4, argc=7, argv=0x0000000107015b70) at dm-generic.c:131:13\n    frame #4: 0x000000010001218c mged`mged_dm_init(o_dm_list=0x0000000106002200, dm_type=4, argc=8, argv=0x0000000107015b70) at attach.c:273:16\n    frame #5: 0x000000010001392c mged`mged_attach(wp=0x00000001000fc908, argc=8, argv=0x0000000107015b70) at attach.c:655:9\n    frame #6: 0x00000001000133a7 mged`f_attach(UNUSED_clientData=0x0000000100103228, interpreter=0x0000000107010a10, argc=8, argv=0x0000000107015b70) at attach.c:519:12\n</code></pre></div>",
+        "id": 198521291,
+        "sender_full_name": "Sean",
+        "timestamp": 1590215220
+    },
+    {
+        "content": "<p>I don't know where it's coming from, but this is feeling like a compilation mismatch, because it detected and successfully compiled against the system Tcl/Tk 8.5</p>\n<p>I'm guessing, but could be the display from Tk_Display() getting set to dpy in dm_open is a non-X11 tk \"display\" and we later assume it's an x11 display. </p>\n<p>It wasn't previously using system Tk, so presumably either some check was removed/relaxed that prevented it or something was addd/enabled that turned it on.</p>",
+        "id": 198521576,
+        "sender_full_name": "Sean",
+        "timestamp": 1590215800
+    },
+    {
+        "content": "<p>Any ideas?</p>",
+        "id": 198521577,
+        "sender_full_name": "Sean",
+        "timestamp": 1590215803
+    },
+    {
+        "content": "<p>so an enable all build seems to confirm it, so just something untintended pulled in or let out that is letting system Tk try to run despite not enabling an aqua build.  That being the case, it should be okay to merge as trunk doesn't seem to have the issue, and if it does, then it's not unique to the branch.  Will need to get fixed but shoul be good to merge.</p>",
+        "id": 198523608,
+        "sender_full_name": "Sean",
+        "timestamp": 1590219749
+    },
+    {
+        "content": "<p>OK, thanks - merged.  You say it's getting a system Tcl/Tk 8.5?  That should have failed the version number test...</p>\n<p>The most likely thing I can think of offhand is that I didn't translate some portion of the X11 vs Aqua testing logic when I made the 8.5 -&gt; 8.6 transition, and the new FindTCL logic is succeeding incorrectly.  I switched from our custom, messy pile of Tcl detection logic to a combination of the standard CMake Find modules so it's actually quite likely FindTCL is now working \"better\" than it used to, although that should have manifested not long after the 8.6 merge went in...</p>\n<p>What is actually needed is an additional detection that will fail an otherwise successful FindTCL based on the windowing system used by Tk.  As far as I can tell there's no way to have Tcl/Tk tell you what windowing system is in use without actually initializing a Tk window, which breaks the build on headless machines.  If there is a way to detect the Tk windowing system during configure, that's almost certainly what we need...</p>",
+        "id": 198536737,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590241900
+    },
+    {
+        "content": "<p>Interesting that's it's trying an OGL attach - I wonder if it found an X11 OpenGL and the Aqua Tcl/Tk?</p>",
+        "id": 198536808,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590242018
+    },
+    {
+        "content": "<p>Trying to keep all that straight on the Mac was one of the reasons (the main one, really) our custom FindTCL.cmake was so complicated.</p>",
+        "id": 198536874,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590242064
+    },
+    {
+        "content": "<p>I'll have to check more closely, but worth noting that I don't think it's getting system Tk on trunk, so presumably you just pulled too little or too much on the branch.</p>",
+        "id": 198540104,
+        "sender_full_name": "Sean",
+        "timestamp": 1590247644
+    },
+    {
+        "content": "<p>at least, mged hasn't segfaulted on me there <em>yet</em></p>",
+        "id": 198540114,
+        "sender_full_name": "Sean",
+        "timestamp": 1590247674
+    },
+    {
+        "content": "<p>Could be - those merges can be a real pain in the neck...</p>",
+        "id": 198540221,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590247837
+    },
+    {
+        "content": "<p>worth mentioning that \"make regress\" took 18 minutes on my laptop.   I don't know if I just had it particularly busy at the time, but all the tests ran slower than usual for some reason.</p>",
+        "id": 198540672,
+        "sender_full_name": "Sean",
+        "timestamp": 1590248532
+    },
+    {
+        "content": "<p>That's.. peculiar.  I pushed a few changes back from trunk to bioh, but none of them should have caused either that or the Tcl/Tk searching change.</p>\n<p>I pushed a test into bioh trying to get a read on the Tk windowing system - I can't properly test it here, but I'd be curious to know what it does with the mac system Tk if you can run a configure (it's a configure time test, so will succeed/fail right away.)</p>",
+        "id": 198543533,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590253587
+    },
+    {
+        "content": "<p>I can run it, but not digging the approach nor understand the motivation.  That's a heck of a lot of complexity and code that could go wrong to detect an issue on one platform that I'd said I hadn't seen on trunk...</p>",
+        "id": 198543975,
+        "sender_full_name": "Sean",
+        "timestamp": 1590254267
+    },
+    {
+        "content": "<p>If we needed a test (and it's not clear that we do), the feature test would be to simply link against Tk,  call Tk_Init+Tk_Display followed by an X11 call like XNextEvent or something simple.</p>",
+        "id": 198544106,
+        "sender_full_name": "Sean",
+        "timestamp": 1590254488
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> It's not specifically for the issue you indicated you saw - it's an attempt to solve more robustly something I've tried to solve several times over the years, always unsuccessfully - a configure time test to identify from the Tcl/Tk installation we have detected what graphics system it uses.</p>\n<p>Calling Tk_Init, if I'm understanding the libtk code correctly, is enough <em>all by itself</em> to cause the graphics system test to fail on something like a headless Jenkins build client.  It tries to create a graphics window, fails, and the test fails.  So trying to specify Aqua vs X11 is iffy, because we don't know if we've got the right Tcl/Tk at configure time.</p>\n<p>The correct long term fix is to get our code to the point where we don't care if it's an Aqua, Win32 or X11 build of Tk, but we're quite a ways from that.  (Actually, I'm not sure we can ever get there until Tcl/Tk provides its own built-in OpenGL widget.)</p>",
+        "id": 198545637,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590257145
+    },
+    {
+        "content": "<p>That's a want, not a problem... what's the problem being fixed?  Every conceivable problem I can think of has a far simpler solution that should be more than adequate for whatever short remaining time we have left with Tk.</p>",
+        "id": 198546435,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258594
+    },
+    {
+        "content": "<p>OK.  The \"problem\" as I saw it was the risk of a Mac user doing a configure + build and getting a cryptic failure because the configure process mixed and matched incorrectly.  That's the motivation, so if the cost of resolving it is too high I'm good with skipping it.</p>",
+        "id": 198546495,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590258699
+    },
+    {
+        "content": "<p>We shouldn't be caring whether we're win32 or x11 as those are platform distinctions, so the only issue is aqua vs non-aqua.</p>",
+        "id": 198546543,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258738
+    },
+    {
+        "content": "<p>As long as we're not trying to build X11 on Windows, that's correct</p>",
+        "id": 198546559,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590258797
+    },
+    {
+        "content": "<p>Those are details that could just as easily be a requirement line in the respective README.* file (X11 on windows? you're on your own)</p>",
+        "id": 198546607,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258854
+    },
+    {
+        "content": "<p>(aquatk on mac? patches welcome, but you're on your own)</p>",
+        "id": 198546610,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258875
+    },
+    {
+        "content": "<p>OK, works for me.  I'll back it out.</p>",
+        "id": 198546627,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590258913
+    },
+    {
+        "content": "<p>whatever we are/were doing on Mac has been working.  it's not been until the 8.6 build that the build has pulled in a system tk on mac</p>",
+        "id": 198546631,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258919
+    },
+    {
+        "content": "<p>i'm not sure what was going on in the branch, but like I said, I've not (yet) seen it do that on trunk</p>",
+        "id": 198546640,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258945
+    },
+    {
+        "content": "<p>Which is worrisome, because I didn't see anything in the branch that would have justified a different configure response</p>",
+        "id": 198546690,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590258972
+    },
+    {
+        "content": "<p>haven't looked at the cmake logic to remind myself what criteria it's trying to use to ensure aquatk is pulled in without the cmake flag</p>",
+        "id": 198546691,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258973
+    },
+    {
+        "content": "<p>it's more likely something that was missing</p>",
+        "id": 198546693,
+        "sender_full_name": "Sean",
+        "timestamp": 1590258984
+    },
+    {
+        "content": "<p>I don't know what version OSX's native Tcl/Tk reports, but if it's 8.6 then for a long time version checking by itself would have avoided system detection - i.e. we may have been \"accidentally\" working</p>",
+        "id": 198546703,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590259043
+    },
+    {
+        "content": "<p>It's 8.5</p>",
+        "id": 198546710,
+        "sender_full_name": "Sean",
+        "timestamp": 1590259079
+    },
+    {
+        "content": "<p>we put something in the logic, I just don't recall what</p>",
+        "id": 198546766,
+        "sender_full_name": "Sean",
+        "timestamp": 1590259093
+    },
+    {
+        "content": "<p>It wasn't accident, but it might have been tied to some related system feature like the availability of the Tk.framework or Carbon or something similar.</p>",
+        "id": 198546780,
+        "sender_full_name": "Sean",
+        "timestamp": 1590259155
+    },
+    {
+        "content": "<p>I'm actually impressed that the branch got as far as it did.  It would have been a good environment to try and make it work with dm-tk.</p>",
+        "id": 198546834,
+        "sender_full_name": "Sean",
+        "timestamp": 1590259207
+    },
+    {
+        "content": "<p>technically what dm-ogl is doing is wrong -- it's assuming typeof(Tk_Display) == typeof(Display), compatible by cast, which is quite wrong.  that's working by coincidence.</p>",
+        "id": 198546899,
+        "sender_full_name": "Sean",
+        "timestamp": 1590259325
+    },
+    {
+        "content": "<p>The old graphics platform detection is at <a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/tags/rel-7-30-8/misc/CMake/FindBRLCADTCL.cmake\">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/tags/rel-7-30-8/misc/CMake/FindBRLCADTCL.cmake</a> around line 273.  called in turn at 750 by VALIDATE_TK, which in turn was called by the main \"validate this Tcl/Tk installation\" loops.  That whole Find setup is a complex, messy implementation that tries too hard to resolve too much, which is why I fell back to the vanilla CMake standard modules for 8.6.</p>\n<p>What may have happened in all that though, is whenever the graphics script failed (e.g. headless mode), we wound up not using system Tcl/Tk under any conditions even when it was otherwise present.)  That wouldn't work for proper distcheck testing, but would \"function\" as long as the embedded build worked under any conditions.</p>",
+        "id": 198547283,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590260012
+    },
+    {
+        "content": "<p>Although in fairness, even the distcheck tests never pre-install the deps to make sure a SYSTEM configuration would function... Probably something to eventually set up</p>",
+        "id": 198547341,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590260114
+    },
+    {
+        "content": "<p>You may be right as i'm not seeing any toggles any more currently in the code that will make it not pick system tk on mac, though the FindTCL logic isn't quite what I'd remember there being.</p>",
+        "id": 198547462,
+        "sender_full_name": "Sean",
+        "timestamp": 1590260373
+    },
+    {
+        "content": "<p>that begs a question how trunk is working, I'll take a look (maybe it's not...)</p>",
+        "id": 198547502,
+        "sender_full_name": "Sean",
+        "timestamp": 1590260410
+    },
+    {
+        "content": "<p>If I need to I can reproduce that behavior with the new setup - i.e. fail a detection if either a) the windowing system test succeeds and the results are wrong for the selected config or b) the test simply fails to execute - and in either case fall back to enabling the build.  I'd have to incorporate the old graphics check into the new FindTCL.cmake, but that shouldn't be too bad.</p>",
+        "id": 198547635,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590260661
+    },
+    {
+        "content": "<p>you're right that it would be nice if whatever we get working can be made to work with the standard Findtcl</p>",
+        "id": 198547656,
+        "sender_full_name": "Sean",
+        "timestamp": 1590260732
+    },
+    {
+        "content": "<p>Well, it's a concatenation of several of their modules - they broke out tclsh, tcl, and a couple others.  It's not really right - modern CMake will produce warnings about naming incompatibiltiies using them if one just uses the built in modules.  I may try to submit the merged version back upstream.</p>",
+        "id": 198547722,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590260836
+    },
+    {
+        "content": "<p>I'll extract the old graphics check and see if I can incorporate it into the new find logic - it will be simpler in the sense that it will be a single pass/fail rather than looping through all found Tcl/Tk setups trying to find one that matches, but I think the post CMake 3.12 -D&lt;PackageName&gt;_ROOT=/path find_package behavior is a better answer to that.</p>",
+        "id": 198547814,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590260979
+    },
+    {
+        "content": "<p>And if we ever do decide we want a CI test that incorporates a system installed Tcl/Tk, it will break - we'll need to revisit it then.</p>",
+        "id": 198547858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590261030
+    },
+    {
+        "content": "<p>Could let standard find do it's job, then run our own function to determine if it's suitable, otherwise undoes the vars and uses bundled.</p>",
+        "id": 198549277,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263487
+    },
+    {
+        "content": "<p>That's basically what I'm doing - it's easier though to have the FindTCL.cmake report the failure, because all the ThirdParty logic is already set up to do that sort of cleanup</p>",
+        "id": 198549323,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590263541
+    },
+    {
+        "content": "<p>I'm suggesting NOT having our own FindTCL ...</p>",
+        "id": 198549342,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263613
+    },
+    {
+        "content": "<p>so our needs are a simple overlay and we aren't tied to whatever snapshot Find script that got used.  they can update/change and our function would still do it's job independently.  neither should affect the other unless variable names change.</p>",
+        "id": 198549402,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263699
+    },
+    {
+        "content": "<p>It's a lot harder to do it that way the way the ThirdParty.cmake is currently designed.</p>",
+        "id": 198549413,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590263744
+    },
+    {
+        "content": "<p>I don't understand then.  Because it's using the system one now, no?</p>",
+        "id": 198549456,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263775
+    },
+    {
+        "content": "<p>Kinda.  It's using a cleaned up version o fthe system version, but our turning on and off of the bundled is keyed on the results of the find_package call.</p>",
+        "id": 198549465,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590263820
+    },
+    {
+        "content": "<p>I'm suggesting it keep doing whatever it's doing now, which presumably amounts to setting up a set of variables, maybe some cache values.</p>",
+        "id": 198549469,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263826
+    },
+    {
+        "content": "<p>So it's NOT using the system one.... c'mon clarity and precision here.  :)</p>",
+        "id": 198549538,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263927
+    },
+    {
+        "content": "<p>It's using a copy of the system one.</p>",
+        "id": 198549549,
+        "sender_full_name": "Sean",
+        "timestamp": 1590263950
+    },
+    {
+        "content": "<p>okay, I misunderstood you saying that it was switched back to using the standard system cmake find script.  it switched to a \"less modified\" version if I'm understanding correctly now.</p>",
+        "id": 198549620,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264023
+    },
+    {
+        "content": "<p>OK - in detail:</p>\n<p>a) it is using a FindTCL.cmake file in misc/CMake</p>\n<p>b) that FindTCL.cmake file is a concatenation and simplification of FindTCL.cmake , FindTclsh.cmake, FindTlStub.cmake, and FindWish,cmake from upstream CMake.</p>\n<p>c)  This is an improvement over the old FindBRLCADTCL.cmake, which used to be an essentially complete (and complicated) rewrite.</p>",
+        "id": 198549637,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264082
+    },
+    {
+        "content": "<p>However, because the contents are mostly those upstream files, the original graphics system check that we had in FindBRLCADTCL.cmake was removed.</p>",
+        "id": 198549655,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264114
+    },
+    {
+        "content": "<p>So then we presumably do this for every single Find dependency we rely on?</p>",
+        "id": 198549699,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264133
+    },
+    {
+        "content": "<p>i.e., have modified copies of all the cmake Find scripts, none using the default?</p>",
+        "id": 198549713,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264170
+    },
+    {
+        "content": "<p>Only if we have to.  FindX11.cmake is customized, and FindGL.cmake may still be</p>",
+        "id": 198549714,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264175
+    },
+    {
+        "content": "<p>I need to audit our current copies against the minimum required CMake copies and see if any can be removed - I haven't checked in quite a while</p>",
+        "id": 198549740,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264235
+    },
+    {
+        "content": "<p>but from what you described, it sounds like we do for the sake of ThirdParty logic</p>",
+        "id": 198549790,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264275
+    },
+    {
+        "content": "<p>Only if the \"default\" CMake module behavior is insufficient for what we need.</p>",
+        "id": 198549798,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264306
+    },
+    {
+        "content": "<p>if we can for some, then what's the distinction with Tcl being a lot harder?</p>",
+        "id": 198549802,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264309
+    },
+    {
+        "content": "<p>Is there any example where the default cmake module behavior is sufficient?</p>",
+        "id": 198549822,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264357
+    },
+    {
+        "content": "<p>ZLIB and PNG are both default now, IIRC.</p>",
+        "id": 198549871,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264387
+    },
+    {
+        "content": "<p>Hang on, let me check...</p>",
+        "id": 198549876,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264403
+    },
+    {
+        "content": "<p>Sorry, don't mean to be a pain, I'm honestly trying to understand because at heart my understanding is that nearly all Find scripts simply set the location of the lib, headers, maybe a root dir, maybe a couple other vars, but essentially what amounts to the lib and headers are what we need...</p>",
+        "id": 198549886,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264438
+    },
+    {
+        "content": "<p>and this \"setting\" is really just a set of naming convention variables</p>",
+        "id": 198549896,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264461
+    },
+    {
+        "content": "<p>The Find modules report out paths and headers, but the more complex ones (Qt I think is an example) also allow callers to specify criteria by which they can accept or reject particular versions or features as inadequate to the build's needs.</p>\n<p>The Find module defines required variables, which are set according to tests.  Those tests can be simple find_path and find_library looksups, or they can be more complex</p>",
+        "id": 198549988,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264580
+    },
+    {
+        "content": "<p>Actually, Qt is another case where we don't bundle the Find module</p>",
+        "id": 198550028,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264603
+    },
+    {
+        "content": "<p>Most of the find modules we have in misc/CMake are actually for things that are too obscure to be bundled with standard CMake (openNURBS, SCL, UTAHRLE, etc.)</p>",
+        "id": 198550066,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264700
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198549988\">said</a>:</p>\n<blockquote>\n<p>The Find modules report out paths and headers, but the more complex ones (Qt I think is an example) also allow callers to specify criteria by which they can accept or reject particular versions or features as inadequate to the build's needs.</p>\n</blockquote>\n<p>This sounds like it'd make it a lot easier, not harder.  So.. not a problem.</p>\n<blockquote>\n<p>The Find module defines required variables, which are set according to tests.  Those tests can be simple find_path and find_library looksups, or they can be more complex</p>\n</blockquote>\n<p>Sure.. and they are whatever they are.</p>",
+        "id": 198550108,
+        "sender_full_name": "Sean",
+        "timestamp": 1590264736
+    },
+    {
+        "content": "<p>Right.  So if the system tests give us what we need, we can just use the bundled version and no problem.  Unfortunately, they're not always adequate - and it used to be that Tcl was one of the most inadequate.  The newer logic is much improved from what I remember, but most \"proper\" Tcl/Tk packages aren't supposed to care what graphics system is in use - so the vanilla system tests for Tcl don't check.  (Most everything in the Tcl world that does care uses the TEA build setup, so we're pretty much on our own.)</p>",
+        "id": 198550214,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590264942
+    },
+    {
+        "content": "<p>maybe need to back up, because this whole conversation started with a suggestion of using an uncopied unmodified cmake-provided FindTcl ... and then running a function from our misc/CMake to do whatever additional acceptance/rejection criteria we have.  You responded that would make something a lot harder.  Can you elaborate on that?  that's the only point in question that I don't understand because to me it should just be us unsetting vars (rejecting something system cmake thought we could use).</p>\n<p>Now if it fails to detect at all and there's nothing to reject, I might see a benefit, but that didn't seem to be what we were talking about.</p>",
+        "id": 198550270,
+        "sender_full_name": "Sean",
+        "timestamp": 1590265032
+    },
+    {
+        "content": "<p>To that point, it looks like in r75899 that you're even doing exactly what I suggested, wiping out all the vars.  You're just doing it in the copy instead of doing it in another file that's run after a system Find.</p>",
+        "id": 198550423,
+        "sender_full_name": "Sean",
+        "timestamp": 1590265279
+    },
+    {
+        "content": "<p>OK.  So the guts of the third party management logic are in misc/CMake/ThirdParty.cmake, around line 200.  That's when we do the find_package call, using either our local misc/CMake copy if its present or the CMake defined version if we don't give it one.</p>\n<p>Once that find_package call is complete, we have a yes/no decision for whether the system version is usable.  From that point on, the work beings to set all the necessary cache variables and other fun that go into making the 3rd party build system work the way it does.  All of that logic assumes that after the find_package call, the decision is made one way or the other on whether we're going to build 3rd party.</p>\n<p>If we want to subsequently change our mind once we're out of that function, all the bookkeeping and state management after the find_package call in that function has to be done again.</p>",
+        "id": 198550425,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590265288
+    },
+    {
+        "content": "<p>why wouldn't we just do the validation check in ThirdParty right after find_package?</p>",
+        "id": 198550485,
+        "sender_full_name": "Sean",
+        "timestamp": 1590265391
+    },
+    {
+        "content": "<p>Note also that the FindTCL.cmake file itself, at the end, has calls to standard CMake functionality FIND_PACKAGE_HANDLE_STANDARD_ARGS that find_package is expected to execute.  If we wanted to change our decision post find_package, we'd also have to make sure we weren't messing up anything that would be subsequently relied upon by CMake's state management.</p>",
+        "id": 198550538,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590265460
+    },
+    {
+        "content": "<p>That's why the graphics check is located where it is in that file - so we can make the decision before those finalization routines are called.</p>\n<p>It's undoubtedly possible to handle it anyway - a reconfigure with changed build settings actually does do that - but it's a hassle to get right and I've broken things hundreds of times over the years when I've had to muck with that aspect of things.</p>",
+        "id": 198550608,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590265576
+    },
+    {
+        "content": "<p>It's also a common source of the \"weird intermediate state\" build errors we get when someone does a lot of reconfiguring with different settings without clearing the cache or build directory - if I drop a stitch on the cleanup, weird stale state can start having unpredictable consequences.</p>",
+        "id": 198550628,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590265646
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198550608\">said</a>:</p>\n<blockquote>\n<p>That's why the graphics check is located where it is in that file - so we can make the decision before those finalization routines are called.</p>\n</blockquote>\n<p>But then this could still cause the unintended consequences you're trying to avoid I would think.  Are you saying there's state somewhere involved beyond the variables and the cache? </p>\n<blockquote>\n<p>It's undoubtedly possible to handle it anyway - a reconfigure with changed build settings actually does do that - but it's a hassle to get right and I've broken things hundreds of times over the years when I've had to muck with that aspect of things.</p>\n</blockquote>\n<p>I don't want to rest on a pile of sand.  If it's brittle, that's all the MORE reason it needs to be modularized overlays with gated changes.</p>",
+        "id": 198550790,
+        "sender_full_name": "Sean",
+        "timestamp": 1590265877
+    },
+    {
+        "content": "<p>maybe I should play with some of these ideas, I must not be communicating clearly or I'm just totally not getting it.  probably both.  To me, this seems like a modularity 101 -- to move towards not having copies and not modifying if we can overlay.  The only issue I could see would be a script that is just fundamentally broken or non-existent, so we provide one.</p>",
+        "id": 198550974,
+        "sender_full_name": "Sean",
+        "timestamp": 1590266179
+    },
+    {
+        "content": "<p>There are internal CMake variables beyond those we normally manipulate - if you search for :INTERNAL in the cache you'll see them.  I can't say what they all do - I try not to have to manipulate things at that level - but it's clearly state being tracked by CMake.</p>\n<p>The problem is \"resetting\" a find package result is just going to be brittle no matter what.  It's not something that the system is really designed for - the expectation pretty much seems to be that if you want to change things you clear the cache and re-run.  We do better than that - if we flip between SYSTEM and BUNDLED the right thing should happen - but it's pretty unnatural from CMake's perspective that we do.</p>",
+        "id": 198550977,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590266185
+    },
+    {
+        "content": "<p>at the end of the day, though, it's still just a bunch of variables and if push came to shove, I could write a list before the Find and a list after the Find, and reset... at least I'd hope that's possible.</p>",
+        "id": 198551039,
+        "sender_full_name": "Sean",
+        "timestamp": 1590266288
+    },
+    {
+        "content": "<p>Sure - the question is how invasive you want to get and at what levels.  ResetCache.cmake does some pretty gnarly manipulations, for example</p>",
+        "id": 198551143,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590266411
+    },
+    {
+        "content": "<p>That was an attempt to reset library searching when switching between 32 and 64 bit builds.  Don't know if it still works - haven't tried to do that in a long time - but that was one instance of a mean low-level state manipulation attempt.</p>",
+        "id": 198551197,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590266513
+    },
+    {
+        "content": "<p>I've always tried to let CMake do it's own thing as much as possible and roll my own logic on top of it only when necessary (I know it probably doesn't look that way)</p>",
+        "id": 198551251,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590266573
+    },
+    {
+        "content": "<p>It's not about being invasive.  If anything it's \"less invasive\" on code.  We're cleaning up after the fact  to whatever extend necessary to undo a system Find result deemed unacceptable.  \"you do you, and we'll sort it out after\"</p>",
+        "id": 198551265,
+        "sender_full_name": "Sean",
+        "timestamp": 1590266635
+    },
+    {
+        "content": "<p>I wouldn't do something more aggressive than demonstrably required.</p>",
+        "id": 198551311,
+        "sender_full_name": "Sean",
+        "timestamp": 1590266664
+    },
+    {
+        "content": "<p>I have trouble believing that we can't just unset the public vars we end up using.</p>",
+        "id": 198551327,
+        "sender_full_name": "Sean",
+        "timestamp": 1590266696
+    },
+    {
+        "content": "<p>Well, in that most recent commit I initially tried unset() on the vars - it didn't work.  I had to override the CACHE before I got the desired behavior.</p>\n<p>Now, could we do that after the find_package call but before the rest of the ThirdParty logic executes?  Probably - but I'm not at all sure we wouldn't be just trading one form of complexity for another</p>",
+        "id": 198551391,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590266801
+    },
+    {
+        "content": "<p>If a new version of CMake has FIND_PACKAGE_HANDLE_STANDARD_ARGS start doing some new behind the scenes magic as a consequence of the find decision, we'd have to catch that and mod our after-the-fact cleanup code to also unravel the new behavior.  That may not be a huge risk, but I'm not sure how we'd catch it...</p>",
+        "id": 198551475,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590266978
+    },
+    {
+        "content": "<p>At a glance, I think our FindGL.cmake was originally modded mainly to allow us to find X11 OpenGL on the Mac.  Not completely sure what upstream does with that case, but looking at the file I think they default to the native OpenGL if(APPLE)</p>",
+        "id": 198552317,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590268403
+    },
+    {
+        "content": "<p>FindX11.cmake I think needed Xinput, plus had a habit of mixing include headers from two different X11 installations on OSX.</p>",
+        "id": 198552438,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590268664
+    },
+    {
+        "content": "<p>Our FindOpenCL.cmake is quite different from the upstream - not sure what the relative merits are.</p>",
+        "id": 198552480,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590268694
+    },
+    {
+        "content": "<p>Ah - unset(&lt;var&gt; CACHE) has the same result, looks like</p>",
+        "id": 198553638,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590270707
+    }
+]

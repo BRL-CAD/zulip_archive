@@ -1,0 +1,125 @@
+<html>
+<head><meta charset="utf-8"><title>gcv API · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html">gcv API</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="209628168"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209628168" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209628168">(Sep 10 2020 at 12:03)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-general/topic/png.20support.20in.20vol.20primitive/near/209593203">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> so an issue you might be able to help sort out... ran into a problem creating an image-to-geometry plugin for libgcv that  hadn't been fully considered when the mime stuff was put in place.  gcv's interface technically only handles "bu_mime_model" types or "unknown"/"auto".   that type/grouping limitation is technically wrong, and is compounded considering one might want to create geometry off of other types (e.g., excel spreadsheet or something).</p>
+</blockquote>
+<p>That doesn't surprise me, actually - I think the mime stuff was me, and I'm pretty sure I didn't consider a non-model to model mapping when I set it up.</p>
+
+
+
+<a name="209628517"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209628517" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209628517">(Sep 10 2020 at 12:07)</a>:</h4>
+<p>If we want an anything to anything mapping, probably the thing to do is to not use the category typing at all, but just assemble a more generalized mapping setup... hmm...</p>
+
+
+
+<a name="209635617"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209635617" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209635617">(Sep 10 2020 at 13:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> you mean like instead of using  enums, doing something dictionary-based?</p>
+
+
+
+<a name="209636228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209636228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209636228">(Sep 10 2020 at 13:11)</a>:</h4>
+<p>could see something string-based work, maybe where we just stash all the mime.types mappings into a std::map&lt;std::string, std::list&lt;std::string&gt; internally and expose that through a search/lookup call using string matching.  completely alternatively, could stick with the enums, but just have on honking enum list all of the same type.  hm.</p>
+
+
+
+<a name="209653156"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209653156" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209653156">(Sep 10 2020 at 14:29)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I made a quick stab at generalizing in r77099</p>
+
+
+
+<a name="209653236"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209653236" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209653236">(Sep 10 2020 at 14:30)</a>:</h4>
+<p>Shouldn't be merged to RELEASE, but conveys the idea</p>
+
+
+
+<a name="209653320"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209653320" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209653320">(Sep 10 2020 at 14:30)</a>:</h4>
+<p>yeah, this isn't needed for release, just came up yesterday helping set up an example plugin</p>
+
+
+
+<a name="209653423"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209653423" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209653423">(Sep 10 2020 at 14:31)</a>:</h4>
+<p>That's a real quick run at it - having to do paperwork fun today and probably tomorrow, so couldn't test more extensively.</p>
+
+
+
+<a name="209653535"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209653535" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209653535">(Sep 10 2020 at 14:32)</a>:</h4>
+<p>On the plus side, I doubt I'll be stacking up too many more commits for you to review ;-)</p>
+
+
+
+<a name="209653615"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209653615" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209653615">(Sep 10 2020 at 14:32)</a>:</h4>
+<p>no worries, I'm waist-deep in training checking off the last remaining commits in between the reboots and slow dialog</p>
+
+
+
+<a name="209654035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209654035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209654035">(Sep 10 2020 at 14:35)</a>:</h4>
+<p>/me may finally have found the threshold for "committing too often"</p>
+
+
+
+<a name="209654906"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209654906" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209654906">(Sep 10 2020 at 14:37)</a>:</h4>
+<p>nah, it's just our/my review methods need to adapt better to higher frequency and bursts</p>
+
+
+
+<a name="209655121"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209655121" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209655121">(Sep 10 2020 at 14:38)</a>:</h4>
+<p>95% of commits are trivially reviewed and can be checked off.  really need something (other than inbox) that will help keep track of just that 5% that beg closer inspection</p>
+
+
+
+<a name="209655795"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209655795" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209655795">(Sep 10 2020 at 14:42)</a>:</h4>
+<p>/me is really behind the curve when it comes to the latest and greatest of github, in many ways...</p>
+
+
+
+<a name="209671738"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209671738" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209671738">(Sep 10 2020 at 16:22)</a>:</h4>
+<p>If they don't have a commit inspection/tracking UI, that would sure be a logical next step...</p>
+
+
+
+<a name="209697819"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209697819" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209697819">(Sep 10 2020 at 19:33)</a>:</h4>
+<p>I should have guessed... they're set up entirely around pre-merge commit reviews</p>
+
+
+
+<a name="209698611"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209698611" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209698611">(Sep 10 2020 at 19:39)</a>:</h4>
+<p>Hmm... <a href="https://github.com/jez/auditors-webhook">https://github.com/jez/auditors-webhook</a></p>
+
+
+
+<a name="209737483"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcv%20API/near/209737483" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcv.20API.html#209737483">(Sep 11 2020 at 03:20)</a>:</h4>
+<p>there are pre-merge and post-merge review options.  all of them integrate with git, several of them integrate with github</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

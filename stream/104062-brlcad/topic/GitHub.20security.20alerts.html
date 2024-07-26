@@ -1,0 +1,77 @@
+<html>
+<head><meta charset="utf-8"><title>GitHub security alerts · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html">GitHub security alerts</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="208721420"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721420" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721420">(Sep 01 2020 at 17:36)</a>:</h4>
+<p>Just FYI, I enabled github security auditing on all repos and it instantly kicked back a couple dozen reports on ogv, benchmark, and other existing repos.  In case anyone was wondering why that suddenly happened, that's why.</p>
+
+
+
+<a name="208721505"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721505" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721505">(Sep 01 2020 at 17:37)</a>:</h4>
+<p>Is that auditing for web security issues?  Or is it also doing clang static analyzer style analysis?</p>
+
+
+
+<a name="208721515"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721515" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721515">(Sep 01 2020 at 17:37)</a>:</h4>
+<p>Unrelated, but I also enabled a new cronjob on the server that pings the webserver every couple minutes to make sure it's running and responsive (and reset if it's not).</p>
+
+
+
+<a name="208721588"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721588" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721588">(Sep 01 2020 at 17:38)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/GitHub.20security.20alerts/near/208721505">said</a>:</p>
+<blockquote>
+<p>Is that auditing for web security issues?  Or is it also doing clang static analyzer style analysis?</p>
+</blockquote>
+<p>I believe they do a simple BOM analysis.</p>
+
+
+
+<a name="208721676"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721676" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721676">(Sep 01 2020 at 17:39)</a>:</h4>
+<p>OK, cool.  Figured the static analyzer would be too much for them to just turn on.</p>
+
+
+
+<a name="208721713"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721713" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721713">(Sep 01 2020 at 17:39)</a>:</h4>
+<p>web projects nearly all use BOM manifests, so it's primarily going to report on web security issues.  in theory, it may support C/C++ reporting if we provide a recognized BOM.</p>
+
+
+
+<a name="208721898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721898">(Sep 01 2020 at 17:40)</a>:</h4>
+<p>yeah, it's not anything fancy like that.  they're looking for files like packages.json, seeing a line like "ajax &gt;= 4.5" and matching it against a vulnerability database (e.g., ajax 4.7 is busted, so recommend upgrading to "ajax &gt;=4.8")</p>
+
+
+
+<a name="208721974"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/208721974" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#208721974">(Sep 01 2020 at 17:41)</a>:</h4>
+<p>in theory, we could itemize all external deps and get auto-notified when png, zlib, tcl/tk, etc have an issue</p>
+
+
+
+<a name="209289584"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/209289584" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#209289584">(Sep 07 2020 at 12:23)</a>:</h4>
+<p>ships is pretty easy to set up and, has a whole set of handy checks (recommend nope to a second watchdog machine, as well)</p>
+
+
+
+<a name="209289643"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/GitHub%20security%20alerts/near/209289643" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/GitHub.20security.20alerts.html#209289643">(Sep 07 2020 at 12:24)</a>:</h4>
+<p>nah, autocorrect, nagios</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

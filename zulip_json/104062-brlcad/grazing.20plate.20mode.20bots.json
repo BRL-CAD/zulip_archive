@@ -1,0 +1,140 @@
+[
+    {
+        "content": "<p>So the grazing plate mode BoT case that was reported is the very same case.  ray is grazing a plate-mode bot and returning an LOS thickness way longer than physically possible, which results in an overlap with nearby objects that don't actually overlap.</p>",
+        "id": 197614810,
+        "sender_full_name": "Sean",
+        "timestamp": 1589488810
+    },
+    {
+        "content": "<p>Ah, lovely</p>",
+        "id": 197615162,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589488964
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/LPbMabaAduaDbSPI8787N_iW/Screen-Shot-2020-05-14-at-4.42.33-PM.png\">Screen-Shot-2020-05-14-at-4.42.33-PM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/LPbMabaAduaDbSPI8787N_iW/Screen-Shot-2020-05-14-at-4.42.33-PM.png\" title=\"Screen-Shot-2020-05-14-at-4.42.33-PM.png\"><img src=\"/user_uploads/1549/LPbMabaAduaDbSPI8787N_iW/Screen-Shot-2020-05-14-at-4.42.33-PM.png\"></a></div>",
+        "id": 197615213,
+        "sender_full_name": "Sean",
+        "timestamp": 1589488987
+    },
+    {
+        "content": "<p>Yep, sure enough.</p>",
+        "id": 197615265,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589489021
+    },
+    {
+        "content": "<p>rays come in from left to right -- they graze the faces on the left, which are nearly horizontal</p>",
+        "id": 197615274,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489024
+    },
+    {
+        "content": "<p>you can see one of the resulting LOS thicknesses, the actual hit point is near the cluster on the left, but it extends all the way forward through the tubes.</p>",
+        "id": 197615380,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489070
+    },
+    {
+        "content": "<p>and/or tubes are extending backwards</p>",
+        "id": 197615429,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489094
+    },
+    {
+        "content": "<p>as they also have grazing hits</p>",
+        "id": 197615450,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489105
+    },
+    {
+        "content": "<p>this is actually a really nicely isolated generic case for figuring out how to fix this</p>",
+        "id": 197615492,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489136
+    },
+    {
+        "content": "<p>So we're back to either clamping a maximum length, implementing some sort of crazy robust (and slow) special calculation for those near-tangent cases, or...?</p>",
+        "id": 197615500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589489141
+    },
+    {
+        "content": "<p>clamping will help avoid egregious cases like this, but will still be wrong</p>",
+        "id": 197616140,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489437
+    },
+    {
+        "content": "<p>just not as long-wrong</p>",
+        "id": 197616167,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489447
+    },
+    {
+        "content": "<p>there's a catchy motto in there somewhere... \"BRL-CAD - not long-wrong!\"</p>",
+        "id": 197616257,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589489486
+    },
+    {
+        "content": "<p>it's potentially wrong even for nearly orthogonal hits</p>",
+        "id": 197616262,
+        "sender_full_name": "Sean",
+        "timestamp": 1589489488
+    },
+    {
+        "content": "<p>So... fall back on something like <a href=\"https://bellard.org/libbf/\">https://bellard.org/libbf/</a> for near tangent inputs?</p>",
+        "id": 197616794,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589489749
+    },
+    {
+        "content": "<p>this is an algorithmic problem, not a numerics or precision problem.  How would libbf help?</p>",
+        "id": 197628664,
+        "sender_full_name": "Sean",
+        "timestamp": 1589496910
+    },
+    {
+        "content": "<p>I was thinking if the trig calculations were breaking down numerically in the near tangent cases, we could fall back on more robust but slower solvers in that situation.</p>",
+        "id": 197629246,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589497295
+    },
+    {
+        "content": "<p>just a thought - I may not have fully understood the underlying math issues</p>",
+        "id": 197629392,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589497380
+    },
+    {
+        "content": "<p>they \"break down\" in the sense that it causes big numbers, but they're not wrong</p>",
+        "id": 197629460,
+        "sender_full_name": "Sean",
+        "timestamp": 1589497420
+    },
+    {
+        "content": "<p>it's literally the projection to where the ray intersects the plane of the plate-mode-extruded surface</p>",
+        "id": 197629556,
+        "sender_full_name": "Sean",
+        "timestamp": 1589497481
+    },
+    {
+        "content": "<p>I drew a diagram of it last week, if you recall it</p>",
+        "id": 197629598,
+        "sender_full_name": "Sean",
+        "timestamp": 1589497524
+    },
+    {
+        "content": "<p>we can calculate the face plane and trim the segment deterministically at the plate's extruded distance.  that gives exact and correct in/out segments.</p>\n<p>the problem is more one of coordination.</p>",
+        "id": 197629943,
+        "sender_full_name": "Sean",
+        "timestamp": 1589497778
+    },
+    {
+        "content": "<p>Ah, right.</p>",
+        "id": 197633221,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589500396
+    }
+]

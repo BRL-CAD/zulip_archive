@@ -1,0 +1,515 @@
+<html>
+<head><meta charset="utf-8"><title>MOOSE · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html">MOOSE</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="185398213"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185398213" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185398213">(Jan 11 2020 at 17:30)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> What are the next steps for MOOSE?</p>
+
+
+
+<a name="185398220"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185398220" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185398220">(Jan 11 2020 at 17:31)</a>:</h4>
+<p>I still can't believe I forgot the name we'd settled on.  I love it.</p>
+
+
+
+<a name="185398936"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185398936" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185398936">(Jan 11 2020 at 17:52)</a>:</h4>
+<p>Well, I don't know. The C++ interface is my standard API for doing something with BR-CAD. But, it looks like I'm the only one using it. Its features are sufficient for my current needs. Maybe, they have to be enlarged if i can really realize my ideas for a new GUI.</p>
+<p>There is however more behind MOOSE as only "doing things in C++". It's a behavior description of the BRL-CAD kernel and a reference for how to use the standard C API. AND, with the brlcad.dll, a demonstration of how the BRL-CAD kernel can be included as a module in other applications, <a href="https://univemo.iabg.de/Download/BrlCadViewer30_setup.exe" target="_blank" title="https://univemo.iabg.de/Download/BrlCadViewer30_setup.exe">https://univemo.iabg.de/Download/BrlCadViewer30_setup.exe</a> for example. I mentioned this here in the Appleseed thread too.</p>
+
+
+
+<a name="185401802"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185401802" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185401802">(Jan 11 2020 at 19:17)</a>:</h4>
+<blockquote>
+<p>Maybe, they have to be enlarged if i can really realize my ideas for a new GUI.</p>
+</blockquote>
+<p>That's what I'm getting at.  I think it can/should be the foundation for the new GUI (not direct linkage into librt).  Towards that end, though, I do think it needs some things.  I'm not 100% on what that TODO looks like yet, though.</p>
+<p>I think my next step will be to take the IBRT interface (which directly calls librt) and see how well it converts over.  Right now, it and the Qt bits we have would make a pretty decent GUI.</p>
+<blockquote>
+<p>It's a behavior description of the BRL-CAD kernel and a reference for how to use the standard C API. AND, with the brlcad.dll, a demonstration of how the BRL-CAD kernel can be included as a module in other applications,[snip]</p>
+</blockquote>
+<p>To me MOOSE <em>becomes</em> the kernel and the lower level C libraries are implementation encapsulation/layering/grouping details.</p>
+
+
+
+<a name="185402163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185402163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185402163">(Jan 11 2020 at 19:28)</a>:</h4>
+<p>Towards that end, this is still the roadmap I have in mind: <a href="/user_uploads/1549/m2VUdnNjCy5OGebYLNHCTvoR/Unknown.png" target="_blank" title="Unknown.png">Unknown.png</a>  </p>
+<div class="message_inline_image"><a href="/user_uploads/1549/m2VUdnNjCy5OGebYLNHCTvoR/Unknown.png" target="_blank" title="Unknown.png"><img src="/user_uploads/1549/m2VUdnNjCy5OGebYLNHCTvoR/Unknown.png"></a></div><p>Begs some discussion on how libged is going to become exposed to applications, but one possibility is that appleseed and ospray move up into the application layer and the purple layerC++  sits over all the C libs including icv, gcv, ged, rt, &amp; analyze.</p>
+
+
+
+<a name="185615008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185615008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185615008">(Jan 14 2020 at 16:55)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> how do you feel about adding something like BRLCAD:Database.execute() ?</p>
+
+
+
+<a name="185615421"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185615421" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185615421">(Jan 14 2020 at 16:58)</a>:</h4>
+<p>as a means to expose the entirety of the libged API, assuming a corresponding ged_exec() that it would call into for running any ged command on the given database.  this would probably entail storing a struct ged alongside the struct wdb (or instead of it since you can extract a wdb from a ged).</p>
+
+
+
+<a name="185619160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619160">(Jan 14 2020 at 17:34)</a>:</h4>
+<p><span class="user-mention" data-user-id="252475">@Himanshu Sekhar Nayak</span> what task are you working on now?</p>
+
+
+
+<a name="185619213"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619213" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619213">(Jan 14 2020 at 17:35)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="252475">Himanshu Sekhar Nayak</span> what task are you working on now?</p>
+</blockquote>
+<p>currently working on <code>BRL-CAD Lua binding: Test BRLCAD.database:Title() (part #1 of 2)</code></p>
+
+
+
+<a name="185619239"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619239" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619239">(Jan 14 2020 at 17:36)</a>:</h4>
+<p>ah cool, unit test for the Title interface?  what's part 2?</p>
+
+
+
+<a name="185619316"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619316" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619316">(Jan 14 2020 at 17:36)</a>:</h4>
+<p>didn't see part 2 yet</p>
+
+
+
+<a name="185619357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619357">(Jan 14 2020 at 17:37)</a>:</h4>
+<p>yeah Unit test for Title interface</p>
+
+
+
+<a name="185619456"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619456" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619456">(Jan 14 2020 at 17:38)</a>:</h4>
+<p>ah, I see part 2 is not uploaded/enabled yet</p>
+
+
+
+<a name="185619527"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619527" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619527">(Jan 14 2020 at 17:39)</a>:</h4>
+<p>btw there are still some binding left</p>
+
+
+
+<a name="185619548"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185619548" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185619548">(Jan 14 2020 at 17:39)</a>:</h4>
+<p>yeah, I just noticed, 5 remaining</p>
+
+
+
+<a name="185632830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185632830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185632830">(Jan 14 2020 at 19:48)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> how do you feel about adding something like BRLCAD:Database.execute() ?</p>
+</blockquote>
+<p>Not so good.</p>
+<p>libged is command language interface (namely TCL). (int argc, const char *argv[]) looks like a riddle. The return value is a string, its evaluation is the hell, unless you work with a language like TCL. And, libged is closely linked to the graphics library.</p>
+<p>The C++ interface is a non-libged. Behavior oriented, methods with parameters, easy to work with in the language it’s written, no assumptions regarding the environment at all. It hasn’t even simple vector functions, because they are likely already present in the application where the BRL-CAD core is linked to. Instead, the Vector2D etc. structures are designed for easy casting to “usual” vector classes.</p>
+<p>However, the <strong>M</strong> in MOOSE stands for <strong>modular</strong>. I see the core interface only as one component. There are more parts of the BRL-CAD libraries, which may be worth to export via the new API. The command language interface from libged is one of them, even a problematic one, because of its strong dependency to the current mged and Archer architecture.</p>
+<p>In any case, libged is not a functionality of the database. It has some commands which operate on the database, but that’s all. It’s rather the central command interface of the current BRL-CAD program infrastructure.</p>
+
+
+
+<a name="185671050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185671050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185671050">(Jan 15 2020 at 05:59)</a>:</h4>
+<blockquote>
+<p>Not so good.</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  Appreciate the honesty.</p>
+<blockquote>
+<p>libged is command language interface (namely TCL). (int argc, const char *argv[]) looks like a riddle. The return value is a string, its evaluation is the hell, unless you work with a language like TCL. And, libged is closely linked to the graphics library.</p>
+</blockquote>
+<p>return value is <em>currently</em> a string, but that is not the intended end state.  I'm not sure of your tcl references, though, as the library is almost entirely stripped of it's former tcl association.  the command pattern it uses was intentionally designed to be abstracted from the evaluation layer above it, which could be tcl, perl, shell, lisp, lua, etc. , as simple commands followed by arguments which translates to nearly all interactive scripting environments.</p>
+<blockquote>
+<p>The C++ interface is a non-libged. Behavior oriented, methods with parameters, ...[snip]</p>
+</blockquote>
+<p>This I totally get and would reject myself as muddying the object-oriented behavior model.  What  I guess I'm hoping to find is a way to make them play together effectively (and not kludged) to benefit applications.  I believe you phrased it better in the next point...</p>
+<blockquote>
+<p>...[snip]... even a problematic one, because of it's strong dependency to the current mged and Archer architecture.</p>
+</blockquote>
+<p>I'm not sure I'd agree with this characterization.  If anything, we now have such clean separation that you can invoke any ged command without mged or archer architecture.  You merely need a database handle.  See src/libged/tests/test_tops.c for example.</p>
+<p>Now where I do agree there remains a problem is that currently commands either acts on the database and returns a dumb string.  These are all side effects and that's not ideal or desired long-term.</p>
+<blockquote>
+<p>In any case, libged is not a functionality of the database.  It has some commands which operate on the database, but that's all.  It's rather the central command interface of the current BRL-CAD program infrastructure.</p>
+</blockquote>
+<p>From a pure object-oriented design standpoint, I would counter that this has been framed in library terms which is not entirely relevant to the conceptual model.  Conceptually, a Database certainly could/does have a notion of operations it can perform.  Whether this is presented as a db-&gt;tops() or db-&gt;invoke("tops") is a not a divergent distinction.  That's not to say I think only the prior or the latter should exist, just that it's not inconsistent for a database (class or object) to have some intrinsic ability to perform supported operations.</p>
+<p>While it's undeniably the clI to the current infrastructure, I have no desire to abandon it going forward.  To the contrary, I think the issues (some you have noted) are simply items to be worked as we develop new GUIs and expand new use cases as a means to leverage existing functionality while also enabling and creating new apps that rid themselves of mged/archer baggage.</p>
+
+
+
+<a name="185732502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/185732502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#185732502">(Jan 15 2020 at 19:09)</a>:</h4>
+<p>I‘m aware of the fact that the direct TCL calls were removed from libged, but it is still a command language with flags and variable parameters. This is usual for shell scripts and scripting languages which imitate their behavior. For other languages, this is a problem.</p>
+<p>I’m also aware, that we don’t need a fully featured mged or Archer to use libged. For example, if we use mged with nu atached. Nevertheless, we shouldn’t ignore the many graphics functions in libged which are closely related to the current display manager logic.</p>
+<p>The solution which I recommend is to access libged through an own MOOSE module. This way, MOOSE based application can use libged functionality if they can profit from them, without disturbing the other parts.</p>
+
+
+
+<a name="194341302"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/194341302" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#194341302">(Apr 16 2020 at 17:42)</a>:</h4>
+<p>I created a first draft of a <strong>BRL-CAD MOOSE</strong> implementation: <a href="https://github.com/drossberg/MOOSE" title="https://github.com/drossberg/MOOSE">https://github.com/drossberg/MOOSE</a><br>
+This shouldn't be considered in no sense as complete, but I want to share it because I don't want to put much effort in something we won't agree on.</p>
+<p>At least, it compiles on Linux.</p>
+
+
+
+<a name="196762208"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/196762208" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#196762208">(May 07 2020 at 12:24)</a>:</h4>
+<p><span class="user-mention" data-user-id="252475">@Himanshu Sekhar Nayak</span> MOOSE usually denotes the BRL-CAD core C++ interface. Its code can be found in the rt^3 branch of the main repository. Look at the include/brlcad and src/coreInterface directories there.</p>
+<p>To start, you can check the sources for consistency. E.g., does Database.cpp support all available object types?</p>
+<p>A prototype/demonstrator of a BRL-CAD library with MOOSE API can be found here: <a href="https://github.com/drossberg/MOOSE" title="https://github.com/drossberg/MOOSE">https://github.com/drossberg/MOOSE</a><br>
+A demonstration of how to write programs on top of BRL-CAD MOOSE: <a href="https://github.com/drossberg/BrlCadGUI" title="https://github.com/drossberg/BrlCadGUI">https://github.com/drossberg/BrlCadGUI</a><br>
+I made both CMake set-ups for Linux. They are demonstrators only.</p>
+
+
+
+<a name="198541974"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/198541974" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#198541974">(May 23 2020 at 16:20)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  yeah just starting today. First I am cleaning my workspace so that I can work again into it and I forked your repo too. I will start looking into it today onwards</p>
+
+
+
+<a name="198542230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/198542230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#198542230">(May 23 2020 at 16:28)</a>:</h4>
+<p>You may want to look at <strong>BrlCadGUI</strong> too, as this is an example for how to use MOOSE. You have to install MOOSE and give the BrlCadGUI CMake the installation directory, such that it'll find the lib and headers there. The GUI itself is Qt based.</p>
+
+
+
+<a name="198854186"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/198854186" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#198854186">(May 27 2020 at 06:35)</a>:</h4>
+<p>Is there a good example for a tree-walk to create a wire-frame view from a subtree? I.e., a db_walk_tree() which calls ft_plot() for the leafs. I wouls especially like to know how to include the transformations from the combinations. libged/draw.c gave me no idea.</p>
+
+
+
+<a name="199457683"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/199457683" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#199457683">(Jun 02 2020 at 07:28)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I wouldn't call it a "good" example, but the submodel code is probably the most concise example in librt/primitives/submodel/submodel.c in rt_submodel_plot() where it make a db_walk_tree to plot separate database models.</p>
+
+
+
+<a name="199479102"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/199479102" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#199479102">(Jun 02 2020 at 11:44)</a>:</h4>
+<p>Yeah, a saw this too.<br>
+It looks like the tree walking code can be rather short. This is what I made of it: <a href="https://github.com/drossberg/MOOSE/blob/master/src/Database/ConstDatabase.cpp#L459">https://github.com/drossberg/MOOSE/blob/master/src/Database/ConstDatabase.cpp#L459</a></p>
+<p>However, creating the application to test it needs a bit more time...</p>
+
+
+
+<a name="199539229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/199539229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#199539229">(Jun 02 2020 at 19:11)</a>:</h4>
+<p>That looks right.  Looks nice and clean too.  I like the integration with VectorList, though it highlights the expansion of vlist to more than vectors...</p>
+
+
+
+<a name="200631577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/200631577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#200631577">(Jun 12 2020 at 03:24)</a>:</h4>
+<p>sorry, <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> as I am unable to contribute due to some keyboard problems in my laptop as most of the keys are in bad shape and since my pc is outdated. So I bought new laptop today. I will start working on moose in a few days</p>
+
+
+
+<a name="200640420"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/200640420" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#200640420">(Jun 12 2020 at 07:16)</a>:</h4>
+<p>I added the Lua bindings to the lib. It can now be loaded in Lua as a module.</p>
+
+
+
+<a name="200792262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/200792262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#200792262">(Jun 14 2020 at 00:22)</a>:</h4>
+<p>btw <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  I am getting <code>Could not find BRL-CAD root directory - please set BRLCAD_BASE_DIR in CMake</code>. Should it find the BrlCadGUI or the <code>/usr/brlcad/dev-7.31.0/
+</code> ?</p>
+
+
+
+<a name="200899661"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/200899661" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#200899661">(Jun 15 2020 at 14:53)</a>:</h4>
+<p><span class="user-mention" data-user-id="252475">@Himanshu Sekhar Nayak</span> BRLCAD_BASE_DIR should point to wherever the main libs like libbu and librt are installed, typically /usr/brlcad/dev-7.31.0 or similar.</p>
+
+
+
+<a name="201143262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201143262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201143262">(Jun 17 2020 at 13:50)</a>:</h4>
+<p>btw I am getting this</p>
+
+
+
+<a name="201143267"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201143267" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201143267">(Jun 17 2020 at 13:50)</a>:</h4>
+<p><code>CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
+Please set them or make sure they are set and tested correctly in the CMake files:
+BRLCAD_LZ4_STATIC_LIBRARY
+    linked by target "brlcad" in directory /home/h1manshu/brlcad/MOOSE/src
+</code></p>
+
+
+
+<a name="201143368"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201143368" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201143368">(Jun 17 2020 at 13:51)</a>:</h4>
+<p>I have done exporting but I am not if I am giving correct PATH or something</p>
+
+
+
+<a name="201143390"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201143390" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201143390">(Jun 17 2020 at 13:51)</a>:</h4>
+<p><code>export PATH="/usr/brlcad/dev-7.31.0/bin:$PATH"</code></p>
+
+
+
+<a name="201169598"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201169598" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201169598">(Jun 17 2020 at 16:57)</a>:</h4>
+<p>You may need to clear the CMakeCache.txt file</p>
+
+
+
+<a name="201170441"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201170441" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201170441">(Jun 17 2020 at 17:02)</a>:</h4>
+<p>Another possibility: This can happen if there is a lz4 development package installed. In this case, BRL-CAD won't build an own one. setting BRLCAD_LZ4_STATIC_LIBRARY to the place of the installed lib (e.g. /usr/lib/liblz4.a) should help.</p>
+<p>The CMake logic in MOOSE isn't very intelligent yet.</p>
+
+
+
+<a name="201487210"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201487210" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201487210">(Jun 20 2020 at 17:10)</a>:</h4>
+<p>lz4 is now embedded with librt. I.e., there is no separate lz4 library any more. I adapted the MOOSE CMake file accordingly.</p>
+
+
+
+<a name="201687017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201687017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201687017">(Jun 23 2020 at 04:34)</a>:</h4>
+<p>yeah build passed</p>
+
+
+
+<a name="201687670"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201687670" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201687670">(Jun 23 2020 at 04:52)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/104062-general/topic/MOOSE/near/196762208">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="252475">Himanshu Sekhar Nayak</span> MOOSE usually denotes the BRL-CAD core C++ interface. Its code can be found in the rt^3 branch of the main repository. Look at the include/brlcad and src/coreInterface directories there.</p>
+<p>To start, you can check the sources for consistency. E.g., does Database.cpp support all available object types?</p>
+<p>A prototype/demonstrator of a BRL-CAD library with MOOSE API can be found here: <a href="https://github.com/drossberg/MOOSE">https://github.com/drossberg/MOOSE</a><br>
+A demonstration of how to write programs on top of BRL-CAD MOOSE: <a href="https://github.com/drossberg/BrlCadGUI">https://github.com/drossberg/BrlCadGUI</a><br>
+I made both CMake set-ups for Linux. They are demonstrators only.</p>
+</blockquote>
+<p>btw I saw, you had included all the objects types that are supported to Database.cpp. So can I know how to look further in this regard?</p>
+
+
+
+<a name="201693304"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/201693304" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#201693304">(Jun 23 2020 at 07:05)</a>:</h4>
+<p>Did you had a look at the Lua interface, which is part of MOOSE? It's interesting to see how it's used.</p>
+
+
+
+<a name="303301735"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303301735" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303301735">(Oct 10 2022 at 17:40)</a>:</h4>
+<p>I did a step towards a MOOSE interface for libged, but got an odd issue on Linux: When linking the resulting <code>libbrlcad.so</code> (the MOOSE library) to an executable, I get three undefined references: <strong>bu_cmd</strong>, <strong>bu_terminate</strong>, and <strong>quat_mat2quat</strong>. However, how can <strong>quat_mat2quat</strong> be so different from <strong>quat_quat2mat</strong>? Any idea what could cause the undefined references? On Windows, it's fine.</p>
+
+
+
+<a name="303303162"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303303162" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303303162">(Oct 10 2022 at 17:51)</a>:</h4>
+<p>It seems to be connected with the order of the libraries in <code>target_link_libraries()</code>. Moving <strong>libged</strong> above <strong>libnbu</strong> but below <strong>libbn</strong> removes the undefined <em>bu_</em> references. But moving <strong>libged</strong> above <strong>libbn</strong> gives link errors in MOOSE: <code>multiple definition of 'XXH_versionNumber'</code>, etc..</p>
+
+
+
+<a name="303352758"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303352758" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303352758">(Oct 11 2022 at 02:55)</a>:</h4>
+<p>I might not be including the xxhash.h header quite right - that's presumably where the XXH_* complaints are coming from.</p>
+
+
+
+<a name="303352861"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303352861" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303352861">(Oct 11 2022 at 02:57)</a>:</h4>
+<p>For bu_cmd, does it help if you move bu_cmdtab inside the __BEGIN_DECLS block in bu/cmd.h?</p>
+
+
+
+<a name="303369814"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303369814" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303369814">(Oct 11 2022 at 06:58)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/MOOSE/near/303352861">said</a>:</p>
+<blockquote>
+<p>For bu_cmd, does it help if you move bu_cmdtab inside the __BEGIN_DECLS block in bu/cmd.h?</p>
+</blockquote>
+<p>For <strong>bu_cmd</strong> and <strong>bu_terminate</strong> it helps to move <strong>libged</strong> before <strong>libbu</strong>. I.e., I consider these as solved :)</p>
+
+
+
+<a name="303370093"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303370093" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303370093">(Oct 11 2022 at 07:01)</a>:</h4>
+<p>It's a bit surprising that the linking order is so important. I think that I had this kind of issue already before, but forgot it.</p>
+
+
+
+<a name="303887152"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/303887152" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#303887152">(Oct 13 2022 at 17:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/MOOSE/near/303352758">said</a>:</p>
+<blockquote>
+<p>I might not be including the xxhash.h header quite right - that's presumably where the XXH_* complaints are coming from.</p>
+</blockquote>
+<p><a href="https://github.com/BRL-CAD/brlcad/pull/60">https://github.com/BRL-CAD/brlcad/pull/60</a> fixes it. At least for the moment.</p>
+
+
+
+<a name="421203689"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/421203689" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#421203689">(Feb 13 2024 at 09:19)</a>:</h4>
+<p>I'm seeing linker errors when trying to build the brlcad library from MOOSE:</p>
+<div class="codehilite"><pre><span></span><code>/bin/ld: /home/rossberg/bin/brlcad/lib/libbv.a(vlist.c.o): in function `pd_3&#39;:
+/home/rossberg/Devel/BRL-CAD/brlcad/src/libbv/vlist.c:310: multiple definition of `pd_3&#39;; /home/rossberg/bin/brlcad/lib/libbg.a(polygon.c.o):/home/rossberg/Devel/BRL-CAD/brlcad/include/bv/plot3.h:310: first defined here
+</code></pre></div>
+<p>There are similar errors with Visual Studio on Windows.</p>
+<p>I assume that these errors are related to <a href="https://github.com/BRL-CAD/brlcad/commit/717eaf57ef5c9bb7dfdab3196f00efc4e8ca6aab">https://github.com/BRL-CAD/brlcad/commit/717eaf57ef5c9bb7dfdab3196f00efc4e8ca6aab</a>. Any idea, how this can be fixed? In MOOSE, the brlcad library is build from the static librt, libbu, etc..</p>
+
+
+
+<a name="421621898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/421621898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#421621898">(Feb 15 2024 at 10:15)</a>:</h4>
+<p><span aria-label="+1" class="emoji emoji-1f44d" role="img" title="+1">:+1:</span> Looks like <a href="https://github.com/BRL-CAD/brlcad/commit/f5f1e19d376b2acdbc142cf16665eb1e5ab94aa5">https://github.com/BRL-CAD/brlcad/commit/f5f1e19d376b2acdbc142cf16665eb1e5ab94aa5</a> fixed the issu. Thanks <span class="user-mention" data-user-id="112516">@starseeker</span>!</p>
+
+
+
+<a name="421622600"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/421622600" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#421622600">(Feb 15 2024 at 10:19)</a>:</h4>
+<p>However, after fixing an issue is before discovering a new one: I'm seeing two undefined references when linking arbalest:</p>
+<ul>
+<li><code>bu_vls_incr</code></li>
+<li><code>bg_distsq_lseg3_pt</code></li>
+</ul>
+<p>I just try to find out what's special with them. Any idea?</p>
+
+
+
+<a name="421625168"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/421625168" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#421625168">(Feb 15 2024 at 10:36)</a>:</h4>
+<p>looks like it is connected to the linking order in MOOSE...</p>
+
+
+
+<a name="421627238"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/421627238" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#421627238">(Feb 15 2024 at 10:48)</a>:</h4>
+<p>Fixed.</p>
+
+
+
+<a name="422024666"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422024666" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422024666">(Feb 17 2024 at 16:20)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Any chance you could put together a Github Actions test that checks this for us on a regular basis?  It's not a build mode I normally test so it'd be a good candidate for automated checking.</p>
+
+
+
+<a name="422044834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422044834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422044834">(Feb 17 2024 at 21:43)</a>:</h4>
+<p>I never looked at Github Actions before, but it sounds like a good idea. I'll give it a try. (I may need some time and support.)</p>
+
+
+
+<a name="422155486"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422155486" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422155486">(Feb 19 2024 at 03:54)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>   If I get a chance I'll try to rough something in place, but I'll need you to verify it's actually building what we need to build the way we need to build it to act as a good test.</p>
+
+
+
+<a name="422196355"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422196355" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422196355">(Feb 19 2024 at 09:46)</a>:</h4>
+<p>Okay, let's see, if I understood it right (Linux only, for the start):</p>
+<ul>
+<li>The file to change is <code>.github/workflows/check.yml</code></li>
+<li>The BRL-CAD installation is needed, therefore<ul>
+<li>Add something like <code>-DCMAKE_INSTALL_PREFIX=$ENV{GITHUB_WORKSPACE}/install</code> to the cmake command</li>
+<li>Add <code>cmake --build build --config Release --target install</code> to the Build</li>
+</ul>
+</li>
+<li>Checkout MOOSE</li>
+</ul>
+<div class="codehilite" data-code-language="YAML"><pre><span></span><code><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Checkout MOOSE</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">repository</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">brlcad/MOOSE</span>
+</code></pre></div>
+<p>(I'm not sure about the <code>@4</code> here.)</p>
+<ul>
+<li>Configure MOOSE<ul>
+<li>Point it to the BRL-CAD install directory <code>-DBRLCAD_BASE_DIR=$ENV{GITHUB_WORKSPACE}/install</code></li>
+</ul>
+</li>
+<li>Build the all(?) target of MOOSE</li>
+</ul>
+
+
+
+<a name="422290217"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422290217" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422290217">(Feb 19 2024 at 18:47)</a>:</h4>
+<p>I'd suggest adding a separate moose.yml file for this specific case, but it can work either way.</p>
+
+
+
+<a name="422290252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422290252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422290252">(Feb 19 2024 at 18:47)</a>:</h4>
+<p>Sounds like you've got the right idea.</p>
+
+
+
+<a name="422580359"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422580359" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422580359">(Feb 21 2024 at 09:53)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/MOOSE/near/422290217">said</a>:</p>
+<blockquote>
+<p>I'd suggest adding a separate moose.yml file for this specific case, but it can work either way.</p>
+</blockquote>
+<p>Yes, for developing and testing the action, and it could be hooked to MOOSE commits. But, for hooking it to brlcad commits, it has the disadvantage of building brlcad twice in this case.</p>
+<p>However, first it needs to work. I'll take a look at it.</p>
+
+
+
+<a name="422646039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/422646039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#422646039">(Feb 21 2024 at 15:40)</a>:</h4>
+<p>There is an issue with the static brlcad libraries on Windows with Visual Studio: The rt_tgc_tess() and rt_tgc_tnurb() functions are missing. I think, this is because of a Visual Studio individuality, where the linker thinks that these functions are unused. I created a pull request with a proposed solution: <a href="https://github.com/BRL-CAD/brlcad/pull/115">https://github.com/BRL-CAD/brlcad/pull/115</a></p>
+
+
+
+<a name="423099015"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/423099015" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#423099015">(Feb 23 2024 at 21:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Interesting that those two functions have a problem, but rt_tgc_mirror does not.  I think it's probably my fault for missing something when I moved them...</p>
+
+
+
+<a name="423099372"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/423099372" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#423099372">(Feb 23 2024 at 21:44)</a>:</h4>
+<p>OK, I guess we can merge them back in for now... I'd like to understand why that didn't work, but in the meantime we can get up and running again.</p>
+
+
+
+<a name="423103234"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/423103234" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#423103234">(Feb 23 2024 at 22:15)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/MOOSE/near/423099015">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> Interesting that those two functions have a problem, but rt_tgc_mirror does not.  I think it's probably my fault for missing something when I moved them...</p>
+</blockquote>
+<p>rt_tgc_mirror() is used in src/librt/primitives/mirror.c</p>
+
+
+
+<a name="423103324"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/423103324" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#423103324">(Feb 23 2024 at 22:15)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/MOOSE/near/423099372">said</a>:</p>
+<blockquote>
+<p>OK, I guess we can merge them back in for now... I'd like to understand why that didn't work, but in the meantime we can get up and running again.</p>
+</blockquote>
+<p>Maybe there is even a difference between MSVS 2019 and 2022...</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

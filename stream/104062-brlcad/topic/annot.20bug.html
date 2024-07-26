@@ -1,0 +1,170 @@
+<html>
+<head><meta charset="utf-8"><title>annot bug · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html">annot bug</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="120263451"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120263451" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120263451">(Dec 26 2017 at 19:46)</a>:</h4>
+<p><span class="user-mention" data-user-email="prieelslucas@gmail.com" data-user-id="104458">@Lucas Prieels</span> you'd asked about the annot bug -- please repost your questions and comments here so others are in the loop</p>
+
+
+
+<a name="120263594"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120263594" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120263594">(Dec 26 2017 at 19:51)</a>:</h4>
+<p>when looking in the typein.c file,  start with the annotation input function (annot_in).  maybe add some printing statements, recompile, and test them so you know what's going on</p>
+
+
+
+<a name="120270566"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120270566" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120270566">(Dec 26 2017 at 23:44)</a>:</h4>
+<p>Well basically, I think I understand that bu_vls_printf is the function used to convert the input to a string, so I suppose the bug is in this function but I haven't been able to find the bug in the function so I'll try what you say!</p>
+
+
+
+<a name="120280372"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120280372" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120280372">(Dec 27 2017 at 06:01)</a>:</h4>
+<p>well from your original line analysis, you weren't in code being called by annot, so you may want to double-check the logic flow.  maybe use some print statements or try a debugger tutorial.  You're not likely going to find a bug by simply reading code unless you have a lot of prior experience.</p>
+
+
+
+<a name="120339766"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120339766" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120339766">(Dec 28 2017 at 16:22)</a>:</h4>
+<p>Are you sure the lines 3470 to 3473 are not called? I've tried to print something there and it's printed when I run "in". I've understand that nbvals stands for the number of arguments we have to give after "in ann1.s annot". I'll try to print some things more to understand</p>
+
+
+
+<a name="120379240"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120379240" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120379240">(Dec 29 2017 at 15:07)</a>:</h4>
+<p>no, not that it's not called, but not specifically related to annot ...  we may have been looking at different revisions though</p>
+
+
+
+<a name="120379282"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120379282" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120379282">(Dec 29 2017 at 15:08)</a>:</h4>
+<p>the bug is definitely specific to annot, so it is "probably" in how annot is handling or storing things</p>
+
+
+
+<a name="120398787"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120398787" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120398787">(Dec 30 2017 at 02:42)</a>:</h4>
+<p>I now almost understand it all, but what is the function which actually draws the annot?</p>
+
+
+
+<a name="120404229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120404229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120404229">(Dec 30 2017 at 06:27)</a>:</h4>
+<p>drawing happens via the *_plot() callback, in src/librt/primitives/annot/annot.c</p>
+
+
+
+<a name="120518963"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120518963" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120518963">(Jan 02 2018 at 12:04)</a>:</h4>
+<p>The label bug seems more complicated than I thought: actually the problem is not that numbers can't be shown. Any string which has a length of 2 characters or less is not shown(for example in ann annot 0 0 0 te 10 10 3 1), but numbers which have a length of 5 digits or more are shown (for example in ann annot 0 0 0 12345 10 10 3 1), so the bug is more complicated than just a string parsing problem...</p>
+
+
+
+<a name="120523629"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120523629" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120523629">(Jan 02 2018 at 14:48)</a>:</h4>
+<p><span class="user-mention" data-user-email="prieelslucas@gmail.com" data-user-id="104458">@Lucas Prieels</span> that's VERY interesting... would not have guessed it was length-based.  perhaps there's something in libdm's plotting that is making it calculate a length wrong</p>
+
+
+
+<a name="120525627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120525627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120525627">(Jan 02 2018 at 15:43)</a>:</h4>
+<p>You're talking about src/libdm/dm-plot.c? <br>
+For now, I'm searching in src/libbn/font.c because bn_vlist_3string is the function which draw the ASCII characters but everything seems ok, the drawn lines are also good</p>
+
+
+
+<a name="120525700"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120525700" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120525700">(Jan 02 2018 at 15:45)</a>:</h4>
+<p>quite possibly .. I just mean libdm in general handles the final drawing and is given a "draw this string" command from the primtive -- so either the primitive didn't give it the right string or it's handling the string wrong</p>
+
+
+
+<a name="120527277"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120527277" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120527277">(Jan 02 2018 at 16:27)</a>:</h4>
+<p>And in this case, which file is called? I didn't find any. It's difficult to figure out what are the functions called by typein.c which lead to the plot function</p>
+
+
+
+<a name="120547563"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120547563" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120547563">(Jan 03 2018 at 01:36)</a>:</h4>
+<p><span class="user-mention" data-user-email="brlcad@mac.com" data-user-id="102902">@Sean</span> Actually there were no bug in the functions I was looking at, but I can't figure out where the function rt_annot_import5 and rt_annot_plot are called...</p>
+
+
+
+<a name="120547614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120547614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Lucas Prieels <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120547614">(Jan 03 2018 at 01:37)</a>:</h4>
+<p>I know they're both part of the rt_functab structure, but there are a lot of files calling it</p>
+
+
+
+<a name="120554986"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120554986" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nwankwo Ifeanyichukwu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120554986">(Jan 03 2018 at 06:11)</a>:</h4>
+<p>My pleasure</p>
+
+
+
+<a name="120557459"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120557459" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120557459">(Jan 03 2018 at 07:53)</a>:</h4>
+<blockquote>
+<p>I know they're both part of the rt_functab structure, but there are a lot of files calling it</p>
+</blockquote>
+<p>if you search for 'ft_plot(', you'll find all the places the plot function is called ... you can do a similar search for import, but I don't think that is going to help you as that's just called whenever the object is read to/from disk (i.e., every time it's edited)</p>
+
+
+
+<a name="120560341"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120560341" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rahil Malik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120560341">(Jan 03 2018 at 09:48)</a>:</h4>
+<p>Hello, I have a problem while raytracing the hyp , i am building the hourglass , and when i group the hyp1.s into a region and give it any material and raytrace the Handle , Base and other stuff appears but the hyp1.s  doesn' Show up</p>
+
+
+
+<a name="120562148"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120562148" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rahil Malik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120562148">(Jan 03 2018 at 10:57)</a>:</h4>
+<p>The Problem has ben solved , now i have some other troubles , while using mged, i have place a cone to represent sand in the hourglass now i coloured it light brown, now only at ae 45 45 can you see that the cone is full brown at all other angles its just light brown outline of a cone</p>
+
+
+
+<a name="120562531"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120562531" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rahil Malik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120562531">(Jan 03 2018 at 11:11)</a>:</h4>
+<p>Solved that one too , tthe problem was in the glass so  i turned its refractive index low so the light rays dont bend too much and the sand is visivle</p>
+
+
+
+<a name="120573852"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120573852" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rahil Malik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120573852">(Jan 03 2018 at 17:29)</a>:</h4>
+<p>I am Curious , can some one tell me how BRL CAD chooses its Leaders  for Google Code-in ?</p>
+
+
+
+<a name="120574017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120574017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Siddharth <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120574017">(Jan 03 2018 at 17:33)</a>:</h4>
+<blockquote>
+<p>I am Curious , can some one tell me how BRL CAD chooses its Leaders  for Google Code-in ?</p>
+</blockquote>
+<p>Hey <span class="user-mention" data-user-email="malikrahil77@gmail.com" data-user-id="104400">@Rahil Malik</span>  Please ask such questions on "Having fun" or some random stream</p>
+
+
+
+<a name="120574025"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120574025" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Siddharth <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120574025">(Jan 03 2018 at 17:33)</a>:</h4>
+<p>Try not to spam topics : )</p>
+
+
+
+<a name="120574206"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/annot%20bug/near/120574206" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rahil Malik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/annot.20bug.html#120574206">(Jan 03 2018 at 17:38)</a>:</h4>
+<p>OK, i am sorry. I will follow your advice</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

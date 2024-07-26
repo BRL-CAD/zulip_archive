@@ -1,0 +1,2294 @@
+[
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> , for now, could you help me work through the EBM task? I'm still not sure how I should be reading bip and then exporting.</p>",
+        "id": 184120548,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577123244
+    },
+    {
+        "content": "<p>There's this part in the import5() code: </p>\n<div class=\"codehilite\"><pre><span></span>/* Get bit map from .bw(5) file */\nmp = bu_open_mapped_file_with_path(dbip-&gt;dbi_filepath, eip-&gt;file, &quot;ebm&quot;);\nif (!mp) {\n    bu_log(&quot;rt_ebm_import4() unable to open &#39;%s&#39;\\n&quot;, eip-&gt;file);\n    bu_free((char *)eip, &quot;rt_ebm_import4: eip&quot;);\nfail:\n    ip-&gt;idb_type = ID_NULL;\n    ip-&gt;idb_ptr = (void *)NULL;\n    return -1;\n}\neip-&gt;mp = mp;\nif (mp-&gt;buflen &lt; (size_t)(eip-&gt;xdim*eip-&gt;ydim)) {\nbu_log(&quot;rt_ebm_import4() file &#39;%s&#39; is too short %zu &lt; %u\\n&quot;,\n        eip-&gt;file, mp-&gt;buflen, eip-&gt;xdim*eip-&gt;ydim);\ngoto fail;\n}\n</pre></div>\n\n\n<p>But for my implementation, I think that this should only run when datasrc is specified to be 'f'. Otherwise, something else should run instead to read the object, right?</p>",
+        "id": 184120739,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577123421
+    },
+    {
+        "content": "<p>Oh, is that where the empty get_obj_data() and get_file_data() come into play?</p>",
+        "id": 184120836,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577123535
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>, in regards to the fix you mentioned on my task, would this be correct?</p>\n<div class=\"codehilite\"><pre><span></span>const struct bu_structparse rt_ebm_parse[] = {\n    {&quot;%s&quot;,  RT_EBM_NAME_LEN, &quot;file&quot;, bu_offsetof(struct rt_ebm_internal, file), BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;%s&quot;,  RT_EBM_NAME_LEN, &quot;name&quot;, bu_offsetof(struct rt_ebm_internal, file), BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;%c&quot;,  1, &quot;src&quot;,   RT_EBM_O(datasrc),  BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;%d&quot;,  1, &quot;w&quot;,     RT_EBM_O(xdim),     BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;%d&quot;,  1, &quot;n&quot;,     RT_EBM_O(ydim),     BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;%f&quot;,  1, &quot;d&quot;,     RT_EBM_O(tallness), BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;%f&quot;,  16, &quot;mat&quot;, bu_offsetof(struct rt_ebm_internal, mat), BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n    {&quot;&quot;,    0, (char *)0, 0,            BU_STRUCTPARSE_FUNC_NULL, NULL, NULL }\n};\n</pre></div>",
+        "id": 184153854,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577169190
+    },
+    {
+        "content": "<p>I took a look at the DSP example and noticed that there was something called <code>hook_file</code> in place of <code>BU_STRUCTPARSE_FUNC_NULL</code>, but I couldn't seem to find it in EBM</p>",
+        "id": 184153905,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577169254
+    },
+    {
+        "content": "<p>Also, is it alright if my submission patch for the second task also includes the patches from the first?</p>",
+        "id": 184153981,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577169477
+    },
+    {
+        "content": "<p>hey <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> sorry for missing all your questions since you started that hard task... just a bit under the weather with a cold and it's taken up some of my energy</p>",
+        "id": 184154044,
+        "sender_full_name": "Sean",
+        "timestamp": 1577169598
+    },
+    {
+        "content": "<p>No worries! I managed to figure it out and I understand that the mentors are obviously busy outside of GCI. I hope you're feeling better now?</p>",
+        "id": 184154090,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577169639
+    },
+    {
+        "content": "<blockquote>\n<p>Also, is it alright if my submission patch for the second task also includes the patches from the first?</p>\n</blockquote>\n<p>if the first patch isn't applied yet, then yes but then you can also just post it as an update to the same patch</p>",
+        "id": 184154091,
+        "sender_full_name": "Sean",
+        "timestamp": 1577169640
+    },
+    {
+        "content": "<p>just keep an eye out, run svn up and check svn log to see if/when it gets applied.  I was going to tonight, but alas <em>cough</em> <em>cough</em> I'm still feeling pretty crappy and need to get some extra sleep</p>",
+        "id": 184154153,
+        "sender_full_name": "Sean",
+        "timestamp": 1577169724
+    },
+    {
+        "content": "<p>Ah it's alright, I don't want to keep you up if you're sick - so would it be fine if I just reran <code>svn diff &gt; ...</code> when applying my changes, even if the previous ones are still there?</p>",
+        "id": 184154222,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577169870
+    },
+    {
+        "content": "<p>as long as you keep running \"svn up\" first, sure</p>",
+        "id": 184154226,
+        "sender_full_name": "Sean",
+        "timestamp": 1577169892
+    },
+    {
+        "content": "<p>that way, it should merge</p>",
+        "id": 184154227,
+        "sender_full_name": "Sean",
+        "timestamp": 1577169902
+    },
+    {
+        "content": "<p>just keep an eye out for conflicts as you'd have to resolve those before running diff</p>",
+        "id": 184154236,
+        "sender_full_name": "Sean",
+        "timestamp": 1577169921
+    },
+    {
+        "content": "<p>Ok that makes sense, thanks for the advice!</p>",
+        "id": 184154285,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577169970
+    },
+    {
+        "content": "<p>So regarding the other question I just asked, is that all I should change, or am I missing something?</p>",
+        "id": 184154300,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577170026
+    },
+    {
+        "content": "<p>your patch has been applied</p>",
+        "id": 184154542,
+        "sender_full_name": "Sean",
+        "timestamp": 1577170498
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 184154552,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1577170525
+    },
+    {
+        "content": "<p>only problem is you're using the wrong whitespace rules (presumably in MSVC or visual code)</p>",
+        "id": 184154553,
+        "sender_full_name": "Sean",
+        "timestamp": 1577170526
+    },
+    {
+        "content": "<p>jeffrey's ebm patch</p>",
+        "id": 184154556,
+        "sender_full_name": "Sean",
+        "timestamp": 1577170546
+    },
+    {
+        "content": "<p>ok</p>",
+        "id": 184154559,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1577170553
+    },
+    {
+        "content": "<p>Shoot, I can take a look at it again if there's something wrong. Was it something specific or just in general?</p>",
+        "id": 184154602,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577170595
+    },
+    {
+        "content": "<p>you need to set your indentation to 4 char indent, tab at 8</p>",
+        "id": 184154618,
+        "sender_full_name": "Sean",
+        "timestamp": 1577170659
+    },
+    {
+        "content": "<p>Alright, I will do that. Sorry for the inconvenience</p>",
+        "id": 184154660,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577170689
+    },
+    {
+        "content": "<p>I believe you set the tab size to 4, but tab size should be 8, indentation is 4</p>",
+        "id": 184154661,
+        "sender_full_name": "Sean",
+        "timestamp": 1577170689
+    },
+    {
+        "content": "<p>your patch is applied in r74544</p>",
+        "id": 184154665,
+        "sender_full_name": "Sean",
+        "timestamp": 1577170724
+    },
+    {
+        "content": "<p>Great! I'll update now and then continue working. It seems like I was a bit behind on the revisions before though, and some CMake files got updated. Is it necessary for me to reconfigure everything and then recompile?</p>",
+        "id": 184154682,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577170800
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>, sorry to bother you again but I had one last question when I was reading through your comment. Would it be enough to add two entries to rt_ebm_parse like this,</p>\n<div class=\"codehilite\"><pre><span></span>{&quot;%s&quot;,  RT_EBM_NAME_LEN, &quot;file&quot;, bu_offsetof(struct rt_ebm_internal, file), BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n{&quot;%s&quot;,  RT_EBM_NAME_LEN, &quot;name&quot;, bu_offsetof(struct rt_ebm_internal, file), BU_STRUCTPARSE_FUNC_NULL, NULL, NULL },\n</pre></div>\n\n\n<p>or would I also have to change something to the other arguments as well?</p>",
+        "id": 184155443,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577172143
+    },
+    {
+        "content": "<p>yeah, that's not the desired end state</p>",
+        "id": 184155459,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172222
+    },
+    {
+        "content": "<p>so notice the actual struct -- struct rt_ebm_internal</p>",
+        "id": 184155464,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172233
+    },
+    {
+        "content": "<p>it currently has a file field, but that is what's changing to just a name</p>",
+        "id": 184155505,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172252
+    },
+    {
+        "content": "<p>that name might be a file or might be an object</p>",
+        "id": 184155507,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172258
+    },
+    {
+        "content": "<p>the field should get renamed, but if you do that, then bu_offsetof() has to be updated</p>",
+        "id": 184155509,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172283
+    },
+    {
+        "content": "<p>Oh right, my bad for not noticing that. If I recall correctly, there's a bu function that can be used to get the offset of a string. Should I be using that?</p>",
+        "id": 184155518,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577172351
+    },
+    {
+        "content": "<p>you are correct though in that you do want to structparse entries, one for \"file\" and one for \"name\" as those are strings that get serialized out to the .g file, but both will point to the renamed 'name' field</p>",
+        "id": 184155519,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172352
+    },
+    {
+        "content": "<p>no</p>",
+        "id": 184155558,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172368
+    },
+    {
+        "content": "<p>that's a bit of mildly advanced C going on there, no worries</p>",
+        "id": 184155561,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172382
+    },
+    {
+        "content": "<p>what that {...} line is doing is initializing an array with a bunch of field that help with parsing C structs automatically</p>",
+        "id": 184155565,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172415
+    },
+    {
+        "content": "<p>one of the columns there is bu_offset(...) .. what that is actually doing is reporting how many bytes into a \"struct rt_ebm_internal\" one can find a field named \"file\"</p>",
+        "id": 184155576,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172480
+    },
+    {
+        "content": "<p>if you rename file to name, you'll have to update that label to name as well</p>",
+        "id": 184155619,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172501
+    },
+    {
+        "content": "<p>Ah I see, so the only change that needs to be made is to change the second line's <code>file</code> to <code>name</code> again?</p>",
+        "id": 184155631,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577172536
+    },
+    {
+        "content": "<p>no, you want a \"file\" line and a \"name\" line, but the byte offset for both will be to a name field after you rename the field in rt_ebm_internal</p>",
+        "id": 184155701,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172634
+    },
+    {
+        "content": "<p>oh wait, so both should be changed to <code>name</code>? Sorry I didn't really understand what the second argument was doing at first, as it wasn't a traditional string</p>",
+        "id": 184155725,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577172692
+    },
+    {
+        "content": "<p>yeah, it's understandably confusing. it's a macro.</p>",
+        "id": 184155771,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172742
+    },
+    {
+        "content": "<p>getting byte offsets at compile-time requires a little bit of machinery</p>",
+        "id": 184155791,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172796
+    },
+    {
+        "content": "<p>if you did kernel development, you might become familiar with the C offsetof() macro which this is modeled after but portably cross-platform</p>",
+        "id": 184155844,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172847
+    },
+    {
+        "content": "<p>alright, gotta run.  keep up the great work!</p>",
+        "id": 184155849,
+        "sender_full_name": "Sean",
+        "timestamp": 1577172863
+    },
+    {
+        "content": "<p>Ah ok, I think I'm starting to understand it more now. Thanks so much for your help! Hope you feel better soon :)</p>",
+        "id": 184155862,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577172887
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , I mentioned a couple of extra changes I did on to the patch after my submission was approved - it seems like there were some things that I initially neglected to change. With the changes, the tests I've done seemed to have worked correctly (with the file input being default for the time being).  Sorry for the inconvenience!</p>",
+        "id": 184210511,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577266666
+    },
+    {
+        "content": "<p>Here's the updated patch by the way - most of it was just me forgetting to change <code>eip-&gt;file</code> to <code>eip-&gt;name</code> after changing <code>rt_ebm_internal</code> struct parameter.<br>\n<a href=\"/user_uploads/1549/hTd5VFwF73EsbHlKrEuFAZ9t/ebm2_updated.patch\" target=\"_blank\" title=\"ebm2_updated.patch\">ebm2_updated.patch</a></p>",
+        "id": 184210573,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577266751
+    },
+    {
+        "content": "<p>Also one last minor thing, while I was looking through typein.c, I noticed that the first line for <code>p_dsp_v5</code>, which is \"Take data from file or database binary object [f|o]:\" is missing a space at the end while the others all have one. Even though it's not related to EBM, could I add on the space for my next patch?</p>",
+        "id": 184210742,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577267071
+    },
+    {
+        "content": "<p>Oh by the way, since C doesn't support function overloading, I'm getting an error when I try to add <code>get_file_data()</code> into src/librt/primitives/ebm/ebm.c because it already exists in src/librt/primitives/dsp/dsp.c; any idea how I could work around this?</p>",
+        "id": 184226548,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577297689
+    },
+    {
+        "content": "<p>It seems like the easiest option would be to just rename the functions in both files to something more specific like <code>get_ebm_file_data()</code> and <code>get_dsp_file_data()</code>, but I didn't want to change anything externally without permission. Would this solution be ok?</p>",
+        "id": 184226668,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577297891
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> Hi, Erik.</p>",
+        "id": 184237740,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1577322129
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span>  Hm.  What about marking the functions as static?  Do they need to be externally visible beyond their own files?</p>",
+        "id": 184238619,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577324276
+    },
+    {
+        "content": "<p>Oh, that works as well since they're only needed within the file. Thanks for the advice!</p>",
+        "id": 184238710,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577324459
+    },
+    {
+        "content": "<p>Hmm... Looking at the HIDDEN macro definition, it should already be static, but I was getting some errors before</p>",
+        "id": 184238961,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577325035
+    },
+    {
+        "content": "<p>Do I need to define NDEBUG myself?</p>",
+        "id": 184238969,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577325100
+    },
+    {
+        "content": "<p>I would just use static directly, without using HIDDEN - I don't know that we'll be keeping HIDDEN in the long run anyway</p>",
+        "id": 184240999,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577329708
+    },
+    {
+        "content": "<p>Hidden conditionally sets static, IIRC - Sean can give you more of the history there.</p>",
+        "id": 184241004,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577329760
+    },
+    {
+        "content": "<p>Oh, right - it's in the common.h definition comment.  Evidently someone found it useful to disable static for debugging purposes.  I think there have been some discussions about the utility of that vs. losing the locality to the file that static is supposed to bring - my own thought is that it would be better to manually change the function names around in the (rare) case where we want to un-static a function for debugging and use static directly in its normal behavior all other times, but I don't remember for sure if that's where the consensus landed.</p>",
+        "id": 184241264,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577330289
+    },
+    {
+        "content": "<p>Ah ok, thanks for the explanation! I was just using it because it was being used in dsp.c - should I change it from HIDDEN to static in both dsp.c and ebm.c?</p>",
+        "id": 184242138,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577332178
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span>  You can, but shouldn't have to - as long as the ebm version is static, it shouldn't interfere with the dsp version.</p>",
+        "id": 184251518,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577350473
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , for the fourth task, I noticed that there are other functions that currently rely upon the fact that EBM only supports file data at the moment. Should I update them as well?</p>",
+        "id": 184298546,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577421014
+    },
+    {
+        "content": "<p>For example, <code>rt_ebm_prep</code> or <code>rt_ebm_bbox</code> seem to rely on <code>eip-&gt;mp</code>, unless I'm mistaken?</p>",
+        "id": 184298624,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577421139
+    },
+    {
+        "content": "<p>I'm pretty sure get_obj_data() is working properly because a success statement is getting printed at the end of the function, but MGED still ends up crashing when I try to import from obj</p>",
+        "id": 184299011,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577421964
+    },
+    {
+        "content": "<p>I've been working for a while now but I still have no idea what's causing the crashing... this is my current patch: <a href=\"/user_uploads/1549/SEQfwfGqbj3Pjjt2-CEIofzf/get_obj_data.patch\" target=\"_blank\" title=\"get_obj_data.patch\">get_obj_data.patch</a> , and the file reading is still working, but MGED is still crashing when I try to use a database object as the data source.</p>",
+        "id": 184308415,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577435821
+    },
+    {
+        "content": "<p>Could I get some help?</p>",
+        "id": 184308432,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577435866
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span>  Are you able to attach a debugger to MGED to see where it is crashing?  <a href=\"https://docs.microsoft.com/en-us/visualstudio/debugger/attach-to-running-processes-with-the-visual-studio-debugger?view=vs-2019\" target=\"_blank\" title=\"https://docs.microsoft.com/en-us/visualstudio/debugger/attach-to-running-processes-with-the-visual-studio-debugger?view=vs-2019\">https://docs.microsoft.com/en-us/visualstudio/debugger/attach-to-running-processes-with-the-visual-studio-debugger?view=vs-2019</a></p>",
+        "id": 184320644,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577452668
+    },
+    {
+        "content": "<p>If you launch a debug build of MGED, attach the debugger and then try your ebm operation you should be able to see where it is wiping out...</p>",
+        "id": 184320704,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577452702
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Do you know how to build LibreCAD v3 from the source?</p>",
+        "id": 184320728,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1577452757
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"253014\">@Thusal Ranawaka</span> no, sorry</p>",
+        "id": 184320740,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577452782
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"253014\">Thusal Ranawaka</span> no, sorry</p>\n</blockquote>\n<p>It's okay.</p>",
+        "id": 184320784,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1577452802
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"253014\">@Thusal Ranawaka</span> Remember to ask unrelated questions in another channel (this one is specific to the EBM primitive task)</p>",
+        "id": 184320825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577452852
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span>  Without looking too closely at the code, I would expect that you'll need to update any of the other ebm functions that depend on a file being present for raytracing to work without crashing, but I'm not sure which functionality is called by the import command - this is a situation where the debugger would be helpful.</p>",
+        "id": 184320990,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577453076
+    },
+    {
+        "content": "<p>Ah ok, thanks for the advice! I didn't even know attaching debuggers was a thing - I'll try it out right now.</p>",
+        "id": 184332646,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577466859
+    },
+    {
+        "content": "<p>This was the exception indicated: <a href=\"/user_uploads/1549/Gct-HhJOmLNg_ejyI629x_uq/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a> I'll try to see what's going on but it definitely seems like it has to do with the file dependency</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Gct-HhJOmLNg_ejyI629x_uq/pasted_image.png\" target=\"_blank\" title=\"pasted image\"><img src=\"/user_uploads/1549/Gct-HhJOmLNg_ejyI629x_uq/pasted_image.png\"></a></div>",
+        "id": 184334084,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577468699
+    },
+    {
+        "content": "<p>So the issue lies in rt_ebm_plot()?</p>",
+        "id": 184334258,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577468934
+    },
+    {
+        "content": "<p>Ok so I'm not completely sure, but I think this is where the issue is</p>\n<div class=\"codehilite\"><pre><span></span>#define BIT(_eip, _xx, _yy) \\\n    ((unsigned char *)((_eip)-&gt;mp-&gt;apbuf))[ ((_yy)+BIT_YWIDEN)*((_eip)-&gt;xdim + BIT_XWIDEN*2)+(_xx)+BIT_XWIDEN ]\n</pre></div>",
+        "id": 184334454,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577469156
+    },
+    {
+        "content": "<p>Where the call to <code>eip-&gt;mp</code> results in an exception being thrown</p>",
+        "id": 184334473,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577469183
+    },
+    {
+        "content": "<p>Or actually, it seems like this is the line throwing the actual exception <code>base = y</code>, but I think that's being caused by the BIT macro</p>",
+        "id": 184334657,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577469390
+    },
+    {
+        "content": "<p>Ok... so change <code>(_eip)-&gt;mp-&gt;apbuf</code> to <code>(_eip)-&gt;buf</code> solves the crashing, but now it looks like something is being read incorrectly which is probably a separate issue</p>",
+        "id": 184335357,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577470342
+    },
+    {
+        "content": "<p>I'm still having some issues with the BIT macro, object reading isn't crashing but it's producing some weird results, and now file reading is crashing with a similar issue as what was happening with the object reading before</p>",
+        "id": 184341331,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577477657
+    },
+    {
+        "content": "<p>I tried changing the logic of get_file_data() to the one found in dsp, because it looked like it was writing to eip-&gt;mp-&gt;apbuf before, but the issue is still there</p>",
+        "id": 184341363,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577477727
+    },
+    {
+        "content": "<p>I've tried everything I could think of so far, but nothing has been working for me. Depending on how I change BIT or get_file_data(), either file or object reading gets messed up. I'm pretty sure my change to BIT was correct, since other functions will rely on it to access the data, but even after changing get_file_data() to mimic the one from dsp.c, I'm still getting a read access violation during rt_ebm_plot().</p>",
+        "id": 184352063,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577493870
+    },
+    {
+        "content": "<p>What I don't understand is why it works for DSP, but not for this. From what I can tell, they're almost identical in terms of logic</p>",
+        "id": 184352198,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577494184
+    },
+    {
+        "content": "<p>For the weird results from object reading: removing the bit offsets from the BIT macro seems to fix it? File reading still isn't working though.</p>",
+        "id": 184359997,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577510290
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> if you're available, could you help me with this? I still can't manage to get both working together.</p>",
+        "id": 184360010,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577510375
+    },
+    {
+        "content": "<p>My best guess is that since <code>mp</code> goes out of scope, the pointer gets freed while <code>eip-&gt;mp</code> is still pointing to that location, but if that's the case, then I'm not sure why it works for dsp?</p>",
+        "id": 184362426,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577515007
+    },
+    {
+        "content": "<p>Nope, I don't think that was it because I tried doing it without <code>mp</code> and the issue still occurs. This is what I'm currently trying <a href=\"/user_uploads/1549/jQxL8qTxqht06cl35i4Pd9Lu/file_reading_error.patch\" target=\"_blank\" title=\"file_reading_error.patch\">file_reading_error.patch</a> and this is the error that is occurring when I attach a debugger to MGED:</p>\n<div class=\"codehilite\"><pre><span></span>Exception thrown: read access violation.\neip-&gt;**buf** was 0x1110347A42F0112. occurred\n</pre></div>\n\n\n<p>I'm pretty much out of ideas by now, so any help would be much appreciated.</p>",
+        "id": 184363759,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577517729
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> All I can suggest without stepping it through a debugger (unfortunately I don't have time for right now) is to look very carefully at each piece of the macro in question and what is in memory at the specific memory addresses in question, to make sure you understand what it intends to do vs what it is actually doing.  Another action sometimes helpful is to expand the macro to the actual code being compiled and see if that is easier to follow.</p>",
+        "id": 184383633,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577554407
+    },
+    {
+        "content": "<p>Thanks for the advice! I'll look through it again and hopefully I can make some progress now that I've taken a break from it for a while</p>",
+        "id": 184384379,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577555730
+    },
+    {
+        "content": "<p>Hm.. so I'm trying to track the differences in execution between DSP and EBM, and I think the main difference is that this conditional gets evaluated differently <code>(bu_cv_optimize(in_cookie) != bu_cv_optimize(out_cookie))</code>, where DSP evaluates this as true whereas EBM evaluates it as false. I'll have to look more into the function itself, but the values of <code>in_cookie</code> and <code>out_cookie</code> are different?</p>",
+        "id": 184388946,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577563436
+    },
+    {
+        "content": "<p>Oh, so I guess the output of <code>bu_cv_optimize</code> end up becoming the same for <code>in_cookie</code> and <code>out_cookie</code> even though they're initially different.</p>",
+        "id": 184389066,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577563651
+    },
+    {
+        "content": "<p>hi <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span></p>",
+        "id": 184389109,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563712
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> !</p>",
+        "id": 184389111,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577563730
+    },
+    {
+        "content": "<p>I have a lot of messages to catch up on, but one thing to notice is that the datatype for EBM and DSP are different</p>",
+        "id": 184389112,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563738
+    },
+    {
+        "content": "<p>DSP reads 16-bit unsigned integers</p>",
+        "id": 184389120,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563758
+    },
+    {
+        "content": "<p>I replaced \"s\" with \"c\" and 16 with 8 anywhere I could notice, but perhaps I might have missed something</p>",
+        "id": 184389124,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577563796
+    },
+    {
+        "content": "<p>EBM reads 8-bit unsigned integers (I think, have to double-check)</p>",
+        "id": 184389164,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563804
+    },
+    {
+        "content": "<p>the original ebm code would have been correct, it's just the translation needed for reading it from an in-memory correctly that should be needed, and to make sure it's not getting double-converter</p>",
+        "id": 184389180,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563857
+    },
+    {
+        "content": "<p>*converted</p>",
+        "id": 184389181,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563860
+    },
+    {
+        "content": "<p>Oh, so I should keep the original file reading logic?</p>",
+        "id": 184389192,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577563919
+    },
+    {
+        "content": "<p>you'll need to have the same logic when the source is a file :)</p>",
+        "id": 184389233,
+        "sender_full_name": "Sean",
+        "timestamp": 1577563936
+    },
+    {
+        "content": "<p>I think I tried something like <code>eip-&gt;buf = (unsigned char *)eip-&gt;mp-&gt;apbuf</code> at the end of the original code before, but it still didn't work. I'll try it again just to make sure though</p>",
+        "id": 184389294,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564068
+    },
+    {
+        "content": "<p>Is that what you meant by translating it?</p>",
+        "id": 184389315,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564162
+    },
+    {
+        "content": "<p>no no</p>",
+        "id": 184389371,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564228
+    },
+    {
+        "content": "<p>so first off, the translation for 8-bit (i.e., 1-byte) data is simple</p>",
+        "id": 184389420,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564296
+    },
+    {
+        "content": "<p>you just have to copy memory (or reference existing)</p>",
+        "id": 184389422,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564315
+    },
+    {
+        "content": "<p>previously, for file-based source, ebm mapped the file into memory with bu_open_mapped_file_with_path()</p>",
+        "id": 184389443,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564357
+    },
+    {
+        "content": "<p>then it \"translates\" it into ebm in-memory form with a simple memcpy() loop over the data</p>",
+        "id": 184389449,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564395
+    },
+    {
+        "content": "<p>for dsp, the translation is a bit more complicated because it's 2-byte data and it has to make sure the bytes are in the right order (ABABAB... vs BABABA...)</p>",
+        "id": 184389517,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564460
+    },
+    {
+        "content": "<p>that's where the bu_cv_... comes in, it does that more complicated translation</p>",
+        "id": 184389523,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564481
+    },
+    {
+        "content": "<p>however, for ebm, it's really super simple -- it's just a copy</p>",
+        "id": 184389530,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564497
+    },
+    {
+        "content": "<p>Ohh, that makes sense, so I guess that means my current object reading is also incorrect then?</p>",
+        "id": 184389588,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564558
+    },
+    {
+        "content": "<p>rather, it can be just a copy.  heck, it probably doesn't not even need to copy it for the binunif case since  its already in memory</p>",
+        "id": 184389589,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564559
+    },
+    {
+        "content": "<p>what's the current code you have look like?</p>",
+        "id": 184389599,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564585
+    },
+    {
+        "content": "<p>It was pretty much the same thing as the dsp version, with changes to indicate that it was unsigned char</p>",
+        "id": 184389604,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564619
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>static int\nget_obj_data(struct rt_ebm_internal *eip, const struct db_i *dbip)\n{\n    struct rt_binunif_internal *bip;\n    int in_cookie, out_cookie;\n    size_t got;\n    int ret;\n\n    BU_ALLOC(eip-&gt;bip, struct rt_db_internal);\n\n    ret = rt_retrieve_binunif(eip-&gt;bip, dbip, eip-&gt;name);\n    if (ret)\n    return -1;\n\n    if (RT_G_DEBUG &amp; RT_DEBUG_HF) {\n    bu_log(&quot;db_internal magic: 0x%08x  major: %d  minor: %d\\n&quot;,\n        eip-&gt;bip-&gt;idb_magic,\n        eip-&gt;bip-&gt;idb_major_type,\n        eip-&gt;bip-&gt;idb_minor_type);\n    }\n\n    bip = (struct rt_binunif_internal *)eip-&gt;bip-&gt;idb_ptr;\n\n    if (RT_G_DEBUG &amp; RT_DEBUG_HF)\n    bu_log(&quot;binunif magic: 0x%08x  type: %d count:%zu data[0]:%u\\n&quot;,\n        bip-&gt;magic, bip-&gt;type, bip-&gt;count, bip-&gt;u.uint8[0]);\n\n    if (bip-&gt;type != DB5_MINORTYPE_BINU_8BITINT_U\n    || (size_t)bip-&gt;count != (size_t)(eip-&gt;xdim*eip-&gt;ydim))\n    {\n    size_t i = 0;\n    size_t size;\n    struct bu_vls binudesc = BU_VLS_INIT_ZERO;\n    rt_binunif_describe(&amp;binudesc, eip-&gt;bip, 0, dbip-&gt;dbi_base2local);\n\n    /* skip the first title line */\n    size = bu_vls_strlen(&amp;binudesc);\n    while (size &gt; 0 &amp;&amp; i &lt; size &amp;&amp; bu_vls_cstr(&amp;binudesc)[0] != &#39;\\n&#39;) {\n        bu_vls_nibble(&amp;binudesc, 1);\n    }\n    if (bu_vls_cstr(&amp;binudesc)[0] == &#39;\\n&#39;)\n        bu_vls_nibble(&amp;binudesc, 1);\n\n    bu_log(&quot;ERROR: Binary object &#39;%s&#39; has invalid data (expected type %d, found %d).\\n&quot;\n           &quot;       Expecting %zu 8-bit unsigned char (nuc) integer data values.\\n&quot;\n           &quot;       Encountered %s\\n&quot;,\n           eip-&gt;name,\n           DB5_MINORTYPE_BINU_8BITINT_U,\n           bip-&gt;type,\n           (size_t)(eip-&gt;xdim * eip-&gt;ydim),\n           bu_vls_cstr(&amp;binudesc));\n    return -2;\n    }\n\n    in_cookie = bu_cv_cookie(&quot;nuc&quot;); /* data is network unsigned char */\n    out_cookie = bu_cv_cookie(&quot;huc&quot;);\n\n    if (bu_cv_optimize(in_cookie) != bu_cv_optimize(out_cookie)) {\n    /* if we&#39;re on a little-endian machine we convert the input\n     * file from network to host format\n     */\n\n    got = bu_cv_w_cookie(bip-&gt;u.uint8, out_cookie,\n                 bip-&gt;count * sizeof(unsigned char),\n                 bip-&gt;u.uint8, in_cookie, bip-&gt;count);\n\n    if (got != bip-&gt;count) {\n        bu_log(&quot;got %zu != count %zu&quot;, got, bip-&gt;count);\n        bu_bomb(&quot;\\n&quot;);\n    }\n    }\n\n    eip-&gt;buf = bip-&gt;u.uint8;\n    return 0;\n}\n</pre></div>",
+        "id": 184389654,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564644
+    },
+    {
+        "content": "<p>so this is to get it from a binunif ... which assumes you created the binunif correctly</p>",
+        "id": 184389660,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564677
+    },
+    {
+        "content": "<p>Wait, was this not how it was supposed to look? My understanding was that the process would be something like <code>bo -i u C dbobj bw-image.bw</code> and then <code>in ebm ebm o dbobj 256 256 20</code>, which is how I've been creating DSPs from database objects.</p>",
+        "id": 184389738,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564802
+    },
+    {
+        "content": "<p>no, I think that's right ... and I wasn't suggesting it wasn't right, just that the code obviously needs it to BE right, not just assume it's right :)</p>",
+        "id": 184389797,
+        "sender_full_name": "Sean",
+        "timestamp": 1577564884
+    },
+    {
+        "content": "<p>Whew, I was scared that I was approaching this completely incorrectly... the issue I had with using the original EBM code for file reading and this code for the object reading was that the BIT macro got messed up</p>",
+        "id": 184389817,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577564982
+    },
+    {
+        "content": "<p>Since it uses <code>(_eip)-&gt;mp-&gt;apbuf</code>, which only works for file-based sources?</p>",
+        "id": 184389891,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577565077
+    },
+    {
+        "content": "<p>you're definitely on the right track.  if anything, you're just a bit too complicated in how closely your mimicing the dsp code because it's got a more complicated data format</p>",
+        "id": 184389937,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565139
+    },
+    {
+        "content": "<p>but it's not to say it can't work. it definitely can.  just need to check data at every step along the way.</p>",
+        "id": 184389965,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565225
+    },
+    {
+        "content": "<p>what BIT macro?</p>",
+        "id": 184390006,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565246
+    },
+    {
+        "content": "<p>This one:</p>\n<div class=\"codehilite\"><pre><span></span>#define BIT(_eip, _xx, _yy) \\\n    ((unsigned char *)((_eip)-&gt;mp-&gt;apbuf))[ ((_yy)+BIT_YWIDEN)*((_eip)-&gt;xdim + BIT_XWIDEN*2)+(_xx)+BIT_XWIDEN ]\n</pre></div>",
+        "id": 184390078,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577565423
+    },
+    {
+        "content": "<p>I think it's used to access the data at a specific coordinate?</p>",
+        "id": 184390089,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577565444
+    },
+    {
+        "content": "<p>Oh so for the object reading, is the whole part with the bu_cv... unnecessary, since there's no need for complicated translations?</p>",
+        "id": 184390226,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577565696
+    },
+    {
+        "content": "<p>ah, not exactly -- in fact I was wrong about EBM using 1-byte data</p>",
+        "id": 184390228,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565700
+    },
+    {
+        "content": "<p>it's using 1-BIT data but since data is only stored on a byte basis, we must index into each byte to find the specific bit we're looking for</p>",
+        "id": 184390274,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565746
+    },
+    {
+        "content": "<p>which is what that macro is doing</p>",
+        "id": 184390276,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565764
+    },
+    {
+        "content": "<p>so looking at your get_obj_data() function, the only issue I see is all the bu_cv logic should be completely unnecessary.  should take it out.</p>",
+        "id": 184390338,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565892
+    },
+    {
+        "content": "<p>bip-&gt;u.uint8 is the data, so setting it to eip-&gt;buf should be adequate I believe</p>",
+        "id": 184390348,
+        "sender_full_name": "Sean",
+        "timestamp": 1577565923
+    },
+    {
+        "content": "<p>Ah ok, thanks for the explanation! I was pretty confused about what that part was for</p>",
+        "id": 184390405,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577565999
+    },
+    {
+        "content": "<p>So about the macro again, the issue I was having was that for file-based sources, the data would be stored in <code>eip-&gt;mp-&gt;apbuf</code> whereas the data would be stored in <code>eip-&gt;buf</code> for the object-based sources, so I would be dereferencing a null pointer</p>",
+        "id": 184390471,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577566171
+    },
+    {
+        "content": "<p>But if I changed the BIT macro to <code>(_eip)-&gt;buf</code>, the file reading logic would get messed up instead</p>",
+        "id": 184390640,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577566324
+    },
+    {
+        "content": "<p>One potential solution: switch-casing eip-&gt;datasrc anywhere BIT is called, and then passing eip-&gt;buf or eip-&gt;mp-&gt;apbuf depending on whether it is file-based or object-based?</p>",
+        "id": 184392144,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577569094
+    },
+    {
+        "content": "<p>yep, that or better still, replace BIT with a function that has the switch or other conditional to access the appropriate container</p>",
+        "id": 184392198,
+        "sender_full_name": "Sean",
+        "timestamp": 1577569203
+    },
+    {
+        "content": "<p>Ah, so I could do something like test if <code>eip-&gt;buf</code> is null or not, and if it is, use <code>eip-&gt;mp-&gt;apbuf</code> and if it isn't, use it?</p>",
+        "id": 184392217,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577569278
+    },
+    {
+        "content": "<p>well you could, but you added eip-&gt;datasrc for a reason :)</p>",
+        "id": 184392219,
+        "sender_full_name": "Sean",
+        "timestamp": 1577569302
+    },
+    {
+        "content": "<p>Ohh right that exists</p>",
+        "id": 184392221,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577569315
+    },
+    {
+        "content": "<p>Alright I'll give it a try, thank so much for the advice!</p>",
+        "id": 184392262,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577569331
+    },
+    {
+        "content": "<p>sure thing</p>",
+        "id": 184392263,
+        "sender_full_name": "Sean",
+        "timestamp": 1577569342
+    },
+    {
+        "content": "<p>for what it's worth, this is very much \"real\" coding that one might do on a day-to-day basis ;)</p>",
+        "id": 184392269,
+        "sender_full_name": "Sean",
+        "timestamp": 1577569375
+    },
+    {
+        "content": "<p>This is quite an experience, I think I'm slowly getting used to it :) this is the first time I've done \"serious\" debugging before</p>",
+        "id": 184392325,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577569515
+    },
+    {
+        "content": "<p>I feel like I'm so close but I can't get past this one error... I changed the macro to</p>\n<div class=\"codehilite\"><pre><span></span>#define BIT(_eip, _xx, _yy) (                                               \\\n    ((_eip)-&gt;datasrc == RT_EBM_SRC_FILE) ?                                      \\\n    ((unsigned char *)((_eip)-&gt;mp-&gt;apbuf))[ ((_yy)+BIT_YWIDEN)*((_eip)-&gt;xdim + BIT_XWIDEN*2)+(_xx)+BIT_XWIDEN ] \\\n    : ((unsigned char *)((_eip)-&gt;buf))[ (_yy)*((_eip)-&gt;xdim)+(_xx)])\n</pre></div>\n\n\n<p>but the error I'm getting is \"expression must be an lvalue or function designator.\" I've read that as long as both the second and third arguments to the ternary have the same lvalue/type, then the type of the ternary expression is also an lvalue. Both expressions don't create any errors individually, so why is this error still occurring?</p>",
+        "id": 184408940,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577602919
+    },
+    {
+        "content": "<p>well it depends -- what line is the error on?</p>",
+        "id": 184409062,
+        "sender_full_name": "Sean",
+        "timestamp": 1577603145
+    },
+    {
+        "content": "<p>that is still crazy hard to read -- that's why I suggested turning it into a function anyways.  macros are not only hard to read.  they can be hard to debug too.</p>",
+        "id": 184409114,
+        "sender_full_name": "Sean",
+        "timestamp": 1577603204
+    },
+    {
+        "content": "<p>They occur in the two places with <code>memcpy(&amp;BIT(eip, 0, y), cp, eip-&gt;xdim);</code></p>",
+        "id": 184409116,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577603215
+    },
+    {
+        "content": "<p>But yeah, I agree, macros in general confuse me a lot...</p>",
+        "id": 184409131,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577603264
+    },
+    {
+        "content": "<p>I think I'll try replacing it with a function that has a switch-case</p>",
+        "id": 184409199,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577603357
+    },
+    {
+        "content": "<p>Hm... this is still giving me the same error</p>\n<div class=\"codehilite\"><pre><span></span>unsigned char *\nBIT(struct rt_ebm_internal *eip, size_t x, size_t y)\n{\n    unsigned char *ret;\n\n    switch (eip-&gt;datasrc) {\n    case RT_EBM_SRC_FILE:\n        ret = (((unsigned char *)(eip-&gt;mp-&gt;apbuf))[(y+BIT_YWIDEN)*(eip-&gt;xdim+BIT_XWIDEN*2)+x+BIT_XWIDEN]);\n        break;\n    case RT_EBM_SRC_OBJ:\n        ret = ((eip-&gt;buf)[(y)*(eip-&gt;xdim) + x]);\n        break;\n    }\n    return ret;\n}\n</pre></div>\n\n\n<p>but shouldn't it be returning a pointer to that location, which is an lvalue?</p>",
+        "id": 184409530,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577603993
+    },
+    {
+        "content": "<p>that's much easier to read regardless</p>",
+        "id": 184409584,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604088
+    },
+    {
+        "content": "<p>so the problem is you can't take the address of a function return value</p>",
+        "id": 184409629,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604136
+    },
+    {
+        "content": "<p>it's a temporary value, might be in a register, might be handled by the compiler in some obscure way, might not even exist if inlined or eliminated (though this case it wouldn't be)</p>",
+        "id": 184409640,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604183
+    },
+    {
+        "content": "<p>you just need to capture the value to a variable first</p>",
+        "id": 184409643,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604199
+    },
+    {
+        "content": "<p>void *bitp = bit(eip, 0, y);  ... memcpy(bitp, cp, eip-&gt;xdim)</p>",
+        "id": 184409693,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604310
+    },
+    {
+        "content": "<p>I think that fix worked, thanks so much! I'm still a little confused though, could you elaborate on the difference between the address of the function return value and the actual address?</p>",
+        "id": 184409817,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577604572
+    },
+    {
+        "content": "<p>the address-of operator \"&amp;\"</p>",
+        "id": 184409981,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604885
+    },
+    {
+        "content": "<p>it evaluates to the address of something in memory, which canonically is the address of a variable</p>",
+        "id": 184409989,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604928
+    },
+    {
+        "content": "<p>which points to a piece of memory</p>",
+        "id": 184409991,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604945
+    },
+    {
+        "content": "<p>and &amp; provides its address</p>",
+        "id": 184409997,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604960
+    },
+    {
+        "content": "<p>Ohhh I see, so I was basically taking the address of the address</p>",
+        "id": 184410037,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577604983
+    },
+    {
+        "content": "<p>a function returns a value, but you can't take the address of a <em>value</em> .. you take the address of something in memory</p>",
+        "id": 184410040,
+        "sender_full_name": "Sean",
+        "timestamp": 1577604992
+    },
+    {
+        "content": "<p>no, address of an address (i.e., a pointer) would have been just fine</p>",
+        "id": 184410044,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605014
+    },
+    {
+        "content": "<p>it's that a return value doesn't necessarily actually have a location in memory</p>",
+        "id": 184410052,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605052
+    },
+    {
+        "content": "<p>Oh ok, now I think I actually understand, thanks so much for the clarification!</p>",
+        "id": 184410097,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577605091
+    },
+    {
+        "content": "<p>don't worry, it's a complicated topic</p>",
+        "id": 184410100,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605103
+    },
+    {
+        "content": "<p>you won't really fully understand probably until you attempt to do a canonical bit of recursive programming</p>",
+        "id": 184410106,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605134
+    },
+    {
+        "content": "<p>a good way to think about it, though, is to think about memory and where things are in memory</p>",
+        "id": 184410119,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605182
+    },
+    {
+        "content": "<p>a value being returned from a function doesn't necessarily reside in memory, thus you simply can't get the address to it until you assign it to a variable (i.e., until you save that value into a piece of memory)</p>",
+        "id": 184410168,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605234
+    },
+    {
+        "content": "<p>That makes sense I think, I guess I never knew that that was how function return values worked</p>",
+        "id": 184410182,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577605288
+    },
+    {
+        "content": "<p>this might help: <a href=\"https://www.learncpp.com/cpp-tutorial/74a-returning-values-by-value-reference-and-address/\" target=\"_blank\" title=\"https://www.learncpp.com/cpp-tutorial/74a-returning-values-by-value-reference-and-address/\">https://www.learncpp.com/cpp-tutorial/74a-returning-values-by-value-reference-and-address/</a></p>",
+        "id": 184410183,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605304
+    },
+    {
+        "content": "<p>it's a little different for C as it doesn't have the concept of references, but the rest applies</p>",
+        "id": 184410224,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605325
+    },
+    {
+        "content": "<p>Hm, for some reason the function (or more specifically, <code>ret = (((unsigned char *)(eip-&gt;mp-&gt;apbuf))[(y+BIT_YWIDEN)*(eip-&gt;xdim+BIT_XWIDEN*2)+x+BIT_XWIDEN]);</code>) keeps returning NULL</p>",
+        "id": 184410411,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577605726
+    },
+    {
+        "content": "<p>well you had a couple mistakes, for example you had it returning a pointer yet the indexing is into an unsigned char array</p>",
+        "id": 184410484,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605806
+    },
+    {
+        "content": "<p>that means the value is an unsigned char (not a pointer)</p>",
+        "id": 184410500,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605875
+    },
+    {
+        "content": "<p>but then that'd be a problem for memcpy as you need the address of that unsigned char</p>",
+        "id": 184410503,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605903
+    },
+    {
+        "content": "<p>i.e., where it is in the buf, not just the value</p>",
+        "id": 184410558,
+        "sender_full_name": "Sean",
+        "timestamp": 1577605981
+    },
+    {
+        "content": "<p>what may work is to move the address-of operator into the function, but then you'll need to modify all of the calls</p>",
+        "id": 184410570,
+        "sender_full_name": "Sean",
+        "timestamp": 1577606019
+    },
+    {
+        "content": "<p>Oh, so to get the address of the unsigned char, I would just place the &amp; operator in front of that whole expression, right?</p>",
+        "id": 184410679,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577606213
+    },
+    {
+        "content": "<p>And then in places where the value itself is needed, I would need to dereference it?</p>",
+        "id": 184410685,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577606234
+    },
+    {
+        "content": "<p>Also for that case, wouldn't something like <code>memcpy(BIT(eip, 0, y), cp, eip-&gt;xdim);</code> be enough, since the value is now the address?</p>",
+        "id": 184410994,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577606696
+    },
+    {
+        "content": "<p>Oops sorry I didn't realize I just asked 3 questions in a row like that, I'm pretty inexperienced working with pointers and all of their intricacies</p>",
+        "id": 184411052,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577606794
+    },
+    {
+        "content": "<p>Well as an update - for the most part, it actually worked!! The only thing that's buggy are the outlines around the image during object reading: <a href=\"/user_uploads/1549/5GTh6I4nQaxJ98S8evDgciEc/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/5GTh6I4nQaxJ98S8evDgciEc/pasted_image.png\" target=\"_blank\" title=\"pasted image\"><img src=\"/user_uploads/1549/5GTh6I4nQaxJ98S8evDgciEc/pasted_image.png\"></a></div>",
+        "id": 184411326,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577607364
+    },
+    {
+        "content": "<p>My best guess is that it has something to do with the fact that the file-based bitmap is stored with 2 cells of 0s around, but something changes for the object-based bitmap, so it's accessing random external values.</p>",
+        "id": 184412188,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577609268
+    },
+    {
+        "content": "<p>Yeah, it definitely looks like the data is being read at some weird offset or something - I'll see if I can figure out what's causing it tomorrow. Thanks so much for all of your help <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> and <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ! I think I learned a lot from this whole process.</p>",
+        "id": 184413035,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577610938
+    },
+    {
+        "content": "<p>Well, I think I managed to work around it by copying the data from bip-&gt;u.uint8 along with the specified offset, but if there's a solution that doesn't require copying, that would probably be better.</p>",
+        "id": 184439869,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577660391
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> , I noticed that r74585 reverted an EBM change I made because it broke the regress-solids regression test. While that patch was still incomplete (I just submitted my new patch that can implement both file and object source), is there something that I should correct?</p>",
+        "id": 184560432,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577819155
+    },
+    {
+        "content": "<p>Here's the patch by the way: <a href=\"/user_uploads/1549/g6kWbrhr0j3TJ1JQmdP2z757/ebm4_updated4.patch\" target=\"_blank\" title=\"ebm4_updated4.patch\">ebm4_updated4.patch</a></p>",
+        "id": 184560760,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577819564
+    },
+    {
+        "content": "<p>Does the regress-solids test work with the patch applied?</p>",
+        "id": 184578542,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577846894
+    },
+    {
+        "content": "<p>Er, hmm... now that I think about it, I don't know that that test will run on Windows...</p>",
+        "id": 184578670,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577847155
+    },
+    {
+        "content": "<p>Yeah, shell script based.  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , how do you want to proceed here?</p>",
+        "id": 184578679,
+        "sender_full_name": "starseeker",
+        "timestamp": 1577847185
+    },
+    {
+        "content": "<blockquote>\n<p>Does the regress-solids test work with the patch applied?</p>\n</blockquote>\n<p>Sorry, I didn't look much into it, I just noticed what the revision note that reverted the EBM changes said (although I guess I wouldn't be able to anyways, since I'm on Windows?). I was only wondering if there was anything I would be able to change to EBM in order to somehow correct this issue.</p>",
+        "id": 184582343,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577853859
+    },
+    {
+        "content": "<blockquote>\n<p>Hey <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> , for the fourth task, I noticed that there are other functions that currently rely upon the fact that EBM only supports file data at the moment. Should I update them as well?</p>\n</blockquote>\n<p>Eventually will need to, so yes that would be great!</p>",
+        "id": 184587754,
+        "sender_full_name": "Sean",
+        "timestamp": 1577864645
+    },
+    {
+        "content": "<blockquote>\n<p>Yeah, shell script based.  <span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> , how do you want to proceed here?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I'll have to reproduce/see the regression failure.  A little surprised it failed anything as it was a non-logic change.  Gut reaction would be to assume it's a bad test / false-positive but maybe something going on with structparse printing.  There's a bigger patch pending that will get more exhaustively tested sitting as an sf patch waiting for it all to come together.</p>",
+        "id": 184587940,
+        "sender_full_name": "Sean",
+        "timestamp": 1577865057
+    },
+    {
+        "content": "<blockquote>\n<p>Eventually will need to, so yes that would be great!</p>\n</blockquote>\n<p>I didn't look at every single function in EBM, but fortunately, I think most of them were originally using the BIT macro to access the data. Hopefully, now that I've replaced all the BIT calls with the new bit() function, it should mostly be correct already :)</p>",
+        "id": 184603325,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577894312
+    },
+    {
+        "content": "<p>It's definitely what I would expect as well.  It should be right or at least really close to correct.</p>",
+        "id": 184624103,
+        "sender_full_name": "Sean",
+        "timestamp": 1577933360
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> So I did a quick test of creating an ebm using an older/existing MGED, then opened that ebm using an MGED with your patch applied, and it fails to load it correctly:</p>",
+        "id": 184632846,
+        "sender_full_name": "Sean",
+        "timestamp": 1577949623
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>mged&gt; tops\n<span class=\"m\">00000</span>.000000.comb/   ebm\n\nmged&gt; e ebm\nUnreasonable EBM parameters\n    <span class=\"nv\">file</span><span class=\"o\">=</span><span class=\"s2\">&quot;data&quot;</span>\n    <span class=\"nv\">src</span><span class=\"o\">=</span><span class=\"s1\">&#39;&#39;</span>\n    <span class=\"nv\">w</span><span class=\"o\">=</span><span class=\"m\">32</span>\n\n    <span class=\"nv\">n</span><span class=\"o\">=</span><span class=\"m\">32</span>\n\n    <span class=\"nv\">d</span><span class=\"o\">=</span><span class=\"m\">10</span>\n\n <span class=\"nv\">mat</span><span class=\"o\">=</span><span class=\"m\">1</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00\n\n<span class=\"m\">0</span>.000000E+00 <span class=\"m\">1</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00\n\n<span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">1</span>.000000E+00 <span class=\"m\">0</span>.000000E+00\n\n<span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">1</span>.000000E+00\nrt_db_external5_to_internal5<span class=\"o\">(</span>ebm<span class=\"o\">)</span>:  import failure\ndb_recurse<span class=\"o\">()</span> rt_db_get_internal<span class=\"o\">(</span>ebm<span class=\"o\">)</span> FAIL\nmged&gt; l ebm\nUnreasonable EBM parameters\n    <span class=\"nv\">file</span><span class=\"o\">=</span><span class=\"s2\">&quot;data&quot;</span>\n    <span class=\"nv\">src</span><span class=\"o\">=</span><span class=\"s1\">&#39;&#39;</span>\n    <span class=\"nv\">w</span><span class=\"o\">=</span><span class=\"m\">32</span>\n\n    <span class=\"nv\">n</span><span class=\"o\">=</span><span class=\"m\">32</span>\n\n    <span class=\"nv\">d</span><span class=\"o\">=</span><span class=\"m\">10</span>\n\n <span class=\"nv\">mat</span><span class=\"o\">=</span><span class=\"m\">1</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00\n\n<span class=\"m\">0</span>.000000E+00 <span class=\"m\">1</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00\n\n<span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">1</span>.000000E+00 <span class=\"m\">0</span>.000000E+00\n\n<span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">0</span>.000000E+00 <span class=\"m\">1</span>.000000E+00\nrt_db_external5_to_internal5<span class=\"o\">(</span>ebm<span class=\"o\">)</span>:  import failure\nrt_db_get_internal<span class=\"o\">(</span>ebm<span class=\"o\">)</span> failure\n\nmged&gt; in ebm2\nEnter solid type: ebm\nTake data from file or database binary object <span class=\"o\">[</span>f<span class=\"p\">|</span>o<span class=\"o\">]</span>: f\nEnter name of file/object: data\nEnter width of bit-map <span class=\"o\">(</span>number of cells<span class=\"o\">)</span>: <span class=\"m\">32</span>\nEnter height of bit-map <span class=\"o\">(</span>number of cells<span class=\"o\">)</span>: <span class=\"m\">32</span>\nEnter extrusion distance: <span class=\"m\">10</span>\nebm2\nmged&gt; l ebm2\nebm2:  extruded bitmap <span class=\"o\">(</span>EBM<span class=\"o\">)</span>\n      <span class=\"nv\">file</span><span class=\"o\">=</span><span class=\"s2\">&quot;data&quot;</span> <span class=\"nv\">w</span><span class=\"o\">=</span><span class=\"m\">32</span> <span class=\"nv\">n</span><span class=\"o\">=</span><span class=\"m\">32</span> <span class=\"nv\">depth</span><span class=\"o\">=</span><span class=\"m\">10</span>\n   <span class=\"nv\">mat</span><span class=\"o\">=</span><span class=\"m\">1</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">1</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">1</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">0</span>, <span class=\"m\">1</span>\n</pre></div>",
+        "id": 184632850,
+        "sender_full_name": "Sean",
+        "timestamp": 1577949652
+    },
+    {
+        "content": "<p>As you can hopefully see, it works just fine creating new ebm, but can't handle old ebm (and it obviously should).  I think the issue is the empty src='' field, but hopefully something you can recreate and fix.  It could be something as simple as setting a default value in the structparse table, or it might require some change in the ebm import5 function.  It's unclear why import5 is reporting a failure, but that's where the problem resides.</p>",
+        "id": 184632944,
+        "sender_full_name": "Sean",
+        "timestamp": 1577949816
+    },
+    {
+        "content": "<p>This is likely why the original patch had to be reverted as well as we have tests that include old ebm.</p>",
+        "id": 184632989,
+        "sender_full_name": "Sean",
+        "timestamp": 1577949843
+    },
+    {
+        "content": "<p>Ah I forgot to account for that... so if I'm understanding correctly, the issue lies in the fact that EBM objects created before the <code>datasrc</code> field was added, so then redrawing them after the update will cause an error because nothing was written to that field for those objects?</p>",
+        "id": 184639097,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577958498
+    },
+    {
+        "content": "<p>I think one method that would work would be to add a check like <code>!eip-&gt;datasrc</code> and then assign it a value of RT_EBM_SRC_FILE. I tried something like this, <code>{\"%c\",   1, \"src\",   RT_EBM_O(datasrc),  BU_STRUCTPARSE_FUNC_NULL, NULL, 'f' }</code> but I guess I either did something wrong or it didn't work</p>",
+        "id": 184640178,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577959735
+    },
+    {
+        "content": "<p>Another option could be to add a function like <code>hook_verify()</code> found in DSP to do the checking, if that's how those functions work?</p>",
+        "id": 184640310,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577959868
+    },
+    {
+        "content": "<p>Ok, so I'm pretty sure this check worked: <code>if (!eip-&gt;datasrc) eip-&gt;datasrc = RT_EBM_SRC_FILE;</code> <br>\nI currently just placed it right before import5() checks for reasonable values, but I could also try putting it in something like a <code>hook_verify()</code> if that's preferred.</p>",
+        "id": 184640800,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577960386
+    },
+    {
+        "content": "<p>Here's the patch: <a href=\"/user_uploads/1549/JEgxswovGd41_XqV2WI74A2e/ebm4_updated6.patch\" target=\"_blank\" title=\"ebm4_updated6.patch\">ebm4_updated6.patch</a> <br>\nI think it should work for all cases because MGED inherently prevents the user from inputting nothing to a field.</p>",
+        "id": 184641247,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577960794
+    },
+    {
+        "content": "<p>Drawing/erasing \"old\" EBM objects works now, but could there be some other functions that I haven't accounted for through this check?</p>",
+        "id": 184641512,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1577961102
+    },
+    {
+        "content": "<p>simple is fine, no need for a hook function if putting a check in one place fixes it.  dsp needed the check in a few places (v4 and v5 support), so it then makes sense to refactor to a function that does the check.</p>",
+        "id": 184660372,
+        "sender_full_name": "Sean",
+        "timestamp": 1577980002
+    },
+    {
+        "content": "<p>that way if the check itself ever needs to change, you change it in one place instead of finding everywhere datasrc is accessed and having to re-evaluate if it's needed</p>",
+        "id": 184660424,
+        "sender_full_name": "Sean",
+        "timestamp": 1577980049
+    },
+    {
+        "content": "<blockquote>\n<p>Drawing/erasing \"old\" EBM objects works now, but could there be some other functions that I haven't accounted for through this check?</p>\n</blockquote>\n<p>This I don't know, wouldn't know without reading the code in more detail.  You could look at all the places -&gt;name is accessed and see if any seem to assume it's  a file.</p>",
+        "id": 184660529,
+        "sender_full_name": "Sean",
+        "timestamp": 1577980118
+    },
+    {
+        "content": "<blockquote>\n<p>This I don't know, wouldn't know without reading the code in more detail.  You could look at all the places -&gt;name is accessed and see if any seem to assume it's  a file.</p>\n</blockquote>\n<p>I just looked at all the calls to <code>-&gt;name</code>, as well as if there were any more calls to <code>-&gt;mp-&gt;apbuf</code> (how the data was accessed before), but it seemed okay to me. It looks like most functions were using <code>BIT</code> (now <code>bit()</code>) which checks the datasrc.</p>",
+        "id": 184687041,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578001521
+    },
+    {
+        "content": "<p>For the wiki edit task, could I include everything that should be added into a pdf file? Some of the old text would also need to be adjusted as well, so should I include that in the comments?</p>",
+        "id": 184687305,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578001747
+    },
+    {
+        "content": "<p>Hi, I was trying to test the solid edit mode feature for DSP and EBM, but I was having a little trouble working with it and I couldn't find much relevant documentation. My main issue was that when trying to edit something, my input is only ever prompted when I choose file name. Otherwise, I'm not really sure how I'm supposed to edit the value (such as file size). Could anyone help me with this?</p>",
+        "id": 184766690,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578084653
+    },
+    {
+        "content": "<p>Also, I think I may have found a bug (I don't think it's been reported before, so could I submit this as a bug report task?) - when I try to use \"Primitive Editor\" and I try to select a DSP object that I have created, I get this error after I click \"Reset:\" <a href=\"/user_uploads/1549/rsRjCWoRv9OLs0LnjBjo8q_x/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/rsRjCWoRv9OLs0LnjBjo8q_x/pasted_image.png\" target=\"_blank\" title=\"pasted image\"><img src=\"/user_uploads/1549/rsRjCWoRv9OLs0LnjBjo8q_x/pasted_image.png\"></a></div>",
+        "id": 184766958,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578084890
+    },
+    {
+        "content": "<p>There's not really any documentation on the Tcl side of things besides the code itself.</p>",
+        "id": 184770303,
+        "sender_full_name": "Sean",
+        "timestamp": 1578087758
+    },
+    {
+        "content": "<p>As to the file name prompt, that's because the code makes a call that asks for the file dialog.</p>",
+        "id": 184771994,
+        "sender_full_name": "Sean",
+        "timestamp": 1578089203
+    },
+    {
+        "content": "<p>That's really the central issue with the task, figuring out how to conditionally prompt differently.  I would suggest changing the menu entry to a \"Data Source\" entry that opens a dialog that has a \"Object or file name\" label, a  text input where you can type a name, and a button next to it that opens the file dialog.  Third line could have a toggle input that denotes object or file  that autosets to file when the file dialog is used but otherwise defaults to object.  Could display  warning when the name doesn't match an existing object or file accordingly.</p>",
+        "id": 184772303,
+        "sender_full_name": "Sean",
+        "timestamp": 1578089501
+    },
+    {
+        "content": "<p>This is kind of what happens when you edit a sketch object, it opens a new window.</p>",
+        "id": 184772360,
+        "sender_full_name": "Sean",
+        "timestamp": 1578089526
+    },
+    {
+        "content": "<p>The easiest way to go about this is probably to just do a simple tk tutorial that creates a little window with the input field, file button, checkbox, labels, etc.  Get that  working, then you just have to make the menu call it.</p>",
+        "id": 184772644,
+        "sender_full_name": "Sean",
+        "timestamp": 1578089843
+    },
+    {
+        "content": "<p>and of course, <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> keep asking questions :)</p>",
+        "id": 184772695,
+        "sender_full_name": "Sean",
+        "timestamp": 1578089890
+    },
+    {
+        "content": "<p>A good example to follow might be the color selection panel which you can see under Tools -&gt; Color Selector or by searching for \"cadColorWidget\" in src/tclscripts/mged (most is in colors.tcl)</p>",
+        "id": 184773148,
+        "sender_full_name": "Sean",
+        "timestamp": 1578090423
+    },
+    {
+        "content": "<p>another really great one is botedit.tcl</p>",
+        "id": 184773176,
+        "sender_full_name": "Sean",
+        "timestamp": 1578090473
+    },
+    {
+        "content": "<p>Ah okay, thank you for the advice! I think I have a better idea of what the task is asking for now - would it be better to reprompt for the file size as well when a new file/object is chosen?</p>",
+        "id": 184780468,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578099436
+    },
+    {
+        "content": "<p>On second thought, it might be better to leave them separate. I'm still a little confused about how to precisely edit values though, when I'm in primitive edit mode for EBM and try to do Edit &gt; File Size (W N), I'm not given a prompt but middle clicking doesn't do anything either. Looking at edsol.c, it looks like it's extracting 2 arguments from <code>es_para</code> which is keyboard input, but I still haven't been able to actually input new dimensions myself. Am I still doing something wrong?</p>",
+        "id": 184783593,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578104405
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I just made this on Google Drawings to plan things out, but is this similar to what you were talking about? <a href=\"/user_uploads/1549/pEszkrlLIvlAMLB-YYBdDYFu/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/pEszkrlLIvlAMLB-YYBdDYFu/pasted_image.png\" target=\"_blank\" title=\"pasted image\"><img src=\"/user_uploads/1549/pEszkrlLIvlAMLB-YYBdDYFu/pasted_image.png\"></a></div>",
+        "id": 184792552,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578121937
+    },
+    {
+        "content": "<p>I haven't used Tcl/Tk before, but I took a look at the existing code and I think two challenges might be returning two different parameters (name and datasrc), and actually calling the Tcl getFile command to get a file name.</p>",
+        "id": 184792614,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578122159
+    },
+    {
+        "content": "<p>Well, I think an easy way to return both <code>name</code> and <code>datasrc</code> would be to just concatenate the two before returning it before parsing it to separate them. I'm having some difficulty actually creating the window though - I took a look at color.tcl and botedit.tcl, but from what I understand, those are directly called through openw.tcl (and some variables are provided) whereas getFile() is called through edsol.c. Is there something that I overlooked?</p>",
+        "id": 184820612,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578173648
+    },
+    {
+        "content": "<p>I've been trying a couple soledit functions, but so far I haven't found any that actually opens a new window aside from the call to <code>tk_getOpenFile</code></p>",
+        "id": 184820753,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578173944
+    },
+    {
+        "content": "<p>Hey! My name is Wendelin and I'm participating in the Google Code In. My favorite task by BRL-CAD is the \"Discover the BRL-CAD open source community\" task because it is a lovely introduction to this project.</p>",
+        "id": 184820993,
+        "sender_full_name": "Wendelin Wemhöner",
+        "timestamp": 1578174428
+    },
+    {
+        "content": "<blockquote>\n<p>Ah okay, thank you for the advice! I think I have a better idea of what the task is asking for now - would it be better to reprompt for the file size as well when a new file/object is chosen?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> I don't think it needs to prompt for file size as that's already a menu option unless you want to completely implement an edit panel for all the ebm parameters (kind of like how 'sketch' object editing is handled)</p>",
+        "id": 184838084,
+        "sender_full_name": "Sean",
+        "timestamp": 1578209844
+    },
+    {
+        "content": "<p>it's not that it'd better or worse.  both / either can work.  that said, I think you found a bug in the File Size (W N) edit menu.   The normal way to set values on the menu (like the extrusion height) is to either middle-click in the gui or utilize the 'p' command to provide exact values.  So you'd select \"File Size ...\" and then run something like \"p 10 20\".</p>",
+        "id": 184838145,
+        "sender_full_name": "Sean",
+        "timestamp": 1578209973
+    },
+    {
+        "content": "<p>However, like I said, it doesn't appear to be working right now.   Some bug in src/mged/edsol.c before where it reports \"width and length of file are required\".</p>",
+        "id": 184838193,
+        "sender_full_name": "Sean",
+        "timestamp": 1578210025
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> I just made this on Google Drawings to plan things out, but is this similar to what you were talking about? <a href=\"/user_uploads/1549/pEszkrlLIvlAMLB-YYBdDYFu/pasted_image.png\" target=\"_blank\" title=\"pasted_image.png\">pasted image</a></p>\n</blockquote>\n<p>Yes, very close.  Welcome to ideas, but could also just have two buttons -- select data object &amp; select data file.  then you wouldn't need the toggle since it'd be implicit in the selection.</p>",
+        "id": 184838307,
+        "sender_full_name": "Sean",
+        "timestamp": 1578210278
+    },
+    {
+        "content": "<blockquote>\n<p>I've been trying a couple soledit functions, but so far I haven't found any that actually opens a new window aside from the call to <code>tk_getOpenFile</code></p>\n</blockquote>\n<p>the references I mentioned opened new windows.</p>",
+        "id": 184838612,
+        "sender_full_name": "Sean",
+        "timestamp": 1578211008
+    },
+    {
+        "content": "<p>welcome <span class=\"user-mention\" data-user-id=\"256658\">@Wendelin Wemhöner</span> !</p>",
+        "id": 184838618,
+        "sender_full_name": "Sean",
+        "timestamp": 1578211025
+    },
+    {
+        "content": "<p>Thank you for the advice! The 'p' command was exactly what I was looking for. Regarding the references - I took a look at them, but from what I could understand, they were being called directly from openw.tcl, which passed in a couple variables (<code>$id</code>, <code>$screen</code>) that were used to actually create the window. On the other hand, the Tk application that I would need to make would be called from edsol.c, right? That's why I was a little confused.</p>",
+        "id": 184840922,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578215565
+    },
+    {
+        "content": "<blockquote>\n<p>However, like I said, it doesn't appear to be working right now.   Some bug in src/mged/edsol.c before where it reports \"width and length of file are required\".</p>\n</blockquote>\n<p>I just tested this, and I would first get the error \"three arguments needed,\" but when I put in 3 arguments, I would get the error \"width and length of file are required.\" I looked into it and this seems to be the problem:</p>\n<div class=\"codehilite\"><pre><span></span>else {\n    if (inpara != 3) {\n        Tcl_AppendResult(interp, &quot;ERROR: three arguments needed\\n&quot;, (char *)NULL);\n        inpara = 0;\n        return TCL_ERROR;\n    }\n}\n</pre></div>\n\n\n<p>on line 7902, as everything worked normally after I commented it out. Perhaps the issue is that the if statement is not being evaluated correctly?</p>",
+        "id": 184842153,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578217876
+    },
+    {
+        "content": "<p>Or actually in this case,  there might need to be an else-if statement because the if block checks for editing options with only a single argument.</p>",
+        "id": 184842260,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578218155
+    },
+    {
+        "content": "<p>The if conditional is a little interesting though, I'm getting similar \"three arguments needed\" errors when I try to set EBM height or scale DSP X/Y, all of which work again after I comment out the else block</p>",
+        "id": 184842773,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578219145
+    },
+    {
+        "content": "<p>Back to my challenge with creating a new window, this was what I was talking about:<br>\n<code>proc bot_askforname {parent screen}</code><br>\nwhere the procedure is already given certain arguments beforehand, which it uses to create a new window. However, I believe that when calling a function through edsol.c, I don't have this capability.</p>",
+        "id": 184842975,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578219549
+    },
+    {
+        "content": "<p>At the risk of spamming too many things, I think I found another error: using <code>tk_getOpenFile</code> returns the absolute path, which gets assigned to ebm-&gt;name (something similar happens for DSP). However, DSP and EBM both use the function <code>bu_open_mapped_file_with_path()</code>, which assumes a relative path. As a result, it concatenates the paths weirdly, and I'm getting a file import error whenever I try to edit a DSP or EBM file name/path. Perhaps it might be better to just prompt the user to manually type a name and then choose file or object, as this is essentially what DSP/EBM creation does in the first place?</p>",
+        "id": 184862144,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578253945
+    },
+    {
+        "content": "<p>Ahh I finally got to create a new window - I needed to call <code>dm_get_filepath(DMP)</code> and <code>dm_get_dname(DMP)</code> in order to pass <code>parent</code> and <code>screen</code> as arguments to the function. As for the two errors - I mentioned possible solutions above, but perhaps if a dev could confirm some things so that I don't go ahead to change some things that shouldn't be changed?</p>",
+        "id": 184972625,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578357977
+    },
+    {
+        "content": "<p>What about using bu_dir to get the root of the filepath, then passing the relative path on to the creation routine?</p>",
+        "id": 184976284,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578363062
+    },
+    {
+        "content": "<p>Shoot, I just saw this but I'm almost done with my implementation that requires a manual input. I think I'll stick with this for now since it's already taken me quite a while to get to an almost complete GUI. I'm just having trouble returning a string using the information from the entry and menubutton widget.</p>",
+        "id": 184982783,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578373658
+    },
+    {
+        "content": "<p>I'm so close to finishing the GUI, but I'm stuck on one last thing. Could I get some help? This is my code (I know it's pretty messy right now, but I'll clean it up once I get things working):</p>\n<div class=\"codehilite\"><pre><span></span>proc apply_datasrc { type name } {\n    if {$type == &quot;File&quot;} {\n    set ret &quot;f&quot;\n    } else {\n    set ret &quot;o&quot;\n    }\n    append ret $name\n    return $ret\n}\n\nproc init_datasrc { parent screen } {\n    set w $parent.data\n    catch { destroy $w }\n\n    set row -1\n    toplevel $w -screen $screen\n    wm title $w &quot;Set Data Source&quot;\n\n    incr row\n    frame $w.nameF -relief flat -bd 2\n    label $w.nameL -text &quot;Name:&quot; -anchor e\n    entry $w.nameE -relief sunken -bd 2 -textvariable name\n    grid $w.nameL $w.nameE -in $w.nameF -padx 8\n    grid $w.nameF -row $row -column 0 -sticky nsew -pady 8\n    grid rowconfigure $w $row -weight 0\n\n    incr row\n    frame $w.typeF -relief flat -bd 2\n    label $w.typeL -text &quot;Type:&quot; -anchor e\n    menubutton $w.typeMB -relief raised -bd 2 -text &quot;Object&quot; -textvariable type -menu $w.typeMB.m\n    menu $w.typeMB.m -tearoff 0\n    $w.typeMB.m add command -label Object -command {set type &quot;Object&quot;}\n    $w.typeMB.m add command -label File -command {set type &quot;File&quot;}\n    grid $w.typeL $w.typeMB -in $w.typeF -padx 8\n    grid $w.typeF -row $row -column 0 -sticky nsew -pady 8\n    grid rowconfigure $w $row -weight 0\n\n    incr row\n    frame $w.buttons -relief flat -bd 2\n    button $w.okB -text &quot;OK&quot; \\\n    -command {set ret [apply_datasrc $type $name]; return $ret}\n    button $w.dismissB -text &quot;Dismiss&quot; \\\n    -command &quot;destroy $w&quot;\n    grid $w.okB x $w.dismissB -in $w.buttons -sticky nsew -padx 8\n    grid columnconfigure $w.buttons 1 -weight 1\n    grid $w.buttons -row $row -column 0 -sticky nsew -pady 8\n    grid rowconfigure $w $row -weight 0\n\n    grid columnconfigure $w 0 -weight 1\n}\n\nproc getDataSrc { parent screen } {\n    set ret [init_datasrc $parent $screen]\n    return $ret\n}\n</pre></div>\n\n\n<p>So the issue I'm having is that when <code>getDataSrc</code> is called, the GUI gets set up and all, but even though I've tested that ret is getting assigned exactly what I want it to after I click \"OK,\" the GUI remains open and it doesn't seem like anything gets updated. I've tried debugging but I'm still a little bit confused as to how the Tcl interpreter is working, so I was wondering if there could be something blatantly incorrect with this code?</p>",
+        "id": 184986286,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578379211
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> manual is certainly fine for starters.  I don't think the GUI editing method has been tested very much for dsp, so it's not surprising.  full path should work, as should relative, so it's more likely a change to mapped file maybe broke that or requires a flag now.</p>",
+        "id": 184986375,
+        "sender_full_name": "Sean",
+        "timestamp": 1578379405
+    },
+    {
+        "content": "<p>we definitely do have much better file/path handling routines now than when dsp was implemented</p>",
+        "id": 184986384,
+        "sender_full_name": "Sean",
+        "timestamp": 1578379434
+    },
+    {
+        "content": "<p>Ah ok, thank you for the advice! If that's the case, perhaps I could try to update both DSP and EBM after GCi ends?</p>",
+        "id": 184986454,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578379539
+    },
+    {
+        "content": "<p>absolutely, they both could use some TLC</p>",
+        "id": 184986514,
+        "sender_full_name": "Sean",
+        "timestamp": 1578379646
+    },
+    {
+        "content": "<p>(tender loving care, not TCL typo) ;)</p>",
+        "id": 184986518,
+        "sender_full_name": "Sean",
+        "timestamp": 1578379661
+    },
+    {
+        "content": "<p>Haha, yeah I did notice that a couple of DSP things weren't updated/implemented yet (like the file size sedit option)</p>",
+        "id": 184986572,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578379729
+    },
+    {
+        "content": "<p>I don't see anything blatantly wrong in your code, but that doesn't mean the data is getting to where it needs to be.  tcl debugging is annoying.</p>",
+        "id": 184986579,
+        "sender_full_name": "Sean",
+        "timestamp": 1578379743
+    },
+    {
+        "content": "<p>there is no return value from init_datasrc so returning that in getDataSrc presumably does nothing</p>",
+        "id": 184986658,
+        "sender_full_name": "Sean",
+        "timestamp": 1578379839
+    },
+    {
+        "content": "<p>Hm, I didn't know how I would explicitly declare a return value, but I thought that the \"return\" command from the OK button would suffice. I did create a label from within getDataSrc with ret as a textvariable, and it was getting updated too. That's why I'm a little confused as to why the string isn't getting returned back.</p>",
+        "id": 184986749,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578379973
+    },
+    {
+        "content": "<p>I don't think that's going to suffice because it's not a return from the right place</p>",
+        "id": 184987339,
+        "sender_full_name": "Sean",
+        "timestamp": 1578380924
+    },
+    {
+        "content": "<p>that said, don't worry about it too much.  if you have it displaying a GUI, I'm happy to call the task done.  that's useful in itself and more appropriately scoped.  it was a noticeably harder task involving aspects of tcl/tk, mged, gui design, gui behavior implementation, debugging existing code, and hooking into existing code.  task probably should have been a chain of 3-6 tasks ..</p>",
+        "id": 184988141,
+        "sender_full_name": "Sean",
+        "timestamp": 1578382261
+    },
+    {
+        "content": "<p>Alright, thanks so much! The tcl/tk was definitely challenging, but I wish I could've got everything working together though...</p>",
+        "id": 185007620,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578402103
+    },
+    {
+        "content": "<p>I guess that's also part of the to-do after GCi</p>",
+        "id": 185007947,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578402318
+    },
+    {
+        "content": "<p>looking pretty  awesome, <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> , I don't  suppose we  could see a non-2^n non-square  \"complicated\" bitmap  (like  a photo) raytraced? Eye  candy is always nice. Keep up the good work!</p>",
+        "id": 185051535,
+        "sender_full_name": "Erik",
+        "timestamp": 1578429063
+    },
+    {
+        "content": "<p>Thank you <span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> :) I can do one right now - do you have anything in mind?</p>",
+        "id": 185052143,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578429469
+    },
+    {
+        "content": "<p>how about something  like a  mona  lisa as heightmap?</p>",
+        "id": 185053160,
+        "sender_full_name": "Erik",
+        "timestamp": 1578430098
+    },
+    {
+        "content": "<p>(not a requirement or anything. Everyone likes eye candy and this could be a  good acid  test  <span aria-label=\"slight smile\" class=\"emoji emoji-1f642\" role=\"img\" title=\"slight smile\">:slight_smile:</span> )</p>",
+        "id": 185054790,
+        "sender_full_name": "Erik",
+        "timestamp": 1578431256
+    },
+    {
+        "content": "<p>Hm... It definitely sounds interesting, I never thought of using EBM (or did you mean DSP?) like that. It might seem a bit weird as an EBM, since everything would be the same height.</p>",
+        "id": 185060095,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578434855
+    },
+    {
+        "content": "<p>I'll give it a try for both EBM and DSP to see how it goes</p>",
+        "id": 185060123,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578434872
+    },
+    {
+        "content": "<p>Shoot I just realized that I don't have BRLCAD compiled on Linux, I'll have to do that first</p>",
+        "id": 185060818,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578435424
+    },
+    {
+        "content": "<p>Something like <a href=\"https://www.prosportstickers.com/product_images/g/abe_lincoln_decal__43877_thumb.jpg\" target=\"_blank\" title=\"https://www.prosportstickers.com/product_images/g/abe_lincoln_decal__43877_thumb.jpg\">https://www.prosportstickers.com/product_images/g/abe_lincoln_decal__43877_thumb.jpg</a> maybe?</p>\n<div class=\"message_inline_image\"><a href=\"https://www.prosportstickers.com/product_images/g/abe_lincoln_decal__43877_thumb.jpg\" target=\"_blank\" title=\"https://www.prosportstickers.com/product_images/g/abe_lincoln_decal__43877_thumb.jpg\"><img src=\"https://www.prosportstickers.com/product_images/g/abe_lincoln_decal__43877_thumb.jpg\"></a></div>",
+        "id": 185061965,
+        "sender_full_name": "Sean",
+        "timestamp": 1578436253
+    },
+    {
+        "content": "<p>another fun one maybe: <a href=\"https://live.staticflickr.com/5653/20581371208_dfccf787d6_o_d.jpg\" target=\"_blank\" title=\"https://live.staticflickr.com/5653/20581371208_dfccf787d6_o_d.jpg\">https://live.staticflickr.com/5653/20581371208_dfccf787d6_o_d.jpg</a></p>\n<div class=\"message_inline_image\"><a href=\"https://live.staticflickr.com/5653/20581371208_dfccf787d6_o_d.jpg\" target=\"_blank\" title=\"https://live.staticflickr.com/5653/20581371208_dfccf787d6_o_d.jpg\"><img src=\"https://live.staticflickr.com/5653/20581371208_dfccf787d6_o_d.jpg\"></a></div>",
+        "id": 185063080,
+        "sender_full_name": "Sean",
+        "timestamp": 1578437119
+    },
+    {
+        "content": "<p>Hm yeah, those might work better. I'll try some out</p>",
+        "id": 185065125,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578438760
+    },
+    {
+        "content": "<p>Although if the EBM reads the white pixels, would it be better to invert the colors?</p>",
+        "id": 185065176,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578438810
+    },
+    {
+        "content": "<p>I didn't really spend too much time configuring the colors and stuff, but here's a quick render of two images imported to EBM: <a href=\"/user_uploads/1549/byyJ47ztF7ql4O5r_imUSqsl/lincoln_render.png\" target=\"_blank\" title=\"lincoln_render.png\">lincoln_render.png</a> <a href=\"/user_uploads/1549/82kbvsOx95qKA9d2nx7CoQ7t/tsunami_render.png\" target=\"_blank\" title=\"tsunami_render.png\">tsunami_render.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/byyJ47ztF7ql4O5r_imUSqsl/lincoln_render.png\" target=\"_blank\" title=\"lincoln_render.png\"><img src=\"/user_uploads/1549/byyJ47ztF7ql4O5r_imUSqsl/lincoln_render.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/82kbvsOx95qKA9d2nx7CoQ7t/tsunami_render.png\" target=\"_blank\" title=\"tsunami_render.png\"><img src=\"/user_uploads/1549/82kbvsOx95qKA9d2nx7CoQ7t/tsunami_render.png\"></a></div>",
+        "id": 185070348,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578443924
+    },
+    {
+        "content": "<p>cool, can you rotate it a bit to see the 3d effect?</p>",
+        "id": 185070438,
+        "sender_full_name": "Sean",
+        "timestamp": 1578444009
+    },
+    {
+        "content": "<p>Here: <a href=\"/user_uploads/1549/DdCc6z4t_Y64sYVQRbfge-S8/lincoln_render_rotated.png\" target=\"_blank\" title=\"lincoln_render_rotated.png\">lincoln_render_rotated.png</a> <a href=\"/user_uploads/1549/ImCMLjZ46vsOP2fqKnfdW76m/tsunami_render_rotated.png\" target=\"_blank\" title=\"tsunami_render_rotated.png\">tsunami_render_rotated.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/DdCc6z4t_Y64sYVQRbfge-S8/lincoln_render_rotated.png\" target=\"_blank\" title=\"lincoln_render_rotated.png\"><img src=\"/user_uploads/1549/DdCc6z4t_Y64sYVQRbfge-S8/lincoln_render_rotated.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ImCMLjZ46vsOP2fqKnfdW76m/tsunami_render_rotated.png\" target=\"_blank\" title=\"tsunami_render_rotated.png\"><img src=\"/user_uploads/1549/ImCMLjZ46vsOP2fqKnfdW76m/tsunami_render_rotated.png\"></a></div>",
+        "id": 185070620,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578444219
+    },
+    {
+        "content": "<p>By the way <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , would it be alright for me to update the wiki before the patch is applied?</p>",
+        "id": 185071113,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578444732
+    },
+    {
+        "content": "<p>yes, that should be just fine</p>",
+        "id": 185071130,
+        "sender_full_name": "Sean",
+        "timestamp": 1578444764
+    },
+    {
+        "content": "<p>Ok thanks, I wasn't sure if I should just in case someone else would be referencing it anytime soon</p>",
+        "id": 185071173,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578444817
+    },
+    {
+        "content": "<p>Updated :)</p>",
+        "id": 185072559,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578446393
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> Got it and closed.  Thank you for your work on this.  Hopefully you had fun.. that was a bit more of a diversion than was expected, but hopefully learned a lot too. ;)</p>",
+        "id": 185078895,
+        "sender_full_name": "Sean",
+        "timestamp": 1578455483
+    },
+    {
+        "content": "<p>The ebm work is actually going to be quite useful.  What we really need is to generalize the entire concept of referencing something from a data object so that it's the same across dsp, ebm, vol, textures, uv maps, projection maps, image objects, and other entities instead of getting coded up independently each time.  That's not GCI work, but it is where we need to get to long term.</p>",
+        "id": 185079013,
+        "sender_full_name": "Sean",
+        "timestamp": 1578455638
+    },
+    {
+        "content": "<p>This is a nudge in that direction, so thank you.</p>",
+        "id": 185079055,
+        "sender_full_name": "Sean",
+        "timestamp": 1578455651
+    },
+    {
+        "content": "<p>Thank you :) Throughout the whole taskset, I learned a lot (Tcl/Tk, pointers, macros, etc) and I think I have a better understanding of how MGED works now. It took me a lot longer than I also expected, but the process as a whole was a lot of fun. As for the future work, would it be possible for me to contribute to this after GCI?</p>",
+        "id": 185093962,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578477087
+    },
+    {
+        "content": "<p>That said, I can't wait to get back into the appleseed tasks! But before that, I need to revert my EBM changes right?</p>",
+        "id": 185094100,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578477196
+    },
+    {
+        "content": "<p>Certainly - BRL-CAD is an open source project :-)</p>",
+        "id": 185104237,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578486156
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> the HOPE is that you keep contributing  after GCI.  you can work on literally any aspect of the code that you desire.  happy to mentor you in new or old areas.  would be great to take on a specific project of your own that is interesting to you that you can keep working on.</p>",
+        "id": 185131661,
+        "sender_full_name": "Sean",
+        "timestamp": 1578502041
+    },
+    {
+        "content": "<blockquote>\n<p>That said, I can't wait to get back into the appleseed tasks! But before that, I need to revert my EBM changes right?</p>\n</blockquote>\n<p>No reason to revert them.  You'll just want to be intentional when you \"svn diff\" anything in the future to make sure you don't pull in ebm changes.</p>",
+        "id": 185131773,
+        "sender_full_name": "Sean",
+        "timestamp": 1578502091
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> can you submit the Great Wave model as a patch?  that'd make a great sample ebm for the db/ directory to showcase the new embedded binunif ebm data source capability.  You'll want to make sure the model is cleanly near the origin (with 0,0,0 at the bottom-left corner or base center), has a title set (e.g., Great Wave Off Kanagawa silhouette as an extruded bitmap by Jeffrey Liu), has good object names, has a region defined, etc., and also hooked into the CMakeLists.txt file so it gets installed.  Think it'll need to be added as a .g as I don't believe binunif serialize to .asc yet.</p>",
+        "id": 185134639,
+        "sender_full_name": "Sean",
+        "timestamp": 1578503699
+    },
+    {
+        "content": "<p>No problem, I'll do that as soon as I can :) For future projects, I'd definitely like to first tie up any loose ends with EBM/DSP and appleseed (perhaps at a slightly more leisurely but thorough pace), and then find something else do to from there.</p>",
+        "id": 185151172,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578513821
+    },
+    {
+        "content": "<p>The image is pretty large though (it's around 3500x2500 if I recall), should I scale it down or find a smaller image so it takes up less space?</p>",
+        "id": 185151652,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578514170
+    },
+    {
+        "content": "<p>Yeah, the .g becomes almost 10mb with it, so I think it'd be better if I scaled it down a bit.</p>",
+        "id": 185155197,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578516628
+    },
+    {
+        "content": "<p>how does it compress?</p>",
+        "id": 185159408,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519250
+    },
+    {
+        "content": "<p>even if it doesn't compress well, 10mb is not a problem</p>",
+        "id": 185159508,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519309
+    },
+    {
+        "content": "<p>if it compresses well, you could have it be external, but then \"compile\" a version that has it imported as a binunif</p>",
+        "id": 185159590,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519351
+    },
+    {
+        "content": "<p>Sorry, I'm not quite sure if I understand what you mean by compress. Does it have something to do with CMake?</p>",
+        "id": 185160128,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578519733
+    },
+    {
+        "content": "<p>if you run gzip on the data, how small does it get</p>",
+        "id": 185160217,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519819
+    },
+    {
+        "content": "<p>Ah oops, sorry about that - I've never used it before. I'll do it right now.</p>",
+        "id": 185160316,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578519880
+    },
+    {
+        "content": "<p>you're on windows, right?</p>",
+        "id": 185160349,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519913
+    },
+    {
+        "content": "<p>it's akin to making a .zip file</p>",
+        "id": 185160376,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519932
+    },
+    {
+        "content": "<p>just wouldn't use the .zip format, it's terribly inefficient</p>",
+        "id": 185160393,
+        "sender_full_name": "Sean",
+        "timestamp": 1578519946
+    },
+    {
+        "content": "<p>if you have 7-zip installed, it has support for the bzip2 and gzip formats that do much better</p>",
+        "id": 185160474,
+        "sender_full_name": "Sean",
+        "timestamp": 1578520003
+    },
+    {
+        "content": "<p>cmake has built-in support for both too, so the general idea would be to add the image data as a compressed bz2 or gz file, then during \"make\", you'd run a custom command that decompresses the data file and imports it into a .g file.</p>",
+        "id": 185160626,
+        "sender_full_name": "Sean",
+        "timestamp": 1578520134
+    },
+    {
+        "content": "<p>if that's all too complicated, seriously, you can just add the .g file as-is.  10mb will probably compress down to less than 1mb but it's not a big deal.  we have bigger .g's in there already.</p>",
+        "id": 185160685,
+        "sender_full_name": "Sean",
+        "timestamp": 1578520201
+    },
+    {
+        "content": "<p>That makes sense, I'll try it out at the very least</p>",
+        "id": 185160796,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578520276
+    },
+    {
+        "content": "<p>It's only 204 kb now!!</p>",
+        "id": 185164741,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578522879
+    },
+    {
+        "content": "<p>cool!</p>",
+        "id": 185164778,
+        "sender_full_name": "Sean",
+        "timestamp": 1578522907
+    },
+    {
+        "content": "<p>bitmap data tends to compress extremely well</p>",
+        "id": 185164803,
+        "sender_full_name": "Sean",
+        "timestamp": 1578522931
+    },
+    {
+        "content": "<p>something we've had on our roadmap for a long time is the ability to store objects compressed in the .g file, so storing a binunif compressed for example.  that would be awesome for lots of things.</p>",
+        "id": 185164930,
+        "sender_full_name": "Sean",
+        "timestamp": 1578523006
+    },
+    {
+        "content": "<p>Yeah, I can imagine how. Has there been any work done towards it so far?</p>",
+        "id": 185165741,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578523528
+    },
+    {
+        "content": "<p>our file format specification has bits reserved to say \"this is compressed\" but no compression currently happens</p>",
+        "id": 185165827,
+        "sender_full_name": "Sean",
+        "timestamp": 1578523566
+    },
+    {
+        "content": "<p>probably wouldn't be too hard now that we have lz4 (a compression library) integrated</p>",
+        "id": 185165895,
+        "sender_full_name": "Sean",
+        "timestamp": 1578523610
+    },
+    {
+        "content": "<p>Oh wait, I just gzipped the geometry database with the image data already imported, is that okay? I noticed that the CMake text doesn't mention anything about .gz though, so would I need to include that somewhere as well?</p>",
+        "id": 185168029,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578525149
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> Yeah, I think that's fine.  You'll want to check out the cmake \"tar\" command.  It has compression/decompression options.  BZip2 ('j' option) is best.</p>",
+        "id": 185169180,
+        "sender_full_name": "Sean",
+        "timestamp": 1578526322
+    },
+    {
+        "content": "<p>Ah ok, thanks! So if I zipped it with BZip2, would it be enough to just include something like <code>tar -E cjf tsunami.g.bz2 tsunami.g</code> at the end of db/CMakeLists.txt?</p>",
+        "id": 185181122,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578541379
+    },
+    {
+        "content": "<p>Something seems a little off with that, but the ADD_G_TARGET function doesn't mention anything about zipped geometry database files so I'm not sure if I'm supposed to add it to G_SAMPLE_MODELS.</p>",
+        "id": 185181177,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578541447
+    },
+    {
+        "content": "<p>you're probably not going to be able to use the typical macros we wrote</p>",
+        "id": 185192699,
+        "sender_full_name": "Sean",
+        "timestamp": 1578559259
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> look at regress/icv/CMakeLists.txt for a better example, search for \"tar \"</p>",
+        "id": 185192875,
+        "sender_full_name": "Sean",
+        "timestamp": 1578559404
+    },
+    {
+        "content": "<p>then note where the ppm is used</p>",
+        "id": 185192886,
+        "sender_full_name": "Sean",
+        "timestamp": 1578559415
+    },
+    {
+        "content": "<p>you'll want something similar for you file to unpack it and install it</p>",
+        "id": 185192920,
+        "sender_full_name": "Sean",
+        "timestamp": 1578559441
+    },
+    {
+        "content": "<p>Ok thanks, I'll check it out as soon as I can - I was having some trouble finding an example where tar was being used.</p>",
+        "id": 185223743,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578584722
+    },
+    {
+        "content": "<p>So for this, should I just leave the command outside of the ADD_G_TARGET function and exclude the .bz2 from the G_SAMPLE_MODELS? I think that if I left it in there, I would need to add a check for .bz2 files within the function itself. I'm perfectly fine with doing it, but I wasn't sure if that's making too many unwanted changes to the file.</p>",
+        "id": 185276357,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578622060
+    },
+    {
+        "content": "<p>^ so what I meant by that was I would do something like this: <a href=\"/user_uploads/1549/ghu5nQEQZX45uiHQTExOF5sc/bz.patch\" target=\"_blank\" title=\"bz.patch\">bz.patch</a> I have no idea if this solution would work or not, but calling <code>tar</code> outside of the rest of the logic seemed a little bit messy</p>",
+        "id": 185280457,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578628772
+    },
+    {
+        "content": "<p>Hmm.  That might actually do fairly well - you may want to try an extension of .g.tbz2  to match what we're doing for the images - tar and bzip2 are generic to file type.</p>",
+        "id": 185280897,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578629606
+    },
+    {
+        "content": "<p>I'd have to test if that logic can work with the more elaborate extension - it might not as-is.</p>",
+        "id": 185280949,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578629694
+    },
+    {
+        "content": "<p>You've already got the key idea by adding the bz2 logic in the right place - the most likely failure point is needing to handle a two-part file extension with that REGEX expression - it may work as is, but I'd have to try it to be sure.</p>",
+        "id": 185281180,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578630023
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span>   You can actually use CMake itself to make the tbz2 file.  On Linux it would be:</p>\n<p>cmake -E tar cfj tsunami.g.tbz2 tsunami.g</p>",
+        "id": 185281326,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578630310
+    },
+    {
+        "content": "<p>Thanks! The command worked for me as well. I haven't tested the actual logic itself yet, but I think I might want to set this aside for just a little bit so I can focus on my appleseed task.</p>",
+        "id": 185302235,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578656099
+    },
+    {
+        "content": "<p>Sounds good.</p>",
+        "id": 185307966,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578661489
+    },
+    {
+        "content": "<p>Actually, I did have one more question. What exactly is the DEPENDS macro used for? I noticed that all of the other add_custom_commands had it at the end, which also had the command as an argument. I was thinking about doing something like this: </p>\n<div class=\"codehilite\"><pre><span></span>if(${MODEL_TYPE} STREQUAL &quot;g.tbz2&quot;)\n    add_custom_command(\n      OUTPUT ${CMAKE_CURRENT_BUILD_DIR_SCRIPT}/${output_file}\n      COMMAND ${CMAKE_COMMAND} -E tar xjf ${CMAKE_CURRENT_SOURCE_DIR}/${in_model} WORKING_DIRECTORY ${CMAKE_CURRENT_BUILD_DIR}\n      DEPENDS ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${in_model}\n    )\nendif(${MODEL_TYPE} STREQUAL &quot;g.tbz2&quot;)\n</pre></div>\n\n\n<p>but I couldn't find what it was supposed to do exactly.</p>",
+        "id": 185335071,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578679757
+    },
+    {
+        "content": "<p>DEPENDS tells the build target that it is dependent on that file (or another build target).  That way, if the input file or a target that is required by the current target changes, the build system knows it needs to recreate the .g file</p>",
+        "id": 185369484,
+        "sender_full_name": "starseeker",
+        "timestamp": 1578709430
+    },
+    {
+        "content": "<p>Ah ok, thanks for the explanation! So I guess it would be better to include it then?</p>",
+        "id": 185375699,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1578720991
+    },
+    {
+        "content": "<p>Before I forget, here's some of the preliminary stuff I did for the example ebm .g file: <a href=\"/user_uploads/1549/44tOMXZr3cw3wYje1xe_nJR6/example_ebm.patch\" target=\"_blank\" title=\"example_ebm.patch\">example_ebm.patch</a> <a href=\"/user_uploads/1549/3i_sVE_yEgqy3KAjF7Iv-1AQ/tsunami.g.tbz2\" target=\"_blank\" title=\"tsunami.g.tbz2\">tsunami.g.tbz2</a> I'm almost positive it's building correctly, but in the wrong directory (build/db instead of build/Debug/share/db) - it's probably a pretty easy fix that I'll take care of later, I just haven't taken that close of a look at it for a while.</p>",
+        "id": 186450769,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579824806
+    },
+    {
+        "content": "<p>thanks <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> !  Definitely don't want to loose track of this work.  I was just testing the ebm code changes work recently.  It's almost ready to integrate, but a few issues I had to track down.</p>",
+        "id": 186559025,
+        "sender_full_name": "Sean",
+        "timestamp": 1579931206
+    },
+    {
+        "content": "<p>That's great - if there's anything I can do on my end, please let me know!</p>",
+        "id": 186572439,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579956982
+    },
+    {
+        "content": "<p>Which also reminds me, there were a few minor bugs that I should submit tickets for relating to DSP/EBM</p>",
+        "id": 186572826,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579957711
+    },
+    {
+        "content": "<p>or even better, submit a patch that fixes the issue <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span>  :)</p>",
+        "id": 186589454,
+        "sender_full_name": "Sean",
+        "timestamp": 1579987855
+    },
+    {
+        "content": "<blockquote>\n<p>or even better, submit a patch that fixes the issue <span class=\"user-mention silent\" data-user-id=\"250111\">Jeffrey Liu</span>  :)</p>\n</blockquote>\n<p>Yep, that would be the plan, but seeing as I'll probably be working mostly on Appleseed integration, I thought I'd submit tickets so that I don't lose track of the bugs I found (to be honest, I already had to scroll through the chat to recall what the issues were).</p>",
+        "id": 186589784,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579988470
+    },
+    {
+        "content": "<p>what was the issue?</p>",
+        "id": 186589787,
+        "sender_full_name": "Sean",
+        "timestamp": 1579988501
+    },
+    {
+        "content": "<p>So I think I found 3/4 - one was the issue of tk_getOpenFile() returning an absolute path while bu_open_mapped_file_with_path() was expecting a relative path, another was the issue of editing the data source of a DSP object-based source (the file browser was still opening), another one was the issue of trying to select a DSP object with the primitive editor (this one is odd, since I'm getting 2 different errors on the version of MGED that I installed vs. the version of MGED compiled on a recent revision)</p>",
+        "id": 186589956,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579988776
+    },
+    {
+        "content": "<p>I've also had a weird issue with the 'p' command, where I keep getting \"three arguments needed\" when trying to edit attributes of EBM or DSP (I haven't tried other object types yet), but I'm surprised that nothing similar has been reported before from what I've seen.</p>",
+        "id": 186590028,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579988937
+    },
+    {
+        "content": "<p>\"bu_open_mapped_file_with_path() was expecting a relative path\" &lt;--- that doesn't sound right</p>",
+        "id": 186590098,
+        "sender_full_name": "Sean",
+        "timestamp": 1579989047
+    },
+    {
+        "content": "<p>definitely seemed to run into a bug with the 'p' command -- I hit the same bug but didn't have time to debug it</p>",
+        "id": 186590119,
+        "sender_full_name": "Sean",
+        "timestamp": 1579989096
+    },
+    {
+        "content": "<blockquote>\n<p>\"bu_open_mapped_file_with_path() was expecting a relative path\" &lt;--- that doesn't sound right</p>\n</blockquote>\n<p>I think you're right, I just took a look at the BUGS file and this may be the cause <code>dsp primitives specifying data using Windows style file paths don't work.</code> In which case, my bug ticket is wrong/already reported...</p>",
+        "id": 186590175,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579989180
+    },
+    {
+        "content": "<p>the 'p' parameter command is tailored to different states, so there's undoubtedly something just not described right for the state it needed to be in</p>",
+        "id": 186590183,
+        "sender_full_name": "Sean",
+        "timestamp": 1579989199
+    },
+    {
+        "content": "<p>yet they should just work if they are getting passed through to open()</p>",
+        "id": 186590227,
+        "sender_full_name": "Sean",
+        "timestamp": 1579989251
+    },
+    {
+        "content": "<p>I did some debugging on it back when I was working on the EBM tasks, and if I recall correctly, it was because of a conditional in mged_param() where es_edflag didn't satisfy the if statement so it jumped to the else statement for \"three arguments needed\"</p>",
+        "id": 186590556,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579989930
+    },
+    {
+        "content": "<p>Yeah, so the condition checks for this: <code>if (es_edflag == PSCALE || es_edflag == SSCALE || es_edflag == ECMD_BOT_THICK)</code>, but the DSP and EBM settings are setting es_edflag to these:</p>\n<div class=\"codehilite\"><pre><span></span>#define ECMD_EBM_DSRC       53  /* set EBM data source */\n#define ECMD_EBM_FSIZE      54  /* set EBM file size */\n#define ECMD_EBM_HEIGHT     55  /* set EBM extrusion depth */\n\n#define ECMD_DSP_FNAME      56  /* set DSP file name */\n#define ECMD_DSP_FSIZE      57  /* set DSP file size */\n#define ECMD_DSP_SCALE_X        58  /* Scale DSP x size */\n#define ECMD_DSP_SCALE_Y        59  /* Scale DSP y size */\n#define ECMD_DSP_SCALE_ALT      60  /* Scale DSP Altitude size */\n</pre></div>",
+        "id": 186590987,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579990700
+    },
+    {
+        "content": "<p>An easy fix would be to just add the correct settings to the conditional (I think that's what's already being done for ECMD_BOT_THICK). I could do that right now, unless there's a better approach?</p>",
+        "id": 186591060,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579990845
+    },
+    {
+        "content": "<p>Taking a bit of a closer look, I'm wondering if the conditional should actually be checking for something like EDIT_SCALE instead, which seems to encompass more things instead of just PSCALE AND SSCALE, although it still doesn't account for EBM or DSP's FSIZE.</p>",
+        "id": 186591857,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579992411
+    },
+    {
+        "content": "<p>This change worked for me <a href=\"/user_uploads/1549/zY-cedxcRMjFDZ5FNNSWkPAQ/p_command_fix.patch\" target=\"_blank\" title=\"p_command_fix.patch\">p_command_fix.patch</a>, if I'm using EDIT_SCALE as it was intended. Setting EBM file size and depth and DSP altitude work as expected with the change applied.</p>",
+        "id": 186593211,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1579995099
+    },
+    {
+        "content": "<p>I have been getting another error, but I've had some trouble debugging it because I think it's TCL related... for me, I'm consistently getting an error when I try to modify/create a DSP using the primitive editor. Curious if other people have seen this?</p>",
+        "id": 186756834,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580193378
+    },
+    {
+        "content": "<p>These are the errors I'm getting - they are when I try to edit or create a DSP respectively: <a href=\"/user_uploads/1549/c02W0BLyn9Kmu3wI8eZ2Pdl9/error.log\" target=\"_blank\" title=\"error.log\">error.log</a> <a href=\"/user_uploads/1549/_VCpL0R2xyfSDXVoC7pHdkm7/error1.log\" target=\"_blank\" title=\"error1.log\">error1.log</a></p>",
+        "id": 186757646,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580194709
+    },
+    {
+        "content": "<p>Awesome <span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> !  That's some good debugging on the 'p' command.</p>",
+        "id": 187285372,
+        "sender_full_name": "Sean",
+        "timestamp": 1580751777
+    },
+    {
+        "content": "<p>Thank you! Was the patch acceptable?</p>",
+        "id": 187330550,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580792049
+    },
+    {
+        "content": "<p>The edsol code is just awful but your added case for dsp and ebm looked good to me.</p>",
+        "id": 187330770,
+        "sender_full_name": "Sean",
+        "timestamp": 1580792448
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> the only bit I'm unsure of is what's going on with EDIT_SCALE?</p>",
+        "id": 187330776,
+        "sender_full_name": "Sean",
+        "timestamp": 1580792467
+    },
+    {
+        "content": "<p>I noticed that the conditionals for PSCALE and SSCALE weren't covering what was needed for DSP and EBM, which is why I changed it to EDIT_SCALE which seemed to include it. It may not be the correct macro to use in that case though?</p>",
+        "id": 187330854,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580792568
+    },
+    {
+        "content": "<p>I have no idea honestly</p>",
+        "id": 187330912,
+        "sender_full_name": "Sean",
+        "timestamp": 1580792650
+    },
+    {
+        "content": "<p>it seems okay on the surface.  question would be whether any of the additional clauses covered by, say SEDIT_SCALE, supposed to take more than one parameter</p>",
+        "id": 187330951,
+        "sender_full_name": "Sean",
+        "timestamp": 1580792720
+    },
+    {
+        "content": "<p>also odd then, why is ECMD_BOT_THICK not included in SEDIT_SCALE.  should it be?</p>",
+        "id": 187330958,
+        "sender_full_name": "Sean",
+        "timestamp": 1580792756
+    },
+    {
+        "content": "<p>I'm not sure, I'll take a look at it again to make sure. There were some other options with SEDIT_SCALE and OEDIT_SCALE that I'd never used before, so it's possible that there are some that take in more than a single parameter.</p>",
+        "id": 187331037,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580792880
+    },
+    {
+        "content": "<p>that would be the only thing to make sure, since it adds about 10 more that wheren't being tested there</p>",
+        "id": 187331086,
+        "sender_full_name": "Sean",
+        "timestamp": 1580792922
+    },
+    {
+        "content": "<p>Right</p>",
+        "id": 187331098,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580792972
+    },
+    {
+        "content": "<p>I'm pretty sure I tested the DSP and EBM scaling when I changed it, but I didn't really find much documentation on some of the other things (Cline?) so I couldn't test those</p>",
+        "id": 187331446,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580793588
+    },
+    {
+        "content": "<p>cline can be ignored</p>",
+        "id": 187331496,
+        "sender_full_name": "Sean",
+        "timestamp": 1580793603
+    },
+    {
+        "content": "<p>Ah ok, how about EXTR?</p>",
+        "id": 187331607,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580793801
+    },
+    {
+        "content": "<p>probably ignorable, I think they're all RT_NURB_ which is the old nurbs implementation, now defunct</p>",
+        "id": 187335778,
+        "sender_full_name": "Sean",
+        "timestamp": 1580800817
+    },
+    {
+        "content": "<p>I didn't look that closely.  Is that all of what was left?</p>",
+        "id": 187335787,
+        "sender_full_name": "Sean",
+        "timestamp": 1580800838
+    },
+    {
+        "content": "<p>Aside from those, the rest of them (besides EBM and DSP), if I remember correctly, had to do with VOL. I should be able to test those myself though.</p>",
+        "id": 187386954,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580842132
+    },
+    {
+        "content": "<p>Just saw that the EBM changes were implemented! One minor thing when merging though, I might have noticed and changed this after I submitted the original patch. Sorry about that! <a href=\"/user_uploads/1549/bcq9GgNaPJcbudPwDbT0Nwwk/ebm_src.patch\" target=\"_blank\" title=\"ebm_src.patch\">ebm_src.patch</a></p>",
+        "id": 187399531,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580849972
+    },
+    {
+        "content": "<p>For reference, it's just that ebm-&gt;datasrc was being set to RT_DSP_SRC_(TYPE) instead of RT_EBM_SRC_(TYPE). My fault - I probably changed this later but forgot to update the patch.</p>",
+        "id": 187399602,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580850006
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> oh wow, I missed that on review.  thanks!</p>",
+        "id": 187472204,
+        "sender_full_name": "Sean",
+        "timestamp": 1580921900
+    },
+    {
+        "content": "<p>fortunately, they're the same value (today), but good catch regardless.</p>",
+        "id": 187472217,
+        "sender_full_name": "Sean",
+        "timestamp": 1580921916
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"250111\">@Jeffrey Liu</span> since you've been working in that area of the code and have some experience now, and see how VOL is pretty much in the same situation as EBM and DSP, can you think of a good way to generalize what they're doing in a reusable manner</p>",
+        "id": 187472914,
+        "sender_full_name": "Sean",
+        "timestamp": 1580922332
+    },
+    {
+        "content": "<p>so that VOL isn't version #3 of the get_file_data() and get_obj_data() .. and whatever additional objects that end up supporting internal and external data sources</p>",
+        "id": 187472996,
+        "sender_full_name": "Sean",
+        "timestamp": 1580922380
+    },
+    {
+        "content": "<p>Interesting, like get_obj_data() and get_file_data() in a separate file that can be called by any of the three?</p>",
+        "id": 187489619,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580933078
+    },
+    {
+        "content": "<p>yeah, some sort of generalized interface for this pattern</p>",
+        "id": 187495859,
+        "sender_full_name": "Sean",
+        "timestamp": 1580937391
+    },
+    {
+        "content": "<p>I'm thinking maybe something like a \"struct rt_data_obj *data\" field that would replace the existing name field, src field, and the #defines for src/obj.</p>",
+        "id": 187496409,
+        "sender_full_name": "Sean",
+        "timestamp": 1580937816
+    },
+    {
+        "content": "<p>Maybe something like a simple api that works with it like rt_data_read(struct rt_data_obj <em>,  (</em>rt_data_file_func)(), (*rt_data_obj_func)()) and rt_data_write() to read and write object data using callback functions defined by individual primitives.  Or alternatively, something involving ICV to just specify an image/data source and let the primitive's prep auto-convert accordingly.</p>",
+        "id": 187496569,
+        "sender_full_name": "Sean",
+        "timestamp": 1580937898
+    },
+    {
+        "content": "<p>Hm I didn't even think of the struct, but that definitely seems a lot cleaner. I'm not sure if I completely understand what you mean by the API though, could you elaborate?</p>",
+        "id": 187513479,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1580953549
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  if I remember correctly, you commented on one of my tickets recently about the EBM GUI. I'm not sure if you saw my response, but I didn't commit those changes. I uploaded them to another patch here: <a href=\"https://sourceforge.net/p/brlcad/patches/540/\">https://sourceforge.net/p/brlcad/patches/540/</a>.  Please let me know if there's anything else I can do to help!</p>",
+        "id": 211693766,
+        "sender_full_name": "Jeffrey Liu",
+        "timestamp": 1601418989
+    },
+    {
+        "content": "<p>Will do</p>",
+        "id": 211774165,
+        "sender_full_name": "Sean",
+        "timestamp": 1601478543
+    }
+]

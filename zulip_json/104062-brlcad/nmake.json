@@ -1,0 +1,128 @@
+[
+    {
+        "content": "<p>Has anyone been able to build with nmake? This keeps giving an error when \"Building RC object src/other/tcl/CMakeFiles/tcl.dir/win/tcl.rc.res\".</p>\n<p>It works fine when I build a VS solution and then open it with VS IDE and build. But when I make an NMAKE solution with CMAKE and try to run nmake it gives the error.</p>",
+        "id": 196651594,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588778935
+    },
+    {
+        "content": "<p>I can continue this with -I flag to nmake. But then everything that depends on TCL are not built</p>",
+        "id": 196652177,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588779196
+    },
+    {
+        "content": "<p>No, we've not tried an nmake build for a (very) long time.  Why do you want nmake as opposed to VS?  If you want a command line only build, I'd suggest looking into using ninja build tool on Windows before looking at nmake.</p>",
+        "id": 196653577,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588779783
+    },
+    {
+        "content": "<p>On Ubuntu it took only seconds to build when it has already been built once. Compiling only the changed parts is done in a very short time. </p>\n<p>VS is taking a long time for building  even after the first build. I thought I might be able to improve if I ran something closer to Ubuntu's CMAKE, MAKE system.</p>",
+        "id": 196657247,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588781190
+    },
+    {
+        "content": "<p>Yeah, I'd try ninja - nmake I don't think is terribly fast</p>",
+        "id": 196666604,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588785227
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"217384\">@Sadeep Darshana</span> can you post a more complete build error?  It should still work, might be something trivial you can fix.</p>",
+        "id": 196677065,
+        "sender_full_name": "Sean",
+        "timestamp": 1588789742
+    },
+    {
+        "content": "<p>I got it built.<br>\nI had to change several files. <br>\nsrc/other/tcl/CMakeList.txt, src/other/tk/CMakeList.txt, and a deprecated method in a Windows 10 SDk header file.<br>\nCMake and NMake run without errors. </p>\n<p>I know this is not exactly a fix. Changing Windows 10 SDK headers and outside libraries is not a solution. But would be sufficient for my works. <br>\nBtw Archer seems to be broken (it does not start, not error messages,nothing) likely due to the changes to TCL/TK. MGED is fine. I won't be working with TCL/TK.</p>",
+        "id": 196680109,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588791203
+    },
+    {
+        "content": "<p>Cool, <span class=\"user-mention\" data-user-id=\"217384\">@Sadeep Darshana</span> that's great.  Can you post a patch of your changes?</p>\n<p>You're right that changing a system header isn't an option.  Maybe you can figure out a different workaround -- or post the full error here, might have some ideas.</p>",
+        "id": 196683786,
+        "sender_full_name": "Sean",
+        "timestamp": 1588792982
+    },
+    {
+        "content": "<p>as for archer - check if mged works and if fbhelp works.</p>",
+        "id": 196683870,
+        "sender_full_name": "Sean",
+        "timestamp": 1588793028
+    },
+    {
+        "content": "<p>Not sure if I should make a patch because I simply removed and edited some stuff from the files. (I'm sure they were there for a reason)<br>\nBy the way here is what I did.</p>\n<p>1) Changed this in tcl CMakeLists file: line 107</p>\n<div class=\"codehilite\"><pre><span></span><code>if (MSVC)\n  add_definitions(-D_UNICODE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEP -Ot -Oi -fp:strict -Gs -GS -GL -MD)\n</code></pre></div>\n\n\n<p>into</p>\n<div class=\"codehilite\"><pre><span></span><code>if (MSVC)\n  add_definitions(-D_UNICODE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEP )\n</code></pre></div>\n\n\n<p>2)  Changed this in tk CMakeLists file: line 101<br>\nI'm building this for x86 to see anything is different. (previously I built for x64)</p>\n<div class=\"codehilite\"><pre><span></span><code>if (MSVC)\n  add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -Ot -Oi -fp:strict -Gs -GS -GL -MD -DSUPPORT_CONFIG_EMBEDDED -DHAVE_UXTHEME_H=1)\n</code></pre></div>\n\n\n<p>into</p>\n<div class=\"codehilite\"><pre><span></span><code>if (MSVC)\n  add_definitions(-DUNICODE -D_UNICODE )\n</code></pre></div>\n\n\n<p>These 2 changes had to be done because Visual Studio's  rc.exe gave an error message saying -Ot is an invalid operator, when I removed -Ot it said -Oi is valid. Then fp:strict was invalid and another error. </p>\n<p>3)VS compilor (CL) gave this error \"you cannot overload a function with 'extern \"C\"' linkage.\" when compiling corecrt_io.h (a windows 10 header). </p>\n<p>Removing following lines(:502) from the file fixed it.<br>\n        _Check_return_opt_ _CRT_NONSTDC_DEPRECATE(_lseek)<br>\n        _ACRTIMP long __cdecl lseek(<br>\n            _In_ int  _FileHandle,<br>\n            _In_ long _Offset,<br>\n            _In_ int  _Origin<br>\n            );</p>\n<p>Archer does not work either in x86 or x64. MGED works (I could draw a sphere)<br>\nI'm trying to figure out how to operate fbhelp. It displays a Available devices and current selection when run without parameters.</p>\n<p>Will reproduce and post exact error messages if necessary.</p>",
+        "id": 196690054,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588795754
+    },
+    {
+        "content": "<p>This is with nmake?</p>",
+        "id": 196690254,
+        "sender_full_name": "starseeker",
+        "timestamp": 1588795828
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/nmake/near/196690254\" title=\"#narrow/stream/104062-general/topic/nmake/near/196690254\">said</a>:</p>\n<blockquote>\n<p>This is with nmake?</p>\n</blockquote>\n<p>yes</p>",
+        "id": 196720412,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588817576
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"217384\">@Sadeep Darshana</span> can you provide the exact output of the rc.exe ?  that's odd because it should be the same set of supported options.  it's still compiling via msvc</p>",
+        "id": 196720502,
+        "sender_full_name": "Sean",
+        "timestamp": 1588817700
+    },
+    {
+        "content": "<p>the second response at <a href=\"https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe\" title=\"https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe\">https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe</a> might be a hint if you've installed multiple versions of msvc or a mismatched sdk.</p>",
+        "id": 196720672,
+        "sender_full_name": "Sean",
+        "timestamp": 1588817899
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/nmake/near/196720672\" title=\"#narrow/stream/104062-general/topic/nmake/near/196720672\">said</a>:</p>\n<blockquote>\n<p>the second response at <a href=\"https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe\" title=\"https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe\">https://stackoverflow.com/questions/14372706/visual-studio-cant-build-due-to-rc-exe</a> might be a hint if you've installed multiple versions of msvc or a mismatched sdk.</p>\n</blockquote>\n<p>rc.exe runs and exits with a non zero.<br>\nI'm reproducing the error</p>",
+        "id": 196720980,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588818277
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <br>\nC:\\gsoc2\\brlcad-code\\build&gt;nmake<br>\n...<br>\n...</p>\n<div class=\"codehilite\"><pre><span></span><code>[  5%] Building RC object src/other/tcl/CMakeFiles/tcl.dir/win/tcl.rc.res\nfatal error RC1106: invalid option: -Ot\nNMAKE : fatal error U1077: &#39;C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100183~1.0\\x64\\rc.exe&#39; : return code &#39;0x1&#39;\nStop.\nNMAKE : fatal error U1077: &#39;&quot;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.25.28610\\bin\\HostX64\\x64\\nmake.exe&quot;&#39; : return code &#39;0x2&#39;\nStop.\nNMAKE : fatal error U1077: &#39;&quot;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.25.28610\\bin\\HostX64\\x64\\nmake.exe&quot;&#39; : return code &#39;0x2&#39;\nStop.\n</code></pre></div>",
+        "id": 196721847,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588819483
+    },
+    {
+        "content": "<p>hm, at a glance, I'd say that's because C++ compiler options are being passed to the resource compiler, which is odd because msvc also calls the resource compiler</p>",
+        "id": 196721952,
+        "sender_full_name": "Sean",
+        "timestamp": 1588819578
+    },
+    {
+        "content": "<p>nmake VERBOSE=1</p>",
+        "id": 196721953,
+        "sender_full_name": "Sean",
+        "timestamp": 1588819585
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>[  2%] Building RC object src/other/tcl/CMakeFiles/tcl.dir/win/tcl.rc.res\n        cd C:\\gsoc2\\brlcad-code\\build\\src\\other\\tcl\n        C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100183~1.0\\x64\\rc.exe -DBUILD_tcl -DGETTOD_NOT_DECLARED=1 -DHAVE_FLOAT_H=1 -DHAVE_GETCWD=1 -DHAVE_INTPTR_T=1 -DHAVE_INTTYPES_H=1 -DHAVE_LIMITS_H=1 -DHAVE_MEMORY_H=1 -DHAVE_MKTIME=1 -DHAVE_SIGNED_CHAR=1 -DHAVE_SIZE_T=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_UINTPTR_T=1 -DHAVE_ZLIB=1 -DMP_FIXED_CUTOFFS -DMP_NO_STDINT -DMP_PREC=4 -DNO_DIRENT_H=1 -DNO_DLFCN_H=1 -DNO_FSTATFS=1 -DNO_GETTOD=1 -DNO_REALPATH=1 -DNO_UNAME=1 -DNO_WAIT3=1 -DPSAPI_VERSION=1 -DSTDC_HEADERS=1 -DTCL_CFGVAL_ENCODING=\\&quot;cp1252\\&quot; -DTCL_COMPILE_DEBUG=0 -DTCL_PIPE_DLL=\\&quot;tclpip86.dll\\&quot; -DTCL_SHLIB_EXT=\\&quot;.dll\\&quot; -DTCL_THREADS=1 -DTCL_TOMMATH=1 -DTCL_UNLOAD_DLLS=1 -DUSE_COMPAT=1 -DUSE_DIRENT2_H=1 -DUSE_THREAD_ALLOC=1 -DZ_PREFIX -DZ_PREFIX_STR=brl_ -D_CRT_NONSTDC_NO_DEP -D_CRT_SECURE_NO_DEPRECATE -D_REENTRANT=1 -D_THREAD_SAFE=1 -D_UNICODE -D_WIN64 -D__CHAR_UNSIGNED__ -D_stati64=_stat64 -Dinline=__inline -Dtcl_EXPORTS -IC:\\gsoc2\\brlcad-code\\build\\include\\brlcad -IC:\\gsoc2\\brlcad-code\\build\\include -IC:\\gsoc2\\brlcad-code\\include -IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\win -IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\generic -IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\libtommath -IC:\\gsoc2\\brlcad-code\\build\\src\\other\\tcl\\include -IC:\\gsoc2\\brlcad-code\\src\\other\\libz -IC:\\gsoc2\\brlcad-code\\build\\src\\other\\libz -DWIN32 -D_DEBUG   -Ot -Oi -fp:strict -Gs -GS -GL -MD /fo CMakeFiles\\tcl.dir\\win\\tcl.rc.res C:\\gsoc2\\brlcad-code\\src\\other\\tcl\\win\\tcl.rc\nfatal error RC1106: invalid option: -Ot\nNMAKE : fatal error U1077: &#39;C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100183~1.0\\x64\\rc.exe&#39; : return code &#39;0x1&#39;\nStop.\nNMAKE : fatal error U1077: &#39;&quot;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.25.28610\\bin\\HostX64\\x64\\nmake.exe&quot;&#39; : return code &#39;0x2&#39;\nStop.\nNMAKE : fatal error U1077: &#39;&quot;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.25.28610\\bin\\HostX64\\x64\\nmake.exe&quot;&#39; : return code &#39;0x2&#39;\nStop.\n</code></pre></div>\n\n\n<p>with verbose</p>",
+        "id": 196721985,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588819673
+    },
+    {
+        "content": "<p>C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100183~1.0\\x64\\rc.exe</p>\n<div class=\"codehilite\"><pre><span></span><code>-DBUILD_tcl\n-DGETTOD_NOT_DECLARED=1\n-DHAVE_FLOAT_H=1\n-DHAVE_GETCWD=1\n-DHAVE_INTPTR_T=1\n-DHAVE_INTTYPES_H=1\n-DHAVE_LIMITS_H=1\n-DHAVE_MEMORY_H=1\n-DHAVE_MKTIME=1\n-DHAVE_SIGNED_CHAR=1\n-DHAVE_SIZE_T=1\n-DHAVE_STDINT_H=1\n-DHAVE_STDLIB_H=1\n-DHAVE_STRING_H=1\n-DHAVE_SYS_STAT_H=1\n-DHAVE_SYS_TYPES_H=1\n-DHAVE_UINTPTR_T=1\n-DHAVE_ZLIB=1\n-DMP_FIXED_CUTOFFS\n-DMP_NO_STDINT\n-DMP_PREC=4\n-DNO_DIRENT_H=1\n-DNO_DLFCN_H=1\n-DNO_FSTATFS=1\n-DNO_GETTOD=1\n-DNO_REALPATH=1\n-DNO_UNAME=1\n-DNO_WAIT3=1\n-DPSAPI_VERSION=1\n-DSTDC_HEADERS=1\n-DTCL_CFGVAL_ENCODING=\\&quot;cp1252\\&quot;\n-DTCL_COMPILE_DEBUG=0\n-DTCL_PIPE_DLL=\\&quot;tclpip86.dll\\&quot;\n-DTCL_SHLIB_EXT=\\&quot;.dll\\&quot;\n-DTCL_THREADS=1\n-DTCL_TOMMATH=1\n-DTCL_UNLOAD_DLLS=1\n-DUSE_COMPAT=1\n-DUSE_DIRENT2_H=1\n-DUSE_THREAD_ALLOC=1\n-DZ_PREFIX\n-DZ_PREFIX_STR=brl_\n-D_CRT_NONSTDC_NO_DEP\n-D_CRT_SECURE_NO_DEPRECATE\n-D_REENTRANT=1\n-D_THREAD_SAFE=1\n-D_UNICODE\n-D_WIN64\n-D__CHAR_UNSIGNED__\n-D_stati64=_stat64\n-Dinline=__inline\n-Dtcl_EXPORTS\n-IC:\\gsoc2\\brlcad-code\\build\\include\\brlcad\n-IC:\\gsoc2\\brlcad-code\\build\\include\n-IC:\\gsoc2\\brlcad-code\\include\n-IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\win\n-IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\generic\n-IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\libtommath\n-IC:\\gsoc2\\brlcad-code\\build\\src\\other\\tcl\\include\n-IC:\\gsoc2\\brlcad-code\\src\\other\\libz\n-IC:\\gsoc2\\brlcad-code\\build\\src\\other\\libz\n-DWIN32\n-D_DEBUG\n\n\n-Ot\n-Oi\n-fp:strict\n-Gs\n-GS\n-GL\n-MD\n/fo\nCMakeFiles\\tcl.dir\\win\\tcl.rc.res\nC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\win\\tcl.rc\n</code></pre></div>\n\n\n<p>These are all the parameters passed to rc.exe <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 196722219,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588819985
+    },
+    {
+        "content": "<p>I looked at the RC_DEFINES, RC_INCLUDES, RC_FLAGS variables. Here are the results. (I split into lines by space for readability)</p>\n<p>RC_DEFINES</p>\n<div class=\"codehilite\"><pre><span></span><code>-DBUILD_tcl\n-DGETTOD_NOT_DECLARED=1\n-DHAVE_FLOAT_H=1\n-DHAVE_GETCWD=1\n-DHAVE_INTPTR_T=1\n-DHAVE_INTTYPES_H=1\n-DHAVE_LIMITS_H=1\n-DHAVE_MEMORY_H=1\n-DHAVE_MKTIME=1\n-DHAVE_SIGNED_CHAR=1\n-DHAVE_SIZE_T=1\n-DHAVE_STDINT_H=1\n-DHAVE_STDLIB_H=1\n-DHAVE_STRING_H=1\n-DHAVE_SYS_STAT_H=1\n-DHAVE_SYS_TYPES_H=1\n-DHAVE_UINTPTR_T=1\n-DHAVE_ZLIB=1\n-DMP_FIXED_CUTOFFS\n-DMP_NO_STDINT\n-DMP_PREC=4\n-DNO_DIRENT_H=1\n-DNO_DLFCN_H=1\n-DNO_FSTATFS=1\n-DNO_GETTOD=1\n-DNO_REALPATH=1\n-DNO_UNAME=1\n-DNO_WAIT3=1\n-DPSAPI_VERSION=1\n-DSTDC_HEADERS=1\n-DTCL_CFGVAL_ENCODING=\\&quot;cp1252\\&quot;\n-DTCL_COMPILE_DEBUG=0\n-DTCL_PIPE_DLL=\\&quot;tclpip86.dll\\&quot;\n-DTCL_SHLIB_EXT=\\&quot;.dll\\&quot;\n-DTCL_THREADS=1\n-DTCL_TOMMATH=1\n-DTCL_UNLOAD_DLLS=1\n-DUSE_COMPAT=1\n-DUSE_DIRENT2_H=1\n-DUSE_THREAD_ALLOC=1\n-DZ_PREFIX\n-DZ_PREFIX_STR=brl_\n-D_CRT_NONSTDC_NO_DEP\n-D_CRT_SECURE_NO_DEPRECATE\n-D_REENTRANT=1\n-D_THREAD_SAFE=1\n-D_UNICODE\n-D_WIN64\n-D__CHAR_UNSIGNED__\n-D_stati64=_stat64\n-Dinline=__inline\n-Dtcl_EXPORTS\n</code></pre></div>\n\n\n<p>RC_INCLUDES</p>\n<div class=\"codehilite\"><pre><span></span><code>-IC:\\gsoc2\\brlcad-code\\build\\include\\brlcad\n-IC:\\gsoc2\\brlcad-code\\build\\include\n-IC:\\gsoc2\\brlcad-code\\include\n-IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\win\n-IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\generic\n-IC:\\gsoc2\\brlcad-code\\src\\other\\tcl\\libtommath\n-IC:\\gsoc2\\brlcad-code\\build\\src\\other\\tcl\\include\n-IC:\\gsoc2\\brlcad-code\\src\\other\\libz\n-IC:\\gsoc2\\brlcad-code\\build\\src\\other\\libz\n</code></pre></div>\n\n\n<p>RC_FLAGS</p>\n<div class=\"codehilite\"><pre><span></span><code>-DWIN32\n-D_DEBUG\n-Ot\n-Oi\n-fp:strict\n-Gs\n-GS\n-GL\n-MD\n</code></pre></div>\n\n\n<p>These are the params passed to rc.exe<br>\nC:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100183~1.0\\x64\\rc.exe $(RC_DEFINES) $(RC_INCLUDES) $(RC_FLAGS) /fo CMakeFiles\\tcl.dir\\win\\tcl.rc.res C:\\gsoc2\\brlcad-code\\src\\other\\tcl\\win\\tcl.rc</p>",
+        "id": 196723563,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1588821557
+    }
+]

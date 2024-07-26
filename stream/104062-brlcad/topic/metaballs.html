@@ -1,0 +1,103 @@
+<html>
+<head><meta charset="utf-8"><title>metaballs · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html">metaballs</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="267979170"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/267979170" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#267979170">(Jan 14 2022 at 07:21)</a>:</h4>
+<p><span class="user-mention" data-user-id="103542">@Erik</span>  can I scratch your brain?  I'm looking at the metaballs implementation and am wondering why you "fluffed" up the ISO method, why you're squaring the field strength instead of using a simple falloff curve (i.e., it's using f^2/r^2 instead of f/r^2)</p>
+
+
+
+<a name="267979547"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/267979547" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#267979547">(Jan 14 2022 at 07:26)</a>:</h4>
+<p>looks like you changed it mid-development:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>    fluff up the isopotential method a bit... back to the old way, kinda
+
+    svn:revision:30487
+    svn:branch:trunk
+    svn:account:erikgreenwald
+
+diff --git a/src/librt/g_metaball.c b/src/librt/g_metaball.c
+index 9649859e7f..4918318cf0 100644
+--- a/src/librt/g_metaball.c
++++ b/src/librt/g_metaball.c
+@@ -67,6 +67,8 @@
+ #define METABALL_ISOPOTENTIAL  1
+ #define METABALL_BLOB          2
+
++#define PLOT_THE_BIG_BOUNDING_SPHERE 0
++
+ const char *metaballnames[] =
+ {
+     "Metaball",
+@@ -128,7 +130,7 @@ fastf_t rt_metaball_get_bounding_sphere(point_t *center, fastf_t threshold, stru
+                fastf_t additive;
+                VSUB2(d, mbpt2-&gt;coord, mbpt-&gt;coord);
+                mag = MAGNITUDE(d) + dist;
+-               additive = (mbpt2-&gt;fldstr*mbpt2-&gt;fldstr) / mag;
++               additive = fabs(mbpt2-&gt;fldstr) * mbpt2-&gt;fldstr / mag;
+                dist += additive;
+            }
+        /* then see if this is a 'defining' point */
+@@ -238,7 +240,7 @@ rt_metaball_point_value_iso(point_t *p, struct bu_list *points)
+
+     for (BU_LIST_FOR(mbpt, wdb_metaballpt, points)) {
+        VSUB2(v, mbpt-&gt;coord, *p);
+-       ret += mbpt-&gt;fldstr / MAGSQ(v); /* f/r^2 */
++       ret += fabs(mbpt-&gt;fldstr) * mbpt-&gt;fldstr / MAGSQ(v);    /* f/r^2 */
+     }
+     return ret;
+ }
+@@ -352,7 +354,7 @@ rt_metaball_norm(register struct hit *hitp, struct soltab *stp, register struct
+            for (BU_LIST_FOR(mbpt, wdb_metaballpt, &amp;mb-&gt;metaball_ctrl_head)) {
+                VSUB2(v, hitp-&gt;hit_point, mbpt-&gt;coord);
+                a = MAGSQ(v);
+-               VJOIN1(hitp-&gt;hit_normal, hitp-&gt;hit_normal, mbpt-&gt;fldstr / (a*a), v);    /* f/r^4 */
++               VJOIN1(hitp-&gt;hit_normal, hitp-&gt;hit_normal, fabs(mbpt-&gt;fldstr)*mbpt-&gt;fldstr / (a*a), v); /* f/r^4 */
+            }
+            break;
+        case METABALL_BLOB:
+</code></pre></div>
+
+
+
+<a name="267979805"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/267979805" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#267979805">(Jan 14 2022 at 07:30)</a>:</h4>
+<p>I was working on an animation with it, and ran into some issues.  trying to get a smooth transition.  method 2 (blob) appears to have a clipping bug:  <a href="/user_uploads/1549/u-beVITuzUcqGchZBX_5Kj71/anim.gif">anim.gif</a>   method 1 works better (iso) but then it's not quite what I'm going for.  method 0 (metaball) appears to be unimplemented.</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/u-beVITuzUcqGchZBX_5Kj71/anim.gif" title="anim.gif"><img src="/user_uploads/1549/u-beVITuzUcqGchZBX_5Kj71/anim.gif"></a></div>
+
+
+
+<a name="268000568"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/268000568" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#268000568">(Jan 14 2022 at 11:19)</a>:</h4>
+<p>iirc, there were a couple different field strength algortithms, I think I stubbed in 3 and impl'd 2? I'd expect your animation to have a bulge that travels along the toroid segment,  it's an odd anim... there was a 'tokyo' one that was the paper one, but the one modelled on electric field charge seemed to fit the requirement better iirc... been a hot minute and I've done a think or two since :)</p>
+
+
+
+<a name="268001176"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/268001176" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#268001176">(Jan 14 2022 at 11:24)</a>:</h4>
+<p>yeah, there they are, 'metaball', 'isopotential', and 'blob', I think blob was more of a visual experimentation thing and I didn't do the tokyo one, heh</p>
+
+
+
+<a name="268001626"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/268001626" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#268001626">(Jan 14 2022 at 11:29)</a>:</h4>
+<p>um, f^2/r^2 ... um... I don't recall. I think there was a weird mathy reason (since we're looking at them in isolation, we 'pair' them to create the delta to eigenvalue off of or something to get the ^2), ir it could be a straight up bug that just happened to look better with my inputs :) "fix" it and see what happens? iso should work for visualizing an electrical or gravitational isosurface for a test reference?</p>
+
+
+
+<a name="268001949"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/metaballs/near/268001949" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/metaballs.html#268001949">(Jan 14 2022 at 11:33)</a>:</h4>
+<p>I don't think the tokyo paper fit the problem domain of the requesting party particularly well, Lee proposed it and we pounded a square peg into a round hole, I think</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

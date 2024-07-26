@@ -1,0 +1,38 @@
+[
+    {
+        "content": "<p>Well, it's  a \"real\" flawfinder issue but in this case I've no idea what to do about it - it's complaining about readlink in the realpath implementation we're using to guarantee a working realpath on Linux, but I have no idea how to decode symbolic links for that purpose without using it...</p>",
+        "id": 198883364,
+        "sender_full_name": "starseeker",
+        "timestamp": 1590582482
+    },
+    {
+        "content": "<p>aha, interesting.  yep, that's an old syscall flaw</p>",
+        "id": 199451199,
+        "sender_full_name": "Sean",
+        "timestamp": 1591074774
+    },
+    {
+        "content": "<p>here's what flawfinder says about it:</p>\n<div class=\"codehilite\"><pre><span></span><code>  &quot;readlink&quot;:\n     (normal, 5,\n      &quot;This accepts filename arguments; if an attacker &quot; +\n      &quot;can move those files or change the link content, &quot; +\n      &quot;a race condition results.  &quot; +\n      &quot;Also, it does not terminate with ASCII NUL. (CWE-362, CWE-20)&quot;,\n      # This is often just a bad idea, and it&#39;s hard to suggest a\n      # simple alternative:\n      &quot;Reconsider approach&quot;,\n      &quot;race&quot;, &quot;&quot;, {&#39;input&#39; : 1}),\n</code></pre></div>\n\n\n<p>We can certainly ensure the null-termination is accounted for, but not the first issue.</p>",
+        "id": 199451252,
+        "sender_full_name": "Sean",
+        "timestamp": 1591074849
+    },
+    {
+        "content": "<p>It gets pretty good coverage of the issues in this secure programming book: <a href=\"https://books.google.com/books?id=GL8AeTCu1WAC&amp;pg=PT218&amp;lpg=PT218&amp;dq=%22readlink%22+%22safe%22&amp;source=bl&amp;ots=igMmAwNZQn&amp;sig=ACfU3U3cjlgBWaD-Z8VElKaoqkMwgQhVTA&amp;hl=en&amp;sa=X&amp;ved=2ahUKEwjnhZPwteLpAhX9lHIEHapBAsAQ6AEwB3oECAoQAQ#v=onepage&amp;q=%22readlink%22%20%22safe%22&amp;f=false\">https://books.google.com/books?id=GL8AeTCu1WAC&amp;pg=PT218&amp;lpg=PT218&amp;dq=%22readlink%22+%22safe%22&amp;source=bl&amp;ots=igMmAwNZQn&amp;sig=ACfU3U3cjlgBWaD-Z8VElKaoqkMwgQhVTA&amp;hl=en&amp;sa=X&amp;ved=2ahUKEwjnhZPwteLpAhX9lHIEHapBAsAQ6AEwB3oECAoQAQ#v=onepage&amp;q=%22readlink%22%20%22safe%22&amp;f=false</a></p>",
+        "id": 199452585,
+        "sender_full_name": "Sean",
+        "timestamp": 1591077144
+    },
+    {
+        "content": "<p>looks like realpath_bsd.c is guilty of the 4th issue, but then so are we</p>",
+        "id": 199452611,
+        "sender_full_name": "Sean",
+        "timestamp": 1591077215
+    },
+    {
+        "content": "<p>looks like flawfinder has categorized this as a level 5 issue, i.e., the highest level of risk possible</p>",
+        "id": 199453436,
+        "sender_full_name": "Sean",
+        "timestamp": 1591078481
+    }
+]

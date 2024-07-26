@@ -1,0 +1,80 @@
+[
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer.20of.20Code/topic/UNDO/near/243996044\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> ... really hate to say it, but that is a straight up scope violation for that structure.  I mean I get how and why it works and why you thought to put it there, but I do not think it's right from a design perspective.   I hadn't seen that commit yet or I would thought it worth discussion. </p>\n</blockquote>\n<p>Fair  enough, but if we're not going to do that we'll need some functionally equivalent alternative.  I'm not going to recreate libtclcad/MGED's per ged call wrapper functions if there is any alternative - I want to be able to add arbitrary commands to the command set known to ged_exec that change the view and/or the database without the app having to know anything about the new commands - that needs to \"just work\".</p>\n<blockquote>\n<p>Now that's not to suggest that another structure is more appropriate, it's specifically the notion of what an edit flag means in a general sense on a directory entry.  Is a non-zero value supposed to mean recently edited?  What constitutes recently?  What does a value of -8 mean?  Directory structs were stateless, and that appears to be some sort of live state -- so when does it change?  Can my code change it? </p>\n</blockquote>\n<p>As currently implemented, the flag is set when the drectory pointer's object is written to disk.  Everything else (initialization, reading, clearing, etc.) is up to the app.  It simply offers a way for the application to get a window into what changed before and after a command without having to store some massive set of database information internally, and/or having to do a massive data analysis post-command-execution. </p>\n<blockquote>\n<p>You can probably achieve the same effect by using the u_data pointer or by adding a callback so calling code is notified when something happens to the directory entry.</p>\n</blockquote>\n<p>I'm leaning toward the callback solution, actually - I was just thinking about that this morning before I saw your post.  edit_flag isn't enough for what I need for a proper \"Qt .g database\" model anyway, and I think the callback can be.  I'm pretty sure u_data will not work, because the various librt commands that will trigger the callback need to supply information for use by the caller (i.e. was the dp added, deleted, modified - for combs we're also going to need the internal so we can get at the comb tree)...</p>",
+        "id": 244015034,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624713966
+    },
+    {
+        "content": "<p>Does <a href=\"https://github.com/BRL-CAD/brlcad/commit/a547d9a5c1a07bfe7413a6505641eca88f798e30\">https://github.com/BRL-CAD/brlcad/commit/a547d9a5c1a07bfe7413a6505641eca88f798e30</a> look better?</p>",
+        "id": 244021288,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624722605
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/struct.20directory/near/244015034\">said</a>:</p>\n<blockquote>\n<p>Fair  enough, but if we're not going to do that we'll need some functionally equivalent alternative.  I'm not going to recreate libtclcad/MGED's per ged call wrapper functions if there is any alternative - I want to be able to add arbitrary commands to the command set known to ged_exec that change the view and/or the database without the app having to know anything about the new commands - that needs to \"just work\".</p>\n</blockquote>\n<p>Agreed, that's def been the plan for me too.</p>\n<blockquote>\n<p>As currently implemented, the flag is set when the drectory pointer's object is written to disk.  Everything else (initialization, reading, clearing, etc.) is up to the app.  It simply offers a way for the application to get a window into what changed before and after a command without having to store some massive set of database information internally, and/or having to do a massive data analysis post-command-execution. </p>\n</blockquote>\n<p>Yep, got that -- but that's also the reason for all the questions I posed.  Adding it as a public struct field begs a load of behavior questions and as implemented, it's basically undefined for all but this one rather specific use case.   That's not a great direction for any struct, much less such a fundamental very visible one like this.  Commands aren't the only users of that structure though, too, so behavior would have to be defined or the field would have to be carved out with \"do not touch\" markers, the prior behing a lot of work and the latter being an indication of inadequate design.  And on top of it all, the analogy still reigns in that the data really isn't something that data type should be aware of from a design perspective.  The callback, however, is on point!</p>\n<blockquote>\n<p>I'm pretty sure u_data will not work, because the various librt commands that will trigger the callback need to supply information for use by the caller (i.e. was the dp added, deleted, modified - for combs we're also going to need the internal so we can get at the comb tree)...</p>\n</blockquote>\n<p>u_data can be literally anything including a complex structure with all those fields, so it could work.  You'd just have to define a structure as the calling app, and set/pass it from the ged funcs into the directory, and then extract / clear them when the command completes.  The main issue with u_data is that it assumes a single context which could get tricky with commands that call commands.  Not impossible, but yuck.</p>",
+        "id": 244235259,
+        "sender_full_name": "Sean",
+        "timestamp": 1624944725
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/struct.20directory/near/244021288\">said</a>:</p>\n<blockquote>\n<p>Does <a href=\"https://github.com/BRL-CAD/brlcad/commit/a547d9a5c1a07bfe7413a6505641eca88f798e30\">https://github.com/BRL-CAD/brlcad/commit/a547d9a5c1a07bfe7413a6505641eca88f798e30</a> look better?</p>\n</blockquote>\n<p>It does!  For consistency, ctx should probably be dbi_udata or dbi_u_data, but otherwise looks good.</p>\n<p>The TODO looks a bit problematic -- dbi  is (presently) completely decoupled from the other I/O structs so that wouldnt be good to introduce them even masked behind a magic or void.  I'm not sure I understand the concern other than saving a db_get_external() or db_get_internal() call.. except those functions doesn't take any time.  Def don't need to re-open the database or worry about performance.</p>\n<p>The biggest two limitations I see are 1) it's a single callback and 2) It's public API.  So in a given dbi usage context, only one caller can be notified.  Should we ever want to change that limitation, it's a guaranteed fail and rewrite, no chance for apps to upgrade gracefully.  Of course, only easy way to combat that which quickly come to mind would be to add API to register change callback(s) like bu_log or dirent</p>",
+        "id": 244236928,
+        "sender_full_name": "Sean",
+        "timestamp": 1624946800
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/brlcad/commit/d756c54bff196a5ac60cda9cdce799f04d05dfa9\">https://github.com/BRL-CAD/brlcad/commit/d756c54bff196a5ac60cda9cdce799f04d05dfa9</a></p>",
+        "id": 244276901,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624971967
+    },
+    {
+        "content": "<p>Like that?</p>",
+        "id": 244276950,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624971998
+    },
+    {
+        "content": "<p>I think the hooks into db_update_nref will deal with what I was pondering with the TODO in the prior commit.  I need to collect comb tree child info for setting up hierarchy models in Qt, and currently I'm essentially replicating part of what db_update_nref does in its walk.</p>\n<p>I was initially contemplating returning extra info in the db_changed signals (which is what that TODO was) but after thinking about it for a bit I realized that a) the local struct directory event doesn't really have enough info by itself for the model update (every db operation has potentially global implications via hierarchy changes) and b) db_update_nref already gets what I need to handle the global implications, since it has the same concern.  Moreover, it's already being called anyway every time something happens with hierarchy implications  (or if it isn't, that's a problem) so if I just hook into that logic I'm not adding any extra database I/O.</p>\n<p>db_update_nref doesn't itself store the unpacked comb tree info, but it is available when it's doing the walk - so a callback added at that point can just take what's already available and expose it to the caller.</p>",
+        "id": 244278879,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624972898
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/struct.20directory/near/244276950\">said</a>:</p>\n<blockquote>\n<p>Like that?</p>\n</blockquote>\n<p>NIIIICE .... yeah, I really like that</p>",
+        "id": 244350006,
+        "sender_full_name": "Sean",
+        "timestamp": 1625001897
+    },
+    {
+        "content": "<p>that's some REALLY good thought design on the dbi_update_nref_t callback..</p>",
+        "id": 244350060,
+        "sender_full_name": "Sean",
+        "timestamp": 1625001928
+    },
+    {
+        "content": "<p>I mean, I've been trying for years to find a way to make the rt_dbi_update_nref() function go away and this will make that a bit harder, but as a callback updating mechanism, it looks FANTASTIC to me.  I kinda want a walktree iterator designed like that ...</p>",
+        "id": 244350253,
+        "sender_full_name": "Sean",
+        "timestamp": 1625002017
+    },
+    {
+        "content": "<p>regarding the global changes, that still is potentially a concern for dbi_changed_t callers, no?   may make sense to make struct db_i * be the first param just in case it needs to look up/down/all around.  unless the callback isn't needed any longer and is being replaced with the nref one.  That callback might benefit from having the dbi made available too since struct directory intentionally doesn't know about dbi.</p>",
+        "id": 244350639,
+        "sender_full_name": "Sean",
+        "timestamp": 1625002215
+    },
+    {
+        "content": "<p>Yeah, that's a good point.  I'm carrying the dbip around in my callback context, so I don't need it in dbi_changed_t, but it'd probably be better not to assume that.</p>",
+        "id": 244365779,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625013387
+    },
+    {
+        "content": "<p>Done.</p>",
+        "id": 244373830,
+        "sender_full_name": "starseeker",
+        "timestamp": 1625023842
+    }
+]

@@ -1,0 +1,68 @@
+[
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  Yes but I called shootrays and define parallel macros.So bu_parallel took as a function (shootrays_in_parallel).  But the loop is returning false in shootrays_in_parallel. Tried with a for loop for nrays but got a memory stack error.Maybe got wrong with setup resource structure .</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> I understand what you did and what I'm saying is that you're using a non-public function that is NOT intended to be called by other codes.  It should have a \"static\" label on it.  In fact, I'm going to add one now because it's not public API and was never intended to be public API because of assumptions it has in it that would lead to exactly this sort of confusion.   It (shootrays_in_parallel) will no longer be directly callable after the next release, only indirectly via rt_shootrays().</p>",
+        "id": 184987081,
+        "sender_full_name": "Sean",
+        "timestamp": 1578380465
+    },
+    {
+        "content": "<p>Is there a reason you cannot call rt_shootrays() or rt_shootray_bundle() ?</p>",
+        "id": 184987136,
+        "sender_full_name": "Sean",
+        "timestamp": 1578380557
+    },
+    {
+        "content": "<p>I would guess it's because rt_shootrays() currently isn't implemented in parallel and that's what you're trying to achieve?  If so, that's current development that isn't finished (which is why the version that calls shootrays_in_parallel() is protected by a compile-time SHOOTRAYS_IN_PARALLEL ifdef check).  As soon as someone get it working, parallel will either be the default or will at least be configurable.</p>",
+        "id": 184987285,
+        "sender_full_name": "Sean",
+        "timestamp": 1578380844
+    },
+    {
+        "content": "<blockquote>\n<p>Is there a reason you cannot call rt_shootrays() or rt_shootray_bundle() ?</p>\n<p>I would guess it's because rt_shootrays() currently isn't implemented in parallel and that's what you're trying to achieve?  If so, that's current development that isn't finished (which is why the version that calls shootrays_in_parallel() is protected by a compile-time SHOOTRAYS_IN_PARALLEL ifdef check).  As soon as someone get it working, parallel will either be the default or will at least be configurable.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Yes, I wanted  to see parallelism over serial shoot.</p>",
+        "id": 185009521,
+        "sender_full_name": "scorp08",
+        "timestamp": 1578403520
+    },
+    {
+        "content": "<p>set ncpu to 1 for serial, &gt;1  for parallel, and 0 for autodetect  parallel</p>",
+        "id": 185050740,
+        "sender_full_name": "Erik",
+        "timestamp": 1578428538
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> then you're probably going to want to implement your own callback function and call bu_parallel(), like rt does.  or keep bugging me or others to finish the rt_shootrays() interface :)</p>",
+        "id": 185061643,
+        "sender_full_name": "Sean",
+        "timestamp": 1578436010
+    },
+    {
+        "content": "<p>(for parallel)</p>",
+        "id": 185061655,
+        "sender_full_name": "Sean",
+        "timestamp": 1578436016
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> then you're probably going to want to implement your own callback function and call bu_parallel(), like rt does.  or keep bugging me or others to finish the rt_shootrays() interface :)</p>\n</blockquote>\n<p>:)) <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Where can I start to study shootray_parallel?  :)</p>",
+        "id": 185896875,
+        "sender_full_name": "scorp08",
+        "timestamp": 1579250306
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"228172\">@scorp08</span> I would study bu_parallel() first, figure out how you want to chop up work into sets/buckets, then use the ncpu key from bu_parallel to set up rt_shootray() calls for each bucket.</p>",
+        "id": 185920627,
+        "sender_full_name": "Sean",
+        "timestamp": 1579271719
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> I would study bu_parallel() first, figure out how you want to chop up work into sets/buckets, then use the ncpu key from bu_parallel to set up rt_shootray() calls for each bucket.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  thnks. Do I need to setup a resource structure for each ray  or for only one is enough ??</p>",
+        "id": 186570628,
+        "sender_full_name": "scorp08",
+        "timestamp": 1579953480
+    },
+    {
+        "content": "<blockquote>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"228172\">scorp08</span> I would study bu_parallel() first, figure out how you want to chop up work into sets/buckets, then use the ncpu key from bu_parallel to set up rt_shootray() calls for each bucket.</p>\n</blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span>  thnks. Do I need to setup a resource structure for each ray  or for only one is enough ??</p>\n</blockquote>\n<p>No, you only need to setup a resource for each core that will be involved, which is typically the number of virtual cores your CPU has enabled</p>",
+        "id": 186589271,
+        "sender_full_name": "Sean",
+        "timestamp": 1579987527
+    }
+]

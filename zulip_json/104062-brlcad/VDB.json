@@ -1,0 +1,320 @@
+[
+    {
+        "content": "<p>Hi everyone, I did the first PR for the GSoC Project on VDB. It creates the basic structure to run a \"make vdbName vdb\". It is simple because it is the first one but I will add more once I have a feedback on that. =)</p>",
+        "id": 379246948,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1690478814
+    },
+    {
+        "content": "<p>I went through your PR and got to know something. But still I have some doubt to clarify.</p>\n<ol>\n<li>I saw that magic number is used here. So we can assign to variables at runtime and then check if they have been modified or used before being initialized. Btw how it works? Or it helps during debugging?</li>\n<li><code>ID_MAX_SOLID</code> count changed from 47 to 48. For addition of new command I guess?</li>\n<li><code>vect_t minBB; vect_t maxBB;</code>: The minimum and maximum values of a bounding box represent the extreme points in the scene that enclose the object or objects it surrounds. The value it will hold can be change dynamically like according to the user choice or it will be fixed?</li>\n<li><code>#define RT_VDB_CK_MAGIC(_p) BU_CKMAG(_p, RT_VDB_INTERNAL_MAGIC, \"rt_vdb_internal\")</code> Here <code>_p</code>   is a pointer but what it's actual use here?</li>\n</ol>",
+        "id": 379843084,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1690647486
+    },
+    {
+        "content": "<p>Let me try to answer it:</p>\n<ol>\n<li>I am not sure, honestly.</li>\n<li>Yes, now there is ID_VDB.</li>\n<li>The idea was to have a simple data structure to begin and understand how to make a primitive and how the data arrives at the ray tracing function. I just did an update on the PR and the ray tracing is able to compute the ray intersection with the bounding box. I think that now I will add the vdb on it. Instead of a bounding box it will have the information of a vdb file to render. =)</li>\n<li>p is pointer to  an internal data, it will check if it is the correct data (it must be rt_vdb_internal).</li>\n</ol>",
+        "id": 380451854,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1690828213
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span> What will be your next milestone? Btw your dev log is not up to date. You should update it so that I can get know how you are proceeding and I can learn from you too.</p>",
+        "id": 380786032,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1690910772
+    },
+    {
+        "content": "<p>I updated the dev log and will adding more as I progress.<br>\nMy idea is to learn how to render something using the data in the vdb data structure at the moment. I was thinking of rendering a normal value. Assuming that the bounding box is like a voxel that contains one normal ((1,0,0) for instance). Once a ray hits that voxel, the normal value would be the pixel color.<br>\nOnce I have that, I will probably move to add an actual vdb on the data structure. Load from file and store in the rt_vdb_internal.<br>\nWhat do you think?</p>",
+        "id": 380841262,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1690925226
+    },
+    {
+        "content": "<p>/**</p>\n<ul>\n<li>Import an arb from the db5 format and convert to the internal</li>\n<li>structure.  Code duplicated from rt_arb_import4() with db5 help from</li>\n<li>g_ell.c<br>\n */<br>\nWhat does db5 format mean here <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> ?</li>\n</ul>",
+        "id": 381386358,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1691049169
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span> What is the meaning of these two lines here?</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">MAT4X3PNT</span><span class=\"p\">(</span><span class=\"n\">eip</span><span class=\"o\">-&gt;</span><span class=\"n\">minBB</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">mat</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"o\">&amp;</span><span class=\"n\">vec</span><span class=\"p\">[</span><span class=\"mi\">0</span><span class=\"w\"> </span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">ELEMENTS_PER_VECT</span><span class=\"p\">]);</span>\n<span class=\"n\">MAT4X3VEC</span><span class=\"p\">(</span><span class=\"n\">eip</span><span class=\"o\">-&gt;</span><span class=\"n\">maxBB</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">mat</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"o\">&amp;</span><span class=\"n\">vec</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"w\"> </span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">ELEMENTS_PER_VECT</span><span class=\"p\">]);</span>\n</code></pre></div>",
+        "id": 381392925,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1691050648
+    },
+    {
+        "content": "<p>I found meaning of <code>MAT4X3VEC: Apply a 4x4 matrix to a 3-tuple which is a relative Vector in space.</code> and <code>MAT4X3PNT: Apply a 4x4 matrix to a 3-tuple which is an absolute Point in space. Output and input points should be separate arrays.</code> but does it actually do here?</p>",
+        "id": 381393606,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1691050797
+    },
+    {
+        "content": "<p>Basically, it applies a transformation to the points. In reality, it does not do anything because the transformation matrix is an identity matrix (bn_mat_identity). I got that from the \"rt_ell_import4\" in ell.c code. I left there because it could be useful in the future when I am using a vdb.</p>",
+        "id": 381444235,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1691061504
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu Sekhar Nayak</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/381386358\">said</a>:</p>\n<blockquote>\n<p>/**</p>\n<ul>\n<li>Import an arb from the db5 format and convert to the internal</li>\n<li>structure.  Code duplicated from rt_arb_import4() with db5 help from</li>\n<li>g_ell.c<br>\n */<br>\nWhat does db5 format mean here <span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> ?</li>\n</ul>\n</blockquote>\n<p><a href=\"https://brlcad.org/w/images/2/2d/BRL_CAD_g_format_V5.pdf\">https://brlcad.org/w/images/2/2d/BRL_CAD_g_format_V5.pdf</a></p>",
+        "id": 381538313,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1691078687
+    },
+    {
+        "content": "<p>It's the current format of the .g files.</p>",
+        "id": 381538510,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1691078721
+    },
+    {
+        "content": "<p>I have the impression, that VDB has something in common with a point cloud(?) I.e., you could look at the pnts primitive to get an idea of how to implement it for VDB.</p>",
+        "id": 381549392,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1691080862
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span> What will be our next milestone?</p>",
+        "id": 385462951,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1692192642
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/380841262\">said</a>:</p>\n<blockquote>\n<p>I updated the dev log and will adding more as I progress.<br>\nMy idea is to learn how to render something using the data in the vdb data structure at the moment. I was thinking of rendering a normal value. Assuming that the bounding box is like a voxel that contains one normal ((1,0,0) for instance). Once a ray hits that voxel, the normal value would be the pixel color.<br>\nOnce I have that, I will probably move to add an actual vdb on the data structure. Load from file and store in the rt_vdb_internal.<br>\nWhat do you think?</p>\n</blockquote>\n<p>So for now the ray is hitting the bounding box right. The next part will be hitting the vdb?</p>",
+        "id": 385713622,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1692290351
+    },
+    {
+        "content": "<p>Hi Caio, what do you mean by \"normal\"? In geometry, and with this in BRL-CAD, the meaning is <a href=\"https://en.wikipedia.org/wiki/Normal_(geometry)\">https://en.wikipedia.org/wiki/Normal_(geometry)</a> The color is a different value.</p>",
+        "id": 385732802,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1692298174
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span> btw I checked out your PR but it is leading me to build errors. Here which files I have <code>include_directories()</code>.<br>\n<code>modified:   include/ged/CMakeLists.txt\nmodified:   src/librt/CMakeLists.txt</code><br>\nHere what I have added to CMakeLists.txt </p>\n<div class=\"codehilite\" data-code-language=\"CMake\"><pre><span></span><code><span class=\"nb\">include_directories</span><span class=\"p\">(</span>\n<span class=\"w\">  </span><span class=\"o\">${</span><span class=\"nv\">CMAKE_SOURCE_DIR</span><span class=\"o\">}</span><span class=\"s\">/src/other/openVDB/Release/openvdb</span>\n<span class=\"w\">  </span><span class=\"o\">${</span><span class=\"nv\">CMAKE_SOURCE_DIR</span><span class=\"o\">}</span><span class=\"s\">/src/other/openVDB/Release/nanovdb</span>\n<span class=\"w\">  </span><span class=\"o\">${</span><span class=\"nv\">CMAKE_SOURCE_DIR</span><span class=\"o\">}</span><span class=\"s\">/src/other/openVDB/Release/build/openvdb/openvdb/openvdb</span>\n<span class=\"w\">  </span><span class=\"o\">${</span><span class=\"nv\">CMAKE_SOURCE_DIR</span><span class=\"o\">}</span><span class=\"s\">/src/other/openVDB/Release/build/openvdb/openvdb</span>\n<span class=\"p\">)</span>\n</code></pre></div>",
+        "id": 391558379,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1694977913
+    },
+    {
+        "content": "<p>it could be the lack of the openvdb lib. What is the error?</p>",
+        "id": 391583290,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1694990564
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/391583290\">said</a>:</p>\n<blockquote>\n<p>it could be the lack of the openvdb lib. What is the error?</p>\n</blockquote>\n<p>Oops I missed that. Let me include it and rebuild it.</p>",
+        "id": 391630688,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695020216
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span>, E.g., I'm seeing the compilation error</p>\n<div class=\"codehilite\"><pre><span></span><code>brlcad/src/librt/primitives/vdb/vdb.cpp:14:10: fatal error: openvdb/tools/LevelSetSphere.h: File or directory not found\n   14 | #include &quot;openvdb/tools/LevelSetSphere.h&quot;\n      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\ncompilation terminated.\n</code></pre></div>\n<p>with gcc on Linux (CMake generated build). I think, you should do the changes recommended by Himanshu.</p>",
+        "id": 391750208,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1695059774
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu Sekhar Nayak</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/391630688\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/391583290\">said</a>:</p>\n<blockquote>\n<p>it could be the lack of the openvdb lib. What is the error?</p>\n</blockquote>\n<p>Oops I missed that. Let me include it and rebuild it.</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"252475\">@Himanshu Sekhar Nayak</span> I made a few adjustments and should be working in Release. The only thing that must be done manually is to copy the .dll files from src\\other\\openVDB\\build\\openvdb\\openvdb\\openvdb\\Release  to the correct place. I will fix that later but now you should be able to compile and run. =)</p>",
+        "id": 391969994,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695147528
+    },
+    {
+        "content": "<p>Does anyone know where can I change to copy the list of dll files?</p>",
+        "id": 392005633,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695163017
+    },
+    {
+        "content": "<p>A VDB build issue on Linux:</p>\n<div class=\"codehilite\"><pre><span></span><code>src/librt/primitives/vdb/vdb.c:259: error: ISO C forbids an empty translation unit [-Wpedantic]\nmake[2]: *** [src/librt/CMakeFiles/librt-obj.dir/build.make:2694: src/librt/CMakeFiles/librt-obj.dir/primitives/vdb/vdb.c.o] Error 1\nmake[1]: *** [CMakeFiles/Makefile2:17823: src/librt/CMakeFiles/librt-obj.dir/all] Error 2\nmake: *** [Makefile:166: all] Error 2\n</code></pre></div>\n<p>You have two empty/unused files in src/librt/primitives/vdb. You should remove them, if you don't need them.</p>",
+        "id": 392167813,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1695232501
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/392167813\">said</a>:</p>\n<blockquote>\n<p>A VDB build issue on Linux:</p>\n<div class=\"codehilite\"><pre><span></span><code>src/librt/primitives/vdb/vdb.c:259: error: ISO C forbids an empty translation unit [-Wpedantic]\nmake[2]: *** [src/librt/CMakeFiles/librt-obj.dir/build.make:2694: src/librt/CMakeFiles/librt-obj.dir/primitives/vdb/vdb.c.o] Error 1\nmake[1]: *** [CMakeFiles/Makefile2:17823: src/librt/CMakeFiles/librt-obj.dir/all] Error 2\nmake: *** [Makefile:166: all] Error 2\n</code></pre></div>\n<p>You have two empty/unused files in src/librt/primitives/vdb. You should remove them, if you don't need them.</p>\n</blockquote>\n<p>Thank you for the explanation (On windows worked fine). I just removed the files and I will wait if there is any other problem.</p>",
+        "id": 392174864,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695235407
+    },
+    {
+        "content": "<p>I am getting librt.dll not found? <br>\n<a href=\"/user_uploads/1549/Afvu9AsvWddOnI4l-frycJay/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Afvu9AsvWddOnI4l-frycJay/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Afvu9AsvWddOnI4l-frycJay/image.png\"></a></div>",
+        "id": 392560334,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695400211
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/aKXiMoWlKxdcfCSeKOgGSWp2/Screenshot-133.png\">vdb branch</a><br>\n<a href=\"/user_uploads/1549/Na1_defUO23OUWF5RDHgG7xW/Screenshot-134.png\">main branch</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/aKXiMoWlKxdcfCSeKOgGSWp2/Screenshot-133.png\" title=\"vdb branch\"><img src=\"/user_uploads/1549/aKXiMoWlKxdcfCSeKOgGSWp2/Screenshot-133.png\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Na1_defUO23OUWF5RDHgG7xW/Screenshot-134.png\" title=\"main branch\"><img src=\"/user_uploads/1549/Na1_defUO23OUWF5RDHgG7xW/Screenshot-134.png\"></a></div>",
+        "id": 392560892,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695400342
+    },
+    {
+        "content": "<p>The vdb branch have more variables than main branch.</p>",
+        "id": 392561134,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695400401
+    },
+    {
+        "content": "<p>I switched to vdb branch and made sure main branch build is removed. Then cmake generates from vdb branch and then I went on to build brlcad. Then tried to openvdb and it is giving librt.dll not found. Am I missing something here? <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span></p>",
+        "id": 392561877,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695400593
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"252475\">@Himanshu Sekhar Nayak</span>, you need to copy that manually, I think I mentioned that before. The dll files are on src\\other\\openVDB\\build\\openvdb\\openvdb\\openvdb\\Release . I will fix that later (to copy automatically) but you should be able to compile and run (after the copy and paste). =)</p>",
+        "id": 392567155,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695402364
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/392567155\">said</a>:</p>\n<blockquote>\n<p>Hi <span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu Sekhar Nayak</span>, you need to copy that manually, I think I mentioned that before. The dll files are on src\\other\\openVDB\\build\\openvdb\\openvdb\\openvdb\\Release . I will fix that later (to copy automatically) but you should be able to compile and run (after the copy and paste). =)</p>\n</blockquote>\n<p>Oh... my bad. I thought your cmake config fixed that. No problem I will copy it.</p>",
+        "id": 392567561,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695402489
+    },
+    {
+        "content": "<p>you need to copy the dll files to build\\Release\\bin. To make sure it is the correct folder, you can check if the mged executable file is there too.</p>",
+        "id": 392567587,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695402502
+    },
+    {
+        "content": "<p>to create a vdb, you put \"in\", \"name of the object that you want to create\", \"vdb\", \"path to vdb (relative to the database that is being used)\"</p>",
+        "id": 392568374,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695402816
+    },
+    {
+        "content": "<p>you can download a few vdb files here <a href=\"https://www.openvdb.org/download/\">https://www.openvdb.org/download/</a><br>\nyou can test with any object that is a level set (bunny, dragon, astronaut....). To visualize you run the ray tracing =)</p>",
+        "id": 392568555,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695402880
+    },
+    {
+        "content": "<p>Okay, I started recompiling it after I copied those dll files into <code>build\\Release\\bin</code>. I am eager to test it.</p>",
+        "id": 392568742,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695402961
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>394&gt;C:\\Users\\Himanshu\\Desktop\\Workspace\\brlcadBuild\\Debug\\bin\\librt.dll : fatal error LNK1120: 6 unresolved externals\n394&gt;Done building project &quot;librt.vcxproj&quot; -- FAILED.\n</code></pre></div>",
+        "id": 392586315,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695410307
+    },
+    {
+        "content": "<p>Why <code>librt.dll</code> is failing here? Switching to VDB branch and making sure all the dll file present in <code>C:\\Users\\Himanshu\\Desktop\\Workspace\\brlcadBuild\\Debug\\bin</code> <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span></p>",
+        "id": 392586582,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695410440
+    },
+    {
+        "content": "<p>The dll should not be a problem with the build. Normally it is only asked when it is running the code. What is that link error? Which function? Which file? It could try in Release to check if it has the same issue.</p>",
+        "id": 392587939,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695411106
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/392587939\">said</a>:</p>\n<blockquote>\n<p>The dll should not be a problem with the build. Normally it is only asked when it is running the code. What is that link error? Which function? Which file? It could try in Release to check if it has the same issue.</p>\n</blockquote>\n<p>I copied those dll files to <code>brlcadBuild\\Debug\\bin</code> because mged executable is there. <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span></p>",
+        "id": 392846353,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695570941
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"252475\">@Himanshu Sekhar Nayak</span> , great! That is a post build step. I am assuming that you were able to compile and run mged, since you sent the picture that the dll was missing. Now you just copy the dll to the folder and run it again, there is no need to compile everything again.</p>",
+        "id": 392847427,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695571537
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/392847427\">said</a>:</p>\n<blockquote>\n<p>Hi <span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu Sekhar Nayak</span> , great! That is a post build step. I am assuming that you were able to compile and run mged, since you sent the picture that the dll was missing. Now you just copy the dll to the folder and run it again, there is no need to compile everything again.</p>\n</blockquote>\n<p>Oh.. that's why it is creating an issue. I am recompiling it which is creating this issue.</p>",
+        "id": 392847715,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695571759
+    },
+    {
+        "content": "<p>Just for your information:<br>\nJust saw that openVDB is C++17 but brlcad is C++ 14 (line 353 in its main CMakeLists.txt). This can probably be easily solved, but then I get a bunch of <code>error: declaration of ‘grid’ shadows a previous local [-Werror=shadow]</code> with lines 430 ff in src/other/openVDB/nanovdb/nanovdb/util/IO.h.</p>\n<p>I.e., it looks like the integration of openVDB in the brlcad build won't be trivial.</p>",
+        "id": 392861894,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1695584172
+    },
+    {
+        "content": "<p>I changed the c++ version in the projects that use openVDB (libged and librt, If I'm not mistaken). I am not sure why you are getting this error. I created a solution from scratch and only these projects had the c++ changed and it worked fine.</p>",
+        "id": 392892488,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695609746
+    },
+    {
+        "content": "<p>I build <code>vdb</code> in <code>Release</code> mode but there is no <code>mged</code> executable in <code>brlcadBuild\\Release\\bin</code>. I made sure I started from scratch from configuring cmake for <code>vdb</code> branch. <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span></p>",
+        "id": 393077196,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1695664837
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu Sekhar Nayak</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/393077196\">said</a>:</p>\n<blockquote>\n<p>I build <code>vdb</code> in <code>Release</code> mode but there is no <code>mged</code> executable in <code>brlcadBuild\\Release\\bin</code>. I made sure I started from scratch from configuring cmake for <code>vdb</code> branch. <span class=\"user-mention silent\" data-user-id=\"601736\">Caio José Dos Santos Brito</span></p>\n</blockquote>\n<p>Hi, I have no clue. Did you compile the code? It should be there.</p>",
+        "id": 393089095,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695668798
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu Sekhar Nayak</span> <a href=\"#narrow/stream/104062-general/topic/VDB/near/392560334\">said</a>:</p>\n<blockquote>\n<p>I am getting librt.dll not found? <br>\n<a href=\"/user_uploads/1549/Afvu9AsvWddOnI4l-frycJay/image.png\">image.png</a></p>\n</blockquote>\n<p>How did you get that? You should do the same but with the vdb branch.</p>",
+        "id": 393089294,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1695668858
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> <span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span> Our first bunny vdb. This one is build in Release mode.<br>\n<a href=\"/user_uploads/1549/sSPhFz9qRIjRbEmdQAvkUjoX/Screenshot-139.png\">Screenshot-139.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/sSPhFz9qRIjRbEmdQAvkUjoX/Screenshot-139.png\" title=\"Screenshot-139.png\"><img src=\"/user_uploads/1549/sSPhFz9qRIjRbEmdQAvkUjoX/Screenshot-139.png\"></a></div>",
+        "id": 395374790,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1696656859
+    },
+    {
+        "content": "<p>Glad you were able to run. =) I will be finishing the final report tomorrow.</p>",
+        "id": 395375394,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1696657316
+    },
+    {
+        "content": "<p>if anyone want to check what I implemented and a few more results: <a href=\"https://brlcad.org/wiki/User:Caio/GSoC2023/FinalReport\">https://brlcad.org/wiki/User:Caio/GSoC2023/FinalReport</a></p>",
+        "id": 395375471,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1696657350
+    },
+    {
+        "content": "<p>That is looking great!  Outstanding work <span class=\"user-mention\" data-user-id=\"601736\">@Caio José Dos Santos Brito</span> ... taking a look over your final report</p>",
+        "id": 395423448,
+        "sender_full_name": "Sean",
+        "timestamp": 1696687779
+    },
+    {
+        "content": "<p>Did you happen to implement UV support (that would be the rt_vdb_uv() callback)?  What gaps remain in the implementation?  I assume there's no adjust support (rt_vdb_adjust())?  What about plot and tess?</p>",
+        "id": 395423750,
+        "sender_full_name": "Sean",
+        "timestamp": 1696688002
+    },
+    {
+        "content": "<p>That's not all in scope of what you were going for, more curious what all you were able to accomplish, if you got some of them</p>",
+        "id": 395423785,
+        "sender_full_name": "Sean",
+        "timestamp": 1696688032
+    },
+    {
+        "content": "<p>Thank you, <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> . I was a fun project and a great experience. Regarding your questions, there is no support to UV, adjust, tess. I have seen some people adding a uv grid on top of the but it is not a direct use of the OpenVDB library. I implemented the plot function as showing the bounding box of the vdb object.</p>",
+        "id": 395439111,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1696700013
+    },
+    {
+        "content": "<p>In terms of gaps in the implementation, the main thing would be to give support to different types of vdb objects. I focused on levelset objects but vdb also supports fully volumetric objects and points clouds.</p>",
+        "id": 395439190,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1696700101
+    },
+    {
+        "content": "<p>Btw, I just did the upload of the final evaluation! =)</p>",
+        "id": 395453224,
+        "sender_full_name": "Caio José Dos Santos Brito",
+        "timestamp": 1696711132
+    }
+]

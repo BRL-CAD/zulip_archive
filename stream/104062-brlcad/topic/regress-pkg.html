@@ -1,0 +1,876 @@
+<html>
+<head><meta charset="utf-8"><title>regress-pkg · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html">regress-pkg</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="198236659"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198236659" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198236659">(May 20 2020 at 18:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I'm not able to reproduce r75847 on GhostBSD, OpenBSD or bz - are there specific conditions that trigger it?</p>
+
+
+
+<a name="198243170"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198243170" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198243170">(May 20 2020 at 19:05)</a>:</h4>
+<p>no conditions, default build + make regress<br>
+.bz is stalling (see jenkins)</p>
+
+
+
+<a name="198243257"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198243257" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198243257">(May 20 2020 at 19:06)</a>:</h4>
+<p>or did at least once.  i haven't been back to check it, been debugging it for a while.</p>
+
+
+
+<a name="198244226"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198244226" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198244226">(May 20 2020 at 19:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> debugging is going slow though.  took a while just to get at the actual calls.</p>
+<p>the regression tests are a bit of a mess..  some using macros, some using functions, some using nothing, some logging, some not logging, all slightly different from the rest.  any relief planned?</p>
+<p>even noticed undefined global keywords like EXCLUDE_FROM_DEFAULT_BUILD and EXCLUDE_FROM _REGRESS that trigger special logic elsewhere (e.g., top-level cmakelists.txt file ).  that makes it super hard to figure out what's going on, frustrating because of the unnecessary spaghet.</p>
+
+
+
+<a name="198244763"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198244763" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198244763">(May 20 2020 at 19:18)</a>:</h4>
+<p>Yeah, most of those grew organically and weren't well designed for multi-config setups.</p>
+
+
+
+<a name="198244870"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198244870" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198244870">(May 20 2020 at 19:19)</a>:</h4>
+<p>is that because of the log files?</p>
+
+
+
+<a name="198244903"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198244903" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198244903">(May 20 2020 at 19:19)</a>:</h4>
+<p>how does multiconfig complicate it?</p>
+
+
+
+<a name="198245063"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245063" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245063">(May 20 2020 at 19:21)</a>:</h4>
+<p>Mostly has to do with the need to launch built executable programs from configuration dependent output directories.  I need to look into whether generator expressions in newer CMake can help clean that up, but it was a real pain originally</p>
+
+
+
+<a name="198245150"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245150" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245150">(May 20 2020 at 19:21)</a>:</h4>
+<p>$&lt;TARGET_FILE: doesn't take care of that?</p>
+
+
+
+<a name="198245236"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245236" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245236">(May 20 2020 at 19:22)</a>:</h4>
+<p>It may now - that wasn't an option when most of them were written.  regress-repository and regress-license experiment with using those expressions - so far successfully</p>
+
+
+
+<a name="198245255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245255">(May 20 2020 at 19:22)</a>:</h4>
+<p>ah okay</p>
+
+
+
+<a name="198245300"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245300" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245300">(May 20 2020 at 19:23)</a>:</h4>
+<p>Log and stamp files are another issue though - if you switch configs in MSVC, you need everything to look for configuration dependent stamp files to know to re-run tests.</p>
+
+
+
+<a name="198245357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245357">(May 20 2020 at 19:23)</a>:</h4>
+<p>Those aren't an issue with repo and license - those just run every time the target is called.  Maybe that's what all the regress targets should do - would simplify that a fair bit</p>
+
+
+
+<a name="198245516"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245516" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245516">(May 20 2020 at 19:25)</a>:</h4>
+<p>Also depends on how much you want logged to text files - Running things from execute_process in CMake allows capture of stdout and stderror to per-test log files.</p>
+
+
+
+<a name="198245531"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245531" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245531">(May 20 2020 at 19:25)</a>:</h4>
+<p>just for some context, here's the hot tests on mac laptop (ssd):</p>
+
+
+
+<a name="198245567"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245567" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245567">(May 20 2020 at 19:25)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>30/37 Test #33: regress-nurbs-nirt-NIST03_MISS_01 .........   Passed   37.87 sec
+31/37 Test  #3: regress-solids ............................   Passed    8.65 sec
+32/37 Test #48: regress-repository ........................   Passed   47.49 sec
+33/37 Test #46: regress-gchecker ..........................   Passed   21.88 sec
+34/37 Test  #6: regress-rtedge ............................   Passed   60.01 sec
+35/37 Test #47: regress-licenses ..........................   Passed   26.60 sec
+36/37 Test #14: regress-red ...............................   Passed   68.78 sec
+37/37 Test #36: regress-pkg ...............................***Failed  1009.37 sec
+</code></pre></div>
+
+
+
+<a name="198245657"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245657" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245657">(May 20 2020 at 19:26)</a>:</h4>
+<p>(looks like latest jenkins tests either succeeded or are failing on usual rtedge issue unless I'm looking at the wrong thing...)</p>
+
+
+
+<a name="198245667"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245667" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245667">(May 20 2020 at 19:26)</a>:</h4>
+<p>pkg only aborted after I ended up killing the server process manually.</p>
+
+
+
+<a name="198245676"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245676" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245676">(May 20 2020 at 19:26)</a>:</h4>
+<p>O.o</p>
+
+
+
+<a name="198245774"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245774" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245774">(May 20 2020 at 19:27)</a>:</h4>
+<p>OK... if you run stand-alone what happens?</p>
+<p>./bin/regress_pkg ./bin/regress_pkg_server ./bin/regress_pkg_client</p>
+
+
+
+<a name="198245882"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198245882" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198245882">(May 20 2020 at 19:28)</a>:</h4>
+<p>I thought I set regress-pkg to not be part of the make check/make regress targets - let me see if I goofed that up somehow</p>
+
+
+
+<a name="198246031"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246031" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246031">(May 20 2020 at 19:29)</a>:</h4>
+<p>Huh.  r75832 should have taken it out of both regress and check - only make test or a specific run of the regress-pkg target should trigger it.</p>
+
+
+
+<a name="198246215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246215">(May 20 2020 at 19:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> will the jenkins instance run multiple builds in parallel (i.e. if commits some in one after the other?)</p>
+
+
+
+<a name="198246377"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246377" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246377">(May 20 2020 at 19:32)</a>:</h4>
+<p>that could definitely hang it, if multiple pkg test programs start mixing it up</p>
+
+
+
+<a name="198246394"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246394" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246394">(May 20 2020 at 19:32)</a>:</h4>
+<p>it's configured to test commits one at a time</p>
+
+
+
+<a name="198246658"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246658" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246658">(May 20 2020 at 19:34)</a>:</h4>
+<p>the stall feels like a race condition and that's what the log seems to confirm to some extent, like the client runs before the server, exits, and then the server runs and waits forever, just due to how the threads got scheduled.</p>
+
+
+
+<a name="198246734"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246734" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246734">(May 20 2020 at 19:35)</a>:</h4>
+<p>this probably needs to be accommodated in the client code.  I noticed it exits immediately, which is not the behavior needed here.</p>
+
+
+
+<a name="198246851"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198246851" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198246851">(May 20 2020 at 19:36)</a>:</h4>
+<p>client should probably try a few times and for a few seconds before giving up</p>
+
+
+
+<a name="198247065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198247065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198247065">(May 20 2020 at 19:38)</a>:</h4>
+<p>So you're thinking around line 94 to loop for a little while if the initial connection attempt fails?</p>
+
+
+
+<a name="198247152"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198247152" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198247152">(May 20 2020 at 19:39)</a>:</h4>
+<p>Probably could also have the sever time out after a second or so - this test should be virtually instantaneous if it's running correctly</p>
+
+
+
+<a name="198247400"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198247400" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198247400">(May 20 2020 at 19:41)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> you want me to go ahead and add some timing logic to see if I can force it to behave a little better if something goes wrong?</p>
+
+
+
+<a name="198250396"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198250396" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198250396">(May 20 2020 at 20:06)</a>:</h4>
+<p>r75850 should help some.  I'm not seeing a non-blocking option to pkg_process in pkg.h offhand...</p>
+
+
+
+<a name="198251227"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251227" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251227">(May 20 2020 at 20:13)</a>:</h4>
+<p>a second is likely not enough, that depends on the kernel.  starting a process can commonly take 0-5 depending on operating system, level of concurrency, and other factors</p>
+
+
+
+<a name="198251247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251247">(May 20 2020 at 20:13)</a>:</h4>
+<p>but yeah, that looks like the right direction</p>
+
+
+
+<a name="198251346"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251346" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251346">(May 20 2020 at 20:14)</a>:</h4>
+<p>should document those magic numbers (which is what the BU_SEC2USEC macro does in effect, or a comment)</p>
+
+
+
+<a name="198251385"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251385" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251385">(May 20 2020 at 20:14)</a>:</h4>
+<p>not sure about making the server non-blocking on getting clients, that doesn't seem right</p>
+
+
+
+<a name="198251443"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251443" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251443">(May 20 2020 at 20:15)</a>:</h4>
+<p>that's just going to make it spin hot and/or fall right into the error condition</p>
+
+
+
+<a name="198251543"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251543" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251543">(May 20 2020 at 20:16)</a>:</h4>
+<p>The snooze was intended to keep it from spinning hot - will that not work?</p>
+
+
+
+<a name="198251698"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198251698" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198251698">(May 20 2020 at 20:17)</a>:</h4>
+<p>Only other option that came to mind was launching the connection wait from a thread, which seemed like a fair bit of complication for what's supposed to be something simple...</p>
+
+
+
+<a name="198254604"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198254604" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198254604">(May 20 2020 at 20:42)</a>:</h4>
+<p>no, you're right -- the sleep alleviates it running hot, but it does fall right into the condition</p>
+<p>note, that it doesn't mean it's busy.  null return just means there's no client to get.</p>
+
+
+
+<a name="198254684"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198254684" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198254684">(May 20 2020 at 20:42)</a>:</h4>
+<p>this is informative, the server is now running and timing out before the client even starts</p>
+
+
+
+<a name="198255040"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255040" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255040">(May 20 2020 at 20:45)</a>:</h4>
+<p>With a 10 second wait time? O.o</p>
+
+
+
+<a name="198255123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255123">(May 20 2020 at 20:46)</a>:</h4>
+<p>Is the machine thread starved somehow?</p>
+
+
+
+<a name="198255273"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255273" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255273">(May 20 2020 at 20:47)</a>:</h4>
+<p>nope</p>
+
+
+
+<a name="198255329"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255329" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255329">(May 20 2020 at 20:48)</a>:</h4>
+<p>Or is the port just blocked outright?  Not sure how that would manifest...</p>
+
+
+
+<a name="198255351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255351">(May 20 2020 at 20:48)</a>:</h4>
+<p>nope</p>
+
+
+
+<a name="198255364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255364">(May 20 2020 at 20:48)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>34/37 Test #36: regress-pkg ...............................***Failed    2.10 sec
+Launching server
+SERVER thread starting
+Listening on port 2000
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Connection seems to be busy, waiting...
+Launching client
+CLIENT thread starting
+Connection inactive for &gt; 1 second, quitting.
+
+Timeout - inactive
+SERVER thread ending
+Connecting to 127.0.0.1, port 2000
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+</code></pre></div>
+
+
+
+<a name="198255585"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255585" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255585">(May 20 2020 at 20:50)</a>:</h4>
+<p>So... the 1 second wait isn't long enough?  It looks like CLIENT thread is starting just before the server bails?</p>
+
+
+
+<a name="198255788"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198255788" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198255788">(May 20 2020 at 20:52)</a>:</h4>
+<p>running some tests</p>
+
+
+
+<a name="198257622"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198257622" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198257622">(May 20 2020 at 21:09)</a>:</h4>
+<p>curiouser and curiouser</p>
+<div class="codehilite"><pre><span></span><code>Launching server
+SERVER thread starting
+Listening on port 2000
+No client input available, waiting...
+No client input available, waiting...
+Launching client
+CLIENT thread starting
+No client input available, waiting...
+No client input available, waiting...
+Waiting for client to exit
+No client input available, waiting...
+No client input available, waiting...
+No client input available, waiting...
+No client input available, waiting...
+No client input available, waiting...
+No client input available, waiting...
+Connection inactive for &gt; 5 seconds, quitting.
+
+Timeout - inactive
+SERVER thread ending
+Connecting to 127.0.0.1, port 2000
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+pkg_open: client connect: errno=61
+Connection to 127.0.0.1, port 2000, failed.
+</code></pre></div>
+
+
+
+<a name="198257832"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198257832" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198257832">(May 20 2020 at 21:10)</a>:</h4>
+<p>Is that BSD?  or OSX?</p>
+
+
+
+<a name="198257850"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198257850" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198257850">(May 20 2020 at 21:11)</a>:</h4>
+<p>so the client thread starts, but the client process does not until the second process completes.  I wonder, this could be a security or system implementation issue that prevents simultaneous std::system() calls from multiple threads</p>
+
+
+
+<a name="198257866"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198257866" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198257866">(May 20 2020 at 21:11)</a>:</h4>
+<p>this is OSX</p>
+
+
+
+<a name="198258089"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258089" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258089">(May 20 2020 at 21:13)</a>:</h4>
+<p>Um.  Unfortunately, to the best of my knowledge CTest doesn't provide a way to define a test that launches multiple executables.  (The controlling regress_pkg program was an attempt to get cute and work around that.)</p>
+
+
+
+<a name="198258187"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258187" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258187">(May 20 2020 at 21:14)</a>:</h4>
+<p>why make it multiprocess?</p>
+
+
+
+<a name="198258215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258215">(May 20 2020 at 21:14)</a>:</h4>
+<p>To verify that information moved successfully between two different programs</p>
+
+
+
+<a name="198258218"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258218" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258218">(May 20 2020 at 21:14)</a>:</h4>
+<p>instead of std::system, just call their (renamed) main functions accordingly</p>
+
+
+
+<a name="198258388"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258388" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258388">(May 20 2020 at 21:16)</a>:</h4>
+<p>That'll probably do for exercising libpkg.  That wasn't why I originally put that example together, so I was probably to focused on the multiple programs sharing information aspect - I'll try the renamed mains and see if communication-across-threads works.</p>
+
+
+
+<a name="198258413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258413">(May 20 2020 at 21:16)</a>:</h4>
+<p>add_test can't take multiple COMMAND lines?</p>
+
+
+
+<a name="198258447"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258447" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258447">(May 20 2020 at 21:17)</a>:</h4>
+<p>or custom_target</p>
+
+
+
+<a name="198258485"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258485" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258485">(May 20 2020 at 21:17)</a>:</h4>
+<p>Docs for add_test don't look like it takes multiple COMMANDs - even if it did, if it's like the other add_ functions it would execute in series.</p>
+
+
+
+<a name="198258506"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258506" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258506">(May 20 2020 at 21:18)</a>:</h4>
+<p>I thought we had examples calling multiple commands, things that replaced shell scripts</p>
+
+
+
+<a name="198258592"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258592" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258592">(May 20 2020 at 21:18)</a>:</h4>
+<p>in series is fine -- server is run (stays running), client is run (exits), server is shut down</p>
+
+
+
+<a name="198258631"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258631" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258631">(May 20 2020 at 21:19)</a>:</h4>
+<p>I don't think it will launch the client until the server completes - e.g. std::system()</p>
+
+
+
+<a name="198258662"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258662" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258662">(May 20 2020 at 21:19)</a>:</h4>
+<p>it wouldn't be using std::system, pkg_regress would go away</p>
+
+
+
+<a name="198258678"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258678" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258678">(May 20 2020 at 21:19)</a>:</h4>
+<p>if cmake can run multiple commands in series or otherwise, it's doable as multiprocess</p>
+
+
+
+<a name="198258742"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258742" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258742">(May 20 2020 at 21:20)</a>:</h4>
+<p>Er, sorry - wasn't clear.  As far as I know, CMake script execution can't do async process launching - it runs one program to exit, then launches the next</p>
+
+
+
+<a name="198258766"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258766" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258766">(May 20 2020 at 21:20)</a>:</h4>
+<p>that'd work</p>
+
+
+
+<a name="198258834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258834">(May 20 2020 at 21:21)</a>:</h4>
+<p>Not following - it would wait for the server to finish, then launch the client - would do just what OSX is doing now.</p>
+
+
+
+<a name="198258838"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258838" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258838">(May 20 2020 at 21:21)</a>:</h4>
+<p>you run the server, it detaches and keeps running, the process exits (server remains running)</p>
+
+
+
+<a name="198258854"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258854" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258854">(May 20 2020 at 21:21)</a>:</h4>
+<p>It doesn't detach (as far as I know)</p>
+
+
+
+<a name="198258884"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258884" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258884">(May 20 2020 at 21:21)</a>:</h4>
+<p>well not now, we're talking about what it could be made to do in a serial cmake context</p>
+
+
+
+<a name="198258956"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258956" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258956">(May 20 2020 at 21:22)</a>:</h4>
+<p>it could be made to detach</p>
+
+
+
+<a name="198258961"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258961" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258961">(May 20 2020 at 21:22)</a>:</h4>
+<p>I don't think CMake detaches either - looking for docs now, but I think a script doesn't proceed until program return.</p>
+
+
+
+<a name="198258981"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258981" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258981">(May 20 2020 at 21:22)</a>:</h4>
+<p>still, no it wouldn't you'd have to write the code to make it detach</p>
+
+
+
+<a name="198258991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258991">(May 20 2020 at 21:22)</a>:</h4>
+<p>I mean, I think multithreaded tests is adequate myself</p>
+
+
+
+<a name="198258999"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198258999" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198258999">(May 20 2020 at 21:22)</a>:</h4>
+<p>but sounds doable</p>
+
+
+
+<a name="198259069"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198259069" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198259069">(May 20 2020 at 21:23)</a>:</h4>
+<p>we have multiprocess libpkg testing, several regress scripts render via pkg</p>
+
+
+
+<a name="198259148"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198259148" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198259148">(May 20 2020 at 21:24)</a>:</h4>
+<p>we don't have pkg unit testing, that would be interesting <br>
+(and maybe tricky to get right)</p>
+
+
+
+<a name="198259215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198259215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198259215">(May 20 2020 at 21:25)</a>:</h4>
+<p>I'll try the multithreading - at this point I'm regretting stepping on the land mine, so if that's the shortest way out of the patch I'm all for it ;-)</p>
+
+
+
+<a name="198260453"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198260453" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198260453">(May 20 2020 at 21:38)</a>:</h4>
+<p><a href="/user_uploads/1549/GKRbGbAKo5Yr7NQhY2S-wDs4/test2.cpp">test2.cpp</a> <a href="/user_uploads/1549/80Ric5GfE235clRvXbhSJJaL/test2.sh">test2.sh</a></p>
+
+
+
+<a name="198260466"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198260466" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198260466">(May 20 2020 at 21:38)</a>:</h4>
+<p>looks like that's definitely what's going on</p>
+
+
+
+<a name="198260488"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198260488" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198260488">(May 20 2020 at 21:38)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>agua:.build morrison$ clang++ test2.cpp
+agua:.build morrison$ ./a.out
+running ONE
+running ONE
+running ONE
+running ONE
+running ONE
+running ONE
+running TWO
+running TWO
+running TWO
+running TWO
+running TWO
+running TWO
+</code></pre></div>
+
+
+
+<a name="198260530"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198260530" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198260530">(May 20 2020 at 21:39)</a>:</h4>
+<p>I wonder...</p>
+
+
+
+<a name="198260586"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198260586" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198260586">(May 20 2020 at 21:39)</a>:</h4>
+<p>I just got a multithreaded test working (I think) - I'll pull in your updates and commit so you can give it a whirl</p>
+
+
+
+<a name="198261116"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198261116" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198261116">(May 20 2020 at 21:45)</a>:</h4>
+<p>I found an alternative that should work for multiprocess too</p>
+
+
+
+<a name="198261130"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198261130" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198261130">(May 20 2020 at 21:45)</a>:</h4>
+<p>if it doesn't pan out, but testing indicates it will</p>
+
+
+
+<a name="198261249"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198261249" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198261249">(May 20 2020 at 21:47)</a>:</h4>
+<p>OK, I'll hold off</p>
+
+
+
+<a name="198262526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198262526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198262526">(May 20 2020 at 22:00)</a>:</h4>
+<p>I think you should do the threaded approach.  it's still simpler and avoids std::system (which will show up on a security audit anyways as a high-vulnerability code issue).</p>
+
+
+
+<a name="198262553"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198262553" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198262553">(May 20 2020 at 22:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  btw, add_executable in CMake won't install out of the box - you need an install() as well.  The BRLCAD_ADDEXEC call does all that automatically, so that's why it has the NO_INSTALL flag.  What you did works fine, just thought I'd mention it for clarity</p>
+
+
+
+<a name="198262619"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198262619" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198262619">(May 20 2020 at 22:01)</a>:</h4>
+<p>alrightie - committing.  Let me know what the Mac thinks.</p>
+
+
+
+<a name="198262645"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198262645" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198262645">(May 20 2020 at 22:01)</a>:</h4>
+<p>ah, gotcha.  it was more that I noticed they were oddities in my build/bin dir.</p>
+
+
+
+<a name="198262794"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198262794" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198262794">(May 20 2020 at 22:03)</a>:</h4>
+<p>I'll sometimes just us add_executable when I don't need to link in lots of stuff, worry about DLL defines, and all the other complex pieces - I shouldn't really, since I've also been bit on a few occasions when I was wrong about not needing it after trying on Windows...</p>
+
+
+
+<a name="198262934"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198262934" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198262934">(May 20 2020 at 22:04)</a>:</h4>
+<p>If the free OSes are going to implement something similar to that DLL import/export business, we should probably enable it even if we don't otherwise care just to more easily test the Windows behavior</p>
+
+
+
+<a name="198263035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263035">(May 20 2020 at 22:05)</a>:</h4>
+<p>I think it's good practice not to just because it creates outliers that beg questions to whomever didn't write that logic</p>
+
+
+
+<a name="198263095"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263095" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263095">(May 20 2020 at 22:06)</a>:</h4>
+<p>I <em>really</em> need to get a CI setup somewhere using the new Ninja/CMake multiconfig build - up until that was added it was only Xcode and Visual Studio that could exercise that part of things.</p>
+
+
+
+<a name="198263125"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263125" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263125">(May 20 2020 at 22:06)</a>:</h4>
+<p>won't know why one is different from the rest</p>
+
+
+
+<a name="198263135"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263135" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263135">(May 20 2020 at 22:06)</a>:</h4>
+<p>true</p>
+
+
+
+<a name="198263158"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263158" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263158">(May 20 2020 at 22:06)</a>:</h4>
+<p>looks like there are only 6 instances currently</p>
+
+
+
+<a name="198263248"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263248" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263248">(May 20 2020 at 22:07)</a>:</h4>
+<p>we could also adopt the forced import/export behavior on linux/mac so it's the same everywhere</p>
+
+
+
+<a name="198263329"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263329" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263329">(May 20 2020 at 22:08)</a>:</h4>
+<p>it would eliminate the conditionals and make everyone fail like windows</p>
+
+
+
+<a name="198263369"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263369" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263369">(May 20 2020 at 22:08)</a>:</h4>
+<p>I've never actually seen that done on any platform other than Windows - how does it work?</p>
+
+
+
+<a name="198263393"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263393" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263393">(May 20 2020 at 22:08)</a>:</h4>
+<p>it's identical</p>
+
+
+
+<a name="198263438"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263438" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263438">(May 20 2020 at 22:09)</a>:</h4>
+<p>I think clang (or maybe gcc or both?? I forget) even adopted the same syntax</p>
+
+
+
+<a name="198263454"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263454" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263454">(May 20 2020 at 22:09)</a>:</h4>
+<p>__declspec(dllexport) and __declspec(dllimport) ?</p>
+
+
+
+<a name="198263462"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263462" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263462">(May 20 2020 at 22:09)</a>:</h4>
+<p>yep</p>
+
+
+
+<a name="198263490"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263490" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263490">(May 20 2020 at 22:09)</a>:</h4>
+<p>hrm.  Well, I guess if configure tested for support for it...</p>
+
+
+
+<a name="198263491"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263491" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263491">(May 20 2020 at 22:09)</a>:</h4>
+<p>there's another cflag that makes them required iirc</p>
+
+
+
+<a name="198263606"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263606" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263606">(May 20 2020 at 22:10)</a>:</h4>
+<p>Much as it irks me in some ways, we should probably mandate it - that's one of the major rolling pain points building on Windows.</p>
+
+
+
+<a name="198263636"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263636" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263636">(May 20 2020 at 22:11)</a>:</h4>
+<p>here it is: <a href="https://gcc.gnu.org/wiki/Visibility">https://gcc.gnu.org/wiki/Visibility</a></p>
+
+
+
+<a name="198263758"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263758" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263758">(May 20 2020 at 22:11)</a>:</h4>
+<p>will have to do some performance testing as it does affect what is visible to the optimizer as well (could be better or worse, why it warrants testing)</p>
+
+
+
+<a name="198263840"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263840" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263840">(May 20 2020 at 22:12)</a>:</h4>
+<p>there it is -- just have to add -fvisibility=hidden</p>
+
+
+
+<a name="198263893"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263893" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263893">(May 20 2020 at 22:12)</a>:</h4>
+<p>then of course the appropriate dllimport/export decls we use on windows should be used</p>
+
+
+
+<a name="198263949"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198263949" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198263949">(May 20 2020 at 22:13)</a>:</h4>
+<p>/me thinks __attribute__ ((dllimport)) is stupid given they made it fully compatible with __declspec(dllimport)</p>
+
+
+
+<a name="198264025"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198264025" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198264025">(May 20 2020 at 22:14)</a>:</h4>
+<p>agreed - if that works I see no reason to complicate things.</p>
+
+
+
+<a name="198264085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198264085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198264085">(May 20 2020 at 22:14)</a>:</h4>
+<p>Trying to remember where we made the DLL bits windows specific... first I'd better make sure I can test for -fvisibility=hidden.</p>
+
+
+
+<a name="198264212"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198264212" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198264212">(May 20 2020 at 22:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Did the threaded version of regress_pkg build on OSX?</p>
+
+
+
+<a name="198264613"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198264613" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198264613">(May 20 2020 at 22:20)</a>:</h4>
+<p>be back in a bit</p>
+
+
+
+<a name="198289442"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198289442" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198289442">(May 21 2020 at 06:03)</a>:</h4>
+<p>builds and passes now</p>
+
+
+
+<a name="198345120"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198345120" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198345120">(May 21 2020 at 16:45)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>   about the regression testing - I'll go through and convert everything I can to functions.</p>
+<p>I can probably remove the stamp file mechanism from the regression tests altogether - that's important for custom build steps, but is unnecessary for regression tests since we want them to run each time one of the targets is invoked.  I originally based the regression test code on the other custom runs for the build, and it migrated in with that IIRC.</p>
+<p>The EXCLUDE_FROM_DEFAULT_BUILD property is a standard CMake option that keeps a target from being run by "Build Solution" in Visual Studio.  I never run that target myself, so I'd be OK with skipping it:<br>
+<a href="https://cmake.org/cmake/help/latest/prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD.html">https://cmake.org/cmake/help/latest/prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD.html</a></p>
+<p>EXCLUDE_FROM_REGRESS and the other implicit naming conventions are trickier.  It might be possible to define a better wrapper function which hides the details to assemble the check and regress targets, but I don't know if you'd like that any better than what's there...  I'll take a stab at it, but we'll have to see.</p>
+<p>For test logging, here are the options I know of:</p>
+<p>1)  current solution - launch test programs with execute_process inside a .cmake script which is run by cmake -P via add_test  in the parent build.  This captures I/O to log files, but does complicate execution.  In particular, the .cmake script has to know how to launch the executable specific to the current configuration, as well as writing out the log files in the appropriate directories.</p>
+<p>2)  Directly run the regression executable with add_test, no wrapping .cmake file.  This has the virtue of simplicity, but to the best of my knowledge this approach has no way to capture the I/O from the test executable to a file.  It is captured by ctest, which I believe does do some organization of its reported outputs, but as far as I can discover it has no sophisticated logging options so we give up per-test logging files.</p>
+
+
+
+<a name="198690947"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198690947" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198690947">(May 25 2020 at 18:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> upon inspection  It looks like the regress-flawfinder target is successfully running, so the failure is flawfinder not liking something</p>
+
+
+
+<a name="198698011"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198698011" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198698011">(May 25 2020 at 19:56)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> bioh branch has the rework of the regression testing system.  It should be at a point now where it's worth you taking a look and seeing if it addresses your concerns</p>
+
+
+
+<a name="198715023"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198715023" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198715023">(May 26 2020 at 02:18)</a>:</h4>
+<p>The system is now the BRLCAD_REGRESSION_TEST function in misc/CMake/BRLCAD_Targets.cmake along with  the *.cmake.in files and CMakeLists.txt files in the regress directory and subdirectories.</p>
+
+
+
+<a name="198850482"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198850482" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198850482">(May 27 2020 at 05:20)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/regress-pkg/near/198690947">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> upon inspection  It looks like the regress-flawfinder target is successfully running, so the failure is flawfinder not liking something</p>
+</blockquote>
+<p>Oh cool.  I <em>thought</em> flawinder was left at a really low setting that always detected real code smells, but wasn't sure.</p>
+
+
+
+<a name="198851108"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/198851108" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#198851108">(May 27 2020 at 05:38)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/regress-pkg/near/198698011">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> bioh branch has the rework of the regression testing system.  It should be at a point now where it's worth you taking a look and seeing if it addresses your concerns</p>
+</blockquote>
+<p>K, will take a look!</p>
+
+
+
+<a name="199285322"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/199285322" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#199285322">(May 31 2020 at 01:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Unless something is clearly broken, I'd like to go ahead and merge the regress updates - even if that's not its final form, I think it's an improvement over what was there previously</p>
+
+
+
+<a name="199296698"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/regress-pkg/near/199296698" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/regress-pkg.html#199296698">(May 31 2020 at 08:23)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> the branch looks good to me, all running well.  love the unified logging.   making it work with/without existing test definitions was a nice addition.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

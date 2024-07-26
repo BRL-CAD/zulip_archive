@@ -1,0 +1,218 @@
+[
+    {
+        "content": "<p>Gah, how did datums get busted?!?!</p>",
+        "id": 204793007,
+        "sender_full_name": "Sean",
+        "timestamp": 1595509176
+    },
+    {
+        "content": "<p>looks like minortype is correct (44).. majortype is 255, though, and that's not right</p>",
+        "id": 204793732,
+        "sender_full_name": "Sean",
+        "timestamp": 1595509470
+    },
+    {
+        "content": "<p>yeah, it's supposed to be 1 (majortype BRLCAD)</p>",
+        "id": 204794037,
+        "sender_full_name": "Sean",
+        "timestamp": 1595509592
+    },
+    {
+        "content": "<p>Busted in 7-30-2-1</p>",
+        "id": 204795687,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510409
+    },
+    {
+        "content": "<p>works in 7-26-0</p>",
+        "id": 204795704,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510419
+    },
+    {
+        "content": "<p>looks like the datum_in code has never set the majortype but worked, so either extra validation checks were added or majortype setting was removed from someplace common to multipl types</p>",
+        "id": 204795713,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510422
+    },
+    {
+        "content": "<p>OK, you're deeper than I am - want me to add a regression test while you're hunting?</p>",
+        "id": 204795765,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510454
+    },
+    {
+        "content": "<p>can you see what the majortype is in 26.0?</p>",
+        "id": 204795772,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510456
+    },
+    {
+        "content": "<p>what's a quick way to print that?</p>",
+        "id": 204795833,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510495
+    },
+    {
+        "content": "<p>does the datum from 26 open in 30?</p>",
+        "id": 204795853,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510506
+    },
+    {
+        "content": "<p>Opens in trunk, actually - draws too</p>",
+        "id": 204795963,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510563
+    },
+    {
+        "content": "<p>okay, so it's not extra validation then</p>",
+        "id": 204796005,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510593
+    },
+    {
+        "content": "<p>just to confirm, you can try running: gex file.g</p>",
+        "id": 204796057,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510615
+    },
+    {
+        "content": "<p>see if there's an unknown majortype listed  (assuming you didn't create invalid and valid ones)</p>",
+        "id": 204796093,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510634
+    },
+    {
+        "content": "<p>===============================================<br>\n Objects found in BRL-CAD V5 database: datum.g <br>\n===============================================</p>\n<p>Object DLI type/major/minor type:   1/  0/  0 name: (none)<br>\nObject DLI type/major/minor type:   0/  2/  0 name: _GLOBAL<br>\n  Has one or more attributes.<br>\nObject DLI type/major/minor type:   0/  1/ 44 name: datum.s<br>\n  Has one or more attributes.</p>\n<p>==========================================<br>\n Summary for BRL-CAD V5 database: datum.g<br>\n==========================================</p>\n<p>Found 3 objects:<br>\n  free space:      0<br>\n  named     :      2<br>\n  other     :      1</p>\n<p>2 objects have one or more attributes.</p>\n<p>Object DLI types (the main category: defined in H Flags):<br>\n    0 (APPLICATION_DATA_OBJECT)   :      2<br>\n    1 (HEADER_OBJECT)             :      1<br>\nObject major types:<br>\n    0 (RESERVED)                  :      1<br>\n    1 (BRLCAD)                    :      1<br>\n    2 (ATTRIBUTE_ONLY)            :      1<br>\nObject minor types:<br>\n    0 (RESERVED)                  :      2<br>\n   44 (unknown)                   :      1</p>\n<p>Note: file read ended normally at EOF.</p>",
+        "id": 204796098,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510638
+    },
+    {
+        "content": "<p>yeah that looks right</p>",
+        "id": 204796195,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510672
+    },
+    {
+        "content": "<p>created prior to my fix creates:</p>",
+        "id": 204796231,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510695
+    },
+    {
+        "content": "<p>Object major types:<br>\n    0 (RESERVED)                  :      4<br>\n    1 (BRLCAD)                    :     14<br>\n    2 (ATTRIBUTE_ONLY)            :      1<br>\n    9 (BINARY_UNIF)               :      1<br>\n  255 (unknown)                   :      1</p>",
+        "id": 204796233,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510696
+    },
+    {
+        "content": "<p>ah, right, there it is: Object DLI type/major/minor type: 0/ 1/ 44 name: datum.s</p>",
+        "id": 204796333,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510755
+    },
+    {
+        "content": "<p>vs Object DLI type/major/minor type:   0/255/ 44 name: datum</p>",
+        "id": 204796346,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510760
+    },
+    {
+        "content": "<p>busted in rel-7-28-2</p>",
+        "id": 204796499,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595510840
+    },
+    {
+        "content": "<p>this is where having a database with all objects in the regression suite would have triggered a failure, caught it</p>",
+        "id": 204796526,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510860
+    },
+    {
+        "content": "<p>.. <span class=\"user-mention\" data-user-id=\"253014\">@Thusal Ranawaka</span> can you make sure you add datums to your list? :)</p>",
+        "id": 204796558,
+        "sender_full_name": "Sean",
+        "timestamp": 1595510878
+    },
+    {
+        "content": "<p>rel-7-26-4 works</p>",
+        "id": 204797099,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595511156
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Is r76443 the full fix?  I'll have to start bisecting if you want me to ID which commit actually broke it</p>",
+        "id": 204797722,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595511486
+    },
+    {
+        "content": "<p>May want to put out a patch release with that fix - trunk would be a heck of a jump just for that...</p>",
+        "id": 204797906,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595511608
+    },
+    {
+        "content": "<p>Working as of r71000</p>",
+        "id": 204798188,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595511765
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-general/topic/datums/near/204796558\">said</a>:</p>\n<blockquote>\n<p>.. <span class=\"user-mention silent\" data-user-id=\"253014\">Thusal Ranawaka</span> can you make sure you add datums to your list? :)</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Roger that! <span aria-label=\"police\" class=\"emoji emoji-1f46e\" role=\"img\" title=\"police\">:police:</span></p>",
+        "id": 204799294,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595512310
+    },
+    {
+        "content": "<p>Found it - I did it, commit r71953</p>",
+        "id": 204804201,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595514448
+    },
+    {
+        "content": "<p>I don't think we need to bisect the cause</p>",
+        "id": 204810490,
+        "sender_full_name": "Sean",
+        "timestamp": 1595517157
+    },
+    {
+        "content": "<p>oh, I see you found it, great</p>",
+        "id": 204810508,
+        "sender_full_name": "Sean",
+        "timestamp": 1595517170
+    },
+    {
+        "content": "<p>so what that might imply is that other 'in' command primitives could be busted.  we should check them since this reared its head</p>",
+        "id": 204810747,
+        "sender_full_name": "Sean",
+        "timestamp": 1595517271
+    },
+    {
+        "content": "<p>/me agrees</p>",
+        "id": 204810883,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595517345
+    },
+    {
+        "content": "<p>most manually set, but I did see at least two other commits where the type was added back in, presumably to fix a released error</p>",
+        "id": 204810894,
+        "sender_full_name": "Sean",
+        "timestamp": 1595517348
+    },
+    {
+        "content": "<p>also implies a NEWS item will be in order for those types</p>",
+        "id": 204810992,
+        "sender_full_name": "Sean",
+        "timestamp": 1595517378
+    },
+    {
+        "content": "<p>/me nods - I'm thinking a 7.30.10 patch release?  Should be easy to backport the changes for this issue...</p>",
+        "id": 204811056,
+        "sender_full_name": "starseeker",
+        "timestamp": 1595517416
+    }
+]

@@ -1,0 +1,98 @@
+<html>
+<head><meta charset="utf-8"><title>rt_shootrays · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html">rt_shootrays</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="184987081"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/184987081" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#184987081">(Jan 07 2020 at 07:01)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span>  Yes but I called shootrays and define parallel macros.So bu_parallel took as a function (shootrays_in_parallel).  But the loop is returning false in shootrays_in_parallel. Tried with a for loop for nrays but got a memory stack error.Maybe got wrong with setup resource structure .</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> I understand what you did and what I'm saying is that you're using a non-public function that is NOT intended to be called by other codes.  It should have a "static" label on it.  In fact, I'm going to add one now because it's not public API and was never intended to be public API because of assumptions it has in it that would lead to exactly this sort of confusion.   It (shootrays_in_parallel) will no longer be directly callable after the next release, only indirectly via rt_shootrays().</p>
+
+
+
+<a name="184987136"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/184987136" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#184987136">(Jan 07 2020 at 07:02)</a>:</h4>
+<p>Is there a reason you cannot call rt_shootrays() or rt_shootray_bundle() ?</p>
+
+
+
+<a name="184987285"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/184987285" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#184987285">(Jan 07 2020 at 07:07)</a>:</h4>
+<p>I would guess it's because rt_shootrays() currently isn't implemented in parallel and that's what you're trying to achieve?  If so, that's current development that isn't finished (which is why the version that calls shootrays_in_parallel() is protected by a compile-time SHOOTRAYS_IN_PARALLEL ifdef check).  As soon as someone get it working, parallel will either be the default or will at least be configurable.</p>
+
+
+
+<a name="185009521"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/185009521" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#185009521">(Jan 07 2020 at 13:25)</a>:</h4>
+<blockquote>
+<p>Is there a reason you cannot call rt_shootrays() or rt_shootray_bundle() ?</p>
+<p>I would guess it's because rt_shootrays() currently isn't implemented in parallel and that's what you're trying to achieve?  If so, that's current development that isn't finished (which is why the version that calls shootrays_in_parallel() is protected by a compile-time SHOOTRAYS_IN_PARALLEL ifdef check).  As soon as someone get it working, parallel will either be the default or will at least be configurable.</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  Yes, I wanted  to see parallelism over serial shoot.</p>
+
+
+
+<a name="185050740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/185050740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#185050740">(Jan 07 2020 at 20:22)</a>:</h4>
+<p>set ncpu to 1 for serial, &gt;1  for parallel, and 0 for autodetect  parallel</p>
+
+
+
+<a name="185061643"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/185061643" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#185061643">(Jan 07 2020 at 22:26)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> then you're probably going to want to implement your own callback function and call bu_parallel(), like rt does.  or keep bugging me or others to finish the rt_shootrays() interface :)</p>
+
+
+
+<a name="185061655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/185061655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#185061655">(Jan 07 2020 at 22:26)</a>:</h4>
+<p>(for parallel)</p>
+
+
+
+<a name="185896875"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/185896875" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#185896875">(Jan 17 2020 at 08:38)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="228172">scorp08</span> then you're probably going to want to implement your own callback function and call bu_parallel(), like rt does.  or keep bugging me or others to finish the rt_shootrays() interface :)</p>
+</blockquote>
+<p>:)) <span class="user-mention" data-user-id="102902">@Sean</span>  Where can I start to study shootray_parallel?  :)</p>
+
+
+
+<a name="185920627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/185920627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#185920627">(Jan 17 2020 at 14:35)</a>:</h4>
+<p><span class="user-mention" data-user-id="228172">@scorp08</span> I would study bu_parallel() first, figure out how you want to chop up work into sets/buckets, then use the ncpu key from bu_parallel to set up rt_shootray() calls for each bucket.</p>
+
+
+
+<a name="186570628"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/186570628" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> scorp08 <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#186570628">(Jan 25 2020 at 11:58)</a>:</h4>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="228172">scorp08</span> I would study bu_parallel() first, figure out how you want to chop up work into sets/buckets, then use the ncpu key from bu_parallel to set up rt_shootray() calls for each bucket.</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  thnks. Do I need to setup a resource structure for each ray  or for only one is enough ??</p>
+
+
+
+<a name="186589271"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_shootrays/near/186589271" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_shootrays.html#186589271">(Jan 25 2020 at 21:25)</a>:</h4>
+<blockquote>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="228172">scorp08</span> I would study bu_parallel() first, figure out how you want to chop up work into sets/buckets, then use the ncpu key from bu_parallel to set up rt_shootray() calls for each bucket.</p>
+</blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span>  thnks. Do I need to setup a resource structure for each ray  or for only one is enough ??</p>
+</blockquote>
+<p>No, you only need to setup a resource for each core that will be involved, which is typically the number of virtual cores your CPU has enabled</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

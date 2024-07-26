@@ -1,0 +1,251 @@
+<html>
+<head><meta charset="utf-8"><title>off_t · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html">off_t</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="191286281"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191286281" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191286281">(Mar 20 2020 at 18:48)</a>:</h4>
+<p>Sean, you around to discuss the off_t issue?</p>
+
+
+
+<a name="191286313"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191286313" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191286313">(Mar 20 2020 at 18:48)</a>:</h4>
+<p>in a lil bit, yes, but not just this sec</p>
+
+
+
+<a name="191286335"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191286335" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191286335">(Mar 20 2020 at 18:48)</a>:</h4>
+<p>k</p>
+
+
+
+<a name="191293518"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191293518" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191293518">(Mar 20 2020 at 19:48)</a>:</h4>
+<p>That took longer than expected!  So for the off_t thing, we do already have a regression test that breaks when it's wrong I think.</p>
+
+
+
+<a name="191293552"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191293552" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191293552">(Mar 20 2020 at 19:48)</a>:</h4>
+<p>But the more immediate is simply compiling correctly/cleanly</p>
+
+
+
+<a name="191293797"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191293797" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191293797">(Mar 20 2020 at 19:50)</a>:</h4>
+<p>If I'm understand what <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> reported, we can't reliably redefine off_t as 64 bit without breaking things.</p>
+
+
+
+<a name="191293935"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191293935" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191293935">(Mar 20 2020 at 19:52)</a>:</h4>
+<p>Which is not good - I counted a number of places in our own API were we expose off_t:</p>
+<p>bu_fseek<br>
+bu_ftell<br>
+bu_vls_nibble<br>
+struct directory<br>
+struct db_i<br>
+a number of functions in rt/db_io.h<br>
+struct mem_map<br>
+struct mater<br>
+rt_color_addrec<br>
+db_dup_path_tail</p>
+
+
+
+<a name="191294008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294008">(Mar 20 2020 at 19:52)</a>:</h4>
+<p>If we can't safely redefine off_t some of those variables probably won't be large enough, and if we do redefine it we're breaking (at least) the fstat call.</p>
+
+
+
+<a name="191294277"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294277" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294277">(Mar 20 2020 at 19:54)</a>:</h4>
+<p>well our stuff is easy, we can make them use whatever we want.  I think the issue is we were trying to not introduce a symbol if we didn't need to.</p>
+
+
+
+<a name="191294328"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294328" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294328">(Mar 20 2020 at 19:54)</a>:</h4>
+<p>but it sounds like we may need to.  I don't know -- would need to see an error log or see the issue Daniel described myself.</p>
+
+
+
+<a name="191294349"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294349" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294349">(Mar 20 2020 at 19:54)</a>:</h4>
+<p>I count seven uses of fstat in our code - if that's the only problem child we might conceivably do something at the point of those fstat calls, but now that this has happened I'm concerned that the off_t redefinition trick might start subtly breaking other things as well...</p>
+
+
+
+<a name="191294600"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294600" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294600">(Mar 20 2020 at 19:57)</a>:</h4>
+<p>Apparently this is one of those "WONTFIX" issues for Microsoft:  <a href="https://developercommunity.visualstudio.com/content/problem/308714/in-c-header-systypesh-off-t-is-defined-as-32-bit-s.html" target="_blank" title="https://developercommunity.visualstudio.com/content/problem/308714/in-c-header-systypesh-off-t-is-defined-as-32-bit-s.html">https://developercommunity.visualstudio.com/content/problem/308714/in-c-header-systypesh-off-t-is-defined-as-32-bit-s.html</a></p>
+
+
+
+<a name="191294623"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294623" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294623">(Mar 20 2020 at 19:57)</a>:</h4>
+<p>We should be popping these symbols out of config_win.h as they're encountered and detected/fixed instead of the #define trickery we're trying to get away with.</p>
+
+
+
+<a name="191294856"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191294856" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191294856">(Mar 20 2020 at 19:59)</a>:</h4>
+<p>probably best to introduce our own wrapper for this concept given this issue, bu_off_t</p>
+
+
+
+<a name="191295015"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191295015" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191295015">(Mar 20 2020 at 20:00)</a>:</h4>
+<p>OK.  I can probably rough in some of it, but I'm not really set up for proper MSVC testing at the moment.</p>
+
+
+
+<a name="191295405"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191295405" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191295405">(Mar 20 2020 at 20:04)</a>:</h4>
+<p>doesn't need to be complicated, probably can just test if off64_t is available, and if it is then bu_off_t is typedef'd to it, otherwise define to off_t</p>
+
+
+
+<a name="191295831"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191295831" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191295831">(Mar 20 2020 at 20:07)</a>:</h4>
+<p>Right.  I think for MSVC we need _off64_t as well.  I remember vaguely some fun when I last tried this - a long while back I attempted to shift as much as possible of config_win.h into CMakeLists.txt and many things exploded.  Fingers crossed...</p>
+
+
+
+<a name="191295962"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191295962" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191295962">(Mar 20 2020 at 20:09)</a>:</h4>
+<p>Do we want to care about _FILE_OFFSET_BITS ?</p>
+
+
+
+<a name="191296151"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296151" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296151">(Mar 20 2020 at 20:10)</a>:</h4>
+<p>We don't do anything with that</p>
+
+
+
+<a name="191296365"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296365" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296365">(Mar 20 2020 at 20:12)</a>:</h4>
+<p>It might be an issue if we don't on 32 bit systems - if we detect off64_t and go with it,  but don't define _FILE_OFFSET_BITS=64, we might get some unexpected results..</p>
+
+
+
+<a name="191296376"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296376" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296376">(Mar 20 2020 at 20:12)</a>:</h4>
+<p>I think it's availability is unreliable, but would be an alternative to a cmakelist.txt test</p>
+
+
+
+<a name="191296389"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296389" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296389">(Mar 20 2020 at 20:12)</a>:</h4>
+<p>Oh well - start small, build up as needed.</p>
+
+
+
+<a name="191296394"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296394" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296394">(Mar 20 2020 at 20:12)</a>:</h4>
+<p>Hmmm</p>
+
+
+
+<a name="191296453"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296453" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296453">(Mar 20 2020 at 20:13)</a>:</h4>
+<p>/me goes digging for ancient <a href="http://config_win.h.in" target="_blank" title="http://config_win.h.in">config_win.h.in</a> rework attempts...</p>
+
+
+
+<a name="191296458"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296458" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296458">(Mar 20 2020 at 20:13)</a>:</h4>
+<p>refreshing my memory on _FILE_OFFSET_BITS</p>
+
+
+
+<a name="191296659"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191296659" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191296659">(Mar 20 2020 at 20:15)</a>:</h4>
+<p>I have vague memories of the stat/fstat/fseek/etc. functions having all sorts of 64 bit versions and needing to be careful to match all them up to get decent behavior, but it's been a while since I tangled with any of this...  almost wonder if it's worth checking for a wrapper header on github or somewhere to see if someone's already wrapped all this...</p>
+
+
+
+<a name="191297002"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191297002" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191297002">(Mar 20 2020 at 20:18)</a>:</h4>
+<p>I'm certain there are solutions and we can craft something easily enough.. just will take some iterations probably.</p>
+
+
+
+<a name="191297014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191297014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191297014">(Mar 20 2020 at 20:18)</a>:</h4>
+<p>this looks like a non-windows start, for exampl:  <br>
+<a href="https://github.com/the-tcpdump-group/libpcap/blob/master/cmake/Modules/FindLFS.cmake" target="_blank" title="https://github.com/the-tcpdump-group/libpcap/blob/master/cmake/Modules/FindLFS.cmake">https://github.com/the-tcpdump-group/libpcap/blob/master/cmake/Modules/FindLFS.cmake</a></p>
+
+
+
+<a name="191297367"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191297367" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191297367">(Mar 20 2020 at 20:22)</a>:</h4>
+<p>Hmm - might be worth inquiring on the CMake list (or discourse now, I guess...)</p>
+
+
+
+<a name="191319163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191319163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191319163">(Mar 21 2020 at 00:31)</a>:</h4>
+<p><a href="https://github.com/zlib-ng/zlib-ng" target="_blank" title="https://github.com/zlib-ng/zlib-ng">https://github.com/zlib-ng/zlib-ng</a> actually has a fair bit of logic related to this issue, from the looks of things...</p>
+
+
+
+<a name="191323690"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191323690" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191323690">(Mar 21 2020 at 02:16)</a>:</h4>
+<p>OK, I think a defined type instead of off_t may have greatly simplified a lot of things.  I had forgotten the antics needed to make the off_t trick work - I think that was actually the root cause of needing bu_fseek and bu_ftell.  r75063 is a stab at switching everything over - untested on Windows.</p>
+
+
+
+<a name="191324116"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191324116" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191324116">(Mar 21 2020 at 02:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I'd be curious if the latest trunk clears the issues for you -  I'm not able to test the Windows code right  now, so I may have missed some pieces...</p>
+
+
+
+<a name="191338039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191338039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191338039">(Mar 21 2020 at 09:58)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/off_t/near/191324116" title="#narrow/stream/104062-general/topic/off_t/near/191324116">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> I'd be curious if the latest trunk clears the issues for you -  I'm not able to test the Windows code right  now, so I may have missed some pieces...</p>
+</blockquote>
+<p>Okay, I'll test it next week.</p>
+
+
+
+<a name="191352802"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191352802" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191352802">(Mar 21 2020 at 16:07)</a>:</h4>
+<p>I can test windows if needed, though I'll need to install the latest msvc (I think I'm on 17)</p>
+
+
+
+<a name="191405747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191405747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191405747">(Mar 22 2020 at 17:09)</a>:</h4>
+<p>You could do the test with VS2017, I'll test it with VS2019 anyway.<br>
+I plan a new release of the brlcad.dll because I experienced some bugs with the current one.</p>
+
+
+
+<a name="191504182"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191504182" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191504182">(Mar 23 2020 at 17:01)</a>:</h4>
+<p>I needed to fix some compilation issues, but now the VS2019 x64 release build works. I plan to test the other builds in the next days.</p>
+
+
+
+<a name="191511889"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/off_t/near/191511889" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/off_t.html#191511889">(Mar 23 2020 at 17:55)</a>:</h4>
+<p>Excellent!</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

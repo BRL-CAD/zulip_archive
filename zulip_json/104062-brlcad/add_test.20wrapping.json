@@ -1,0 +1,134 @@
+[
+    {
+        "content": "<p>So the first thing to do is probably to replace add_test with brlcad_add_test in our code and see what breaks (if anything)</p>",
+        "id": 216234453,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605025036
+    },
+    {
+        "content": "<p>yeah, I suppose.  should it be lowercase like that or uppercase for consistency?  do we have anything else lowercase?</p>",
+        "id": 216235060,
+        "sender_full_name": "Sean",
+        "timestamp": 1605025255
+    },
+    {
+        "content": "<p>I see we have BRLCAD_REGRESSION_TEST() and friends in Targets</p>",
+        "id": 216235100,
+        "sender_full_name": "Sean",
+        "timestamp": 1605025276
+    },
+    {
+        "content": "<p>Er, yeah - upper case.</p>",
+        "id": 216235149,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605025299
+    },
+    {
+        "content": "<p>I guess we can keep that workaround, but arrgh...</p>",
+        "id": 216235173,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605025314
+    },
+    {
+        "content": "<p>(different calling for all the space cases)</p>",
+        "id": 216235240,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605025325
+    },
+    {
+        "content": "<p>then in the function, it'd change from calling _add_test() to add_test()</p>",
+        "id": 216235277,
+        "sender_full_name": "Sean",
+        "timestamp": 1605025347
+    },
+    {
+        "content": "<p>Was that space issue specific to add_test?  If so, maybe we'd be good...</p>",
+        "id": 216235338,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605025376
+    },
+    {
+        "content": "<p>yes, it was iirc, specific to both add_test and _add_test, but not to our function calling them -- that's why the workaround worked.  I had to backtrack to figure out whose code was ignoring empty args.</p>",
+        "id": 216236543,
+        "sender_full_name": "Sean",
+        "timestamp": 1605025845
+    },
+    {
+        "content": "<p>OK, so BRLCAD_ADD_TEST may do the trick, and with ExternalProject_Add coming online any 3rd party tests we may care about will have to be handled differently anyway.</p>",
+        "id": 216236851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605025974
+    },
+    {
+        "content": "<p>Should I do the alteration in the extbuild branch, since that's where we've got ExternalProject_Add set up, or go ahead and do it in trunk?</p>",
+        "id": 216236916,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605026008
+    },
+    {
+        "content": "<p>I'd say trunk as it's not really specific to the external build</p>",
+        "id": 216238778,
+        "sender_full_name": "Sean",
+        "timestamp": 1605026795
+    },
+    {
+        "content": "<p>and then merge back to extbuild</p>\n<p>want me to refactor trunk?</p>",
+        "id": 216238879,
+        "sender_full_name": "Sean",
+        "timestamp": 1605026842
+    },
+    {
+        "content": "<p>If you've got time, but more urgent is probably to try extbuild on the Mac</p>",
+        "id": 216242360,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605028292
+    },
+    {
+        "content": "<p>I'm hitting some odd-pathnames test issues (a couple of which I'm not really sure are resolvable - if the external build system doesn't like them...) but if the Windows issue really has been addressed then I'm closing in on merge.</p>",
+        "id": 216242678,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605028428
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I switched the wrapper - getting a couple new bu_vls_simplify failures, but not sure why yet...</p>",
+        "id": 216268595,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605039737
+    },
+    {
+        "content": "<p>Ah!  that's the empty failure.</p>",
+        "id": 216268851,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605039845
+    },
+    {
+        "content": "<p>/me tries to boil it down</p>",
+        "id": 216268870,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605039855
+    },
+    {
+        "content": "<p>I just commented again on the github issue.  The chunk of code that packs and unpacks is probably still necessary unless there's some way to forward a subset of argv quoted.</p>",
+        "id": 216269204,
+        "sender_full_name": "Sean",
+        "timestamp": 1605039995
+    },
+    {
+        "content": "<p>what little digging I did indicates it's an issue with forwarding ${ARGV}'s in general</p>",
+        "id": 216269301,
+        "sender_full_name": "Sean",
+        "timestamp": 1605040045
+    },
+    {
+        "content": "<p>so we happened to hit it in our override function, but it's an issue for any function</p>",
+        "id": 216269336,
+        "sender_full_name": "Sean",
+        "timestamp": 1605040062
+    },
+    {
+        "content": "<p>There we go - restored and working.</p>",
+        "id": 216271658,
+        "sender_full_name": "starseeker",
+        "timestamp": 1605041063
+    }
+]

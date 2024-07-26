@@ -1,0 +1,140 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> When I tried to install mged 7.30.8, shows an error <a href=\"/user_uploads/1549/jHFadswTGkZWuCww_Ho9SwqK/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/jHFadswTGkZWuCww_Ho9SwqK/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/jHFadswTGkZWuCww_Ho9SwqK/image.png\"></a></div>",
+        "id": 205197454,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595910863
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Why is that?</p>",
+        "id": 205197459,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595910880
+    },
+    {
+        "content": "<p>Ran it as administrator.</p>",
+        "id": 205197838,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595911548
+    },
+    {
+        "content": "<p>It worked, I think.</p>",
+        "id": 205197880,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595911565
+    },
+    {
+        "content": "<p>running something as administrator fixes many things most of the time but it has its own risk....</p>",
+        "id": 205197950,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1595911717
+    },
+    {
+        "content": "<p>Yeah</p>",
+        "id": 205197951,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595911727
+    },
+    {
+        "content": "<p>Usually setups run on normal click</p>",
+        "id": 205197956,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595911743
+    },
+    {
+        "content": "<p>But for this one</p>",
+        "id": 205197959,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595911752
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Do you happen to know what the \"inmem\" wdb_open is for on mged.c:2826?  I'm having a heck of a time figuring out what it does - I only see one use of .inmem in the Tcl code - ray.tcl - and I'm not really clear what it's trying to accomplish with that or if we need .inmem to do whatever it's trying to do...  It goes back a long way in the repo - SVN r13946 in fact.  I think that code might be why we've got two wdbp instances floating around in MGED.</p>",
+        "id": 302380440,
+        "sender_full_name": "starseeker",
+        "timestamp": 1664939773
+    },
+    {
+        "content": "<p>there used to be an in-memory concept of db way back to facilitate distributed raytracing, iirc. could it be related to that?</p>",
+        "id": 302450521,
+        "sender_full_name": "Erik",
+        "timestamp": 1664974636
+    },
+    {
+        "content": "<p>Yeah, that one has quite a bit of history.  Basically, it's an in-memory database where geometry can be loaded but everything is ephemeral (and crazy fast).  If I remember right, Bob only hooked it into a couple things in mged, but the idea is that it's a copy of the database that only lives in memory so you can do prep on some geometry and you don't have to do it again, and there's no way to affect the .g by subsequent changes -- but you can still make changes.</p>",
+        "id": 302780324,
+        "sender_full_name": "Sean",
+        "timestamp": 1665118333
+    },
+    {
+        "content": "<p>So in the case of ray.tcl, that's a routine used in a surprising number of places.  It's how it queries what's under the mouse (by shooting a ray), which is one of the comb and primitive input selection methods, which is not just bound through in the tcl gui, but it's also hooked into classic mode through to the dm graphics window.  By using inmem, prep only happens once.</p>",
+        "id": 302780761,
+        "sender_full_name": "Sean",
+        "timestamp": 1665118848
+    },
+    {
+        "content": "<p>Note that the inmem doesn't really consume additional resources as it's an in-memory reopening of the same dbip.  It's just tracked quite differently when changes are made.  That's actually the same interface that's provided to ajem for dynamic geometry.  The inmem is used for geometry changes that are desirable to be persisted to disk, and being in the inmem dbip, it can't even by accident down the road.</p>",
+        "id": 302781024,
+        "sender_full_name": "Sean",
+        "timestamp": 1665119042
+    },
+    {
+        "content": "<p>I have a very bad feeling about <a href=\"https://github.com/BRL-CAD/brlcad/commit/abcba83f77babcccd0b9b7074037a424a2539c46\">https://github.com/BRL-CAD/brlcad/commit/abcba83f77babcccd0b9b7074037a424a2539c46</a>. It breaks applications working with real in-memory databases, e.g. via the C++ interface. Fixing this would be a mess.</p>",
+        "id": 315483499,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670887161
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> how does it break in-memory databases?  I didn't remove that mode of operation, as far as I know... (note there are a lot of commits after that one related to that particular refactor as well - is current main broken?)</p>",
+        "id": 315491460,
+        "sender_full_name": "starseeker",
+        "timestamp": 1670891969
+    },
+    {
+        "content": "<p>After looking at my problem in the debugger, I have to admit, that I don't come so far to open a database.</p>\n<p>What I try to do is open a database and getting its title. My last change was related to dbi_wdbp_inmem.</p>\n<p>However, I don't even reach main() now. The program crashes in ON_wString::ReserveArray() during libged_init() with a segmentation fault.</p>",
+        "id": 315511456,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670907507
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>0x00007ffff546fba7 in ON_wString::ReserveArray(unsigned long) () from /home/rossberg/bin/MOOSE/lib/libbrlcad.so\n(gdb) bt\n#0  0x00007ffff546fba7 in ON_wString::ReserveArray(unsigned long) () from /home/rossberg/bin/MOOSE/lib/libbrlcad.so\n#1  0x00007ffff546fffa in ON_wString::CopyToArray(int, wchar_t const*) () from /home/rossberg/bin/MOOSE/lib/libbrlcad.so\n#2  0x00007ffff5470b95 in ON_wString::operator=(wchar_t const*) () from /home/rossberg/bin/MOOSE/lib/libbrlcad.so\n#3  0x00007ffff06a2b01 in ON_FontList::Internal_FromNames (this=0x7ffff0b4ebe0 &lt;ON_ManagedFonts::List+256&gt;,\n    postscript_name=0x55555558728c L&quot;ArialMT&quot;, windows_logfont_name=0x55555558722c L&quot;Arial&quot;, family_name=0x55555558714c L&quot;Arial&quot;,\n    prefered_face_name=0x5555555871ac L&quot;Regular&quot;, prefered_weight=ON_Font::Weight::Normal, prefered_stretch=ON_Font::Stretch::Medium,\n    prefered_style=ON_Font::Style::Upright, bRequireFaceMatch=true, bRequireStyleMatch=true, bMatchUnderlineStrikethroughAndPointSize=false,\n    bUnderlined=false, bStrikethrough=false, point_size=0) at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_font.cpp:4411\n#4  0x00007ffff06a28c8 in ON_FontList::FromNames (this=0x7ffff0b4ebe0 &lt;ON_ManagedFonts::List+256&gt;, postscript_name=0x55555558728c L&quot;ArialMT&quot;,\n    windows_logfont_name=0x55555558722c L&quot;Arial&quot;, family_name=0x55555558714c L&quot;Arial&quot;, prefered_face_name=0x5555555871ac L&quot;Regular&quot;,\n    prefered_weight=ON_Font::Weight::Normal, prefered_stretch=ON_Font::Stretch::Medium, prefered_style=ON_Font::Style::Upright,\n    bRequireFaceMatch=true, bRequireStyleMatch=true) at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_font.cpp:4323\n#5  0x00007ffff06a3a4c in ON_FontList::FromFontProperties (this=0x7ffff0b4ebe0 &lt;ON_ManagedFonts::List+256&gt;,\n    font_properties=0x7ffff0b4eda0 &lt;ON_Font::Default&gt;, bRequireFaceMatch=true, bRequireStyleMatch=true)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_font.cpp:4751\n#6  0x00007ffff06a82a4 in ON_Font::Internal_CopyFrom (this=0x7ffff0b4eda0 &lt;ON_Font::Default&gt;, src=...)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_font.cpp:6265\n#7  0x00007ffff06a8f49 in ON_Font::ON_Font (this=0x7ffff0b4eda0 &lt;ON_Font::Default&gt;, src=...)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_font.cpp:6435\n#8  0x00007ffff0894352 in __static_initialization_and_destruction_0 (__initialize_p=1, __priority=65535)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_statics.cpp:1425\n#9  0x00007ffff0895988 in _GLOBAL__sub_I_opennurbs_statics.cpp(void) ()\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/other/openNURBS/opennurbs_statics.cpp:3018\n#10 0x00007ffff7fe1fe2 in call_init (l=&lt;optimized out&gt;, argc=argc@entry=2, argv=argv@entry=0x7fffffffe508, env=env@entry=0x7fffffffe520)\n    at dl-init.c:72\n#11 0x00007ffff7fe20e9 in call_init (env=0x7fffffffe520, argv=0x7fffffffe508, argc=2, l=&lt;optimized out&gt;) at dl-init.c:30\n#12 _dl_init (main_map=0x55555557e410, argc=2, argv=0x7fffffffe508, env=0x7fffffffe520) at dl-init.c:119\n#13 0x00007ffff452aaed in __GI__dl_catch_exception (exception=&lt;optimized out&gt;, operate=&lt;optimized out&gt;, args=&lt;optimized out&gt;)\n    at dl-error-skeleton.c:182\n#14 0x00007ffff7fe6058 in dl_open_worker (a=a@entry=0x7fffffffd040) at dl-open.c:758\n#15 0x00007ffff452aa90 in __GI__dl_catch_exception (exception=0x7fffffffd020, operate=0x7ffff7fe5ca0 &lt;dl_open_worker&gt;, args=0x7fffffffd040)\n    at dl-error-skeleton.c:208\n#16 0x00007ffff7fe58fa in _dl_open (file=0x7fffffffd3e0 &quot;/home/rossberg/bin/brlcad/libexec/ged/libged-3ptarb.so&quot;, mode=-2147483646,\n    caller_dlopen=0x7ffff4f84803 &lt;bu_dlopen+47&gt;, nsid=-2, argc=2, argv=0x7fffffffd020, env=0x7fffffffe520) at dl-open.c:837\n#17 0x00007ffff43d2258 in dlopen_doit (a=a@entry=0x7fffffffd260) at dlopen.c:66\n#18 0x00007ffff452aa90 in __GI__dl_catch_exception (exception=exception@entry=0x7fffffffd200, operate=0x7ffff43d2200 &lt;dlopen_doit&gt;,\n    args=0x7fffffffd260) at dl-error-skeleton.c:208\n#19 0x00007ffff452ab4f in __GI__dl_catch_error (objname=0x55555557e3f0, errstring=0x55555557e3f8, mallocedp=0x55555557e3e8,\n    operate=&lt;optimized out&gt;, args=&lt;optimized out&gt;) at dl-error-skeleton.c:227\n#20 0x00007ffff43d2a65 in _dlerror_run (operate=operate@entry=0x7ffff43d2200 &lt;dlopen_doit&gt;, args=args@entry=0x7fffffffd260) at dlerror.c:170\n--Type &lt;RET&gt; for more, q to quit, c to continue without paging--\n#21 0x00007ffff43d22e4 in __dlopen (file=&lt;optimized out&gt;, mode=&lt;optimized out&gt;) at dlopen.c:87\n#22 0x00007ffff4f84803 in bu_dlopen (path=0x7fffffffd3e0 &quot;/home/rossberg/bin/brlcad/libexec/ged/libged-3ptarb.so&quot;, mode=2)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/libbu/dylib.c:47\n#23 0x00007ffff4a7e671 in libged_init () at /home/rossberg/Devel/BRL-CAD/brlcad/src/libged/ged_init.cpp:183\n#24 0x00007ffff4a7f05e in libged_initializer::libged_initializer (this=0x7ffff573afd0 &lt;LIBGED&gt;)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/libged/ged_init.cpp:280\n#25 0x00007ffff4a7ed7c in __static_initialization_and_destruction_0 (__initialize_p=1, __priority=65535)\n    at /home/rossberg/Devel/BRL-CAD/brlcad/src/libged/ged_init.cpp:289\n#26 0x00007ffff4a7edd3 in _GLOBAL__sub_I_ged_init.cpp(void) () at /home/rossberg/Devel/BRL-CAD/brlcad/src/libged/ged_init.cpp:289\n#27 0x00007ffff7fe1fe2 in call_init (l=&lt;optimized out&gt;, argc=argc@entry=2, argv=argv@entry=0x7fffffffe508, env=env@entry=0x7fffffffe520)\n    at dl-init.c:72\n#28 0x00007ffff7fe20e9 in call_init (env=0x7fffffffe520, argv=0x7fffffffe508, argc=2, l=&lt;optimized out&gt;) at dl-init.c:30\n#29 _dl_init (main_map=0x7ffff7ffe180, argc=2, argv=0x7fffffffe508, env=0x7fffffffe520) at dl-init.c:119\n#30 0x00007ffff7fd30ca in _dl_start_user () from /lib64/ld-linux-x86-64.so.2\n#31 0x0000000000000002 in ?? ()\n#32 0x00007fffffffe85f in ?? ()\n#33 0x00007fffffffe8ae in ?? ()\n#34 0x0000000000000000 in ?? ()\n</code></pre></div>",
+        "id": 315511823,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670907716
+    },
+    {
+        "content": "<p>That call stack is coming from OpenNURBS, so my first thought is that something about the new OpenNURBS version isn't playing nicely with the library initialization.</p>",
+        "id": 315594236,
+        "sender_full_name": "starseeker",
+        "timestamp": 1670939158
+    },
+    {
+        "content": "<p>(Assuming you're working with main and not the 7.34.0 release?)</p>",
+        "id": 315594420,
+        "sender_full_name": "starseeker",
+        "timestamp": 1670939196
+    },
+    {
+        "content": "<p>Does MGED work from that build on that machine?</p>",
+        "id": 315595651,
+        "sender_full_name": "starseeker",
+        "timestamp": 1670939555
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/MGED/near/315594420\">said</a>:</p>\n<blockquote>\n<p>(Assuming you're working with main and not the 7.34.0 release?)</p>\n</blockquote>\n<p>Right.</p>",
+        "id": 315660731,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670957274
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/MGED/near/315595651\">said</a>:</p>\n<blockquote>\n<p>Does MGED work from that build on that machine?</p>\n</blockquote>\n<p>MGED works.</p>",
+        "id": 315660834,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670957294
+    },
+    {
+        "content": "<p>The point is, after some recompilations and tests, the error is gone. Was a clean build necessary? I saw this error on several machines. I'll have to look at them when I'm back.</p>",
+        "id": 315664580,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1670958476
+    }
+]

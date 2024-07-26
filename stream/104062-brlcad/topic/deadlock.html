@@ -1,0 +1,63 @@
+<html>
+<head><meta charset="utf-8"><title>deadlock · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html">deadlock</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="129437563"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129437563" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129437563">(Jul 10 2018 at 22:22)</a>:</h4>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> also, how did you observe the deadlock you mention in r71111?  if it's user-visible, that'll warrant a NEWS line.  if it was theoretical or only encountered in dev testing, then it doesn't need anything.</p>
+
+
+
+<a name="129440220"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129440220" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129440220">(Jul 10 2018 at 23:32)</a>:</h4>
+<blockquote>
+<p><span class="user-mention" data-user-id="106398">@Cezar</span> also, how did you observe the deadlock you mention in r71111?  if it's user-visible, that'll warrant a NEWS line.  if it was theoretical or only encountered in dev testing, then it doesn't need anything.</p>
+</blockquote>
+<p>i had a bug while implementing the SoA thing which set <code>dont_restat</code> to non-zero, so the branch which released the semaphore was not taken. however, i grepped for <code>dont_restat =</code> afterwards, and there was a place (librt/primites/something.c) which set it to 1, so i think it's not only theoretical</p>
+
+
+
+<a name="129440228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129440228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129440228">(Jul 10 2018 at 23:32)</a>:</h4>
+<p>maybe it warrants adding a test for it?</p>
+
+
+
+<a name="129440237"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129440237" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129440237">(Jul 10 2018 at 23:32)</a>:</h4>
+<div class="codehilite"><pre><span></span>brl-clean/src % grep -R &quot;dont_restat =&quot; .
+./librt/primitives/submodel/submodel.c: if (sub_dbip-&gt;dbi_mf) sub_dbip-&gt;dbi_mf-&gt;dont_restat = 1;
+</pre></div>
+
+
+
+<a name="129440470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129440470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Cezar <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129440470">(Jul 10 2018 at 23:38)</a>:</h4>
+<p>maybe the submodel code in the grep is never used/reached, can't tell. but even looking at the mappedfile.c code, either there is a case where the branch is not taken and the semaphore is never released, or there isn't, in which case the conditional is unnecessary :-?</p>
+
+
+
+<a name="129449494"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129449494" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129449494">(Jul 11 2018 at 04:08)</a>:</h4>
+<blockquote>
+<p>maybe it warrants adding a test for it?</p>
+</blockquote>
+<p>if you want, but I wouldn't unless I'd actually encountered bad behavior.  there is too much code to stop at every potential -- stop at the actuals. :)</p>
+
+
+
+<a name="129450350"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/deadlock/near/129450350" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/deadlock.html#129450350">(Jul 11 2018 at 04:30)</a>:</h4>
+<p>submodel code is essentially incomplete and not yet been made robust (and confirmed buggy during GCI), so it's fair game to clean up and fix as warranted</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

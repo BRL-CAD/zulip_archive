@@ -1,0 +1,776 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Question - are the globals in the display manager backends (like, for example, ambientColor in dm-ogl.c) intended to be global across all display managers?  I'm trying to figure out why they would have been included in the local variables associated with a given display manager...</p>",
+        "id": 193503095,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463059
+    },
+    {
+        "content": "<p>looking</p>",
+        "id": 193503156,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463088
+    },
+    {
+        "content": "<p>er - would NOT have been included in the local dm variables, sorry</p>",
+        "id": 193503208,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463115
+    },
+    {
+        "content": "<p>No, they're not intended to be global across all.</p>",
+        "id": 193503386,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463214
+    },
+    {
+        "content": "<p>OK, thanks - that establishes some degrees of freedom</p>",
+        "id": 193503480,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463252
+    },
+    {
+        "content": "<p>they're a rather specific implementation detail of opengl 2</p>",
+        "id": 193503491,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463257
+    },
+    {
+        "content": "<p>so you'll probably see them replicated in all the DMs using opengl, and not elsewhere</p>",
+        "id": 193503537,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463285
+    },
+    {
+        "content": "<p>Ah, I wasn't clear - I meant whether they're intended to be global across all instances of display managers of a specific type</p>",
+        "id": 193503546,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463290
+    },
+    {
+        "content": "<p>if we made a vulkan or ogl4 interface, some of them would likely disappear or change</p>",
+        "id": 193503583,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463311
+    },
+    {
+        "content": "<p>so if you set ambientColor on one ogl dm, is it expected that that setting be reflected across all ogl instances?</p>",
+        "id": 193503597,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463319
+    },
+    {
+        "content": "<p>ah, hm</p>",
+        "id": 193503633,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463339
+    },
+    {
+        "content": "<p>icky if it does...</p>",
+        "id": 193503657,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463354
+    },
+    {
+        "content": "<p>probably yes</p>",
+        "id": 193503662,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463355
+    },
+    {
+        "content": "<p>that's the only reason to make them static</p>",
+        "id": 193503718,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463366
+    },
+    {
+        "content": "<p>&lt;wince&gt;</p>",
+        "id": 193503723,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463369
+    },
+    {
+        "content": "<p>C version of class data</p>",
+        "id": 193503767,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463394
+    },
+    {
+        "content": "<p>That's kinda not cool - what if the user application doesn't want the same settings in all windows??</p>",
+        "id": 193503823,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463422
+    },
+    {
+        "content": "<p>they don't appear to be settings in the same sense of DM settings, but I don't feel strongly about it</p>",
+        "id": 193504185,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463610
+    },
+    {
+        "content": "<p>Oh, well - I guess compared to the rest of this that's a minor pain point...</p>",
+        "id": 193504225,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463638
+    },
+    {
+        "content": "<p>they're more \"these are values we have to tell opengl for things to display\" that could just as well be static inside of functions except that several functions need that value</p>",
+        "id": 193504244,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463653
+    },
+    {
+        "content": "<p>like position of the light source -- that's completely arbitrary.  just needs to be defined.</p>",
+        "id": 193504308,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463706
+    },
+    {
+        "content": "<p>So rather than pull the values from the private vars struct, they're just stashed in statics?</p>",
+        "id": 193504310,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463707
+    },
+    {
+        "content": "<p>I suppose it doesn't really matter,  just a bit odd when reading a function and a variable swoops in from nowhere...</p>",
+        "id": 193504424,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463771
+    },
+    {
+        "content": "<p>Just looking through the code, I would say the main distinction looks to be more that the statics are reflective values that just get set and/or updated as needed, whereas the private vars are declarative values that control and modify</p>",
+        "id": 193504499,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463834
+    },
+    {
+        "content": "<p>If this were a C++ class, it's the difference between class data and object data</p>",
+        "id": 193504609,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463902
+    },
+    {
+        "content": "<p>How they intruded on my radar screen - I was experimenting with moving the *_open calls (which are relatively heavy Tcl/Tk users) up into libtclcad and tripped on the statics.</p>",
+        "id": 193504630,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463918
+    },
+    {
+        "content": "<p>class { static int var = val; } vs class { int var = val; }</p>",
+        "id": 193504661,
+        "sender_full_name": "Sean",
+        "timestamp": 1586463938
+    },
+    {
+        "content": "<p>I suppose that's a fairly hare-brained idea to begin with</p>",
+        "id": 193504670,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586463944
+    },
+    {
+        "content": "<p>how so?  looks like they only set dm_interp and don't actually do anything with it</p>",
+        "id": 193505020,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464117
+    },
+    {
+        "content": "<p>dm_plot at least set the statics in its open call.  I went ahead and stuffed those into the plot_vars, but I haven't audited the more complex globals to see if the _open functions monkey with them or not.</p>",
+        "id": 193505182,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464195
+    },
+    {
+        "content": "<p>but yeah, conceptually, that makes no sense... a DM API without a way to open a DM would be broken design-wise..  wouldn't do it just for the sake of moving a type.</p>",
+        "id": 193505189,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464201
+    },
+    {
+        "content": "<p>I'm trying to get Tcl/Tk out of libdm and libfb - I'm pretty sure I've gotten libged itself clear now, so the dm and fb layers are the last holdouts.</p>",
+        "id": 193505381,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464265
+    },
+    {
+        "content": "<p>you know you're in super-likely-to-change-behavior territory... ? :)</p>",
+        "id": 193505387,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464267
+    },
+    {
+        "content": "<p>and by 'change', I mean introduce a bug ;)</p>",
+        "id": 193505425,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464282
+    },
+    {
+        "content": "<p>Yeah, that's why I had to revert my first attempt - worked on Linux, busted on Windows</p>",
+        "id": 193505457,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464297
+    },
+    {
+        "content": "<p>it's all good, just beware :)</p>",
+        "id": 193505467,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464300
+    },
+    {
+        "content": "<p>There's a lot of really weird black magic going on with X, ogl, wgl, and Tk in this - it's incredibly fragile</p>",
+        "id": 193505551,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464325
+    },
+    {
+        "content": "<p>I'll scrub down the verbose \"cast everything at every usage even though the cast is 20 chars long\" style to try and make it more readable (THAT at least should be safe enough), but this is one intimidating maze...</p>",
+        "id": 193505697,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464402
+    },
+    {
+        "content": "<p>such as?  they've always looked pretty CG101 to me.  it's not black magic, it's just what one has to do</p>",
+        "id": 193505823,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464457
+    },
+    {
+        "content": "<p>like the ogl DM is pretty text book</p>",
+        "id": 193505877,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464494
+    },
+    {
+        "content": "<p>most of the ugly is ... the X11 api and that's just how it is</p>",
+        "id": 193505952,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464540
+    },
+    {
+        "content": "<p>The platform specific voodoo for embedding the Tk window, trying to get it to repaint at the right times, the platform specific differences beyond glx vs wgl despite Tk nominally being cross platform...</p>",
+        "id": 193505966,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464545
+    },
+    {
+        "content": "<p>I know a lot of this is Tk's fault for not providing a proper OpenGL widget, but that doesn't make it any less annoying to deal with.</p>",
+        "id": 193506088,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464597
+    },
+    {
+        "content": "<p>yeah, that's just an artifact at this level of API.  DM creates the lowest level contexts and needs a handle on them, as does Tk, so the two have to cooperate <em>somehow</em></p>",
+        "id": 193506122,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464624
+    },
+    {
+        "content": "<p>From a design standpoint that's what's binding libged et. al. to Tk right now though - that low level connection.  Just conceptually, what should a libged+dm+fb functionality set look like without Tk in the mix?</p>",
+        "id": 193506276,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464717
+    },
+    {
+        "content": "<p>as it is, Tk is being rather polite in that we can do the init and hand it our context.  lots of APIs don't make that work, especially higher level apis like game engines.</p>",
+        "id": 193506288,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464726
+    },
+    {
+        "content": "<p>&lt;snort&gt; they'd better be polite about it, if they're not going to do the right thing and give us a properly integrated widget to begin with</p>",
+        "id": 193506370,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464766
+    },
+    {
+        "content": "<p>right, the alternative is usually fully managed where they don't let you get at the context</p>",
+        "id": 193506471,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464807
+    },
+    {
+        "content": "<p>from libged's perspective, it needs the original dm/fb callback API design -- you just open a dm and draw into it.</p>",
+        "id": 193506605,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464889
+    },
+    {
+        "content": "<p>if everything is properly defined through the callbacks, ged should be just fine without having any awareness of Tk</p>",
+        "id": 193506669,
+        "sender_full_name": "Sean",
+        "timestamp": 1586464922
+    },
+    {
+        "content": "<p>Hmm... I think the explicit linkage right now is with fb, actually...</p>",
+        "id": 193506759,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586464972
+    },
+    {
+        "content": "<p>So would we define a lightweight/high-level dm/fb API that is what libged uses, and then it's the responsibility of libdm/lifb/whatever else to implement that minimal API?</p>",
+        "id": 193506893,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465046
+    },
+    {
+        "content": "<p>I was going to say, maybe I've already updated and you've cleared it out, but libdm doesn't really seem to do much at all with Tk or Tcl</p>",
+        "id": 193506958,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465103
+    },
+    {
+        "content": "<p>Um.  The details of the dm-ogl and dm-X backends do...</p>",
+        "id": 193507002,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465137
+    },
+    {
+        "content": "<p>the biggest issue with fb last time I looked is reconciling what open_existing is doing</p>",
+        "id": 193507011,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465143
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193506893\" title=\"#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193506893\">said</a>:</p>\n<blockquote>\n<p>So would we define a lightweight/high-level dm/fb API that is what libged uses, and then it's the responsibility of libdm/lifb/whatever else to implement that minimal API?</p>\n</blockquote>\n<p>Yes, that was the original design of them both too.</p>",
+        "id": 193507091,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465179
+    },
+    {
+        "content": "<p>I had to revert my attempt to push Tk out of the backends when it broke on Windows (frustrating, I was actually fairly close, but debugging that sort of problem on Windows could be a long haul).  From what you were saying that probably wasn't the right way to go at it anyway.</p>",
+        "id": 193507210,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465277
+    },
+    {
+        "content": "<p>hence all the #define DM_* ... defines that should all generically hook into the dmp callback table for a given dm instance</p>",
+        "id": 193507260,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465289
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193507002\" title=\"#narrow/stream/104062-general/topic/globals.20in.20libdm/near/193507002\">said</a>:</p>\n<blockquote>\n<p>Um.  The details of the dm-ogl and dm-X backends do...</p>\n</blockquote>\n<p>example?  line?</p>",
+        "id": 193507347,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465347
+    },
+    {
+        "content": "<p>dm_ogl.c:569</p>",
+        "id": 193507428,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465377
+    },
+    {
+        "content": "<p>dm_ogl.c:632 - basically just search for Tk_ in the file</p>",
+        "id": 193507524,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465408
+    },
+    {
+        "content": "<p>ah, well yeah but that's the actual window.  it needs a window to draw into and one doesn't exist so it creates it, initializes .. but it doesn't really \"do\" anything with it that results in a back and forth with the Tcl interpreter</p>",
+        "id": 193507889,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465611
+    },
+    {
+        "content": "<p>Sure.  But the necessity of calling all those Tk_ functions binds us to the Tcl/Tk libraries below the libged level.</p>",
+        "id": 193507973,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465651
+    },
+    {
+        "content": "<p>probably being imprecise with my words, sorry -- dm presently does have the responsibility for create a window</p>",
+        "id": 193507998,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465667
+    },
+    {
+        "content": "<p>to date, that has been (and needed to be) a Tk window</p>",
+        "id": 193508003,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465673
+    },
+    {
+        "content": "<p>OK.  Then as long as that's true and we need Tk windows, we're stuck unless we switch to a gcv style \"load the backend as a plugin\" setup and have libtclcad build the backends...</p>",
+        "id": 193508114,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465749
+    },
+    {
+        "content": "<p>In some ways it doesn't look to far away from that,  actually...</p>",
+        "id": 193508229,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465805
+    },
+    {
+        "content": "<p>right, you're not going to change that binding moving it without either changing dm responsibility or changing (or perhaps violating) architecture in some manner.</p>",
+        "id": 193508232,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465808
+    },
+    {
+        "content": "<p>OK.  So, path forward?</p>",
+        "id": 193508361,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465885
+    },
+    {
+        "content": "<p>I was going to say, a workable solution to avoid symbol linkage would be to either do dynamic loading or change the responsibility</p>",
+        "id": 193508364,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465888
+    },
+    {
+        "content": "<p>what exactly is the goal?  to simply remove Tk as a linkage yet still keep creating Tk windows?</p>",
+        "id": 193508414,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465923
+    },
+    {
+        "content": "<p>that wouldn't seem incredibly useful to me</p>",
+        "id": 193508440,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465938
+    },
+    {
+        "content": "<p>to set the stage for another window mechanism?</p>",
+        "id": 193508469,
+        "sender_full_name": "Sean",
+        "timestamp": 1586465960
+    },
+    {
+        "content": "<p>Well, my goal is libged capabilities without the necessity of Tcl/Tk - for example, if I were to define a GLFW based display for gsh I would want to be able do at least do old-style console display managers and frame buffers.</p>",
+        "id": 193508537,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586465991
+    },
+    {
+        "content": "<p>If I can do that, then the stage should be properly set for a Qt interface</p>",
+        "id": 193508694,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586466076
+    },
+    {
+        "content": "<p>so devil is definitely in the details to what you just said</p>",
+        "id": 193508843,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466138
+    },
+    {
+        "content": "<p>to do what you describe and what I think you're getting at, I think we'll need to separate the concept of window and context creation in the DM api</p>",
+        "id": 193508879,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466161
+    },
+    {
+        "content": "<p>right now, they are one in the same throughout dm</p>",
+        "id": 193508902,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466176
+    },
+    {
+        "content": "<p>the API isn't far off, but it needs to be one layer lower on the open/close calls and a layer higher on everything else</p>",
+        "id": 193509138,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466287
+    },
+    {
+        "content": "<p>for example, currently, dm_open does both -- it creates a window and sets up a context.  dm_open_existing avoids both I believe, which is why there is a platform version of each.</p>",
+        "id": 193509264,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466362
+    },
+    {
+        "content": "<p>to be able to utilize a window and/or context that someone else creates, things WILL get messy and likely platform-specific in application code but it can work</p>",
+        "id": 193509479,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466474
+    },
+    {
+        "content": "<p>Hmm.  So we'll have to basically sketch out a reworked dm/fb API, then identify an implementation/migration path from where we are to it?</p>",
+        "id": 193509544,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586466500
+    },
+    {
+        "content": "<p>not the only option, but that's a possibility sure</p>",
+        "id": 193509606,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466543
+    },
+    {
+        "content": "<p>What if we make the libdm backends into plugins, keeping the window creation where it is, but allowing a program to provide its own custom backend?</p>",
+        "id": 193509647,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586466579
+    },
+    {
+        "content": "<p>Decorator Pattern: <a href=\"https://en.wikipedia.org/wiki/Decorator_pattern\" title=\"https://en.wikipedia.org/wiki/Decorator_pattern\">https://en.wikipedia.org/wiki/Decorator_pattern</a></p>",
+        "id": 193509930,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466738
+    },
+    {
+        "content": "<p>Am I correct that's more or less what we envision for libgcv?</p>",
+        "id": 193509996,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586466799
+    },
+    {
+        "content": "<p>don't need to be plugins per se, they could be, but the important aspect is that you have basically two apis -- a front end and a backend</p>",
+        "id": 193510013,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466806
+    },
+    {
+        "content": "<p>I guess I would need to whiteboard it - my brain jumps to the dmp-&gt;dm_* calls as being the front end and the X/ogl/wgl specific implementations being the back end, but I know I'm missing the real point...</p>",
+        "id": 193510170,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586466898
+    },
+    {
+        "content": "<p>dm is presently concerned with front+back simultaneously, thus dm-ogl.c is really X11 user frontend and OpenGL drawing backend; dm-X.c is X11 user frontend and X11 drawing backend; dm-wgl is WGL frontend and OpenGL drawing backend, etc</p>",
+        "id": 193510196,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466916
+    },
+    {
+        "content": "<p>Oh, by frontend you're referring to the Windowing API?</p>",
+        "id": 193510229,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586466942
+    },
+    {
+        "content": "<p>it's like a driver interface, rather it needs to be that</p>",
+        "id": 193510255,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466959
+    },
+    {
+        "content": "<p>think of it this way, look at dm-ogl.c and think what it'd take to extricate OpenGL</p>",
+        "id": 193510332,
+        "sender_full_name": "Sean",
+        "timestamp": 1586466994
+    },
+    {
+        "content": "<p>similar for the window creation calls (e.g., i.e. the Tk+X11 calls)</p>",
+        "id": 193510498,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467090
+    },
+    {
+        "content": "<p>Hmm.  So, create then Window and then use that to inform the creation of the context?</p>",
+        "id": 193510554,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467139
+    },
+    {
+        "content": "<p>no, the become separate concepts</p>",
+        "id": 193510605,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467170
+    },
+    {
+        "content": "<p>this direction would actually greatly benefit from C++... <em>sigh</em></p>",
+        "id": 193510713,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467205
+    },
+    {
+        "content": "<p>it'd be something like dm_create_window(), dm_create_context(), dm_register_context()</p>",
+        "id": 193510816,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467283
+    },
+    {
+        "content": "<p>Ah, OK - I hadn't succeeded in parsing the code well enough yet to have a sense that you could create the context without the window.</p>",
+        "id": 193510942,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467352
+    },
+    {
+        "content": "<p>that all said, I would suggest focusing on just the minimal necessary bits  that simply encapsulate all the Tcl/Tk calls and whatever else is necessary so interp is not part of the public API</p>",
+        "id": 193511424,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467610
+    },
+    {
+        "content": "<p>that's a GREATLY reduced subset of work needed to make that happen.  you can't/shouldn't pull Tk out of DM without surgery, but GED doesn't need to know anything whatsoever about the Tcl/Tk in DM</p>",
+        "id": 193511560,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467682
+    },
+    {
+        "content": "<p>that'll be good forward progress even if we later burn it all to the ground</p>",
+        "id": 193511635,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467715
+    },
+    {
+        "content": "<p>I'd probably start with interp</p>",
+        "id": 193511695,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467748
+    },
+    {
+        "content": "<p>I think the only instances of Tcl/Tk in the public API (at least, per the headers) are the interp and he dm/dm_xvars.h Tk_Windows.</p>",
+        "id": 193511744,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467778
+    },
+    {
+        "content": "<p>yep</p>",
+        "id": 193511768,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467792
+    },
+    {
+        "content": "<p>IIRC the only overt use I saw of interp was in wgl - something about deiconifying the window.</p>",
+        "id": 193511860,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467812
+    },
+    {
+        "content": "<p>figure out how to hide interp, and you'll be half done</p>",
+        "id": 193511863,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467812
+    },
+    {
+        "content": "<p>interp is used to create tkwin via Tk_MainWindow(interp)</p>",
+        "id": 193511913,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467844
+    },
+    {
+        "content": "<p>Oh, the other one was the _init_dm call.</p>",
+        "id": 193511917,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467848
+    },
+    {
+        "content": "<p>interp kicks of all the tk calls</p>",
+        "id": 193511955,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467871
+    },
+    {
+        "content": "<p>Ah nuts, that's right... forgot about that.</p>",
+        "id": 193511991,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467899
+    },
+    {
+        "content": "<p>the way to hide it is to either pass it in opaquely from calling code, which is ugly but can work</p>",
+        "id": 193512003,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467912
+    },
+    {
+        "content": "<p>&lt;nod&gt; - got that to work, actually...</p>",
+        "id": 193512065,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586467939
+    },
+    {
+        "content": "<p>or register it via decorator pattern as a \"dm_decorator\" of sorts where the dm's create it but the code is elsewhere</p>",
+        "id": 193512124,
+        "sender_full_name": "Sean",
+        "timestamp": 1586467987
+    },
+    {
+        "content": "<p>I don't think the dms create the interp even now - I think the parent application passes it to them?</p>",
+        "id": 193512164,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468024
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 193512172,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468031
+    },
+    {
+        "content": "<p>that's how the responsbility is delegated to it</p>",
+        "id": 193512233,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468049
+    },
+    {
+        "content": "<p>it would be something like:  struct dm_window *dm_create_tk_window(interp);</p>",
+        "id": 193512340,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468139
+    },
+    {
+        "content": "<p>I'll see what I can do about the public API - sounds like a reasonable starting point.</p>",
+        "id": 193512444,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468203
+    },
+    {
+        "content": "<p>so dm_window is where Tk_Window woud hide?</p>",
+        "id": 193512536,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468264
+    },
+    {
+        "content": "<p>we don't need to avoid Tcl_Interp being in the API entirely, but you can avoid it being in all the API portions that LIBGED calls and is aware of</p>",
+        "id": 193512559,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468279
+    },
+    {
+        "content": "<p>struct dm_window would probably have a struct dm_window_impl* inside it that is only accessed via whatever source file had dm_create_tk_window()</p>",
+        "id": 193512699,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468359
+    },
+    {
+        "content": "<p>that way, the Tk_Window symbol is never exposed in a public header</p>",
+        "id": 193512728,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468377
+    },
+    {
+        "content": "<p>Ah, gotcha.</p>",
+        "id": 193512754,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468397
+    },
+    {
+        "content": "<p>/me will poke at that for a bit - will probably drive me to go back and finish the license scanner :-P</p>",
+        "id": 193512891,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468443
+    },
+    {
+        "content": "<p>As the entire entry point hinges on Tcl_Interp, even that would likely be made a dm_create_tk_window(void*interp)</p>",
+        "id": 193512902,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468451
+    },
+    {
+        "content": "<p>so not even tcl is exposed any more.  the application creating the window would know they have an interp and call it (or in the case of glfw, call a different dm_create_glfw_window(void)</p>",
+        "id": 193513077,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468527
+    },
+    {
+        "content": "<p>&lt;nod&gt;</p>",
+        "id": 193513100,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468546
+    },
+    {
+        "content": "<p>OK, I've got to run - thanks Sean for the help, much appreciated.</p>",
+        "id": 193513328,
+        "sender_full_name": "starseeker",
+        "timestamp": 1586468715
+    },
+    {
+        "content": "<p>sure thing!  enjoy a walk.  Gorgeous day.</p>",
+        "id": 193513444,
+        "sender_full_name": "Sean",
+        "timestamp": 1586468781
+    }
+]

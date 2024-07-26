@@ -1,0 +1,85 @@
+<html>
+<head><meta charset="utf-8"><title>spherical sampling · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html">spherical sampling</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="217795073"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217795073" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217795073">(Nov 24 2020 at 18:30)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> I was working on spherical sampling and noticed you added a sobol sequence generator and related code in libanalyze.  That's awesome!  Is that exposed/presented anywhere user-visible?</p>
+
+
+
+<a name="217795241"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217795241" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217795241">(Nov 24 2020 at 18:31)</a>:</h4>
+<p>I want to compare it with another generator I have for incremental spherical sets, use it as a base for convergence testing on closures.</p>
+
+
+
+<a name="217798147"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217798147" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217798147">(Nov 24 2020 at 18:55)</a>:</h4>
+<p>It's exposed in the pnts command, IIRC... one sec</p>
+
+
+
+<a name="217798397"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217798397" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217798397">(Nov 24 2020 at 18:57)</a>:</h4>
+<p>pnts gen --sobol</p>
+
+
+
+<a name="217798439"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217798439" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217798439">(Nov 24 2020 at 18:57)</a>:</h4>
+<p>If you generate points from a sphere using --rand and --sobol, you'll see the difference</p>
+
+
+
+<a name="217798558"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217798558" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217798558">(Nov 24 2020 at 18:58)</a>:</h4>
+<p>sobol ended up being of dubious utility for that - it clusters near the poles of the sphere, and I never got deep enough in to see if there was a correction that might be applied.</p>
+
+
+
+<a name="217798869"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217798869" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217798869">(Nov 24 2020 at 19:00)</a>:</h4>
+<p>Really should have ripped it out, to be honest - it took a while to find a sobol generator that was appropriately licensed and able to be integrated cleanly, so I hated to get rid of it, but honesty compels me to admit  it's mostly code bloat right now...</p>
+
+
+
+<a name="217799048"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217799048" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217799048">(Nov 24 2020 at 19:02)</a>:</h4>
+<p>clustering near the poles is just a classic mistake in how the random numbers are being used</p>
+
+
+
+<a name="217799124"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217799124" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217799124">(Nov 24 2020 at 19:02)</a>:</h4>
+<p>the code itself is simple enough and sobol is a useful sequence for quasi-random montecarlo</p>
+
+
+
+<a name="217799403"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217799403" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217799403">(Nov 24 2020 at 19:05)</a>:</h4>
+<p>I did see a few issues in the code that need clean up, few mistakes to correct</p>
+
+
+
+<a name="217799579"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217799579" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217799579">(Nov 24 2020 at 19:06)</a>:</h4>
+<p>few things I just don't understand yet (like the next ranges and skip function, the example snippet has typos and comments aren't clear to me yet)</p>
+
+
+
+<a name="217799793"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/spherical%20sampling/near/217799793" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/spherical.20sampling.html#217799793">(Nov 24 2020 at 19:08)</a>:</h4>
+<p>thanks for the lead on pnts.  I'll check it out.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

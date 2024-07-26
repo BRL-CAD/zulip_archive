@@ -1,0 +1,55 @@
+<html>
+<head><meta charset="utf-8"><title>IGES · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html">IGES</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="235202707"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235202707" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235202707">(Apr 19 2021 at 15:43)</a>:</h4>
+<p>Okay, so after MUCH testing and debugging, I'm getting up to speed on our IGES export support.</p>
+
+
+
+<a name="235202802"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235202802" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235202802">(Apr 19 2021 at 15:43)</a>:</h4>
+<p>I'd rather forgotten just how actually rather impressive it is... even more complex than our STEP converter, with more flexibility and options.</p>
+
+
+
+<a name="235202887"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235202887" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235202887">(Apr 19 2021 at 15:44)</a>:</h4>
+<p>Short summary is that it looks like it IS outputting correctly, at least as far as I can tell, BUT...</p>
+
+
+
+<a name="235203219"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235203219" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235203219">(Apr 19 2021 at 15:46)</a>:</h4>
+<p>our converter is (by default) exporting more than most IGES importers are implemented to handle.  For example, by default IGES has a suite of primitives that it supports (like arb8, ell, rcc, etc) and g-iges actually exports them as such, but those entity types are not supported by loads of importers (e.g., opencascade, ACIS, Granite, ...).  Presumably one of the 2nd gen CAD like NX maybe supports them, as they were king when it was implemented and would have been in the testing regimen.</p>
+
+
+
+<a name="235203505"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235203505" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235203505">(Apr 19 2021 at 15:48)</a>:</h4>
+<p>IGES is rather expressive and supports other entity types, though, so g-iges ALSO has support to export those primitives tessellated as either meshes or breps.  The latter appears to be the supported format for Granite, but some CAD appear to support mesh format too.</p>
+
+
+
+<a name="235203821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235203821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235203821">(Apr 19 2021 at 15:50)</a>:</h4>
+<p>Now what I'm still trying to sort out is some systems (e.g., OpenCASCADE) still fail at importing our IGES when there's a bigger hierarchy and I'm not yet sure why.  I suspect we're exporting some hierarchy metadata (e.g., regionID, materialID) that causes them to fail/bail/dunno.   Simple hierarchies even with regions seem to work just fine.</p>
+
+
+
+<a name="235203930"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/IGES/near/235203930" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/IGES.html#235203930">(Apr 19 2021 at 15:51)</a>:</h4>
+<p>I did find one issue in the IGES header where we're not exporting two fields commonly found, but I got to read up on the spec to see if they're optional or required.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

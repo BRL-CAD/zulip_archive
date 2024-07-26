@@ -1,0 +1,32 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Tried to reproduce the gdiff issue in MGED with moss.g:</p>\n<p>cp all.g all2.g<br>\ne all2.g<br>\noed / all2.g/box.r/box.s<br>\ntra 10 0 0<br>\naccept<br>\ne all.g<br>\ngdiff all.g all2.g</p>\n<p>I see visual differences, at least on Linux...</p>",
+        "id": 221768377,
+        "sender_full_name": "starseeker",
+        "timestamp": 1609940887
+    },
+    {
+        "content": "<p>Thought... do any of the commands other than gdiff do significant raytracing in the same process as MGED itself?  rt, rtcheck and nirt are all separate programs...</p>",
+        "id": 221828199,
+        "sender_full_name": "starseeker",
+        "timestamp": 1609969820
+    },
+    {
+        "content": "<p>/me is wondering if the combination of calling prep and xpush in the same process is why this is happening now with d_use_hd</p>",
+        "id": 221828331,
+        "sender_full_name": "starseeker",
+        "timestamp": 1609969904
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Interesting... trying to zero in on the cause, I did the following in xpush.c:</p>\n<div class=\"codehilite\"><pre><span></span><code>Index: src/libged/xpush/xpush.c\n===================================================================\n--- src/libged/xpush/xpush.c    (revision 78049)\n+++ src/libged/xpush/xpush.c    (working copy)\n@@ -260,6 +260,10 @@\n\n     RT_CK_DIR(dp);\n\n+    struct rt_i *rtip = rt_new_rti(gedp-&gt;ged_wdbp-&gt;dbip);\n+    if (rt_gettree(rtip, dp-&gt;d_namep) &lt; 0) return NULL;\n+    //rt_free_rti(rtip);\n+\n     if (!(dp-&gt;d_flags &amp; RT_DIR_SOLID)) {\n    bu_vls_printf(gedp-&gt;ged_result_str, &quot;Copy_solid: %s is not a solid!!!!\\n&quot;, dp-&gt;d_namep);\n    return RT_DIR_NULL;\n</code></pre></div>\n<p>If I'm understanding correctly, that should be a no-op as far as xpush is concerned?  However, in the above form, xpush crashes in Free_uses.  If I uncomment the rt_free_rti, I get the following:</p>\n<div class=\"codehilite\"><pre><span></span><code>/bin/mged share/db/moss.g cp\\ all.g\\ all2.g\\;g\\ all\\ all.g\\ all2.g\\;xpush\\ all\nRan out of uses for combination all.g\nFailed to copy object all.gRan out of uses for combination all2.g\nFailed to copy object all2.g\n</code></pre></div>\n<p>Am I missing something?</p>",
+        "id": 221945530,
+        "sender_full_name": "starseeker",
+        "timestamp": 1610028755
+    },
+    {
+        "content": "<p>/me puts on his hip waders and heads into the xpush code...</p>",
+        "id": 221946486,
+        "sender_full_name": "starseeker",
+        "timestamp": 1610029292
+    }
+]

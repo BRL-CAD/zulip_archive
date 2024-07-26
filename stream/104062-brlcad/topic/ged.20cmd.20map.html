@@ -1,0 +1,111 @@
+<html>
+<head><meta charset="utf-8"><title>ged cmd map · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html">ged cmd map</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="214176279"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214176279" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214176279">(Oct 22 2020 at 12:00)</a>:</h4>
+<p>FWIW:  the libged init loads all commands so we can do things like list the valid defined commands and do the "near-miss" command lookup, without requiring any hard coding of a 'fixed' command list.  It's also a convenient way to detect any problems with the plugins at startup, so we can catch any errors in regression testing.  I'd want to make sure we preserve all those capabilities if we shift to on-the-fly lookup... </p>
+<p>(The only hard coded list is the exec_mapping.cpp file, and the purpose of that is to define the C functions for the libged programming API needed at compile time.)  </p>
+<p>I had initially envisioned the dynamic nature of the plugin mechanism as a way to extend the ged command set at run time - it's not implemented right now, but the libged_init would load the "standard" command set and then users could supply their own commands via plugin loading if they wanted to extend the command set...</p>
+
+
+
+<a name="214177671"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214177671" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214177671">(Oct 22 2020 at 12:14)</a>:</h4>
+<p>Yeah, I totally got all that.  It's just that it shouldn't load unless it needs to. That near-miss logic is specific to an mged/archer app and doesn't necessarily apply to an app that just runs a command or three.  Right?</p>
+
+
+
+<a name="214177757"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214177757" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214177757">(Oct 22 2020 at 12:15)</a>:</h4>
+<p>Right - it's for interactive apps that want to assist the user</p>
+
+
+
+<a name="214177773"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214177773" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214177773">(Oct 22 2020 at 12:15)</a>:</h4>
+<p>Even for mged/archer, if a "top" command misses, it could still maybe just load all the "t*" commands.  If it's always needing a list of all commands, there's really no reason for this all to be dynamic.  It's just complexity and overhead.</p>
+
+
+
+<a name="214177895"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214177895" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214177895">(Oct 22 2020 at 12:16)</a>:</h4>
+<p>It's also slightly different if the app requests loading everything at a particular time.  That's cool too.</p>
+
+
+
+<a name="214177996"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214177996" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214177996">(Oct 22 2020 at 12:17)</a>:</h4>
+<p>which is kind of how I see mged behaving, it can pull up the list periodically, e.g., during startup but then still check dynamically as needed (in case something was installed).</p>
+
+
+
+<a name="214178119"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178119" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178119">(Oct 22 2020 at 12:18)</a>:</h4>
+<p>So ged_cmd_lookup would move somewhere else then.</p>
+
+
+
+<a name="214178207"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178207" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178207">(Oct 22 2020 at 12:19)</a>:</h4>
+<p>probably.  not a big deal, but it does stick out at the moment since it basically loads everything on any access</p>
+
+
+
+<a name="214178250"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178250" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178250">(Oct 22 2020 at 12:19)</a>:</h4>
+<p>which is really weird for apps like that bigdb app that just needed to call tops and title.</p>
+
+
+
+<a name="214178326"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178326" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178326">(Oct 22 2020 at 12:20)</a>:</h4>
+<p>In fairness, the current form of that init logic was driven mostly by the initial testing requirements, which were attempting to shake out any problems with any of the commands.  I didn't optimize it for minimal loading.</p>
+
+
+
+<a name="214178328"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178328" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178328">(Oct 22 2020 at 12:20)</a>:</h4>
+<p>in theory, only calling ged_exec(tops) should only load the tops plugin I'd think</p>
+
+
+
+<a name="214178351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178351">(Oct 22 2020 at 12:20)</a>:</h4>
+<p>Agreed.</p>
+
+
+
+<a name="214178412"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178412" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178412">(Oct 22 2020 at 12:21)</a>:</h4>
+<p>I think I might have a solution for the "where's the libexec" dir, testing it out</p>
+
+
+
+<a name="214178452"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178452" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178452">(Oct 22 2020 at 12:21)</a>:</h4>
+<p>Make sure you check OpenBSD - that breaks directory logic where nothing else does...</p>
+
+
+
+<a name="214178654"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214178654" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214178654">(Oct 22 2020 at 12:23)</a>:</h4>
+<p>ged_cmd_list would have to move too, that also assumes full knowledge of all available commands.</p>
+
+
+
+<a name="214248823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged%20cmd%20map/near/214248823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.20cmd.20map.html#214248823">(Oct 22 2020 at 21:12)</a>:</h4>
+<p>yeah, I will do.  I just tried an OpenBSD yesterday and it failed on trunk.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

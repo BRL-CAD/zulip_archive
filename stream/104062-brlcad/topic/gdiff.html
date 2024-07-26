@@ -1,0 +1,74 @@
+<html>
+<head><meta charset="utf-8"><title>gdiff · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gdiff.html">gdiff</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="221768377"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gdiff/near/221768377" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gdiff.html#221768377">(Jan 06 2021 at 13:48)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Tried to reproduce the gdiff issue in MGED with moss.g:</p>
+<p>cp all.g all2.g<br>
+e all2.g<br>
+oed / all2.g/box.r/box.s<br>
+tra 10 0 0<br>
+accept<br>
+e all.g<br>
+gdiff all.g all2.g</p>
+<p>I see visual differences, at least on Linux...</p>
+
+
+
+<a name="221828199"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gdiff/near/221828199" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gdiff.html#221828199">(Jan 06 2021 at 21:50)</a>:</h4>
+<p>Thought... do any of the commands other than gdiff do significant raytracing in the same process as MGED itself?  rt, rtcheck and nirt are all separate programs...</p>
+
+
+
+<a name="221828331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gdiff/near/221828331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gdiff.html#221828331">(Jan 06 2021 at 21:51)</a>:</h4>
+<p>/me is wondering if the combination of calling prep and xpush in the same process is why this is happening now with d_use_hd</p>
+
+
+
+<a name="221945530"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gdiff/near/221945530" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gdiff.html#221945530">(Jan 07 2021 at 14:12)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Interesting... trying to zero in on the cause, I did the following in xpush.c:</p>
+<div class="codehilite"><pre><span></span><code>Index: src/libged/xpush/xpush.c
+===================================================================
+--- src/libged/xpush/xpush.c    (revision 78049)
++++ src/libged/xpush/xpush.c    (working copy)
+@@ -260,6 +260,10 @@
+
+     RT_CK_DIR(dp);
+
++    struct rt_i *rtip = rt_new_rti(gedp-&gt;ged_wdbp-&gt;dbip);
++    if (rt_gettree(rtip, dp-&gt;d_namep) &lt; 0) return NULL;
++    //rt_free_rti(rtip);
++
+     if (!(dp-&gt;d_flags &amp; RT_DIR_SOLID)) {
+    bu_vls_printf(gedp-&gt;ged_result_str, &quot;Copy_solid: %s is not a solid!!!!\n&quot;, dp-&gt;d_namep);
+    return RT_DIR_NULL;
+</code></pre></div>
+<p>If I'm understanding correctly, that should be a no-op as far as xpush is concerned?  However, in the above form, xpush crashes in Free_uses.  If I uncomment the rt_free_rti, I get the following:</p>
+<div class="codehilite"><pre><span></span><code>/bin/mged share/db/moss.g cp\ all.g\ all2.g\;g\ all\ all.g\ all2.g\;xpush\ all
+Ran out of uses for combination all.g
+Failed to copy object all.gRan out of uses for combination all2.g
+Failed to copy object all2.g
+</code></pre></div>
+<p>Am I missing something?</p>
+
+
+
+<a name="221946486"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gdiff/near/221946486" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gdiff.html#221946486">(Jan 07 2021 at 14:21)</a>:</h4>
+<p>/me puts on his hip waders and heads into the xpush code...</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

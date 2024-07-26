@@ -1,0 +1,128 @@
+<html>
+<head><meta charset="utf-8"><title>OSX M1 runners · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html">OSX M1 runners</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="405684560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/405684560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#405684560">(Dec 03 2023 at 17:52)</a>:</h4>
+<p>Cool - looks like there is some progress towards M1 runners for Github Actions with the Mac, although it's not on the free accounts yet:  <a href="https://github.com/actions/runner-images/issues/8439#issuecomment-1755601587">https://github.com/actions/runner-images/issues/8439#issuecomment-1755601587</a></p>
+
+
+
+<a name="411961365"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/411961365" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#411961365">(Jan 09 2024 at 15:44)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> Dunno if this is M1/M2-specific, but I'm getting a build error on brlcad_externals in libpng:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>[ 60%] Building C object CMakeFiles/png.dir/png.c.o
+/Library/Developer/CommandLineTools/usr/bin/cc -DPNG_ARM_NEON_OPT=2 -Dpng_EXPORTS -I/Users/morrison/brlcad_ext/install/include -I/Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD-build -I/Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fPIC -MD -MT CMakeFiles/png.dir/png.c.o -MF CMakeFiles/png.dir/png.c.o.d -o CMakeFiles/png.dir/png.c.o -c /Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD/png.c
+
+-- stderr output is:
+In file included from /Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD/png.c:14:
+/Users/morrison/brlcad_externals/.build/png/PNG_BLD-prefix/src/PNG_BLD/pngpriv.h:911:4: error: ZLIB_VERNUM != PNG_ZLIB_VERNUM       "-I (include path) error: see the notes in pngpriv.h"
+#  error ZLIB_VERNUM != PNG_ZLIB_VERNUM \
+   ^
+1 error generated.
+</code></pre></div>
+
+
+
+<a name="411961482"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/411961482" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#411961482">(Jan 09 2024 at 15:45)</a>:</h4>
+<p>That's with<br>
+cmake .. -DENABLE_ALL=ON</p>
+
+
+
+<a name="412215612"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/412215612" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#412215612">(Jan 10 2024 at 20:36)</a>:</h4>
+<p>IIRC that may come from getting system zlib and bundled zlib stuff mixed... I've seen it before, but I don't recall offhand what the specific issue was.  I'm still more or less offline for the next few days - I may be able to have a go at it Friday or Monday</p>
+
+
+
+<a name="412407479"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/412407479" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#412407479">(Jan 11 2024 at 19:29)</a>:</h4>
+<p>Okay, yeah, let me know if you can check it out or point me at a file.  I'm still using src/other elsewhere in the meantime, but couldn't find the delta.</p>
+
+
+
+<a name="412407503"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/412407503" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#412407503">(Jan 11 2024 at 19:29)</a>:</h4>
+<p>Hope you feel better!</p>
+
+
+
+<a name="416788395"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/416788395" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#416788395">(Jan 19 2024 at 14:25)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> , I just realized something - your directory name is brlcad_externals for this build.  Are you using <a href="https://github.com/BRL-CAD/bext">https://github.com/BRL-CAD/bext</a> for the third party repo?  I've got the brlcad_externals repo archived, since it didn't use the submodule approach.  brlcad_externals shouldn't be used - I just left it up for now in case we needed anything in it for reference.</p>
+
+
+
+<a name="416788533"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/416788533" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#416788533">(Jan 19 2024 at 14:25)</a>:</h4>
+<p>If you are using bext, can you send me the pnglibconf.h file the build generates?</p>
+
+
+
+<a name="417472273"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/417472273" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#417472273">(Jan 23 2024 at 15:38)</a>:</h4>
+<p>I have it rebuilding fresh to check current status since it's been a couple weeks.  do you know why the submodules  would report as modified?  I cleared their status by blowing away the build, but I'm guessing some sort of submodule update is needed:</p>
+<p>morrison@Miniagua brlcad.bext % git status<br>
+On branch main<br>
+Your branch is up to date with 'origin/main'.</p>
+<p>Changes not staged for commit:<br>
+  (use "git add &lt;file&gt;..." to update what will be committed)<br>
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)<br>
+    modified:   lmdb/lmdb (new commits)<br>
+    modified:   netpbm/netpbm (new commits)<br>
+    modified:   opencv/opencv (new commits)<br>
+    modified:   openmesh/OpenMesh (new commits)<br>
+    modified:   opennurbs/opennurbs (new commits)<br>
+    modified:   patch/patch (new commits)<br>
+    modified:   png/libpng (new commits)<br>
+    modified:   proj/PROJ (new commits)<br>
+    modified:   pugixml/pugixml (new commits)</p>
+<p>no changes added to commit (use "git add" and/or "git commit -a")</p>
+
+
+
+<a name="417473723"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/417473723" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#417473723">(Jan 23 2024 at 15:44)</a>:</h4>
+<p>probably not related to the prior error, but I did notice that libpng and opencv both throw cmake warnings about "Argument not separated from previous token by whitespace"</p>
+
+
+
+<a name="417473927"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/417473927" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#417473927">(Jan 23 2024 at 15:45)</a>:</h4>
+<p>looking at the generated cmake scripts, it looks like a syntax error (quotes within a quoted string) in both</p>
+<p>/Users/morrison/brlcad.bext/.build/png/PNG_BLD-prefix/src/PNG_BLD-stamp/PNG_BLD-configure-.cmake</p>
+<p>and</p>
+<p>/Users/morrison/brlcad.bext/.build/opencv/OPENCV_BLD-prefix/src/OPENCV_BLD-stamp/OPENCV_BLD-configure-.cmake</p>
+
+
+
+<a name="417524967"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/417524967" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#417524967">(Jan 23 2024 at 20:42)</a>:</h4>
+<p>For the submodules, I think this might be the line for updating:</p>
+<p>git submodule update --recursive</p>
+
+
+
+<a name="417526093"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/417526093" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#417526093">(Jan 23 2024 at 20:50)</a>:</h4>
+<p>Looks like the cmake errors were a quoting problem passing in empty args via "" in our files - I've committed what should be a fix.</p>
+
+
+
+<a name="417557127"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/OSX%20M1%20runners/near/417557127" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/OSX.20M1.20runners.html#417557127">(Jan 24 2024 at 01:04)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> I'm curious if the latest bext still has the PNG_ZLIB_VERNUM issue - I'm not quite seeing where it would come from in the code, unless pnglibconf.h.prebuilt is getting used.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

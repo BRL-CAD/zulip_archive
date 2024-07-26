@@ -1,0 +1,272 @@
+[
+    {
+        "content": "<p>Is there an easy way to obtain this to a list?</p>\n<div class=\"codehilite\"><pre><span></span><code>        <span class=\"n\">std</span><span class=\"o\">::</span><span class=\"n\">vector</span><span class=\"o\">&lt;</span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">Element</span><span class=\"o\">&gt;</span> <span class=\"n\">list</span><span class=\"p\">;</span>\n        <span class=\"n\">VectorList</span> <span class=\"n\">vl</span><span class=\"p\">;</span>\n        <span class=\"n\">db</span><span class=\"o\">-&gt;</span><span class=\"n\">Plot</span><span class=\"p\">(</span><span class=\"n\">objectName</span><span class=\"p\">.</span><span class=\"n\">c_str</span><span class=\"p\">(),</span> <span class=\"n\">vl</span><span class=\"p\">);</span>\n\n        <span class=\"k\">class</span> <span class=\"nc\">Callback</span> <span class=\"o\">:</span> <span class=\"k\">public</span> <span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">ElementCallback</span> <span class=\"p\">{</span>\n            <span class=\"kt\">bool</span> <span class=\"k\">operator</span><span class=\"p\">()(</span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">Element</span> <span class=\"o\">*</span><span class=\"n\">element</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n                <span class=\"n\">list</span><span class=\"p\">.</span><span class=\"n\">push_back</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"n\">element</span><span class=\"p\">);</span>\n                <span class=\"k\">return</span> <span class=\"nb\">true</span><span class=\"p\">;</span>\n            <span class=\"p\">}</span>\n        <span class=\"p\">};</span>\n\n        <span class=\"n\">Callback</span> <span class=\"n\">b</span><span class=\"p\">;</span>\n        <span class=\"n\">vl</span><span class=\"p\">.</span><span class=\"n\">Iterate</span><span class=\"p\">(</span><span class=\"n\">b</span><span class=\"p\">);</span>\n</code></pre></div>\n\n\n<p>I need to get the elements in a VectorList to a list (vector) <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span></p>",
+        "id": 200470189,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1591819852
+    },
+    {
+        "content": "<p>Apparently I can't get them to a list even if use globally available lists.<br>\nSince <code>*element</code> is stack allocated it will have been destroyed if I just add <code>element</code> (pointer) to a list (vector&lt;Element*&gt;) by the time I actually access it.<br>\nAlso I cannot copy it and create a new object since <code>Element</code> is an abstract class. Can somebody help me with this?</p>",
+        "id": 200507413,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1591854066
+    },
+    {
+        "content": "<p>It is possible to create a list of copies from the elements, but I decided no not explicitly support it (e.g. by providing a Clone() method), because this is not how this list should be used. It would slow down the process. Instead, you should move the corresponding drawing functions to a call-back class:</p>\n<div class=\"codehilite\"><pre><span></span><code><span class=\"k\">class</span> <span class=\"nc\">ElementOpenGL</span> <span class=\"o\">:</span> <span class=\"k\">public</span> <span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">ConstElementCallback</span> <span class=\"p\">{</span>\n<span class=\"k\">public</span><span class=\"o\">:</span>\n    <span class=\"k\">virtual</span> <span class=\"kt\">bool</span> <span class=\"k\">operator</span><span class=\"p\">()(</span><span class=\"k\">const</span> <span class=\"n\">Element</span><span class=\"o\">*</span> <span class=\"n\">element</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n        <span class=\"k\">switch</span> <span class=\"p\">(</span><span class=\"n\">element</span><span class=\"o\">-&gt;</span><span class=\"n\">Type</span><span class=\"p\">())</span> <span class=\"p\">{</span>\n        <span class=\"k\">case</span> <span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">Element</span><span class=\"o\">::</span><span class=\"nl\">PointDraw</span><span class=\"p\">:</span>\n            <span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">PointDraw</span><span class=\"o\">*</span> <span class=\"n\">pointDraw</span> <span class=\"o\">=</span> <span class=\"k\">static_cast</span><span class=\"o\">&lt;</span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">PointDraw</span><span class=\"o\">*&gt;</span><span class=\"p\">(</span><span class=\"n\">element</span><span class=\"p\">);</span>\n            <span class=\"c1\">// put your OpenGL code here</span>\n            <span class=\"k\">break</span><span class=\"p\">;</span>\n\n        <span class=\"k\">case</span> <span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">Element</span><span class=\"o\">::</span><span class=\"nl\">PointSize</span><span class=\"p\">:</span>\n             <span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">PointSize</span><span class=\"o\">*</span> <span class=\"n\">pointSize</span> <span class=\"o\">=</span> <span class=\"k\">static_cast</span><span class=\"o\">&lt;</span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">VectorList</span><span class=\"o\">::</span><span class=\"n\">PointSize</span><span class=\"o\">*&gt;</span><span class=\"p\">(</span><span class=\"n\">element</span><span class=\"p\">);</span>\n            <span class=\"c1\">// put your OpenGL code here</span>\n            <span class=\"k\">break</span><span class=\"p\">;</span>\n        <span class=\"c1\">// ...</span>\n       <span class=\"p\">}</span>\n    <span class=\"p\">}</span>\n<span class=\"p\">};</span>\n\n<span class=\"kt\">void</span> <span class=\"nf\">DrawVectorList</span><span class=\"p\">(</span><span class=\"k\">const</span> <span class=\"n\">VectorList</span><span class=\"o\">&amp;</span> <span class=\"n\">vectorList</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n    <span class=\"n\">ElementOpenGL</span> <span class=\"n\">elementOpenGL</span><span class=\"p\">;</span>\n    <span class=\"n\">vectorList</span><span class=\"p\">.</span><span class=\"n\">Iterate</span><span class=\"p\">(</span><span class=\"n\">elementOpenGL</span><span class=\"p\">);</span>\n<span class=\"p\">}</span>\n</code></pre></div>\n\n\n<p>This code demonstrates the principle only. It doesn't contain all necessary methods, checks, etc..</p>",
+        "id": 200562585,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1591890308
+    },
+    {
+        "content": "<p>Any future plans to bring coreinterface to the main repo? What if I want to access coreinterfaces from there? My current plan is to rewrite stuff not to include things from coreinterfaces. Alternatively do we plan to bring it there?</p>",
+        "id": 202131709,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1593199525
+    },
+    {
+        "content": "<p>We're actually planning to migrate the main repository to github - once we do that, we may do something like include coreInterface as a submodule - not decided yet.</p>",
+        "id": 202131846,
+        "sender_full_name": "starseeker",
+        "timestamp": 1593199591
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"217384\">@Sadeep Darshana</span> By keeping it separate, the MOOSE API cannot not become tangled with the low-level C API.  That's entirely intentional and helps keep the implementation clean.</p>",
+        "id": 202131939,
+        "sender_full_name": "Sean",
+        "timestamp": 1593199649
+    },
+    {
+        "content": "<p>It does complicate some things, but for now it's worth it.</p>",
+        "id": 202131945,
+        "sender_full_name": "Sean",
+        "timestamp": 1593199653
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/coreInterface/near/202131846\">said</a>:</p>\n<blockquote>\n<p>We're actually planning to migrate the main repository to github - once we do that, we may do something like include coreInterface as a submodule - not decided yet.</p>\n</blockquote>\n<p>you might keep it as a seperate branch actually</p>",
+        "id": 202132034,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1593199687
+    },
+    {
+        "content": "<p>It's also pure C++, and while we do allow C++ in the low-level library implementation (i.e., not in public headers), they are nowhere close to being good C++ designwise even on the backend.</p>",
+        "id": 202132119,
+        "sender_full_name": "Sean",
+        "timestamp": 1593199742
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/coreInterface/near/202131846\">said</a>:</p>\n<blockquote>\n<p>We're actually planning to migrate the main repository to github - once we do that, we may do something like include coreInterface as a submodule - not decided yet.</p>\n</blockquote>\n<p>Possibly the other way around since it's layered on top.  It's more like some of the BRL-CAD libs are proper 3rd party dependencies.</p>",
+        "id": 202132277,
+        "sender_full_name": "Sean",
+        "timestamp": 1593199818
+    },
+    {
+        "content": "<p>Where it gets complicated is wanting to use MOOSE in utilities and new commands, as they can't live in the main repo, but that's the tradeoff for now.</p>",
+        "id": 202132421,
+        "sender_full_name": "Sean",
+        "timestamp": 1593199891
+    },
+    {
+        "content": "<p>Once the main build is shifted to the superbuild pattern, we can actually start making pieces of BRL-CAD into \"proper\" projects that are built as part of the parent build.  Once we do that, coreInteface could do the same thing and reference those subprojects.</p>",
+        "id": 202132826,
+        "sender_full_name": "starseeker",
+        "timestamp": 1593200117
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"217384\">Sadeep Darshana</span> <a href=\"#narrow/stream/104062-general/topic/coreInterface/near/202131709\">said</a>:</p>\n<blockquote>\n<p>Any future plans to bring coreinterface to the main repo?</p>\n</blockquote>\n<p>The <strong>MOOSE</strong> is designed to be entirely on top of the BRL-CAD core libraries. There is no need to move it to the main (or more precisely core) repository. Vice versa, MOOSE classes should not be used in the core libraries.</p>",
+        "id": 202471777,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1593539518
+    },
+    {
+        "content": "<p>Not to be confused with the core interface ;)</p>",
+        "id": 202537476,
+        "sender_full_name": "Sean",
+        "timestamp": 1593587775
+    },
+    {
+        "content": "<p>MOOSE demonstrates how I think the interface should be constructed on top of the classical BRL-CAD libraries. The functionality is the same as the one of rt^3's coreInterface, but if you talk about integration and software architecture, the development direction is more MOOSE than coreIntterface.</p>",
+        "id": 202601265,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1593625934
+    },
+    {
+        "content": "<p>What do you see as the biggest architecture and integration difference between coreInterface and MOOSE??  I kind of viewed them as \"the same\", just with MOOSE now slightly more cleaned up and evolved but architecturally the same.  Both present a canonical OO API over the low-level libs.  Are there major implementation differences?</p>",
+        "id": 202603895,
+        "sender_full_name": "Sean",
+        "timestamp": 1593627202
+    },
+    {
+        "content": "<p>What does MOOSE mean? Do the letters stand for words?</p>",
+        "id": 202614478,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1593632276
+    },
+    {
+        "content": "<p>It's fluctuated, but this is what has stuck with me:<br>\nModular Object-Oriented Solidity Engine</p>",
+        "id": 202614607,
+        "sender_full_name": "Sean",
+        "timestamp": 1593632329
+    },
+    {
+        "content": "<p>It's also a play on words homage as it's how you pronounce the last name of the person that started BRL-CAD, Mike Muuss.</p>",
+        "id": 202614791,
+        "sender_full_name": "Sean",
+        "timestamp": 1593632405
+    },
+    {
+        "content": "<p>Ubject-Uriented doesn't quite work, though ;)</p>",
+        "id": 202614842,
+        "sender_full_name": "Sean",
+        "timestamp": 1593632431
+    },
+    {
+        "content": "<p>noticed his name in dedication</p>",
+        "id": 202614923,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1593632472
+    },
+    {
+        "content": "<p>brilliant scientist, huge personality, super friendly, got me latched onto the project young :)</p>",
+        "id": 202614988,
+        "sender_full_name": "Sean",
+        "timestamp": 1593632522
+    },
+    {
+        "content": "<p>I also encountered his name when for some reason I was looking at ping command</p>",
+        "id": 202615350,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1593632701
+    },
+    {
+        "content": "<p>Was the same person when I looked back at the dedication</p>",
+        "id": 202615387,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1593632726
+    },
+    {
+        "content": "<p>The API of MOOSE and coreInterface are essentially the same. The difference is how they are build, how their libraries depend on the BRL-CAD installation.</p>\n<p>The brlcad.dll for Windows is a hack in the main repository. I tried to to extend it to build a library for Linux too, but without success. I.e., I succeeded to build a shared library, but it still depends on the BRL-CAD installation. The standard build in rt^3 depends on the BRL-CAD installation too.</p>\n<p>The problem with the BRL-CAD installation is that a program from for example Debian doesn't has it. And, without being available in the big distributions, the number of users is very limited.</p>\n<p>Therefore MOOSE demonstrates an approach and architecture to overcome this. Without affecting the standard BRL-CAD repository and build, it generates a single self-consistent library (i.e., it depends only on some libraries contained in every big Linux distribution) which can go into a libbrlcad package, defines a SDK which can go into a libbrlcad-dev package, and there is an example for an application using these too.</p>\n<p>Therefore, the difference is not in the features of the API, but the integration with the other software.</p>",
+        "id": 202668634,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1593683704
+    },
+    {
+        "content": "<p>Ah, I took your earlier comment to mean that the APIs were different, hence a little surprise.</p>\n<p>For what it's worth, cmake now finally does provide a sublibrary mechanism that would make a libbrlcad possible without recompilation so it could once again simply be the union of its sublibs.</p>",
+        "id": 202749237,
+        "sender_full_name": "Sean",
+        "timestamp": 1593727288
+    },
+    {
+        "content": "<p>I mean, to be clear, MOOSE also requires a build of BRL-CAD, it just presumably doesn't need to be installed since it's linking in all the libs statically.  It's the result that is standalone because of the static linkage.</p>",
+        "id": 202749414,
+        "sender_full_name": "Sean",
+        "timestamp": 1593727434
+    },
+    {
+        "content": "<p>BTW, there are minor differences in the C++ APIs:</p>\n<ul>\n<li>MOOSE has the <strong>Database</strong> module directory</li>\n<li>coreInterface must not use C++11 or above features (I'm still using it with VS2008)</li>\n</ul>",
+        "id": 202803534,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1593782795
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  Any chance I can get a permanent <code>Object*</code>  instead of void Database::Get ( const char*     objectName,  ObjectCallback&amp; callback)?</p>",
+        "id": 204312073,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1595096858
+    },
+    {
+        "content": "<p>Because this is very slow when editing properties</p>",
+        "id": 204312121,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1595096888
+    },
+    {
+        "content": "<p>Think about dragging an object with mouse, I have to call Get (which will search the entire db for the string path I give) for every delta change of a property</p>",
+        "id": 204312167,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1595097001
+    },
+    {
+        "content": "<p>The drawing speed is also not sufficient for such a scenario.</p>",
+        "id": 204314599,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1595100961
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"217384\">Sadeep Darshana</span> <a href=\"#narrow/stream/104062-general/topic/coreInterface/near/204312073\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span>  Any chance I can get a permanent <code>Object*</code>  instead of void Database::Get ( const char*     objectName,  ObjectCallback&amp; callback)?</p>\n</blockquote>\n<p>There is a <code>Object* Get(const char* objectName) const;</code> method (right below the other Get() method you mentioned in brlcad/ConstDatabase.h ;). But, you need to Destroy() it when you are done. And, don't forget to write it back to the database to see the effect.</p>",
+        "id": 204355132,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1595171396
+    },
+    {
+        "content": "<p>I didn't think I could use it since it was a copy. Didn't occur to me that I could write it back.<br>\nDoes Object::Name() contains the entire path too as opposed to just the name, to determine where in the hierarchy it is added?</p>",
+        "id": 204367907,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1595187839
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 204381326,
+        "sender_full_name": "Thusal Ranawaka",
+        "timestamp": 1595212124
+    },
+    {
+        "content": "<p>The Object subclasses are just wrappers for the rt_~_internal structs and just is their behavior. Modifying these structs doesn't change the database either. You have to use rt_~_import5() and rt_~_export5() to read/write them from/to the database. The Get() method with the call-back in the C++ interface does the write-back automatically. If you use the other Get(), you need to export the struct explicitly to the database if you want to have the changes an effect to it.</p>\n<p>However, this should make it easier to implement the dialogs. \"OK\" calls Set(), \"Cancel\" not.</p>",
+        "id": 204388457,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1595224272
+    },
+    {
+        "content": "<p>The name is just the name of the object. The path is build from the combinations in between the selected object (usually a group combination) and the object in question. This path doesn't have to be unique.</p>\n<p>You can get the path from a tree walk algorithm.</p>",
+        "id": 204388602,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1595224508
+    },
+    {
+        "content": "<p>is Combination::SetHasColor(false) working?<br>\nbecause when I query with Combination::HasColor() after calling Combination::SetHasColor(false) on a combination it still gives true.</p>",
+        "id": 206809120,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1597322143
+    },
+    {
+        "content": "<p>Combination::SetHasColor(true) is working as expected</p>",
+        "id": 206809193,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1597322175
+    },
+    {
+        "content": "<p>I also have trouble with setting color</p>",
+        "id": 206838577,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1597336599
+    },
+    {
+        "content": "<p>Combination::SetGreen, Combination::SetBlue, Combination::SetRed apparently don't change the colors.<br>\nDatabase::Set gives an error when setting Combinations, it worked fine for solids. So I'm setting via ObjectCallback.<br>\nWhat am I doing wrong?</p>",
+        "id": 206839320,
+        "sender_full_name": "Sadeep Darshana",
+        "timestamp": 1597336981
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"217384\">Sadeep Darshana</span> <a href=\"#narrow/stream/104062-general/topic/coreInterface/near/206809120\">said</a>:</p>\n<blockquote>\n<p>is Combination::SetHasColor(false) working?<br>\nbecause when I query with Combination::HasColor() after calling Combination::SetHasColor(false) on a combination it still gives true.</p>\n</blockquote>\n<p>Can you debug this and see what happens in line 992 of Combination.cpp? Maybe</p>\n<div class=\"codehilite\"><pre><span></span><code>    Internal()-&gt;rgb_valid = (value ? &#39;\\1&#39; : &#39;\\0&#39;);\n</code></pre></div>\n\n\n<p>would be better there.</p>",
+        "id": 206923442,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1597407736
+    },
+    {
+        "content": "<p>Or</p>\n<div class=\"codehilite\"><pre><span></span><code>    Internal()-&gt;rgb_valid = (value ? 1 : 0);\n</code></pre></div>\n\n\n<p>?</p>",
+        "id": 206923583,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1597407847
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"217384\">Sadeep Darshana</span> <a href=\"#narrow/stream/104062-general/topic/coreInterface/near/206839320\">said</a>:</p>\n<blockquote>\n<p>Combination::SetGreen, Combination::SetBlue, Combination::SetRed apparently don't change the colors.<br>\nDatabase::Set gives an error when setting Combinations, it worked fine for solids. So I'm setting via ObjectCallback.<br>\nWhat am I doing wrong?</p>\n</blockquote>\n<p>Which values do your colors have?</p>",
+        "id": 206923636,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1597407900
+    },
+    {
+        "content": "<p>And - which error?</p>",
+        "id": 206923679,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1597407943
+    }
+]

@@ -1,0 +1,827 @@
+<html>
+<head><meta charset="utf-8"><title>visibility=hidden · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html">visibility=hidden</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="198271626"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198271626" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198271626">(May 20 2020 at 23:53)</a>:</h4>
+<p>Ouch.  This is going to be a job - my using CPP_DLL_DEFINES instead of MSVC to denote a Visual Studio compile is going to boomerang big time.  Will actually have to go back and put the proper MSVC symbols in.</p>
+<p>Also, at first look gcc doesn't really support the Windows syntax:</p>
+<div class="codehilite"><pre><span></span><code>include/brlcad/bu/defines.h:43:33: error: expected constructor, destructor, or type conversion before ‘(’ token
+   43 | #    define BU_EXPORT __declspec(dllimport)
+      |                                 ^
+include/brlcad/bu/app.h:54:1: note: in expansion of macro ‘BU_EXPORT’
+   54 | BU_EXPORT extern const char *bu_argv0_full_path(void);
+      | ^~~~~~~~~
+</code></pre></div>
+
+
+
+<a name="198272273"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198272273" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198272273">(May 21 2020 at 00:01)</a>:</h4>
+<p>This example makes me think they're not a 1-1 swap:</p>
+<div class="codehilite"><pre><span></span><code>// Generic helper definitions for shared library support
+#if defined _WIN32 || defined __CYGWIN__
+  #define FOX_HELPER_DLL_IMPORT __declspec(dllimport)
+  #define FOX_HELPER_DLL_EXPORT __declspec(dllexport)
+  #define FOX_HELPER_DLL_LOCAL
+#else
+  #if __GNUC__ &gt;= 4
+    #define FOX_HELPER_DLL_IMPORT __attribute__ ((visibility (&quot;default&quot;)))
+    #define FOX_HELPER_DLL_EXPORT __attribute__ ((visibility (&quot;default&quot;)))
+    #define FOX_HELPER_DLL_LOCAL  __attribute__ ((visibility (&quot;hidden&quot;)))
+  #else
+    #define FOX_HELPER_DLL_IMPORT
+    #define FOX_HELPER_DLL_EXPORT
+    #define FOX_HELPER_DLL_LOCAL
+  #endif
+#endif
+</code></pre></div>
+
+
+
+<a name="198273380"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198273380" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198273380">(May 21 2020 at 00:16)</a>:</h4>
+<p>The BU_EXPORT/BU_IMPORT definitions didn't seem to work - the only thing that actually succeeded was putting  __attribute__ ((visibility ("default"))) before the actual implementations in the .c files.   I must be missing something...</p>
+
+
+
+<a name="198273591"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198273591" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198273591">(May 21 2020 at 00:20)</a>:</h4>
+<p>Ah - the definitions aren't making it to the command line.  Why....</p>
+
+
+
+<a name="198273771"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198273771" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198273771">(May 21 2020 at 00:23)</a>:</h4>
+<p>Bingo.  the ${libname}-obj target needs it as well.</p>
+
+
+
+<a name="198274049"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198274049" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198274049">(May 21 2020 at 00:27)</a>:</h4>
+<p>Based on that GCC page, we're looking at something like:</p>
+<div class="codehilite"><pre><span></span><code>#ifndef BU_EXPORT
+#  if defined(BU_DLL_EXPORTS) &amp;&amp; defined(BU_DLL_IMPORTS)
+#    error &quot;Only BU_DLL_EXPORTS or BU_DLL_IMPORTS can be defined, not both.&quot;
+#  elif defined(BU_DLL_EXPORTS)
+#      if defined(_WIN32)
+#        define BU_EXPORT __declspec(dllexport)
+#      else
+#        define BU_EXPORT __attribute__ ((visibility (&quot;default&quot;)))
+#      endif
+#  elif defined(BU_DLL_IMPORTS)
+#      if defined(_WIN32)
+#        define BU_EXPORT __declspec(dllimport)
+#      else
+#        define BU_EXPORT __attribute__ ((visibility (&quot;default&quot;)))
+#      endif
+#  else
+#    define BU_EXPORT
+#  endif
+#endif
+</code></pre></div>
+
+
+
+<a name="198274614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198274614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198274614">(May 21 2020 at 00:36)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  Assuming it doesn't break any rules, my vote would be to do something like this once in common.h:</p>
+<div class="codehilite"><pre><span></span><code>#if defined(_WIN32)
+# define DLLEXPORT __declspec(dllexport)
+# define DLLIMPORT __declspec(dllimport)
+#else
+# define DLLEXPORT __attribute__ ((visibility (&quot;default&quot;)))
+# define DLLIMPORT __attribute__ ((visibility (&quot;default&quot;)))
+#endif
+</code></pre></div>
+
+
+<p>And then rework our existing defines.h headers to do:</p>
+<div class="codehilite"><pre><span></span><code>#ifndef BU_EXPORT
+#  if defined(BU_DLL_EXPORTS) &amp;&amp; defined(BU_DLL_IMPORTS)
+#    error &quot;Only BU_DLL_EXPORTS or BU_DLL_IMPORTS can be defined, not both.&quot;
+#  elif defined(BU_DLL_EXPORTS)
+#    define BU_EXPORT DLLEXPORT
+#  elif defined(BU_DLL_IMPORTS)
+#    define BU_EXPORT DLLIMPORT
+#  else
+#    define BU_EXPORT
+#  endif
+#endif
+</code></pre></div>
+
+
+
+<a name="198280741"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198280741" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198280741">(May 21 2020 at 02:42)</a>:</h4>
+<p>The bioh branch r75860 has a build that works with Ubuntu gcc 9.3.0 -fvisibility=hidden.  I've not tested it extensively, and not tried it with clang at all, but it should be a reasonable approximation of what will be needed to make this work...</p>
+
+
+
+<a name="198285698"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198285698" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198285698">(May 21 2020 at 04:33)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198271626">said</a>:</p>
+<blockquote>
+<p>Ouch.  This is going to be a job - my using CPP_DLL_DEFINES instead of MSVC to denote a Visual Studio compile is going to boomerang big time.  Will actually have to go back and put the proper MSVC symbols in.</p>
+</blockquote>
+<p>Yuck, using MSVC or _WIN32 is never proper...  Should be keyed on a feature test from the build system, like a HAVE_DECLSPEC test.  Even better if conditionals can be eliminated so it all turns into a build provision, otherwise it's usually best to leave things obvious and direct.</p>
+<blockquote>
+<p>Also, at first look gcc doesn't really support the Windows syntax:</p>
+</blockquote>
+<p>From the comment, must have only been gcc on windows then.</p>
+
+
+
+<a name="198286029"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198286029" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198286029">(May 21 2020 at 04:41)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198274614">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span>  Assuming it doesn't break any rules, my vote would be to do something like this once in common.h:</p>
+</blockquote>
+<p>Doesn't break any rules, and common.h mod looks good except for the usage of _WIN32.</p>
+<blockquote>
+<p>And then rework our existing defines.h headers to do:</p>
+<div class="codehilite"><pre><span></span><code>#ifndef BU_EXPORT
+#  if defined(BU_DLL_EXPORTS) &amp;&amp; defined(BU_DLL_IMPORTS)
+#    error &quot;Only BU_DLL_EXPORTS or BU_DLL_IMPORTS can be defined, not both.&quot;
+#  elif defined(BU_DLL_EXPORTS)
+#    define BU_EXPORT DLLEXPORT
+#  elif defined(BU_DLL_IMPORTS)
+#    define BU_EXPORT DLLIMPORT
+#  else
+#    define BU_EXPORT
+#  endif
+#endif
+</code></pre></div>
+
+
+</blockquote>
+<p>This is an improvement!  If you can get an export/import define written out into the config header after testing for it, you won't need anything in common.h too.</p>
+
+
+
+<a name="198334793"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198334793" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198334793">(May 21 2020 at 15:28)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> OK, I've gotten it doing a configure test and using brlcad_config.h instead of common.h.  It's probably worth testing the bioh branch on the Mac now to see how it reacts.  I'm testing Windows (which for once is the platform where nothing should change if we're good) and if everything passes I'd like to merge back to trunk.</p>
+
+
+
+<a name="198401072"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198401072" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198401072">(May 22 2020 at 02:37)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> awesome, okay will test it on mac tonight.</p>
+
+
+
+<a name="198521239"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198521239" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198521239">(May 23 2020 at 06:24)</a>:</h4>
+<p>mged is crashing inside libdm initialization:</p>
+<div class="codehilite"><pre><span></span><code>Call location:
+2020-05-23 02:20:18.432190-0400 mged[11937:31932533] 0   CarbonCore                          0x00007fff40f58fee ___Gestalt_SystemVersion_block_invoke + 112
+2020-05-23 02:20:18.432202-0400 mged[11937:31932533] 1   libdispatch.dylib                   0x00007fff6bb8263d _dispatch_client_callout + 8
+2020-05-23 02:20:18.432212-0400 mged[11937:31932533] 2   libdispatch.dylib                   0x00007fff6bb83d4b _dispatch_once_callout + 20
+2020-05-23 02:20:18.432222-0400 mged[11937:31932533] 3   CarbonCore                          0x00007fff40efa992 _Gestalt_SystemVersion + 945
+2020-05-23 02:20:18.432231-0400 mged[11937:31932533] 4   CarbonCore                          0x00007fff40ef3e7c Gestalt + 149
+2020-05-23 02:20:18.432237-0400 mged[11937:31932533] 5   Tk                                  0x00007fff4ba9ca53 TkpOpenDisplay + 573
+2020-05-23 02:20:18.432247-0400 mged[11937:31932533] 6   Tk                                  0x00007fff4ba07d33 TkCreateMainWindow + 1178
+Process 11937 stopped
+* thread #1, queue = &#39;com.apple.main-thread&#39;, stop reason = EXC_BAD_ACCESS (code=1, address=0x28)
+    frame #0: 0x0000000102ea1b48 libX11.6.dylib`XGetVisualInfo + 299
+libX11.6.dylib`XGetVisualInfo:
+-&gt;  0x102ea1b48 &lt;+299&gt;: cmpl   $0x0, 0x28(%rax,%rcx)
+    0x102ea1b4d &lt;+304&gt;: jle    0x102ea1d2d               ; &lt;+784&gt;
+    0x102ea1b53 &lt;+310&gt;: leaq   0x30(%rax,%rcx), %rdx
+    0x102ea1b58 &lt;+315&gt;: movq   %rdx, -0x88(%rbp)
+Target 0: (mged) stopped.
+(lldb) up
+frame #1: 0x00000001007024de libdm.20.dylib`ogl_choose_visual(dmp=0x0000000105a21e40, tkwin=0x00000001060f6010) at dm-ogl.c:496:14
+   493      /* Try to satisfy the above desires with a color visual of the
+   494       * greatest depth */
+   495
+-&gt; 496      vibase = XGetVisualInfo(((struct dm_xvars *)dmp-&gt;dm_vars.pub_vars)-&gt;dpy,
+   497                  0, &amp;vitemp, &amp;num);
+</code></pre></div>
+
+
+
+<a name="198521291"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198521291" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198521291">(May 23 2020 at 06:27)</a>:</h4>
+<p>here's the relevant backtrace: </p>
+<div class="codehilite"><pre><span></span><code>* thread #1, queue = &#39;com.apple.main-thread&#39;, stop reason = EXC_BAD_ACCESS (code=1, address=0x28)
+    frame #0: 0x0000000102ea1b48 libX11.6.dylib`XGetVisualInfo + 299
+  * frame #1: 0x00000001007024de libdm.20.dylib`ogl_choose_visual(dmp=0x0000000105a21e40, tkwin=0x00000001060f6010) at dm-ogl.c:496:14
+    frame #2: 0x0000000100701c59 libdm.20.dylib`ogl_open(interp=0x0000000107010a10, argc=6, argv=0x0000000107015b78) at dm-ogl.c:859:23
+    frame #3: 0x0000000100711428 libdm.20.dylib`dm_open(interp=0x0000000107010a10, type=4, argc=7, argv=0x0000000107015b70) at dm-generic.c:131:13
+    frame #4: 0x000000010001218c mged`mged_dm_init(o_dm_list=0x0000000106002200, dm_type=4, argc=8, argv=0x0000000107015b70) at attach.c:273:16
+    frame #5: 0x000000010001392c mged`mged_attach(wp=0x00000001000fc908, argc=8, argv=0x0000000107015b70) at attach.c:655:9
+    frame #6: 0x00000001000133a7 mged`f_attach(UNUSED_clientData=0x0000000100103228, interpreter=0x0000000107010a10, argc=8, argv=0x0000000107015b70) at attach.c:519:12
+</code></pre></div>
+
+
+
+<a name="198521576"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198521576" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198521576">(May 23 2020 at 06:36)</a>:</h4>
+<p>I don't know where it's coming from, but this is feeling like a compilation mismatch, because it detected and successfully compiled against the system Tcl/Tk 8.5</p>
+<p>I'm guessing, but could be the display from Tk_Display() getting set to dpy in dm_open is a non-X11 tk "display" and we later assume it's an x11 display. </p>
+<p>It wasn't previously using system Tk, so presumably either some check was removed/relaxed that prevented it or something was addd/enabled that turned it on.</p>
+
+
+
+<a name="198521577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198521577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198521577">(May 23 2020 at 06:36)</a>:</h4>
+<p>Any ideas?</p>
+
+
+
+<a name="198523608"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198523608" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198523608">(May 23 2020 at 07:42)</a>:</h4>
+<p>so an enable all build seems to confirm it, so just something untintended pulled in or let out that is letting system Tk try to run despite not enabling an aqua build.  That being the case, it should be okay to merge as trunk doesn't seem to have the issue, and if it does, then it's not unique to the branch.  Will need to get fixed but shoul be good to merge.</p>
+
+
+
+<a name="198536737"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198536737" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198536737">(May 23 2020 at 13:51)</a>:</h4>
+<p>OK, thanks - merged.  You say it's getting a system Tcl/Tk 8.5?  That should have failed the version number test...</p>
+<p>The most likely thing I can think of offhand is that I didn't translate some portion of the X11 vs Aqua testing logic when I made the 8.5 -&gt; 8.6 transition, and the new FindTCL logic is succeeding incorrectly.  I switched from our custom, messy pile of Tcl detection logic to a combination of the standard CMake Find modules so it's actually quite likely FindTCL is now working "better" than it used to, although that should have manifested not long after the 8.6 merge went in...</p>
+<p>What is actually needed is an additional detection that will fail an otherwise successful FindTCL based on the windowing system used by Tk.  As far as I can tell there's no way to have Tcl/Tk tell you what windowing system is in use without actually initializing a Tk window, which breaks the build on headless machines.  If there is a way to detect the Tk windowing system during configure, that's almost certainly what we need...</p>
+
+
+
+<a name="198536808"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198536808" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198536808">(May 23 2020 at 13:53)</a>:</h4>
+<p>Interesting that's it's trying an OGL attach - I wonder if it found an X11 OpenGL and the Aqua Tcl/Tk?</p>
+
+
+
+<a name="198536874"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198536874" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198536874">(May 23 2020 at 13:54)</a>:</h4>
+<p>Trying to keep all that straight on the Mac was one of the reasons (the main one, really) our custom FindTCL.cmake was so complicated.</p>
+
+
+
+<a name="198540104"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198540104" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198540104">(May 23 2020 at 15:27)</a>:</h4>
+<p>I'll have to check more closely, but worth noting that I don't think it's getting system Tk on trunk, so presumably you just pulled too little or too much on the branch.</p>
+
+
+
+<a name="198540114"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198540114" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198540114">(May 23 2020 at 15:27)</a>:</h4>
+<p>at least, mged hasn't segfaulted on me there <em>yet</em></p>
+
+
+
+<a name="198540221"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198540221" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198540221">(May 23 2020 at 15:30)</a>:</h4>
+<p>Could be - those merges can be a real pain in the neck...</p>
+
+
+
+<a name="198540672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198540672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198540672">(May 23 2020 at 15:42)</a>:</h4>
+<p>worth mentioning that "make regress" took 18 minutes on my laptop.   I don't know if I just had it particularly busy at the time, but all the tests ran slower than usual for some reason.</p>
+
+
+
+<a name="198543533"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198543533" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198543533">(May 23 2020 at 17:06)</a>:</h4>
+<p>That's.. peculiar.  I pushed a few changes back from trunk to bioh, but none of them should have caused either that or the Tcl/Tk searching change.</p>
+<p>I pushed a test into bioh trying to get a read on the Tk windowing system - I can't properly test it here, but I'd be curious to know what it does with the mac system Tk if you can run a configure (it's a configure time test, so will succeed/fail right away.)</p>
+
+
+
+<a name="198543975"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198543975" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198543975">(May 23 2020 at 17:17)</a>:</h4>
+<p>I can run it, but not digging the approach nor understand the motivation.  That's a heck of a lot of complexity and code that could go wrong to detect an issue on one platform that I'd said I hadn't seen on trunk...</p>
+
+
+
+<a name="198544106"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198544106" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198544106">(May 23 2020 at 17:21)</a>:</h4>
+<p>If we needed a test (and it's not clear that we do), the feature test would be to simply link against Tk,  call Tk_Init+Tk_Display followed by an X11 call like XNextEvent or something simple.</p>
+
+
+
+<a name="198545637"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198545637" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198545637">(May 23 2020 at 18:05)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> It's not specifically for the issue you indicated you saw - it's an attempt to solve more robustly something I've tried to solve several times over the years, always unsuccessfully - a configure time test to identify from the Tcl/Tk installation we have detected what graphics system it uses.</p>
+<p>Calling Tk_Init, if I'm understanding the libtk code correctly, is enough <em>all by itself</em> to cause the graphics system test to fail on something like a headless Jenkins build client.  It tries to create a graphics window, fails, and the test fails.  So trying to specify Aqua vs X11 is iffy, because we don't know if we've got the right Tcl/Tk at configure time.</p>
+<p>The correct long term fix is to get our code to the point where we don't care if it's an Aqua, Win32 or X11 build of Tk, but we're quite a ways from that.  (Actually, I'm not sure we can ever get there until Tcl/Tk provides its own built-in OpenGL widget.)</p>
+
+
+
+<a name="198546435"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546435" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546435">(May 23 2020 at 18:29)</a>:</h4>
+<p>That's a want, not a problem... what's the problem being fixed?  Every conceivable problem I can think of has a far simpler solution that should be more than adequate for whatever short remaining time we have left with Tk.</p>
+
+
+
+<a name="198546495"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546495" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546495">(May 23 2020 at 18:31)</a>:</h4>
+<p>OK.  The "problem" as I saw it was the risk of a Mac user doing a configure + build and getting a cryptic failure because the configure process mixed and matched incorrectly.  That's the motivation, so if the cost of resolving it is too high I'm good with skipping it.</p>
+
+
+
+<a name="198546543"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546543" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546543">(May 23 2020 at 18:32)</a>:</h4>
+<p>We shouldn't be caring whether we're win32 or x11 as those are platform distinctions, so the only issue is aqua vs non-aqua.</p>
+
+
+
+<a name="198546559"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546559" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546559">(May 23 2020 at 18:33)</a>:</h4>
+<p>As long as we're not trying to build X11 on Windows, that's correct</p>
+
+
+
+<a name="198546607"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546607" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546607">(May 23 2020 at 18:34)</a>:</h4>
+<p>Those are details that could just as easily be a requirement line in the respective README.* file (X11 on windows? you're on your own)</p>
+
+
+
+<a name="198546610"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546610" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546610">(May 23 2020 at 18:34)</a>:</h4>
+<p>(aquatk on mac? patches welcome, but you're on your own)</p>
+
+
+
+<a name="198546627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546627">(May 23 2020 at 18:35)</a>:</h4>
+<p>OK, works for me.  I'll back it out.</p>
+
+
+
+<a name="198546631"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546631" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546631">(May 23 2020 at 18:35)</a>:</h4>
+<p>whatever we are/were doing on Mac has been working.  it's not been until the 8.6 build that the build has pulled in a system tk on mac</p>
+
+
+
+<a name="198546640"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546640" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546640">(May 23 2020 at 18:35)</a>:</h4>
+<p>i'm not sure what was going on in the branch, but like I said, I've not (yet) seen it do that on trunk</p>
+
+
+
+<a name="198546690"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546690" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546690">(May 23 2020 at 18:36)</a>:</h4>
+<p>Which is worrisome, because I didn't see anything in the branch that would have justified a different configure response</p>
+
+
+
+<a name="198546691"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546691" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546691">(May 23 2020 at 18:36)</a>:</h4>
+<p>haven't looked at the cmake logic to remind myself what criteria it's trying to use to ensure aquatk is pulled in without the cmake flag</p>
+
+
+
+<a name="198546693"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546693" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546693">(May 23 2020 at 18:36)</a>:</h4>
+<p>it's more likely something that was missing</p>
+
+
+
+<a name="198546703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546703">(May 23 2020 at 18:37)</a>:</h4>
+<p>I don't know what version OSX's native Tcl/Tk reports, but if it's 8.6 then for a long time version checking by itself would have avoided system detection - i.e. we may have been "accidentally" working</p>
+
+
+
+<a name="198546710"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546710" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546710">(May 23 2020 at 18:37)</a>:</h4>
+<p>It's 8.5</p>
+
+
+
+<a name="198546766"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546766" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546766">(May 23 2020 at 18:38)</a>:</h4>
+<p>we put something in the logic, I just don't recall what</p>
+
+
+
+<a name="198546780"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546780" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546780">(May 23 2020 at 18:39)</a>:</h4>
+<p>It wasn't accident, but it might have been tied to some related system feature like the availability of the Tk.framework or Carbon or something similar.</p>
+
+
+
+<a name="198546834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546834">(May 23 2020 at 18:40)</a>:</h4>
+<p>I'm actually impressed that the branch got as far as it did.  It would have been a good environment to try and make it work with dm-tk.</p>
+
+
+
+<a name="198546899"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198546899" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198546899">(May 23 2020 at 18:42)</a>:</h4>
+<p>technically what dm-ogl is doing is wrong -- it's assuming typeof(Tk_Display) == typeof(Display), compatible by cast, which is quite wrong.  that's working by coincidence.</p>
+
+
+
+<a name="198547283"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547283" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547283">(May 23 2020 at 18:53)</a>:</h4>
+<p>The old graphics platform detection is at <a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/tags/rel-7-30-8/misc/CMake/FindBRLCADTCL.cmake">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/tags/rel-7-30-8/misc/CMake/FindBRLCADTCL.cmake</a> around line 273.  called in turn at 750 by VALIDATE_TK, which in turn was called by the main "validate this Tcl/Tk installation" loops.  That whole Find setup is a complex, messy implementation that tries too hard to resolve too much, which is why I fell back to the vanilla CMake standard modules for 8.6.</p>
+<p>What may have happened in all that though, is whenever the graphics script failed (e.g. headless mode), we wound up not using system Tcl/Tk under any conditions even when it was otherwise present.)  That wouldn't work for proper distcheck testing, but would "function" as long as the embedded build worked under any conditions.</p>
+
+
+
+<a name="198547341"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547341" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547341">(May 23 2020 at 18:55)</a>:</h4>
+<p>Although in fairness, even the distcheck tests never pre-install the deps to make sure a SYSTEM configuration would function... Probably something to eventually set up</p>
+
+
+
+<a name="198547462"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547462" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547462">(May 23 2020 at 18:59)</a>:</h4>
+<p>You may be right as i'm not seeing any toggles any more currently in the code that will make it not pick system tk on mac, though the FindTCL logic isn't quite what I'd remember there being.</p>
+
+
+
+<a name="198547502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547502">(May 23 2020 at 19:00)</a>:</h4>
+<p>that begs a question how trunk is working, I'll take a look (maybe it's not...)</p>
+
+
+
+<a name="198547635"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547635" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547635">(May 23 2020 at 19:04)</a>:</h4>
+<p>If I need to I can reproduce that behavior with the new setup - i.e. fail a detection if either a) the windowing system test succeeds and the results are wrong for the selected config or b) the test simply fails to execute - and in either case fall back to enabling the build.  I'd have to incorporate the old graphics check into the new FindTCL.cmake, but that shouldn't be too bad.</p>
+
+
+
+<a name="198547656"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547656" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547656">(May 23 2020 at 19:05)</a>:</h4>
+<p>you're right that it would be nice if whatever we get working can be made to work with the standard Findtcl</p>
+
+
+
+<a name="198547722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547722">(May 23 2020 at 19:07)</a>:</h4>
+<p>Well, it's a concatenation of several of their modules - they broke out tclsh, tcl, and a couple others.  It's not really right - modern CMake will produce warnings about naming incompatibiltiies using them if one just uses the built in modules.  I may try to submit the merged version back upstream.</p>
+
+
+
+<a name="198547814"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547814" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547814">(May 23 2020 at 19:09)</a>:</h4>
+<p>I'll extract the old graphics check and see if I can incorporate it into the new find logic - it will be simpler in the sense that it will be a single pass/fail rather than looping through all found Tcl/Tk setups trying to find one that matches, but I think the post CMake 3.12 -D&lt;PackageName&gt;_ROOT=/path find_package behavior is a better answer to that.</p>
+
+
+
+<a name="198547858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198547858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198547858">(May 23 2020 at 19:10)</a>:</h4>
+<p>And if we ever do decide we want a CI test that incorporates a system installed Tcl/Tk, it will break - we'll need to revisit it then.</p>
+
+
+
+<a name="198549277"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549277" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549277">(May 23 2020 at 19:51)</a>:</h4>
+<p>Could let standard find do it's job, then run our own function to determine if it's suitable, otherwise undoes the vars and uses bundled.</p>
+
+
+
+<a name="198549323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549323">(May 23 2020 at 19:52)</a>:</h4>
+<p>That's basically what I'm doing - it's easier though to have the FindTCL.cmake report the failure, because all the ThirdParty logic is already set up to do that sort of cleanup</p>
+
+
+
+<a name="198549342"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549342" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549342">(May 23 2020 at 19:53)</a>:</h4>
+<p>I'm suggesting NOT having our own FindTCL ...</p>
+
+
+
+<a name="198549402"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549402" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549402">(May 23 2020 at 19:54)</a>:</h4>
+<p>so our needs are a simple overlay and we aren't tied to whatever snapshot Find script that got used.  they can update/change and our function would still do it's job independently.  neither should affect the other unless variable names change.</p>
+
+
+
+<a name="198549413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549413">(May 23 2020 at 19:55)</a>:</h4>
+<p>It's a lot harder to do it that way the way the ThirdParty.cmake is currently designed.</p>
+
+
+
+<a name="198549456"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549456" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549456">(May 23 2020 at 19:56)</a>:</h4>
+<p>I don't understand then.  Because it's using the system one now, no?</p>
+
+
+
+<a name="198549465"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549465" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549465">(May 23 2020 at 19:57)</a>:</h4>
+<p>Kinda.  It's using a cleaned up version o fthe system version, but our turning on and off of the bundled is keyed on the results of the find_package call.</p>
+
+
+
+<a name="198549469"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549469" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549469">(May 23 2020 at 19:57)</a>:</h4>
+<p>I'm suggesting it keep doing whatever it's doing now, which presumably amounts to setting up a set of variables, maybe some cache values.</p>
+
+
+
+<a name="198549538"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549538" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549538">(May 23 2020 at 19:58)</a>:</h4>
+<p>So it's NOT using the system one.... c'mon clarity and precision here.  :)</p>
+
+
+
+<a name="198549549"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549549" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549549">(May 23 2020 at 19:59)</a>:</h4>
+<p>It's using a copy of the system one.</p>
+
+
+
+<a name="198549620"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549620" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549620">(May 23 2020 at 20:00)</a>:</h4>
+<p>okay, I misunderstood you saying that it was switched back to using the standard system cmake find script.  it switched to a "less modified" version if I'm understanding correctly now.</p>
+
+
+
+<a name="198549637"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549637" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549637">(May 23 2020 at 20:01)</a>:</h4>
+<p>OK - in detail:</p>
+<p>a) it is using a FindTCL.cmake file in misc/CMake</p>
+<p>b) that FindTCL.cmake file is a concatenation and simplification of FindTCL.cmake , FindTclsh.cmake, FindTlStub.cmake, and FindWish,cmake from upstream CMake.</p>
+<p>c)  This is an improvement over the old FindBRLCADTCL.cmake, which used to be an essentially complete (and complicated) rewrite.</p>
+
+
+
+<a name="198549655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549655">(May 23 2020 at 20:01)</a>:</h4>
+<p>However, because the contents are mostly those upstream files, the original graphics system check that we had in FindBRLCADTCL.cmake was removed.</p>
+
+
+
+<a name="198549699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549699">(May 23 2020 at 20:02)</a>:</h4>
+<p>So then we presumably do this for every single Find dependency we rely on?</p>
+
+
+
+<a name="198549713"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549713" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549713">(May 23 2020 at 20:02)</a>:</h4>
+<p>i.e., have modified copies of all the cmake Find scripts, none using the default?</p>
+
+
+
+<a name="198549714"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549714" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549714">(May 23 2020 at 20:02)</a>:</h4>
+<p>Only if we have to.  FindX11.cmake is customized, and FindGL.cmake may still be</p>
+
+
+
+<a name="198549740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549740">(May 23 2020 at 20:03)</a>:</h4>
+<p>I need to audit our current copies against the minimum required CMake copies and see if any can be removed - I haven't checked in quite a while</p>
+
+
+
+<a name="198549790"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549790" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549790">(May 23 2020 at 20:04)</a>:</h4>
+<p>but from what you described, it sounds like we do for the sake of ThirdParty logic</p>
+
+
+
+<a name="198549798"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549798" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549798">(May 23 2020 at 20:05)</a>:</h4>
+<p>Only if the "default" CMake module behavior is insufficient for what we need.</p>
+
+
+
+<a name="198549802"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549802" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549802">(May 23 2020 at 20:05)</a>:</h4>
+<p>if we can for some, then what's the distinction with Tcl being a lot harder?</p>
+
+
+
+<a name="198549822"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549822" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549822">(May 23 2020 at 20:05)</a>:</h4>
+<p>Is there any example where the default cmake module behavior is sufficient?</p>
+
+
+
+<a name="198549871"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549871" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549871">(May 23 2020 at 20:06)</a>:</h4>
+<p>ZLIB and PNG are both default now, IIRC.</p>
+
+
+
+<a name="198549876"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549876" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549876">(May 23 2020 at 20:06)</a>:</h4>
+<p>Hang on, let me check...</p>
+
+
+
+<a name="198549886"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549886" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549886">(May 23 2020 at 20:07)</a>:</h4>
+<p>Sorry, don't mean to be a pain, I'm honestly trying to understand because at heart my understanding is that nearly all Find scripts simply set the location of the lib, headers, maybe a root dir, maybe a couple other vars, but essentially what amounts to the lib and headers are what we need...</p>
+
+
+
+<a name="198549896"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549896" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549896">(May 23 2020 at 20:07)</a>:</h4>
+<p>and this "setting" is really just a set of naming convention variables</p>
+
+
+
+<a name="198549988"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198549988" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198549988">(May 23 2020 at 20:09)</a>:</h4>
+<p>The Find modules report out paths and headers, but the more complex ones (Qt I think is an example) also allow callers to specify criteria by which they can accept or reject particular versions or features as inadequate to the build's needs.</p>
+<p>The Find module defines required variables, which are set according to tests.  Those tests can be simple find_path and find_library looksups, or they can be more complex</p>
+
+
+
+<a name="198550028"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550028" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550028">(May 23 2020 at 20:10)</a>:</h4>
+<p>Actually, Qt is another case where we don't bundle the Find module</p>
+
+
+
+<a name="198550066"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550066" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550066">(May 23 2020 at 20:11)</a>:</h4>
+<p>Most of the find modules we have in misc/CMake are actually for things that are too obscure to be bundled with standard CMake (openNURBS, SCL, UTAHRLE, etc.)</p>
+
+
+
+<a name="198550108"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550108" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550108">(May 23 2020 at 20:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198549988">said</a>:</p>
+<blockquote>
+<p>The Find modules report out paths and headers, but the more complex ones (Qt I think is an example) also allow callers to specify criteria by which they can accept or reject particular versions or features as inadequate to the build's needs.</p>
+</blockquote>
+<p>This sounds like it'd make it a lot easier, not harder.  So.. not a problem.</p>
+<blockquote>
+<p>The Find module defines required variables, which are set according to tests.  Those tests can be simple find_path and find_library looksups, or they can be more complex</p>
+</blockquote>
+<p>Sure.. and they are whatever they are.</p>
+
+
+
+<a name="198550214"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550214" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550214">(May 23 2020 at 20:15)</a>:</h4>
+<p>Right.  So if the system tests give us what we need, we can just use the bundled version and no problem.  Unfortunately, they're not always adequate - and it used to be that Tcl was one of the most inadequate.  The newer logic is much improved from what I remember, but most "proper" Tcl/Tk packages aren't supposed to care what graphics system is in use - so the vanilla system tests for Tcl don't check.  (Most everything in the Tcl world that does care uses the TEA build setup, so we're pretty much on our own.)</p>
+
+
+
+<a name="198550270"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550270" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550270">(May 23 2020 at 20:17)</a>:</h4>
+<p>maybe need to back up, because this whole conversation started with a suggestion of using an uncopied unmodified cmake-provided FindTcl ... and then running a function from our misc/CMake to do whatever additional acceptance/rejection criteria we have.  You responded that would make something a lot harder.  Can you elaborate on that?  that's the only point in question that I don't understand because to me it should just be us unsetting vars (rejecting something system cmake thought we could use).</p>
+<p>Now if it fails to detect at all and there's nothing to reject, I might see a benefit, but that didn't seem to be what we were talking about.</p>
+
+
+
+<a name="198550423"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550423" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550423">(May 23 2020 at 20:21)</a>:</h4>
+<p>To that point, it looks like in r75899 that you're even doing exactly what I suggested, wiping out all the vars.  You're just doing it in the copy instead of doing it in another file that's run after a system Find.</p>
+
+
+
+<a name="198550425"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550425" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550425">(May 23 2020 at 20:21)</a>:</h4>
+<p>OK.  So the guts of the third party management logic are in misc/CMake/ThirdParty.cmake, around line 200.  That's when we do the find_package call, using either our local misc/CMake copy if its present or the CMake defined version if we don't give it one.</p>
+<p>Once that find_package call is complete, we have a yes/no decision for whether the system version is usable.  From that point on, the work beings to set all the necessary cache variables and other fun that go into making the 3rd party build system work the way it does.  All of that logic assumes that after the find_package call, the decision is made one way or the other on whether we're going to build 3rd party.</p>
+<p>If we want to subsequently change our mind once we're out of that function, all the bookkeeping and state management after the find_package call in that function has to be done again.</p>
+
+
+
+<a name="198550485"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550485" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550485">(May 23 2020 at 20:23)</a>:</h4>
+<p>why wouldn't we just do the validation check in ThirdParty right after find_package?</p>
+
+
+
+<a name="198550538"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550538" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550538">(May 23 2020 at 20:24)</a>:</h4>
+<p>Note also that the FindTCL.cmake file itself, at the end, has calls to standard CMake functionality FIND_PACKAGE_HANDLE_STANDARD_ARGS that find_package is expected to execute.  If we wanted to change our decision post find_package, we'd also have to make sure we weren't messing up anything that would be subsequently relied upon by CMake's state management.</p>
+
+
+
+<a name="198550608"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550608" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550608">(May 23 2020 at 20:26)</a>:</h4>
+<p>That's why the graphics check is located where it is in that file - so we can make the decision before those finalization routines are called.</p>
+<p>It's undoubtedly possible to handle it anyway - a reconfigure with changed build settings actually does do that - but it's a hassle to get right and I've broken things hundreds of times over the years when I've had to muck with that aspect of things.</p>
+
+
+
+<a name="198550628"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550628" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550628">(May 23 2020 at 20:27)</a>:</h4>
+<p>It's also a common source of the "weird intermediate state" build errors we get when someone does a lot of reconfiguring with different settings without clearing the cache or build directory - if I drop a stitch on the cleanup, weird stale state can start having unpredictable consequences.</p>
+
+
+
+<a name="198550790"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550790" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550790">(May 23 2020 at 20:31)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/visibility.3Dhidden/near/198550608">said</a>:</p>
+<blockquote>
+<p>That's why the graphics check is located where it is in that file - so we can make the decision before those finalization routines are called.</p>
+</blockquote>
+<p>But then this could still cause the unintended consequences you're trying to avoid I would think.  Are you saying there's state somewhere involved beyond the variables and the cache? </p>
+<blockquote>
+<p>It's undoubtedly possible to handle it anyway - a reconfigure with changed build settings actually does do that - but it's a hassle to get right and I've broken things hundreds of times over the years when I've had to muck with that aspect of things.</p>
+</blockquote>
+<p>I don't want to rest on a pile of sand.  If it's brittle, that's all the MORE reason it needs to be modularized overlays with gated changes.</p>
+
+
+
+<a name="198550974"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550974" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550974">(May 23 2020 at 20:36)</a>:</h4>
+<p>maybe I should play with some of these ideas, I must not be communicating clearly or I'm just totally not getting it.  probably both.  To me, this seems like a modularity 101 -- to move towards not having copies and not modifying if we can overlay.  The only issue I could see would be a script that is just fundamentally broken or non-existent, so we provide one.</p>
+
+
+
+<a name="198550977"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198550977" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198550977">(May 23 2020 at 20:36)</a>:</h4>
+<p>There are internal CMake variables beyond those we normally manipulate - if you search for :INTERNAL in the cache you'll see them.  I can't say what they all do - I try not to have to manipulate things at that level - but it's clearly state being tracked by CMake.</p>
+<p>The problem is "resetting" a find package result is just going to be brittle no matter what.  It's not something that the system is really designed for - the expectation pretty much seems to be that if you want to change things you clear the cache and re-run.  We do better than that - if we flip between SYSTEM and BUNDLED the right thing should happen - but it's pretty unnatural from CMake's perspective that we do.</p>
+
+
+
+<a name="198551039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551039">(May 23 2020 at 20:38)</a>:</h4>
+<p>at the end of the day, though, it's still just a bunch of variables and if push came to shove, I could write a list before the Find and a list after the Find, and reset... at least I'd hope that's possible.</p>
+
+
+
+<a name="198551143"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551143" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551143">(May 23 2020 at 20:40)</a>:</h4>
+<p>Sure - the question is how invasive you want to get and at what levels.  ResetCache.cmake does some pretty gnarly manipulations, for example</p>
+
+
+
+<a name="198551197"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551197" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551197">(May 23 2020 at 20:41)</a>:</h4>
+<p>That was an attempt to reset library searching when switching between 32 and 64 bit builds.  Don't know if it still works - haven't tried to do that in a long time - but that was one instance of a mean low-level state manipulation attempt.</p>
+
+
+
+<a name="198551251"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551251" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551251">(May 23 2020 at 20:42)</a>:</h4>
+<p>I've always tried to let CMake do it's own thing as much as possible and roll my own logic on top of it only when necessary (I know it probably doesn't look that way)</p>
+
+
+
+<a name="198551265"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551265" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551265">(May 23 2020 at 20:43)</a>:</h4>
+<p>It's not about being invasive.  If anything it's "less invasive" on code.  We're cleaning up after the fact  to whatever extend necessary to undo a system Find result deemed unacceptable.  "you do you, and we'll sort it out after"</p>
+
+
+
+<a name="198551311"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551311" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551311">(May 23 2020 at 20:44)</a>:</h4>
+<p>I wouldn't do something more aggressive than demonstrably required.</p>
+
+
+
+<a name="198551327"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551327" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551327">(May 23 2020 at 20:44)</a>:</h4>
+<p>I have trouble believing that we can't just unset the public vars we end up using.</p>
+
+
+
+<a name="198551391"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551391" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551391">(May 23 2020 at 20:46)</a>:</h4>
+<p>Well, in that most recent commit I initially tried unset() on the vars - it didn't work.  I had to override the CACHE before I got the desired behavior.</p>
+<p>Now, could we do that after the find_package call but before the rest of the ThirdParty logic executes?  Probably - but I'm not at all sure we wouldn't be just trading one form of complexity for another</p>
+
+
+
+<a name="198551475"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198551475" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198551475">(May 23 2020 at 20:49)</a>:</h4>
+<p>If a new version of CMake has FIND_PACKAGE_HANDLE_STANDARD_ARGS start doing some new behind the scenes magic as a consequence of the find decision, we'd have to catch that and mod our after-the-fact cleanup code to also unravel the new behavior.  That may not be a huge risk, but I'm not sure how we'd catch it...</p>
+
+
+
+<a name="198552317"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198552317" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198552317">(May 23 2020 at 21:13)</a>:</h4>
+<p>At a glance, I think our FindGL.cmake was originally modded mainly to allow us to find X11 OpenGL on the Mac.  Not completely sure what upstream does with that case, but looking at the file I think they default to the native OpenGL if(APPLE)</p>
+
+
+
+<a name="198552438"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198552438" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198552438">(May 23 2020 at 21:17)</a>:</h4>
+<p>FindX11.cmake I think needed Xinput, plus had a habit of mixing include headers from two different X11 installations on OSX.</p>
+
+
+
+<a name="198552480"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198552480" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198552480">(May 23 2020 at 21:18)</a>:</h4>
+<p>Our FindOpenCL.cmake is quite different from the upstream - not sure what the relative merits are.</p>
+
+
+
+<a name="198553638"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/visibility%3Dhidden/near/198553638" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/visibility.3Dhidden.html#198553638">(May 23 2020 at 21:51)</a>:</h4>
+<p>Ah - unset(&lt;var&gt; CACHE) has the same result, looks like</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

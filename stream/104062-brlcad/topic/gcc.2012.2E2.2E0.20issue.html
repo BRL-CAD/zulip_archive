@@ -1,0 +1,68 @@
+<html>
+<head><meta charset="utf-8"><title>gcc 12.2.0 issue · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcc.2012.2E2.2E0.20issue.html">gcc 12.2.0 issue</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="314315755"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcc%2012.2.0%20issue/near/314315755" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcc.2012.2E2.2E0.20issue.html#314315755">(Dec 06 2022 at 20:02)</a>:</h4>
+<p>With CMAKE_BUILD_TYPE=Release on latest Ubuntu (gcc version 12.2.0 (Ubuntu 12.2.0-3ubuntu1)) I'm seeing the following:</p>
+<div class="codehilite"><pre><span></span><code>brlcad/src/libbu/bitv.c:149:16: error: writing 1 byte into a region of size 0 [-Werror=stringop-overflow=]
+  149 |         *out++ |= *in++;
+      |                ^
+brlcad/include/bu/bitv.h:111:12: note: at offset [22, 2305843009213693950] into destination object ‘bits’ of size 2
+  111 |     bitv_t bits[2];     /**&lt; variable size array */
+      |            ^
+brlcad/include/bu/bitv.h:111:12: note: at offset [6, 14] into destination object ‘bits’ of size 2
+brlcad/include/bu/bitv.h:111:12: note: at offset [22, 2305843009213693950] into destination object ‘bits’ of size 2
+</code></pre></div>
+
+
+
+<a name="322616734"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcc%2012.2.0%20issue/near/322616734" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcc.2012.2E2.2E0.20issue.html#322616734">(Jan 20 2023 at 21:12)</a>:</h4>
+<p>Anybody else seeing the following?</p>
+<div class="codehilite"><pre><span></span><code>src/libbu/progname.c:138:73: error: ‘__builtin___snprintf_chk’ output may be truncated before the last format character [-Werror=format-truncation=]
+  138 |     snprintf(buffer+strlen(buffer), sizeof(buffer)-strlen(buffer), &quot;%c%s&quot;, BU_DIR_SEPARATOR, argv0);
+      |                                                                         ^
+In file included from /usr/include/stdio.h:906,
+                 from include/bio.h:41,
+                 from src/libbu/progname.c:41:
+In function ‘snprintf’,
+    inlined from ‘bu_argv0_full_path’ at src/libbu/progname.c:138:5:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:54:10: note: ‘__builtin___snprintf_chk’ output between 2 and 4097 bytes into a destination of size 4096
+   54 |   return __builtin___snprintf_chk (__s, __n, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   55 |                                    __glibc_objsize (__s), __fmt,
+      |                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   56 |                                    __va_arg_pack ());
+      |                                    ~~~~~~~~~~~~~~~~~
+</code></pre></div>
+
+
+
+<a name="323359660"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcc%2012.2.0%20issue/near/323359660" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcc.2012.2E2.2E0.20issue.html#323359660">(Jan 24 2023 at 21:47)</a>:</h4>
+<p>OK, main branch doesn't show it.  Must be something I'm doing in a branch.</p>
+
+
+
+<a name="323361450"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcc%2012.2.0%20issue/near/323361450" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcc.2012.2E2.2E0.20issue.html#323361450">(Jan 24 2023 at 22:00)</a>:</h4>
+<p>Ah - one of the bits of code I was shoehorning in on the branch requires C++17 standard - that might be it</p>
+
+
+
+<a name="323385158"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/gcc%2012.2.0%20issue/near/323385158" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/gcc.2012.2E2.2E0.20issue.html#323385158">(Jan 25 2023 at 01:06)</a>:</h4>
+<p>No... combination of the O2 flag and something else... hmm...</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,842 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  the dm-fb-merge branch is working - I was able to test it on Linux this morning, and I'll check Windows later today.  Have no way to try graphically on the Mac (the github CI runners aren't set up to build X11 graphically, and I can't launch remotely from them to confirm GUI behavior in any case as far as I can tell...) so not sure what's happening there :-(</p>",
+        "id": 197695260,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589551323
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  dm-fb-merge opengl display works on Linux, Windows, GhostBSD and OpenBSD here.</p>",
+        "id": 197730617,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589566174
+    },
+    {
+        "content": "<p>Woo-hoo!  Still need to figure out four libged commands, but other than that have Tcl/Tk completely out of the core library stack below libged in the dm/fb branch.</p>",
+        "id": 198020659,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589861744
+    },
+    {
+        "content": "<p>saw the commit, that's awesome</p>",
+        "id": 198020687,
+        "sender_full_name": "Sean",
+        "timestamp": 1589861762
+    },
+    {
+        "content": "<p>think those the ones behind 'screenshot' too, yes?</p>",
+        "id": 198020731,
+        "sender_full_name": "Sean",
+        "timestamp": 1589861780
+    },
+    {
+        "content": "<p>er, 'screengrab'</p>",
+        "id": 198020745,
+        "sender_full_name": "Sean",
+        "timestamp": 1589861823
+    },
+    {
+        "content": "<p>screengrab is focused on the dm rather than the fb, so it might actually still work</p>",
+        "id": 198020762,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589861862
+    },
+    {
+        "content": "<p>or maybe not, might be going straight to the dm interface</p>",
+        "id": 198020765,
+        "sender_full_name": "Sean",
+        "timestamp": 1589861864
+    },
+    {
+        "content": "<p>that's cool</p>",
+        "id": 198020815,
+        "sender_full_name": "Sean",
+        "timestamp": 1589861885
+    },
+    {
+        "content": "<p>four of them were reading into a fbserv_obj for some reason - presumably to pull the rendered fb out of MGED/Archer, although I'm not sure of that yet.  Not quite sure whether they should be talking to the dm to have it broker the right data flows, or make them plugin commands for libged supplied by libtclcad - needs more study.</p>",
+        "id": 198020840,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589861951
+    },
+    {
+        "content": "<p>they shouldn't exist in that form, imho</p>",
+        "id": 198020863,
+        "sender_full_name": "Sean",
+        "timestamp": 1589861988
+    },
+    {
+        "content": "<p>Heh - the ged struct entry they were using had a \"this shouldn't be here\" comment</p>",
+        "id": 198020903,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862011
+    },
+    {
+        "content": "<p>I think I wrote that 10 years ago</p>",
+        "id": 198020906,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862029
+    },
+    {
+        "content": "<p>Will have to see if there's a better way to express the functionality they were trying to encapsulate - could be the screengrab logic might actually do the trick...</p>",
+        "id": 198020924,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862099
+    },
+    {
+        "content": "<p>fb2pix should probably just be part of screengrab, the overlay command, or draw/erase</p>",
+        "id": 198020966,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862123
+    },
+    {
+        "content": "<p>pix2fb similarly with overlay or draw/erase</p>",
+        "id": 198020977,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862151
+    },
+    {
+        "content": "<p>/me nods - makes sense</p>",
+        "id": 198020980,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862165
+    },
+    {
+        "content": "<p>png2fb ditto</p>",
+        "id": 198020982,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862166
+    },
+    {
+        "content": "<p>icv should be hooked behind that so we don't have to care about image format, imho</p>",
+        "id": 198020990,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862185
+    },
+    {
+        "content": "<p>fbclear becomes overlay subcommand or erase switch</p>",
+        "id": 198020996,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862201
+    },
+    {
+        "content": "<p>yeah</p>",
+        "id": 198021001,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862208
+    },
+    {
+        "content": "<p>just have to decide how to handle the render buffer</p>",
+        "id": 198021004,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862227
+    },
+    {
+        "content": "<p>with dm and fb merged, probably everything belongs under draw/erase</p>",
+        "id": 198021071,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862294
+    },
+    {
+        "content": "<p>even overlay probably should merge under draw</p>",
+        "id": 198021078,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862318
+    },
+    {
+        "content": "<p>\"draw file.plot3\" ?</p>",
+        "id": 198021083,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862340
+    },
+    {
+        "content": "<p>we should design it so it's deterministic, but yeah, something similar</p>",
+        "id": 198021151,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862384
+    },
+    {
+        "content": "<p>draw -overlay file.plot3</p>",
+        "id": 198021154,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862400
+    },
+    {
+        "content": "<p>Ah, right - the difference between \"on top\" of the scene and \"in\" the scene</p>",
+        "id": 198021182,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862453
+    },
+    {
+        "content": "<p>draw -overlay [file] vs  draw [object], unless it's a fully qualified uri that can disambiguate like draw file:/path/to/file.plot3</p>",
+        "id": 198021196,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862474
+    },
+    {
+        "content": "<p>/me reflects that as good as that felt, it actually didn't answer the immediate need, which is to get a proper Tk dm/fb backend up to replace the X11 fallback with 8.6...  think I have some decent progress there, but need to revisit the original work that mated up the fb rendering with the Tk_Photo environment.  Glad we saved that, it's going to come in handy now.</p>",
+        "id": 198021343,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862707
+    },
+    {
+        "content": "<p>that's one that would be good to spend a few minutes designing for at least the cases we have now: draw geometry into the scene, draw images fixed to the viewport, draw plot/data into the scene, draw images into the scene, and (probably) draw plot/data into the viewport</p>",
+        "id": 198021344,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862708
+    },
+    {
+        "content": "<p>/me nods - agreed.  I'd also like to think about how we're handling multiple display managers (e.g. quad view) and how to address them.</p>",
+        "id": 198021388,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862762
+    },
+    {
+        "content": "<p>that only leaves one outlier (draw geometry fixed to viewport), but \"overlay\" vs default-into-scene still might be the best way to disambiguate</p>",
+        "id": 198021401,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862790
+    },
+    {
+        "content": "<p>so the 3d \"scene\" is universal, and only overlays are unique to specific viewports/dm instances?</p>",
+        "id": 198021415,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862835
+    },
+    {
+        "content": "<p>maybe:  draw [-view #] [-overlay [file]] [object]</p>",
+        "id": 198021463,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862867
+    },
+    {
+        "content": "<p>or maybe better stated, the \"dm instances\" are different cameras into the same scene?</p>",
+        "id": 198021466,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589862870
+    },
+    {
+        "content": "<p>right, and by default you draw into all of them but certainly could draw into just one of them</p>",
+        "id": 198021488,
+        "sender_full_name": "Sean",
+        "timestamp": 1589862924
+    },
+    {
+        "content": "<p>Do we want solid objects to be up in one dm but not another?  Just off the cuff I'm kinda liking the simplicity of the solid list being universal, with only the view object lists being unique to the camera views.  May be good reasons to have the flexibility though.</p>",
+        "id": 198021603,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589863066
+    },
+    {
+        "content": "<p>(wondering what the interpretation of \"draw -view 1 object\" would be...)</p>",
+        "id": 198021726,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589863226
+    },
+    {
+        "content": "<p>Not by default and not something we presently support (I think) but there are lots of common use cases for custom view sets.  for example, maybe show camera/view objects in the 3d scene in only some views (e.g., to show where a camera is in a  3rd \"rendered\" viewport) or to display reference data/images into the 3d scene, etc</p>",
+        "id": 198022091,
+        "sender_full_name": "Sean",
+        "timestamp": 1589863777
+    },
+    {
+        "content": "<p>but yeah, emphasis on the not by default -- should be you draw something, it displays in all the viewports</p>",
+        "id": 198022096,
+        "sender_full_name": "Sean",
+        "timestamp": 1589863799
+    },
+    {
+        "content": "<p>draw -view 1 would just draw something only into that viewport, default would be akin to \"-view all\" or \"-view *\" or something</p>",
+        "id": 198022160,
+        "sender_full_name": "Sean",
+        "timestamp": 1589863871
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> just a caution -- whenever you see something that seems to be only libtclcad, I've learned that is usually something Bob inserted for some Archer-built tool.  Those four commands sound like something possibly in use by SlideMaker or EGM.</p>",
+        "id": 198082475,
+        "sender_full_name": "Sean",
+        "timestamp": 1589901772
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   That was my guess as well.  However, anything Archer based will also have libtclcad available, so if need be they can be supplied at that level.  Once it starts getting closer to going live I'm planning to do more testing with the Archer level pieces (and we'll also have to coordinate with the other tools that have hooked libdm/fb into Java and Qt...)</p>",
+        "id": 198096744,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589907809
+    },
+    {
+        "content": "<p>At least in theory it should be possible to do that more cleanly with the new setup by making purpose-build dm plugins - I'm planning at some point to try a better Qt dm/fb backing for qged to test that out.</p>",
+        "id": 198097410,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589908081
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> understood that they're in libtclcad (or can be), that's not the issue.</p>",
+        "id": 198097479,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908109
+    },
+    {
+        "content": "<p>the danger is leaving them disabled.  they will be runtime failures not likely to be caught by future testing.</p>",
+        "id": 198097521,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908135
+    },
+    {
+        "content": "<p>at least not without specific intent to find their usage.  like a testing checklist.</p>",
+        "id": 198097580,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908162
+    },
+    {
+        "content": "<p>fair enough, but unless we can contrive some tests for them I can't prove they work even in trunk, much less in the branch...</p>",
+        "id": 198097735,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589908203
+    },
+    {
+        "content": "<p>especially since they could even be specific to a single interface or tool, it'd be good to manage the risk in some manner.</p>",
+        "id": 198097745,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908205
+    },
+    {
+        "content": "<p>unless you can prove they don't work and weren't broken recently by other changes, the converse is just as valid a position...</p>",
+        "id": 198097816,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908248
+    },
+    {
+        "content": "<p>Not sure we've got any sort of testing at all for libtclcad beyond the regression tests themselves, for that matter...</p>",
+        "id": 198097825,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589908253
+    },
+    {
+        "content": "<p>if they're working in slidemaker, for example</p>",
+        "id": 198097865,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908274
+    },
+    {
+        "content": "<p>I'll see if Bob can take a look quick - if not I'll have to come up with some way to exercise them</p>",
+        "id": 198098091,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589908369
+    },
+    {
+        "content": "<p>the lack of testing and awareness of whether it works or not is why the burden is raised on change .. this is going to be a recurring theme with bob out</p>",
+        "id": 198098149,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908399
+    },
+    {
+        "content": "<p>it's going to tie our hands somewhat or we're going to have to pay down the debt as changes are made</p>",
+        "id": 198098211,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908434
+    },
+    {
+        "content": "<p>IMHO we can't afford to tie our hands</p>",
+        "id": 198098313,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589908471
+    },
+    {
+        "content": "<p>it would be nice to find a uniform way to test the things in libtclcad that are not in libged.  if they're in libged though some alternative feature, it's less of a concern.</p>",
+        "id": 198098351,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908493
+    },
+    {
+        "content": "<p>I'd agree that we don't want to, that we shouldn't -- but not that we can't.  Unknowingly but likely breaking tools that are functioning today would be irresponsible too.  We can't do that to users.</p>",
+        "id": 198098674,
+        "sender_full_name": "Sean",
+        "timestamp": 1589908635
+    },
+    {
+        "content": "<p>Again just my opinion, but we urgently need some significant foundational changes to get us moving forward.  Agree we don't want to break existing tools, but stasis is potentially fatal as a project.</p>",
+        "id": 198098991,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589908776
+    },
+    {
+        "content": "<p>I'll try to put my money where my mouth (or fingers technically) are by doing what I can to pay down the debt</p>",
+        "id": 198099587,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589909013
+    },
+    {
+        "content": "<p>Dude, you're preaching to the choir.  I know that, you know that.</p>",
+        "id": 198099590,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909015
+    },
+    {
+        "content": "<p>I'm not sure if you suggesting doing nothing about this is acceptable for the sake of change.</p>",
+        "id": 198099621,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909031
+    },
+    {
+        "content": "<p>I'm saying I think that is not just unacceptable too but that it would be irresponsible to just yank something and hope for the best or expect it to get dealt with by [insert future situation].</p>",
+        "id": 198099738,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909065
+    },
+    {
+        "content": "<p>that it should be managed in some manner.  documented and followed up with when it comes time to testing could be a minimum, providing an alternative interface could be an option too.</p>",
+        "id": 198099928,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909160
+    },
+    {
+        "content": "<p>And it's not just avoiding changing things because they might be risk.  It's that those commands are potentially tied to a user-visible feature and knowingly breaking them without an alternative or testing or some mitigation would be a violation of our own change policy.</p>",
+        "id": 198100285,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909285
+    },
+    {
+        "content": "<p>Ah.  No, I'm not suggesting ignoring it is acceptable  when the breakage is definitely known.</p>",
+        "id": 198100406,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589909352
+    },
+    {
+        "content": "<p>I guess my bias is to proceed forward when we can't readily prove there <em>is</em> breakage.  (We know there is in this case, so I agree it needs to be dealt with before anything goes live.)</p>",
+        "id": 198100609,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589909441
+    },
+    {
+        "content": "<p>\"ignorantia juris non excusat\"</p>",
+        "id": 198100975,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909607
+    },
+    {
+        "content": "<p>if there is breakage, whether we know about it or not, then the change policy has been violated and user trust is eroded (or completely lost in some instances) when it is encountered.</p>\n<p>that doesn't mean we can't/shouldn't change things -- we can and do all the freaking time.  that's exactly why there is a policy written on how we should go about doing it in a manner that is defensible and should minimize loss of user trust.</p>",
+        "id": 198101347,
+        "sender_full_name": "Sean",
+        "timestamp": 1589909794
+    },
+    {
+        "content": "<p>I'm also not suggesting against proceeding forward just because you don't know -- it was simply to take some action to at least document the situation and follow up.  A policy of only acting on proven issues encourages simply not looking, not testing, not asking, not communicating.  Not healthy development.</p>",
+        "id": 198102443,
+        "sender_full_name": "Sean",
+        "timestamp": 1589910368
+    },
+    {
+        "content": "<p>Fair enough.  What would be good for this case?   (Assuming I can't run them to earth quickly) - TODO file a the top level in the branch?</p>",
+        "id": 198102858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1589910561
+    },
+    {
+        "content": "<p>I think a TODO file in the branch for testing / search against tools as an action for the next release.</p>\n<p>If there's not other way to save the fb or write an image into it, then it would be good to figure out some way in libged to do that cleanly in the new fb+db rework state.</p>",
+        "id": 198108675,
+        "sender_full_name": "Sean",
+        "timestamp": 1589913430
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  If I roll back the changes in this branch to be just the dm/fb merger and the plugin loading, without the fb_obj relocation that's causing issues with the libged commands, would there be a reasonable chance to merge this back in?  I didn't radically restructure the dm/fb interactions, and I'm concerned that this is going to be difficult to maintain as a branch for a long period give how much code moved around in the dm/fb libs...</p>",
+        "id": 199415683,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591041760
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> what would that mean in terms of overall changes?  what's the benefit to trunk?  the dm+fb merger by itself isn't very compelling by itself as that's inherently undoing modularity.  that downside was being offset by the improvement to libged's modularity.  if we don't get the libged improvement, won't trunk be worse off?  I'm not familiar with the extent of the plugin loading changes, but I imagine that effect has to be minor as we don't rely on it for anything yet.</p>\n<p>merge concern noted, though -- what are our options?   is it not possible to preserve/rewrite those four commands so the whole branch can be merged?</p>",
+        "id": 199451086,
+        "sender_full_name": "Sean",
+        "timestamp": 1591074534
+    },
+    {
+        "content": "<p>Somewhat to my surprise, it looks like I was able to get the four commands (or a more generic version in png2fb's case) working.</p>",
+        "id": 199654902,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591207543
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I've not hooked it into overlay yet (right now I've just stubbed in icv2fb and fb2icv commands) but so far it looks like I might be able to completely replace fb2pix, pix2fb and png2fb.</p>",
+        "id": 199655373,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591207670
+    },
+    {
+        "content": "<p>How should the usability of this work?  Should there be an \"--fb\" option to overlay to specify that the image is going into the framebuffer rather than the dm?  Should the fb-&gt;image feature be an option to saveview?</p>",
+        "id": 199656151,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591208109
+    },
+    {
+        "content": "<p>Er - screengrab, not saveview...</p>",
+        "id": 199657368,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591208695
+    },
+    {
+        "content": "<p>roughed in -F options to overlay and screengrab in the branch.  Haven't gotten any of the offset logic enabled or tested yet, but getting close</p>",
+        "id": 199682984,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591221903
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> That's great!</p>",
+        "id": 199756093,
+        "sender_full_name": "Sean",
+        "timestamp": 1591281408
+    },
+    {
+        "content": "<p>offset logic is pretty much working now - trying to convince screengrab to return subsets of its image</p>",
+        "id": 199756253,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591281480
+    },
+    {
+        "content": "<p>did the old commands do that?</p>",
+        "id": 199759040,
+        "sender_full_name": "Sean",
+        "timestamp": 1591282622
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/dm.2Ffb.20rework/near/199656151\">said</a>:</p>\n<blockquote>\n<p>How should the usability of this work?  Should there be an \"--fb\" option to overlay to specify that the image is going into the framebuffer rather than the dm?  Should the fb-&gt;image feature be an option to saveview?</p>\n</blockquote>\n<p>I think I saw you went with -F to imply the main / default?</p>",
+        "id": 199759304,
+        "sender_full_name": "Sean",
+        "timestamp": 1591282689
+    },
+    {
+        "content": "<p>That should be consistent enough with other use where -F specifies a framebuffer -- might want to make it \"-F {fb_specification}\" to be backwards compatible, something like \"-F default\"</p>",
+        "id": 199759686,
+        "sender_full_name": "Sean",
+        "timestamp": 1591282844
+    },
+    {
+        "content": "<p>should talk to any FB ideally, so things like -F 4 still work</p>",
+        "id": 199759810,
+        "sender_full_name": "Sean",
+        "timestamp": 1591282908
+    },
+    {
+        "content": "<p>Don't think saveview comes into play with this as that's talking about the camera / viewer parameters of the view, not the image / viewee aspects</p>",
+        "id": 199760091,
+        "sender_full_name": "Sean",
+        "timestamp": 1591283010
+    },
+    {
+        "content": "<p>The old commands were kind of an odd mishmash .  With the exception of some png2fb specific options which don't seem to have been used anywhere (probably added for testing, if I had to guess) I'm trying to use libicv's image features to support rectangle subsets of the fb - that seems to have been the overall intent, but I don't think it was fully realized.</p>\n<p>Right now I'm just using -F to distinguish between capturing the framebuffer and capturing the scene view - I don't have the ability to specify fbserv objects, and I don't think the old commands did either.  I'm using the display manager pointer rather than talking over the fb network protocol, so the code's not well set up for arbitrary fb capture.  If I should use an option other than -F to avoid that expectation that shouldn't be an issue - suggestions welcome.</p>",
+        "id": 199764573,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591284721
+    },
+    {
+        "content": "<p>Did dm-fb-merge build OK on OSX?</p>",
+        "id": 199766347,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591285407
+    },
+    {
+        "content": "<p>/me is trying another Windows build now...</p>",
+        "id": 199766387,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591285421
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/dm.2Ffb.20rework/near/199764573\">said</a>:</p>\n<blockquote>\n<p>The old commands were kind of an odd mishmash .  With the exception of some png2fb specific options which don't seem to have been used anywhere (probably added for testing, if I had to guess) I'm trying to use libicv's image features to support rectangle subsets of the fb - that seems to have been the overall intent, but I don't think it was fully realized.</p>\n</blockquote>\n<p>So... I think you're saying \"no\"?</p>\n<p>If the old code didn't I honestly wouldn't bother with extracting subsets even if it seems easy enough.  Bob was a fan of doing that for some reason and it's just such an antipattern...</p>",
+        "id": 199771922,
+        "sender_full_name": "Sean",
+        "timestamp": 1591287531
+    },
+    {
+        "content": "<p>It would partially do subsets - you could change the x and y starting offsets to get portions of an image, but you couldn't specify the length of what you wanted in each direction from that point.  I think there may be one or two places in Archer and other codes that use that feature.</p>\n<p>Take a look at the screengrab and overlay commands in the branch - that's got my current feature set.</p>",
+        "id": 199773325,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591288152
+    },
+    {
+        "content": "<p>(and yes, I know I need to add/update man pages - waiting until we've got the commands in a stable state ;-)</p>",
+        "id": 199774026,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591288474
+    },
+    {
+        "content": "<p>I could see yanking all of the image subset code in mged/archer and downstream tools.  That's like the feature he implemented to just rt-render a subset of the view that has been band-selected.</p>",
+        "id": 199774334,
+        "sender_full_name": "Sean",
+        "timestamp": 1591288608
+    },
+    {
+        "content": "<p>In all my years, I can't say I've ever wanted or needed to do that or heard of anyone else (besides Bob) wanting to do that.   If it didn't complicate the usability, it wouldn't matter, but that's a feature we could probably strip for the sake of simplicity throughout (including downstream apps).</p>",
+        "id": 199775219,
+        "sender_full_name": "Sean",
+        "timestamp": 1591289044
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Well, for immediate purposes we could probably just not add it to screengrab/overlay - the other 4 commands aren't exposed directly to users to begin with.  I'd rather do any more substantial rippage post-merge...</p>",
+        "id": 199775840,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591289305
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/dm.2Ffb.20rework/near/199773325\">said</a>:</p>\n<blockquote>\n<p>Take a look at the screengrab and overlay commands in the branch - that's got my current feature set.</p>\n</blockquote>\n<p>I did, that's why I've been giving comments on this and the -F option ...  I saw and, hence, the attempt at having a design discussion early / contemporaneously.</p>",
+        "id": 199775848,
+        "sender_full_name": "Sean",
+        "timestamp": 1591289309
+    },
+    {
+        "content": "<p>I'm good with yanking the subset options - my only potential use case was band-selecting from a GUI, and I agree I've never wanted to do that in MGED proper - if I need an image subset I usually snap the whole image and bring it up in another tool to grab the piece I want.</p>",
+        "id": 199776035,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591289394
+    },
+    {
+        "content": "<p>Exactly why I mention it.  That could all go from userland.  Might leave the feature in rt as a debugging/advanced option, but definitely not menu options and propagation to libged commands.  That complexity, however minor, doesn't appear to be terribly helpful.</p>",
+        "id": 199778428,
+        "sender_full_name": "Sean",
+        "timestamp": 1591290345
+    },
+    {
+        "content": "<p>By the way, branch build is mostly clean, but did hit a link error:</p>\n<div class=\"codehilite\"><pre><span></span><code>[ 73%] Linking C shared library ../../../libexec/dm/libdm-X.dylib\nUndefined symbols for architecture x86_64:\n  &quot;_vectorThreshold&quot;, referenced from:\n      _X_drawVList in dm-X.c.o\nld: symbol(s) not found for architecture x86_64\n</code></pre></div>",
+        "id": 199778617,
+        "sender_full_name": "Sean",
+        "timestamp": 1591290443
+    },
+    {
+        "content": "<p>Um.  That's legit.  Interesting it didn't show up previously...</p>",
+        "id": 199781254,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591291606
+    },
+    {
+        "content": "<p>I think r76025 should deal with the X_drawVList issue.</p>",
+        "id": 199784991,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591293260
+    },
+    {
+        "content": "<p>vectorThreshold is icky... unless someone is actually manipulating that somewhere my vote would be to #define it and eliminate the global altogether...</p>",
+        "id": 199785653,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591293585
+    },
+    {
+        "content": "<p>yeah, doesn't look like anybody's touching it at all.</p>",
+        "id": 199786202,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591293825
+    },
+    {
+        "content": "<p>I hadn't compiled this branch prior.  Looks like you yanked it when tcl.c went away.</p>",
+        "id": 199788051,
+        "sender_full_name": "Sean",
+        "timestamp": 1591294866
+    },
+    {
+        "content": "<p>Yep, got moved into libtclcad, but dm-X and dm-tk were referencing it.  Surprised Linux build didn't fail.  Anyway, dealt with now.</p>",
+        "id": 199788111,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591294914
+    },
+    {
+        "content": "<p><em>nod</em>  Just FYI, though, that TclLinkVar call made it available to Tcl scripts.  It's conceivably called by a bit of Tcl somewhere, but don't see it in any of our Tcl.  Just something to keep an eye out for later post-release.  Fix will just be to delete the caller code, so it's not a problem.</p>",
+        "id": 199797943,
+        "sender_full_name": "Sean",
+        "timestamp": 1591299257
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  sounds good.</p>",
+        "id": 199809708,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591305521
+    },
+    {
+        "content": "<p>Windows and Linux seem (knock on wood) to be behaving.  I'll give OpenBSD a shot next.</p>",
+        "id": 199809983,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591305714
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> did you get a chance to try OSX with the fix?</p>",
+        "id": 199908615,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591377903
+    },
+    {
+        "content": "<p>compilation succeeded with the fix</p>",
+        "id": 199959163,
+        "sender_full_name": "Sean",
+        "timestamp": 1591424872
+    },
+    {
+        "content": "<p>Awesome.  MGED and Archer should work - if they do, what else would you like to see prior to a trunk merge?</p>",
+        "id": 199974216,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591448691
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> How disruptive do you think the work in the dm-fb-merge branch will prove to the C++ code?  I'm working towards merging that as the final step in pushing Tcl/Tk up out of our core libs.</p>",
+        "id": 200601942,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591907461
+    },
+    {
+        "content": "<p>A first test was successful. There was no change necessary on the C++ core interface source code.</p>\n<p>However, dm-fb-merge's CMake is complaining about a missing fontconfig, which I do have installed. The build works nevertheless. And, I saw that lz4 is gone.</p>",
+        "id": 200640110,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1591945863
+    },
+    {
+        "content": "<p>What was the specific fontconfig error?  That ought to work, at least on Linux...</p>\n<p>I folded the key bits we use from lz4 into librt, so that's correct.</p>",
+        "id": 200661882,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591963815
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>CMake Warning at src/other/tk/CMakeLists.txt:259 (find_package):\n  By not providing &quot;FindFontconfig.cmake&quot; in CMAKE_MODULE_PATH this project\n  has asked CMake to find a package configuration file provided by\n  &quot;Fontconfig&quot;, but CMake did not find one.\n\n  Could not find a package configuration file provided by &quot;Fontconfig&quot; with\n  any of the following names:\n\n    FontconfigConfig.cmake\n    fontconfig-config.cmake\n\n  Add the installation prefix of &quot;Fontconfig&quot; to CMAKE_PREFIX_PATH or set\n  &quot;Fontconfig_DIR&quot; to a directory containing one of the above files.  If\n  &quot;Fontconfig&quot; provides a separate development package or SDK, be sure it has\n  been installed.\n</code></pre></div>\n\n\n<p>(Debian buster, kernel 4.19.0-9-amd64, gcc (Debian 8.3.0-6) 8.3.0)</p>",
+        "id": 200662363,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1591964125
+    },
+    {
+        "content": "<p>Ah.  What version of CMake?  That error means FindFontconfig isn't available by default in that version.</p>",
+        "id": 200686058,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591976431
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I put back the misc/CMake copy</p>",
+        "id": 200693612,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591979943
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/dm.2Ffb.20rework/near/200686058\">said</a>:</p>\n<blockquote>\n<p>Ah.  What version of CMake?  That error means FindFontconfig isn't available by default in that version.</p>\n</blockquote>\n<p>In Debian buster the FindFontconfig.cmake is included in KDE development packages, but in Debian sid in CMake data and extra too.</p>",
+        "id": 200698468,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1591982451
+    },
+    {
+        "content": "<p>Figures.  \"Modern\" CMake seems to be trying to move more towards *Config.cmake based approaches where those files are provided by the packages, but I'm not up on that approach and if the upstream package doesn't provide it we're back to Find modules anyway...</p>",
+        "id": 200699524,
+        "sender_full_name": "starseeker",
+        "timestamp": 1591982928
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Did MGED/Archer launch OK on the Mac with that build?</p>",
+        "id": 200884832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592225752
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/dm.2Ffb.20rework/near/200661882\">said</a>:</p>\n<blockquote>\n<p>What was the specific fontconfig error?  That ought to work, at least on Linux...</p>\n<p>I folded the key bits we use from lz4 into librt, so that's correct.</p>\n</blockquote>\n<p>Eek, why??  That's a very active project that pushes out updates regularly.  It would be nice to just update their sources or utilize a system lz4.  That was working I thought...</p>",
+        "id": 200904257,
+        "sender_full_name": "Sean",
+        "timestamp": 1592234663
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/dm.2Ffb.20rework/near/200884832\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> Did MGED/Archer launch OK on the Mac with that build?</p>\n</blockquote>\n<p>It's not been compiling for a few days.  I thought you were in the middle of something, so I didn't mention it, but it dies with duplicate symbols when linking fftc.<br>\n(rather, trunk and bioh both fail with that error)</p>",
+        "id": 200904687,
+        "sender_full_name": "Sean",
+        "timestamp": 1592234794
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>[ 33%] Linking C executable ../../bin/fftc\nduplicate symbol &#39;___sincos&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_signbitl&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isnanl&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isnormall&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isinfl&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isfinitel&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___sincospi&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_signbitf&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___sincosf&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isnanf&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isnormalf&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___sincospif&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isinff&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isfinitef&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_signbitd&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isnand&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isnormald&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isinfd&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___inline_isfinited&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nduplicate symbol &#39;___sputc&#39; in:\n    CMakeFiles/fftc.dir/fftc.c.o\n    CMakeFiles/fftc.dir/splitditc.c.o\nld: 20 duplicate symbols for architecture x86_64\nclang: error: linker command failed with exit code 1 (use -v to see invocation)\nmake[2]: *** [bin/fftc] Error 1\nmake[1]: *** [src/libfft/CMakeFiles/fftc.dir/all] Error 2\n</code></pre></div>",
+        "id": 200904775,
+        "sender_full_name": "Sean",
+        "timestamp": 1592234825
+    },
+    {
+        "content": "<p>Here's the actual compile line, so it looks like compilation options were changed elsewhere as those are all math system math symbols that were somehow embedded (maybe related to import/export changes?):</p>\n<div class=\"codehilite\"><pre><span></span><code>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -std=c11  -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions -m64 -ggdb -Qunused-arguments -fstack-protector-all -fno-omit-frame-pointer -pedantic -pedantic-errors -Wall -Wextra -Wundef -Wfloat-equal -Wshadow -Wbad-function-cast -Wc++-compat -Winline -Wno-long-long -Wno-variadic-macros -Wdocumentation -Wno-c11-extensions -Werror -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14 -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -m64 -ggdb CMakeFiles/fftc.dir/fftc.c.o CMakeFiles/fftc.dir/splitditc.c.o  -o ../../bin/fftc  -lm\n</code></pre></div>",
+        "id": 200905896,
+        "sender_full_name": "Sean",
+        "timestamp": 1592235252
+    },
+    {
+        "content": "<p>Good call - libfft would have been getting BRLCADBUILD and HAVE_CONFIG_H from src/CMakeLists.txt.  Interesting Mac seems to be the only platform that hit that particular issue... r76142 should restore the definitions.</p>",
+        "id": 200918091,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592240904
+    },
+    {
+        "content": "<p>In trunk that is - I'll merge to dm-fb-merge next.</p>",
+        "id": 200918133,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592240931
+    },
+    {
+        "content": "<p>There we go.  r76143 in dm-fb-merge</p>",
+        "id": 200918830,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592241310
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> FWIW, trunk just built successfully on the github OSX runner.</p>",
+        "id": 200930890,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592247582
+    },
+    {
+        "content": "<p>dm-fb-merge branch as well, although unfortunately the runner environment doesn't end up enabling any of the graphics...</p>",
+        "id": 200943832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592254212
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> did dm-fb-merge build OK for you?</p>",
+        "id": 201739663,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592925442
+    },
+    {
+        "content": "<p>It builds and runs if I enable all, but default build fails with X11 symbol errors (like a header inclusion is missing).  Trunk doesn't have the error, so it's some change.</p>",
+        "id": 201739975,
+        "sender_full_name": "Sean",
+        "timestamp": 1592925569
+    },
+    {
+        "content": "<p>error was on dm-ogl.c iirc</p>",
+        "id": 201740123,
+        "sender_full_name": "Sean",
+        "timestamp": 1592925610
+    },
+    {
+        "content": "<p>Blast.  I really wish Apple would make some sort of remote test platform available for devs...</p>",
+        "id": 201740181,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592925631
+    },
+    {
+        "content": "<p>/me waddles through a plethora of training</p>",
+        "id": 201740186,
+        "sender_full_name": "Sean",
+        "timestamp": 1592925635
+    },
+    {
+        "content": "<p>/me nods - always lots of fun</p>",
+        "id": 201740292,
+        "sender_full_name": "starseeker",
+        "timestamp": 1592925679
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I dug a lot deeper into the failure, did tons of comparisons with trunk, and looking at the specific cause of the failure -- it's related to the detection of tcl/tk on the branch.  We might have to revisit the tcl logic on trunk, but it doesn't look like a show-stopper now that I found the cause.  I think it's safe enough to merge.</p>",
+        "id": 201960921,
+        "sender_full_name": "Sean",
+        "timestamp": 1593087450
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  OK, thanks for digging into it - sorry it proved to be such a hassle.  I'm wondering if I should try to get ahold of a second-hand Mac somewhere for testing purposes - I seem to be hitting a lot of failure that only manifest there...</p>",
+        "id": 201963525,
+        "sender_full_name": "starseeker",
+        "timestamp": 1593089149
+    },
+    {
+        "content": "<p>That could probably be said of any platform we don't compile on daily.  I can count at least a dozen times I made some super safe innocuous change that I thought was perfectly okay only to find it broke the [xxx] build. </p>\n<p>I think we can just keep pushing more CI, take steps to not break intentionally, investigate and learn when it does break, and move on.</p>",
+        "id": 201964064,
+        "sender_full_name": "Sean",
+        "timestamp": 1593089461
+    },
+    {
+        "content": "<p>phew - merged.  (hah - happened to be commit 76200 - nice round number)</p>",
+        "id": 201983806,
+        "sender_full_name": "starseeker",
+        "timestamp": 1593098649
+    }
+]

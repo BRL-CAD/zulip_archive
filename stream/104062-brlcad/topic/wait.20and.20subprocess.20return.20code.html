@@ -1,0 +1,116 @@
+<html>
+<head><meta charset="utf-8"><title>wait and subprocess return code · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html">wait and subprocess return code</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="406189363"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406189363" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406189363">(Dec 06 2023 at 01:05)</a>:</h4>
+<p>I have a rather vexing problem with the POSIX wait(&amp;retcode) function, and I'm not sure how to zero in on it.  I've defined a test for the libbu process wrappers to verify that I can detect a non-zero child exit code:</p>
+<p><a href="https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/process.c#L96">https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/process.c#L96</a><br>
+<a href="https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/subprocess.cpp#L62">https://github.com/BRL-CAD/brlcad/blob/facetize/src/libbu/tests/subprocess.cpp#L62</a></p>
+<p>It should return 2, but on Linux when I run this via bu_test I get a "0" return code.  However, if I run the subprocess exec directly, "echo $?" does indeed report "2" for an exit code.</p>
+<p>Even more vexing, if I put the bu_test call into gdb and break on bu_process_wait, the program behavior changes and it DOES end up with 2 as the return code.</p>
+<p>Am I setting this up incorrectly somehow?</p>
+
+
+
+<a name="406194608"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406194608" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406194608">(Dec 06 2023 at 01:48)</a>:</h4>
+<p>OK, some progress - closing the stdout and stderr of the child process before waiting was an issue, from the looks of things.</p>
+
+
+
+<a name="406220885"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406220885" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406220885">(Dec 06 2023 at 04:15)</a>:</h4>
+<p>Perhaps not the issue, but you should only use WEXITSTATUS on a return code that passes the WIFEXITED() macro test</p>
+
+
+
+<a name="406221024"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406221024" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Alexis Naveros <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406221024">(Dec 06 2023 at 04:16)</a>:</h4>
+<p>And when a program behaves differently when launched in gdb than standalone, what I usually do is to put a sleep() at the top of main(), launch it standalone and attach gdb to it before the sleep() finishes</p>
+
+
+
+<a name="406327317"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406327317" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406327317">(Dec 06 2023 at 15:17)</a>:</h4>
+<p>It's looking like there are multiple issues at play... it never fails.</p>
+
+
+
+<a name="406332553"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406332553" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406332553">(Dec 06 2023 at 15:40)</a>:</h4>
+<p>I'm commencing to think it's time to dissect CTest and identify the subset of their capabilities that we need for libbu process control - a cursory inspection suggests that they're leveraging libuv and put quite a bit of work into this, so trying to custom roll our own solution without reusing their code is probably going to be both a lot of work and error prone.  The core of what CTest does is almost exactly what we need bu_process to do - launch processes, support timeouts and tracking return codes, and collect output.</p>
+
+
+
+<a name="406364759"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/406364759" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#406364759">(Dec 06 2023 at 18:43)</a>:</h4>
+<p>Hmm.  Looks like there are also a few small libraries for doing similar things.  Experiment time</p>
+
+
+
+<a name="412150784"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412150784" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412150784">(Jan 10 2024 at 14:30)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/wait.20and.20subprocess.20return.20code/near/406364759">said</a>:</p>
+<blockquote>
+<p>Hmm.  Looks like there are also a few small libraries for doing similar things.  Experiment time</p>
+</blockquote>
+<p>I think I'm running into something similar.. Did anything come of your experiments?</p>
+
+
+
+<a name="412216086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412216086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412216086">(Jan 10 2024 at 20:40)</a>:</h4>
+<p>Yes, actually.  One of them worked in the facetize branch.</p>
+
+
+
+<a name="412216423"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412216423" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412216423">(Jan 10 2024 at 20:43)</a>:</h4>
+<p>The subprocess bit is here:  <a href="https://github.com/BRL-CAD/brlcad/commit/c3eefb86430b7bb85e586412d0a26bf3e1dd585c">https://github.com/BRL-CAD/brlcad/commit/c3eefb86430b7bb85e586412d0a26bf3e1dd585c</a></p>
+
+
+
+<a name="412216443"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412216443" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412216443">(Jan 10 2024 at 20:43)</a>:</h4>
+<p><a href="https://github.com/sheredom/subprocess.h">https://github.com/sheredom/subprocess.h</a></p>
+
+
+
+<a name="412216608"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412216608" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412216608">(Jan 10 2024 at 20:44)</a>:</h4>
+<p>I was focused on facetize, so I haven't audited whether it can straight up replace libbu's process bits completely</p>
+
+
+
+<a name="412216828"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412216828" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412216828">(Jan 10 2024 at 20:46)</a>:</h4>
+<p>Gotcha. I'll see if that helps the errors I'm seeing in rtweight.</p>
+
+
+
+<a name="412216899"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412216899" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412216899">(Jan 10 2024 at 20:47)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/wait.20and.20subprocess.20return.20code/near/412216608">said</a>:</p>
+<blockquote>
+<p>I was focused on facetize, so I haven't audited whether it can straight up replace libbu's process bits completely</p>
+</blockquote>
+<p>Should probably set up a test suite for the process stuff's eventually</p>
+
+
+
+<a name="412217051"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/wait%20and%20subprocess%20return%20code/near/412217051" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/wait.20and.20subprocess.20return.20code.html#412217051">(Jan 10 2024 at 20:48)</a>:</h4>
+<p>There is this:  <a href="https://github.com/BRL-CAD/brlcad/blob/main/src/libbu/tests/process.c">https://github.com/BRL-CAD/brlcad/blob/main/src/libbu/tests/process.c</a></p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

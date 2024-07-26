@@ -1,0 +1,62 @@
+<html>
+<head><meta charset="utf-8"><title>file descriptor leak · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html">file descriptor leak</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="207399119"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207399119" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207399119">(Aug 19 2020 at 12:08)</a>:</h4>
+<p>I can confirm seeing the file descriptor leak from ged_test_list, and according to valgrind it's the process.c:290 assignment (looks like specifically fd_in)</p>
+
+
+
+<a name="207409134"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207409134" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207409134">(Aug 19 2020 at 13:43)</a>:</h4>
+<p>for what it's worth, I vaguely recall putting a Tcl_Sleep throttle into the event processing and it having negative effect. <br>
+ sometimes events stream fast, dozens per second, and a throttle stalls the loop</p>
+
+
+
+<a name="207409314"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207409314" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207409314">(Aug 19 2020 at 13:44)</a>:</h4>
+<p>Would a raw sleep call be safer?</p>
+
+
+
+<a name="207409522"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207409522" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207409522">(Aug 19 2020 at 13:46)</a>:</h4>
+<p>Or do you mean it just drags down the execution time too much?  I did see that if I used larger values.</p>
+
+
+
+<a name="207409749"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207409749" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207409749">(Aug 19 2020 at 13:48)</a>:</h4>
+<p>no, it just literally stalls the process for however much time, so if there are 100 pending events for example, it's going to take "100 x sleeptime" to get through them all</p>
+
+
+
+<a name="207409790"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207409790" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207409790">(Aug 19 2020 at 13:48)</a>:</h4>
+<p>I was surprised to find that many could cluster up, but it happens</p>
+
+
+
+<a name="207411378"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207411378" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207411378">(Aug 19 2020 at 14:00)</a>:</h4>
+<p>Hmm.  Well, I don't know that the sleep call is needed - maybe just skip it until it proves necessary?</p>
+
+
+
+<a name="207420616"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/file%20descriptor%20leak/near/207420616" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/file.20descriptor.20leak.html#207420616">(Aug 19 2020 at 15:13)</a>:</h4>
+<p>btw, I noticed if rt doesn't exit cleanly, it also leaks a file descriptor in most cases by not freeing the rtip.  Is it worth going through and cleaning up the rtips before bu_exit calls to avoid the leaks?</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

@@ -1,0 +1,56 @@
+[
+    {
+        "content": "<p>Hi guys, my name is Florian and I'm new in using BRL. Can some of tell me if it's possible to execute MGED in particular the nirt command in parallel computing mode. I want to use more than one CPU to reduce the time for raytracing. Thank you! Cheers!</p>",
+        "id": 166534041,
+        "sender_full_name": "Florian",
+        "timestamp": 1558801465
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"218858\">@Florian</span> -- it is outside of mged with parallel scripting but it's a little advanced to set it up.  it's not possible inside mged with nirt, but it may be possible to do what you need with 'rt' or one of the other tracers that do have built-in support for parallel.  Can you describe more specifically what it is you're trying to achieve?</p>",
+        "id": 166994302,
+        "sender_full_name": "Sean",
+        "timestamp": 1559307491
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  -- Basically, I want to run a tcl script which raytraces my model with around 1000 nirt commands in a loop. This takes superlong on my computer so I decided to run it on a cluster of 8 CPUs. But ressource monitoring shows that only on of the cores is used during the execution of the script. I want to use the full capabilities of the cluster to shorten the computition.</p>",
+        "id": 167064961,
+        "sender_full_name": "Florian",
+        "timestamp": 1559382048
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"218858\">@Florian</span> but I mean what are you doing with those nirt rays?  Depending on what you're doing with the result, you might be able to use a different tool like rt (which is about 10 orders of magnitude faster).</p>",
+        "id": 167077030,
+        "sender_full_name": "Sean",
+        "timestamp": 1559403165
+    },
+    {
+        "content": "<p>1000 rays is a sub-second task on all but the most complex scenes (talking 10's of GBs or huge nurbs)</p>",
+        "id": 167077052,
+        "sender_full_name": "Sean",
+        "timestamp": 1559403226
+    },
+    {
+        "content": "<p>If it's not something that can be handled by rt, then I'll see if I can work our a recipe for faster nirt invocation.</p>",
+        "id": 167077201,
+        "sender_full_name": "Sean",
+        "timestamp": 1559403458
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I need the output for an xml file describing a model I want use for radiation analysis. So I'm not using nirt for a classic raytracing. Does rt also provide line of sight thicknesses for each model component the ray traverses? If yes, then I could probably use rt.<br>\nBTW disc space is not a problem,  I have 800Gb SSD.</p>",
+        "id": 167078393,
+        "sender_full_name": "Florian",
+        "timestamp": 1559405351
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"218858\">@Florian</span> here's some code that might inspire you to get started <a href=\"https://github.com/nmz787/python-brlcad-tcl/blob/master/python_brlcad_tcl/brlcad_tcl.py#L281\" target=\"_blank\" title=\"https://github.com/nmz787/python-brlcad-tcl/blob/master/python_brlcad_tcl/brlcad_tcl.py#L281\">https://github.com/nmz787/python-brlcad-tcl/blob/master/python_brlcad_tcl/brlcad_tcl.py#L281</a></p>",
+        "id": 167131746,
+        "sender_full_name": "Nathan McCorkle",
+        "timestamp": 1559498333
+    },
+    {
+        "content": "<p>It would not be too hard to partition the model space into 8 chunks and start a subprocess for each</p>",
+        "id": 167131762,
+        "sender_full_name": "Nathan McCorkle",
+        "timestamp": 1559498364
+    }
+]

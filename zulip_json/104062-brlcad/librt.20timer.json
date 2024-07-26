@@ -1,0 +1,80 @@
+[
+    {
+        "content": "<p>Oh - a second pair of eyeballs on the librt timer update would be appreciated.  If I have time I'm going to try to complete moving that down to libbu as well, but before I add that layer of change it would be good to make sure I didn't miss anything silly in the approach.</p>",
+        "id": 220372477,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608298655
+    },
+    {
+        "content": "<p>In a technical sense that might be user visible, since I think the old timing routines weren't always measuring what the API documentation indicated they should be measuring.  Don't know if it's worth calling out.</p>",
+        "id": 220372665,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608298781
+    },
+    {
+        "content": "<p>Yeah, they were implemented on Windows way back when they didn't have great timing facilities, was a known issue (to me at least)</p>",
+        "id": 220410103,
+        "sender_full_name": "Sean",
+        "timestamp": 1608315821
+    },
+    {
+        "content": "<p>there's a todo to push it to libbu, but we'll want to reconcile it with the timers already in there.  Definitely don't want to migrate that global state into libbu.. that's gotta go, and that means updating the caller sites.</p>",
+        "id": 220410255,
+        "sender_full_name": "Sean",
+        "timestamp": 1608315898
+    },
+    {
+        "content": "<p>Do we put a bu timer in the rt application struct?</p>",
+        "id": 220410312,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608315937
+    },
+    {
+        "content": "<p>could make bu's timer just start/record both clocks, and have calling applications request one or the other</p>",
+        "id": 220410338,
+        "sender_full_name": "Sean",
+        "timestamp": 1608315954
+    },
+    {
+        "content": "<p>ehm, I dunno -- could belong in the rtip</p>",
+        "id": 220410402,
+        "sender_full_name": "Sean",
+        "timestamp": 1608315973
+    },
+    {
+        "content": "<p>maybe the app</p>",
+        "id": 220410412,
+        "sender_full_name": "Sean",
+        "timestamp": 1608315979
+    },
+    {
+        "content": "<p>/me nods.  OK, got enough other fish to fry I'll not worry about the libbu move this round - not urgent</p>",
+        "id": 220410461,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316014
+    },
+    {
+        "content": "<p>wow, hate to say it ... but looking at the structs, it looks like struct resource may be the most appropriate</p>",
+        "id": 220410901,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316225
+    },
+    {
+        "content": "<p>it's already tracking counts, just not time</p>",
+        "id": 220410964,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316256
+    },
+    {
+        "content": "<p>that would allow for proper timing if we split work across cores too.  struct rt_i says it's its job to track statistics, but it tracks via struct resource.</p>",
+        "id": 220411220,
+        "sender_full_name": "Sean",
+        "timestamp": 1608316380
+    },
+    {
+        "content": "<p>/me nods - sounds reasonable</p>",
+        "id": 220411394,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608316464
+    }
+]

@@ -1,0 +1,2342 @@
+[
+    {
+        "content": "<p>/me tests compiling Qt 5.15 from scratch, and so far looking good.</p>",
+        "id": 210037368,
+        "sender_full_name": "Sean",
+        "timestamp": 1600104629
+    },
+    {
+        "content": "<p>/me rediscovers alacritty and thinks it might be a viable embedded terminal solution!</p>",
+        "id": 210064052,
+        "sender_full_name": "Sean",
+        "timestamp": 1600118083
+    },
+    {
+        "content": "<p>Stumbled on this, in the Qt terminal department:  <a href=\"https://github.com/jsbronder/sff\">https://github.com/jsbronder/sff</a></p>",
+        "id": 210068502,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600120896
+    },
+    {
+        "content": "<p>/me debates between the dreary utility of trying to properly fix the WiX msi installer's startup dirs and diving back into the src/other superbuild thorn pile...</p>",
+        "id": 210069537,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600121727
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> thanks, that's interesting.  do you have any indication that it actually works on Windows though?  It looks like it uses libvterm which, I may be mistaken, doesn't appear to be for Windows.  I looked at the source code and it doesn't look like libvterm  uses pty, so that's promising, but still left wondering what it does.</p>",
+        "id": 210133208,
+        "sender_full_name": "Sean",
+        "timestamp": 1600178513
+    },
+    {
+        "content": "<p>ah, maybe it is still using pty somewhere.  looks like it: <a href=\"https://github.com/akermu/emacs-libvterm/issues/12\">https://github.com/akermu/emacs-libvterm/issues/12</a></p>",
+        "id": 210133552,
+        "sender_full_name": "Sean",
+        "timestamp": 1600178648
+    },
+    {
+        "content": "<p>that's what makes alacritty interesting.  it has a similar virtual terminal interface, but is using an abstraction underneath to establish a pseudoterminal interface on windows.</p>",
+        "id": 210133737,
+        "sender_full_name": "Sean",
+        "timestamp": 1600178761
+    },
+    {
+        "content": "<p>I mean, it'd be quite a feat of engineering given it's another language stack, but it's one of only three possibilities I've found so far.</p>",
+        "id": 210133864,
+        "sender_full_name": "Sean",
+        "timestamp": 1600178814
+    },
+    {
+        "content": "<p>Not sure of the details, but libvterm is used by neovim, which I know does work on Windows:  <a href=\"https://github.com/neovim/neovim\">https://github.com/neovim/neovim</a></p>",
+        "id": 210139655,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181312
+    },
+    {
+        "content": "<p>it's used by emacs-vterm too, but the specifically say it doesn't work on windows</p>",
+        "id": 210139732,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181359
+    },
+    {
+        "content": "<p>which is frankly what I would expect.</p>",
+        "id": 210140073,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181498
+    },
+    {
+        "content": "<p>I'd have to dig into what neovim is doing.  It sure felt like they were terminal emulating when I last ran it...</p>",
+        "id": 210140181,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181533
+    },
+    {
+        "content": "<p>only know of a handful of libs that extract an interface that includes windows support, two being in Node's ecosystem</p>",
+        "id": 210140182,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181534
+    },
+    {
+        "content": "<p>Maybe related:  <a href=\"https://github.com/equalsraf/libvterm-win/commit/f876a3379bcd80e467d770ca1dd74448b60fe40c\">https://github.com/equalsraf/libvterm-win/commit/f876a3379bcd80e467d770ca1dd74448b60fe40c</a></p>",
+        "id": 210140205,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181548
+    },
+    {
+        "content": "<p>were you able to run a command-line command in neovim?</p>",
+        "id": 210140210,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181551
+    },
+    {
+        "content": "<p>that's cool if it was just the escape code being wrong</p>",
+        "id": 210140360,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181612
+    },
+    {
+        "content": "<p>saw others were able to get it to compile</p>",
+        "id": 210140385,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181631
+    },
+    {
+        "content": "<p>No, that I didn't try - I was referring more to the look/feel of the neovim editing window and interactions.</p>",
+        "id": 210140394,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181635
+    },
+    {
+        "content": "<p>heh, oh</p>",
+        "id": 210140460,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181649
+    },
+    {
+        "content": "<p>yeah, I mean emacs runs fine on windows too :P</p>",
+        "id": 210140497,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181670
+    },
+    {
+        "content": "<p>Fair enough - I seldom run external commands from an editor, so it's not something I would miss</p>",
+        "id": 210140594,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181711
+    },
+    {
+        "content": "<p>there's even a separate module to kick off a command shell -- and something like that is always an option</p>",
+        "id": 210140595,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181712
+    },
+    {
+        "content": "<p>/me experiments...</p>",
+        "id": 210140651,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181737
+    },
+    {
+        "content": "<p>i.e., just maintain two separate interfaces -- I've seen a lot of projects do that.  pty for non-windows and msys for windows</p>",
+        "id": 210140691,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181758
+    },
+    {
+        "content": "<p>if libvterm abstracts the line interpreter (usually the pty bit coming from the  system), then they could avoid needing a pty interface altogether.  I've been hoping to find some solution like that as we don't actually need kernelspace interaction</p>",
+        "id": 210140888,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181835
+    },
+    {
+        "content": "<p>heck, we could even get away without a terminal (this is what mged does)</p>",
+        "id": 210140954,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181862
+    },
+    {
+        "content": "<p><a href=\"https://github.com/neovim/libvterm\">https://github.com/neovim/libvterm</a> is the place to check</p>",
+        "id": 210141045,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181887
+    },
+    {
+        "content": "<p>but that means interactive commands are no good. that's why mged does all it's \"MORE_ARGS\" funniness</p>",
+        "id": 210141065,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181899
+    },
+    {
+        "content": "<p>that's their fork - if anyone's got that working, it's probably them</p>",
+        "id": 210141086,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181908
+    },
+    {
+        "content": "<p>I read through that, unclear</p>",
+        "id": 210141091,
+        "sender_full_name": "Sean",
+        "timestamp": 1600181910
+    },
+    {
+        "content": "<p>I'm updating the git conversion right now, I'll flip OSes once that's done and try neovim on Windows.  Anything specific I should try?</p>",
+        "id": 210141178,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600181956
+    },
+    {
+        "content": "<p>it's whether it's abstracted enough of the i/o interpretation for the tty driver</p>",
+        "id": 210141294,
+        "sender_full_name": "Sean",
+        "timestamp": 1600182002
+    },
+    {
+        "content": "<p>try running an interactive command from within vim, like mged</p>",
+        "id": 210141356,
+        "sender_full_name": "Sean",
+        "timestamp": 1600182025
+    },
+    {
+        "content": "<p>er, mged -c</p>",
+        "id": 210141366,
+        "sender_full_name": "Sean",
+        "timestamp": 1600182031
+    },
+    {
+        "content": "<p>make sure it works in cmd.exe first ;)</p>",
+        "id": 210141377,
+        "sender_full_name": "Sean",
+        "timestamp": 1600182039
+    },
+    {
+        "content": "<p>can start with something simple non-interactive like \"time\"</p>",
+        "id": 210141421,
+        "sender_full_name": "Sean",
+        "timestamp": 1600182059
+    },
+    {
+        "content": "<p>but the real test of a vterm is an interactive command</p>",
+        "id": 210141460,
+        "sender_full_name": "Sean",
+        "timestamp": 1600182073
+    },
+    {
+        "content": "<p><a href=\"https://github.com/neovim/neovim/pull/7007\">https://github.com/neovim/neovim/pull/7007</a></p>",
+        "id": 210143143,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600182715
+    },
+    {
+        "content": "<p>Looks like they're using winpty</p>",
+        "id": 210143295,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600182776
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/-wIawyUcwTG7nL4COH4dskT9/neovim_mged.gif\">neovim_mged.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-wIawyUcwTG7nL4COH4dskT9/neovim_mged.gif\" title=\"neovim_mged.gif\"><img src=\"/user_uploads/1549/-wIawyUcwTG7nL4COH4dskT9/neovim_mged.gif\"></a></div>",
+        "id": 210146573,
+        "sender_full_name": "starseeker",
+        "timestamp": 1600184248
+    },
+    {
+        "content": "<p>Cool, that's great to know too, and will undoubtedly be easier to maintain than alacritty then</p>",
+        "id": 210161585,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191104
+    },
+    {
+        "content": "<p>maybe</p>",
+        "id": 210161680,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191140
+    },
+    {
+        "content": "<p>looks like winpty relies on msys :/</p>",
+        "id": 210161742,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191161
+    },
+    {
+        "content": "<p>looking more and more like going the git-bash route is going to be unavoidable.</p>",
+        "id": 210161870,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191213
+    },
+    {
+        "content": "<p>looks like alacritty can be built to use winpty or conpty (<a href=\"https://devblogs.microsoft.com/commandline/windows-command-line-introducing-the-windows-pseudo-console-conpty/\">https://devblogs.microsoft.com/commandline/windows-command-line-introducing-the-windows-pseudo-console-conpty/</a>)</p>",
+        "id": 210162661,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191592
+    },
+    {
+        "content": "<p>cool, looks like conpty doesn't use msys or cygwin, so just need to find that code and extract it or find someone else that wraps them with unixpty, like these guys: <a href=\"https://github.com/kafeg/ptyqt\">https://github.com/kafeg/ptyqt</a></p>",
+        "id": 210162854,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191671
+    },
+    {
+        "content": "<p>that actually might be exactly what I was looking for .... huh</p>",
+        "id": 210163005,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191732
+    },
+    {
+        "content": "<p>hot diggity</p>",
+        "id": 210163060,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191761
+    },
+    {
+        "content": "<p>/me mentally shelves this until <em>after</em> the announcement and github ...</p>",
+        "id": 210163139,
+        "sender_full_name": "Sean",
+        "timestamp": 1600191796
+    },
+    {
+        "content": "<p>/me ponders whether the libged subprocess mechanisms should be generalized to allow using QProcess, as well as libbu's subprocess...</p>",
+        "id": 230758820,
+        "sender_full_name": "starseeker",
+        "timestamp": 1616012042
+    },
+    {
+        "content": "<p>That doesn't make a lot of sense to me.  It's make more sense to make it an implementation option in libbu.</p>",
+        "id": 230811090,
+        "sender_full_name": "Sean",
+        "timestamp": 1616040258
+    },
+    {
+        "content": "<p>I'll study it some more... I'm hoping QProcess might offer some advantages integrating the libged command I/O into Qt gui elements, but as far as I can tell you can't create a QProcess using an already-launched program, so I'm not sure how that would/could work with a libbu API...</p>",
+        "id": 230852426,
+        "sender_full_name": "starseeker",
+        "timestamp": 1616069759
+    },
+    {
+        "content": "<p>I don't understand ... QProcess invokes a binary and sets up I/O handlers.  That's pretty much the scope of what  bu_process_exec() and the other API in process.c are doing too.</p>",
+        "id": 230922367,
+        "sender_full_name": "Sean",
+        "timestamp": 1616094905
+    },
+    {
+        "content": "<p>Making Qt a <em>library</em> requirement is a big architectural decision that really shouldn't be made lightly.</p>",
+        "id": 230922958,
+        "sender_full_name": "Sean",
+        "timestamp": 1616095186
+    },
+    {
+        "content": "<p>and an even bigger one if it's not encapsulated behind API... that would go against our current architecture as an antipattern</p>",
+        "id": 230923055,
+        "sender_full_name": "Sean",
+        "timestamp": 1616095219
+    },
+    {
+        "content": "<p>Getting it to work underneath bu_process_*() would likely expose a variety of limitations / assumptions in that code now.  That would be very useful to eliminate from the API, a really good thing, and keep it encapsulated (== more maintainable).</p>",
+        "id": 230923553,
+        "sender_full_name": "Sean",
+        "timestamp": 1616095454
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  My hope (although I don't know yet) is that QProcess will have signal/slot integrations with Qt's subsystems that offer advantages.  I agree it shouldn't be exposed publicly in the APIs.  My query was whether a Qt based application could somehow be set up to fire libged commands that are launched as subcommands (currently rt and friends, but eventually most or all of them) using QProcess, rather than the implementations currently underneath the libbu subprocess code.  It could very well be that there aren't any advantages, or at least not compelling ones - I just don't know yet.</p>",
+        "id": 230924942,
+        "sender_full_name": "starseeker",
+        "timestamp": 1616096081
+    },
+    {
+        "content": "<p>It'll be a while before it comes up, anyway - currently I'm getting my tail kicked around the keyboard trying to figure out how to get OpenGL rendering to work in a QThread to not block the main app.</p>",
+        "id": 230925063,
+        "sender_full_name": "starseeker",
+        "timestamp": 1616096141
+    },
+    {
+        "content": "<p>I wasn't referring to being publicly exposed in the API.  That's a WHOLE other level of antipattern and wouldn't be compatible with libged public API anyways.</p>\n<p>It's about it being encapsulated or not.  If it's directly called by a library, then that becomes a coupling.  If the coupling is in all call sites, then it's a tight coupling that is more costly to replace than if it were encapsulated (i.e., light coupling).</p>",
+        "id": 230968758,
+        "sender_full_name": "Sean",
+        "timestamp": 1616122604
+    },
+    {
+        "content": "<p>That said, there are a couple ways to avoid tight coupling and still use it in libged.  There's putting it behind libbu API, or we could add a delegate mechanism where the calling application code passes in a handler that uses QProcess to invoke.</p>",
+        "id": 230968947,
+        "sender_full_name": "Sean",
+        "timestamp": 1616122813
+    },
+    {
+        "content": "<p>Woo-hoo!  Still in its rudimentary beginnings, but first correct display of a libdm generated wireframe in a Qt supplied OpenGL using the new libdm setup and qtgl backend:  <a href=\"/user_uploads/1549/rZeUCMoIr4BMuqopJVKqHzus/libdm_and_QOpenGLWidget.png\">libdm_and_QOpenGLWidget.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/rZeUCMoIr4BMuqopJVKqHzus/libdm_and_QOpenGLWidget.png\" title=\"libdm_and_QOpenGLWidget.png\"><img src=\"/user_uploads/1549/rZeUCMoIr4BMuqopJVKqHzus/libdm_and_QOpenGLWidget.png\"></a></div>",
+        "id": 232168957,
+        "sender_full_name": "starseeker",
+        "timestamp": 1616940231
+    },
+    {
+        "content": "<p>That's great!</p>",
+        "id": 232215201,
+        "sender_full_name": "Sean",
+        "timestamp": 1616990307
+    },
+    {
+        "content": "<p>Early beginnings of decoding MGED's mouse interactions (wow - modes upon modes upon modes.   gnarly...)<br>\n<a href=\"/user_uploads/1549/RIpa91TTogb3xUbRuuGMzbSJ/Qt_libdm_mouse_rot.gif\">Qt_libdm_mouse_rot.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RIpa91TTogb3xUbRuuGMzbSJ/Qt_libdm_mouse_rot.gif\" title=\"Qt_libdm_mouse_rot.gif\"><img src=\"/user_uploads/1549/RIpa91TTogb3xUbRuuGMzbSJ/Qt_libdm_mouse_rot.gif\"></a></div>",
+        "id": 232449348,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617119591
+    },
+    {
+        "content": "<p>/me groans... and so far, my machine is the only one where this works.</p>",
+        "id": 232517704,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617149910
+    },
+    {
+        "content": "<p>That's the OGL life... Want me to test it?</p>",
+        "id": 232578816,
+        "sender_full_name": "Sean",
+        "timestamp": 1617192639
+    },
+    {
+        "content": "<p>Not yet - I'm still working on getting it to build on the Mac without manual hackery</p>",
+        "id": 232614818,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617205687
+    },
+    {
+        "content": "<p>All the work we did to get our CMake logic to detect the X11 OpenGL is cutting against me now.</p>",
+        "id": 232614968,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617205740
+    },
+    {
+        "content": "<p>More progress... <a href=\"/user_uploads/1549/zoLbwc0_2STkDMyvY5On7aN7/additional_mouse_motions.gif\">additional_mouse_motions.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/zoLbwc0_2STkDMyvY5On7aN7/additional_mouse_motions.gif\" title=\"additional_mouse_motions.gif\"><img src=\"/user_uploads/1549/zoLbwc0_2STkDMyvY5On7aN7/additional_mouse_motions.gif\"></a></div>",
+        "id": 232847952,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617326248
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> It's still pretty rudimentary, but I did get it to build on OSX if you wanted to give it a go.  For Mac it needs both -DBRLCAD_ENABLE_QT=ON and -DQt5_DIR=/path/to/dir/with/cmake/config/file</p>",
+        "id": 232848592,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617326901
+    },
+    {
+        "content": "<p>Is this  available for linux?<br>\nAnd how to enable it?</p>",
+        "id": 232865387,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1617344502
+    },
+    {
+        "content": "<p>I'm developing with it on Linux, but it's still way too rudimentary for me to recommend trying it - it's just a testbed right now for figuring out what needs to be done to make libdm and Qt work together.  I know of at least one major change I need to make, and likely more.</p>",
+        "id": 232893336,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617366561
+    },
+    {
+        "content": "<p>Oh<br>\nI would like to try it out when it is available<br>\nPing me up after this is out of beta state<span aria-label=\"sweat smile\" class=\"emoji emoji-1f605\" role=\"img\" title=\"sweat smile\">:sweat_smile:</span></p>",
+        "id": 232895763,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1617368395
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"247135\">@Sumagna Das</span> out of beta state will be a long while.  If you want to check it out it's located in src/isst/dmtest and will compile to produce the qdm executable with -DBRLCAD_ENABLE_QT=ON passed to CMake.  Just remember it's an experiment in combining libdm and Qt at this point, so nothing much is going to work...</p>",
+        "id": 233039164,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617490583
+    },
+    {
+        "content": "<p>Oh<br>\nI will compile again with that option as this seems cool to me.</p>",
+        "id": 233060177,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1617517114
+    },
+    {
+        "content": "<p>Axes with labels: <a href=\"/user_uploads/1549/ri1Fq00cDLlfmJi9SMwm6747/axes_with_labels.png\">axes_with_labels.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ri1Fq00cDLlfmJi9SMwm6747/axes_with_labels.png\" title=\"axes_with_labels.png\"><img src=\"/user_uploads/1549/ri1Fq00cDLlfmJi9SMwm6747/axes_with_labels.png\"></a></div>",
+        "id": 233518933,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617812267
+    },
+    {
+        "content": "<p>More view elements:  <a href=\"/user_uploads/1549/RC0QPhBE52isbYe4l-uREfVY/qdm_faceplate.gif\">qdm_faceplate.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RC0QPhBE52isbYe4l-uREfVY/qdm_faceplate.gif\" title=\"qdm_faceplate.gif\"><img src=\"/user_uploads/1549/RC0QPhBE52isbYe4l-uREfVY/qdm_faceplate.gif\"></a></div>",
+        "id": 233547041,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617823540
+    },
+    {
+        "content": "<p>What are the things present in this experimental setup at the moment?</p>\n<p>It might be helpful if you keep a list here or somewhere (atleast for me<span aria-label=\"sweat smile\" class=\"emoji emoji-1f605\" role=\"img\" title=\"sweat smile\">:sweat_smile:</span>)</p>",
+        "id": 233561131,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1617829384
+    },
+    {
+        "content": "<p>I tested out and it was pretty good</p>",
+        "id": 233561270,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1617829407
+    },
+    {
+        "content": "<p>So far, all I've got is basic view manipulation (rotate, translate, scale) and some of the faceplate elements (the last video).  I've had pretty lousy luck with using a separate rendering thread (didn't work at all on the Mac, and even on Linux the faceplate matrices mess up the display - the fixes for that issue in the single threaded version didn't seem to work for the separate thread.)</p>",
+        "id": 233566044,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617830669
+    },
+    {
+        "content": "<p>I'll be looking at some more of the Archer/libtclcad manipulations next - both view element manipulation and sketch editing are going to require more than just the current view operations, and I need to figure out how how that's going to work.</p>",
+        "id": 233566345,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617830840
+    },
+    {
+        "content": "<p>I'm concerned the hashing trick I'm using to avoid having to list out which commands might alter the geometry won't scale - testing with the Stanford Lucy model is not encouraging.  It works, but it's slow for all commands, not just view updates.</p>",
+        "id": 233569505,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617832583
+    },
+    {
+        "content": "<p>/me adds a timer</p>",
+        "id": 233569772,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617832712
+    },
+    {
+        "content": "<p>Growl.  Yep, hash calculations for Lucy are too slow for this purpose.  Time to invent plan B...</p>",
+        "id": 233574899,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617835605
+    },
+    {
+        "content": "<p>View responds to attribute color setting now:  <a href=\"/user_uploads/1549/9gv3aCQOGmrShaiDJPh4JcEV/qdm_edit_response.gif\">qdm_edit_response.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/9gv3aCQOGmrShaiDJPh4JcEV/qdm_edit_response.gif\" title=\"qdm_edit_response.gif\"><img src=\"/user_uploads/1549/9gv3aCQOGmrShaiDJPh4JcEV/qdm_edit_response.gif\"></a></div>",
+        "id": 233676448,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617896349
+    },
+    {
+        "content": "<p>Oof.  First successful view polygon drawing:  <a href=\"/user_uploads/1549/bQjX_TVwoNkM48jVcZHgxLTi/first_polygon_circle.png\">first_polygon_circle.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bQjX_TVwoNkM48jVcZHgxLTi/first_polygon_circle.png\" title=\"first_polygon_circle.png\"><img src=\"/user_uploads/1549/bQjX_TVwoNkM48jVcZHgxLTi/first_polygon_circle.png\"></a></div>",
+        "id": 233883254,
+        "sender_full_name": "starseeker",
+        "timestamp": 1617998865
+    },
+    {
+        "content": "<p>More progress with circle creation:  <a href=\"/user_uploads/1549/FOJoFGYYIbj1WQUxukhtqjuy/circle_as_vlist_obj.gif\">circle_as_vlist_obj.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/FOJoFGYYIbj1WQUxukhtqjuy/circle_as_vlist_obj.gif\" title=\"circle_as_vlist_obj.gif\"><img src=\"/user_uploads/1549/FOJoFGYYIbj1WQUxukhtqjuy/circle_as_vlist_obj.gif\"></a></div>",
+        "id": 234387745,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618342701
+    },
+    {
+        "content": "<p>3D line drawing: <a href=\"/user_uploads/1549/7DXlcV8EVkSmhXkSWqRxKjIw/3d_data_lines.png\">3d_data_lines.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/7DXlcV8EVkSmhXkSWqRxKjIw/3d_data_lines.png\" title=\"3d_data_lines.png\"><img src=\"/user_uploads/1549/7DXlcV8EVkSmhXkSWqRxKjIw/3d_data_lines.png\"></a></div>",
+        "id": 234419427,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618357603
+    },
+    {
+        "content": "<p>Line with arrow:  <a href=\"/user_uploads/1549/O2SgHbHeSxKCrn2dJ9nVb0hs/arrow.png\">arrow.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/O2SgHbHeSxKCrn2dJ9nVb0hs/arrow.png\" title=\"arrow.png\"><img src=\"/user_uploads/1549/O2SgHbHeSxKCrn2dJ9nVb0hs/arrow.png\"></a></div>",
+        "id": 234427875,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618363949
+    },
+    {
+        "content": "<p>Bit of a detour:  here's a demonstration of using bundled OSMesa software rendering to display the same OpenGL drawing calls used by the qtgl backend.  My Linux box manifested some sort of OpenGL problem, which was annoying but also a perfect testing environment to get this working:  <a href=\"/user_uploads/1549/WSYiQjOG-mY2weGsO_eGlx1z/Qt_with_software_rasterizer_fallback.gif\">Qt_with_software_rasterizer_fallback.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/WSYiQjOG-mY2weGsO_eGlx1z/Qt_with_software_rasterizer_fallback.gif\" title=\"Qt_with_software_rasterizer_fallback.gif\"><img src=\"/user_uploads/1549/WSYiQjOG-mY2weGsO_eGlx1z/Qt_with_software_rasterizer_fallback.gif\"></a></div>",
+        "id": 235040769,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618718116
+    },
+    {
+        "content": "<p>The initial messages are the important ones - the first lines are the QOpenGLWidget failing to set up properly, and then our message indicating we're falling back on software rasterizing.  The view axes show that we have not just the wireframes but also fontstash text rendering with this backend.  In principle (unlike the X backend) this is a fully portable solution to fallback rendering.  As an added bonus, most of the drawing code it uses is the same code as our other backends.</p>",
+        "id": 235040864,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618718273
+    },
+    {
+        "content": "<p>OK.  For anyone who may have tried the software backend, they probably saw the following if they resized the window: <a href=\"/user_uploads/1549/agPv4vVzn-goYnAB-SwedI0c/resize_problem.gif\">resize_problem.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/agPv4vVzn-goYnAB-SwedI0c/resize_problem.gif\" title=\"resize_problem.gif\"><img src=\"/user_uploads/1549/agPv4vVzn-goYnAB-SwedI0c/resize_problem.gif\"></a></div>",
+        "id": 235086151,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618765952
+    },
+    {
+        "content": "<p>This turned out to be a mismatch between Qt's QImage and the OpenGL data.  I've figured out a working path, so the resize behavior should now look like this:  <a href=\"/user_uploads/1549/AWq6tC9pv5cYjBmK0Y1kA1y3/resize_fixed.gif\">resize_fixed.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AWq6tC9pv5cYjBmK0Y1kA1y3/resize_fixed.gif\" title=\"resize_fixed.gif\"><img src=\"/user_uploads/1549/AWq6tC9pv5cYjBmK0Y1kA1y3/resize_fixed.gif\"></a></div>",
+        "id": 235086187,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618766027
+    },
+    {
+        "content": "<p>(The software rendering can be explicitly triggered by launching with the \"-s\" option to qdm, for those that have working OpenGL.)</p>",
+        "id": 235086262,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618766105
+    },
+    {
+        "content": "<p>For grins, here is gsh running swrast without any on-screen graphics at all but still supporting screengrab:  <a href=\"/user_uploads/1549/j-zPZjAJ5jaDV7XgcFspBC8A/swrast_command_line_only.gif\">swrast_command_line_only.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/j-zPZjAJ5jaDV7XgcFspBC8A/swrast_command_line_only.gif\" title=\"swrast_command_line_only.gif\"><img src=\"/user_uploads/1549/j-zPZjAJ5jaDV7XgcFspBC8A/swrast_command_line_only.gif\"></a></div>",
+        "id": 235118201,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618797613
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/235040769\">said</a>:</p>\n<blockquote>\n<p>Bit of a detour:  here's a demonstration of using bundled OSMesa software rendering to display the same OpenGL drawing calls used by the qtgl backend.  My Linux box manifested some sort of OpenGL problem, which was annoying but also a perfect testing</p>\n</blockquote>\n<p>Thats awesome!  Any metrics on the performance impact?  There is a faceplate FPS meter you may be able to turn on to show what the rate is during rotation.</p>",
+        "id": 235207701,
+        "sender_full_name": "Sean",
+        "timestamp": 1618848889
+    },
+    {
+        "content": "<p>I think the FPS meter may be MGED only right now (it's on my list to check)</p>",
+        "id": 235207837,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618848949
+    },
+    {
+        "content": "<p>OK, got a FPS meter working.  It's slow, no question.</p>",
+        "id": 235226970,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618857049
+    },
+    {
+        "content": "<p>Dragon is about 85fps with qtgl, and with osmesa it's a little over 7fps</p>",
+        "id": 235227228,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618857170
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/mFdMSpMSfK1PMrQR8u8clOYf/dragon_accelerated.gif\">dragon_accelerated.gif</a> <a href=\"user_uploads/1549/p2bV2JU0AdyH-oB1yDiYnfQE/dragon_swrast.gif\">dragon_swrast.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/mFdMSpMSfK1PMrQR8u8clOYf/dragon_accelerated.gif\" title=\"dragon_accelerated.gif\"><img src=\"/user_uploads/1549/mFdMSpMSfK1PMrQR8u8clOYf/dragon_accelerated.gif\"></a></div><div class=\"message_inline_image\"><a href=\"user_uploads/1549/p2bV2JU0AdyH-oB1yDiYnfQE/dragon_swrast.gif\" title=\"dragon_swrast.gif\"><img src=\"user_uploads/1549/p2bV2JU0AdyH-oB1yDiYnfQE/dragon_swrast.gif\"></a></div>",
+        "id": 235227784,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618857381
+    },
+    {
+        "content": "<p>The X wireframe drawing is considerably faster - on the order of 40fps</p>",
+        "id": 235228347,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618857626
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/8lFVGkpTEZdcLEyCIAz0JE9E/dragon_X.gif\">dragon_X.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/8lFVGkpTEZdcLEyCIAz0JE9E/dragon_X.gif\" title=\"dragon_X.gif\"><img src=\"/user_uploads/1549/8lFVGkpTEZdcLEyCIAz0JE9E/dragon_X.gif\"></a></div>",
+        "id": 235228582,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618857728
+    },
+    {
+        "content": "<p>For me this is acceptable (though certainly not ideal) since the intent of swrast is as a last-resort fallback rather than a primary operating mode.  Under normal circumstances the expectation would be that the accelerated context is available.</p>",
+        "id": 235229010,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618857918
+    },
+    {
+        "content": "<p>It may be possible to translate the X wireframe logic to a generic, platform agnostic equivalent of swrast, but it will still lack the shading capabilities (however slow) that swrast offers.</p>",
+        "id": 235229477,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618858116
+    },
+    {
+        "content": "<p>A possible hybrid approach would be to treat such a platform agnostic X drawing routine the same way we look at the TIE raytracing - have it render to a buffer, then composite the buffer in OpenGL to produce the final drawing.  For wireframe only drawing we could do that, and then fall back to the slower all-OpenGL mode for more complex scenes.</p>",
+        "id": 235229912,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618858310
+    },
+    {
+        "content": "<p>Yeah, cool.  Just good to know what that difference is at.</p>",
+        "id": 235230044,
+        "sender_full_name": "Sean",
+        "timestamp": 1618858358
+    },
+    {
+        "content": "<p>Both seem acceptable for those target situations.</p>",
+        "id": 235230074,
+        "sender_full_name": "Sean",
+        "timestamp": 1618858373
+    },
+    {
+        "content": "<p>Part of the issue is undoubtedly how old this OSMesa is - it is extracted from 7.0.4, which is the last version of the software rasterizer that didn't start depending on more complex substrates for better performance.  I know the modern Mesa software rasterizers are way way faster, but they're also a lot more complex.</p>",
+        "id": 235230365,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618858490
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , does the X wireframe drawing do any depth sorting?</p>",
+        "id": 235233801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618859871
+    },
+    {
+        "content": "<p>It must be somewhere (or maybe X itself is...)</p>",
+        "id": 235234103,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618859988
+    },
+    {
+        "content": "<p>Nevermind.  Not 100% sure how fast an \"extracted\" X wireframe render would be anyway, since I'm not sure if X has some sort of graphics driver level routines its talking to...</p>",
+        "id": 235243187,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618863960
+    },
+    {
+        "content": "<p>First drawing of a general polygon contour:  <a href=\"/user_uploads/1549/IF0cULha5LXxCl_PrhwEu_WO/first_general_polygon.png\">first_general_polygon.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/IF0cULha5LXxCl_PrhwEu_WO/first_general_polygon.png\" title=\"first_general_polygon.png\"><img src=\"/user_uploads/1549/IF0cULha5LXxCl_PrhwEu_WO/first_general_polygon.png\"></a></div>",
+        "id": 235256933,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618869878
+    },
+    {
+        "content": "<p>Closing the polygon: <a href=\"/user_uploads/1549/NkVMClA5pTkxOOhfjrugr2A6/closed_polygon.gif\">closed_polygon.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/NkVMClA5pTkxOOhfjrugr2A6/closed_polygon.gif\" title=\"closed_polygon.gif\"><img src=\"/user_uploads/1549/NkVMClA5pTkxOOhfjrugr2A6/closed_polygon.gif\"></a></div>",
+        "id": 235354306,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618929592
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I think it does (otherwise Z-clipping wouldn't do anything)...but I don't know for sure.</p>",
+        "id": 235371014,
+        "sender_full_name": "Sean",
+        "timestamp": 1618935121
+    },
+    {
+        "content": "<p>Selecting and moving points:  <a href=\"/user_uploads/1549/vOIePngK-h8JkFLGYOnPC2Pd/show_selected_point.gif\">show_selected_point.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/vOIePngK-h8JkFLGYOnPC2Pd/show_selected_point.gif\" title=\"show_selected_point.gif\"><img src=\"/user_uploads/1549/vOIePngK-h8JkFLGYOnPC2Pd/show_selected_point.gif\"></a></div>",
+        "id": 235393369,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618943891
+    },
+    {
+        "content": "<p>First demonstration of boolean operations with new setup:  <a href=\"/user_uploads/1549/62tPDZziCRIGmNUC3VMviWnH/first_successful_booleans.gif\">first_successful_booleans.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/62tPDZziCRIGmNUC3VMviWnH/first_successful_booleans.gif\" title=\"first_successful_booleans.gif\"><img src=\"/user_uploads/1549/62tPDZziCRIGmNUC3VMviWnH/first_successful_booleans.gif\"></a></div>",
+        "id": 235663063,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619092723
+    },
+    {
+        "content": "<p>Interior fill:  <a href=\"/user_uploads/1549/dylmDAleYhSjSwRJjTZvu9i-/first_successfull_polygon_fill.png\">first_successfull_polygon_fill.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/dylmDAleYhSjSwRJjTZvu9i-/first_successfull_polygon_fill.png\" title=\"first_successfull_polygon_fill.png\"><img src=\"/user_uploads/1549/dylmDAleYhSjSwRJjTZvu9i-/first_successfull_polygon_fill.png\"></a></div>",
+        "id": 235749501,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619125990
+    },
+    {
+        "content": "<p>More control of filling, combined with interior polygon hole:  <a href=\"/user_uploads/1549/nazYABD7yxWwkjslBGDJtgiN/line_fill_with_hole_and_controls.gif\">line_fill_with_hole_and_controls.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/nazYABD7yxWwkjslBGDJtgiN/line_fill_with_hole_and_controls.gif\" title=\"line_fill_with_hole_and_controls.gif\"><img src=\"/user_uploads/1549/nazYABD7yxWwkjslBGDJtgiN/line_fill_with_hole_and_controls.gif\"></a></div>",
+        "id": 235773269,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619140958
+    },
+    {
+        "content": "<p>Draw fill before main polygon:  <a href=\"/user_uploads/1549/lUOjPEHSZciK57btAxPF9oZ5/improved_drawing_ordering.png\">improved_drawing_ordering.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/lUOjPEHSZciK57btAxPF9oZ5/improved_drawing_ordering.png\" title=\"improved_drawing_ordering.png\"><img src=\"/user_uploads/1549/lUOjPEHSZciK57btAxPF9oZ5/improved_drawing_ordering.png\"></a></div>",
+        "id": 235830516,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619180417
+    },
+    {
+        "content": "<p>First text label not part of faceplate:  <a href=\"/user_uploads/1549/AwcO2YUjjfkUtrKC2hVPi54Q/first_text_label.png\">first_text_label.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AwcO2YUjjfkUtrKC2hVPi54Q/first_text_label.png\" title=\"first_text_label.png\"><img src=\"/user_uploads/1549/AwcO2YUjjfkUtrKC2hVPi54Q/first_text_label.png\"></a></div>",
+        "id": 235896643,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619206391
+    },
+    {
+        "content": "<p>This is kinda fun - label with line:  <a href=\"/user_uploads/1549/7B-Tp-_RCASRxE67wcMR3DQJ/first_working_label_with_line.gif\">first_working_label_with_line.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/7B-Tp-_RCASRxE67wcMR3DQJ/first_working_label_with_line.gif\" title=\"first_working_label_with_line.gif\"><img src=\"/user_uploads/1549/7B-Tp-_RCASRxE67wcMR3DQJ/first_working_label_with_line.gif\"></a></div>",
+        "id": 235915810,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619215344
+    },
+    {
+        "content": "<p>First successful data axes:  <a href=\"/user_uploads/1549/hQZvs5XY4aKiycky1PF9sM5u/first_data_axes.png\">first_data_axes.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/hQZvs5XY4aKiycky1PF9sM5u/first_data_axes.png\" title=\"first_data_axes.png\"><img src=\"/user_uploads/1549/hQZvs5XY4aKiycky1PF9sM5u/first_data_axes.png\"></a></div>",
+        "id": 236101779,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619393162
+    },
+    {
+        "content": "<p>Test of using view objs for primitive labeling: <a href=\"/user_uploads/1549/S7SvffSsVpH0SmJgK61pOsJH/first_primitive_labels.png\">first_primitive_labels.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/S7SvffSsVpH0SmJgK61pOsJH/first_primitive_labels.png\" title=\"first_primitive_labels.png\"><img src=\"/user_uploads/1549/S7SvffSsVpH0SmJgK61pOsJH/first_primitive_labels.png\"></a></div>",
+        "id": 236341532,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619532016
+    },
+    {
+        "content": "<p>This won't look like much to the casual eye, but it has both matrix application and correct colors using the new drawing setup (labels are just on for testing purposes):  <a href=\"/user_uploads/1549/IU3ZbvQjdYEtfsiY9BWgFqoy/first_correct_colors_new_draw.png\">first_correct_colors_new_draw.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/IU3ZbvQjdYEtfsiY9BWgFqoy/first_correct_colors_new_draw.png\" title=\"first_correct_colors_new_draw.png\"><img src=\"/user_uploads/1549/IU3ZbvQjdYEtfsiY9BWgFqoy/first_correct_colors_new_draw.png\"></a></div>",
+        "id": 236721330,
+        "sender_full_name": "starseeker",
+        "timestamp": 1619720460
+    },
+    {
+        "content": "<p>This is a side effect, but got hidden line mode working in MGED:  <a href=\"/user_uploads/1549/mybso9iDLiJpBwL8EsjcoAQ3/hidden_line_mged.png\">hidden_line_mged.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/mybso9iDLiJpBwL8EsjcoAQ3/hidden_line_mged.png\" title=\"hidden_line_mged.png\"><img src=\"/user_uploads/1549/mybso9iDLiJpBwL8EsjcoAQ3/hidden_line_mged.png\"></a></div>",
+        "id": 237417311,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620171446
+    },
+    {
+        "content": "<p>No colors yet, but first shaded view of moss with new drawing setup:  <a href=\"/user_uploads/1549/ckQh-FOiMiIEMURxFQVzR_LU/first_shaded_moss.png\">first_shaded_moss.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ckQh-FOiMiIEMURxFQVzR_LU/first_shaded_moss.png\" title=\"first_shaded_moss.png\"><img src=\"/user_uploads/1549/ckQh-FOiMiIEMURxFQVzR_LU/first_shaded_moss.png\"></a></div>",
+        "id": 237424278,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620175952
+    },
+    {
+        "content": "<p>There we go:  <a href=\"/user_uploads/1549/RYEgZtjo-QWVbhAC7UCG6MwR/moss_shaded_w_color.gif\">moss_shaded_w_color.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RYEgZtjo-QWVbhAC7UCG6MwR/moss_shaded_w_color.gif\" title=\"moss_shaded_w_color.gif\"><img src=\"/user_uploads/1549/RYEgZtjo-QWVbhAC7UCG6MwR/moss_shaded_w_color.gif\"></a></div>",
+        "id": 237435215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620185022
+    },
+    {
+        "content": "<p>Nice progress!  That's some serious effort going on there.</p>",
+        "id": 237439424,
+        "sender_full_name": "Sean",
+        "timestamp": 1620189214
+    },
+    {
+        "content": "<p>Hidden line mode in qdm:  <a href=\"/user_uploads/1549/pVcOFhnMBZo26YJg6v8nBcoQ/moss_hidden_line_qdm.gif\">moss_hidden_line_qdm.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/pVcOFhnMBZo26YJg6v8nBcoQ/moss_hidden_line_qdm.gif\" title=\"moss_hidden_line_qdm.gif\"><img src=\"/user_uploads/1549/pVcOFhnMBZo26YJg6v8nBcoQ/moss_hidden_line_qdm.gif\"></a></div>",
+        "id": 237490967,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620219830
+    },
+    {
+        "content": "<p>bigE mode as draw2 -m3: <a href=\"/user_uploads/1549/GXl51I9ffA7wtL9bay0znVUL/rook_bigE.gif\">rook_bigE.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/GXl51I9ffA7wtL9bay0znVUL/rook_bigE.gif\" title=\"rook_bigE.gif\"><img src=\"/user_uploads/1549/GXl51I9ffA7wtL9bay0znVUL/rook_bigE.gif\"></a></div>",
+        "id": 237556375,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620244880
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/237556375\">said</a>:</p>\n<blockquote>\n<p>bigE mode as draw2 -m3: <a href=\"/user_uploads/1549/GXl51I9ffA7wtL9bay0znVUL/rook_bigE.gif\">rook_bigE.gif</a></p>\n</blockquote>\n<p>the first drawing of the rook looked like a wormhole to me <span aria-label=\"sweat smile\" class=\"emoji emoji-1f605\" role=\"img\" title=\"sweat smile\">:sweat_smile:</span></p>",
+        "id": 237556747,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1620245022
+    },
+    {
+        "content": "<p>Heh.  rook makes a great example of the benefits of bigE mode - large subtractions and intersections</p>",
+        "id": 237556980,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620245118
+    },
+    {
+        "content": "<p>The E command isn't working in MGED right now for some reason, but a quick look indicated the vlists were still being created (i.e. the problem is strictly on the display end) so it was worth refactoring the logic to work with draw2.</p>",
+        "id": 237557282,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620245267
+    },
+    {
+        "content": "<p>Still got some more options to work through (transparency, subtraction suppression, etc. - I'm not adding the NMG debugging draw options, those belong elsewhere).  Also need to look at the drawing outputs produced by nirt, rtcheck, gqa, etc.</p>",
+        "id": 237557798,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620245481
+    },
+    {
+        "content": "<p>Can anyone test transparency (draw -m1 -x 0.7 all) on the share/db/faa/Generic_Twin.g example model?  I can't get either latest main or the 7.30.10 release to draw with any sort of shading, and I'm wondering if my local OpenGL is messed up again...</p>",
+        "id": 237587329,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620260564
+    },
+    {
+        "content": "<p>Doh.  Nevermind - need to enable the transparency variable in the dm</p>",
+        "id": 237591719,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620264639
+    },
+    {
+        "content": "<p>FAA Generic twin with transparency: <a href=\"/user_uploads/1549/SikykTURM1m8hvRBqJocTlTK/faa_transparent.gif\">faa_transparent.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/SikykTURM1m8hvRBqJocTlTK/faa_transparent.gif\" title=\"faa_transparent.gif\"><img src=\"/user_uploads/1549/SikykTURM1m8hvRBqJocTlTK/faa_transparent.gif\"></a></div>",
+        "id": 237591992,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620264869
+    },
+    {
+        "content": "<p>And the same thing using the software rasterizing backend: <a href=\"/user_uploads/1549/Q15GGsxxbe37sZVV1LDZGrKD/faa_transparent_swrast.gif\">faa_transparent_swrast.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Q15GGsxxbe37sZVV1LDZGrKD/faa_transparent_swrast.gif\" title=\"faa_transparent_swrast.gif\"><img src=\"/user_uploads/1549/Q15GGsxxbe37sZVV1LDZGrKD/faa_transparent_swrast.gif\"></a></div>",
+        "id": 237592870,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620265668
+    },
+    {
+        "content": "<p>Got the solid-lines-only and subtraction suppression going: <a href=\"/user_uploads/1549/xqra1eQh2I_f4nzk8GIuPGwD/rook_nodash_nosubtract.gif\">rook_nodash_nosubtract.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/xqra1eQh2I_f4nzk8GIuPGwD/rook_nodash_nosubtract.gif\" title=\"rook_nodash_nosubtract.gif\"><img src=\"/user_uploads/1549/xqra1eQh2I_f4nzk8GIuPGwD/rook_nodash_nosubtract.gif\"></a></div>",
+        "id": 237662497,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620309670
+    },
+    {
+        "content": "<p>It would be interesting to go half way.  draw dashed subtractions, but clip to the positive bounding box so it doesn't distort the entire view.</p>",
+        "id": 237664880,
+        "sender_full_name": "Sean",
+        "timestamp": 1620310569
+    },
+    {
+        "content": "<p>Color overriding and line width adjustment: <a href=\"/user_uploads/1549/RpJxyMd2o2KA9u1jGy7OtT9d/color_line-width.gif\">color_line-width.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/RpJxyMd2o2KA9u1jGy7OtT9d/color_line-width.gif\" title=\"color_line-width.gif\"><img src=\"/user_uploads/1549/RpJxyMd2o2KA9u1jGy7OtT9d/color_line-width.gif\"></a></div>",
+        "id": 237682635,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620316376
+    },
+    {
+        "content": "<p>Early stages yet, but working on getting the adaptive plotting up and running:  <a href=\"/user_uploads/1549/rhxWH935GnZcUg3rw-RoEp-v/adaptive_first_steps.png\">adaptive_first_steps.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/rhxWH935GnZcUg3rw-RoEp-v/adaptive_first_steps.png\" title=\"adaptive_first_steps.png\"><img src=\"/user_uploads/1549/rhxWH935GnZcUg3rw-RoEp-v/adaptive_first_steps.png\"></a></div>",
+        "id": 237755588,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620351514
+    },
+    {
+        "content": "<p>Working LoD on zoom in qdm: <a href=\"/user_uploads/1549/U8nkjIlXbZw1GyQqgocAQqxH/moss_lod_on_zoom.gif\">moss_lod_on_zoom.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/U8nkjIlXbZw1GyQqgocAQqxH/moss_lod_on_zoom.gif\" title=\"moss_lod_on_zoom.gif\"><img src=\"/user_uploads/1549/U8nkjIlXbZw1GyQqgocAQqxH/moss_lod_on_zoom.gif\"></a></div>",
+        "id": 237852468,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620405341
+    },
+    {
+        "content": "<p>Option to skip autoview when drawing to empty scene:  <a href=\"/user_uploads/1549/bRTGb0DBXPTuSqcF5POj2kS3/no_autoview.gif\">no_autoview.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bRTGb0DBXPTuSqcF5POj2kS3/no_autoview.gif\" title=\"no_autoview.gif\"><img src=\"/user_uploads/1549/bRTGb0DBXPTuSqcF5POj2kS3/no_autoview.gif\"></a></div>",
+        "id": 237874439,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620414367
+    },
+    {
+        "content": "<p>Faceplate grid (Archer style):  <a href=\"/user_uploads/1549/QKekcR1geNFaDLWG2ACZN5NG/faceplate_grid.gif\">faceplate_grid.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/QKekcR1geNFaDLWG2ACZN5NG/faceplate_grid.gif\" title=\"faceplate_grid.gif\"><img src=\"/user_uploads/1549/QKekcR1geNFaDLWG2ACZN5NG/faceplate_grid.gif\"></a></div>",
+        "id": 237990383,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620514499
+    },
+    {
+        "content": "<p>Confirmed rect command can create the interactive rectangle:  <a href=\"/user_uploads/1549/gP9R-_SGzNU3_bnC92wJ0LYB/interactive_rect.png\">interactive_rect.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/gP9R-_SGzNU3_bnC92wJ0LYB/interactive_rect.png\" title=\"interactive_rect.png\"><img src=\"/user_uploads/1549/gP9R-_SGzNU3_bnC92wJ0LYB/interactive_rect.png\"></a></div>",
+        "id": 238047824,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620579865
+    },
+    {
+        "content": "<p>Mutter... still using the old pixel approach instead of a texture, but working qtgl framebuffer display: <a href=\"/user_uploads/1549/C3_oig5qGwpnxP6vGwHXlmjA/qtgl_fb_display.png\">qtgl_fb_display.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/C3_oig5qGwpnxP6vGwHXlmjA/qtgl_fb_display.png\" title=\"qtgl_fb_display.png\"><img src=\"/user_uploads/1549/C3_oig5qGwpnxP6vGwHXlmjA/qtgl_fb_display.png\"></a></div>",
+        "id": 238511222,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620839895
+    },
+    {
+        "content": "<p>Embedded fb image display:  <a href=\"/user_uploads/1549/HKBagSTKZb_LvPIzoUlkjc0E/qtgl_embedded_fb.png\">qtgl_embedded_fb.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/HKBagSTKZb_LvPIzoUlkjc0E/qtgl_embedded_fb.png\" title=\"qtgl_embedded_fb.png\"><img src=\"/user_uploads/1549/HKBagSTKZb_LvPIzoUlkjc0E/qtgl_embedded_fb.png\"></a></div>",
+        "id": 238536992,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620850427
+    },
+    {
+        "content": "<p>Working overlay/underlay (not an actual in-app raytrace, yet): <a href=\"/user_uploads/1549/klmdmeBc-jhT3cFBuIYo-UN0/fb_overlay_underlay.gif\">fb_overlay_underlay.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/klmdmeBc-jhT3cFBuIYo-UN0/fb_overlay_underlay.gif\" title=\"fb_overlay_underlay.gif\"><img src=\"/user_uploads/1549/klmdmeBc-jhT3cFBuIYo-UN0/fb_overlay_underlay.gif\"></a></div>",
+        "id": 238561601,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620863922
+    },
+    {
+        "content": "<p>Potentially useful resource:  <br>\nTcl and the Qt Event Loop<br>\n<a href=\"https://www.tcl.tk/community/tcl2019/assets/talk160/Paper.pdf\">https://www.tcl.tk/community/tcl2019/assets/talk160/Paper.pdf</a></p>",
+        "id": 238618245,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620911286
+    },
+    {
+        "content": "<p>First successful display of text output from rt: <a href=\"/user_uploads/1549/yjdN5f_aKk59NuDGOFJwcHwK/rt_output.gif\">rt_output.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/yjdN5f_aKk59NuDGOFJwcHwK/rt_output.gif\" title=\"rt_output.gif\"><img src=\"/user_uploads/1549/yjdN5f_aKk59NuDGOFJwcHwK/rt_output.gif\"></a></div>",
+        "id": 238663119,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620931766
+    },
+    {
+        "content": "<p>Better integration (using the callback like libtclcad now): <a href=\"/user_uploads/1549/Eh23T7lTNpM-LkYy9ViwodAP/rt_output_improved.gif\">rt_output_improved.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Eh23T7lTNpM-LkYy9ViwodAP/rt_output_improved.gif\" title=\"rt_output_improved.gif\"><img src=\"/user_uploads/1549/Eh23T7lTNpM-LkYy9ViwodAP/rt_output_improved.gif\"></a></div>",
+        "id": 238711992,
+        "sender_full_name": "starseeker",
+        "timestamp": 1620961475
+    },
+    {
+        "content": "<p>First successful generation of an rtcheck visual: <a href=\"/user_uploads/1549/jLLQ8YCai5bR3ccJWK2Wpuuc/rtcheck_first_success.gif\">rtcheck_first_success.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/jLLQ8YCai5bR3ccJWK2Wpuuc/rtcheck_first_success.gif\" title=\"rtcheck_first_success.gif\"><img src=\"/user_uploads/1549/jLLQ8YCai5bR3ccJWK2Wpuuc/rtcheck_first_success.gif\"></a></div>",
+        "id": 238793553,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621009906
+    },
+    {
+        "content": "<p>Improvements to Qt console behavior:  <a href=\"/user_uploads/1549/eAvLglFPSZqWFJ8sIKshLFda/improved_console.gif\">improved_console.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/eAvLglFPSZqWFJ8sIKshLFda/improved_console.gif\" title=\"improved_console.gif\"><img src=\"/user_uploads/1549/eAvLglFPSZqWFJ8sIKshLFda/improved_console.gif\"></a></div>",
+        "id": 238940699,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621130274
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Do you know if libpkg can communicate using stdin/stdout between two processes, as well as TCP sockets?</p>",
+        "id": 239314425,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621367209
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> yes, the code for it is there for some platforms (and that is very much a platform-specific thing), but I'm not sure how much it's exercised or what tools even make use of it.</p>",
+        "id": 239316763,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368156
+    },
+    {
+        "content": "<p>see all the references to un.h and UNIX domain sockets -- that's the IPC mechanism you're referring to for interprocess communication.</p>",
+        "id": 239316931,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368208
+    },
+    {
+        "content": "<p>Well... I was just thinking about launching a subprocess, sending pkg contents down stdin to the other program, and getting its responses back by listening to its stdout.</p>",
+        "id": 239317114,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621368274
+    },
+    {
+        "content": "<p>INET TCP sockets are what are more frequently created and utilized by calling apps like rt, but in theory it should chatter over a UNIX port.</p>",
+        "id": 239317136,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368283
+    },
+    {
+        "content": "<p>Maybe that's a crazy idea...</p>",
+        "id": 239317204,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621368313
+    },
+    {
+        "content": "<p>okay, yeah -- I would expect something like that to \"probably\" work.</p>",
+        "id": 239317209,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368315
+    },
+    {
+        "content": "<p>at least on linux<br>\nI'd expect windows would need some modifications because it probably assumes a tcp socket in some places .. but don't know, that's not something we've ever tested.</p>",
+        "id": 239317391,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368375
+    },
+    {
+        "content": "<p>/me nods.  OK, mostly I'm just being lazy and hoping I could use the same mechanism I'm already using for the framebuffer I/O - but if it's not something that has been tried with the code I should probably just go with what's there.</p>",
+        "id": 239317567,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621368440
+    },
+    {
+        "content": "<p>Only way to find out is to try : )</p>",
+        "id": 239317827,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368554
+    },
+    {
+        "content": "<p>try a little demo main() that chats with itself</p>",
+        "id": 239317861,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368573
+    },
+    {
+        "content": "<p>Bob fell back on Tcl channels for Windows, with a cryptic note that pkg_permserver \"beget other mods\" when trying to use it there.  Maybe it's time to revisit that and see if it still applies - I know I fixed at least one issue in libpkg on Windows a while back.</p>",
+        "id": 239317983,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621368623
+    },
+    {
+        "content": "<p>I don't think you'd even end up calling that</p>",
+        "id": 239318109,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368676
+    },
+    {
+        "content": "<p>permserver I think specifically kicks off a tcp listener.  you'd be using the calls that come after that (I think).</p>",
+        "id": 239318175,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368720
+    },
+    {
+        "content": "<p>Not for stdin/stdout, true - I've been going through the fbserv code in libtclcad since the most \"straightforward\" path is to translate the Tcl listening logic into Qt terms.</p>",
+        "id": 239318228,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621368727
+    },
+    {
+        "content": "<p>Unfortunately, so far at least, there's nothing straightforward about any of this... I suppose mostly because I have ziltch experience with async I/O between programs.</p>",
+        "id": 239318330,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621368775
+    },
+    {
+        "content": "<p>all the more reason to try a demo.  implementing a chat program with a given interface is like towers of hanoi, a rite of passage in CS curricula.</p>",
+        "id": 239318801,
+        "sender_full_name": "Sean",
+        "timestamp": 1621368972
+    },
+    {
+        "content": "<p>After a week, <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> finally gets an image to render (still in the wrong place) in the embedded fb via Qt's Tcp logic.</p>",
+        "id": 239809613,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621629309
+    },
+    {
+        "content": "<p>/me is beginning to wonder how many straightjackets are typically necessary for this sort of programming...  it's almost of a piece with the joys of standing up OpenGL rendering.</p>",
+        "id": 239809822,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621629398
+    },
+    {
+        "content": "<p>Progress to date:  <a href=\"/user_uploads/1549/n3sWNApOKUQaaTyr265bkqnz/first_embedded_fb_progress.gif\">first_embedded_fb_progress.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/n3sWNApOKUQaaTyr265bkqnz/first_embedded_fb_progress.gif\" title=\"first_embedded_fb_progress.gif\"><img src=\"/user_uploads/1549/n3sWNApOKUQaaTyr265bkqnz/first_embedded_fb_progress.gif\"></a></div>",
+        "id": 239811390,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621630255
+    },
+    {
+        "content": "<p>Finally...:  <a href=\"/user_uploads/1549/Y66p4kE-TdVxnw_eGQmwKnRQ/embedded_rt_interactive_update.gif\">embedded_rt_interactive_update.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Y66p4kE-TdVxnw_eGQmwKnRQ/embedded_rt_interactive_update.gif\" title=\"embedded_rt_interactive_update.gif\"><img src=\"/user_uploads/1549/Y66p4kE-TdVxnw_eGQmwKnRQ/embedded_rt_interactive_update.gif\"></a></div>",
+        "id": 240108190,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621888557
+    },
+    {
+        "content": "<p>Cool beans.  Hard to get them to align?</p>",
+        "id": 240135705,
+        "sender_full_name": "Sean",
+        "timestamp": 1621909268
+    },
+    {
+        "content": "<p>Not too bad, once I found the right foo in the RtControl.tcl file and translated it to ert.  The HARD parts were the Tcp+libpkg communication, signals/slots async updating, and getting all the OpenGL ducks in a row to draw correctly.</p>",
+        "id": 240135815,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621909409
+    },
+    {
+        "content": "<p>I've still got some work to do for the swrast version, and will need to take a file to the rough edges in a number of places, but that's a pretty fundamental \"yes this really can work\" milestone.</p>",
+        "id": 240135877,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621909478
+    },
+    {
+        "content": "<p>There we go - embedded fb display and updating with swrast:  <a href=\"/user_uploads/1549/tfW0Yznz1hphY1CBaLTijHw6/embedded_rt_interactive_swrast.gif\">embedded_rt_interactive_swrast.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/tfW0Yznz1hphY1CBaLTijHw6/embedded_rt_interactive_swrast.gif\" title=\"embedded_rt_interactive_swrast.gif\"><img src=\"/user_uploads/1549/tfW0Yznz1hphY1CBaLTijHw6/embedded_rt_interactive_swrast.gif\"></a></div>",
+        "id": 240208102,
+        "sender_full_name": "starseeker",
+        "timestamp": 1621957682
+    },
+    {
+        "content": "<p>First step towards quad view: <a href=\"/user_uploads/1549/QtunQyxdsMgG5CV7XhC20ml6/first_quad_layout_test.png\">first_quad_layout_test.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/QtunQyxdsMgG5CV7XhC20ml6/first_quad_layout_test.png\" title=\"first_quad_layout_test.png\"><img src=\"/user_uploads/1549/QtunQyxdsMgG5CV7XhC20ml6/first_quad_layout_test.png\"></a></div>",
+        "id": 240331957,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622038887
+    },
+    {
+        "content": "<p>Per view drawing:  <a href=\"/user_uploads/1549/cv5uBrkUY4as9ovzxbv1HqHT/quad_independent.png\">quad_independent.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/cv5uBrkUY4as9ovzxbv1HqHT/quad_independent.png\" title=\"quad_independent.png\"><img src=\"/user_uploads/1549/cv5uBrkUY4as9ovzxbv1HqHT/quad_independent.png\"></a></div>",
+        "id": 240978113,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622569404
+    },
+    {
+        "content": "<p>Quad view with initial aet set and updating all views in response to change:  <a href=\"/user_uploads/1549/FF-G2eV3Y_x-qCEYLibQiy-w/quad_view_init_views_and_updating.gif\">quad_view_init_views_and_updating.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/FF-G2eV3Y_x-qCEYLibQiy-w/quad_view_init_views_and_updating.gif\" title=\"quad_view_init_views_and_updating.gif\"><img src=\"/user_uploads/1549/FF-G2eV3Y_x-qCEYLibQiy-w/quad_view_init_views_and_updating.gif\"></a></div>",
+        "id": 241158268,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622644795
+    },
+    {
+        "content": "<p>Quad view awareness of which view has had the most recent mouse click: <a href=\"/user_uploads/1549/c7DxxlBRwbz_Of6zRMQzoVV0/quad_view_selection_update.gif\">quad_view_selection_update.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/c7DxxlBRwbz_Of6zRMQzoVV0/quad_view_selection_update.gif\" title=\"quad_view_selection_update.gif\"><img src=\"/user_uploads/1549/c7DxxlBRwbz_Of6zRMQzoVV0/quad_view_selection_update.gif\"></a></div>",
+        "id": 241310686,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622663562
+    },
+    {
+        "content": "<p>rtcheck in quadview: <a href=\"/user_uploads/1549/yJ_moOUlKbYYkVfnV19PrfOR/rtcheck_quadview.gif\">rtcheck_quadview.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/yJ_moOUlKbYYkVfnV19PrfOR/rtcheck_quadview.gif\" title=\"rtcheck_quadview.gif\"><img src=\"/user_uploads/1549/yJ_moOUlKbYYkVfnV19PrfOR/rtcheck_quadview.gif\"></a></div>",
+        "id": 241463946,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622758899
+    },
+    {
+        "content": "<p>Would be nice to provide some visual indication for which quad view currently has 'focus' for when running commands like autoview and such that apply to only one view.  Maybe a hairline 1px highlight border.</p>",
+        "id": 241565025,
+        "sender_full_name": "Sean",
+        "timestamp": 1622826130
+    },
+    {
+        "content": "<p>I was thinking either that or changing the background color in the non-selected views.  Prefer the border if I can figure out how to get that to work (the spacers I'm currently using don't accept a color setting as far as I can tell, which would have been the easiest thing - means I'll have to get a little more custom.)</p>",
+        "id": 241572130,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622829565
+    },
+    {
+        "content": "<p>Can't you just draw a 1px overlay?  You had the logic for that working.</p>",
+        "id": 241580186,
+        "sender_full_name": "Sean",
+        "timestamp": 1622833708
+    },
+    {
+        "content": "<p>same as faceplate</p>",
+        "id": 241580235,
+        "sender_full_name": "Sean",
+        "timestamp": 1622833737
+    },
+    {
+        "content": "<p>Hmm... possibly</p>",
+        "id": 241661711,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622936735
+    },
+    {
+        "content": "<p>First concrete progress towards getting qdm work stood up inside qged:  <a href=\"/user_uploads/1549/NQgmLdvd2hxlhujZrLYcc_uj/qged_qdm_first_merge.gif\">qged_qdm_first_merge.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/NQgmLdvd2hxlhujZrLYcc_uj/qged_qdm_first_merge.gif\" title=\"qged_qdm_first_merge.gif\"><img src=\"/user_uploads/1549/NQgmLdvd2hxlhujZrLYcc_uj/qged_qdm_first_merge.gif\"></a></div>",
+        "id": 241661755,
+        "sender_full_name": "starseeker",
+        "timestamp": 1622936775
+    },
+    {
+        "content": "<p>I got a compilation error with Qt 5.15.2 in file src/libqtcad/QtCADTree.cpp at line 1079: QString::SkipEmptyParts is deprecated. The new constant (since Qt 5.14) is Qt::SkipEmptyParts. I don't know, how usual Qt 5.14 or higher is. Debian buster (stable) uses Qt 5.11, but I have to modify the sorces for this version anyway because of Qt::ScrollMomentum, introduced in Qt 5.12.</p>",
+        "id": 241699333,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1622997138
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I'll defer to <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> on whether we want to conditionalize the code for various version of Qt - I suppose the \"correct\" thing to do would be to configure time test for various features, but I've not yet tried setting up those sorts of checks in a configure step.</p>",
+        "id": 241704063,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623004123
+    },
+    {
+        "content": "<p>I think until there is a baseline release, we should target the latest Qt.</p>",
+        "id": 241787690,
+        "sender_full_name": "Sean",
+        "timestamp": 1623077311
+    },
+    {
+        "content": "<p>If something isn't working or is deprecated in the latest Qt 6, I think we'd be much better off fixing it as soon as possible instead of locking into an older Qt prematurely.</p>",
+        "id": 241787699,
+        "sender_full_name": "Sean",
+        "timestamp": 1623077314
+    },
+    {
+        "content": "<p>The only reason to ignore the deprecation warnings would be in code that we're potentially not going to use.</p>",
+        "id": 241787887,
+        "sender_full_name": "Sean",
+        "timestamp": 1623077398
+    },
+    {
+        "content": "<p>Figures... in the end, my efforts on the Accordion widget weren't needed - if I rethink how I'm organizing the info/control widgets a bit, QDockWidget itself can do the job even better:  <a href=\"/user_uploads/1549/QfJQto0sBcCLbzGh276wc4Az/docked_palettes.gif\">docked_palettes.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/QfJQto0sBcCLbzGh276wc4Az/docked_palettes.gif\" title=\"docked_palettes.gif\"><img src=\"/user_uploads/1549/QfJQto0sBcCLbzGh276wc4Az/docked_palettes.gif\"></a></div>",
+        "id": 241923212,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623160652
+    },
+    {
+        "content": "<p>looking very \"right\"! can the console be moved to a side? can the h-order be changed by the user? (ultrawide monitors kinda change the ... geometry of the situation.)</p>",
+        "id": 241925943,
+        "sender_full_name": "Erik",
+        "timestamp": 1623161720
+    },
+    {
+        "content": "<p>Console can be detached, but it's bottom only at the moment.   Not sure what you mean by h-order?</p>",
+        "id": 241935263,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623165037
+    },
+    {
+        "content": "<p>The ordering in the column can be changed (attributes at top, view controls at bottom, etc.)</p>",
+        "id": 241935574,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623165152
+    },
+    {
+        "content": "<p>If it makes sense to allow the console to be side docked that's an easy setting change in the code - trying to trade off flexibility vs. too much opportunity for users to do unexpected things.</p>",
+        "id": 241935864,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623165257
+    },
+    {
+        "content": "<p>h-order like moving the geometry window to the right side, or middle, or move the view window to the right, or ...</p>",
+        "id": 241941195,
+        "sender_full_name": "Erik",
+        "timestamp": 1623167345
+    },
+    {
+        "content": "<p>flexibility vs 'user-proofing', I guess</p>",
+        "id": 241941224,
+        "sender_full_name": "Erik",
+        "timestamp": 1623167359
+    },
+    {
+        "content": "<p>screens are getting wider faster than taller, top and bottom realestate are precious, so we end up with a bunch of columns</p>",
+        "id": 241941480,
+        "sender_full_name": "Erik",
+        "timestamp": 1623167473
+    },
+    {
+        "content": "<p>There we go - highlighting restored with new dockable palettes:  <a href=\"/user_uploads/1549/MgIBucs55xCtVkGCESL5ax2f/qged_restored_highlighting.png\">qged_restored_highlighting.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/MgIBucs55xCtVkGCESL5ax2f/qged_restored_highlighting.png\" title=\"qged_restored_highlighting.png\"><img src=\"/user_uploads/1549/MgIBucs55xCtVkGCESL5ax2f/qged_restored_highlighting.png\"></a></div>",
+        "id": 242010729,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623204730
+    },
+    {
+        "content": "<p>Man page viewing with brlman, now with Qt!  <a href=\"/user_uploads/1549/7kvs5tuwM-vbD5OQB4bm5MRF/qged_brlman.gif\">qged_brlman.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/7kvs5tuwM-vbD5OQB4bm5MRF/qged_brlman.gif\" title=\"qged_brlman.gif\"><img src=\"/user_uploads/1549/7kvs5tuwM-vbD5OQB4bm5MRF/qged_brlman.gif\"></a></div>",
+        "id": 242145907,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623283389
+    },
+    {
+        "content": "<p>Interactive updating of info from the view:  <a href=\"/user_uploads/1549/PtxiQPh5vYi7YrIY7htXn2bS/qged_view_info.gif\">qged_view_info.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/PtxiQPh5vYi7YrIY7htXn2bS/qged_view_info.gif\" title=\"qged_view_info.gif\"><img src=\"/user_uploads/1549/PtxiQPh5vYi7YrIY7htXn2bS/qged_view_info.gif\"></a></div>",
+        "id": 242258805,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623353661
+    },
+    {
+        "content": "<p>is this going to be the new user interface of mged or archer after its complete?</p>",
+        "id": 242263107,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1623355638
+    },
+    {
+        "content": "<p>That's the long term plan, yes.</p>",
+        "id": 242264878,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623356411
+    },
+    {
+        "content": "<p>no<br>\ni am asking which one is going to have this UI<br>\nMGED or archer?</p>",
+        "id": 242265091,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1623356523
+    },
+    {
+        "content": "<p>Oh.  I suspect the first to be replaced will be Archer, since it's less mature.</p>",
+        "id": 242265163,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623356560
+    },
+    {
+        "content": "<p>The plan is to eventually replace both - I may try making an MGED style interface using a toolkit other than Qt to make sure I'm not baking any Qt-isms in too deep, but there's not much point in that until the Qt pieces are in place.</p>",
+        "id": 242265295,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623356642
+    },
+    {
+        "content": "<p>oh</p>",
+        "id": 242265424,
+        "sender_full_name": "Sumagna Das",
+        "timestamp": 1623356701
+    },
+    {
+        "content": "<p>Or even better if someone else wants to do an MGED style interface ;-)</p>",
+        "id": 242265681,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623356794
+    },
+    {
+        "content": "<p>View info with quad view:  <a href=\"/user_uploads/1549/90v4xY5TrbkifQUlqCWMwbhS/qged_view_info_quad.gif\">qged_view_info_quad.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/90v4xY5TrbkifQUlqCWMwbhS/qged_view_info_quad.gif\" title=\"qged_view_info_quad.gif\"><img src=\"/user_uploads/1549/90v4xY5TrbkifQUlqCWMwbhS/qged_view_info_quad.gif\"></a></div>",
+        "id": 242289678,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623373065
+    },
+    {
+        "content": "<p>Well, my event filter trick for the tree is a problem, but leaving that aside for the moment here's GUI based on/off control for faceplate elements:  <a href=\"/user_uploads/1549/z8K51zsw_W_nihhogFhFFTLi/qged_faceplate_ctrls.gif\">qged_faceplate_ctrls.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/z8K51zsw_W_nihhogFhFFTLi/qged_faceplate_ctrls.gif\" title=\"qged_faceplate_ctrls.gif\"><img src=\"/user_uploads/1549/z8K51zsw_W_nihhogFhFFTLi/qged_faceplate_ctrls.gif\"></a></div>",
+        "id": 242425924,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623471341
+    },
+    {
+        "content": "<p>There we go - view manipulation and tree highlighting:  <a href=\"/user_uploads/1549/AgwwApV5HlKIbhcUdwOLpnfS/qged_view_panel_with_highlighting.gif\">qged_view_panel_with_highlighting.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AgwwApV5HlKIbhcUdwOLpnfS/qged_view_panel_with_highlighting.gif\" title=\"qged_view_panel_with_highlighting.gif\"><img src=\"/user_uploads/1549/AgwwApV5HlKIbhcUdwOLpnfS/qged_view_panel_with_highlighting.gif\"></a></div>",
+        "id": 242455167,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623510146
+    },
+    {
+        "content": "<p>First polygon creation in QGED with the mouse:  <a href=\"/user_uploads/1549/iQSMKb5Jk1P2Xij14vXt1jYe/qged_first_polygons.gif\">qged_first_polygons.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/iQSMKb5Jk1P2Xij14vXt1jYe/qged_first_polygons.gif\" title=\"qged_first_polygons.gif\"><img src=\"/user_uploads/1549/iQSMKb5Jk1P2Xij14vXt1jYe/qged_first_polygons.gif\"></a></div>",
+        "id": 242656226,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623703210
+    },
+    {
+        "content": "<p>Support for creating multiple polygon shape types: <a href=\"/user_uploads/1549/Z3qktHFqSdVBpV0oNNfuSAeh/qged_multiple_polygon_shape_support.gif\">qged_multiple_polygon_shape_support.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Z3qktHFqSdVBpV0oNNfuSAeh/qged_multiple_polygon_shape_support.gif\" title=\"qged_multiple_polygon_shape_support.gif\"><img src=\"/user_uploads/1549/Z3qktHFqSdVBpV0oNNfuSAeh/qged_multiple_polygon_shape_support.gif\"></a></div>",
+        "id": 242677162,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623719016
+    },
+    {
+        "content": "<p>Some progress on manipulating polygons:  <a href=\"/user_uploads/1549/33huaXriSsekRCJv6BWbA-YE/qged_polygon_progress.gif\">qged_polygon_progress.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/33huaXriSsekRCJv6BWbA-YE/qged_polygon_progress.gif\" title=\"qged_polygon_progress.gif\"><img src=\"/user_uploads/1549/33huaXriSsekRCJv6BWbA-YE/qged_polygon_progress.gif\"></a></div>",
+        "id": 242891902,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623855035
+    },
+    {
+        "content": "<p>Application of boolean ops to polygons:  <a href=\"/user_uploads/1549/62U-O0wCp76XmcQYY1ZDMk8X/qged_polygon_booleans.gif\">qged_polygon_booleans.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/62U-O0wCp76XmcQYY1ZDMk8X/qged_polygon_booleans.gif\" title=\"qged_polygon_booleans.gif\"><img src=\"/user_uploads/1549/62U-O0wCp76XmcQYY1ZDMk8X/qged_polygon_booleans.gif\"></a></div>",
+        "id": 242931862,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623872355
+    },
+    {
+        "content": "<p>super awesome... so the 'csg' (poly bool ops, I guess) is applied immediately and the stored result is always explicit?</p>",
+        "id": 243012926,
+        "sender_full_name": "Erik",
+        "timestamp": 1623934793
+    },
+    {
+        "content": "<p>Yes - it's the clipper boolean outputs, and they'll replace the original polygons.</p>",
+        "id": 243066258,
+        "sender_full_name": "starseeker",
+        "timestamp": 1623956049
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ... any chance you can try to stash the result into a sketch object??  That could be the start of an outstanding replacement for the sketch editor, or even just as a debug facility to stash the results into the .g</p>",
+        "id": 243222128,
+        "sender_full_name": "Sean",
+        "timestamp": 1624068089
+    },
+    {
+        "content": "<p>Yes, Bob had logic for that and I've got it integrated at lower levels.  Not exposed in the GUI yet - need to get things like color and fill going first - but it's definitely on the list.  (Once I have that working, I'll shift the tools from the view to the object edit palette.)</p>",
+        "id": 243257370,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624120255
+    },
+    {
+        "content": "<p>To do a proper sketch editor with it, we'd have to associate non-polygon sketch segments with the polygon segments in such a way that they survive boolean ops, so we can turn around and use the resulting polygons to construct (say) an arc from a circle if the circle got chomped during the boolean.</p>",
+        "id": 243257443,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624120333
+    },
+    {
+        "content": "<p>I think I saw something in the development version of clipper that might be useful for the bookkeeping part of that, but I've not tried it as I didn't want to toss an unfinished clipper into the mix at this stage.</p>",
+        "id": 243257463,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624120374
+    },
+    {
+        "content": "<p>Setting colors on polygons: <a href=\"user_uploads/1549/7MsOM_xC6BhhMljOyZ3CEL9z/qged_boolean_colors.gif\">qged_boolean_colors.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"user_uploads/1549/7MsOM_xC6BhhMljOyZ3CEL9z/qged_boolean_colors.gif\" title=\"qged_boolean_colors.gif\"><img src=\"user_uploads/1549/7MsOM_xC6BhhMljOyZ3CEL9z/qged_boolean_colors.gif\"></a></div>",
+        "id": 243308065,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624203408
+    },
+    {
+        "content": "<p>More editing progress for booleans:  <a href=\"/user_uploads/1549/gcQJ3WfAfQIZrRrmqgFZTc8i/qged_polygon_editing_progress.gif\">qged_polygon_editing_progress.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/gcQJ3WfAfQIZrRrmqgFZTc8i/qged_polygon_editing_progress.gif\" title=\"qged_polygon_editing_progress.gif\"><img src=\"/user_uploads/1549/gcQJ3WfAfQIZrRrmqgFZTc8i/qged_polygon_editing_progress.gif\"></a></div>",
+        "id": 243418349,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624297901
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/243257443\">said</a>:</p>\n<blockquote>\n<p>To do a proper sketch editor with it, we'd have to associate non-polygon sketch segments with the polygon segments in such a way that they survive boolean ops, so we can turn around and use the resulting polygons to construct (say) an arc from a circle if the circle got chomped during the boolean.</p>\n</blockquote>\n<p>Maybe, but even if it turned it into all polylines, I think that'd be just fine.  I mean, that's worlds better than the current options.</p>",
+        "id": 243437807,
+        "sender_full_name": "Sean",
+        "timestamp": 1624307002
+    },
+    {
+        "content": "<p>The only question youd have to sort out for revolve and extrude, I think, is where the principal axis resides (e.g., always at [minX,minY]).</p>",
+        "id": 243438272,
+        "sender_full_name": "Sean",
+        "timestamp": 1624307225
+    },
+    {
+        "content": "<p>Would be interesting to figure out how to extend sketch with color attributes, so those can be stored in objects too.</p>",
+        "id": 243438423,
+        "sender_full_name": "Sean",
+        "timestamp": 1624307303
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/243418349\">said</a>:</p>\n<blockquote>\n<p>More editing progress for booleans:  <a href=\"/user_uploads/1549/gcQJ3WfAfQIZrRrmqgFZTc8i/qged_polygon_editing_progress.gif\">qged_polygon_editing_progress.gif</a></p>\n</blockquote>\n<p>These animations are making me interested on your work. If you arrange a virtual meeting (with screenshare etc.) to present your work, I would be interested in joining.<br>\nHowever I am not sure whether this is a good idea, or whether other people would be interested in joining too.</p>\n<p>Myself I am working on improving the documentation system, and I would like to make a presentation of my work by the end, when most of it is done. Assuming that people are interested in joining it.</p>",
+        "id": 243477813,
+        "sender_full_name": "Dashamir Hoxha",
+        "timestamp": 1624344809
+    },
+    {
+        "content": "<p>Thanks!  It'll probably be a while before it's presented anywhere, but I appreciate the interest.</p>",
+        "id": 243559840,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624386764
+    },
+    {
+        "content": "<p>Here's the creation of sketches from polygons hooked up to the gui:  <a href=\"/user_uploads/1549/-wV91gwSOelBU2-2EecoLM_Z/qged_create_poly_sketches.gif\">qged_create_poly_sketches.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-wV91gwSOelBU2-2EecoLM_Z/qged_create_poly_sketches.gif\" title=\"qged_create_poly_sketches.gif\"><img src=\"/user_uploads/1549/-wV91gwSOelBU2-2EecoLM_Z/qged_create_poly_sketches.gif\"></a></div>",
+        "id": 243559898,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624386791
+    },
+    {
+        "content": "<p>Note in particular the appearance of the new sketches in the tree widget on the left as they are created, as well as the update due to renaming.</p>",
+        "id": 243559953,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624386822
+    },
+    {
+        "content": "<p>And restoring a polygon from a saved sketch:  <a href=\"/user_uploads/1549/QYVwE_smvmOThGiQJmsPnHyK/qged_restore_polygon_from_sketch.gif\">qged_restore_polygon_from_sketch.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/QYVwE_smvmOThGiQJmsPnHyK/qged_restore_polygon_from_sketch.gif\" title=\"qged_restore_polygon_from_sketch.gif\"><img src=\"/user_uploads/1549/QYVwE_smvmOThGiQJmsPnHyK/qged_restore_polygon_from_sketch.gif\"></a></div>",
+        "id": 243592840,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624405819
+    },
+    {
+        "content": "<p>Able to set vZ now to shift the polygon planes up and down:  <a href=\"/user_uploads/1549/W1vTFtyqF7XYa4FIcFgaakDI/qged_polygons_vZ.gif\">qged_polygons_vZ.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/W1vTFtyqF7XYa4FIcFgaakDI/qged_polygons_vZ.gif\" title=\"qged_polygons_vZ.gif\"><img src=\"/user_uploads/1549/W1vTFtyqF7XYa4FIcFgaakDI/qged_polygons_vZ.gif\"></a></div>",
+        "id": 243805614,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624549560
+    },
+    {
+        "content": "<p>Slightly more intuitive way to set vZ - specify a 3D point.  Example showing adding a circle through the center of a torus:<br>\n<a href=\"/user_uploads/1549/IxEBBzxdUcQX5iRdTPdlUXMN/qged_setting_vZ.gif\">qged_setting_vZ.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/IxEBBzxdUcQX5iRdTPdlUXMN/qged_setting_vZ.gif\" title=\"qged_setting_vZ.gif\"><img src=\"/user_uploads/1549/IxEBBzxdUcQX5iRdTPdlUXMN/qged_setting_vZ.gif\"></a></div>",
+        "id": 243920796,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624630227
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/243592840\">said</a>:</p>\n<blockquote>\n<p>And restoring a polygon from a saved sketch:  <a href=\"/user_uploads/1549/QYVwE_smvmOThGiQJmsPnHyK/qged_restore_polygon_from_sketch.gif\">qged_restore_polygon_from_sketch.gif</a></p>\n</blockquote>\n<p>Er, terminology check -- is that actually a sketch??  Looks like a serialized view object, not a sketch object.</p>",
+        "id": 243996945,
+        "sender_full_name": "Sean",
+        "timestamp": 1624686911
+    },
+    {
+        "content": "<p>It's a sketch object with metadata for colors and fill state stashed in attributes.</p>",
+        "id": 244014188,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624712733
+    },
+    {
+        "content": "<p>What is being drawn is the view object generated from that metadata and sketch data.  If you were to draw the t1 sketch in the scene, rather than importing it as a view polygon, you would see a red circle.</p>",
+        "id": 244014245,
+        "sender_full_name": "starseeker",
+        "timestamp": 1624712792
+    },
+    {
+        "content": "<p>I wouldn't have thought to store as attributes, but neat compromise.</p>",
+        "id": 244233536,
+        "sender_full_name": "Sean",
+        "timestamp": 1624942495
+    },
+    {
+        "content": "<p>Not fully there yet, but first real progress on an updating TreeView for .g files:<br>\n<a href=\"/user_uploads/1549/DX6d5-DPJKw3E5nQrUZN_OOd/first_working_QgTreeView_update_-2022-02-13-22-38.gif\">first_working_QgTreeView_update_-2022-02-13-22-38.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/DX6d5-DPJKw3E5nQrUZN_OOd/first_working_QgTreeView_update_-2022-02-13-22-38.gif\" title=\"first_working_QgTreeView_update_-2022-02-13-22-38.gif\"><img src=\"/user_uploads/1549/DX6d5-DPJKw3E5nQrUZN_OOd/first_working_QgTreeView_update_-2022-02-13-22-38.gif\"></a></div>",
+        "id": 271781977,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644810159
+    },
+    {
+        "content": "<p>How does it perform with 100k items and doing insertions/deletions in the middle?  Responsive?</p>",
+        "id": 271846007,
+        "sender_full_name": "Sean",
+        "timestamp": 1644854071
+    },
+    {
+        "content": "<p>Haven't stress tested yet - still working on getting it not to crash in weird places.</p>",
+        "id": 271895695,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644876089
+    },
+    {
+        "content": "<p>I'm seeing crashes after return from main() again... appears to be some corruption.  Trying to catch it.</p>",
+        "id": 271910561,
+        "sender_full_name": "Sean",
+        "timestamp": 1644885413
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> this is with the latest commits from today? (presumably on Mac?)</p>",
+        "id": 271913221,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644887402
+    },
+    {
+        "content": "<p>Just committed one more change that might help</p>",
+        "id": 271918636,
+        "sender_full_name": "starseeker",
+        "timestamp": 1644892078
+    },
+    {
+        "content": "<p>Got highlighting going in combination with tree updating:  <a href=\"/user_uploads/1549/R_nJXIaxMgCjj0R2LTXuwA4T/highlighting_with_tree_updating_QgTreeView_2022-02-16-16-49.gif\">highlighting_with_tree_updating_QgTreeView_2022-02-16-16-49.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/R_nJXIaxMgCjj0R2LTXuwA4T/highlighting_with_tree_updating_QgTreeView_2022-02-16-16-49.gif\" title=\"highlighting_with_tree_updating_QgTreeView_2022-02-16-16-49.gif\"><img src=\"/user_uploads/1549/R_nJXIaxMgCjj0R2LTXuwA4T/highlighting_with_tree_updating_QgTreeView_2022-02-16-16-49.gif\"></a></div>",
+        "id": 272186594,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645049624
+    },
+    {
+        "content": "<p>in command (incremental prompting for input) in qged: <a href=\"/user_uploads/1549/vJSeKUUrzX3rivAHATkMkIKF/in_extrude_qged_2022-02-17-11-26.gif\">in_extrude_qged_2022-02-17-11-26.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/vJSeKUUrzX3rivAHATkMkIKF/in_extrude_qged_2022-02-17-11-26.gif\" title=\"in_extrude_qged_2022-02-17-11-26.gif\"><img src=\"/user_uploads/1549/vJSeKUUrzX3rivAHATkMkIKF/in_extrude_qged_2022-02-17-11-26.gif\"></a></div>",
+        "id": 272284698,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645115324
+    },
+    {
+        "content": "<p>Awesome!</p>",
+        "id": 272322951,
+        "sender_full_name": "Sean",
+        "timestamp": 1645132230
+    },
+    {
+        "content": "<p>Proof-of-principle scene obj from .g obj (one of the pieces needed for MGED's manipulate-before-saving-to-disk editing of primitives): <a href=\"/user_uploads/1549/AfQywEgjqkkIxaCYxdJoEkHS/view_only_g_obj_wireframe_2022-02-18-15-12.gif\">view_only_g_obj_wireframe_2022-02-18-15-12.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AfQywEgjqkkIxaCYxdJoEkHS/view_only_g_obj_wireframe_2022-02-18-15-12.gif\" title=\"view_only_g_obj_wireframe_2022-02-18-15-12.gif\"><img src=\"/user_uploads/1549/AfQywEgjqkkIxaCYxdJoEkHS/view_only_g_obj_wireframe_2022-02-18-15-12.gif\"></a></div>",
+        "id": 272452597,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645215746
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> thinking of the recent PR, I'm wondering if we should keep track of who contributes to qged in AUTHORS or in a separate README/AUTHORS file that's qged-specific in case it moves</p>",
+        "id": 273148734,
+        "sender_full_name": "Sean",
+        "timestamp": 1645736312
+    },
+    {
+        "content": "<p>ddreeves70 was involved back in 2009 on the nurbs/brep ray tracing code ... wonder if he'd pick it up again to work on optimization</p>",
+        "id": 273149546,
+        "sender_full_name": "Sean",
+        "timestamp": 1645736702
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'm game to keep a separate README/AUTHORS going, although it's not my intent to split qged out from the main repo yet.  (I'm deliberately molding the backend libraries and the GUI together to try and improve both - when things get closer to a working/finished state we can have that discussion.)</p>",
+        "id": 273167619,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645747324
+    },
+    {
+        "content": "<p>That'd be cool - my thought though is new GUI first, then nurbs/brep ;-)</p>",
+        "id": 273167719,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645747384
+    },
+    {
+        "content": "<p>Here's a video of <span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span>  changes in action: <a href=\"/user_uploads/1549/a0_GQx0JBF6GzoCjKvH5-ioU/qged_switch_to_quadview_ddreeves70_2022-02-24-19-10.gif\">qged_switch_to_quadview_ddreeves70_2022-02-24-19-10.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/a0_GQx0JBF6GzoCjKvH5-ioU/qged_switch_to_quadview_ddreeves70_2022-02-24-19-10.gif\" title=\"qged_switch_to_quadview_ddreeves70_2022-02-24-19-10.gif\"><img src=\"/user_uploads/1549/a0_GQx0JBF6GzoCjKvH5-ioU/qged_switch_to_quadview_ddreeves70_2022-02-24-19-10.gif\"></a></div>",
+        "id": 273168463,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645747987
+    },
+    {
+        "content": "<p>yeah, <span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> don't take my comment to imply a desire or priority or such, just a passing comment.  you should work on whatever interests and motivates you!</p>",
+        "id": 273192237,
+        "sender_full_name": "Sean",
+        "timestamp": 1645768974
+    },
+    {
+        "content": "<p>That quad view support looks good, impressive change!</p>",
+        "id": 273192322,
+        "sender_full_name": "Sean",
+        "timestamp": 1645769079
+    },
+    {
+        "content": "<p>Thanks Sean and Cliff for the kinds word.  Hopefully I can make more of an impact here.  I will for now continue working on the QGED.  Cliff I was thinking of looking into the HUD stuff next but if you think there is something better for me to work I am fine with working on the other stuff.   Also if you guys will point me to test cases and the goal of improvement I will work on the NURBS stuff if I need a break from QGED. Also on QGED is it ok if I commit directly to main or do you want me to continue with pull request.  Also on QGED if you are ok I would not mind doing a little bit of refactoring some inconsistencies with the HACKING guide. It bugs my OCD nature.  BTW if you are discussing Author credit stuff on QGED for my benefit don’t worry about it for now. If QGED gets released you can give me credit then</p>",
+        "id": 273194745,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645772062
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Go ahead and commit directly to main on QGED, that's fine.</p>",
+        "id": 273226931,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645794898
+    },
+    {
+        "content": "<p>Please feel free to refactor to conform with HACKING - when working on QGED I've been trying to drive hard and fast towards functionality, and often times that means I end up committing something that works but doesn't satisfy all the style points.  (Indeed, most of the spelling mistakes fixed in the recent pull request were my fault.)</p>",
+        "id": 273227127,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645794995
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I apologize if it sounded like I was being critical that was not my intention. I am very inspired by what has been done so far. It is great work. The integration between dm fb and QT was no small feat</p>",
+        "id": 273242306,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645802519
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> not at all!  That was an explanation, not a complaint ;-)</p>",
+        "id": 273272225,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645816339
+    },
+    {
+        "content": "<p>If you want to see me complaining, watch me try and debug some obscure interactive problem in the Archer Itcl/Itk code :-P</p>",
+        "id": 273272374,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645816412
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I'm open qged with moss.g noting displayed and I select view model axes and getting a core dump.  When I look at what is happening I'm getting an assert on line 3155 of libdm-&gt;fontstash-&gt;stb_truetype.h  if I uncomment lines 3151 &amp; 3152 that you commented out 5 months ago due to a clang static analyzer report, it passes the assert and the axes display as expected.  I'm not really sure what is going on but this is the core dump I was talking about earlier but I just didn't have time to open up in gdb to find out where it was dumping at.  I'm curious why my code is all the sudden triggering this failure.  I remember before my latest round of changes axes display was working.  Any thoughts?</p>",
+        "id": 273318977,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645852492
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span>  good catch.  I'll re-run the analyzer on the previous commit to take another look at what the error was .</p>",
+        "id": 273355557,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645900231
+    },
+    {
+        "content": "<p>My first thought was that something about the view initialization might be different between quad view and the single widget - if you look through the backtrace, at some stage  the call that's getting into fontstash and stb_truetype is getting input values from our code.  If the view is the same between the quad view single-window version and the previous single-widget approach, then something must be initialized differently in the data structures</p>",
+        "id": 273355644,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645900356
+    },
+    {
+        "content": "<p>Or perhaps is uninitialized, which might explain why you're seeing it and I'm not - different random garbage can produce different results...</p>",
+        "id": 273355684,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645900426
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> OK, I was definitely too aggressive in my stb_truetype.h changes.  I've committed an adjustment that will deal with the immediate functional issue for you.</p>",
+        "id": 273365126,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645912595
+    },
+    {
+        "content": "<p>It's still an interesting question as to why quad and individual behaved differently, but a debugging session to ID what's different about the inputs to the font calls is probably the way to run that down.</p>",
+        "id": 273365159,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645912659
+    },
+    {
+        "content": "<p>One thing I do notice - I don't get a crash, but if I bring up the model axes as you suggest the location of X changes from the lower left corner of the screen (1st drawing) to what I think is the proper position.</p>",
+        "id": 273377138,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645929697
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> So the bizarre values being fed to the text drawing routines for the initial passes (that are getting clamped by stb_truetype) are from dm-qtgl.cpp:342 - the glGetFloatv(GL_CURRENT_RASTER_POSITION, pos) call</p>",
+        "id": 273378832,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645932354
+    },
+    {
+        "content": "<p>For the first two calls, pos is set to {0, 0, 0, 1}</p>",
+        "id": 273378880,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645932400
+    },
+    {
+        "content": "<p>Only on the third does it return something usable:  {702.445312, 621.945312, 0.50012207, 1} in my case.</p>",
+        "id": 273378892,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645932441
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Still not sure why the quad view triggers it, but looks like the odd text positioning behavior was a consequence of the glRasterPos being out of range in the first few draws - addressed by clamping the range.</p>",
+        "id": 273380284,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645934415
+    },
+    {
+        "content": "<p>fwiw, I see the same behavior in the single view w/o quad widget involvement here.  In no case so far have I seen a crash here, so it may be you're getting \"lucky\" in having something in the right memory location to wipe out w/ the quad mode + invalid behavior combo...</p>",
+        "id": 273380757,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645934891
+    },
+    {
+        "content": "<p>Anyway, let me know if you still have problems with latest main.</p>",
+        "id": 273380787,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645934925
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> yes it appears to be working with the latest.  Just to be clear my core dump was because I have debug compiled and I hit an assert  which causes a core dump.  I was not getting a core dump from a seg fault.  The assert was because there was assert checking to make sure the delta x and y was greater than 0</p>\n<p>I also could not figure out how what I had changed that would have triggered the functionality other than the axes display was close to the edge of the screen and in quad it went over the edge and triggered some functionality that caused the axes to be displayed differently than normal.</p>\n<p>Did you mean to say the view axes vs model axes should be on the bottom left?  </p>\n<p>I'm thinking the model axes is displayed at the origin...</p>",
+        "id": 273407987,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645974181
+    },
+    {
+        "content": "<p>No, it's in the right place now - I was seeing it in the wrong place in the first frame, which was a consequence of the attempt to draw text off screen not working correctly - stb_truetype was \"correcting\" the numbers, and that ended up with the labels in the lower left for me.</p>",
+        "id": 273414795,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645982482
+    },
+    {
+        "content": "<p>It should be OK now - the only improvement would be to adjust the text drawing logic to support partial text drawing when the origin coordinates of the text label are offscreen, but part of the text would be visible coming in from the left.  That would be ideal, but also a bit of a pain to get working so for me it's a lower priority.</p>",
+        "id": 273414858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645982547
+    },
+    {
+        "content": "<p>And of course staring at it the annoyance got to me, so I had to try and correct it... I think everything should now be behaving correctly.</p>",
+        "id": 273419893,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645988870
+    },
+    {
+        "content": "<p>You can see the behavior in question if you drag the model axes to the left - previously you'd see the labels abruptly disappear as they reached the edge of the screen, now they should just be partially visible (as you would expect.)</p>",
+        "id": 273420037,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645989074
+    },
+    {
+        "content": "<p>Yeah that looks way better!!  </p>\n<p>Although I would like to position the view axis so that no mater how you rotate it does not go off screen.  Are you ok if I make that adjustment?</p>",
+        "id": 273423381,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645993715
+    },
+    {
+        "content": "<p>Ok looking at util.c/bv_settings_init sets view axes.axes_os 0.85, -0.85, 0 then sets size to 0.2.  That is why it will rotate off screen.  I think I will adjust to 0.8, -0.8, 0. On my display I would be ok with adjust size to 0.15 but I think that will make it too small on other people's display</p>",
+        "id": 273425679,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645996696
+    },
+    {
+        "content": "<p>ok I guess I don't have commit permissions</p>",
+        "id": 273425976,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645997105
+    },
+    {
+        "content": "<p>I will make the change in the fork and do a pull request with my next set of changes</p>",
+        "id": 273426580,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645997830
+    },
+    {
+        "content": "<p>Hmm.  I'll have to double check with <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> on the commit permissions - still new enough to Github I'm not sure how that works</p>",
+        "id": 273426684,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645998000
+    },
+    {
+        "content": "<p>Not that big a deal having to work through forks just takes about 30 mins total to deal with and a little disruptive to the flow.</p>",
+        "id": 273426764,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645998099
+    },
+    {
+        "content": "<p>Now that I have already done it. I'm wondering if I have to delete the forked repository?  I wonder if I can just commit to the fork then generate pull request whenever I'm ready for it to be merged into main?</p>",
+        "id": 273426883,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645998245
+    },
+    {
+        "content": "<p>if all i have to do is generate a pull request then may not even be 30 mins time</p>",
+        "id": 273426895,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1645998284
+    },
+    {
+        "content": "<p>On the (rare) occasions I've done pull requests, I make a branch in my repo to hold the commits related to the specific change, make the pull request from there, update my local copy once the PR is merged upstream, then make a new branch for the next request.  Dunno if that's the \"right\" way or not...</p>",
+        "id": 273427155,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645998688
+    },
+    {
+        "content": "<p>I'm looking at the project now to see if I'm able to fix your commit status...</p>",
+        "id": 273427160,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645998710
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> I think I sent something...</p>",
+        "id": 273427248,
+        "sender_full_name": "starseeker",
+        "timestamp": 1645998835
+    },
+    {
+        "content": "<p>pushed my changes to adjust defaults on the view settings.  This will keep the view axes from rotating off screen</p>\n<p>Also made a change to Qged in quad mode to show which view is selected.</p>",
+        "id": 273517930,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646066596
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Nice!  Like the active quad highlighting.</p>\n<p>Just FYA, it looks like your push undid a couple of changes in a prior commit.  I typically do a \"git pull --rebase\" before doing a push to make sure I'm not overwriting any new commits.</p>",
+        "id": 273527449,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646070548
+    },
+    {
+        "content": "<p>Yeah in had an issue with my local git. Sorry about that</p>",
+        "id": 273533583,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646073080
+    },
+    {
+        "content": "<p>no problem - easy fix.  So you're planning to dig into the primitive editing next?</p>",
+        "id": 273541867,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646076889
+    },
+    {
+        "content": "<p>Yes</p>",
+        "id": 273544145,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646077924
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"271738\">David Reeves</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/273425976\">said</a>:</p>\n<blockquote>\n<p>ok I guess I don't have commit permissions</p>\n</blockquote>\n<p>You do now!   We didn't automatically add everyone with commit access on Sourceforge like yourself that already earned commit rights.  I probably should at least invite people where accounts exist.</p>",
+        "id": 273557191,
+        "sender_full_name": "Sean",
+        "timestamp": 1646083932
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> anyone that's in the dev group on sf should just be invited if they had access before<br>\n -- we don't presently have a use case for the restriction having outside collaborator introduces.</p>",
+        "id": 273557985,
+        "sender_full_name": "Sean",
+        "timestamp": 1646084362
+    },
+    {
+        "content": "<p>maybe someone with a professional temporary relationship, but even that would be a bit of a strange designation and all it does is prevent them from creating/seeing our teams, which is not a secret</p>",
+        "id": 273558136,
+        "sender_full_name": "Sean",
+        "timestamp": 1646084425
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  OK - I wasn't quite sure how all that interacted, but was trying to get <span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> up and running quickly.  Hopefully I didn't make too much of a mess...</p>",
+        "id": 273561438,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646086142
+    },
+    {
+        "content": "<p>Thanks for the help.  <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> are you having issues with your fb?  I'm not seeing ert, maybe just a local issue but I don't think so.  I think something has happened.  Anyway let me know if you are seeing an issue in the mean time I will debug to see what is going on</p>",
+        "id": 273585894,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646104342
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span>  I just  pushed a commit to have ert enable the fb if it's off - does that help?</p>",
+        "id": 273589095,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646108103
+    },
+    {
+        "content": "<p>yes, i forgot about turning on the fb</p>",
+        "id": 273592194,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646111259
+    },
+    {
+        "content": "<p>I like those easy ones... they should happen more often</p>",
+        "id": 273646111,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646143818
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  so I took a quick look at mged.  How do we want to approach this?  Do we want to essentially copy functionality from mged to qged (libqtged)?  Do we want to attempt to get this functionality in libged?  I saw in your TODO that you didn't want to move edit functionality into libged, I'm sure I have missed some documentation somewhere but why?  I'm just trying to catch up with what you have in mind I'm not attempting to push any particular approach.  I'm fine with copying and editing into qged but want to make sure before I go that approach.  Before it is done it will be several 1000 lines of code.  Looking at edsol a lot of that will end up being needed in qged</p>",
+        "id": 273693345,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646161380
+    },
+    {
+        "content": "<p>I think it'd be awesome if libged had editing capability, but the interface for such a thing doesn't currently exist.  That's why edsol and friends still live over in mged's folder -- they're kind of intertwined with a notion of an editing state, and libged is designed to be stateless.</p>",
+        "id": 273706808,
+        "sender_full_name": "Sean",
+        "timestamp": 1646167212
+    },
+    {
+        "content": "<p>same reason there's not a \"sed\" command or the \"push\" buttons interface (for programmatically clicking on the menu)</p>",
+        "id": 273706894,
+        "sender_full_name": "Sean",
+        "timestamp": 1646167261
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> So there are really multiple dimensions to primitive editing.  There's Qt widgets for each primitive (similar to what archer does) paired with basic wireframe updates in the view as parameters are changed (where I was planning to start.)  Then there's the in-scene menus of the faceplate editing.  That's where some of our most sophisticated in-scene interactions take place (pipe editing, for example) but that code is also heavily tied to MGED's state.  I was initially planning not to replicate the in-scene editing and instead make sure the combination of wireframe displays + Qt widgets could do everything we can currently do with the faceplate GUIs.</p>",
+        "id": 273707326,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646167510
+    },
+    {
+        "content": "<p>My initial notion was to have the Qt widget create an rt_db_internal for the primitive in question (either a default primitive a.l.a. make if create a new one, or the current state of the existing specified object on disk if an existing solid's name is supplied) and then manipulate that internal with the editing operations, getting updated wireframes from the internal and using those to update a view object.  Then, either when the editing has stopped for some period of time or the user explicitly requests a save, the rt_db_internal is written to disk.</p>",
+        "id": 273709561,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646168503
+    },
+    {
+        "content": "<p>Especially for large primitives like bots we can't continually stream all incremental changes to disk as the mouse is dragged, but the wireframe will have to be continually adjusted as incremental parameter states are set - that was why I was working on adjusting the drawing logic to be able to create view objects .g object data that are independent of the on-disk object.</p>",
+        "id": 273709801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646168616
+    },
+    {
+        "content": "<p>Ok thanks I will work on it from that direction</p>",
+        "id": 273753299,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646194852
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"103542\">@Erik</span> If you're in the mood for a small OpenGL challenge, I had a heck of a time trying to get our standard librt raytracing output to properly display in a texture the way the ISST rendering does.  All I could get was a pair of white triangles, despite making an attempt to follow what was done for ISST - consequently, the qtgl framebuffer implementation is still using the old school pixel method.  I'm reasonably sure I was just doing something stupid, but I couldn't find it - feel like showing me up?</p>",
+        "id": 273895458,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646263728
+    },
+    {
+        "content": "<p>It's not critical obviously in the sense that the current method does work, but I was hoping to get the texture based approach working for both adrt rendering and our normal fb output and then just make it a setting to switch between them.</p>",
+        "id": 273895616,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646263817
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Just letting you know I'm still looking at the primitive stuff.  It is alot to get my head wrapped around.  I think I'm about to get there now.  Hopefully I will have something prototype by the end of next week.</p>",
+        "id": 274353050,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646632980
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> No worries - I knew it would be a deep dive.  If you're finding design challenges you want to discuss, feel free to bring them up.</p>",
+        "id": 274476447,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646697370
+    },
+    {
+        "content": "<p>Mainly right now I’m focused on getting something to work.  Here are some things that I think are worth thinking about:</p>\n<p>1) plugins should do all the work to connect themselves up to the application.  For example there is code in main_window to connect signals and slots in the plugins. I realize this is probably a result of rapid prototyping but just something I noticed<br>\n2) I feel we need a layer of abstraction between components. For example the hierarchy and the other plugins should not directly connect. Signals from hierarchy should be connected to an abstract signal in the app. Interested plugins should connect their slots to the abstract signal. <br>\n3) I’m not a fan of the tabs for the primitive editing plugin unless there is multiple parts to the primitive. I don’t really feel like we should be editing multiple primitives at the same time. <br>\n4) thinking should add a filter field to the hierarchy component <br>\n5) need to be able to view from the hierarchy. Maybe use the eye icon everyone else is using. The plugins should give you multiple gui components. An editor for seeing details with a primitive but should be primitive specific toolbars, menubars, etc for that specific primitive. All that should come from the plug-in<br>\n6) long term would be good to have a undo history. Or even something like a revision history. Only for while editing </p>\n<p>Anyway nothing huge   For the most part I like the design pretty straightforward to understand. My struggle is more around libged, understanding what mged is doing, archer.  Also have to understand the whole rt_db_internal stuff.I think I’m getting that now but working on the next step of implementing <br>\nsomething</p>",
+        "id": 274498238,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1646716993
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"271738\">David Reeves</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/274498238\">said</a>:</p>\n<blockquote>\n<p>Mainly right now I’m focused on getting something to work.  Here are some things that I think are worth thinking about:<br>\n[snip]</p>\n</blockquote>\n<p>Excellent comments overall, imho!  Definitely appreciate your perspective.</p>\n<blockquote>\n<p>6) long term would be good to have a undo history. Or even something like a revision history. Only for while editing </p>\n</blockquote>\n<p>The plan here is heavily sitting in a patch, but the original plan is that most if not all GUI operations end up going through the libged layer, and that layer would automatically handle event dispatch, transactions, and undo.  It doesn't presently, but that was how it was envisioned.</p>\n<p>So a GUI app would be able to tie an undo button to the libged undo/redo commands and the right things would happen.  Someone did work on this just last year, but it's not yet integrated.</p>",
+        "id": 274503776,
+        "sender_full_name": "Sean",
+        "timestamp": 1646723022
+    },
+    {
+        "content": "<p>And I should caveat that those those are specific to \"ged-using apps\", just my opinion (others may vary), and that apps that go through the higher-level OO API in rt^3 (aka MOOSE) have different constructs to work with.   Personally, I think MOOSE is the better architectural approach as it already encompasses in-memory editing of objects very well (much better than libged), and it has a hard boundary (it's strictly a C++ layer above the C libs, so there's no possibility for cheating and couplings like you noted).  Alas, they're still separate codes solving related but different problems inefficiently..</p>",
+        "id": 274504028,
+        "sender_full_name": "Sean",
+        "timestamp": 1646723272
+    },
+    {
+        "content": "<p>On the other hand,  replacing archer has a different set of challenges, and building modular widgets on top of libged should be reusable long term if they're not tightly coupled as you noted.</p>",
+        "id": 274504153,
+        "sender_full_name": "Sean",
+        "timestamp": 1646723393
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"271738\">David Reeves</span> <a href=\"#narrow/stream/104062-general/topic/Qt/near/274498238\">said</a>:</p>\n<blockquote>\n<p>1) plugins should do all the work to connect themselves up to the application.  For example there is code in main_window to connect signals and slots in the plugins. I realize this is probably a result of rapid prototyping but just something I noticed</p>\n</blockquote>\n<p>Rapid prototyping and trying to figure out/remember on the fly what was possible and what makes sense - it's been a long time since my Qt training.  I very much doubt what is there is what it should truly look like - my main focus was making sure that plugins could trigger view updates and view updates could trigger plugin updates without either knowing anything explicit about the other and without infinite loops.  I'm quite sure there are other considerations beyond those, but unfortunately they've not gotten any attention yet.</p>\n<blockquote>\n<p>2) I feel we need a layer of abstraction between components. For example the hierarchy and the other plugins should not directly connect. Signals from hierarchy should be connected to an abstract signal in the app. Interested plugins should connect their slots to the abstract signal.</p>\n</blockquote>\n<p>That's one of those Qt questions I didn't/don't know the answer to - whether there are concerns stacking layers of signals and slots on top of each other.  I suspect you're right and an \"app bus\" approach makes better sense, but I did have an initial wary reaction in that such an abstract approach might make it very difficult to sort out which specific signal is triggering a slot inappropriately while debugging.  Whatever design we end up with, I think we're going to want a \"beginning-to-end\" example showing folks how to debug problems in the signal/slot connections.</p>\n<blockquote>\n<p>3) I’m not a fan of the tabs for the primitive editing plugin unless there is multiple parts to the primitive. I don’t really feel like we should be editing multiple primitives at the same time. </p>\n</blockquote>\n<p>Sorry, not following - do you mean the tool palette, or the editing panel below it?  The tool palette was intended to allow a Gimp style selection between different primitives to allow users to easily create new objects of each type, and then to be automatically set to the correct button when they select a particular existing object to work on.  In essence it would make the primitives graphically \"discoverable\" for users.  I've not thought through the design on that in any detail though, so feel free to implement whatever makes sense.</p>\n<p>Just realized it currently does look like tabs since there's only one palette button present - see, for example, <a href=\"https://brlcad.org/~starseeker/qdm_videos/qged_qdm_first_merge.gif\">https://brlcad.org/~starseeker/qdm_videos/qged_qdm_first_merge.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"https://brlcad.org/~starseeker/qdm_videos/qged_qdm_first_merge.gif\"><img src=\"https://uploads.zulipusercontent.net/8ad9aeb4ea6f3b21fc73117bada016ef166dd3c0/68747470733a2f2f62726c6361642e6f72672f7e737461727365656b65722f71646d5f766964656f732f716765645f71646d5f66697273745f6d657267652e676966\"></a></div><blockquote>\n<p>4) thinking should add a filter field to the hierarchy component </p>\n</blockquote>\n<p>Absolutely!  The hierarchy widget also needs to be able to display attributes in columns and switch to a \"flat\" view (i.e. the ls command output) - I rather ran out of steam on it after (finally) getting it to respond to edits, but it will need at least one more round.</p>\n<blockquote>\n<p>5) need to be able to view from the hierarchy. Maybe use the eye icon everyone else is using. The plugins should give you multiple gui components. An editor for seeing details with a primitive but should be primitive specific toolbars, menubars, etc for that specific primitive. All that should come from the plug-in</p>\n</blockquote>\n<p>By \"view from the hierarchy\" do you mean adding or removing things from the scene, i.e. \"draw\" and \"erase\"?  If so, definitely agree - the context menu and fixing the double-click behavior to draw and un-draw are also on the hierarchy to-do list.</p>\n<blockquote>\n<p>6) long term would be good to have a undo history. Or even something like a revision history. Only for while editing </p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> already addressed this one, but even beyond editing undo I'd like to actually make the .g file what you might think of as a \"git geometry archive\" where you could check out earlier states of the geometry from the .g file itself.  It's quite an interesting problem in many ways, but unfortunately it'll likely be a while before we can devote the necessary resources to designing and implementing that infrastructure.</p>\n<blockquote>\n<p>Anyway nothing huge   For the most part I like the design pretty straightforward to understand. My struggle is more around libged, understanding what mged is doing, archer.  Also have to understand the whole rt_db_internal stuff.I think I’m getting that now but working on the next step of implementing something</p>\n</blockquote>\n<p>rt_db_internal is basically the transition from \"what we pulled off of disk\" to \"data we can work with in memory\".    I've not studied in detail what MGED and Archer do internally for their editing state management, so if you need assistance there let me know and I can do some digging.  MGED's internal state is rather confusing and messy at times, so I'd suggest using it mostly as a guide on how to do specific individual operations and unpack/generate data - it does at least do many things in C.  Archer tends to do most things in Tcl/Itcl, so the \"translation to C/C++\" problem is a bit more involved there.</p>",
+        "id": 274549593,
+        "sender_full_name": "starseeker",
+        "timestamp": 1646750494
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> How are things looking?  Need any help with the rt_db_internal concepts?</p>",
+        "id": 275351879,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647338635
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> It's going fine.  Right now I'm good.  I have been very distracted with a work project.  I should be able to focus on this in the next couple of days.  Thanks for asking.</p>",
+        "id": 275383499,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647355951
+    },
+    {
+        "content": "<p>Question: I'm reviewing all the code to get familiar with it.  I'm wondering is it optional to use software graphics if it was compiled with opengl?  It doesn't appear to be an option to select but seems to be code throughout to support it to be an option.  Maybe the concept is there but for this pass it is being built to be determined at compile time but in the future you plan to make it optional?</p>",
+        "id": 275535840,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647447350
+    },
+    {
+        "content": "<p>Also what do you think about in the libqtcad if we get rid of the 'Q', 'Qt', 'Qg' prefixing and use namespace(s) instead?</p>\n<p>Also I am seeing classes that is making attributes public.  Do you have an issue if I refactor that stuff to be private and use inline accessor methods instead?</p>",
+        "id": 275536456,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647447547
+    },
+    {
+        "content": "<p>Are you ok if I rename CADQuad to be CADViewport now that we have modified it is always using that class as the central component vs either the QUAD or View.</p>",
+        "id": 275537409,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647447881
+    },
+    {
+        "content": "<p>On the software vs opengl I think unless we do a significant amount of restructuring it is not going to be something that is runtime selectable  in the future.  If that is the case do you mind if do a little refactoring to embrace the idea it is compile time selected.  I think in places we can simplify the code.  The more important issue is to get rid of the concept so we don't have to keep making these weird decisions about when to use the precompiler flags vs looking at type of graphics.</p>",
+        "id": 275539019,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647448406
+    },
+    {
+        "content": "<p>I'm going to get to the primitive stuff but I started looking around for the best place to inject it.  In that process started noticing things that might make future growth easier and more consistent if we did a little clean up...</p>",
+        "id": 275539341,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647448531
+    },
+    {
+        "content": "<p>Hey I decided to create a branch to make the changes.  If you don't agree with the changes we can always discard them.</p>",
+        "id": 275614026,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647500974
+    },
+    {
+        "content": "<p>qged_cleanup is the name of the branch</p>",
+        "id": 275614035,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647500992
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> the software rendering is exposed as a qged command line option</p>",
+        "id": 275633306,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647513729
+    },
+    {
+        "content": "<p>qged -s</p>",
+        "id": 275633353,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647513774
+    },
+    {
+        "content": "<p>Generally speaking I'm fine with refactoring and renaming - <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> may have some thoughts, but I'm not strongly opinionated - what's there right now  can usually be classed as \"well, it had to be called something...\" if I wrote it.</p>",
+        "id": 275633539,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647513896
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> I'd prefer to keep the runtime ability to use either software rasterizing or system opengl - there are usage scenarios where that ability is needed, and I did go to a lot of trouble to make sure we could do that.</p>",
+        "id": 275633697,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647513979
+    },
+    {
+        "content": "<p>In fact, the swrast rendering is not only a user option but qged will also kick it in automatically if the system OpenGL fails to initialize at runtime.</p>",
+        "id": 275634401,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647514400
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ok yeah I guess I missed it.  Thanks</p>",
+        "id": 275658359,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647526345
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> I think your code cleanup ideas sound great to me.  Definitely agree with scrubbing the technology branding.  That typically makes for pretty suboptimal marketing, even when other devs are the audience (e.g., the sea of undifferentiated py* projects and rb*projects and *.js projects...).  So if you're willing to put the thought into good naming, that should be a welcome improvement.</p>\n<p>If the code for software rendering is spread all over the place, that would be an antipattern that might benefit from being abstracted/encapsulated better.  The point of software rendering is that it just happens and application code is unaware, so if that's not presently the case, I'd think they're fair game to refactor.  That said, as was mentioned, having a software rendering fallback is potentially a useful for a host of runtime environments where opengl isn't configured correctly, has a broken driver, isn't available outright, etc.</p>",
+        "id": 275766678,
+        "sender_full_name": "Sean",
+        "timestamp": 1647587337
+    },
+    {
+        "content": "<p>Although I may not have properly succeeded, I attempted to keep the software rendering vs. system rendering hidden behind the QtCADView widget - the idea is to use that, and the specific details needed for system opengl and swrast are encapsulated in the QtGL and QtSW widgets, which the app shouldn't interact with directly.</p>",
+        "id": 275788440,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647602067
+    },
+    {
+        "content": "<p>I didn't mean to imply that it was all over.  I just saw it as I was code reviewing.  I was following a particular path through the code and it keep popping up.  I was probably flipping back and forth in the same set of files.  Besides the QtGL and QtSW classes I have not really seen it too much.  I think it is only in 3 other classes CADView, main and main_window.  Then mostly only in CADView.  I think there probably is a way to abstract away from it.  However, it is not that bad, my main issues is I did something silly and didn't realize it was a selectable attribute.  Again I think you have done a fantastic job with what you have done so far.  I think it is important to clean up now while the code base is still fairly manageable.  The more it grows the more work it is to clean up.  The code appears to be the result of a lot of prototyping.  Which is normal early on.  The work you did on integrating with DM and FB is probably something I would have struggled with. This integration is what has me excited to work on QGED.  There still some integration challenges but you definitely have tackled the toughest one in my opinion.  The rest I feel I can help on.</p>",
+        "id": 275890660,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647667141
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span>  One thing I could use some help on - I'm trying in event_filter.cpp to detect when my focus is on the display views, and then (and only then) trigger the N key binding to shoot nirt.  Unfortunately I've not been able to successfully narrow the focus for that action - it either always triggers or never does (my function to detect if the active widget is a child of the widget of interest doesn't work - I suspect it may be because I'm not establishing proper parent/child relationships for the widget but am not sure.)  Is this something you have experience with?</p>",
+        "id": 276233756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1647973392
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> when you get the focuswidget you need to use the main window.  This method returns the last widget under that widget that had the focus.  You are always checking from the c4 down instead of mainwindow down</p>\n<p>static bool<br>\nwidget_active(QWidget *w, QWidget *checkWidget)<br>\n{<br>\n    bu_log(\"w: %p\\n\", (void *)w);<br>\n    QWidget *fw = w-&gt;focusWidget();<br>\n    bu_log(\"fw: %p\\n\", (void *)fw);<br>\n    QWidget *cw = fw;<br>\n    while (cw) {<br>\n        if (cw == checkWidget) {<br>\n            return true;<br>\n            //return false;  // Disable until parent/child relationships are fixed...<br>\n    }<br>\n    cw = (QWidget *)cw-&gt;parent();<br>\n    bu_log(\"cw: %p\\n\", (void *)fw);<br>\n    }<br>\n    return false;<br>\n}</p>\n<p>bool QGEDFilter::eventFilter(QObject *, QEvent *e)<br>\n{<br>\n    CADApp *c = (CADApp *)qApp;<br>\n    if (!c || !c-&gt;w)<br>\n    return false;</p>\n<div class=\"codehilite\"><pre><span></span><code>// TODO - look into QShortcut, see if it might be a better way to manage this\nif (e-&gt;type() == QEvent::KeyPress) {\n// If we want to have key bindings that run GED commands, we will need\n// application level information - the view widget doesn&#39;t know about\n// the gedp.  To do this, we check if the central widget or one of its\n// children has the focus, and check if the key event is one of our\n// bound events.  If so, we may perform the bound action.\nQKeyEvent *k = (QKeyEvent *)e;\nif (k-&gt;modifiers().testFlag(Qt::ShiftModifier) == true &amp;&amp; k-&gt;key() == &#39;N&#39;) {\n    if (!widget_active(c-&gt;w, c-&gt;w-&gt;c4))\n    return false;\n</code></pre></div>",
+        "id": 276248386,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647980168
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> BTW you could have used application::focuswidget to return the widget with the current focus in the application</p>",
+        "id": 276249142,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647980556
+    },
+    {
+        "content": "<p>widget_active(QApplication *app, QWidget *checkWidget)<br>\n{<br>\n    bu_log(\"w: %p\\n\", (void *)app);<br>\n    QWidget *fw = app-&gt;focusWidget();<br>\n    bu_log(\"fw: %p\\n\", (void *)fw);<br>\n    QWidget *cw = fw;<br>\n    while (cw) {<br>\n        if (cw == checkWidget) {<br>\n            return true;<br>\n            //return false;  // Disable until parent/child relationships are fixed...<br>\n    }<br>\n    cw = (QWidget *)cw-&gt;parent();<br>\n    bu_log(\"cw: %p\\n\", (void *)fw);<br>\n    }<br>\n    return false;<br>\n}</p>",
+        "id": 276249373,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1647980674
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Ah, qApp does do the trick - thanks!</p>",
+        "id": 276283005,
+        "sender_full_name": "starseeker",
+        "timestamp": 1648004003
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Update on my refactoring.  I'm still working on it.  I decided to go a little deeper than just naming clean up.  It will most likely be next week before I have something you can review</p>",
+        "id": 276657917,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1648231554
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> No worries - I've got my head in another part of the display logic right now anyway, so it's  a good time for what you're doing both tactically and strategically.  The next big stab I take at qged will probably be to try and implement as much feature parity as possible with MGED/Archer, so we definitely want the foundation in place before all that extra code gets written/translated.  There's probably still some backend work to be done moving things to libs (just to pick one example I know the fancy MGED pattern tool logic needs to move down at least to clone, and possibly deeper) but once editing support is in place it's going to be a matter of going through the GUIs, seeing what's missing, and making it happen :-)</p>",
+        "id": 276741835,
+        "sender_full_name": "starseeker",
+        "timestamp": 1648323067
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span>  How's the refactor going?</p>",
+        "id": 277554921,
+        "sender_full_name": "starseeker",
+        "timestamp": 1648937845
+    },
+    {
+        "content": "<p>Progress is being made but I’m still in the middle part of the effort.  I<br>\nwas able to get some significant cycles today. But little slow last week.<br>\nAm I holding you up yet?</p>",
+        "id": 277555376,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1648938476
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> nope, not yet - just checking to see how it was/is going.  I'll probably be focused on display logic at least a couple more weeks, based on what I'm seeing so far.</p>",
+        "id": 277565204,
+        "sender_full_name": "starseeker",
+        "timestamp": 1648953082
+    },
+    {
+        "content": "<p>Very much prototype, but here's Level-of-Detail (LoD) in quad view, with each view showing a different level of zoom and detail.  You can see the consequences of zooming out or in in the frames-per-second (FPS) meters in the lower left corners. <a href=\"/user_uploads/1549/kawgmxSp7iKwCNSHD8evTx6A/lod_quad.png\">lod_quad.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/kawgmxSp7iKwCNSHD8evTx6A/lod_quad.png\" title=\"lod_quad.png\"><img src=\"/user_uploads/1549/kawgmxSp7iKwCNSHD8evTx6A/lod_quad.png\"></a></div>",
+        "id": 278777519,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649816969
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> </p>\n<p>I'm still at least a week or two from being done with what I'm working on.  I finished what I was doing on the model stuff and I am working on the plugin stuff right now.  Once I get that refactored I will have to update the existing plugins to follow the refactored approach.  After that I'm going to refector the the whole GL/SW to use a base class so that we can get rid of all the #ifs.  I pretty much think after that I'm done refactoring except I need to add all the standard comments at the end of files and document the classes and methods.</p>\n<p>Question for you, I don't really understand what you are doing with what I think is, you are selecting multiple objects for editing?  Is the concept that you can select multiple objects for editing then each object is highlighted in the tree and there is a button in the object editor dock?</p>",
+        "id": 278829378,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1649857069
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> </p>\n<p>Awesome!  Make sure with the plugins to test \"both ways\" - i.e., update the view from both the GUI and the command line and make sure the view info plugin gets the word, and make sure the view control plugin can update the scene without anything getting into signal loops.  I had to add some debug printing early on to figure out when I was triggering signals incorrectly - presumably a better architected solution will help minimize those issues, but I'm still scarred from the early experiences so I'm paranoid ;-)</p>\n<p>I've not hammered out the editing in substantial detail yet - are you referring to the highlighting?  My concept is to select one primary instance for editing in the tree, with the highlighting indicating which other instances will also be impacted by the proposed edits.  pinewood, for example, reuses the same objects in the hierarchy, so an edit to one instance of a solid in that hierarchy also has implications for the other instances.  I wasn't planning to allow editing of multiple primitive solids or comb tree's simultaneously - just to visually indicate when that single object/hierarchy edit has non-local implications.</p>",
+        "id": 278881756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649879850
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Gpv3HQDx7rB49Jmxy9pZxifv/image.png\">image.png</a> </p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Gpv3HQDx7rB49Jmxy9pZxifv/image.png\" title=\"image.png\"><img src=\"/user_uploads/1549/Gpv3HQDx7rB49Jmxy9pZxifv/image.png\"></a></div><p>The highlights makes since.  However, if the user has not drilled down then that path would not be highlighted? I hope the image comes through..  What I'm asking about is what is the function of the boxes I have underlined with the yellow line</p>",
+        "id": 278900594,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1649889623
+    },
+    {
+        "content": "<p>Ah, got it.  The boxes are intended to select individual tools, a.l.a. the Gimp image editor.  So in the case of the view mode, you could select a measurement tool that would put the mouse into a \"click and drag\" mode like Archer's that would measure distances in the scene.  Another button would bring up controls for raytracing, similar to the raytrace control panel.</p>\n<p>For the editors, my original thought for the object editing was that each primitive would have its own button and custom dialog.  If an object is selected and the object edit panel is selected, the panel would then default to the button corresponding to the selected solid.  If a different button is selected, or the highlighted selection is cleared, then the default would be to create a new object of the selected type.</p>\n<p>The instance editing is more limited in scope, in that it would only be editing the properties applied to instances of objects in combs, and it may not make sense to have a button palette for that mode.  That's the editing area I've given the least amount of thought to.</p>",
+        "id": 278905393,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649893354
+    },
+    {
+        "content": "<p>The clone tool probably fits in there somewhere too - it would be really cool to be able to \"preview\" the results of clone commands before applying them.  And there are surely others - longer term would like to make them all discoverable as \"tools\" to be selected from the palettes.</p>",
+        "id": 278905514,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649893458
+    },
+    {
+        "content": "<p>There are other capabilities, sometimes exposed as \"modes\" in MGED, that we want to express in some fashion.  The \"pick\" component is one example, where a mouse click shoots a ray into the view or otherwise checks for elements along that line and selects one or more of them.  There's also nirt, the angle-distance cursor, and probably others I'm forgetting.</p>",
+        "id": 278906008,
+        "sender_full_name": "starseeker",
+        "timestamp": 1649893868
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> did you have any thoughts on the GUI palette stuff?  Is there a better way to go about that?</p>",
+        "id": 279689097,
+        "sender_full_name": "starseeker",
+        "timestamp": 1650552032
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Still working through this right now.  However, my thinking is there are 2 types of plugins.  One that provides core functionality.  The other type is ones that provide more add on type of functionality.  The core plugins are passed essentially a reference to the application that allows the plugin to add all types of components.  The add on type of plugin works similar to your palette stuff but maybe slightly more prescriptive and restrictive.  Prescriptive where you want the add on to go.  Restrictive is instead of an open ended widget they specify using a property api that we provide from the platform.  I'm working through what I think the component architecture should look like.  I would like to provide a lot of flexibility but at the same time have a structure to how the components interact.  If you have ever looked blender I like their whole editor approach to doing things.  They have about 23 base editors that all the functionality is provided with.  Then they have various layouts that the user can easily flip between depending on the primary function the user trying to perform.  Anyway just trying to work through that design and how to connect the workspace/editors/tools/modes to be seamless and intuitive.  Somewhat modeling after blender but more brlcad (CSG) functional.  The idea is to get the concepts right from the start to allow easy extension of the platform.  It is tough to balance between flexibility and complexity.  Too flexible and it becomes to complex.  However, a lack of the right amount of flexibility and it becomes too limiting.  Anyway still baking on it I'm sure alot of the ideas I'm having right now I will just toss out in the interest of getting something done then later we can always do more refactoring to move the platform to more of what we are looking for.</p>",
+        "id": 279695085,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1650554607
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> sorry long answer for a simple question.  I'm still not sure about the core functionality coming from plugins.  I'm concerned this will lead to alot of coupling between plugins.</p>",
+        "id": 279695563,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1650554830
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> Have you ever looked at blender?  What are your thoughts?</p>",
+        "id": 279695943,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1650555006
+    },
+    {
+        "content": "<p>I've not looked at blender in detail (it's code is GPL, so that's a no-go, and I don't actually do much 3D modeling myself)</p>",
+        "id": 279720441,
+        "sender_full_name": "starseeker",
+        "timestamp": 1650565644
+    },
+    {
+        "content": "<p>My thinking, for what it's worth, was to implement as plugins so that if we do end up having to significantly rework the app architecture down the road, the plugins would (mostly) consist of self-contained widgets and signal connections that could be repurposed fairly easily to a new setup.  I've pushed a fair number of things all the way down into libqtcad, and non-GUI functionality lower than that (for example, the polygon manipulation logic itself lives in low level C libraries now and the plugin's primary role is to define widgets and supply mouse events.)</p>",
+        "id": 279720986,
+        "sender_full_name": "starseeker",
+        "timestamp": 1650565875
+    },
+    {
+        "content": "<p>I had no intention of even looking at the blender code just looking at from a design point of view. I like your approach my question is where is the line between platform and plug-in.  If we are not careful we can create solution where one plugin needs to connect their slots to the signals of another plugin. Are we good with that?  For example we could put the outline in a plugin</p>",
+        "id": 279728890,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1650569774
+    },
+    {
+        "content": "<p>Hmm.  I think we definitely don't want plugins talking directly to other plugins.</p>",
+        "id": 279729044,
+        "sender_full_name": "starseeker",
+        "timestamp": 1650569846
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Oh, meant to ask - as you had mentioned wanting to work on how the interface layout is managed, should I dig in to the primitive editing?</p>",
+        "id": 280570614,
+        "sender_full_name": "starseeker",
+        "timestamp": 1651190249
+    },
+    {
+        "content": "<p>sounds like a good idea</p>",
+        "id": 280644181,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1651244416
+    },
+    {
+        "content": "<p>Tab completion on the qged command line: <a href=\"/user_uploads/1549/IpCKtjDknO2kbCwZNOpgTxfl/qged_tab_completion.gif\">qged_tab_completion.gif</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/IpCKtjDknO2kbCwZNOpgTxfl/qged_tab_completion.gif\" title=\"qged_tab_completion.gif\"><img src=\"/user_uploads/1549/IpCKtjDknO2kbCwZNOpgTxfl/qged_tab_completion.gif\"></a></div>",
+        "id": 281508975,
+        "sender_full_name": "starseeker",
+        "timestamp": 1651884193
+    },
+    {
+        "content": "<p>Gradient background in libdm/qged:  <a href=\"/user_uploads/1549/NxOwqMW8dZNQFmwNshGcKFbR/qged_gradient_background.mp4\">qged_gradient_background.mp4</a></p>",
+        "id": 283694184,
+        "sender_full_name": "starseeker",
+        "timestamp": 1653363602
+    },
+    {
+        "content": "<p>Specific instance drawing control from command line (and successful raytracing of partially drawn hierarchy).  (For context, file behavior is first shown in MGED and Archer.)  <a href=\"/user_uploads/1549/KMyza9qwNkHtq1D6xk-cNxIQ/qged_instance_drawing_2022-06-03.mp4\">qged_instance_drawing_2022-06-03.mp4</a></p>",
+        "id": 284954624,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654313072
+    },
+    {
+        "content": "<p>This one is a bit tricky, as the changes are invasive and will break MGED under certain circumstances.</p>",
+        "id": 284954947,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654313519
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> If you feel like hunting for a bug, I've got one - when I enable quad view, do an embedded raytrace, and then select a different quad view, I lose the raytraced image in the quad view that is no longer selected.  Something specific to the framebuffer - the wireframe is OK.</p>",
+        "id": 285121453,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654526589
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Possibly related - screengrab is grabbing the wrong image - it is getting part of the qged window??</p>",
+        "id": 285335352,
+        "sender_full_name": "starseeker",
+        "timestamp": 1654652718
+    },
+    {
+        "content": "<p>I take a look today</p>",
+        "id": 285395898,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1654696839
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> Were you able to look at the above issue?</p>",
+        "id": 289887867,
+        "sender_full_name": "starseeker",
+        "timestamp": 1658068314
+    },
+    {
+        "content": "<p>qged running on Mac: <br>\n<a href=\"/user_uploads/1549/ljVy15YM53Q2mTn7Jyz-VYZf/Screen-Shot-2022-09-23-at-10.57.21-AM.png\">Screen-Shot-2022-09-23-at-10.57.21-AM.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/ljVy15YM53Q2mTn7Jyz-VYZf/Screen-Shot-2022-09-23-at-10.57.21-AM.png\" title=\"Screen-Shot-2022-09-23-at-10.57.21-AM.png\"><img src=\"/user_uploads/1549/ljVy15YM53Q2mTn7Jyz-VYZf/Screen-Shot-2022-09-23-at-10.57.21-AM.png\"></a></div>",
+        "id": 300393037,
+        "sender_full_name": "Sean",
+        "timestamp": 1663946928
+    },
+    {
+        "content": "<p>Overall, looking really good; the hierarchy and command line are fantastic.  Did get some crashes and the fb seems to not be working quite right, but was able to navigate around easily enough for basic display.</p>",
+        "id": 300394046,
+        "sender_full_name": "Sean",
+        "timestamp": 1663947190
+    },
+    {
+        "content": "<p>Here's one of the crashes:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>Crashed Thread:        0  Dispatch queue: com.apple.main-thread\n\nException Type:        EXC_BAD_ACCESS (SIGSEGV)\nException Codes:       KERN_INVALID_ADDRESS at 0x0000000000000008\nException Note:        EXC_CORPSE_NOTIFY\n\nTermination Signal:    Segmentation fault: 11\nTermination Reason:    Namespace SIGNAL, Code 0xb\nTerminating Process:   exc handler [31256]\n\nVM Regions Near 0x8:\n--&gt;\n    __TEXT                      105187000-1051fb000    [  464K] r-x/r-x SM=COW  /Users/*\n\nThread 0 Crashed:: Dispatch queue: com.apple.main-thread\n0   libged.20.0.1.dylib             0x0000000105589ff5 csg_wireframe_update(bv_scene_obj*, bview*, int) + 1125 (draw.cpp:140)\n1   libdm.20.0.1.dylib              0x0000000105e47f84 draw_scene_obj + 100 (view.c:558)\n2   libdm.20.0.1.dylib              0x0000000105e48018 draw_scene_obj + 248 (view.c:566)\n3   libdm.20.0.1.dylib              0x0000000105e48018 draw_scene_obj + 248 (view.c:566)\n4   libdm.20.0.1.dylib              0x0000000105e483c6 dm_draw_objs + 566 (view.c:749)\n5   libqtcad.20.0.1.dylib           0x000000010539e767 QtGL::paintGL() + 791 (QtGL.cpp:156)\n6   org.qt-project.QtOpenGLWidgets  0x0000000106a6635a QOpenGLWidgetPrivate::invokeUserPaint() + 234\n7   org.qt-project.QtWidgets        0x000000010ac15491 QWidget::event(QEvent*) + 1999\n8   org.qt-project.QtOpenGLWidgets  0x0000000106a6707e QOpenGLWidget::event(QEvent*) + 500\n9   org.qt-project.QtWidgets        0x000000010abd7775 QApplicationPrivate::notify_helper(QObject*, QEvent*) + 247\n10  org.qt-project.QtWidgets        0x000000010abd8660 QApplication::notify(QObject*, QEvent*) + 532\n</code></pre></div>",
+        "id": 300394105,
+        "sender_full_name": "Sean",
+        "timestamp": 1663947205
+    },
+    {
+        "content": "<p>I was clicking around on the hierarchy widget when it did that.</p>",
+        "id": 300394197,
+        "sender_full_name": "Sean",
+        "timestamp": 1663947236
+    },
+    {
+        "content": "<p>That looks like it might be related to the adaptive CSG wireframe drawing - that's in a funny state right now, I've got some work to do there</p>",
+        "id": 300470949,
+        "sender_full_name": "starseeker",
+        "timestamp": 1663980560
+    },
+    {
+        "content": "<p>Little surprised it'd be on - I thought I had that off by default right now</p>",
+        "id": 300471017,
+        "sender_full_name": "starseeker",
+        "timestamp": 1663980621
+    },
+    {
+        "content": "<p>main may be a bit iffy behavior wise - I've been reengineering the drawing layer for scaling to large models in the draw_rework branch, so I've not checked the main behavior in a little while</p>",
+        "id": 300471169,
+        "sender_full_name": "starseeker",
+        "timestamp": 1663980776
+    },
+    {
+        "content": "<p>Once I'm done hammering on that I'll have to do another demo video, particularly for the selection bits</p>",
+        "id": 300471265,
+        "sender_full_name": "starseeker",
+        "timestamp": 1663980863
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span> were you still planning to take a look at the quad view issues above?  I'll need to start digging into it fairly soon, but didn't want to duplicate effort if you're looking at it.</p>",
+        "id": 310458714,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668619058
+    },
+    {
+        "content": "<p>Update - I think I have an inclining of what's going on, just not sure what to do about it yet.  The mechanism being used to add an \"active\" border around the current quad window is also resizing the window, which triggers the resize callbacks.  That in turn invalidates the old embedded framebuffer contents, since the fb size has changed along with the window size.</p>",
+        "id": 310484070,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668627039
+    },
+    {
+        "content": "<p>OK, I think I may have found an approach - needs to be tested on more than just Linux to make sure it behaves</p>",
+        "id": 310521686,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668641964
+    },
+    {
+        "content": "<p>Cute - looking into the screengrab problem, it is specific to the QtGL backend - the QtSW (software rasterizer) version works.  The actual OpenGL version is pulling its image from the lower left corner of the app window.  Probably means the whole window is being rendered with OpenGL and the naive glReadPixels is active for the whole Window, not just the QtGL widget.</p>",
+        "id": 310707709,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668722655
+    },
+    {
+        "content": "<p>Yep - need the Qt widget for that case.</p>",
+        "id": 310714760,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668725599
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"271738\">@David Reeves</span>   if you get a chance, I'd be curious if you can test the draw_rework branch qged</p>",
+        "id": 310714928,
+        "sender_full_name": "starseeker",
+        "timestamp": 1668725657
+    },
+    {
+        "content": "<p>I have been hammered for a while with my paying gig no relief in sight. Go<br>\nahead if you need to</p>",
+        "id": 311431762,
+        "sender_full_name": "David Reeves",
+        "timestamp": 1669051908
+    }
+]

@@ -1,0 +1,1462 @@
+<html>
+<head><meta charset="utf-8"><title>pnts in vol · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html">pnts in vol</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="207229586"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207229586" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207229586">(Aug 18 2020 at 07:13)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> something about r76818 feels really off (designwise).  I get what it's for, but it feels rather wrong design approach to me so highly specialized to points and new nomenclature (inside/outside) when the concept itself is common.  you basically implemented the union operator on a point set.</p>
+<p>A generality we've had on deck for a while is the introduction of a "cg" command to "compile geometry", which would bake/simplify a comb with expression "volobj u pntsobj" into a newcomb with "newpnts" expression.  This would be an excellent first step.</p>
+
+
+
+<a name="207229684"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207229684" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207229684">(Aug 18 2020 at 07:15)</a>:</h4>
+<p>That would set the stage for other automatic simplification, tree contractions, null object detections, etc.  even if initially it only does this one union pnts case.</p>
+
+
+
+<a name="207247262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207247262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207247262">(Aug 18 2020 at 11:15)</a>:</h4>
+<p>I'm not quite following - maybe it's just me, but I would expect "cg volobj u pntsobj" to  return something that incorporated both volobj and pntsobj.  I think we're looking at intersect and subtraction operators here(?)  which would make it:</p>
+<p>cg pntsobj + volobj = pnts_inside_volobj<br>
+cg pntsobj - volobj = pnts_outside_volobj</p>
+
+
+
+<a name="207247414"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207247414" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207247414">(Aug 18 2020 at 11:17)</a>:</h4>
+<p>cg pntsobj u volobj would have to just return pntsobj, since volobj wouldn't have any points.  For pnts on pnts interactions it would be better defined:</p>
+<p>cg pngsobj u pntsobj2 = all_pnts_in_both<br>
+cg pntsobj + pntsobj2 = pnts_only_in_both<br>
+cg pntsobj - pntsobj2 = pnts_in_pntsobj_but_not_in_pntsobj2</p>
+
+
+
+<a name="207247513"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207247513" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207247513">(Aug 18 2020 at 11:19)</a>:</h4>
+<p>There would have to be some convention about the primitive type of the lefthand object dictating the type of the output object, or something along those lines.</p>
+
+
+
+<a name="207247638"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207247638" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207247638">(Aug 18 2020 at 11:20)</a>:</h4>
+<p>We'd also have to think about what something like cg sphobj u pntsobj would mean - do we expand the sphere to contain the points? What do we do with (say) cg sphobj u sketchobj?</p>
+
+
+
+<a name="207278258"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207278258" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207278258">(Aug 18 2020 at 16:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  is r76830 reasonably close to what you were thinking?</p>
+
+
+
+<a name="207302257"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207302257" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207302257">(Aug 18 2020 at 19:11)</a>:</h4>
+<p>no, no -- it would rely on existing object, not be args, and act just like a compiler.   instead of an expression, you'd compile a given object like "cg some_comb" or "cg -o compiled_obj some_comb".</p>
+
+
+
+<a name="207302921"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207302921" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207302921">(Aug 18 2020 at 19:16)</a>:</h4>
+<p>So you'd have to make a comb and then evaluate it to do the point subset op?</p>
+
+
+
+<a name="207303006"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303006" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303006">(Aug 18 2020 at 19:16)</a>:</h4>
+<p>yeah, the compiler would be written to recognize known patterns (just like the c/c++ optimizer in cc).  so if we have some_comb = "volobj x pntsobj", it'd see OBJ1 OP OBJ2 and match OP==intersect with either OBJ1 or OBJ2 with a pnts type, and know it can reduce/replace some_comb with a new pnts object</p>
+
+
+
+<a name="207303060"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303060" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303060">(Aug 18 2020 at 19:17)</a>:</h4>
+<p>codewise, it still just calls exactly what you wrote</p>
+
+
+
+<a name="207303113"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303113" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303113">(Aug 18 2020 at 19:17)</a>:</h4>
+<p>just, UI is through a generalized optimization that we can extend with other optimizable patterns</p>
+
+
+
+<a name="207303221"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303221" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303221">(Aug 18 2020 at 19:18)</a>:</h4>
+<p>I guess my main difficulty is that's not going to be at all what I think of as a user when I'm asking "how do I figure out which points are inside this volume?"  I'd never think to look to that feature to get there, personally...</p>
+
+
+
+<a name="207303226"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303226" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303226">(Aug 18 2020 at 19:18)</a>:</h4>
+<p>like detecting subtractions that do nothing, or replacing huge bot subtractions with minimal bot subtractions, etc</p>
+
+
+
+<a name="207303402"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303402" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303402">(Aug 18 2020 at 19:20)</a>:</h4>
+<p>well you wouldn't necessarily think to perform boolean operations to model geometry either -- that's just fundamentally learning the system</p>
+
+
+
+<a name="207303443"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303443" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303443">(Aug 18 2020 at 19:20)</a>:</h4>
+<p>the generality and simplicity would give it powerful flexibility too</p>
+
+
+
+<a name="207303652"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303652" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303652">(Aug 18 2020 at 19:22)</a>:</h4>
+<p>I guess I think of it as a fundamentally analytic operation rather than a geometric one... I would probably have tried to get it in the analyze command somehow.</p>
+<p>Anyway.  I'll see if I can tweak the existing cg code to look for a comb of the right form, but anything involving tree walking usually means a headache...</p>
+
+
+
+<a name="207303671"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303671" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303671">(Aug 18 2020 at 19:22)</a>:</h4>
+<p>also, you're currently concerned with points, but the question of what's inside something else is not intrinsically specific to points, and the idea of the concept extending to other object types quickly gets out of control</p>
+
+
+
+<a name="207303834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303834">(Aug 18 2020 at 19:24)</a>:</h4>
+<p>Agreed.  Conceptually though, what's the distinction between a CSG boolean expression and a comb tree?  Isn't the former a serialization of the latter?</p>
+
+
+
+<a name="207303838"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303838" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303838">(Aug 18 2020 at 19:24)</a>:</h4>
+<p>just as likely to what to know what rpp's or sph's are inside some other object, or what triangles are inside another mesh and so on.</p>
+
+
+
+<a name="207303913"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207303913" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207303913">(Aug 18 2020 at 19:25)</a>:</h4>
+<p>comb tree is an object whose structure can be queried</p>
+
+
+
+<a name="207304017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304017">(Aug 18 2020 at 19:26)</a>:</h4>
+<p>Right, but I mean from the cg command's perspective - why not feed in an evaluation string?  (As one of the options - not arguing against combs)</p>
+
+
+
+<a name="207304051"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304051" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304051">(Aug 18 2020 at 19:26)</a>:</h4>
+<p>an expression is just text.  maybe conforms to a structure, maybe not, is it ad hoc?  is it the same as comb command's expression parser or the ted command's or some other?  is it prefix?  postfix?  infix?</p>
+
+
+
+<a name="207304128"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304128" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304128">(Aug 18 2020 at 19:27)</a>:</h4>
+<p>Sure, but we already have to solve the problem anyway for the comb command.</p>
+
+
+
+<a name="207304260"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304260" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304260">(Aug 18 2020 at 19:28)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207304017">said</a>:</p>
+<blockquote>
+<p>Right, but I mean from the cg command's perspective - why not feed in an evaluation string?  (As one of the options - not arguing against combs)</p>
+</blockquote>
+<p>Same reason compilers typically don't support something like:  cc "int main() {printf(\"hello world\\n\"); return 0;"</p>
+
+
+
+<a name="207304321"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304321" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304321">(Aug 18 2020 at 19:28)</a>:</h4>
+<p>Heh - I would have thought they would, actually...</p>
+
+
+
+<a name="207304371"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304371" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304371">(Aug 18 2020 at 19:29)</a>:</h4>
+<p>I mean they could, but imagine how a compiler expands in complexity...</p>
+
+
+
+<a name="207304478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304478">(Aug 18 2020 at 19:30)</a>:</h4>
+<p>there's simplicity and improved usability in having consistency, you provide a file</p>
+
+
+
+<a name="207304534"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304534" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304534">(Aug 18 2020 at 19:30)</a>:</h4>
+<p>making cg actually mirror cc would be good for the same reasons like having search mirror find</p>
+
+
+
+<a name="207304708"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304708" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304708">(Aug 18 2020 at 19:32)</a>:</h4>
+<p>/me winces.  I see the argument and I'm willing to give it a shot, but it feels to me  like a significant sacrifice in usability and intuitiveness to require compiler-esque thinking to do geometry operations.</p>
+
+
+
+<a name="207304858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304858">(Aug 18 2020 at 19:33)</a>:</h4>
+<p>So what do you want me to get set up in the cg command to be "minimally functional?"  I'd like to leave the functionality at least exposed (undocumented) where it can be accessed</p>
+
+
+
+<a name="207304864"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304864" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304864">(Aug 18 2020 at 19:33)</a>:</h4>
+<p>I don't deny that it's non-obvious, but I think it's one of those things someone learns just once and then uses it and takes it for granted.</p>
+
+
+
+<a name="207304956"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304956" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304956">(Aug 18 2020 at 19:34)</a>:</h4>
+<p>there is an alternative design we could go with that avoids the expansion of per-type subcommands</p>
+
+
+
+<a name="207304979"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207304979" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207304979">(Aug 18 2020 at 19:34)</a>:</h4>
+<p>instead of cg</p>
+
+
+
+<a name="207305077"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207305077" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207305077">(Aug 18 2020 at 19:35)</a>:</h4>
+<p>cg's "intent" is to reduce / optimize / evaluate geometry into a more optimal, condensed, pre-evaluated, or compressed form</p>
+
+
+
+<a name="207305136"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207305136" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207305136">(Aug 18 2020 at 19:35)</a>:</h4>
+<p>you're wanting to filter geometry</p>
+
+
+
+<a name="207305229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207305229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207305229">(Aug 18 2020 at 19:36)</a>:</h4>
+<p>while a compiler can do this particular filtering because it's a reduction, there's plenty it can't do as a compiler</p>
+
+
+
+<a name="207305783"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207305783" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207305783">(Aug 18 2020 at 19:40)</a>:</h4>
+<p>towards that end, we could go with a different verb / action command that's more focused on lower level processing like an "inside" command (or "evaluate" command with an "inside" subcommand)</p>
+
+
+
+<a name="207305868"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207305868" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207305868">(Aug 18 2020 at 19:41)</a>:</h4>
+<p>probably a way to merge it into "analyze"</p>
+
+
+
+<a name="207306009"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306009" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306009">(Aug 18 2020 at 19:42)</a>:</h4>
+<p>That feels like a conceptually better fit to me - the cg compile could then call the analyze operations as needed for the reduction.</p>
+
+
+
+<a name="207306187"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306187" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306187">(Aug 18 2020 at 19:44)</a>:</h4>
+<p>We'll  need to tweak analyze - right now it takes a list of object names, no subcommands.</p>
+
+
+
+<a name="207306269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306269">(Aug 18 2020 at 19:45)</a>:</h4>
+<p>yeah, and this is a dramatically different "output" so does beg for subcommands to differentiate</p>
+
+
+
+<a name="207306472"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306472" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306472">(Aug 18 2020 at 19:46)</a>:</h4>
+<p>I guess the current behavior could be characterize as "summary" - existing behavior of analyze could then become "analyze summary", which in principle might be considered minimally impacting...</p>
+
+
+
+<a name="207306628"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306628" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306628">(Aug 18 2020 at 19:47)</a>:</h4>
+<p>or "summarize" if we're going noun verb</p>
+
+
+
+<a name="207306810"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306810" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306810">(Aug 18 2020 at 19:49)</a>:</h4>
+<p>could also go the switch route ala gqa</p>
+
+
+
+<a name="207306870"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207306870" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207306870">(Aug 18 2020 at 19:49)</a>:</h4>
+<p>since it's the other "analyze" command that it'd likely merge with eventually</p>
+
+
+
+<a name="207307144"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307144" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307144">(Aug 18 2020 at 19:51)</a>:</h4>
+<p>I'll experiment with refactoring analyze a bit - that's pretty simple, from the looks of things.  I'll do it in a branch though - for release I think I just need to back this whole thing out.  The immediate need was met, so there's no pressing need for the pnt in/out test in the main release right now.</p>
+
+
+
+<a name="207307173"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307173" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307173">(Aug 18 2020 at 19:51)</a>:</h4>
+<p>actually now that I'm looking...</p>
+
+
+
+<a name="207307265"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307265" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307265">(Aug 18 2020 at 19:52)</a>:</h4>
+<p>I'm personally not a big fan of gqa's option handling... lots of negative user karma over the years.</p>
+
+
+
+<a name="207307275"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307275" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307275">(Aug 18 2020 at 19:52)</a>:</h4>
+<p>I suggest mirroring "analyze" like the "check" command, at least in synopsys terms</p>
+
+
+
+<a name="207307298"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307298" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307298">(Aug 18 2020 at 19:52)</a>:</h4>
+<p>/me checks check</p>
+
+
+
+<a name="207307301"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307301" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307301">(Aug 18 2020 at 19:52)</a>:</h4>
+<p>right, that's why I say it</p>
+
+
+
+<a name="207307323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307323">(Aug 18 2020 at 19:52)</a>:</h4>
+<p>nobody remembers -Av</p>
+
+
+
+<a name="207307361"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307361" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307361">(Aug 18 2020 at 19:53)</a>:</h4>
+<p>but "check volume obj" is pretty darn simple and declarative</p>
+
+
+
+<a name="207307442"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307442" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307442">(Aug 18 2020 at 19:53)</a>:</h4>
+<p>/me nods - slightly different mechanism, but this looks similar in some ways to where I ended up with the brep command</p>
+
+
+
+<a name="207307583"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307583" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307583">(Aug 18 2020 at 19:54)</a>:</h4>
+<p>yeah, mechanism doesn't have to be the same</p>
+
+
+
+<a name="207307611"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307611" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307611">(Aug 18 2020 at 19:54)</a>:</h4>
+<p>I see check's not using bu_opt yet, so that'd be an improvement</p>
+
+
+
+<a name="207307687"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307687" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307687">(Aug 18 2020 at 19:55)</a>:</h4>
+<p>is check supposed to replace or merge with analyze eventually?</p>
+
+
+
+<a name="207307851"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207307851" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207307851">(Aug 18 2020 at 19:56)</a>:</h4>
+<p>/me is mentally substituting "analyze" for "check" in front of each of these and so far they all work...</p>
+
+
+
+<a name="207308005"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308005" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308005">(Aug 18 2020 at 19:57)</a>:</h4>
+<p>I suppose they could but there is a problem with the different output types and that might be a reason to keep them separated</p>
+
+
+
+<a name="207308042"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308042" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308042">(Aug 18 2020 at 19:58)</a>:</h4>
+<p>/me nods</p>
+
+
+
+<a name="207308107"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308107" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308107">(Aug 18 2020 at 19:58)</a>:</h4>
+<p>as analyze is currently written, yeah, they totally merge as the summary it produces is also analytic, numbers, info</p>
+
+
+
+<a name="207308144"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308144" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308144">(Aug 18 2020 at 19:58)</a>:</h4>
+<p>it's having a command whose output is geometric that becomes very distinguishing</p>
+
+
+
+<a name="207308294"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308294" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308294">(Aug 18 2020 at 19:59)</a>:</h4>
+<p>not to say the concepts couldn't merge cleanly</p>
+
+
+
+<a name="207308508"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308508" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308508">(Aug 18 2020 at 20:01)</a>:</h4>
+<p>analyze volume -o output obj1 obj2   could work for example, but I'd probably expect 'output' to be an attribute object of some sort</p>
+
+
+
+<a name="207308651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308651">(Aug 18 2020 at 20:02)</a>:</h4>
+<p>or a txt even, in that case...</p>
+
+
+
+<a name="207308670"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308670" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308670">(Aug 18 2020 at 20:02)</a>:</h4>
+<p>well, bo in BRL-CAD</p>
+
+
+
+<a name="207308714"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308714" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308714">(Aug 18 2020 at 20:02)</a>:</h4>
+<p>we don't have txt objects yet</p>
+
+
+
+<a name="207308732"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308732" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308732">(Aug 18 2020 at 20:02)</a>:</h4>
+<p>we have binunif, that'd be an alternative</p>
+
+
+
+<a name="207308739"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308739" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308739">(Aug 18 2020 at 20:03)</a>:</h4>
+<p>Ah, right - couldn't remember where we were with that.</p>
+
+
+
+<a name="207308777"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308777" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308777">(Aug 18 2020 at 20:03)</a>:</h4>
+<p>better would probably be a json-style rich object</p>
+
+
+
+<a name="207308859"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308859" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308859">(Aug 18 2020 at 20:04)</a>:</h4>
+<p>that way it could structurally contain the whole report in structured form</p>
+
+
+
+<a name="207308885"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207308885" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207308885">(Aug 18 2020 at 20:04)</a>:</h4>
+<p>there is one issue, though..</p>
+
+
+
+<a name="207309016"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309016" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309016">(Aug 18 2020 at 20:05)</a>:</h4>
+<p>how the usage would look for this command, without having completely different syntax (i.e., complexity), what [object(s)] means</p>
+
+
+
+<a name="207309044"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309044" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309044">(Aug 18 2020 at 20:05)</a>:</h4>
+<p>e.g., analyze inside -o output obj1 obj2 obj3</p>
+
+
+
+<a name="207309157"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309157" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309157">(Aug 18 2020 at 20:06)</a>:</h4>
+<p>could limit it to pairs of objects, then it'd be consistent</p>
+
+
+
+<a name="207309549"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309549" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309549">(Aug 18 2020 at 20:09)</a>:</h4>
+<p>/me figured the subcommands would have their own syntax</p>
+
+
+
+<a name="207309577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309577">(Aug 18 2020 at 20:09)</a>:</h4>
+<p>could change the command too, instead of "inside" it could be "intersect" and it applies that operation to all object args, so "obj1 obj2 obj3" is treated as if it were a "obj1 x obj2 x obj3" comb expression</p>
+
+
+
+<a name="207309805"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309805" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309805">(Aug 18 2020 at 20:11)</a>:</h4>
+<p>/me is OK with limiting inside to pairs, at least for a first cut</p>
+
+
+
+<a name="207309836"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309836" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309836">(Aug 18 2020 at 20:11)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207309549">said</a>:</p>
+<blockquote>
+<p>/me figured the subcommands would have their own syntax</p>
+</blockquote>
+<p>that's usually a sign they either don't belong together, or the design hasn't been sorted out to make it consistent ... otherwise, there's little point in them being subcommanded together when all the args that follow are different</p>
+
+
+
+<a name="207309933"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309933" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309933">(Aug 18 2020 at 20:12)</a>:</h4>
+<p>we have a few mashups like that currently</p>
+
+
+
+<a name="207309967"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309967" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309967">(Aug 18 2020 at 20:12)</a>:</h4>
+<p>they're usability nightmares imho</p>
+
+
+
+<a name="207309994"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207309994" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207309994">(Aug 18 2020 at 20:12)</a>:</h4>
+<p>I know them, and I have to pull up the usage every time.  that's just bad design.</p>
+
+
+
+<a name="207310083"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310083" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310083">(Aug 18 2020 at 20:13)</a>:</h4>
+<p>/me sees it mainly as a conceptual grouping - sort of like svn's subcommand's are all SVN related, even if they're individually very different.</p>
+
+
+
+<a name="207310192"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310192" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310192">(Aug 18 2020 at 20:14)</a>:</h4>
+<p>Or the per-primitive subcommands</p>
+
+
+
+<a name="207310407"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310407" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310407">(Aug 18 2020 at 20:16)</a>:</h4>
+<p>er, nearly all of svn commands just take paths... super consistent</p>
+
+
+
+<a name="207310463"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310463" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310463">(Aug 18 2020 at 20:16)</a>:</h4>
+<p>the deviation is on their options, not on what follows the options</p>
+
+
+
+<a name="207310484"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310484" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310484">(Aug 18 2020 at 20:16)</a>:</h4>
+<p>big difference</p>
+
+
+
+<a name="207310573"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310573" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310573">(Aug 18 2020 at 20:17)</a>:</h4>
+<p>I guess I was thinking about svn merge taking two paths, where svn add can take many - that sort of thing</p>
+
+
+
+<a name="207310597"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310597" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310597">(Aug 18 2020 at 20:17)</a>:</h4>
+<p>well, three if you count the destination</p>
+
+
+
+<a name="207310696"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310696" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310696">(Aug 18 2020 at 20:18)</a>:</h4>
+<p>propset and friends I think are fairly structured as well</p>
+
+
+
+<a name="207310879"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310879" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310879">(Aug 18 2020 at 20:20)</a>:</h4>
+<p>I'd just like to also acknowledge that considering the complexity of a revision control system is probably a terrible usability pattern to follow regardless ... :D</p>
+
+
+
+<a name="207310897"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207310897" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207310897">(Aug 18 2020 at 20:20)</a>:</h4>
+<p>s/acknowledge/propose/</p>
+
+
+
+<a name="207311014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311014">(Aug 18 2020 at 20:21)</a>:</h4>
+<p>/me grins - I actually go the other way.  I think it's a good mapping to the conceptual complexity of the problem spaces we're working with.</p>
+
+
+
+<a name="207311018"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311018" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311018">(Aug 18 2020 at 20:21)</a>:</h4>
+<p>I mean we're not talking about anything anywhere near as complex -- nearly everything we have can be simplified and made consistent because we have a specific taxonomy that is constrained</p>
+
+
+
+<a name="207311151"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311151" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311151">(Aug 18 2020 at 20:22)</a>:</h4>
+<p>the complexity a developer puts up with is not on par of that of general users</p>
+
+
+
+<a name="207311233"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311233" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311233">(Aug 18 2020 at 20:23)</a>:</h4>
+<p>we have a highly biased perspective as devs.  it's helpful to be aware of that and resist complexity where we can through more considered design.</p>
+
+
+
+<a name="207311375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311375">(Aug 18 2020 at 20:24)</a>:</h4>
+<p>i'm happy to think through the design implications if you're not -- I just don't think we should punt and add options and have 2/3/4 synopsis lines to document command <em>where we can avoid it</em></p>
+
+
+
+<a name="207311643"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311643" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311643">(Aug 18 2020 at 20:26)</a>:</h4>
+<p>this seems like an easy case for example.  we can just apply the same op to all listed objects in succession</p>
+
+
+
+<a name="207311732"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311732" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311732">(Aug 18 2020 at 20:27)</a>:</h4>
+<p>Well, there are subtitles with that - what does it mean, for example, to have a sph followed by a point cloud followed by an arb?</p>
+
+
+
+<a name="207311811"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311811" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311811">(Aug 18 2020 at 20:27)</a>:</h4>
+<p>That's the hesitation your sensing, I think - we can probably come up with a two object interpretation easily enough, but I'm not sure how it scales.</p>
+
+
+
+<a name="207311899"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311899" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311899">(Aug 18 2020 at 20:28)</a>:</h4>
+<p>the operation you're using is still simply an intersection</p>
+
+
+
+<a name="207311915"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311915" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311915">(Aug 18 2020 at 20:28)</a>:</h4>
+<p>A intersect B</p>
+
+
+
+<a name="207311956"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207311956" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207311956">(Aug 18 2020 at 20:28)</a>:</h4>
+<p>A intersect B intersect C</p>
+
+
+
+<a name="207312021"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312021" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312021">(Aug 18 2020 at 20:29)</a>:</h4>
+<p>but what's the output?  the points from the point cloud?  the subset of the sphere from a gqa segment grid that overlaps the volumes of the other shapes?</p>
+
+
+
+<a name="207312092"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312092" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312092">(Aug 18 2020 at 20:29)</a>:</h4>
+<p>the output is the geometric intersection of the three sets...</p>
+
+
+
+<a name="207312194"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312194" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312194">(Aug 18 2020 at 20:30)</a>:</h4>
+<p>A intersect B where either is a pnts object will always be a pnts object or the nul set</p>
+
+
+
+<a name="207312236"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312236" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312236">(Aug 18 2020 at 20:30)</a>:</h4>
+<p>that holds for any number of subsequent intersections</p>
+
+
+
+<a name="207312256"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312256" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312256">(Aug 18 2020 at 20:30)</a>:</h4>
+<p>always a pnts result or nul</p>
+
+
+
+<a name="207312329"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312329" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312329">(Aug 18 2020 at 20:31)</a>:</h4>
+<p>also generalizes nicely and can be extended to things like bot intersect bot</p>
+
+
+
+<a name="207312627"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207312627" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207312627">(Aug 18 2020 at 20:33)</a>:</h4>
+<p>So for points we have an answer - what should we return for (say) two CSG spheres?</p>
+
+
+
+<a name="207313037"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313037" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313037">(Aug 18 2020 at 20:37)</a>:</h4>
+<p>we don't have a single implicit object that can represent the result, so I'd expect it to either return a comb with "A x B" (assuming we're talking about geometric output) or return a nurbs object with the evaluated result</p>
+
+
+
+<a name="207313077"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313077" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313077">(Aug 18 2020 at 20:37)</a>:</h4>
+<p>would be an awesome place to hook the latter</p>
+
+
+
+<a name="207313117"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313117" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313117">(Aug 18 2020 at 20:37)</a>:</h4>
+<p>Now that you mention it I think there is a brep intersect subcommand somewhere...</p>
+
+
+
+<a name="207313222"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313222" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313222">(Aug 18 2020 at 20:38)</a>:</h4>
+<p>could also envision there being something like a -t type option where you could specify bot, dsp, or some other object type</p>
+
+
+
+<a name="207313228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313228">(Aug 18 2020 at 20:38)</a>:</h4>
+<p>there is</p>
+
+
+
+<a name="207313259"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313259" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313259">(Aug 18 2020 at 20:38)</a>:</h4>
+<p>I guess the other risk of putting a general syntax out there is users are going to try a whole bunch of things we don't have implemented - won't there be a risk of negative perceptions about our capability/quality/completeness?</p>
+
+
+
+<a name="207313263"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313263" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313263">(Aug 18 2020 at 20:39)</a>:</h4>
+<p>facetize does it for bots</p>
+
+
+
+<a name="207313314"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313314" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313314">(Aug 18 2020 at 20:39)</a>:</h4>
+<p>sort of another version of the step importer not handling a lot of things...</p>
+
+
+
+<a name="207313614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313614">(Aug 18 2020 at 20:42)</a>:</h4>
+<p>I think it'd be fine if it aborts with an error saying  "ERROR: analyze intersect support limited to 'comb'+'pnts' objects" for starters.  Documents the scope, sets expectation, and is easily expanded as support expands.</p>
+
+
+
+<a name="207313722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313722">(Aug 18 2020 at 20:43)</a>:</h4>
+<p>not that we should leave it that limited for long.  I think the comb fallback would be good to implement off the bat so it's well behaved on anthing</p>
+
+
+
+<a name="207313830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313830">(Aug 18 2020 at 20:44)</a>:</h4>
+<p>So another interpretation question - if I intersect two pnts sets, do I return only the points that are in both sets within tolerance?</p>
+
+
+
+<a name="207313872"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207313872" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207313872">(Aug 18 2020 at 20:44)</a>:</h4>
+<p>that would be my expectation and interpretation, yes</p>
+
+
+
+<a name="207314065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207314065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207314065">(Aug 18 2020 at 20:46)</a>:</h4>
+<p>someone wanting something else implies another operation, like this: analyze convexhull -o hull pnts; analyze intersection -o volpnts hull pnts2;</p>
+
+
+
+<a name="207314071"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207314071" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207314071">(Aug 18 2020 at 20:46)</a>:</h4>
+<p>OK.  That's a separate implementation, so I'll have to think about how to do the pre-processing - whether to find and intersect pnt clouds first and then check them against other volumes...</p>
+
+
+
+<a name="207314342"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207314342" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207314342">(Aug 18 2020 at 20:48)</a>:</h4>
+<p>I'll make  a branch and work with it a bit.</p>
+
+
+
+<a name="207316203"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316203" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316203">(Aug 18 2020 at 21:04)</a>:</h4>
+<p>Another interpretation question - what if someone unions a point cloud into an otherwise volumetric CSG hierarchy?  Is it a no-op under those conditions?</p>
+
+
+
+<a name="207316262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316262">(Aug 18 2020 at 21:04)</a>:</h4>
+<p>you mean intersects?</p>
+
+
+
+<a name="207316365"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316365" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316365">(Aug 18 2020 at 21:05)</a>:</h4>
+<p>Well, I can think of a couple cases.  If we do want to intersect it, what if the CSG hierarchy subtracts a volume from the point cloud?  Do we first "strip down" the point cloud per the CSG hierarchy and then intersect it?</p>
+
+
+
+<a name="207316375"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316375" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316375">(Aug 18 2020 at 21:05)</a>:</h4>
+<p>if it's unioned, it'll be essentially a no-op unless the ray happens to hit the pnt exactly or the pnts have a diameter</p>
+
+
+
+<a name="207316470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316470">(Aug 18 2020 at 21:06)</a>:</h4>
+<p>the functionally act like spheres</p>
+
+
+
+<a name="207316480"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316480" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316480">(Aug 18 2020 at 21:06)</a>:</h4>
+<p>so really no different</p>
+
+
+
+<a name="207316510"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316510" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316510">(Aug 18 2020 at 21:06)</a>:</h4>
+<p>just the radii might be infintessimally small (or they could be huge)</p>
+
+
+
+<a name="207316522"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316522" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316522">(Aug 18 2020 at 21:07)</a>:</h4>
+<p>But if we intersect two point clouds as discussed earlier (toleranced distance comparison) then the point cloud will act differently in a hierarchy</p>
+
+
+
+<a name="207316669"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316669" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316669">(Aug 18 2020 at 21:08)</a>:</h4>
+<p>Would that be surprising?</p>
+
+
+
+<a name="207316677"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316677" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316677">(Aug 18 2020 at 21:08)</a>:</h4>
+<p>keep in mind that would be an analyzed intersection, which is what allows the tolerance and resulting behavior to be specified</p>
+
+
+
+<a name="207316704"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316704" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316704">(Aug 18 2020 at 21:08)</a>:</h4>
+<p>the result is a pnt cloud</p>
+
+
+
+<a name="207316790"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316790" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316790">(Aug 18 2020 at 21:09)</a>:</h4>
+<p>i'm not entirely following -- what would be surprising?</p>
+
+
+
+<a name="207316940"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316940" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316940">(Aug 18 2020 at 21:10)</a>:</h4>
+<p>if I create rppA, pntsA, and pntsB; and combA is "pntsA - rppA" to cull some point, that's all pretty straightforward</p>
+
+
+
+<a name="207316998"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207316998" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207316998">(Aug 18 2020 at 21:11)</a>:</h4>
+<p>if I "analyze intersection -o pntsC pntsA pntsB", thn pntsC will have those in common to both</p>
+
+
+
+<a name="207317095"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317095" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317095">(Aug 18 2020 at 21:12)</a>:</h4>
+<p>explicitly</p>
+
+
+
+<a name="207317116"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317116" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317116">(Aug 18 2020 at 21:12)</a>:</h4>
+<p>if I "comb combB pntsA x pntsB", thats the same result, but implicitly</p>
+
+
+
+<a name="207317143"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317143" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317143">(Aug 18 2020 at 21:12)</a>:</h4>
+<p>So, given a pnt cloud A intersecting with a hierarchy B containing pnt cloud C.  If pnts in C are close within tolerance to pnts in A, such that A intersect C would yield a subset of point common to A and C, but A intersection tests against the hierarchy B using a ray in/out test points that would be part of the intersection only by the action of the point cloud C (i.e. none of the rest of volume of B interacts with A) would be skipped because the raytracing test would fail.</p>
+
+
+
+<a name="207317457"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317457" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317457">(Aug 18 2020 at 21:14)</a>:</h4>
+<p>that's one massive run-on sentence... I'm having trouble parsing it</p>
+
+
+
+<a name="207317470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317470">(Aug 18 2020 at 21:14)</a>:</h4>
+<p>So in the limit case, intersect point cloud A with the hierarchy B containing A and a sph C that doesn't overlap A at all.</p>
+
+
+
+<a name="207317516"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317516" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317516">(Aug 18 2020 at 21:15)</a>:</h4>
+<p>A ray inside test against B from any point in A will report outside.</p>
+
+
+
+<a name="207317539"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317539" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317539">(Aug 18 2020 at 21:15)</a>:</h4>
+<p>But A intersect A will return the set A.</p>
+
+
+
+<a name="207317602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317602">(Aug 18 2020 at 21:15)</a>:</h4>
+<p>when you say intersect, do you mean in the context of a comb intersect operation or this new intersection/intersect command?</p>
+
+
+
+<a name="207317654"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317654" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317654">(Aug 18 2020 at 21:16)</a>:</h4>
+<p>the new intersect command</p>
+
+
+
+<a name="207317658"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317658" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317658">(Aug 18 2020 at 21:16)</a>:</h4>
+<p>okay</p>
+
+
+
+<a name="207317745"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317745" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317745">(Aug 18 2020 at 21:17)</a>:</h4>
+<p>I'm thinking about how I implemented the inside/outside test and what the implications are (or trying to - it's causing run-on sentences...)</p>
+
+
+
+<a name="207317800"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317800" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317800">(Aug 18 2020 at 21:17)</a>:</h4>
+<p>if you have a point cloud A and a hierarchy B containing A (<em>unioned</em>), the result is going to be point cloud A...</p>
+
+
+
+<a name="207317895"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207317895" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207317895">(Aug 18 2020 at 21:18)</a>:</h4>
+<p>But I don't think it will - the ray interrogation won't report inside unless something other than A in the hierarchy contains pnts in A.</p>
+
+
+
+<a name="207318006"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318006" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318006">(Aug 18 2020 at 21:19)</a>:</h4>
+<p>Or put A' rather than exactly A in the hierarchy - just enough to throw off trivially exact hits, but close enough to pass a tolerance distance check.</p>
+
+
+
+<a name="207318019"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318019" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318019">(Aug 18 2020 at 21:19)</a>:</h4>
+<p>I'm not saying what your code does, I don't know what it does.. i"m saying set theory is that A x A = A</p>
+
+
+
+<a name="207318144"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318144" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318144">(Aug 18 2020 at 21:20)</a>:</h4>
+<p>Right.  But my point is I have to do two different comparisons when faced with A vs A' and A vs B - the latter uses the solid raytracer, and the former can't</p>
+
+
+
+<a name="207318180"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318180" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318180">(Aug 18 2020 at 21:21)</a>:</h4>
+<p>So I'll get different answers for A' depending on whether it is inside a hierarchy B or not, which seems wrong.</p>
+
+
+
+<a name="207318189"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318189" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318189">(Aug 18 2020 at 21:21)</a>:</h4>
+<p>are you talking about the current limitation that pnts don't report hits from shot()??</p>
+
+
+
+<a name="207318306"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318306" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318306">(Aug 18 2020 at 21:22)</a>:</h4>
+<p>Kind of - but I think it's more fundamental than that...</p>
+
+
+
+<a name="207318319"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318319" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318319">(Aug 18 2020 at 21:22)</a>:</h4>
+<p>if so, then yeah absolutely have to handle pnts specifically because they don't have a raytrace interpretation</p>
+
+
+
+<a name="207318331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318331">(Aug 18 2020 at 21:22)</a>:</h4>
+<p>ignore the tolerance issue first</p>
+
+
+
+<a name="207318351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318351">(Aug 18 2020 at 21:23)</a>:</h4>
+<p>Right, so when we evaluate B (which uses the raytracer) there's a problem if a pnt cloud is included in B since the test won't work.</p>
+
+
+
+<a name="207318405"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318405" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318405">(Aug 18 2020 at 21:23)</a>:</h4>
+<p>right but that's specifically because of this implementation detail, not theory -- you have to handle pnts</p>
+
+
+
+<a name="207318419"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318419" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318419">(Aug 18 2020 at 21:23)</a>:</h4>
+<p>or implement shot() for them</p>
+
+
+
+<a name="207318554"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318554" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318554">(Aug 18 2020 at 21:25)</a>:</h4>
+<p>I'll have to construct a test case and see what happens, I guess - I think I know but I might be wrong.</p>
+
+
+
+<a name="207318675"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318675" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318675">(Aug 18 2020 at 21:26)</a>:</h4>
+<p>it sounds like you're talking about an implementation concern, which is very much a yes -- you have to handle pnts and by handle pnts that means you have to recognize one is a pnts object and for each point, evaluate it against the other object</p>
+
+
+
+<a name="207318744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318744">(Aug 18 2020 at 21:27)</a>:</h4>
+<p>and if that other object is a comb, you'd have to scan it's logic and look for pnts (applying the right boolean recipe down the hierarchy) to evaluate them with a pnt-to-pnt distance calculation to get the right result...</p>
+
+
+
+<a name="207318805"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318805" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318805">(Aug 18 2020 at 21:28)</a>:</h4>
+<p>But if the other object is a mixed object (pnts unioned with other solids) what is the interpretation of the pnts object in the hierarchy?  Is it OK to return none of those points since they're zero volume in a CSG hierarchy of solids, or do we need to somehow figure out which points in the hierarchy survive the boolean ops and test them as individual points?</p>
+
+
+
+<a name="207318830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318830">(Aug 18 2020 at 21:28)</a>:</h4>
+<p>or implement shot() and just look at whether your point is within the other object's partition list... ;)</p>
+
+
+
+<a name="207318919"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318919" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318919">(Aug 18 2020 at 21:29)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207318805">said</a>:</p>
+<blockquote>
+<p>But if the other object is a mixed object (pnts unioned with other solids) what is the interpretation of the pnts object in the hierarchy?  Is it OK to return none of those points since they're zero volume in a CSG hierarchy of solids, or do we need to somehow figure out which points in the hierarchy survive the boolean ops and test them as individual points?</p>
+</blockquote>
+<p>to return the right set.. the latter!</p>
+
+
+
+<a name="207318929"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318929" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318929">(Aug 18 2020 at 21:29)</a>:</h4>
+<p>unless you implement shot()</p>
+
+
+
+<a name="207318936"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207318936" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207318936">(Aug 18 2020 at 21:29)</a>:</h4>
+<p>Assuming my test rays happened to pass close enough to the other points to register...  this is starting to sound nasty.</p>
+
+
+
+<a name="207319047"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319047" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319047">(Aug 18 2020 at 21:30)</a>:</h4>
+<p>you know all it takes to minimally implement shot() is to iterate over all pnts and call sph_shot().  could even create a db of spheres during prep so you get spatial partitioning.</p>
+
+
+
+<a name="207319153"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319153" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319153">(Aug 18 2020 at 21:31)</a>:</h4>
+<p>without implementing shot, you can just check the comb and only support whatever is easy</p>
+
+
+
+<a name="207319173"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319173" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319173">(Aug 18 2020 at 21:31)</a>:</h4>
+<p>reject the complicated as not yet implemented</p>
+
+
+
+<a name="207319250"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319250" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319250">(Aug 18 2020 at 21:32)</a>:</h4>
+<p>heh - another use of the db_search filter</p>
+
+
+
+<a name="207319252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319252">(Aug 18 2020 at 21:32)</a>:</h4>
+<p>like you could support pnts+non-comb for starters, don't even support combs.</p>
+
+
+
+<a name="207319282"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319282" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319282">(Aug 18 2020 at 21:32)</a>:</h4>
+<p>but seriously, shot() on pnts is downright trivial to implement</p>
+
+
+
+<a name="207319326"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319326" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319326">(Aug 18 2020 at 21:33)</a>:</h4>
+<p>i I didn't have these commits I'm working through, I could have had an initial demo working already :)</p>
+
+
+
+<a name="207319329"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319329" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319329">(Aug 18 2020 at 21:33)</a>:</h4>
+<p>I don't know that that would be enough though - six rays for inside/outside solids vs. distance comparisons of pnt clouds are still different tests.</p>
+
+
+
+<a name="207319364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319364">(Aug 18 2020 at 21:33)</a>:</h4>
+<p>six what??</p>
+
+
+
+<a name="207319425"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319425" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319425">(Aug 18 2020 at 21:34)</a>:</h4>
+<p>that's how I'm doing the inside outside test - looking in +- X, Y and Z directions</p>
+
+
+
+<a name="207319443"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319443" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319443">(Aug 18 2020 at 21:34)</a>:</h4>
+<p>uh, don't do that...</p>
+
+
+
+<a name="207319507"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319507" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319507">(Aug 18 2020 at 21:35)</a>:</h4>
+<p>Are the numerics solid enough to trust one ray?</p>
+
+
+
+<a name="207319585"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319585" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319585">(Aug 18 2020 at 21:36)</a>:</h4>
+<p>especially for bots and the like, I was concerned with edge cases</p>
+
+
+
+<a name="207319679"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319679" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319679">(Aug 18 2020 at 21:37)</a>:</h4>
+<p>So you're willing to 6-folding the computational cost because of concern, without actually knowing...</p>
+
+
+
+<a name="207319722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319722">(Aug 18 2020 at 21:37)</a>:</h4>
+<p>heh, even if you care about edge cases, 3 rays would've been adequate</p>
+
+
+
+<a name="207319783"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319783" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319783">(Aug 18 2020 at 21:38)</a>:</h4>
+<p>rays are infinite, you just need to backout the starting point</p>
+
+
+
+<a name="207319855"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319855" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319855">(Aug 18 2020 at 21:39)</a>:</h4>
+<p>/me shrugs - I was throwing something together to see if it worked, wasn't especially worried about performance.</p>
+
+
+
+<a name="207319898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319898">(Aug 18 2020 at 21:40)</a>:</h4>
+<p>that said, for this, I don't see without evidence why you'd want more than 1 ray per point.  you shoot through the point from outside the bounds, and if that point is within a partition, it's a match</p>
+
+
+
+<a name="207319992"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207319992" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207319992">(Aug 18 2020 at 21:41)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207319855">said</a>:</p>
+<blockquote>
+<p>/me shrugs - I was throwing something together to see if it worked, wasn't especially worried about performance.</p>
+</blockquote>
+<p>heh, the same books that talk about premature optimization also talk very adamantly about making order-of-magnitude changing decisions like that without considering the implications!</p>
+
+
+
+<a name="207320049"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320049" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320049">(Aug 18 2020 at 21:42)</a>:</h4>
+<p>that's so far beyond not being worried about performance...</p>
+
+
+
+<a name="207320123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320123">(Aug 18 2020 at 21:43)</a>:</h4>
+<p>I knew there are grazing rays on objects that report solid partitions beyond their volume, so I just threw multiple directions at it to preclude that being an issue.  Your right 3 would have done it.</p>
+
+
+
+<a name="207320168"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320168" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320168">(Aug 18 2020 at 21:43)</a>:</h4>
+<p>even still</p>
+
+
+
+<a name="207320213"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320213" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320213">(Aug 18 2020 at 21:44)</a>:</h4>
+<p>you're talking about plate mode</p>
+
+
+
+<a name="207320226"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320226" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320226">(Aug 18 2020 at 21:44)</a>:</h4>
+<p>I've seen it on NURBS</p>
+
+
+
+<a name="207320243"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320243" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320243">(Aug 18 2020 at 21:44)</a>:</h4>
+<p>(solid NURBS)</p>
+
+
+
+<a name="207320461"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320461" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320461">(Aug 18 2020 at 21:47)</a>:</h4>
+<p>true, plate mode and nurbs can return incorrect partitions on grazing rays</p>
+
+
+
+<a name="207320512"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207320512" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207320512">(Aug 18 2020 at 21:48)</a>:</h4>
+<p>but it's not right and shouldn't be allowed to spread like a disease to other algorithms because they got it wrong -- at least that's fundamentally wrong in my humble opinion</p>
+
+
+
+<a name="207346614"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207346614" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207346614">(Aug 18 2020 at 21:48)</a>:</h4>
+<p>we should fix them, or get whoever is wanting this feature to pay us to fix them</p>
+
+
+
+<a name="207346685"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207346685" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207346685">(Aug 18 2020 at 21:49)</a>:</h4>
+<p>could also reject those two -- relatively rare at this point -- outliers in the analyze command when it validates the args</p>
+
+
+
+<a name="207346803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207346803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207346803">(Aug 18 2020 at 21:51)</a>:</h4>
+<p>plate mode is just wrong-wrong and shouldn't be accommodated anywhere imho.. nurbs is obviously a harder issue but can probably be handled in code by looking at the grazing flag and only shooting a second ray when it grazes</p>
+
+
+
+<a name="207346933"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207346933" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207346933">(Aug 18 2020 at 21:52)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> as for who is wanting the point-inside-solid  feature - it's just something I threw together for Caleb</p>
+
+
+
+<a name="207346984"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207346984" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207346984">(Aug 18 2020 at 21:53)</a>:</h4>
+<p>I know, all the more reason I'd be concerned with what's left .. he's effectively done already</p>
+
+
+
+<a name="207347061"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347061" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347061">(Aug 18 2020 at 21:54)</a>:</h4>
+<p>(i mean left in the code, it's going to long outlast his involvement and residual impact)</p>
+
+
+
+<a name="207347062"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347062" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347062">(Aug 18 2020 at 21:54)</a>:</h4>
+<p>Well, the original bit was part of the facetization work for Dave a while back.  It's used by one of the fallback algorithms.</p>
+
+
+
+<a name="207347085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347085">(Aug 18 2020 at 21:54)</a>:</h4>
+<p>(I already backed out the bit I put in for him in trunk.)</p>
+
+
+
+<a name="207347163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347163">(Aug 18 2020 at 21:55)</a>:</h4>
+<p>That's why I was way more worried about robustness than performance at that juncture - I think it was some sort of crunch project for Dave.</p>
+
+
+
+<a name="207347220"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347220" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347220">(Aug 18 2020 at 21:56)</a>:</h4>
+<p>Honestly, I think you should just shoot a ray through the point and if it returns a bogus result because the partitions are wrong, so be it -- that puts pressure on fixing the partition list, however small, over time.  and it's completely justifiable.</p>
+
+
+
+<a name="207347357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347357">(Aug 18 2020 at 21:58)</a>:</h4>
+<p>At the expense of distorted or failed factorization cases  that would otherwise succeed?  (Maybe that's not a serious risk - as you say I don't have stats on if or how frequent it is - but it would be a failure where we could potentially have succeeded.)</p>
+
+
+
+<a name="207347417"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347417" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347417">(Aug 18 2020 at 21:58)</a>:</h4>
+<p>I don't mean to put you on the defensive.</p>
+
+
+
+<a name="207347609"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347609" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347609">(Aug 18 2020 at 22:00)</a>:</h4>
+<p>Sorry.  I'm game to clean it up, if it makes sense to spend time on it.</p>
+
+
+
+<a name="207347676"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347676" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347676">(Aug 18 2020 at 22:01)</a>:</h4>
+<p>I'll give you facetization just because we've hammered at that for decades unsuccessfully.</p>
+
+
+
+<a name="207347685"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347685" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347685">(Aug 18 2020 at 22:01)</a>:</h4>
+<p>I don't think that liberty extends anywhere else in the code, though.</p>
+
+
+
+<a name="207347767"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347767" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347767">(Aug 18 2020 at 22:02)</a>:</h4>
+<p>Sure.  I only pulled it from there 'cause when Caleb asked I remembered it being there - if it comes out "for real" we can certainly clean it up.</p>
+
+
+
+<a name="207347815"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347815" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347815">(Aug 18 2020 at 22:03)</a>:</h4>
+<p>Until we can facetize reliably, or at least consistently complete, whatever that means, that's very much in the "lets get anything working camp".</p>
+
+
+
+<a name="207347898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207347898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207347898">(Aug 18 2020 at 22:04)</a>:</h4>
+<p>(By the way, one other case I know of where a ray test will fail is small triangles in meshes - I hit that with the JASP work earlier this year.  I've got a unit test in there somewhere were I captured and isolated an individual triangle that gives the wrong answer.)</p>
+
+
+
+<a name="207348025"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348025" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348025">(Aug 18 2020 at 22:06)</a>:</h4>
+<p>That's why I'm using Dickinson's code, slow as it is, for the new brep meshing.</p>
+
+
+
+<a name="207348028"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348028" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348028">(Aug 18 2020 at 22:06)</a>:</h4>
+<p>I'd still cringe at 6x vs 3x performance decisions in there if they're frequent, but as I said -- it is what it is until it works and facetize gets a hard pass because we've tried for so long.</p>
+
+
+
+<a name="207348134"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348134" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348134">(Aug 18 2020 at 22:07)</a>:</h4>
+<p>I think it DOES matter the moment that code is used anywhere else though.  Might as well not exist for use outside without having a critical re-write if it's been developed with a gloves-off approach.</p>
+
+
+
+<a name="207348177"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348177" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348177">(Aug 18 2020 at 22:08)</a>:</h4>
+<p>Fair enough.</p>
+
+
+
+<a name="207348336"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348336" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348336">(Aug 18 2020 at 22:10)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-general/topic/pnts.20in.20vol/near/207348025">said</a>:</p>
+<blockquote>
+<p>That's why I'm using Dickinson's code, slow as it is, for the new brep meshing.</p>
+</blockquote>
+<p>With all due respect, this is rather dangerous thinking from an architecture and maintenance perspective.  It means we have multiple shotliners doing different things.  Both being maintained, both eventually being debugged.  Both with potentially completely disjoint sets of bugs.</p>
+
+
+
+<a name="207348351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348351">(Aug 18 2020 at 22:10)</a>:</h4>
+<p>It's a green pasture fallacy.  One works with a code long enough to find a flaw.</p>
+
+
+
+<a name="207348408"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348408" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348408">(Aug 18 2020 at 22:11)</a>:</h4>
+<p>and then abandons using that code because of the flaw, in favor of something else less known but maybe known for that case</p>
+
+
+
+<a name="207348498"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348498" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348498">(Aug 18 2020 at 22:12)</a>:</h4>
+<p>that's literally the struggle mentality we have with the s2 folks that have been replicating their own geometry code instead of investing in one place.</p>
+
+
+
+<a name="207348535"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348535" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348535">(Aug 18 2020 at 22:13)</a>:</h4>
+<p>short term benefit, long term death</p>
+
+
+
+<a name="207348816"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207348816" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207348816">(Aug 18 2020 at 22:17)</a>:</h4>
+<p>It's the src/libbg/trimesh_pt_in.c point-in-polyhedron test.  I ran it directly, side by side with the ray based inside/outside test and inspected reported differences - I'd be glad to ditch it if the issues with the ray test can be resolved, but I'm not sure yet  how to do that without potentially impacting performance in some other way or introducing other breakage.</p>
+
+
+
+<a name="207349086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207349086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207349086">(Aug 18 2020 at 22:20)</a>:</h4>
+<p>(I remember when Keith tried to adjust our triangle intersection logic for small triangles and ended breaking the raytrace at larger scales, so I know it's not trivial...)</p>
+
+
+
+<a name="207349215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207349215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207349215">(Aug 18 2020 at 22:22)</a>:</h4>
+<p>I know, that's why I didn't say anything when it was introduced, but those kinds of decisions do have significant consequence long term.  If there's not time to debug it when you have the error right in front of you and a task that's provoking it, when else will it ever be prioritized?  It simply won't and we end up with the duplication, complexity, and increasing costs.</p>
+
+
+
+<a name="207349244"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207349244" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207349244">(Aug 18 2020 at 22:22)</a>:</h4>
+<p>it's a paper cut.  any one of them can be tolerated.</p>
+
+
+
+<a name="207349431"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207349431" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207349431">(Aug 18 2020 at 22:25)</a>:</h4>
+<p>and then we spend months defending against things like particular three-letter systems that can be adapted and changed far more easily because they aren't having to maintain that kind of cruft.   and often have just as many or more issues,  just not yet noticed.</p>
+
+
+
+<a name="207350075"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207350075" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207350075">(Aug 18 2020 at 22:33)</a>:</h4>
+<p>if someone came across it perusing code without knowing the history, they would be entirely justified replacing the perceived duplication without hesitation for something in bn or rt.  best we can hope for is putting up signs in the code that typically just scare away anyone but the original author from changing the code.</p>
+
+
+
+<a name="207350270"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207350270" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207350270">(Aug 18 2020 at 22:35)</a>:</h4>
+<p>And I agree that's far from ideal, but I'm not sure what else to do.</p>
+
+
+
+<a name="207350928"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207350928" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207350928">(Aug 18 2020 at 22:42)</a>:</h4>
+<p>could debug the small triangle case, understand what's failing (if it really is failing) and why (more importantly).  point in polyhedron is a very simple time-tested function in use throughout industry.  there's only a few variants that mostly center around when/how a particular division happens.</p>
+
+
+
+<a name="207350995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207350995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207350995">(Aug 18 2020 at 22:43)</a>:</h4>
+<p>If ours is failing, it's probably related to floating point tolerances used in the implementation, not likely the algorithm itself.</p>
+
+
+
+<a name="207482671"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/pnts%20in%20vol/near/207482671" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/pnts.20in.20vol.html#207482671">(Aug 20 2020 at 02:19)</a>:</h4>
+<p>I've taken an initial whack at the analyze command refactor here:  <a href="https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/branches/analyze_cmd/src/libged/analyze/">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/branches/analyze_cmd/src/libged/analyze/</a></p>
+<p>Current usage looks like:</p>
+<p>analyze obj.s ... - old behavior, except when obj.s matches a command name.<br>
+analyze summarize obj.s ... - old behavior<br>
+analyze intersect -o interior.pnts pnts.s sph.s ... - intersect pnts object with one or more volumes, generate output pnts object<br>
+analyze subtract -o exterior.pnts pnts.s sph.s ... - subtract pnts from object that are inside one or more volumes, generate output pnts object.</p>
+<p>I also made a stab at cleaning up the inside/outside test - it's in op_pnts_vol.cpp, uses one backed out ray.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

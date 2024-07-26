@@ -1,0 +1,3566 @@
+[
+    {
+        "content": "<blockquote>\n<p>I realized I didn't make a proper announciation so I'm doing that now:<br>\n<a href=\"https://brlcad.org/wiki/User:Paddedto10/GSoC18/Project\" target=\"_blank\" title=\"https://brlcad.org/wiki/User:Paddedto10/GSoC18/Project\">https://brlcad.org/wiki/User:Paddedto10/GSoC18/Project</a></p>\n<p>I've already written some code but my commits are local so far. (using git svn)</p>\n</blockquote>\n<p>Thanks for the intro <span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>, looking forward to seeing your project in action!  Before you make a bunch of local commits, please remember to submit patches so progress can be incrementally inspected and discussed.</p>\n<p>Ideally, you should carve off the most simple patch(es) you can think of and submit them for review.  Typically, two \"perfect\" patches will earn you commit rights so you can do all those commits to the actual repository.</p>",
+        "id": 126678319,
+        "sender_full_name": "Sean",
+        "timestamp": 1526527504
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> should I send patches of the smaller changes I have so far? it's just some typedefs/additional fields + the c_exec function is implemented, although I would like nicer error handling in it, but that would probably take some larger changes, outside of that specific function.</p>",
+        "id": 126755415,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526657613
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> sure, go ahead and submit the patch if it's in a clean state</p>",
+        "id": 126777601,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526692042
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> At least with GCC 8 locally here, I can now build strict with latest trunk.</p>",
+        "id": 126779702,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526696891
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  oh forgot to write this: yup, strict build now works here as well</p>\n<p>other thing: I think I'm basically done with the librt part of things, so the next thing would be actually changing db_search to actually accept the new arguments (the exec handler and the userdata), but that would mean having to rewrite every call to it, and there seem to be a lot of them</p>",
+        "id": 126836814,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526833607
+    },
+    {
+        "content": "<p>of course none of them use -exec _now_, so it'd be fine to just pass some NULL pointers, but later that might lead to problems</p>",
+        "id": 126836820,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526833658
+    },
+    {
+        "content": "<p>alternative: I could write the TCL exec evaluation function for MGED and test it on its own, and I still need to actually deliver on my promise to do TDD but the CMake testing is quite intimidating, so I've been putting it off</p>",
+        "id": 126836870,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526833762
+    },
+    {
+        "content": "<p>so, I think I'll do a head first dive into the testing framework and set up the tests for the currently existing functionality and then I'll do another dive into the TCL API</p>",
+        "id": 126836921,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526833837
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> Out of curiosity, why start with Tcl?</p>",
+        "id": 126903753,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526957774
+    },
+    {
+        "content": "<p>We need to be able to exec libged commands, which as a starting point would avoid the need to tangle with the Tcl API.</p>",
+        "id": 126903801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526957910
+    },
+    {
+        "content": "<p>I'd also suggest prototyping a db_search function signature, so we can think about how we want to set up the API</p>",
+        "id": 126903811,
+        "sender_full_name": "starseeker",
+        "timestamp": 1526957980
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  I already have the part that calls the callback, writing the MGED side exec handler sounded like something I could do relatively easily, but it's a lot more complicated than I thought.</p>",
+        "id": 126919197,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526989979
+    },
+    {
+        "content": "<p>well, it's not exactly complicated, more like not very well documented. I just have to call a Tcl command with a list of strings as its parameters.</p>",
+        "id": 126925949,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526999330
+    },
+    {
+        "content": "<p>but idk which API calls are relevant</p>",
+        "id": 126925960,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526999342
+    },
+    {
+        "content": "<p>anyways, I think I'll do tests instead</p>",
+        "id": 126925977,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1526999358
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> is calling libged functions directly actually needed? since they get registered as TCL commands, it makes more sense to me to just call them from TCL. That also makes things like calling TCL builtins more straightforward.</p>",
+        "id": 127060936,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527215562
+    },
+    {
+        "content": "<p>TCL is (eventually) going to be pushed out of the lower level libraries (including libged) and will live only in libtclcad and above.  So TCL shouldn't be necessary to the core functioning of the system.</p>",
+        "id": 127111257,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527300133
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> Do you have a \"working\" -exec option to search?  If so, what does your new db_search function callback look like?</p>",
+        "id": 127149676,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527390922
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> You'll need to be able to pass a function callback into db_search and execute it - how are you thinking to set this up?  It shouldn't be Tcl specific</p>",
+        "id": 127149767,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391197
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> not yet, I'm doing one of the parts I've been putting off: changing the function signatures so I can pass the callback and the userdata around. It's almost done, just one definition left to change.</p>\n<p>I also looked into where libged's \"commands\" are used and it does seem to me like they are only used in MGED.</p>\n<p>I postponed the MGED side callback because I thought it will be better if I can test it properly with db_search. Testing the function on its own, without db_search being done, would have meant having to figure out a bunch of build system things and that would have just been wasted time.</p>",
+        "id": 127149805,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391203
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> before I sent my proposal we agreed with <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> on the following:<br>\ncallback function takes an int argc, char *argv[], and a void *userdata</p>",
+        "id": 127149814,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391274
+    },
+    {
+        "content": "<p>the userdata in MGED's case is the Tcl interpeter pointer</p>",
+        "id": 127149815,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391294
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> OK, so the argv array is the path list from the search run?</p>",
+        "id": 127149817,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391317
+    },
+    {
+        "content": "<p>the argv is what the command is called with, the '{}' get replaced with the current node's path</p>",
+        "id": 127149857,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391361
+    },
+    {
+        "content": "<p>I think this is as abstract as it can usefully get. It supports every argc/argv kind of command reasonable.</p>",
+        "id": 127149899,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391447
+    },
+    {
+        "content": "<p>OK, so the -exec \"template\" will be populated on a per-search-path basis and the function will be execed separately on each path?</p>",
+        "id": 127149900,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391448
+    },
+    {
+        "content": "<p>Yes, exacly. Can't really do it any other way as far as I know.</p>",
+        "id": 127149904,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391475
+    },
+    {
+        "content": "<p>something like: search /  -name \"a*.r\" -exec \"myfunc --special-option1 --special-option2 {}\"</p>",
+        "id": 127149913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391528
+    },
+    {
+        "content": "<p>and a ';' at the end</p>",
+        "id": 127149951,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391564
+    },
+    {
+        "content": "<p>oh wait. nah, nvm, that's only in the search syntax</p>",
+        "id": 127149956,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391605
+    },
+    {
+        "content": "<p>libged then uses a function table to look up the function in question (translating \"myfunc\" into an actual function) and the options and {} are assembled on a per path basis as the arguments to that function.</p>",
+        "id": 127149957,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391611
+    },
+    {
+        "content": "<p>it doesn't get passed.</p>",
+        "id": 127149958,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391612
+    },
+    {
+        "content": "<p>libged is not touched directly, Tcl already has the functions registered so it is left up to Tcl to call them</p>",
+        "id": 127149963,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391651
+    },
+    {
+        "content": "<p>otherwise it wouldn't be able to handle:<br>\n-renamed functions<br>\n-Tcl builtins</p>",
+        "id": 127149965,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391668
+    },
+    {
+        "content": "<p>That might work for a first cut, but libged will eventually not have any direct knowledge of Tcl</p>",
+        "id": 127149968,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391681
+    },
+    {
+        "content": "<p>MGED (or libtclcad) will need to register a callback for handling Tcl processing with libged</p>",
+        "id": 127150008,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391712
+    },
+    {
+        "content": "<p>hmmm, can you give an example where it won't work?</p>",
+        "id": 127150013,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391763
+    },
+    {
+        "content": "<p>the current one, I mean.</p>",
+        "id": 127150014,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527391771
+    },
+    {
+        "content": "<p>For now, as long as any command you want to run is known to the Tcl command execution environment, that should work.  But my point is that eventually we don't want to assume Tcl in order to run commands.  Let's say someone makes a Python version of MGED.  Or they want to link to libged and construct their own search commands programattically, then register their own custom exec function callbacks with libged and run them on the search results.</p>",
+        "id": 127150067,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391895
+    },
+    {
+        "content": "<p>You can start with Tcl execing in order to get something going for testing, but once that is demonstrated we need to think about how to generalize things.</p>",
+        "id": 127150109,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527391930
+    },
+    {
+        "content": "<p>(the latter scenario in particular - linking to libged and supplying customer defined exec functions to run - is fairly likely to crop up eventually)</p>",
+        "id": 127150116,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392005
+    },
+    {
+        "content": "<p>Hmm, I guess if it's Python, we would have to indicate which parameter is the path, so that it is presented as the right type.</p>",
+        "id": 127150117,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392011
+    },
+    {
+        "content": "<p>I guess if the customer links to libged directly, we can provide a pre-made callback that simply searches for commands in the command table and calls them directly. That's even easier than the Tcl evaling.</p>",
+        "id": 127150165,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392128
+    },
+    {
+        "content": "<p>Well, if the function callback hook is a generic int my_exec_func(int argc, const char **argv, void *userdata) and the exec string supplied to the -exec search option is broken out into the argv input passed to my_exec_func (after replacing {} with one path) then the only questions are how to match the string \"my_exec_func\" in the search -exec function to the actual function pointer to call and how to pass all that around</p>",
+        "id": 127150168,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392156
+    },
+    {
+        "content": "<p>oh, the callback is not the one that is matched, the callback does the matching</p>",
+        "id": 127150216,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392231
+    },
+    {
+        "content": "<p>right - we need some way (probably in libged) to define a language agnostic \"string to exec function pointer\" mapping that can be populated, and then either pass that map to the db_search call so it can figure out how to do the exec there, or have libged do the string to pointer breakdown ahead of time and pass the actual exec pointer to db_search</p>",
+        "id": 127150217,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392241
+    },
+    {
+        "content": "<p>if you're almost there with a design, go ahead and finish and we can use that as a basis for further discussion</p>",
+        "id": 127150258,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392319
+    },
+    {
+        "content": "<p>ok, I'll fix this part that I'm working on then call it a day</p>",
+        "id": 127150264,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392353
+    },
+    {
+        "content": "<p>I guess we could make the callback function find the \"actual\" function that will do the work... not sure about that one.</p>",
+        "id": 127150266,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392374
+    },
+    {
+        "content": "<p>sounds good.</p>",
+        "id": 127150267,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392380
+    },
+    {
+        "content": "<p>also,seeing how I've changed db_search's prototype, there will be a lot of broken calls to it</p>",
+        "id": 127150268,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392387
+    },
+    {
+        "content": "<p>don't worry about that too much yet - let's see how you're thinking about changing it before you go too far.</p>",
+        "id": 127150309,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527392412
+    },
+    {
+        "content": "<p>yeah, better stay focused</p>",
+        "id": 127150313,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392464
+    },
+    {
+        "content": "<p>btw I have my code up on gitlab if you wanna take a look:<br>\n<a href=\"https://gitlab.com/raingloom/brlcad/\" target=\"_blank\" title=\"https://gitlab.com/raingloom/brlcad/\">https://gitlab.com/raingloom/brlcad/</a></p>",
+        "id": 127150317,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392496
+    },
+    {
+        "content": "<p>the relevant branch is \"gsoc-search-exec\"</p>",
+        "id": 127150318,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392516
+    },
+    {
+        "content": "<p>anyways, back to work</p>",
+        "id": 127150358,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527392575
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> so, I'm trying to fit the exec specific parameters into ged_search but it breaks the command tab, so I'm thinking about adding it to <code>struct ged</code>. Is that ok? Is this supposed to be thread safe and stuff?</p>",
+        "id": 127207968,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527517563
+    },
+    {
+        "content": "<p>command tab?</p>",
+        "id": 127208005,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527517603
+    },
+    {
+        "content": "<p>this thing: src/libtclcad/tclcad_obj.c:989</p>",
+        "id": 127208051,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527517680
+    },
+    {
+        "content": "<p>it depends on all the functions having the same prototype</p>",
+        "id": 127208102,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527517701
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> so, I'm trying to fit the exec specific parameters into ged_search but it breaks the command tab, so I'm thinking about adding it to <code>struct ged</code>. Is that ok? Is this supposed to be thread safe and stuff?</p>\n</blockquote>\n<p>many commands have custom command hooks, so you shouldn't need to modify the struct ged...</p>",
+        "id": 127208200,
+        "sender_full_name": "Sean",
+        "timestamp": 1527517816
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> I think the way that's going to have to be handled is to have the calling code \"wrap up\" the to_cmds information into one container struct that can be passed through the generic exec function, and then have an \"unpack and run\" function that is the actual hook function supplied to search exec for the Tcl commands.  In essence, the unpack function will serve as the dispatcher to the to_cmd interface.</p>",
+        "id": 127208390,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527518138
+    },
+    {
+        "content": "<p>basically, \"unpack\" will turn the argv string exec generates and the contents of the data structure into a to_cmd call.</p>",
+        "id": 127208460,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527518210
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> where would the client entry point(s) be? There is a <code>to_open_tcl</code> that seems to allow for some userdata.</p>",
+        "id": 127264353,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527616515
+    },
+    {
+        "content": "<p>I'm not following - what do you mean by client entry points?</p>",
+        "id": 127282980,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527641407
+    },
+    {
+        "content": "<blockquote>\n<p>I think the way that's going to have to be handled is to have the calling code \"wrap up\" the to_cmds information</p>\n</blockquote>\n<p>I'm trying to figure out where the client code would do this and which info to wrap</p>",
+        "id": 127283200,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527641797
+    },
+    {
+        "content": "<p>Ah.  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , what would be the \"right\" way to pass application client data through a libged command call?</p>",
+        "id": 127284761,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527644916
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> in this particular case you could probably use the ged_interp pointer in struct ged for testing purposes - it's not intended to be relied upon (at least, not in that form) but right now I believe that's holding the Tcl interpreter used by the libged commands working with Tcl.</p>",
+        "id": 127284769,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527644990
+    },
+    {
+        "content": "<p>So a libged db_search call could pass the gedp-&gt;ged_interp pointer through the call with a void cast, and then your \"run_to_cmd\" function would cast it back to a Tcl_Interp before calling the actual to_cmd.</p>",
+        "id": 127284819,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527645047
+    },
+    {
+        "content": "<p>Probably the ged_interp should morph into a generic \"userdata\" pointer</p>",
+        "id": 127284826,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527645119
+    },
+    {
+        "content": "<p>struct ged is defined in include/ged/defines.h</p>",
+        "id": 127284985,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527645401
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> thanks! Gonna try that.</p>",
+        "id": 127285107,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527645628
+    },
+    {
+        "content": "<blockquote>\n<p>Ah.  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , what would be the \"right\" way to pass application client data through a libged command call?</p>\n</blockquote>\n<p>the only way for a librt function to call into libged state without creating an architecture cycle or violating modularity is for librt to take a function pointer AND a data pointer (which both get passed to the function).  qsort() is a quintessential example of this.</p>\n<p>there are common ways for doing this statefully (e.g., context = db_search_register_callback(mycallback); db_search(context, ...); // data passed internally or explicitly) or stateless (e.g., db_search(mycallback, ...); // data passed internally or explicitly).</p>",
+        "id": 127292390,
+        "sender_full_name": "Sean",
+        "timestamp": 1527660721
+    },
+    {
+        "content": "<p>since you're talking about an interpreter, it likely needs to be explicit</p>",
+        "id": 127292449,
+        "sender_full_name": "Sean",
+        "timestamp": 1527660806
+    },
+    {
+        "content": "<p>which in that pattern could be as simple as a separate db_search_register_data() call</p>\n<p>so with a stateful context, something like ctx = db_search_context_create(); db_search_register_exec(ctx, callback); db_search_register_data(ctx, interp);</p>",
+        "id": 127292550,
+        "sender_full_name": "Sean",
+        "timestamp": 1527661003
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> How are things going?</p>",
+        "id": 127447328,
+        "sender_full_name": "starseeker",
+        "timestamp": 1527902456
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> the last few days were a bit hectic so I'm catching up with the coding today, I just finished modifying librt to use a single context struct pointer instead of separate userdata and callback parameters</p>",
+        "id": 127449226,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527906303
+    },
+    {
+        "content": "<p>right now i'm building mged to see where it broke and where i have to change things in libged</p>",
+        "id": 127449228,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1527906303
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ok, so I have some basic eval thing working, specifically this:</p>\n<div class=\"codehilite\"><pre><span></span>% echo &#39;search * -exec echo yay &quot;;&quot;&#39; | ./bin/mged ../../db/axis.g\nyay\n</pre></div>\n\n\n<p>produces some output without crashing</p>\n<p>but I think it should be printing that multiple times?? not sure what's going on on the Tcl side, I should probably look at existing scripts for commands I should try.</p>",
+        "id": 127612340,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528220344
+    },
+    {
+        "content": "<p>I tried <code>-exec true \";\"</code> but it gives an \"invalid command name: true\" in the log....but still prints every item.....</p>\n<p>oh, of course, this is not a C main, 0 is abnormal return here</p>",
+        "id": 127612481,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528220567
+    },
+    {
+        "content": "<p>-exec echo \"{}\" \";\" seems to do the right thing now but it only printed one path, no idea why. but it returned true for everything so exec printed them all</p>",
+        "id": 127613337,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528221607
+    },
+    {
+        "content": "<p>That looks like invalid find/search syntax.. asterisk?</p>",
+        "id": 127613454,
+        "sender_full_name": "Sean",
+        "timestamp": 1528221746
+    },
+    {
+        "content": "<p>Might I suggest running in immediate mode:  mged f.g obj search . -exec echo yay \\;</p>",
+        "id": 127613643,
+        "sender_full_name": "Sean",
+        "timestamp": 1528222028
+    },
+    {
+        "content": "<p>That way you know exactly what the argc/argv should be.</p>",
+        "id": 127613731,
+        "sender_full_name": "Sean",
+        "timestamp": 1528222153
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> the -exec true and the current -exec echo I'm trying are without the asterisk</p>",
+        "id": 127613981,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528222496
+    },
+    {
+        "content": "<p>i know that the f_exec in the plan is evaluated the right number of times so it must be something else messing up</p>",
+        "id": 127614069,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528222592
+    },
+    {
+        "content": "<p>this is what <code>echo 'search -exec echo \"{}\" \";\"' | ./bin/mged ../../db/axis.g</code> does:</p>\n<div class=\"codehilite\"><pre><span></span>/axis/x.r/x\nX1\nX2\nX\nX.r\n...bunch more names\n</pre></div>",
+        "id": 127614099,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528222649
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ok so I think I know what's going on and it's probably not my code that's wrong</p>\n<p>I've noticed that many parts of the code actually \"print\" into memory, the echo output I see there is the last node in the db that librt looked at, so what's probably happening is:</p>\n<ul>\n<li>there is a buffer</li>\n<li>Tcl <code>echo</code> writes to that buffer</li>\n<li>Tcl <code>echo</code> overwrites that buffer when it's called again</li>\n<li>Tcl <code>echo</code> should be appending, not overwriting</li>\n<li>or it should at least flush to stdout</li>\n<li>basic Tcl I/O is broken and that's.... quite sad, really.</li>\n</ul>\n<p>anyways, I guess that's the core functionality done??</p>",
+        "id": 127743938,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528412710
+    },
+    {
+        "content": "<p>ah. apparently it might not be broken, just.... really, <strong>really</strong> weird and counterintuitive</p>\n<p>one would think that <code>echo</code> prints to stdout, right? but no, there is a result field in Tcl_Interp</p>\n<p>I guess that should be printed after every Tcl_Eval??? this is weird, why would somebody want this??? can't this be done with pipes???</p>",
+        "id": 127744656,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528413863
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> well, I added an extra <code>puts()</code> call so now the eval function I wrote takes care of printing, but it still comes <strong>after</strong> the Tcl output (in this case: the list of found items) unless I explicitly <code>fflush(stdout)</code></p>",
+        "id": 127778113,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528472066
+    },
+    {
+        "content": "<p>but yeah, that's... about it??? should I send a patch so others can try it as well?</p>",
+        "id": 127778143,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528472107
+    },
+    {
+        "content": "<p>what I think _could_ be done:<br>\nthe context is currently the last parameter, but leaving the database pointer to be last might be better? it would be pretty easy to switch their order.</p>",
+        "id": 127778237,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528472195
+    },
+    {
+        "content": "<p>BSD find has the <code>-ok</code> variant, which asks before execution, is this needed?<br>\nthen there is the \"{}\" \"+\" version, which adds things at the end. that's just a minor change in the parser</p>",
+        "id": 127778295,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528472271
+    },
+    {
+        "content": "<p>also, <code>find(1)</code> does not have the implicit <code>-print</code> when <code>-exec</code> or <code>-ok</code> are present, leaving printing up to them</p>\n<p>however, librt does not actually print, it just returns an array and the interpeter has no easy way to do that, so I think this should be left out to keep things simple??? or the presence of <code>-exec</code> should be communicated towards the client code, so that it can decide if it wants to do implicit printing</p>",
+        "id": 127778482,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528472469
+    },
+    {
+        "content": "<p>oh and of course existing code outside mged that uses db_search beeds to be updated</p>",
+        "id": 127778563,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528472567
+    },
+    {
+        "content": "<p>it's not broken -- tcl does exactly what we tell it to do so if the behavior isn't right, it's pretty much on us -- and how it's been set up in mged/libged</p>",
+        "id": 127779547,
+        "sender_full_name": "Sean",
+        "timestamp": 1528473788
+    },
+    {
+        "content": "<p>there is a result field and most commands call Tcl_AppendResult to add to it.  some commands clear the result before printing to start fresh, some merely append, some return a partial result and tell tcl more will come later</p>",
+        "id": 127779610,
+        "sender_full_name": "Sean",
+        "timestamp": 1528473864
+    },
+    {
+        "content": "<p>yeah, figured it out later, but damn that was frustrating. i'm used to I/O working on the standard files, so this was very weird.</p>",
+        "id": 127796972,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528497277
+    },
+    {
+        "content": "<p>so, what should I do with the remaining thingies? what to implement? what to change?</p>",
+        "id": 127796992,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528497327
+    },
+    {
+        "content": "<p>I'd get things working across the system first (update all the db_search calls, add documentation to the man page for search including syntax documentation and examples)</p>",
+        "id": 127803090,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528509493
+    },
+    {
+        "content": "<p>what is the new db_search function signature?</p>",
+        "id": 127803097,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528509553
+    },
+    {
+        "content": "<p>definitely put together a patch so other people can try it out</p>",
+        "id": 127803101,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528509580
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> submitted patch on SF</p>",
+        "id": 127875482,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528677553
+    },
+    {
+        "content": "<p>the sig is the same except there is a <code>ctx</code> parameter at the end</p>",
+        "id": 127875706,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528678013
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> ok, got it right this time, the Tcl result is now properly interpreted<br>\nI only tested it with <code>search -exec echo yes \";\"</code> and <code>search -exec echo no \";\"</code> so far, but those work.</p>",
+        "id": 127931217,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528770535
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> your latest patch file on sourceforge is empty?</p>",
+        "id": 127932249,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528772735
+    },
+    {
+        "content": "<p>...wha... oh hell.</p>",
+        "id": 127932343,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528772848
+    },
+    {
+        "content": "<p>a sec, gonna regenerate it</p>",
+        "id": 127932391,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528772897
+    },
+    {
+        "content": "<p>np</p>",
+        "id": 127932394,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528772913
+    },
+    {
+        "content": "<p>well this is... odd... <code>git diff master</code> works but <code>git diff master -- &lt;some files I took from the diff output&gt;</code> produces an empty output</p>",
+        "id": 127932577,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528773255
+    },
+    {
+        "content": "<p>ok, i uploaded it again</p>",
+        "id": 127932875,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528773823
+    },
+    {
+        "content": "<p>OK, one thing I see right away - you're allocating the db_search_context with bu_malloc, but calling free on it rather than bu_free.  I'd recommend for this situation, if you're going to have a db_search_context_create function, you also add a db_search_context_destroy to handle the deallocation.</p>",
+        "id": 127932989,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528774022
+    },
+    {
+        "content": "<p>minor point - mged_db_search_callback  has some trailing whitespace in it, which we generally try to avoid.</p>",
+        "id": 127933053,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528774148
+    },
+    {
+        "content": "<p>For vim, I use this trick to highlight it:  <a href=\"https://stackoverflow.com/questions/4617059/showing-trailing-spaces-in-vim\" target=\"_blank\" title=\"https://stackoverflow.com/questions/4617059/showing-trailing-spaces-in-vim\">https://stackoverflow.com/questions/4617059/showing-trailing-spaces-in-vim</a></p>",
+        "id": 127933112,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528774271
+    },
+    {
+        "content": "<p>Not sure what other editors do... Sean can probably advise on Emacs</p>",
+        "id": 127933118,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528774305
+    },
+    {
+        "content": "<p>I uh, use Acme. &gt;_&gt;</p>",
+        "id": 127933173,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528774386
+    },
+    {
+        "content": "<p>heh.  maybe this? (untested):  <a href=\"https://gist.github.com/echosa/a5fd4b6637718c455e43\" target=\"_blank\" title=\"https://gist.github.com/echosa/a5fd4b6637718c455e43\">https://gist.github.com/echosa/a5fd4b6637718c455e43</a></p>",
+        "id": 127933231,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528774486
+    },
+    {
+        "content": "<p>I'll probably just run <code>sed -i</code> over them <span class=\"emoji emoji-1f937\" title=\"shrug\">:shrug:</span></p>",
+        "id": 127933371,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528774728
+    },
+    {
+        "content": "<p>that way I don't even have to open the files</p>",
+        "id": 127933380,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528774748
+    },
+    {
+        "content": "<p>that works too</p>",
+        "id": 127933792,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528775551
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> did you get a chance to update the patch?</p>",
+        "id": 127984684,
+        "sender_full_name": "starseeker",
+        "timestamp": 1528854831
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> if you have it all working, check out the manual page for search (brlman search) and see which of the examples it has at the end can turn into shorter search -exec examples.  it's also a good test set in general to make sure everything is working right.</p>",
+        "id": 128009924,
+        "sender_full_name": "Sean",
+        "timestamp": 1528898481
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I changed the calls to bu_free but I haven't uploaded it yet, I will in a bit<br>\n<span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> thanks, I'll check those (and add some examples with -exec)</p>",
+        "id": 128021973,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1528913787
+    },
+    {
+        "content": "<p>bu_free complains at runtime about freeing a null pointer, but afaik <code>free(0)</code> is supposed to be a no-op??? does this need an extra check?</p>",
+        "id": 128085643,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529009160
+    },
+    {
+        "content": "<p>Erm.  <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , is bu_free supposed to be OK in that situation?</p>",
+        "id": 128150165,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529111561
+    },
+    {
+        "content": "<p>i'm trying to do the examples in the manpage but uhh, i'm getting errors and since Tcl is <strong>so</strong> amazing, it doesn't even tell me where the error comes from</p>",
+        "id": 128222615,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529282650
+    },
+    {
+        "content": "<p>like... this: <code>echo [expr {int(rand()*225)+30}]</code></p>\n<p><code>extra characters after close-brace</code></p>\n<p><span class=\"emoji emoji-1f622\" title=\"cry\">:cry:</span></p>",
+        "id": 128222617,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529282679
+    },
+    {
+        "content": "<p>and when it doesn't error it just prints it as a string</p>\n<p>uhhggjhlkhl</p>",
+        "id": 128222624,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529282706
+    },
+    {
+        "content": "<p>i'm reading a tutorial but so far it's been about the standard library</p>",
+        "id": 128222625,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529282739
+    },
+    {
+        "content": "<p>and that's a reduced example, the one in the manpage was bigger and gave the same error</p>",
+        "id": 128222673,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529282821
+    },
+    {
+        "content": "<p>well. i didn't run it directly so maybe this is some weird context sensitive thing</p>",
+        "id": 128222679,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529282848
+    },
+    {
+        "content": "<p>also, <code>man search</code> doesn't work in <code>-c</code> mode apparently? it says <code>man: no manual page /home/rain/Sync/gsoc/build/debug/share/man/mann/search.nged</code></p>\n<p>but that exact file is Right There <span class=\"emoji emoji-1f620\" title=\"angry\">:angry:</span></p>",
+        "id": 128223170,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529283965
+    },
+    {
+        "content": "<p>uhhh. ok. so it works in the original script but as soon as i try to make the loop body into a function with <code>proc</code> it starts complaining when i call the function</p>",
+        "id": 128223286,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529284281
+    },
+    {
+        "content": "<p>....huh. well it works now....</p>",
+        "id": 128223334,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529284352
+    },
+    {
+        "content": "<p>idk what i did differently....</p>",
+        "id": 128223335,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529284359
+    },
+    {
+        "content": "<p>well. nevermind i guess.</p>",
+        "id": 128223336,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529284366
+    },
+    {
+        "content": "<p>uh turns out the full paths i was printing can't actually be used??? this is.... weird.</p>",
+        "id": 128268945,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529354412
+    },
+    {
+        "content": "<p>ok, made another example work with -exec<br>\ndamn.<br>\nglobal variables affecting seemingly basic commands..... yikes</p>",
+        "id": 128337961,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529456243
+    },
+    {
+        "content": "<p>also now f_exec doesn't use full paths because it turns out that was just some debugging thing maybe? because the Tcl interpeter wanted nothing to do with them</p>",
+        "id": 128338016,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529456300
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> There are some commands that will use full paths - the example that comes to mind is arced, although I don't think I have a scripted example of using it handy</p>",
+        "id": 128338844,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529457784
+    },
+    {
+        "content": "<p>\"brlman arced\" from the command or \"man arced\" from the MGED command line should give you the arced man page - I'd try a few experiments with it and then see if you can roll it into a search -exec example successfully</p>",
+        "id": 128338850,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529457837
+    },
+    {
+        "content": "<p>that's quite confusing, i thought paths worked the same way they do in a shell</p>\n<p>is there any reason for the differences?</p>",
+        "id": 128380110,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529524654
+    },
+    {
+        "content": "<p>well, arced doesn't work with the short paths</p>\n<p>but others don't work with the long ones</p>",
+        "id": 128380728,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529525405
+    },
+    {
+        "content": "<p>hmm<br>\n<code>r part1.r u rcc2.s – sph2.s</code> doesn't work in the classic ui</p>",
+        "id": 128394017,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529544990
+    },
+    {
+        "content": "<p>That's OK (commands only working with obj or full path respectively) as long as the commands in question do work when given the correct inputs</p>",
+        "id": 128394331,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529545660
+    },
+    {
+        "content": "<p>What's the error?</p>",
+        "id": 128394338,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529545678
+    },
+    {
+        "content": "<p>i think it was \"wrong number of arguments sph2.s\"<br>\nit went away when i quoted the \"-\"</p>",
+        "id": 128394756,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529546458
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>mged&gt; r foo.r u rcc2.s – sph2.s\n sph2.s\nerror in number of args!\nmged&gt;\n</pre></div>",
+        "id": 128394819,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529546526
+    },
+    {
+        "content": "<p>oh. nvm the quoted one also errors</p>",
+        "id": 128394827,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529546576
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>mged&gt; r foo.r &quot;u&quot; rcc2.s &quot;–&quot; sph2.s\n&quot; sph2.s\nDefaulting item number to 1002\nCreating region with attrs: region_id=1001, los=100, material_id=1\nbad operation:  (0x0) skip member: sph2.s\n</pre></div>",
+        "id": 128394880,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529546652
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> just throwing this out there: why not have a filter command? functional style? can Tcl do that?</p>",
+        "id": 128397670,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529552137
+    },
+    {
+        "content": "<p>although... that would be language dependent... hm.</p>",
+        "id": 128397712,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529552179
+    },
+    {
+        "content": "<p>I separated the -exec option into an <code>-execs</code> and and <code>-execf</code> one, the former uses the short name and the latter uses the full path.</p>",
+        "id": 128525019,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529770135
+    },
+    {
+        "content": "<p>but full paths - as emitted by <code>db_path_to_string</code> - also don't work</p>",
+        "id": 128525914,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529772180
+    },
+    {
+        "content": "<p>That might be the leading slash?</p>",
+        "id": 128558765,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529850645
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>   What do you think is the \"right\" thing to do here?  Teach commands that use a path to handle the search output paths, have exec \"dumb down\" the paths somehow for feeding to libged, ...?</p>",
+        "id": 128558812,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529850728
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> I'm not sure we're going to want to have two different exec options - that's OK for testing, but I think we'll want to resolve some sort of sane default behavior for all commands that doesn't require user awareness of that.</p>",
+        "id": 128558822,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529850822
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> what does \"draw\" do with full paths?  IIRC Bob updated that some years ago to be able to handle full paths, but there again that lead slash might be an issue...</p>",
+        "id": 128558862,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529850879
+    },
+    {
+        "content": "<p>From a command standpoint, it might be as simple as ensuring sane failure behavior if the \"wrong\" form of the path (short vs. long) is supplied - then an exec with the wrong search path modifier will just not do anything, and the \"fix\" is to change the path modifier to produce the correct form for the exec in question.</p>",
+        "id": 128558913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529850986
+    },
+    {
+        "content": "<p>Of course, there's also the situation with multiple exec calls where some expect short paths and some are looking for long paths.</p>",
+        "id": 128558920,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529851032
+    },
+    {
+        "content": "<p>Part of me almost wants to audit the commands and add (where appropriate) the ability to each command to handle full path inputs by \"pre-processing\" it down to the leaf object, if that's what the command is looking for.</p>",
+        "id": 128558961,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529851125
+    },
+    {
+        "content": "<p>db_string_to_path -&gt; DB_FULL_PATH_CUR_DIR -&gt; dp-&gt;d_namep for each string supplied as a \"geometry\" object to commands that don't work with full paths, or something along those lines...</p>",
+        "id": 128559113,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529851559
+    },
+    {
+        "content": "<p>I'm definitely much more inclined to fix the commands to do the \"right\" thing than I am to contort search-exec to try to \"feed\" them properly dumb-ed down  inputs</p>",
+        "id": 128559161,
+        "sender_full_name": "starseeker",
+        "timestamp": 1529851666
+    },
+    {
+        "content": "<p>free(0) is fine per the standard but is typically wrong or lazy memory management (often the prior), so bu will blather a warning expecting you to make sure the caller knows how much was allocated, how much will get freed, etc.</p>",
+        "id": 128560718,
+        "sender_full_name": "Sean",
+        "timestamp": 1529854968
+    },
+    {
+        "content": "<p>For the r command, I believe your expression is wrong.  Don’t put the first op (u).</p>",
+        "id": 128560751,
+        "sender_full_name": "Sean",
+        "timestamp": 1529855042
+    },
+    {
+        "content": "<p>c, r, comb, and g all take different types of expressions</p>",
+        "id": 128560770,
+        "sender_full_name": "Sean",
+        "timestamp": 1529855090
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> in that case I'll go through the commands and see which ones are doing weird things</p>",
+        "id": 128568767,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529873323
+    },
+    {
+        "content": "<p>come to think of it.... the current behaviour might be ok, since the user could just concatenate the short path with some prefix</p>",
+        "id": 128586215,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529909649
+    },
+    {
+        "content": "<p>i'm trying to figure out how but the Tcl concat command adds spaces between things</p>",
+        "id": 128586971,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529911150
+    },
+    {
+        "content": "<p>i think this can only be done with a helper function?</p>",
+        "id": 128587021,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529911223
+    },
+    {
+        "content": "<p>so this sort of works: <code>search Default -depth 1 -execs regsub bloop Default/bloop \"{}\" \";\"</code></p>",
+        "id": 128588770,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1529914825
+    },
+    {
+        "content": "<p>what if instead of expecting a two part \"path\", arced just took two parameters?</p>",
+        "id": 128665871,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530030930
+    },
+    {
+        "content": "<p>found another that takes paths: <code>listeval</code><br>\nthat one pretty much only makes sense with paths</p>",
+        "id": 128680487,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530047590
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> my sense is that we should come up with one or two path processing functions that will \"digest\" full path and object names and determine what was supplied, then have commands either reject the input (path command given non-path object, for example) or \"do the right thing\" (e.g. pull the leaf object from a full path and send that forward to the command.)</p>",
+        "id": 128683368,
+        "sender_full_name": "starseeker",
+        "timestamp": 1530051065
+    },
+    {
+        "content": "<p>Updating all the commands to be robust in that regard will be something of a slog, but we can at least establish the correct patterns.</p>",
+        "id": 128683385,
+        "sender_full_name": "starseeker",
+        "timestamp": 1530051102
+    },
+    {
+        "content": "<p>there needs to be a general object pathname processing, but that will require at least a case-by-case evaluation.  anything that takes an object name should take a pathname, and anything that takes a object name implicitly refers to a path.  fortunately, nearly all commands will easily update to supporting either.  the ones that don't will have to be considered separately (e.g., maybe we decide to eliminate or generalize the outliers).</p>",
+        "id": 128683799,
+        "sender_full_name": "Sean",
+        "timestamp": 1530051657
+    },
+    {
+        "content": "<blockquote>\n<p>come to think of it.... the current behaviour might be ok, since the user could just concatenate the short path with some prefix</p>\n</blockquote>\n<p>the 'join' command is the typical way to do this with tcl</p>",
+        "id": 128683999,
+        "sender_full_name": "Sean",
+        "timestamp": 1530051930
+    },
+    {
+        "content": "<p>so, i have a function like <code>db_lookup</code> that uses paths, it's only missing the part where it checks if the path components are actually connected</p>",
+        "id": 128938230,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530491246
+    },
+    {
+        "content": "<p>now, should it count any connection or should it be restricted somehow?</p>",
+        "id": 128938274,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530491349
+    },
+    {
+        "content": "<p>...where in hecc is the function that lists connected nodes......</p>",
+        "id": 128991108,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530570249
+    },
+    {
+        "content": "<blockquote>\n<p>so, i have a function like <code>db_lookup</code> that uses paths, it's only missing the part where it checks if the path components are actually connected</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> can you explain or show this please?  we don't want multiple lookup functions if we don't need to have them.  adding support for paths to db_lookup() would seem entirely reasonable if it doesn't support them already.  it would naturally need to fail lookup if the path was invalid.</p>",
+        "id": 129063261,
+        "sender_full_name": "Sean",
+        "timestamp": 1530678782
+    },
+    {
+        "content": "<blockquote>\n<p>now, should it count any connection or should it be restricted somehow?</p>\n</blockquote>\n<p>not sure what you mean here</p>",
+        "id": 129063267,
+        "sender_full_name": "Sean",
+        "timestamp": 1530678802
+    },
+    {
+        "content": "<blockquote>\n<p>global variables affecting seemingly basic commands..... yikes</p>\n</blockquote>\n<p>Eliminate them! ;)</p>",
+        "id": 129064247,
+        "sender_full_name": "Sean",
+        "timestamp": 1530680765
+    },
+    {
+        "content": "<blockquote>\n<p>I separated the -exec option into an <code>-execs</code> and and <code>-execf</code> one, the former uses the short name and the latter uses the full path.</p>\n</blockquote>\n<p>I don't think this is the right thing to do here.  whether short or full paths should replace {} is already implied via search . vs search / ... there should just be one -exec option regardless.</p>",
+        "id": 129064410,
+        "sender_full_name": "Sean",
+        "timestamp": 1530681175
+    },
+    {
+        "content": "<blockquote>\n<p>but full paths - as emitted by <code>db_path_to_string</code> - also don't work</p>\n</blockquote>\n<p>what did you mean by this?  invalid paths?  problems with commands that don't take paths?</p>",
+        "id": 129064421,
+        "sender_full_name": "Sean",
+        "timestamp": 1530681229
+    },
+    {
+        "content": "<p>problems with commands that don't take paths and i think the ones that do take paths don't take absolute ones</p>",
+        "id": 129104472,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530737849
+    },
+    {
+        "content": "<p>the function is the following:</p>\n<div class=\"codehilite\"><pre><span></span>struct directory *\ndb_lookup_path(const struct db_i *dbip, const char *_path, int noisy)\n{\n    struct directory *dir = RT_DIR_NULL;\n    size_t i=0;\n    size_t j=0;\n    char tmp;\n    char *path = bu_strdup(_path);\n\n    /* skip leading slashes */\n    while (path[i] == &#39;/&#39; &amp;&amp; path[i] != &#39;\\0&#39;)\n        i++;\n    j=i;\n    while (path[j] != &#39;/&#39; &amp;&amp; path[j] != &#39;\\0&#39;)\n        j++;\n    tmp = path[j];\n    path[j] = &#39;\\0&#39;;\n    /* start from the &quot;root&quot; */\n    dir = db_lookup(dbip, path + i, noisy);\n    if (dir == RT_DIR_NULL)\n        goto exit;\n    for(;;) {/* FIXME: figure out a better loop condition than `true`?? */\n        path[j] = tmp;\n        if (path[j] == &#39;\\0&#39;) /* reached the last segment */\n            goto exit;\n        i = j + 1;\n        while (path[i] == &#39;/&#39; &amp;&amp; path[i] != &#39;\\0&#39;)\n            i++;\n        j = i;\n        while (path[j] != &#39;/&#39; &amp;&amp; path[j] != &#39;\\0&#39;)\n            j++;\n        tmp = path[j];\n        path[j] = &#39;\\0&#39;;\n        if (1) {\n            /* path segment connects to dir */\n            dir = db_lookup(dbip, path + i, noisy);\n        } else {\n            bu_log(&quot;malformed path&quot;); /* FIXME: write more descriptive message once the connection check is implemented */\n            return RT_DIR_NULL;\n        }\n    }\n    exit:\n    bu_free(path, &quot;mutable path&quot;);\n    return dir;\n}\n</pre></div>",
+        "id": 129104629,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530738099
+    },
+    {
+        "content": "<p>it builds on <code>db_lookup</code> and could replace it if necessary</p>",
+        "id": 129104711,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530738214
+    },
+    {
+        "content": "<p>the connection thing: should it eg. only go down unions but not intersections?<br>\ni think it should consider any connection a valid one and it any filtering is necessary, that could be added later</p>",
+        "id": 129104813,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530738343
+    },
+    {
+        "content": "<p>there were some unexpected pet related troubles at home so i didn't have a lot of time to code :/<br>\ntomorrow we're going on that vacation so i should have ample time to code and read more of the source in the car</p>",
+        "id": 129104945,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1530738570
+    },
+    {
+        "content": "<blockquote>\n<p>it builds on <code>db_lookup</code> and could replace it if necessary</p>\n</blockquote>\n<p>this likely makes more sense.  existing db_lookup could be made a HIDDEN/static function renamed to just lookup_object() or something similarly simple, and your new one taking over as db_lookup() assuming the signature matches.  it would need to match.</p>",
+        "id": 129286769,
+        "sender_full_name": "Sean",
+        "timestamp": 1531030815
+    },
+    {
+        "content": "<blockquote>\n<p>the connection thing: should it eg. only go down unions but not intersections?<br>\ni think it should consider any connection a valid one and it any filtering is necessary, that could be added later</p>\n</blockquote>\n<p>Ah, no, I don't think it should be arbitrarily limited by the operation.  Stopping doesn't make sense for intersections in particular.  The only real difficulty is that there can be multiple objects at a given point in the path (e.g., /path/to/foo/bar might have 'bar' in 'foo' N times, with different matrices on each one).  That is only really solved by switching from paths to URI's, and I think that's outside scope for this project.</p>",
+        "id": 129286822,
+        "sender_full_name": "Sean",
+        "timestamp": 1531030999
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  Peter, can you do another version of your patch that doesn't have extra whitespace in it?  I don't remember if we say it explicitly in HACKING, but generally we try to avoid trailing whitespace on lines.</p>",
+        "id": 129382721,
+        "sender_full_name": "starseeker",
+        "timestamp": 1531183063
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> sure, i'll send a fixed one after i'm finished with this function</p>",
+        "id": 129411230,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531229226
+    },
+    {
+        "content": "<p>well.. i have something that should check connections, but it seems like it just considers everything connected...? that took a lot longer than i hoped for and it still doesn't work. frick.</p>",
+        "id": 129461921,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531303994
+    },
+    {
+        "content": "<p>Can you show your code?  Maybe another pair of eyes</p>",
+        "id": 129477965,
+        "sender_full_name": "Sean",
+        "timestamp": 1531322585
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>HIDDEN int\nconnected_directories(const struct db_i *dbip, const struct directory *dpa, const struct directory *dpb)\n{\n    int ret = 0xdead;\n    struct directory *dpachild;\n    size_t i;\n    struct rt_db_internal interna, internb;\n    struct rt_comb_internal *comba;\n    size_t true_count, trueish_count;\n    struct rt_tree_array *rt_tree_array = NULL;\n\n    if (RT_DIR_NULL == dpa || RT_DIR_NULL == dpb) {\n        /* FIXME: panic maybe instead??????? */\n        ret = 0;\n    } else if (!(dpa-&gt;d_flags &amp; RT_DIR_COMB)) {\n        ret = 0; /* not a combination, so paths can&#39;t start from it */\n    } else {\n        if (!(dpa-&gt;d_flags &amp; RT_DIR_COMB)) {\n            ret = 0;\n        } else if (rt_db_get_internal(&amp;interna, dpa, dbip, (fastf_t *)NULL, &amp;rt_uniresource) &lt; 0 || rt_db_get_internal(&amp;internb, dpb, dbip, (fastf_t *)NULL, &amp;rt_uniresource) &lt; 0) {\n            bu_log(&quot;Database read error, aborting&quot;);\n            ret = 0;\n        } else {\n            comba = (struct rt_comb_internal *)interna.idb_ptr;\n            if (comba-&gt;tree) {\n                if (db_ck_v4gift_tree(comba-&gt;tree) &lt; 0) {\n                    db_non_union_push(comba-&gt;tree, &amp;rt_uniresource);\n                    if (db_ck_v4gift_tree(comba-&gt;tree) &lt; 0) {\n                        bu_log(&quot;Cannot flatten tree for listing&quot;);\n                        ret = 0;\n                        goto exit;\n                    }\n                }\n                trueish_count = db_tree_nleaves(comba-&gt;tree);\n                if (trueish_count &gt; 0) {\n                    rt_tree_array = (struct rt_tree_array *)bu_calloc(trueish_count,sizeof(struct rt_tree_array), &quot;tree list&quot;);\n                    true_count = (struct rt_tree_array *)db_flatten_tree(\n                        rt_tree_array, comba-&gt;tree, OP_UNION,\n                        1, &amp;rt_uniresource) - rt_tree_array;\n                    BU_ASSERT(true_count == trueish_count);\n                    comba-&gt;tree = TREE_NULL;\n                } else {\n                    true_count = 0;\n                    rt_tree_array = NULL;\n                }\n\n                for (i = 0; i &lt; true_count &amp;&amp; !ret; i++) {\n                    dpachild = db_lookup(dbip, rt_tree_array[i].tl_tree-&gt;tr_l.tl_name, LOOKUP_QUIET);\n                    if (RT_DIR_NULL != dpachild &amp;&amp; 0 == bu_strcmp(dpachild-&gt;d_namep, dpb-&gt;d_namep)) {\n                        ret = 1;\n                    }\n                    db_free_tree(rt_tree_array[i].tl_tree, &amp;rt_uniresource);\n                }\n\n                while (i &lt; true_count) {\n                    db_free_tree(rt_tree_array[i].tl_tree, &amp;rt_uniresource);\n                    i++;\n                }\n\n                if (rt_tree_array)\n                    bu_free((char *)rt_tree_array, &quot;printnode: rt_tree_array&quot;);\n\n            } else {\n                ret = 0;\n            }\n        }\n    }\n    exit:\n    rt_db_free_internal(&amp;interna);\n    rt_db_free_internal(&amp;internb);\n    BU_ASSERT(ret != 0xdead);\n    return ret;\n}\n\n\nHIDDEN int\nconnected_path(const struct db_i *dbip, const struct db_full_path *fp)\n{\n    size_t i;\n    const struct directory *dpa, *dpb;\n    switch (fp-&gt;fp_len) {\n        case 0:\n        case 1: return 1;\n        default:\n            dpb = fp-&gt;fp_names[0];\n            if (RT_DIR_NULL == dpb) return 0;\n            for (i=1; i&lt;fp-&gt;fp_len-1;i++) {\n                dpa = dpb;\n                dpb = fp-&gt;fp_names[i+1];\n                if (! connected_directories(dbip, dpa, dpb))\n                    return 0;\n            }\n    }\n    return 1;\n}\n</pre></div>\n\n\n<p>i couldn't find a way to check the connections starting from a <code>struct directory</code> so i hoped that the <code>tree</code> command's implementation will have something, that right there is a shameless plagiary of <code>_ged_print_node</code></p>",
+        "id": 129505762,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531351947
+    },
+    {
+        "content": "<p>maybe the problem is that i'm testing it with the wrong file? I've been doing all my tests with the supplied NIST_MBE_PMI_7-10.g since it's pretty big so i thought it should be complex enough. maybe the output of <code>tree</code> just doesn't reflect the connections the way they really are?</p>",
+        "id": 129555324,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531421538
+    },
+    {
+        "content": "<p>the tests that i expected to fail were things like<br>\n<code>ls Default/Default</code> or  <code>ls Solid</code>.... oh..... OH!!!!!!!!!!!!!!!!</p>",
+        "id": 129555896,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531422103
+    },
+    {
+        "content": "<p>.....wait</p>",
+        "id": 129555907,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531422112
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> that's a big file, but it's not a very complex database .. it's just got some big nurbs objects in it.  the havoc or m35 models are considerably more complex</p>",
+        "id": 129556340,
+        "sender_full_name": "Sean",
+        "timestamp": 1531422521
+    },
+    {
+        "content": "<p>Default/Default?? ... that doesn't look right :)</p>",
+        "id": 129556363,
+        "sender_full_name": "Sean",
+        "timestamp": 1531422546
+    },
+    {
+        "content": "<p>i know! and it works! and it shouldn't!</p>",
+        "id": 129562690,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531429557
+    },
+    {
+        "content": "<p>and ya, i later realized it's pretty simple but i couldn't remember which one the big complex tank was. &gt;_&gt;</p>",
+        "id": 129562739,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531429588
+    },
+    {
+        "content": "<p>and the NIST one was fine for just testing if <code>search</code> worked at all</p>",
+        "id": 129562758,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531429612
+    },
+    {
+        "content": "<p>we don't have a big complex tank in our samples</p>",
+        "id": 129562851,
+        "sender_full_name": "Sean",
+        "timestamp": 1531429703
+    },
+    {
+        "content": "<p>the \"goliath.g\" model kind of looks like a tank but is actually a tracked mine ... like a land mine that explodes, but it has tracks on it so it can be driven around</p>",
+        "id": 129562883,
+        "sender_full_name": "Sean",
+        "timestamp": 1531429758
+    },
+    {
+        "content": "<p>it must have been that then. but anyways, Default/Default shouldn't work and it's not just some quirk of the database in question.</p>",
+        "id": 129563196,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531430144
+    },
+    {
+        "content": "<p>maybe ls doesn't use db_lookup....? uhh.</p>\n<p>i guess i can't avoid it. i'll have to step through this with gdb.</p>",
+        "id": 129563752,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531430700
+    },
+    {
+        "content": "<blockquote>\n<p>maybe ls doesn't use db_lookup....? uhh.</p>\n<p>i guess i can't avoid it. i'll have to step through this with gdb.</p>\n</blockquote>\n<p>it does use db_lookup (see src/libged/list.c) but is also path-aware if there's a slash -- there may be some case where object/object resolves wierd</p>",
+        "id": 129609838,
+        "sender_full_name": "Sean",
+        "timestamp": 1531497886
+    },
+    {
+        "content": "<p>oh.... i think i have it working....</p>",
+        "id": 129676428,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531602972
+    },
+    {
+        "content": "<p>well, <code>cat Default/Default</code> no longer works</p>",
+        "id": 129676431,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531602987
+    },
+    {
+        "content": "<p>(cat turned out simpler than ls so i'm testing it with that)</p>",
+        "id": 129676434,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531603009
+    },
+    {
+        "content": "<p>it was an off-by-one error, naturally</p>",
+        "id": 129676440,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531603027
+    },
+    {
+        "content": "<p><code>cat Default/Solid1.s</code> also doesn't work</p>",
+        "id": 129676475,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531603083
+    },
+    {
+        "content": "<p>but it doesn't display an error either... it probably should</p>",
+        "id": 129676485,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531603099
+    },
+    {
+        "content": "<p><code>cat Default/Solid1</code> does work</p>",
+        "id": 129676487,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531603117
+    },
+    {
+        "content": "<p>also, absolute path syntax works now, so <code>search</code> should work too</p>",
+        "id": 129676842,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531603944
+    },
+    {
+        "content": "<p>this indentation style is not a good fit for acme :(</p>\n<p>i think i'll write some scripts to convert between the two, so I can work purely with tabs but then I can convert things back. i've tried the official formatter script but it works on files and I want to work with selections as well and that's easier done with a few <code>sed</code> invocations</p>",
+        "id": 129745489,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531742546
+    },
+    {
+        "content": "<p>i think there already is something like that. check out <code>sh/ws.sh</code></p>",
+        "id": 129746003,
+        "sender_full_name": "Cezar",
+        "timestamp": 1531743296
+    },
+    {
+        "content": "<p>it looks like it works on files and not stdin... ah well, let's try this</p>",
+        "id": 129746544,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531744064
+    },
+    {
+        "content": "<p>found something simpler:</p>\n<div class=\"codehilite\"><pre><span></span># convert from the weird indentation to something simpler\n|sed &#39;s/    /        /g\ns/    / /g&#39;\n\n# revert the previous conversion\n|sed &#39;s/        /        /g\ns/  /    /g\ns/        / /g&#39;\n</pre></div>",
+        "id": 129750793,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531749077
+    },
+    {
+        "content": "<p>it seems to work and i didn't have to learn perl to know what it's doing :3</p>",
+        "id": 129750810,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531749107
+    },
+    {
+        "content": "<p>this is also nicer because it's easy to apply to selections in Acme so it's easier to track what I'm changing</p>",
+        "id": 129750962,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531749317
+    },
+    {
+        "content": "<blockquote>\n<p>(cat turned out simpler than ls so i'm testing it with that)</p>\n</blockquote>\n<p>yes, 'cat' is basically a nearly direct call to the ft_describe() callback</p>",
+        "id": 129751837,
+        "sender_full_name": "Sean",
+        "timestamp": 1531750266
+    },
+    {
+        "content": "<p>it also calls db_lookup() itself, but without modifying the arguments</p>",
+        "id": 129751860,
+        "sender_full_name": "Sean",
+        "timestamp": 1531750301
+    },
+    {
+        "content": "<p>we have plans to convert the entire codebase indentation over.  that was waiting on repo migration, but it might make more sense to do it first now that migration is stalled...</p>",
+        "id": 129752679,
+        "sender_full_name": "Sean",
+        "timestamp": 1531751062
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  So on the patches, please separate them out by topic (you've got the older patch with color, edcolor, prcolor changes which I don't (think?) are related to search -exec)</p>",
+        "id": 129786927,
+        "sender_full_name": "starseeker",
+        "timestamp": 1531790558
+    },
+    {
+        "content": "<p>I'm thinking there are three here - the color stuff, the initial search -exec patch, and the follow-up that does the db_lookup changes</p>",
+        "id": 129787011,
+        "sender_full_name": "starseeker",
+        "timestamp": 1531790678
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> what's the \"something weird\" when you include the type from librt in ged/defines.h?</p>",
+        "id": 129787051,
+        "sender_full_name": "starseeker",
+        "timestamp": 1531790749
+    },
+    {
+        "content": "<p>I think I have separated the prcolor stuff out?? The something weird was some compilation error, but I can't remember what exactly.</p>",
+        "id": 129805716,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531823538
+    },
+    {
+        "content": "<p>But yea, there are changes in my branch that aren't directly related and that's probably not good because it's hard to clean up the diff from the master branch.</p>",
+        "id": 129805736,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531823598
+    },
+    {
+        "content": "<p>problem is idk how to cleanly separate those changes and some of them are nice to have..... maybe i could make each change a new feature branch and make one private branch that has all those changes????? idk</p>",
+        "id": 129816934,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531839045
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> </p>\n<div class=\"codehilite\"><pre><span></span>In file included from /home/rain/Sync/gsoc/brlcad-code/include/ged/defines.h:37,\n                 from /home/rain/Sync/gsoc/brlcad-code/include/analyze.h:34,\n                 from /home/rain/Sync/gsoc/brlcad-code/src/libanalyze/api.c:28:\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:141:39: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n                                struct db_i *dbip,\n                                       ^~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:140:39: error: ‘struct directory’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n                                struct directory **path_v,\n                                       ^~~~~~~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:178:38: error: ‘struct directory’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n                               struct directory ***dpv);\n                                      ^~~~~~~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:175:44: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n RT_EXPORT extern size_t db_ls(const struct db_i *dbip,\n                                            ^~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:203:91: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n DEPRECATED RT_EXPORT extern int db_full_path_list_add(const char *path, int local, struct db_i *dbip, struct db_full_path_list *path_list);\n                                                                                           ^~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:205:74: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n DEPRECATED RT_EXPORT extern void *db_search_formplan(char **argv, struct db_i *UNUSED(dbip), struct db_search_context *);\n                                                                          ^~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:209:20: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n             struct db_i *dbip);\n                    ^~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:212:21: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n              struct db_i *dbip);\n                     ^~~~\n/home/rain/Sync/gsoc/brlcad-code/include/rt/search.h:215:49: error: ‘struct db_i’ declared inside parameter list will not be visible outside of this definition or declaration [-Werror]\n                                          struct db_i *dbip,\n                                                 ^~~~\ncc1: all warnings being treated as errors\nmake[3]: *** [src/libanalyze/CMakeFiles/libanalyze-obj.dir/build.make:63: src/libanalyze/CMakeFiles/libanalyze-obj.dir/api.c.o] Error 1\nmake: exit 2\nmake[2]: *** [CMakeFiles/Makefile2:18004: src/libanalyze/CMakeFiles/libanalyze-obj.dir/all] Error 2\nmake[1]: *** [CMakeFiles/Makefile2:18278: src/libged/CMakeFiles/libged.dir/rule] Error 2\nmake: *** [Makefile:4422: libged] Error 2\n</pre></div>",
+        "id": 129829240,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531854317
+    },
+    {
+        "content": "<p>this is what happens if i include <code>rt/search.h</code></p>",
+        "id": 129829245,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531854335
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>#include &quot;common.h&quot;\n#include &quot;bio.h&quot;\n#include &quot;bu/hash.h&quot;\n#include &quot;bu/list.h&quot;\n#include &quot;bu/vls.h&quot;\n#include &quot;dm/bview.h&quot;\n#include &quot;rt/search.h&quot;\n</pre></div>\n\n\n<p>this is the include order</p>",
+        "id": 129829304,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531854399
+    },
+    {
+        "content": "<p>OK, so there are two ways to handle that.  For simplicity, I would suggest also including the header that defines db_i (rt/ db_instance.h) in your C file along with rt/search.h</p>",
+        "id": 129865419,
+        "sender_full_name": "starseeker",
+        "timestamp": 1531912527
+    },
+    {
+        "content": "<p>i included it in rt/search.h itself, since that's the one that seems to depend on it</p>",
+        "id": 129879519,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1531928971
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  That was my initial thought, and if that works without causing additional problems it's the right thing to do.  There are sufficient interdependence between the rt datatypes I wasn't sure if that would \"just work\", but if it does awesome.</p>",
+        "id": 129907016,
+        "sender_full_name": "starseeker",
+        "timestamp": 1531965772
+    },
+    {
+        "content": "<p>well... i rebased my branch (well, a copy of it)</p>",
+        "id": 129953711,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532031180
+    },
+    {
+        "content": "<p>i squashed a lot of thing into one and left out some commits and git diff tells me it's the same as the other branch</p>",
+        "id": 129953733,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532031222
+    },
+    {
+        "content": "<p>so, gonna send the new and improved patches</p>",
+        "id": 129953782,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532031257
+    },
+    {
+        "content": "<p>(editing the patches by hand was just. so. slow.)</p>",
+        "id": 129953788,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532031275
+    },
+    {
+        "content": "<p>(so i really hope this works)</p>",
+        "id": 129953807,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532031306
+    },
+    {
+        "content": "<p>uh.... what. i can't see the squashed commits... it's the same commits as on the original branch.... what....</p>",
+        "id": 129961818,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039752
+    },
+    {
+        "content": "<p>and it has all the unrelated commits too</p>",
+        "id": 129961880,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039795
+    },
+    {
+        "content": "<p>but.... i thought the rebase ran successfully??</p>",
+        "id": 129961901,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039822
+    },
+    {
+        "content": "<p>well. this is irritating.</p>",
+        "id": 129961912,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039832
+    },
+    {
+        "content": "<p>hm.<br>\n...<br>\nis the big patch really that bad? ehehehehehe.....</p>",
+        "id": 129961941,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039863
+    },
+    {
+        "content": "<p>i can remove the unrelated fixes from it but i don't think i can separate it properly</p>",
+        "id": 129962006,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039911
+    },
+    {
+        "content": "<p>hmmm</p>",
+        "id": 129962024,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532039949
+    },
+    {
+        "content": "<p>so, i did some git magic and came up with this:</p>\n<div class=\"codehilite\"><pre><span></span>+ b9bae437bb4cdf5fb4cf054ae761a2139f5477c8 added exec userdata pointer to struct db_plan_t\n+ 01a04b0a52c9ac93f275a01961c41bdb13dd8a6c remove shorthand definitions from librt search\n+ 499291ac5965258379e0cd3988d23f4fa73dcb60 basics of -exec flag for librt search\n+ f277ef7afc64bdc28c24c35c01d4356854d18363 clean up memory on -exec parse error in librt\n+ 9ff5cc25a6f618c957695553c79d20aa7593a9b5 librt: store result of possibly failed plan creation\n+ e99b62b433c127d024ef5cddcdebb593a0aa6c89 print newline after bu_log in librt&#39;s c_exec\n+ 7906e5864600773889ff771c63ca47dba2d92f8b oops. BRLCAD_OK is not 0, fixes previous commit\n+ 14c64d7005b8e9fc9e3fd2669e618d54b5dd9632 remove debug logging from librt c_exec\n+ 907bb124c83c9c081f42649efb6e778cc3c4f3a7 add db_search -exec related definitions\n+ 40d385ad9ef257cbd5996e8719b58760d3afe492 follow naming convention in search.h\n+ abfe9d6694080a2fa8a96a70bd07f21760d15889 librt/search.h: use a single argc instead of storing every argv strings&#39;s length\n+ 767cd544c3d8547f4813ade9438f861cb6ae2078 small consistency fixes in c_exec\n+ e5a969cdd67fd1047c6be8391b3b290ae2067e69 removed e_orig from c_exec and added a list of holes instead\n+ 8856329eced85fc8b05c599da8b90fc6b6c7b980 first f_exec implementation + cleaned up c_exec a bit more\n+ 2f906da457d984a567ad1e3fffdbe350bcbeb7f2 db_search -exec evaluator implemented\n+ 188dd2e65fd71a97a1b154ab3129f58914b8f06d db_search: special case freeing db_plan_t if it&#39;s an -exec plan\n+ 5ab4a23b53c2fba63102c67472adefa70c834af1 remove unnecessary _e_orig field from db_plan_t\n+ ca05439929846dd40df2dcd739146b2d9a83b7a1 fixed some typos in db_search_free_plan\n+ 9aeda60e227fc3ff1546d9e23582861058fbe7b4 make the db_search callback a const\n+ e9889a108a34b472d3b7927021dacd3d525f1fdd hooked up the search related parameters in librts/search.{c,h}\n+ 5af4f8ddc17da6d9ca5b6f2148a6dd397b537b31 ironed out some conflicting definitions in librt search\n+ 0a7c1f6c18b7dfe57f7eeeefc4bf29be5c6bb8c0 added exec context definitions to rt/search.h\n+ c19eb86b830656051d59438d811c9db56def48e9 actually, we already have NULL. removing null search context\n+ 609ee66dbe3323b2e590de74b97b4fddb3d85907 use search context pointer everywhere instead of explicit params\n+ 33e86bca1442ed789889333d4b942ef8bcd88a94 added NULL contexts for calls to db_search calls in libged/comb.c\n+ 3c054b158de853919076abff96a83e3bb531e85c more NULL contexts for db_search calls in libged\n+ 5bbc048808224fe9a4a16de3e29aaff7c3c18392 libged builds and should now support db_search contexts\n+ ffe0b47290b62c89853db71313ece79d6e8adc47 added callback to MGED that evaluates Tcl with search -exec\n+ fedec08c6265a0813e6e4e93224a76dce4330177 set up the callback\n+ 04f8450e1848317ed9b6be753f3f97cb1934fa7d fixed existing calls to db_search\n+ bba04a19849ad7c0d3a674c7a5a6a858755e0a57 improved docs for `search -exec`\n+ 722b636913a42ed1d588974e8061f41e4a9f89e7 fixed doxygen\n+ 66f4ce1b3bd449335f8b6159ca88da97a916e9c6 free search context after use\n+ d30fdd961456142e952aa233494c516f8ca4b2be properly convert Tcl result to a boolean in MGED search callback\n+ 718337152bcd6bdc8eb1b67efb2c8d341d804856 cleaned up some whitespace, probably\n+ f79a9cc60d79993bf92e3a29099a3b6ff3063dc1 added db_search_context_destroy\n+ 66bc37db6e1f350a5a4e2a9659a4af2d51e79d3b empty exec is a no-op that returns true\n+ 0605f14e89c6b37f98822958781c63111a1a76c5 use bu_free in librt/search.c\n+ 4b4e2fa52fba353d0350b647425537c260d867f4 make sure to use bu_free everywhere\n+ fa2785ac87bc532a4f1da0f2f1c8bf0481dab21c fixed a bu_free call\n+ 3081323a0ecf4aee443dd45c49ac07b33505e692 make the bu_free call&#39;s comment match the bu_realloc call (i thought i already committed this???)\n+ 3859676ece1231779df7ac6bb59fe312ead44779 made some Tcl search examples work with -exec\n+ 572f3591bd9c0f5d9f2d7ce853ade247e232a600 added a super simple and WRONG! path resolver\n+ a597022aa8313cbb4c1c863c1dedd8141e4359da db_lookup works on paths too and there are name and path variants also\n+ 7b0dd3cc057bff4029c850a256864396a879dedc fixed small grammatical error\n+ e7233d774cdef630dd615f4d2c2b09cb66ecffaf removed lying comment\n+ 442c3d883531868aa2f2ff5bd3e04e1043b0b453 i really miss rust&#39;s type system.\n+ 7a6b2221d34457a190d4909b3af044653b7c6acc fixed bugs in the new db_lookup_path functionality\n+ c33949237eaedf0a0125b539b7e88160ebf35394 removed trailing whitespace from db_lookup\n+ 947fcb6d2328488a0d0752b1672604bf8bc787cc better and more error messages in db_lookup_path\n+ 0fa85d60c05c4bef0d22f98a0bb3ab4f7b4d57ac free up the fullpath in db_lookup_path\n+ 59c6b7aaa999d37894ff47e3ecd23fa01f96035e removed trailing ws from src/librt/search.c\n+ caf96e4fa3bfd89629f55dc2ee1368b3a0e5c37a adhere to whitespace standards in src/librt/search.c\n+ 90897eaf938b59fc55841012f954a502ffa81ac5 trim trailing ws from include/rt/search.h\n+ 7719410a045e0b93b65ffa900823d9aea5dce67c trim trailing ws from src/libged/shape_recognition.cpp\n+ 92ee7dcc7402276e36a7abad1be74fb9cd59ccab trim trailing ws from src/mged/cmd.c\n+ 83865fc8df2f41dbe25dd659ca006c80e9964391 trim trailing ws from src/libged/search.c\n+ 026346c7c31a5283a91a3c88ec056b9c6e8580d0 add missing db_instance dependency to include/rt/search.h\n+ 20566236f31470e48e873cfd2e46306aac829898 removed leftover comment\n</pre></div>",
+        "id": 130065861,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532199159
+    },
+    {
+        "content": "<p>these are all the commits that are actually related to the task</p>",
+        "id": 130065865,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532199184
+    },
+    {
+        "content": "<p>my branch had some miscellaneous bugfixes and this filtered them out</p>",
+        "id": 130065871,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532199206
+    },
+    {
+        "content": "<p>now, some of the commit names are wrong because i accidentally added some files or something and noticed it too late and i'd have to do another rebase to fix that</p>",
+        "id": 130065921,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532199323
+    },
+    {
+        "content": "<p>but since only i use the repo, i'll probably do it</p>",
+        "id": 130065923,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532199349
+    },
+    {
+        "content": "<p>i think i can actually skip squashing and other rebase related uglinesses and just git diff to compare commits, that way i can generate some more meaningful diffs that i can submit</p>",
+        "id": 130065973,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532199469
+    },
+    {
+        "content": "<p>Whatever you think best - the key point is to get a set of patches in shape for committing</p>",
+        "id": 130071468,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532209641
+    },
+    {
+        "content": "<blockquote>\n<p>i included it in rt/search.h itself, since that's the one that seems to depend on it</p>\n</blockquote>\n<p>that is the right solution -- headers should be self-contained and make sure all the types they use are properly declared by including the headers that declare them.  the only time there should ever be a problem is in the case of a bonefide cyclic dependency, which should not exist.  we do not have any cycles in the current headers that I know if, so the only reason it should ever not work would likely be to a recent screw-up by someone.</p>",
+        "id": 130083132,
+        "sender_full_name": "Sean",
+        "timestamp": 1532236086
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> note that this way of working over a git bridge is very sub-optimal and is now putting your entire project at risk because it's not committed to the main repository.  please prioritize getting your patches separated and submitted cleanly.  we'd rather you commit directly to the repository, not be working off on your own like this indefinitely.  commit access requires at least a couple patches with no errors, conforms with style, makes some improvement (however minor), and that is mostly to demonstrate your competency in communicating change via patches that do not come with a burden.</p>",
+        "id": 130083272,
+        "sender_full_name": "Sean",
+        "timestamp": 1532236412
+    },
+    {
+        "content": "<p>you've clearly been <em>very</em> productive, but you got to work with <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> to get changes committed to the main svn repo.  as I said on the prcolor patch months ago:  \"You're welcome to set up whatever you like, but submitting a 'complete' (tested and working) patch file is a fundamental developer skill that is independent of any revision control system or workflow. I think there is simply a mismatch in what you're trying to do and what is useful to share.\"</p>",
+        "id": 130083420,
+        "sender_full_name": "Sean",
+        "timestamp": 1532236737
+    },
+    {
+        "content": "<blockquote>\n<p>well, <code>cat Default/Default</code> no longer works</p>\n</blockquote>\n<p>This is an example of something that would make for a perfect simple succinct patch that you should submit.  Just the change that fixed it.</p>",
+        "id": 130083468,
+        "sender_full_name": "Sean",
+        "timestamp": 1532236822
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> any luck?</p>",
+        "id": 130185868,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532399517
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> not really, i'm still trying to figure out how to group commits into patches :/</p>",
+        "id": 130203821,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532429318
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> not really, i'm still trying to figure out how to group commits into patches :/</p>\n</blockquote>\n<p>still??  you can always pull a single commit and submit that or cherry pick a set of commits to a branch and then diff that ... or check out an svn repo and apply your commits one at a time (git diff SHA &gt; git.diff1 ; git diff SHA &gt; git.diff2 ; patch -p1 &lt; git.diff1 ; patch -p1 &lt; git.diff2 ; svn diff &gt; mychanges.diff) .... or even just retype a succinct change on a fresh checkout.</p>",
+        "id": 130210060,
+        "sender_full_name": "Sean",
+        "timestamp": 1532438122
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> at a minimum, you need to be talking through what you're doing and trying here so everyone knows what's going on ...</p>",
+        "id": 130210147,
+        "sender_full_name": "Sean",
+        "timestamp": 1532438183
+    },
+    {
+        "content": "<p>dead silence, struggling through it on your own without talking  is the worst thing you can do</p>",
+        "id": 130210168,
+        "sender_full_name": "Sean",
+        "timestamp": 1532438209
+    },
+    {
+        "content": "<p>i've been looking for ways to group them more or less logically but i think i should just stop overthinking it and go with whatever comes to mind first</p>",
+        "id": 130244216,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532474245
+    },
+    {
+        "content": "<p>rebasing seemed like a good way to make the commits more coherent but i ran into some errors and i have no idea how to deal with them</p>",
+        "id": 130244260,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532474298
+    },
+    {
+        "content": "<p>i've been trying to automate this more or less or at least come up with ways to make it faster, but it looks like i'll just have to do everything manually</p>",
+        "id": 130244270,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532474359
+    },
+    {
+        "content": "<p>i made a copy of the master branch (which is the same as the svn repo) and i'm making patches</p>",
+        "id": 130244326,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532474419
+    },
+    {
+        "content": "<p>also, god bless CoW file systems, i didn't have to sacrifice a bunch of extra space for cloning the repo</p>",
+        "id": 130244339,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532474459
+    },
+    {
+        "content": "<p>alternatively, i thought about just separating the combined patch by file, but that still makes for quite a large patch in most cases</p>",
+        "id": 130244924,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532475367
+    },
+    {
+        "content": "<p>well, not just though about, i tried that a lot</p>",
+        "id": 130244929,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532475384
+    },
+    {
+        "content": "<p>but it didn't feel optimal and i hoped rebasing would be easier</p>",
+        "id": 130244941,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532475428
+    },
+    {
+        "content": "<p>hmmmmm.... i thiiiiiiiiiiiink i just rebased it successfully?</p>",
+        "id": 130245237,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532475947
+    },
+    {
+        "content": "<p>this just removed unrelated and reverted commits</p>",
+        "id": 130245316,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532476056
+    },
+    {
+        "content": "<p>i think i might be able to use rebase after all.....</p>",
+        "id": 130245324,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532476080
+    },
+    {
+        "content": "<p>better make a new branch though... just to be safe...</p>",
+        "id": 130245366,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532476093
+    },
+    {
+        "content": "<p>....i should be writing these to my log instead of rambling on the chat, shouldn't i</p>",
+        "id": 130245371,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532476112
+    },
+    {
+        "content": "<p>hmm, it didn't work out. let's cherry pick then...</p>",
+        "id": 130246073,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532477303
+    },
+    {
+        "content": "<blockquote>\n<p>....i should be writing these to my log instead of rambling on the chat, shouldn't i</p>\n</blockquote>\n<p>rambling is perfectly fine, appreciated even ... better than only writing to your log   :)</p>",
+        "id": 130253645,
+        "sender_full_name": "Sean",
+        "timestamp": 1532491707
+    },
+    {
+        "content": "<p>so, i'm going forward with the rebasing after all and splitting commits as needed, this should make them more manageable</p>",
+        "id": 130379487,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532651086
+    },
+    {
+        "content": "<p>after that, i can hopefully pick the changes out of order and present some nice patches</p>",
+        "id": 130379502,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532651131
+    },
+    {
+        "content": "<p>but the more realistic version is that there will be more patches that i'd like, but at least they will not include weird things</p>",
+        "id": 130379559,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532651195
+    },
+    {
+        "content": "<p>aaannnnd that's the rebase plan thingy done, i probably shouldn't run the rebase itself at 2:32 because that's just gonna lead to more problems, so i'll make a backup of the git-rebase-todo file and go dream of nicer commit histories</p>",
+        "id": 130379785,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532651604
+    },
+    {
+        "content": "<blockquote>\n<p>after that, i can hopefully pick the changes out of order and present some nice patches</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> to be honest, this sounds entirely unacceptable.  It's been an entire week and you still have no patches.  You could have retyped everything on an svn checkout in a day.  You've used a full week, 10% of GSoC coding period timeline, learning git and commit/patch management.  Please stop.</p>",
+        "id": 130386089,
+        "sender_full_name": "Sean",
+        "timestamp": 1532662408
+    },
+    {
+        "content": "<p>at some point, you just have to throw in the towel doing things the automatic way, and do things manually ... I think we're way way way past that point</p>",
+        "id": 130386132,
+        "sender_full_name": "Sean",
+        "timestamp": 1532662483
+    },
+    {
+        "content": "<p>I suggest that unless you have all your changes ready to go today, that you stop with git and simply make one feature change on an svn checkout, make an svn patch (svn diff &gt; change1.patch), submit that, and then get another checkout for change#2, make the changes, make the patch, submit, etc.</p>",
+        "id": 130386504,
+        "sender_full_name": "Sean",
+        "timestamp": 1532663150
+    },
+    {
+        "content": "<p>you can extract a patchfile for every commit you've made with: git format-patch my_branch -o my_patches</p>",
+        "id": 130386549,
+        "sender_full_name": "Sean",
+        "timestamp": 1532663195
+    },
+    {
+        "content": "<p>you can get an svn checkout with: svn co svn+ssh://SFUSERNAME@svn.code.sf.net/p/brlcad/code/brlcad/trunk brlcad.trunk</p>",
+        "id": 130386706,
+        "sender_full_name": "Sean",
+        "timestamp": 1532663482
+    },
+    {
+        "content": "<p>if you don't have one already</p>",
+        "id": 130386709,
+        "sender_full_name": "Sean",
+        "timestamp": 1532663492
+    },
+    {
+        "content": "<p>soooo, I rebased it after all (sorry &gt;_&lt;) and now I have the patches</p>",
+        "id": 130429830,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532718409
+    },
+    {
+        "content": "<p>buuut there are 45 so I probably should send them each separately on SF</p>",
+        "id": 130429871,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532718458
+    },
+    {
+        "content": "<p>(there were more so, i think it's good i did those squashes)</p>",
+        "id": 130429890,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532718480
+    },
+    {
+        "content": "<p>guess i'll upload it here first</p>\n<p><a href=\"/user_uploads/1549/fGFji-qiZdrJcgy71OW65CiD/patches.tar.gz\" target=\"_blank\" title=\"patches.tar.gz\">patches.tar.gz</a></p>",
+        "id": 130430368,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532718878
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> This isn't quite what we were looking for - rather than the various commits in git, we were looking for \"feature\" patches that provided compact, isolated improvements in capabilities.</p>",
+        "id": 130444641,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532739715
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> I'm going to take this patch set and get these changes committed, so we can move forward - watch the commits.  I'll post here once I've completed merging them.</p>",
+        "id": 130444688,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532739806
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>   OK - take a look at SVN commits r71280 thru r71286.</p>",
+        "id": 130448378,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532747663
+    },
+    {
+        "content": "<p>I saw a couple of things running that first example in the man page (or rather, the tweaked version from r71286 that produces a smaller output list with the m35.g example):</p>\n<p>1. The exec version seems to be printing carriage returns, which it probably shouldn't if it's not printing the output explicitly in addition to the -exec (not sure what find does, but I would have expected it to either exec and not print or exec and print the search result list, not do the blank lines...)</p>\n<p>2. When doing the full path version of the search -exec (e.g. supplying \"/all.g\" rather than \"all.g\") the draw command doesn't seem to be operating on the full paths - the \"who\" command, when run after the search -exec with \"/all.g\" should indicate it drew the full paths (this can matter if there are matricies along the full path.)</p>",
+        "id": 130448484,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532747924
+    },
+    {
+        "content": "<p>So, to be a little more explicit/specific:</p>\n<p>open up share/db/m35.g</p>\n<p>run the following search (note the slash before all):</p>\n<p>mged&gt; search /all.g -type region -and ( -below -bool - -or -below -bool + ) </p>\n<p>You should see:</p>\n<p>/all.g/component/bed/r908/r914/r906/r916<br>\n/all.g/component/bed/r908/r914/r906<br>\n/all.g/component/bed/r914/r906/r916<br>\n/all.g/component/frame/r532/r506/r567</p>\n<p>If you then clear your drawing list and do the draw search -exec:</p>\n<p>mged&gt; Z<br>\nmged&gt; search /all.g -type region -and ( -below -bool - -or -below -bool + ) -exec draw \"{}\" \";\"</p>\n<p>I would expect to see either nothing or the same output as above (probably the former, unless I explicitly -print as well as -exec) but instead I see:</p>\n<p>expected boolean value but got \"\"</p>\n<p>The good news is does draw the objects, but if I run the \"who\" command - which lists what is being drawn:</p>\n<p>mged&gt; who<br>\nr567 r906 r916 </p>\n<p>That list show match the full path list above, since we did a full path search - if you explicitly draw the full paths and then do a who, you'll see draw can list them properly:</p>\n<p>mged&gt; Z<br>\nmged&gt; draw /all.g/component/bed/r908/r914/r906/r916 /all.g/component/bed/r908/r914/r906 /all.g/component/bed/r914/r906/r916 /all.g/component/frame/r532/r506/r567<br>\nmged&gt; who<br>\n/all.g/component/bed/r908/r914/r906/r916 /all.g/component/bed/r908/r914/r906 /all.g/component/bed/r914/r906/r916 /all.g/component/frame/r532/r506/r567 </p>\n<p>So it looks like somewhere in the exec pipeline we need to propagate awareness of which type of search we did (full path vs unique name) and adjust what is fed into -exec accordingly</p>",
+        "id": 130448801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532748701
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  very cool to see this working!</p>",
+        "id": 130448805,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532748722
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  So from the current state, I suggest you try to make a focused patch that has -exec work on either the unique object list or the full path list depending on the search type.  For -exec on full paths you'll probably want to use db_path_to_string to take the full path list and generate strings suitable for argv command execution.</p>\n<p>Also, as a separate patch, I would see if you can eliminate the 'expected boolean value but got \"\"' error message</p>",
+        "id": 130448952,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532748967
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> in later versions of my branch i already use db_path_to_string, so that should be easy, but i'm not sure if the output actually should match the input at all times</p>",
+        "id": 130504003,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532831855
+    },
+    {
+        "content": "<p>uhm that's not the best way to put it...</p>",
+        "id": 130504050,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532831889
+    },
+    {
+        "content": "<p>so. BSD find(1) works on files, right?</p>",
+        "id": 130504062,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532831914
+    },
+    {
+        "content": "<p>ignoring bind mount shenanigans, there is only one path to a file and so that path uniquely identifies the file</p>",
+        "id": 130504092,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532831987
+    },
+    {
+        "content": "<p>but BRL-CAD is not like that, apparently.</p>",
+        "id": 130504096,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532831998
+    },
+    {
+        "content": "<p>an object is uniquely identified by its name and names are actually in a flat namespace. objects don't <strong>contain</strong> other objects, not really, they kind of just use them</p>",
+        "id": 130504158,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832092
+    },
+    {
+        "content": "<p>at least that's my understanding so far</p>",
+        "id": 130504209,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832128
+    },
+    {
+        "content": "<p>oh...</p>",
+        "id": 130504239,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832222
+    },
+    {
+        "content": "<p>wait, nevermind.</p>",
+        "id": 130504240,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832227
+    },
+    {
+        "content": "<p>the problem here is that paths aren't identifiers of an object</p>",
+        "id": 130504290,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832257
+    },
+    {
+        "content": "<p>they identify a specific \"use\" of the object.... hm.</p>",
+        "id": 130504308,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832305
+    },
+    {
+        "content": "<p>anyways, re: the noisy output</p>",
+        "id": 130504312,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832313
+    },
+    {
+        "content": "<p>find(1) works with commands. commands have exit codes. Tcl commands don't have exit codes.</p>",
+        "id": 130504318,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832344
+    },
+    {
+        "content": "<p>Tcl doesn't even have bools.</p>",
+        "id": 130504320,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832350
+    },
+    {
+        "content": "<p>so, I turned to the only thing it has: text output.<br>\n-exec is supposed to be a filter, if Tcl had types, -exec would take a function that returns bools. but! printing is also the side-effect of some commands! now, how should -exec know if you are only running something for its side-effects?</p>",
+        "id": 130504443,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832492
+    },
+    {
+        "content": "<p>the easy answer for me was that it simply shouldn't, the user is expected to work their Tcl magic to give <code>search -exec</code> the output it expects</p>",
+        "id": 130504452,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832538
+    },
+    {
+        "content": "<p>so, I think the nicer way to solve the noisy output problem would be to just let the user indicate that \"hey, i'm running this purely for the side-effects, you can shut up about the format\" and give them an equivalent to &amp;&gt;/dev/null</p>",
+        "id": 130504550,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532832683
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> So maybe the more straightforward problem at first is to get exec working on the full path results, when search is in full path mode</p>",
+        "id": 130505373,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532834017
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> could we at least have exec not print empty lines if the Tcl command doesn't produce any non-empty textual output?  Or is that completely out of the control of exec?</p>",
+        "id": 130505496,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532834184
+    },
+    {
+        "content": "<p>that's controlled by mged's callback, so that's perfectly doable</p>",
+        "id": 130523226,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532868261
+    },
+    {
+        "content": "<p>hmmm...... from a Tcl scripting perspective, is it bad if we swallow empty lines? i think that could be misleading for scripts...</p>",
+        "id": 130527485,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532876686
+    },
+    {
+        "content": "<p>the current output isn't necessarily pretty, but it doesn't cause any surprises. I think that's better than being pretty??</p>",
+        "id": 130527537,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532876791
+    },
+    {
+        "content": "<p>idk, i've written some code to filter newlines out but i'm not sure how this affects scripting since I'm not familiar enough with Tcl idioms</p>",
+        "id": 130527546,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532876877
+    },
+    {
+        "content": "<p>We can try some tests, but I'd say first let's get exec operating on full path results when the search is a full path search</p>",
+        "id": 130546211,
+        "sender_full_name": "starseeker",
+        "timestamp": 1532908700
+    },
+    {
+        "content": "<p>ok, but I think it'd be better if it always operated on full paths because that's more uniform</p>",
+        "id": 130606223,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532986996
+    },
+    {
+        "content": "<p>hmm.... inputs can be mixed, can't they?</p>",
+        "id": 130606813,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532987718
+    },
+    {
+        "content": "<p>....my spider sense is telling me this will get messy</p>",
+        "id": 130606822,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532987733
+    },
+    {
+        "content": "<p>ah well</p>",
+        "id": 130606823,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532987735
+    },
+    {
+        "content": "<p>this is a small fix i made yesterday: <a href=\"https://sourceforge.net/p/brlcad/patches/502/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/patches/502/\">https://sourceforge.net/p/brlcad/patches/502/</a></p>",
+        "id": 130607293,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1532988296
+    },
+    {
+        "content": "<blockquote>\n<p>find(1) works with commands. commands have exit codes. Tcl commands don't have exit codes.</p>\n</blockquote>\n<p>Tcl commands have return codes -- they default to \"TCL_OK\" (aka \"1\") if a proc doesn't specify it or specifies \"return\"</p>",
+        "id": 130614992,
+        "sender_full_name": "Sean",
+        "timestamp": 1533001245
+    },
+    {
+        "content": "<blockquote>\n<p>hmmm...... from a Tcl scripting perspective, is it bad if we swallow empty lines? i think that could be misleading for scripts...</p>\n</blockquote>\n<p>I would question who/what is generating empty lines in the first place, what utility that has and whether it could change.  Gut reaction is that 'search' (and by extension search -exec) shouldn't be adding/removing/filtering lines. It should only print what it's been told to print (e.g., -print) or the output from commands it ran.</p>",
+        "id": 130615288,
+        "sender_full_name": "Sean",
+        "timestamp": 1533001789
+    },
+    {
+        "content": "<blockquote>\n<p>Tcl commands have return codes -- they default to \"TCL_OK\" (aka \"1\") if a proc doesn't specify it or specifies \"return\"</p>\n</blockquote>\n<p>I got the impression that that was just for Tcl's internal error reporting, since none of my searches on how to do bools in Tcl said \"well just use the return code like in bash\", instead they all talked about string tests. So does that mean I can just use Tcl_Eval's return and skip the boolean conversion?</p>",
+        "id": 130619029,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533008018
+    },
+    {
+        "content": "<p>also I imagine it being used more like a filter function? since this is embedded scripting I can't help but apply my Lua mindset to it.</p>",
+        "id": 130619094,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533008094
+    },
+    {
+        "content": "<p>so, one-liners with anonymous functions and stuff</p>",
+        "id": 130619103,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533008137
+    },
+    {
+        "content": "<p>and it didn't seem like it had a way of returning a bool from an expression</p>",
+        "id": 130619122,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533008163
+    },
+    {
+        "content": "<blockquote>\n<p>ok, but I think it'd be better if it always operated on full paths because that's more uniform</p>\n</blockquote>\n<p>an unpathed \"object\" is (typically) synonymous with \"/object\" ... just that many commands take only one or the other depending on the command's purpose</p>",
+        "id": 130619226,
+        "sender_full_name": "Sean",
+        "timestamp": 1533008397
+    },
+    {
+        "content": "<p>hmm, is there any command that behaves differently when given a path? i can't remember any off the bat...</p>",
+        "id": 130619358,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533008579
+    },
+    {
+        "content": "<blockquote>\n<p>I got the impression that that was just for Tcl's internal error reporting, since none of my searches on how to do bools in Tcl said \"well just use the return code like in bash\", instead they all talked about string tests. So does that mean I can just use Tcl_Eval's return and skip the boolean conversion?</p>\n</blockquote>\n<p>Return codes are somewhat an orthogonal topic to bools.  In Tcl, \"everything is a string\" -- <a href=\"https://wiki.tcl.tk/3018\" target=\"_blank\" title=\"https://wiki.tcl.tk/3018\">https://wiki.tcl.tk/3018</a></p>",
+        "id": 130619869,
+        "sender_full_name": "Sean",
+        "timestamp": 1533009403
+    },
+    {
+        "content": "<p>Let's not get too distracted from the practical reality -- you're really referring to Tcl's C API (which is conceptually quite different from Tcl's Tcl API).  For that, \"man Tcl_Eval\" and you'll see that you can indeed rely on a getting a whole host of potential return codes, each with a particular meaning.</p>",
+        "id": 130619961,
+        "sender_full_name": "Sean",
+        "timestamp": 1533009544
+    },
+    {
+        "content": "<blockquote>\n<p>and it didn't seem like it had a way of returning a bool from an expression</p>\n</blockquote>\n<p>again, it matters if we're talking about Tcl or C here -- but you can return a value from either  (on the Tcl side, see \"man n return\" and \"man n catch\")</p>",
+        "id": 130620054,
+        "sender_full_name": "Sean",
+        "timestamp": 1533009673
+    },
+    {
+        "content": "<p>it seems like return codes in Tcl are the poor-man's-exceptions....</p>",
+        "id": 130620527,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533010497
+    },
+    {
+        "content": "<p>oh I remember why i thought bool strings were the offical way, because boolean expressions \"return\" a 0 or 1 string</p>",
+        "id": 130620582,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533010575
+    },
+    {
+        "content": "<p>like <code>expr 1 &gt; 0</code></p>",
+        "id": 130620583,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533010583
+    },
+    {
+        "content": "<p>despite the supposed simplicity it is a surprisingly weird language</p>",
+        "id": 130620638,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533010701
+    },
+    {
+        "content": "<p><code>if {1 &gt; 0} {echo a}</code> works but of course <code>1 &gt; 0</code> doesn't mean anything on its own....</p>",
+        "id": 130620644,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533010744
+    },
+    {
+        "content": "<p>so, Tcl has integer returns but it doesn't use them like shells and there is no <code>$?</code> or <code>$status</code>, just <code>catch</code>....</p>",
+        "id": 130620746,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533010938
+    },
+    {
+        "content": "<p>ah Tcl. fun thing I found out: <code>search -exec echo '{}' \";\"</code> (yes, possibly wrong quoting) in <code>m35.g</code> basically freezes MGED<br>\ni mean, it proooobably finishes after a while, but unlike <code>find(1)</code> which streams output nicely, Tcl has to collect everything in the result string (or object, but whatever), so it can't stream output.</p>",
+        "id": 130686608,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533091744
+    },
+    {
+        "content": "<p>not an earth-shattering revelation, yeah, but a nice example of why constructs like UNIX pipes are useful</p>",
+        "id": 130686753,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533091879
+    },
+    {
+        "content": "<blockquote>\n<p>it seems like return codes in Tcl are the poor-man's-exceptions....</p>\n</blockquote>\n<p>Not really, just a completely different approach with tradeoff considerations.  If all languages behaved the same, there wouldn't be much point to having different ones. :)</p>\n<p>In the case of Tcl, their method fully separates the notion of return codes from output at a scripting level.  That's particularly novel in comparison with posix/bash/ksh scripting where the two concepts are fully intermingled and you have to deal with it in convoluted logic or with presumptive convention.  Even compared with a compiled language, Tcl's 'catch' command goes beyond catching a return code in that it can catch any error from a hierarchy of subcommands.  Even C++-style exceptions can't really do that, or at least it would require some convention like using try-catch in leu of return codes -- which is typically quite a bad idea, discouraged.</p>",
+        "id": 130690490,
+        "sender_full_name": "Sean",
+        "timestamp": 1533096238
+    },
+    {
+        "content": "<blockquote>\n<p><code>if {1 &gt; 0} {echo a}</code> works but of course <code>1 &gt; 0</code> doesn't mean anything on its own....</p>\n</blockquote>\n<p>the rabbit hole goes MUCH deeper.  in Tcl, <em>everything</em> is a command or a string.  there is actually no if/then/else language construct like you're used to seeing.  that 'if' statement there is actually running an 'if' _command_ that takes two strings... two arbitrarily complex strings</p>",
+        "id": 130690701,
+        "sender_full_name": "Sean",
+        "timestamp": 1533096493
+    },
+    {
+        "content": "<blockquote>\n<p>not an earth-shattering revelation, yeah, but a nice example of why constructs like UNIX pipes are useful</p>\n</blockquote>\n<p>patches welcome!  you could certainly make it stream the output back over a pipe :)</p>",
+        "id": 130692509,
+        "sender_full_name": "Sean",
+        "timestamp": 1533098990
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  Can't you just feed the output from both types of returns to the commands?</p>",
+        "id": 130706542,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533121787
+    },
+    {
+        "content": "<p>My original thought was that you would take the two different types of results, get the string forms (either dp-&gt;d_namep for objects or db_path_to_string for full paths) and pass that on to the exec cmd.  Does that not work?</p>",
+        "id": 130706632,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533121873
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> yeah, i've written something like that, it just has to communicate which one to use</p>",
+        "id": 130715997,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533132296
+    },
+    {
+        "content": "<p>but i've run into some weirdness with the Tcl result thing (it always returns an empty string for some reason?) and i'm gonna debug that first</p>",
+        "id": 130716046,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533132353
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> yeah, i get <code>if</code> being a command, but it feels a bit.... too special cased that it accepts expressions. it's certainly simpler than <code>sh</code> but i'm not sure it is simpler/better than <code>rc</code><br>\nbut then again, rc is not an embedded language, so they are quite different beasts</p>",
+        "id": 130716396,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533132605
+    },
+    {
+        "content": "<p>it's an odd language for me because it looks like rc but doesn't have its main strengths (pipes) but was built to fit a niche similar to Lua but it doesn't have the strengths of that either</p>",
+        "id": 130716686,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533132874
+    },
+    {
+        "content": "<p>(so no metatables, no iterators, not fast like Lua, doesn't have closures, probably no TCO, etc.)</p>",
+        "id": 130716842,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533132999
+    },
+    {
+        "content": "<blockquote>\n<p>(it always returns an empty string for some reason?)</p>\n</blockquote>\n<p>ah. i was a fool and was getting the result before the eval. <span class=\"emoji emoji-1f926\" title=\"face palm\">:face_palm:</span></p>",
+        "id": 130718412,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533134302
+    },
+    {
+        "content": "<p><a href=\"https://core.tcl.tk/tcllib/doc/trunk/embedded/www/tcllib/files/modules/lambda/lambda.html\" target=\"_blank\" title=\"https://core.tcl.tk/tcllib/doc/trunk/embedded/www/tcllib/files/modules/lambda/lambda.html\">https://core.tcl.tk/tcllib/doc/trunk/embedded/www/tcllib/files/modules/lambda/lambda.html</a> could this be used in MGED?</p>",
+        "id": 130721925,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533137595
+    },
+    {
+        "content": "<p>tbh what i'm more concerned about is that only the last error is printed because the result string is overwritten after every Tcl_Eval</p>",
+        "id": 130743216,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533159434
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> yeah, i get <code>if</code> being a command, but it feels a bit.... too special cased that it accepts expressions. it's certainly simpler than <code>sh</code> but i'm not sure it is simpler/better than <code>rc</code></p>\n</blockquote>\n<p>I don't actually agree that it's simpler than shell other than from a language theory perspective (the conceptual model).  the language expressiveness is far more complicated than shell, the capability is far more expressive too</p>",
+        "id": 130759999,
+        "sender_full_name": "Sean",
+        "timestamp": 1533188284
+    },
+    {
+        "content": "<p>definitely an odd language, but no more so than perl or shell in my mind, just different tradeoffs/benefits/warts</p>",
+        "id": 130760015,
+        "sender_full_name": "Sean",
+        "timestamp": 1533188364
+    },
+    {
+        "content": "<p>I'd argue Tcl is far more capable and expressive as a embedded command interpreter with natural syntax (e.g., \"do this\" not \"do(&amp;this)\" or \"this.do()\" or what have you)</p>",
+        "id": 130760309,
+        "sender_full_name": "Sean",
+        "timestamp": 1533188951
+    },
+    {
+        "content": "<p>(over the likes of lua and shell at least)</p>",
+        "id": 130760368,
+        "sender_full_name": "Sean",
+        "timestamp": 1533189052
+    },
+    {
+        "content": "<p>I digress .. :)   the result string getting smashed by subsequent calls happens in libged too, but how is that an issue for -exec?  you're invoking each one so couldn't it capture the result?  it's supposed to be returned as a true/false predicate for subsequent search command plan statements</p>",
+        "id": 130760492,
+        "sender_full_name": "Sean",
+        "timestamp": 1533189280
+    },
+    {
+        "content": "<p>example:</p>",
+        "id": 130760512,
+        "sender_full_name": "Sean",
+        "timestamp": 1533189341
+    },
+    {
+        "content": "<p>agua:~ morrison$ find test.cpp -exec true \\; -exec echo true \\; -exec false \\; -exec echo false \\;<br>\ntrue</p>",
+        "id": 130760513,
+        "sender_full_name": "Sean",
+        "timestamp": 1533189343
+    },
+    {
+        "content": "<p>it ran all three exec's except the last one because of the 'false' command's return code</p>",
+        "id": 130760560,
+        "sender_full_name": "Sean",
+        "timestamp": 1533189382
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> how are things going?</p>",
+        "id": 130814241,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533264677
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  i made a small fix so far and have been trying to figure out how to get results out of <code>-exec</code> nicely and how to pass callbacks nicely, but it's. eh. it's like... i get that the output is ugly but i don't know how to make it better???</p>",
+        "id": 130815708,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267083
+    },
+    {
+        "content": "<p>i wanted to write more stuff for that fix but i couldn't figure out how to improve it</p>",
+        "id": 130815710,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267104
+    },
+    {
+        "content": "<p>so i'll just send it over as it is</p>",
+        "id": 130815711,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267111
+    },
+    {
+        "content": "<p>i gotta do some bureaucracy stuff for next semester so i'll be running around the city today</p>",
+        "id": 130815759,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267145
+    },
+    {
+        "content": "<p>the paths vs names thing is still...... well idk if it's a good idea to do so much conversion based on the input</p>",
+        "id": 130815825,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267329
+    },
+    {
+        "content": "<p>if the user wants to, they can easily transform a path into a name</p>",
+        "id": 130815828,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267353
+    },
+    {
+        "content": "<p>soooo, either they should always get full paths or they should get to choose between two -exec flags or there should be two kinds of \"holes\"</p>",
+        "id": 130815876,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267428
+    },
+    {
+        "content": "<p>these are also easier to implement than trying to pass down info about what the input was into c_exec</p>",
+        "id": 130815877,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267456
+    },
+    {
+        "content": "<p>also, idk about how Tcl is usually used but could MGED have tools for higher-order functions and lambdas?</p>",
+        "id": 130815923,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267507
+    },
+    {
+        "content": "<p>Tcl seems to have packages for that stuff but a quick test showed that the lambda package isn't in MGED</p>",
+        "id": 130815930,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533267539
+    },
+    {
+        "content": "<blockquote>\n<p>if the user wants to, they can easily transform a path into a name</p>\n</blockquote>\n<p>they could, but this totally violates expectations and desired behavior.  if I specify \"search . -exec echo {}\" vs \"search / -exec echo {}\", they imply a different result.</p>",
+        "id": 130816284,
+        "sender_full_name": "Sean",
+        "timestamp": 1533268276
+    },
+    {
+        "content": "<blockquote>\n<p>these are also easier to implement than trying to pass down info about what the input was into c_exec</p>\n</blockquote>\n<p>maybe easier to implement but more complicated for users and error prone  == not good</p>",
+        "id": 130816522,
+        "sender_full_name": "Sean",
+        "timestamp": 1533268690
+    },
+    {
+        "content": "<p>hmmm. well, what if I add the alternative hole syntax that forces filling with either the name or the full path but also modify the normal hole handling to use the input to decide how to fill it in?</p>",
+        "id": 130835583,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533298720
+    },
+    {
+        "content": "<p>the alternative hole syntax thingy is mostly done anyways</p>",
+        "id": 130835612,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533298767
+    },
+    {
+        "content": "<p>I don't understand what you mean by alternative hole</p>",
+        "id": 130851277,
+        "sender_full_name": "Sean",
+        "timestamp": 1533316546
+    },
+    {
+        "content": "<p>if you're pushing the work onto the user (i.e., making it more complicated and error-prone to use), then that is a complete non-starter</p>",
+        "id": 130851323,
+        "sender_full_name": "Sean",
+        "timestamp": 1533316577
+    },
+    {
+        "content": "<p>you mean some syntax other than {} ?</p>",
+        "id": 130851329,
+        "sender_full_name": "Sean",
+        "timestamp": 1533316608
+    },
+    {
+        "content": "<p>that would still be unfriendly, error-prone, unusual.  can you recap what the problem is?  getting basic substitution working doesn't seem like it should be that complicated to me -- the user already specified whether they want absolute or relative paths or a flat unique 'basename' listing</p>",
+        "id": 130851649,
+        "sender_full_name": "Sean",
+        "timestamp": 1533317039
+    },
+    {
+        "content": "<p>you just need to get that information to the code doing the exec or substitution</p>",
+        "id": 130851709,
+        "sender_full_name": "Sean",
+        "timestamp": 1533317083
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> I've applied your 502 and 503 patches.  Aside from the minor whitespace bit, they applied cleanly</p>",
+        "id": 130929268,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533471229
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  I would really recommend trying the following, if you haven't done so already:</p>\n<p>In f_exec, instead of directly pulling the dp pointer from db_node-&gt;path,  check dp_node-&gt;path-&gt;fp_len</p>\n<p>If fp_len &gt; 1, use db_path_to_string to make a path to feed to the subsequent logic.  else, use the object d_namep.</p>\n<p>Also, what's the bu_fnmatch on search.c:1263 trying to achieve?  We don't seem to be doing anything with that result, and it's not immediately clear to me what you're trying to match the name against?</p>",
+        "id": 130929446,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533471538
+    },
+    {
+        "content": "<blockquote>\n<p>Also, what's the bu_fnmatch on search.c:1263 trying to achieve? We don't seem to be doing anything with that result, and it's not immediately clear to me what you're trying to match the name against?</p>\n</blockquote>\n<p>tbqh i had no idea at the time how to use the db_node as a short name so i just copy-pasted code from some simpler filter. later i rolled that change back and went back to using full path strings everywhere, but either i rolled that back too or Sean only applied some of the patches and they still included that incomplete code</p>",
+        "id": 131009988,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533598514
+    },
+    {
+        "content": "<p>tldr: i had no idea at the time what the thing i copied did so i left everything intact until i could see that it works at which point i would have eliminated unnecessary parts</p>",
+        "id": 131010042,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533598581
+    },
+    {
+        "content": "<p><a href=\"https://sourceforge.net/p/brlcad/patches/504/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/patches/504/\">https://sourceforge.net/p/brlcad/patches/504/</a></p>",
+        "id": 131010906,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533600026
+    },
+    {
+        "content": "<p>Any thoughts on the fullpath handling?  We're getting down to the wire...</p>",
+        "id": 131015666,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533608198
+    },
+    {
+        "content": "<p>I'm not following why we can't just substitute full paths into the {} hole</p>",
+        "id": 131083859,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533697258
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> it may be that some of the commands can't handle full paths properly, but that is the command's problem not that of search -exec</p>",
+        "id": 131084198,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533697731
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> Please try the approach I outlined above and see what happens - even if it has problems, that patch should be a step in the right direction.</p>",
+        "id": 131101509,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533727059
+    },
+    {
+        "content": "<p>(Reminder)<br>\nIn f_exec, instead of directly pulling the dp pointer from db_node-&gt;path, check dp_node-&gt;path-&gt;fp_len<br>\nIf fp_len &gt; 1, use db_path_to_string to make a path to feed to the subsequent logic. else, use the object d_namep.</p>",
+        "id": 131101627,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533727217
+    },
+    {
+        "content": "<p><a href=\"https://sourceforge.net/p/brlcad/patches/507/\" target=\"_blank\" title=\"https://sourceforge.net/p/brlcad/patches/507/\">https://sourceforge.net/p/brlcad/patches/507/</a> i guess i forgot to send this patch</p>",
+        "id": 131130439,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533759464
+    },
+    {
+        "content": "<p>there are a few other ones on SF</p>",
+        "id": 131130451,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533759480
+    },
+    {
+        "content": "<p>Got most of them applied - trying to test #507, but hitting some other problem that doesn't seem to be related to that patch</p>",
+        "id": 131144663,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533780540
+    },
+    {
+        "content": "<p>Alright, backed up a few commits and the patch works, so applying.</p>",
+        "id": 131145032,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533781158
+    },
+    {
+        "content": "<p>Ah, I missed this in r71461.  You actually don't want to free the strings, since this level of memory management is not the level controlling the string pointers.  Looks like we also want to make sure the splan entries are allocated before freeing.  Fixed in r71464</p>",
+        "id": 131145840,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533782537
+    },
+    {
+        "content": "<p>As of that commit, search / -type shape -exec draw \"{}\" \";\" works!</p>",
+        "id": 131145857,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533782573
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> per your log, Tcl can do lambdas but I don't think you have enough Tcl experience or time to learn the nuances of using them.  Moreover, I <em>really</em> can't envision what you possibly need them for that wouldn't be better or more simply implemented a different way.  rather, the Tcl side should frankly be as lean as possible.  this gets back to one of the earliest discussions I recall <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> and I having with you when the project got started, about whether to provide a hook back to Tcl or bind into libged.  we still may need to go the latter route just from a consistency perspective (e.g., consider python scripts running search -exec in an embedded ged context), but there is undeniable appeal in being able to call arbitrary Tcl procs during exec.  Regardless, lambdas are syntactic sugar -- if you have something begging for it, I'd like to see the specific case after evals are due.  Before then, seems like a complete distraction/crutch/hammer/excuse.</p>",
+        "id": 131157973,
+        "sender_full_name": "Sean",
+        "timestamp": 1533803058
+    },
+    {
+        "content": "<p>Major kudos on the latest patch, <span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>!  Core functionality is looking nearly ready.  How are docs looking? What’s next?</p>",
+        "id": 131190161,
+        "sender_full_name": "Sean",
+        "timestamp": 1533840012
+    },
+    {
+        "content": "<p>I was doing bugfixes but ye, good reminder, I should update the docs regarding the specific format of paths.</p>",
+        "id": 131190342,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533840207
+    },
+    {
+        "content": "<p>I wanted to use lambdas because that's kinda what I'm used to, eval with string substitution is way uglier than passing in an anonymous function</p>",
+        "id": 131190424,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533840280
+    },
+    {
+        "content": "<p>eg. one of the examples I rewrote to use -exec instead of storing everything in an array does work but tbqh i was not sure how or why</p>",
+        "id": 131190500,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533840363
+    },
+    {
+        "content": "<p>basically, lambdas are nice for one-liners where you wanna do all sorts of fun things with the parameters</p>",
+        "id": 131190526,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533840416
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  I think r71475 might address the confusion we both had about returning the results - I had the mistaken impression the array of fullpath results was trimmed down to a single db (which is not the case, and meant that once I tried a more hierarchy rich model I saw the problem.)  Fortunately, we do have the necessary information available in db_node-&gt;flags.</p>",
+        "id": 131212270,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533870582
+    },
+    {
+        "content": "<p>So it's the same solution, just keying off of the flag rather than the path length</p>",
+        "id": 131212313,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533870606
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  isn't it different for single element paths?</p>",
+        "id": 131212415,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533870734
+    },
+    {
+        "content": "<p>I was getting some odd failures to print output - can you give me your opinion on commit r71476?</p>",
+        "id": 131212419,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533870742
+    },
+    {
+        "content": "<p>its the same logic you had in your #507 patch, but rather than checking the db_full_path length (which at this stage of the pipeline still has the full paths of all results, which was a conceptual mistake I made earlier) we can key off of the db_node-&gt;flags DB_SEARCH_RETURN_UNIQ_DP setting.</p>",
+        "id": 131212499,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533870850
+    },
+    {
+        "content": "<p>hmm</p>",
+        "id": 131212506,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533870875
+    },
+    {
+        "content": "<p>r71476 looks cleaner actually.... but afaik the result in Tcl is used for error handling not boolean returns?</p>",
+        "id": 131212524,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533870940
+    },
+    {
+        "content": "<p>but yeah it's probably better to always print the result...</p>",
+        "id": 131212529,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533870955
+    },
+    {
+        "content": "<p>I was getting problems with the search / -exec echo \"{}\" \";\" output, and ended up tweaking how the returns are handled.  What I'm not sure of is if I broke something else in doing so - I get the behavior I expect, but I'd like you to test it out and see if it's not doing what you expect.</p>",
+        "id": 131212584,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533870998
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>$ echo &#39;search / -exec echo &quot;{}&quot; &quot;;&quot; &#39; | ./bin/mged ../../db/NIST_MBE_PMI_7-10.g\n/NIST_MBE_PMI_7-10.3dm\n/NIST_MBE_PMI_7-10.3dm/Default\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_4\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_4/Solid1_4.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_3\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_3/Solid1_3.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_2\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_2/Solid1_2.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1/Solid1.s\n</pre></div>\n\n\n<p>that looks like the correct output</p>",
+        "id": 131212668,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871102
+    },
+    {
+        "content": "<p>so my next question is how things behave with multiple -exec statements</p>",
+        "id": 131212788,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871268
+    },
+    {
+        "content": "<p>for example, what's the behavior if you have one exec that does a mv {} {}.1 and then trys to exec a draw {} - will it do left-to-right ordering on execution?  e.g. will the draws fail because {} is now at {}.1 thanks to the mv?</p>",
+        "id": 131212854,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871391
+    },
+    {
+        "content": "<p>I'd suggest determining what the behavior is and documenting it in the search man page so users know what to expect.</p>",
+        "id": 131212874,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871412
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>$ echo &#39;search / -exec echo &quot;{}&quot; &quot;;&quot; -exec echo foo &quot;{}&quot; bar &quot;;&quot;&#39; | ./bin/mged ../../db/NIST_MBE_PMI_7-10.g/NIST_MBE_PMI_7-10.3dm\n/NIST_MBE_PMI_7-10.3dm/Default\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_4\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_4/Solid1_4.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_3\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_3/Solid1_3.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_2\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_2/Solid1_2.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1/Solid1.s\n</pre></div>\n\n\n<p>....huh...</p>",
+        "id": 131212888,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871437
+    },
+    {
+        "content": "<p>hmm</p>",
+        "id": 131212955,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871494
+    },
+    {
+        "content": "<p>soooo the question is \"is this a lazy evaling and\"</p>",
+        "id": 131212964,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871510
+    },
+    {
+        "content": "<p>do multiple echos print out the output twice?</p>",
+        "id": 131212977,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871547
+    },
+    {
+        "content": "<p>if not, figuring out why is the next step</p>",
+        "id": 131213034,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871580
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>mged&gt; proc foo {x} {\n\n? echo foo $x\n\n? echo bar $x\n\n? }\n\nmged&gt; foo a\nbar a\n\nmged&gt;\n</pre></div>\n\n\n<p>......................Tcl is confusing</p>",
+        "id": 131213071,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871671
+    },
+    {
+        "content": "<p>oh wait nvm</p>",
+        "id": 131213113,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871684
+    },
+    {
+        "content": "<p>wait. yes mind</p>",
+        "id": 131213120,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871694
+    },
+    {
+        "content": "<p>i thought i misread it but no, the <code>foo a</code> is the function call i entered</p>",
+        "id": 131213178,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871762
+    },
+    {
+        "content": "<p>and that's not even a search -exec thing, that's hello world 2.0</p>",
+        "id": 131213179,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871762
+    },
+    {
+        "content": "<p>why isn't it printing <code>foo a</code></p>",
+        "id": 131213180,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871763
+    },
+    {
+        "content": "<p>search / -exec echo \"{}\" \";\" -exec  echo \"{}\" \";\" </p>\n<p>What does that do?  For that matter, what does find do with that on the OS command line?</p>",
+        "id": 131213197,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871793
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>mged&gt; search / -exec echo &quot;{}&quot; &quot;;&quot; -exec echo &quot;{}&quot; &quot;;&quot;\n/NIST_MBE_PMI_7-10.3dm\n/NIST_MBE_PMI_7-10.3dm/Default\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_4\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_4/Solid1_4.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_3\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_3/Solid1_3.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_2\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1_2/Solid1_2.s\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1\n/NIST_MBE_PMI_7-10.3dm/Default/Solid1/Solid1.s\n</pre></div>",
+        "id": 131213248,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871815
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> So, should it be reporting the results twice?  That would have been my first guess, but I'd also suggest checking what find does in a similar case.</p>",
+        "id": 131213267,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871873
+    },
+    {
+        "content": "<p>find output of /tmp</p>\n<div class=\"codehilite\"><pre><span></span>.\n.\n./mozilla_rain0\n./mozilla_rain0\n./tmp.RZEtmTN5Tu\n./tmp.RZEtmTN5Tu\n./tmp.RZEtmTN5Tu/acme\n./tmp.RZEtmTN5Tu/acme\n./tmp.RZEtmTN5Tu/plumb\n./tmp.RZEtmTN5Tu/plumb\n./tmp.EzCqEyABTc\n./tmp.EzCqEyABTc\n./tmp.EzCqEyABTc/acme\n./tmp.EzCqEyABTc/acme\n./tmp.EzCqEyABTc/plumb\n./tmp.EzCqEyABTc/plumb\n./Temp-57bdf871-5e70-47a5-8180-755dda4eb98b\n./Temp-57bdf871-5e70-47a5-8180-755dda4eb98b\n./qipc_sharedmemory_qtox45bdc9c0c458c8a25fc32de3a5f6d795f60b53f9\n./qipc_sharedmemory_qtox45bdc9c0c458c8a25fc32de3a5f6d795f60b53f9\n./qipc_systemsem_qtox45bdc9c0c458c8a25fc32de3a5f6d795f60b53f9\n./qipc_systemsem_qtox45bdc9c0c458c8a25fc32de3a5f6d795f60b53f9\n./.esd-1000\n./.esd-1000\n./.esd-1000/socket\n./.esd-1000/socket\n./keepassxc-rain.socket\n./keepassxc-rain.socket\n./keepassxc-rain.lock\n./keepassxc-rain.lock\n./ns.rain.:0\n./ns.rain.:0\n./ns.rain.:0/plumb\n./ns.rain.:0/plumb\n./.X0-lock\n./.X0-lock\n./systemd-private-755da5f6ec004e17a9c73eeadc3d9ee7-chronyd.service-grVvTU\n./systemd-private-755da5f6ec004e17a9c73eeadc3d9ee7-chronyd.service-grVvTU\n./.Test-unix\n./.Test-unix\n./.font-unix\n./.font-unix\n./.XIM-unix\n./.XIM-unix\n./.ICE-unix\n./.ICE-unix\n./.X11-unix\n./.X11-unix\n./.X11-unix/X0\n./.X11-unix/X0\n</pre></div>",
+        "id": 131213280,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871908
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> I've got to sign off for the evening - go ahead and dig into that and see what you can find (remember to discuss what you are finding on your log)</p>",
+        "id": 131213285,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533871919
+    },
+    {
+        "content": "<p>i should sleep too, but i'll be back in a few hours</p>",
+        "id": 131213332,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533871959
+    },
+    {
+        "content": "<p>well, g'nity</p>",
+        "id": 131213405,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533872045
+    },
+    {
+        "content": "<blockquote>\n<p>eg. one of the examples I rewrote to use -exec instead of storing everything in an array does work but tbqh i was not sure how or why</p>\n</blockquote>\n<p>which example was that?</p>",
+        "id": 131217242,
+        "sender_full_name": "Sean",
+        "timestamp": 1533878694
+    },
+    {
+        "content": "<blockquote>\n<p>basically, lambdas are nice for one-liners where you wanna do all sorts of fun things with the parameters</p>\n</blockquote>\n<p>very familiar with lambdas. :)   <em>very</em> old programming construct; quite common with functional programming languages like ML and Lisp, and more recently getting surged attention in many languages with C/C++11 getting them.</p>",
+        "id": 131217757,
+        "sender_full_name": "Sean",
+        "timestamp": 1533879593
+    },
+    {
+        "content": "<p>Imho, there's very few instances outside of functional languages where they do more than save you (literally) 2-4 lines of code.  Not that I don't appreciate the brevity, but there are many languages where that's not the a good fit with the processing model.  It's like how it's awkward to write procedural code in Java or functional code in C++ .. you can do it but it's usually just bad practice and unmaintainable to anyone other than the original author.</p>",
+        "id": 131217808,
+        "sender_full_name": "Sean",
+        "timestamp": 1533879629
+    },
+    {
+        "content": "<p>tcl actually embraces lambda's very strongly (heck it's -everything-is-a-command- perspective means even basic language constructs like \"if [] {}\" is essentially a higher-order function being given two anonymous functions with automatic scope import/export), but it's atypical in user code.  there are simply easier and more readable alternatives given the procedural command environment.</p>",
+        "id": 131218006,
+        "sender_full_name": "Sean",
+        "timestamp": 1533879970
+    },
+    {
+        "content": "<blockquote>\n<p>$ echo 'search / -exec echo \"{}\" \";\" ' | ./bin/mged ../../db/NIST_MBE_PMI_7-10.g</p>\n</blockquote>\n<p>FYI, this should be equiv:  $ ./bin/mged -c ../../db/NIST_MBE_PMI_7-10.g search / -exec echo \"{}\" \";\"</p>",
+        "id": 131218146,
+        "sender_full_name": "Sean",
+        "timestamp": 1533880221
+    },
+    {
+        "content": "<blockquote>\n<p>......................Tcl is confusing</p>\n</blockquote>\n<p>That is mged's fault, not Tcls.  Remember that your running a highly modified embedded interpreter there.  It's doing a lot of things automatically that Tcl doesn't usually do, and some of those things complicate...  for example, here's what you wrote in various forms all the way up to the right form:</p>\n<div class=\"codehilite\"><pre><span></span>agua:~ morrison$ tclsh\n% proc foo {x} {\necho foo $x\necho bar $x\n}\n% foo a\ninvalid command name &quot;echo&quot;\n% proc foo {x} {\nputs foo $x\nputs bar $x\n}\n% foo a\ncan not find channel named &quot;foo&quot;\n% proc foo {x} {\nputs &quot;foo $x&quot;\nputs &quot;bar $x&quot;\n}\n% foo a\nfoo a\nbar a\n</pre></div>",
+        "id": 131219096,
+        "sender_full_name": "Sean",
+        "timestamp": 1533881808
+    },
+    {
+        "content": "<p>In your example, 'echo' is an mged command, not a tcl command, and either it is wiping out the result or mged is running both, but resetting/overwriting as it iterates though the evaluation and gets results back from tcl.</p>",
+        "id": 131219169,
+        "sender_full_name": "Sean",
+        "timestamp": 1533881975
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> So, should it be reporting the results twice?  That would have been my first guess, but I'd also suggest checking what find does in a similar case.</p>\n</blockquote>\n<p>it should, but mged may be getting in the way ... either mged, search, or the command (echo here) is probably wiping out the result  string after each exec.  as it also happens for me with puts, that implies it's either mged or search wiping out the result.  another test with </p>\n<div class=\"codehilite\"><pre><span></span>echo &quot;search . -exec puts \\&quot;{}\\&quot; \\&quot;;\\&quot; -exec puts \\&quot;{}\\&quot; \\&quot;;\\&quot; ; puts hello&quot; | bin/mged test.g\n</pre></div>\n\n\n<p>implies that search is wiping out the result as it prints the hello along with the puts'</p>",
+        "id": 131219740,
+        "sender_full_name": "Sean",
+        "timestamp": 1533883035
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> Definitely you want to try and figure out what's happening in the search code then - we definitely want the multi-echo case to  work.</p>",
+        "id": 131229958,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533897777
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  one data point I can offer - a quick check in gdb working with the share/db/moss.g example and the following search input:</p>\n<p>search / -type tor -exec echo \"{}\" \";\" -exec echo \"{}\" \";\"</p>\n<p>indicates that c_exec does seem to be getting called twice, but f_exec is only being called once - e.g. it's allocating two searchplan objects that are N_EXEC types, but only getting to one of them for execution.</p>",
+        "id": 131230568,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533898730
+    },
+    {
+        "content": "<p>I wonder if one problem we might be having here is if the search plan execution is interpreting the f_exec output as a \"non-match\" filter and halting filter processing once the first -exec \"filter\" is complete.</p>",
+        "id": 131230647,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533898897
+    },
+    {
+        "content": "<p>If that's the case, one option would be to make sure the f_exec \"filter\" always returns a match.</p>",
+        "id": 131230689,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533898939
+    },
+    {
+        "content": "<p>It also raises a question of what to do with mixed -exec calls and filters</p>",
+        "id": 131230706,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533899019
+    },
+    {
+        "content": "<p>Using the same moss.g example:</p>\n<p>mged&gt; search / -type arb8 -name box.s -exec echo \"{}\" \";\"<br>\n/all.g/box.r/box.s</p>\n<p>mged&gt; search / -type arb8 -exec echo \"{}\" \";\" -name box.s<br>\n/all.g/box.r/box.s<br>\n/all.g/platform.r/platform.s</p>",
+        "id": 131230783,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533899140
+    },
+    {
+        "content": "<p>Should those return the same result?  What does find do in such a case?</p>",
+        "id": 131230808,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533899162
+    },
+    {
+        "content": "<p>One possibility is to store the exec plans separately and only execute them after all the other filters have been processed, but that's not the way to go if the expected find behavior is to only apply the filters defined before each exec (i.e. if we tack another echo onto the last example above, would the first echo print both box.s and platform.s and the second print just box.s ?)</p>",
+        "id": 131230898,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533899303
+    },
+    {
+        "content": "<p>Something to check in find's behavior</p>",
+        "id": 131230903,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533899312
+    },
+    {
+        "content": "<blockquote>\n<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span>  one data point I can offer - a quick check in gdb working with the share/db/moss.g example and the following search input:</p>\n<p>search / -type tor -exec echo \"{}\" \";\" -exec echo \"{}\" \";\"</p>\n<p>indicates that c_exec does seem to be getting called twice, but f_exec is only being called once - e.g. it's allocating two searchplan objects that are N_EXEC types, but only getting to one of them for execution.</p>\n</blockquote>\n<p>so it's lazy evaluating, nice <span class=\"emoji emoji-1f44d\" title=\"+1\">:+1:</span> (that's what i expected tbh)</p>",
+        "id": 131833977,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533919099
+    },
+    {
+        "content": "<p>wait...</p>",
+        "id": 131833994,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533919127
+    },
+    {
+        "content": "<blockquote>\n<p>Should those return the same result?  What does find do in such a case?</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> it prints the same thing, since \"echo\" always returns true (well, it should at least, there is probably some weird case like a broken pipe error where it could return false)</p>",
+        "id": 131834112,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533919249
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> why doesn't the echo command allow 0 arguments?</p>",
+        "id": 131838848,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533925022
+    },
+    {
+        "content": "<p>uh.... i removed the result string initialization from the echo command but it still doesn't work???</p>",
+        "id": 131841655,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533928733
+    },
+    {
+        "content": "<p>annd the wrapper function doesn't seem to be doing any resetting.....</p>",
+        "id": 131841741,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533928881
+    },
+    {
+        "content": "<p>and i didn't forget to build this time</p>",
+        "id": 131841746,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533928895
+    },
+    {
+        "content": "<p>hmmm.</p>",
+        "id": 131841751,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533928906
+    },
+    {
+        "content": "<p>oh<br>\n<span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> TCL_OK is not non-zero.... ie. it is zero</p>",
+        "id": 131930920,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533949871
+    },
+    {
+        "content": "<p>I mean, do two echos print things twice, or does it print only once?</p>",
+        "id": 131931730,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533951355
+    },
+    {
+        "content": "<p>Yeah - find will do both exec calls:</p>\n<p>find . -name testfile.txt -exec echo {} \\; -exec echo {} \\;<br>\n./testfile.txt<br>\n./testfile.txt</p>",
+        "id": 131931788,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533951463
+    },
+    {
+        "content": "<p>So I would then expect </p>\n<p>search / -type tor -exec echo \"{}\" \";\" -exec echo \"{}\" \";\"</p>\n<p>to print</p>\n<p>/all.g/tor.r/tor<br>\n/all.g/tor.r/tor</p>",
+        "id": 131931857,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533951592
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> Is patch #510 still needed with the current code?</p>",
+        "id": 131932213,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533952163
+    },
+    {
+        "content": "<p>Ah, I see patch #512 has got it.</p>",
+        "id": 131932479,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533952659
+    },
+    {
+        "content": "<p>So with that, we have search exec echo printing output, plus the \"normal\" search reporting.  That doesn't seem to match the find behavior:</p>\n<blockquote>\n<p>find . -name testfile.txt<br>\n./testfile.txt<br>\nfind . -name testfile.txt -exec echo {} &gt; /dev/null \\;</p>\n<p>find . -name testfile.txt -exec echo {} \\;<br>\n./testfile.txt</p>\n</blockquote>\n<p>It looks like -exec may be regarded as a \"printing filter\" by find, which results in disabling the default output.</p>",
+        "id": 131932704,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533953052
+    },
+    {
+        "content": "<p>nevermind, I see it - c_exec wasn't setting the db_search_isoutput flag.  Trivial fix, committed.</p>",
+        "id": 131932879,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533953368
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> make sure you're updating your development log...</p>",
+        "id": 131933297,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533953965
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> are you aware of any other problematic -exec behaviors?</p>",
+        "id": 131933407,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533954095
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> not really, echo still doesn't work but that's not search's fault</p>",
+        "id": 131933551,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533954289
+    },
+    {
+        "content": "<p>but puts works</p>",
+        "id": 131933555,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533954295
+    },
+    {
+        "content": "<p>really?  echo works for me, at least in GUI mode...</p>",
+        "id": 131933564,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533954313
+    },
+    {
+        "content": "<p>....huh.</p>",
+        "id": 131933571,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533954338
+    },
+    {
+        "content": "<p>The last quirk I'm seeing is a consequence of my use of bu_log in mged_db_search_callback - I can't capture the results of search -exec into a Tcl variable, the way I can with a normal search.</p>",
+        "id": 131933724,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533954615
+    },
+    {
+        "content": "<p>What is echo doing when you try to run it?</p>",
+        "id": 131933887,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955077
+    },
+    {
+        "content": "<p>I think to avoid having to use bu_log, we'd need to instead somehow build up an accumulated buffer of the result strings and then  return them all at once at the end of the search command run.</p>",
+        "id": 131934205,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955550
+    },
+    {
+        "content": "<p>in MGED, bu_log is literally putting text lines in the output window, and not accumulating them to return as part of the Tcl command result.</p>",
+        "id": 131934262,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955620
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span>a\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\na\nb\ndouble free or corruption (fasttop)\n8982: signal: sys: abort (core dumped)\necho: exit 1\n</pre></div>\n\n\n<p>hmmmmmmmmmmmmmmmmmmmmmmmmmm</p>",
+        "id": 131934346,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533955790
+    },
+    {
+        "content": "<p>that's.... not good.</p>",
+        "id": 131934349,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533955798
+    },
+    {
+        "content": "<p>O.o</p>",
+        "id": 131934391,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955805
+    },
+    {
+        "content": "<p>what are you searching?</p>",
+        "id": 131934395,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955821
+    },
+    {
+        "content": "<p>or running?</p>",
+        "id": 131934405,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955853
+    },
+    {
+        "content": "<p><code>0x00007f713adf5014 in bu_free (ptr=0x55d3bd9ab250, str=0x7f713e93740e \"e_argv\") at /home/rain/Sync/gsoc/brlcad-code/src/libbu/malloc.c:200</code></p>",
+        "id": 131934485,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533955934
+    },
+    {
+        "content": "<p>just a basic echo thingy</p>",
+        "id": 131934497,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533955947
+    },
+    {
+        "content": "<p><code>echo 'search -exec echo a \";\" -exec echo b \";\"' | ./bin/mged ../../db/moss.g</code></p>",
+        "id": 131934503,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533955957
+    },
+    {
+        "content": "<p>/me ponders... should the results of search -exec be storable in a Tcl variable as a result of running search?  we might be able to do it with our own bu_log hook in the search callback...</p>",
+        "id": 131934519,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533955991
+    },
+    {
+        "content": "<p>Ah!  an exec with no holes.</p>",
+        "id": 131934523,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956002
+    },
+    {
+        "content": "<p>hadn't tried that</p>",
+        "id": 131934528,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956010
+    },
+    {
+        "content": "<p>hrm... doesn't crash here.</p>",
+        "id": 131934581,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956051
+    },
+    {
+        "content": "<p>Are you building the latest trunk build?</p>",
+        "id": 131934589,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956071
+    },
+    {
+        "content": "<p>yup</p>",
+        "id": 131934598,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956087
+    },
+    {
+        "content": "<p>well, latest as of ~10 minutes ago</p>",
+        "id": 131934601,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956097
+    },
+    {
+        "content": "<p>Oh, there it is - takes two echo commands.  One works.</p>",
+        "id": 131934602,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956099
+    },
+    {
+        "content": "<p>oh</p>",
+        "id": 131934611,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956107
+    },
+    {
+        "content": "<p>my bad</p>",
+        "id": 131934613,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956113
+    },
+    {
+        "content": "<p>hey, this isn't the new and improved node freeer thingy i wrote that fixed my old and horrible node freeer thingy...</p>",
+        "id": 131934681,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956177
+    },
+    {
+        "content": "<p>did i mess up my master branch??</p>",
+        "id": 131934689,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956192
+    },
+    {
+        "content": "<p>(which should be a clone of the svn repo)</p>",
+        "id": 131934694,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956202
+    },
+    {
+        "content": "<p>I applied a patch, then had to change it in a subsequent patch...</p>",
+        "id": 131934703,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956232
+    },
+    {
+        "content": "<p>I might have made a mistake, but the patch I applied looked like it was freeing too much...</p>",
+        "id": 131934713,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956260
+    },
+    {
+        "content": "<p>let me know if I missed something</p>",
+        "id": 131934717,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956276
+    },
+    {
+        "content": "<p>well for one you aren't freeing the strings in argv....</p>",
+        "id": 131934787,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956387
+    },
+    {
+        "content": "<p>waaait...</p>",
+        "id": 131934839,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956419
+    },
+    {
+        "content": "<p>I'm not sure they should be freed - it depends where they come from.</p>",
+        "id": 131934841,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956437
+    },
+    {
+        "content": "<p>here: <code>     e_argv[i] = bu_strdupm(**argvp, \"e_argv arg\");</code></p>",
+        "id": 131934847,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956450
+    },
+    {
+        "content": "<p>dp-&gt;d_namep pointers from db_lookup generally aren't freed in calling code.</p>",
+        "id": 131934848,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956456
+    },
+    {
+        "content": "<p>the d_namep stuff is in <code>f_exec</code>, those aren't supposed to outlive the function</p>",
+        "id": 131934860,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956508
+    },
+    {
+        "content": "<p><code>db_search_free_plan</code> cleans up after <code>c_exec</code></p>",
+        "id": 131934903,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956538
+    },
+    {
+        "content": "<p>r71486 should fix the echo double crasher</p>",
+        "id": 131934916,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956598
+    },
+    {
+        "content": "<p>Let me back up and use your original freeer - if I missed the bu_strdupm I probably introduced a memory leak</p>",
+        "id": 131934961,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533956649
+    },
+    {
+        "content": "<p>yus!</p>",
+        "id": 131934966,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956680
+    },
+    {
+        "content": "<p>it works</p>",
+        "id": 131934967,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533956684
+    },
+    {
+        "content": "<p>r71487 is close to your earlier patch, but if I add in the  bu_free(splan-&gt;p_un.ex._e_argv[i], \"e_argv[i]\"); loop I get memory corruption.  Did I strip out the bu_strdupm by mistake?</p>",
+        "id": 131935148,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533957111
+    },
+    {
+        "content": "<p>No, it's still there... why do I get a crash if I free it when I free the plans??</p>",
+        "id": 131935206,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533957198
+    },
+    {
+        "content": "<p>aren't you supposed to be freeing <code>p</code> in the loop?</p>",
+        "id": 131935207,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533957202
+    },
+    {
+        "content": "<p>and not <code>splan</code>?</p>",
+        "id": 131935211,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533957211
+    },
+    {
+        "content": "<p>quite right</p>",
+        "id": 131935261,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533957266
+    },
+    {
+        "content": "<p>r71488 works for me, but if I uncomment the loop freeing the e_argv entries I get a SIGSEGV</p>",
+        "id": 131935332,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533957474
+    },
+    {
+        "content": "<p>did I mess up p_un.ex._e_argc somehow?</p>",
+        "id": 131935371,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533957522
+    },
+    {
+        "content": "<p>doesn't seem like it</p>",
+        "id": 131935630,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533958070
+    },
+    {
+        "content": "<p>well... echo works...</p>",
+        "id": 131935686,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533958154
+    },
+    {
+        "content": "<p>what would be a good test that does some testing with -exec?</p>",
+        "id": 131935687,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533958179
+    },
+    {
+        "content": "<p>ah HAH!</p>",
+        "id": 131935693,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958197
+    },
+    {
+        "content": "<p>valgrind to the rescue</p>",
+        "id": 131935751,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958257
+    },
+    {
+        "content": "<p>I think r71489 has it.</p>",
+        "id": 131935801,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958334
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> at this point, I would double check that all the man page examples work.</p>",
+        "id": 131935804,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958358
+    },
+    {
+        "content": "<p>good idea</p>",
+        "id": 131935864,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533958475
+    },
+    {
+        "content": "<p>The only other thing I can see that is missing is the possibility to capture the output of the execs into a Tcl variable, and that would probably require some pretty fancy voodoo at the libged search.c level with bu_log hooks - db_search is not set up to return arbitrary string output (which is not only possible but likely with arbitrary exec calls) so it would have to be handled at the libged level.</p>",
+        "id": 131935902,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958562
+    },
+    {
+        "content": "<p>I would also add a man page example illustrating the behavior of multiple -exec calls - what to expect in terms of behavior.</p>",
+        "id": 131935923,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958645
+    },
+    {
+        "content": "<p>you can use the moss.g examples from this chat log as a starting point - examples where I was wondering what the behavior would be (and what the right behavior should be) could be used to guide a man page discussion of the behavior of multiple -exec calls.</p>",
+        "id": 131935968,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533958707
+    },
+    {
+        "content": "<p>can't the result storing be done in Tcl?</p>",
+        "id": 131936110,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533958938
+    },
+    {
+        "content": "<p>since it's so very dynamic and whatnot?</p>",
+        "id": 131936118,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533958950
+    },
+    {
+        "content": "<p>one example might be if you have one -exec call that is a mv and a subsequent list call that is expecting the original name:</p>\n<p>search . -exec mv \"{}\" \"{}\".new \";\" -exec l \"{}\" \";\"</p>\n<p>I would expect all of the \"l\" list commands to fail, since the mv will be done first.  On the other hand, I would expect</p>\n<p>search . -exec mv \"{}\" \"{}\".new \";\" -exec l \"{}\".new \":\" to work</p>\n<p>(Those would be good to try.)</p>",
+        "id": 131936132,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959006
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> the complication with storing the results in Tcl is that we're Tcl_Evaling the commands from exec in the interpreter, so accumulating the results in Tcl gets tricky.  There's probably a way to make it work, but I'm not exactly sure how to do it.</p>\n<p>You can certainly try to figure it out, but before doing that I would add the man page discussion, and make sure you are ready to submit what you need to submit to Google for the wrap-up.</p>",
+        "id": 131936198,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959130
+    },
+    {
+        "content": "<p>hmmm</p>",
+        "id": 131936310,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959309
+    },
+    {
+        "content": "<p>{}a is expanded to NAMEa</p>",
+        "id": 131936312,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959329
+    },
+    {
+        "content": "<p>well<br>\nin find(1)</p>",
+        "id": 131936314,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959337
+    },
+    {
+        "content": "<p>but c_exec only considers \"{}\" when it's on its own completely....</p>",
+        "id": 131936385,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959416
+    },
+    {
+        "content": "<p>Am I correct that supporting that would require us to explicitly store the spaces when you're splitting up the -exec input strings?</p>",
+        "id": 131936389,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959427
+    },
+    {
+        "content": "<p>the splitting is done in Tcl</p>",
+        "id": 131936414,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959499
+    },
+    {
+        "content": "<p>hmmm...</p>",
+        "id": 131936420,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959508
+    },
+    {
+        "content": "<p>but you're building up the exec string by filling in the holes, right?</p>",
+        "id": 131936421,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959519
+    },
+    {
+        "content": "<p>yep</p>",
+        "id": 131936462,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959531
+    },
+    {
+        "content": "<p>so the hole recognition logic would have to do something a bit different</p>",
+        "id": 131936468,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959550
+    },
+    {
+        "content": "<p>but an argument is either replaced by a path or is a constant</p>",
+        "id": 131936469,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959550
+    },
+    {
+        "content": "<p>c_exec has to store the argument string instead of NULLing holes</p>",
+        "id": 131936477,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959599
+    },
+    {
+        "content": "<p>and scan for {} in them</p>",
+        "id": 131936479,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959608
+    },
+    {
+        "content": "<p>and f_exec fills those in</p>",
+        "id": 131936481,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959620
+    },
+    {
+        "content": "<p>/me nods - sounds right</p>",
+        "id": 131936482,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959626
+    },
+    {
+        "content": "<p>shouldn't be too hard...</p>",
+        "id": 131936484,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959640
+    },
+    {
+        "content": "<p>sounds good - just make sure you meet all the submission deadlines!</p>",
+        "id": 131936523,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959658
+    },
+    {
+        "content": "<p>/me nods</p>",
+        "id": 131936527,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959673
+    },
+    {
+        "content": "<p>this is awesome stuff - we've been wanting an -exec option in search for literally years</p>",
+        "id": 131936529,
+        "sender_full_name": "starseeker",
+        "timestamp": 1533959703
+    },
+    {
+        "content": "<p>^u^</p>",
+        "id": 131936586,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1533959857
+    },
+    {
+        "content": "<p>ok i think it finally works. wow. TIL water is wet and doing string stuff in C is prone to errors</p>",
+        "id": 131974384,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534033772
+    },
+    {
+        "content": "<p><code>./bin/mged ../../db/moss.g 'search -exec echo \"{}AAAA{}{}B\" \";\" -exec echo \"foo{}\" \"bar{}\" \";\"'</code></p>\n<div class=\"codehilite\"><pre><span></span>all.gAAAAall.gall.gB\nfooall.g barall.g\nlight.rAAAAlight.rlight.rB\nfoolight.r barlight.r\nLIGHTAAAALIGHTLIGHTB\nfooLIGHT barLIGHT\ntor.rAAAAtor.rtor.rB\nfootor.r bartor.r\ntorAAAAtortorB\nfootor bartor\nellipse.rAAAAellipse.rellipse.rB\nfooellipse.r barellipse.r\nellipse.sAAAAellipse.sellipse.sB\nfooellipse.s barellipse.s\ncone.rAAAAcone.rcone.rB\nfoocone.r barcone.r\ncone.sAAAAcone.scone.sB\nfoocone.s barcone.s\nbox.rAAAAbox.rbox.rB\nfoobox.r barbox.r\nbox.sAAAAbox.sbox.sB\nfoobox.s barbox.s\nplatform.rAAAAplatform.rplatform.rB\nfooplatform.r barplatform.r\nplatform.sAAAAplatform.splatform.sB\nfooplatform.s barplatform.s\n</pre></div>",
+        "id": 131974536,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534034114
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> that patch didn't apply cleanly to trunk - did I miss a precursor patch?</p>",
+        "id": 131976013,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534037566
+    },
+    {
+        "content": "<p>hmm.</p>",
+        "id": 131976020,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534037598
+    },
+    {
+        "content": "<p>oh, nah, i forgot to merge master</p>",
+        "id": 131976075,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534037710
+    },
+    {
+        "content": "<p>hmm...</p>",
+        "id": 131976307,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534038246
+    },
+    {
+        "content": "<p>I did have one commit making sure we had a callback before trying to exec it - that might complicate the merge</p>",
+        "id": 131976308,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534038298
+    },
+    {
+        "content": "<p>np, i just reverted it then merged then reverted the revert then resolved the conflict</p>",
+        "id": 131977032,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534039916
+    },
+    {
+        "content": "<p>oops, i wasn't logged in....</p>",
+        "id": 131977074,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534039945
+    },
+    {
+        "content": "<p>ok i posted a fixed one</p>",
+        "id": 131977266,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534040368
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> can you check it?</p>",
+        "id": 131977272,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534040398
+    },
+    {
+        "content": "<p>It applies, looks good.</p>",
+        "id": 131977546,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534040936
+    },
+    {
+        "content": "<p>Be sure to mention in the docs that the pattern needs to look like:</p>\n<p>search . -exec echo \"{}.suffix\" \";\"</p>\n<p>rather than</p>\n<p>search . -exec echo \"{}\".suffix \";\"</p>\n<p>(I tried the latter first...)</p>",
+        "id": 131977555,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534040996
+    },
+    {
+        "content": "<p>how come the latter doesn't work?</p>",
+        "id": 131977600,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534041050
+    },
+    {
+        "content": "<p>search . -exec echo \"{}\".new \";\"<br>\nextra characters after close-quote</p>",
+        "id": 131977609,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534041098
+    },
+    {
+        "content": "<p>hm. so it's just how Tcl quoting rules roll</p>",
+        "id": 131977651,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534041150
+    },
+    {
+        "content": "<p>looks like it</p>",
+        "id": 131977749,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534041414
+    },
+    {
+        "content": "<p>Applied r71497</p>",
+        "id": 131977753,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534041426
+    },
+    {
+        "content": "<p>I'd say doc updates and additions are probably next up?</p>",
+        "id": 131977800,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534041563
+    },
+    {
+        "content": "<p>Given how cool this is, we want to make sure users can use it!</p>",
+        "id": 131977844,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534041612
+    },
+    {
+        "content": "<p>sent the docs patch, I think that's basically it? gonna upload it now and send the eval</p>",
+        "id": 132047409,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534167621
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> looking at your README.md - what are the conflicts in some of the commits?  Is this the list of patches showing the stages of work (i.e. changes and subsequent changes in other commits?)</p>",
+        "id": 132211238,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534383103
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>  it's (almost) all of the commits by me, not all of them were sent as patches</p>",
+        "id": 132216643,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534392767
+    },
+    {
+        "content": "<p>(the commits for making the \"presentable\" branch aren't included)</p>",
+        "id": 132216661,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534392800
+    },
+    {
+        "content": "<p>hmmmmmmm</p>",
+        "id": 132216663,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534392811
+    },
+    {
+        "content": "<p>come to think of it, maybe i should describe which branches are actually interesting......</p>",
+        "id": 132216703,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534392844
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I have a Tcl question, how come I can't group things like this:</p>\n<div class=\"codehilite\"><pre><span></span>search -exec eval {\n    attr set {} color [expr {int(rand()*225)+30}]/[expr {int(rand()*225)+30}]/[expr {int(rand()*225)+30}]\n    attr set {} shader {glass {tr 0.7 ri 1}}\n} &quot;;&quot;\n</pre></div>\n\n\n<p>I can run the search with either of those, but not both at the same time</p>\n<p>i also tested</p>\n<div class=\"codehilite\"><pre><span></span>eval {\n    puts a\n    puts b\n}\n</pre></div>\n\n\n<p>and that worked as expected, so, something weird is going on...</p>",
+        "id": 132335560,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534553250
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"111633\">@Peter Pronai</span> Looking at the man page, for the search examples of \"Bad\" and \"Good\" do you think you could make a version that has one \"correct\" example paired with one \"incorrect\" example per table row?  Having multiple \"good\" examples on the same line gives the impression that you need two exec calls instead of one to fix the one on the first row (for example.)</p>",
+        "id": 132552414,
+        "sender_full_name": "starseeker",
+        "timestamp": 1534901004
+    },
+    {
+        "content": "<p>sure, I gotta slep now but I'll do it tomorrow afternoon</p>",
+        "id": 132553186,
+        "sender_full_name": "Peter Pronai",
+        "timestamp": 1534902445
+    }
+]

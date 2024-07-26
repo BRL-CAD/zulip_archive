@@ -1,0 +1,14 @@
+[
+    {
+        "content": "<p>I'm seeing the following - when calling ged_exec, I'm expecting to get GED_OK assigned:</p>\n<div class=\"codehilite\"><pre><span></span><code>ret = ged_tire(&amp;ged, ac, (const char **)av);\n</code></pre></div>\n<p>Following the execution through the calls, it looks like the function should indeed be returning GED_OK (0),  but ret instead ends up assigned 16:</p>\n<div class=\"codehilite\"><pre><span></span><code>Breakpoint 1, main (ac=2, av=0x7fffffffdff8) at ../src/shapes/tire.c:62\n62      ret = ged_tire(&amp;ged, ac, (const char **)av);\n(gdb) print ret\n$1 = 0\n(gdb) break ged_exec\nBreakpoint 2 at 0x7ffff7f5ffd9: file ../src/libged/exec.cpp, line 40.\n(gdb) c\nContinuing.\n\nBreakpoint 2, ged_exec (gedp=0x7ffff7fc8068 &lt;cmd_map+8&gt;, argc=21845, argv=0x7fffffffe32d) at ../src/libged/exec.cpp:40\n40  {\n(gdb) n\n41      if (!gedp || !argc || !argv) {\n(gdb)\n45      double start = 0.0;\n(gdb)\n46      const char *tstr = getenv(&quot;GED_EXEC_TIME&quot;);\n(gdb)\n47      if (tstr) {\n(gdb)\n59      std::map&lt;std::string, const struct ged_cmd *&gt; *cmap = (std::map&lt;std::string, const struct ged_cmd *&gt; *)ged_cmds;\n(gdb)\n68      if (!cmap-&gt;size()) {\n(gdb)\n72      std::map&lt;std::string, const struct ged_cmd *&gt;::iterator c_it = cmap-&gt;find(std::string(argv[0]));\n(gdb)\n73      if (c_it == cmap-&gt;end()) {\n(gdb)\n78      const struct ged_cmd *cmd = c_it-&gt;second;\n(gdb)\n83      int cret = (*cmd-&gt;i-&gt;cmd)(gedp, argc, argv);\n(gdb)\n85      if (tstr) {\n(gdb) print cret\n$2 = 0\n(gdb) n\n89      return cret;\n(gdb) print cret\n$3 = 0\n(gdb) n\n90  }\n(gdb)\nmain (ac=2, av=0x7fffffffdff8) at ../src/shapes/tire.c:65\n65      wdb_close(db_fp);\n(gdb) print ret\n$4 = 16\n(gdb)\n</code></pre></div>",
+        "id": 235201098,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618846358
+    },
+    {
+        "content": "<p>Ah, was feeding in argv[0] binary path instead of GED command to ged_exec - that'll do it.</p>",
+        "id": 235202583,
+        "sender_full_name": "starseeker",
+        "timestamp": 1618846935
+    }
+]

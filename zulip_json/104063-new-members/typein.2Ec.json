@@ -1,0 +1,194 @@
+[
+    {
+        "content": "<p>Hi,</p>\n<p>Is the  \" TODO : Add support for line, curve, beizer, \"  on line no.630  of src/libged/typein/typein.c  a requirement as of now?<br>\n  Any reference or tips to attempt it?</p>",
+        "id": 228361164,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614667163
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"372337\">@Debkamal Mullick</span> depends what you mean by requirement.  It is desired functionality, yes.  The best tip would be to study that file to understand what it's doing, how it defines inputs for different object types, and then understand that specific object type (which I assume is the sketch primitive), and then implement it</p>",
+        "id": 228361350,
+        "sender_full_name": "Sean",
+        "timestamp": 1614667281
+    },
+    {
+        "content": "<p>This might help: <a href=\"https://brlcad.org/wiki/Sketch\">https://brlcad.org/wiki/Sketch</a></p>",
+        "id": 228361453,
+        "sender_full_name": "Sean",
+        "timestamp": 1614667352
+    },
+    {
+        "content": "<p>okay. I am studying the typein.c file</p>",
+        "id": 228361640,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614667493
+    },
+    {
+        "content": "<p>Thank you for the previous explanation. I had a query about what the declarations ending with \"_t\" (eg, fastf_t, vect_t, size_t ) are. These declarations are in several parts of the codebase.</p>",
+        "id": 228423682,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614697275
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"372337\">@Debkamal Mullick</span> nearly all types are in the top-level include/ directory or a subdirectory in there.  If you search in those folders with typedef, you can find them easily.  for example, fastf_t and vect_t are both in include/vmath.h</p>",
+        "id": 228424786,
+        "sender_full_name": "Sean",
+        "timestamp": 1614697622
+    },
+    {
+        "content": "<p>fastf_t is basically a double (usually), and vect_t is a double[4] (usually)</p>",
+        "id": 228424866,
+        "sender_full_name": "Sean",
+        "timestamp": 1614697648
+    },
+    {
+        "content": "<p>ok thanks</p>",
+        "id": 228425978,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614698019
+    },
+    {
+        "content": "<p>any progress <span class=\"user-mention\" data-user-id=\"372337\">@Debkamal Mullick</span> ?</p>",
+        "id": 228540469,
+        "sender_full_name": "Sean",
+        "timestamp": 1614750291
+    },
+    {
+        "content": "<p>I have understood the structure but I cannot understand the values assigned to the variable \"nvals\" for different primitives</p>",
+        "id": 228541210,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614750891
+    },
+    {
+        "content": "<p>From what I understood, I will need to add </p>\n<p>1) static const char *p_sketch[ ] ={ </p>\n<p>/* list of instructions for inserting sketch primitive*/</p>\n<p>}</p>\n<p>2) static int sketch_in(struct ged *gedp, const char **cmd_argvs, struct rt_db_internal *intern){</p>\n<p>/* code for taking the input parameters for the sketch primitive*/</p>\n<p>}</p>\n<p>And finally in the \" int ged_in_core(struct ged *gedp, int argc, const char *argv[ ]){...} \", I need to add the if else condition for sketch primitive</p>",
+        "id": 228542944,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614752304
+    },
+    {
+        "content": "<hr>\n<p>Do the \"nvals\" control the mged input prompt messages?</p>",
+        "id": 228553792,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614759949
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"372337\">@Debkamal Mullick</span> They're different for every primitive, but it might help to start with one of the simplest ones like \"sph\" which makes a sphere.</p>",
+        "id": 228728796,
+        "sender_full_name": "Sean",
+        "timestamp": 1614843132
+    },
+    {
+        "content": "<p>but yes, the sort of control the input prompt.  It tells it how many \"instructions\" as you put it there are, if memory serves correctly.</p>",
+        "id": 228728880,
+        "sender_full_name": "Sean",
+        "timestamp": 1614843197
+    },
+    {
+        "content": "<p>Your understanding in general looks about correct though.  Make sure you actually run the \"in\" command in mged to see how it works.  That will explain a lot.  Just type \"in whatever\" to get started, then \"in whatever sph\" and you'll see how it starts asking the p_sph prompts.</p>",
+        "id": 228729049,
+        "sender_full_name": "Sean",
+        "timestamp": 1614843307
+    },
+    {
+        "content": "<p>Ok. With reference to the Sketch wiki page, will the sketch prompt be a 2 line prompt asking for <br>\n1) V, A, B<br>\n2) The entire code containing VL, SL, line, carc<br>\n3) Sketch created</p>\n<p>Or will it be a complex one with prompts for VL, SL with a loop?</p>",
+        "id": 228732135,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614845524
+    },
+    {
+        "content": "<p>Thank you. I will try and understand the code for sphere primitive</p>",
+        "id": 228733139,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614846059
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"372337\">@Debkamal Mullick</span> it can be whatever you want it to be.  It doesn't exist yet, so there's a design component here.  The only limitation is that the end result needs to be deterministic.  What I mean by that is say you have some data being provided that can be any length, like the VL vertex lists.  You'll either need to have them be specified with a count, eg.:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>in {name} {type} {entity} {count} {data}\n</code></pre></div>\n<p>like this:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>in foo sketch VL 5 1 2 3 1 2 3 1 2 3 1 2 3 1 2 3\n</code></pre></div>\n<p>where we say we're going to read 5 vertices.</p>\n<p>OR</p>\n<p>you let them be specified with labels one at a time and you aggregate internally, eg.:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>in {name} {type} {entity} {data}\n</code></pre></div>\n<p>like this:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>in foo sketch VL 1 2 3 VL 1 2 3 VL 1 2 3 VL 1 2 3 VL 1 2 3\n</code></pre></div>",
+        "id": 228805365,
+        "sender_full_name": "Sean",
+        "timestamp": 1614875669
+    },
+    {
+        "content": "<p>The first is obviously more brief but potentially error-prone and requires calculating a value that may not exist (the count) but is derivable.  The second is more verbose, but is more trivial &amp; easy for users to adapt from existing data so that approach would probably be my preference.</p>",
+        "id": 228805617,
+        "sender_full_name": "Sean",
+        "timestamp": 1614875761
+    },
+    {
+        "content": "<p>Actually, it would be best if I knew what mged prompts should be there, that would be conforming to BRL-CAD standard formats. Basically the contents of p_sketch[ ]. </p>\n<p>For the code, can I refer to the line number 683 of : </p>\n<p><a href=\"https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/libged/make/make.c\">https://sourceforge.net/p/brlcad/code/HEAD/tree/brlcad/trunk/src/libged/make/make.c</a></p>",
+        "id": 228811209,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614877634
+    },
+    {
+        "content": "<p>There is no standard format.  It's different for every entity type.</p>",
+        "id": 228812456,
+        "sender_full_name": "Sean",
+        "timestamp": 1614878034
+    },
+    {
+        "content": "<p>Figuring out how to prompt it is essentially the task, or at least a useful task.  If you want, write up your thoughts on the wiki page and we can iterate on the design...</p>",
+        "id": 228812608,
+        "sender_full_name": "Sean",
+        "timestamp": 1614878082
+    },
+    {
+        "content": "<p>Oh. Ok</p>",
+        "id": 228813586,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614878444
+    },
+    {
+        "content": "<p>Will beziers be also included in sketch other than line &amp; carc?</p>",
+        "id": 228818356,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614880081
+    },
+    {
+        "content": "<p>Of course, they're a valid segment type.</p>",
+        "id": 228885670,
+        "sender_full_name": "Sean",
+        "timestamp": 1614910363
+    },
+    {
+        "content": "<p>you can submit this piecemeal though, you know just get the position (V), dimensional vectors (A and B), and vertices (VL) working first, then submit that as a patch.  Then work on line segments, submit that as an update to the patch, etc.</p>",
+        "id": 228885836,
+        "sender_full_name": "Sean",
+        "timestamp": 1614910464
+    },
+    {
+        "content": "<p>will show how you iterate on feedback, make sure you don't make unnecessary work for yourself if there's a problem</p>",
+        "id": 228885859,
+        "sender_full_name": "Sean",
+        "timestamp": 1614910490
+    },
+    {
+        "content": "<p>Thank you for the explanation. Its a lot clearer now.</p>",
+        "id": 228901452,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1614923218
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 229170932,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1615107516
+    },
+    {
+        "content": "<p>I added the code for sketch primitive and compiled. Compile was ok but mged crashes after taking in the 7th argument,ie, the number of vertices. The error is :</p>\n<p>Segmentation fault (core dumped)</p>",
+        "id": 229176117,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1615112617
+    },
+    {
+        "content": "<p>That means you have a mistake somewhere in there... you can try debugging it with print statements or (better) use a debugger like gdb or lldb (if you're on linux/mac) or you can debug using Visual Studio if you're on Windows.</p>",
+        "id": 229319887,
+        "sender_full_name": "Sean",
+        "timestamp": 1615218448
+    },
+    {
+        "content": "<p>ok</p>",
+        "id": 229422563,
+        "sender_full_name": "Debkamal Mullick",
+        "timestamp": 1615266100
+    }
+]

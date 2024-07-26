@@ -1,0 +1,45 @@
+<html>
+<head><meta charset="utf-8"><title>conversion · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/conversion.html">conversion</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="451646570"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/conversion/near/451646570" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/conversion.html#451646570">(Jul 15 2024 at 23:06)</a>:</h4>
+<p>Interesting, some preliminary results coming in from testing main vs 7.36.0 on Mac.</p>
+<p>Overall, main is definitely succeeding more.  There are some that timeout after 5min and some that throw mtx errors and "SHOULD NOT HAPPEN" errors for both old and new at a seemingly similar rate.</p>
+<p>Looks like conversion/facetize is also taking about 2x longer with the new approach.  Most simple objects that succeed seem to do so in about 3s whereas they're 1.5s on average in 7.36.0.  Running the conversion across lots of files, that of course adds up but then is partially offset by slightly more old that hit the 5min timeout limit (I think, still have to verity).</p>
+
+
+
+<a name="451734349"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/conversion/near/451734349" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/conversion.html#451734349">(Jul 16 2024 at 11:01)</a>:</h4>
+<p>For the fully successful run, I had <code>MAXTIME=5000</code> as my upper limit - 300s was definitely much too short, so the timeouts are no surprise.</p>
+
+
+
+<a name="451734662"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/conversion/near/451734662" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/conversion.html#451734662">(Jul 16 2024 at 11:02)</a>:</h4>
+<p>I noticed the simple cases being slower - I think, at least in my case, what appeared to be happening was the overhead of starting up the subprocess to process a single primitive was adding the extra time (which would explain the 1.5s vs 3s difference - two process startup/teardowns vs 1  for 7.36.0 - the actual primitive facetize in such cases should be virtually instantaneous.)</p>
+
+
+
+<a name="451734978"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/conversion/near/451734978" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/conversion.html#451734978">(Jul 16 2024 at 11:04)</a>:</h4>
+<p>For the SHOULD NOT HAPPEN errors, one possible approach would be to get the newer mmesh version of that logic working:  <a href="https://github.com/BRL-CAD/mmesh">https://github.com/BRL-CAD/mmesh</a></p>
+
+
+
+<a name="451735092"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/conversion/near/451735092" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/conversion.html#451735092">(Jul 16 2024 at 11:05)</a>:</h4>
+<p>When I took a quick look it's not quite a 1-1 drop in replacement for the gct calls, so I could use a little help getting it figured out and set up.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>

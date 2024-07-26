@@ -1,0 +1,1004 @@
+[
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> did you happen to test  77843+ to make see if our step converter still works on some real world (non-nist) step files?  I seem to remember there being some issue the last time we tried to merge upstream.</p>",
+        "id": 219181519,
+        "sender_full_name": "Sean",
+        "timestamp": 1607415839
+    },
+    {
+        "content": "<p>probably shouldn't be on that branch since it's a significant and unrelated change.  that's probably an update that could be made on trunk but it'll need it's own testing regardless.</p>",
+        "id": 219181661,
+        "sender_full_name": "Sean",
+        "timestamp": 1607415959
+    },
+    {
+        "content": "<p>and upon further inspection, I see it's not only a major update of the dependency, but you also made edits to the dep that cascaded edits to our converter code... please -- you know  that <em>really</em> makes it terribly hard to review and even harder to test with any sort of isolation or assurance.  I get how one change led to another.</p>\n<p>Example critique unrelated to extbuild but complicating the review, you added a Raw() accessor to stepcode.. why?  the union 'ptr' field looks like it is/was already public, Raw() is public.  If I were reviewing that commit by itself, I'd reject it as unnecessary/unfounded complexity.</p>",
+        "id": 219184782,
+        "sender_full_name": "Sean",
+        "timestamp": 1607418425
+    },
+    {
+        "content": "<p>So here was the thinking, fwiw:  the extbuild stepcode controlling logic and stepcode build logic were causing problems in testing - faced with needing to change them, it made more sense (to me) to see if I could invest the time in getting the upstream stepcode to behave as we needed rather than (further) changing our own copy.</p>\n<p>In the course of testing with the upstream stepcode, I identified a few cases (like the Raw case) where upstream had made previously public class members protected.  Most of the upstream stepcode compatibility changes to the converter code could easily be added back into trunk and help keep the extbuild branch closer to trunk, if we just made the minor adjustments to our bundled stepcode to supply the accessor methods the upstream code has migrated to.  I didn't make ptr protected in our bundled stepcode, because that might have had other implications for changing things in stepcode itself.  Since the point is to get off of our fork eventually, I only wanted to make the minimal changes necessary for the purpose.</p>",
+        "id": 219210756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607436855
+    },
+    {
+        "content": "<p>Having identified the necessary changes for the upstream stepcode, I can probably make similar changes to our bundled stepcode and avoid upgrading the stepcode dependency in the extbuild branch.</p>",
+        "id": 219210913,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607436956
+    },
+    {
+        "content": "<p>That raises a question, as to whether stepcode should be synced with upstream first or the build system rework should go in before doing so.  If the former I'd need to do the update to src/other/stepcode in trunk and test the converter, if the latter I can try to put the non-upstream back in extbuild and make the changes needed to support the extbuild style of building.</p>",
+        "id": 219211317,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607437170
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Just for future reference, how should I have made 77837's commit message clearer?   (That's the one that added the Raw() accessor to trunk's stepcode)</p>",
+        "id": 219215197,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607439149
+    },
+    {
+        "content": "<p>I think merging with upstream is great, and totally worthwhile.  The example was just that -- an example.  It's discussion-provoking all on it's own with rippling changes, potential issues and considerations... that don't really belong on that branch.</p>",
+        "id": 219218581,
+        "sender_full_name": "Sean",
+        "timestamp": 1607440697
+    },
+    {
+        "content": "<p>maybe it would be better to undo the move of ptr from private to protected -- begs the question what that motivation was, or what alternative was being provided</p>",
+        "id": 219218712,
+        "sender_full_name": "Sean",
+        "timestamp": 1607440770
+    },
+    {
+        "content": "<p>adding an accessor violates the scope encapsulation of making something protected, so even on the upstream, I can't imagine that being a solution more desirable than just move the ptr back to public.</p>",
+        "id": 219218883,
+        "sender_full_name": "Sean",
+        "timestamp": 1607440852
+    },
+    {
+        "content": "<p>it's not about having a clear commit message -- it's that it's updating a dep <em>and</em> changing a dep, which doesn't really have anything to do with the \"extbuild\" restructuring</p>",
+        "id": 219219000,
+        "sender_full_name": "Sean",
+        "timestamp": 1607440919
+    },
+    {
+        "content": "<p>/me winces.  Alright, I'll revert and try to do the minimal mods to src/other/stepcode to make extbuild work - just so it's understood  that that moves our stepcode further from upstream.</p>",
+        "id": 219219137,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607440973
+    },
+    {
+        "content": "<p>NOOoooo...</p>",
+        "id": 219219209,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441014
+    },
+    {
+        "content": "<p>it's mixing the two that's the problem -- can just make the step code changes on trunk and then merge that to extbuild</p>",
+        "id": 219219323,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441059
+    },
+    {
+        "content": "<p>That's what I ment</p>",
+        "id": 219219340,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441069
+    },
+    {
+        "content": "<p>(sorry, wasn't clear)</p>",
+        "id": 219219351,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441077
+    },
+    {
+        "content": "<p>i'm not talking about minimal mods, i'm saying you could do the upstream merge on trunk or on a branch</p>",
+        "id": 219219400,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441103
+    },
+    {
+        "content": "<p>something that can be tested in isolation from the branch work</p>",
+        "id": 219219425,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441120
+    },
+    {
+        "content": "<p>then that could be merged to the extbuild branch</p>",
+        "id": 219219448,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441130
+    },
+    {
+        "content": "<p>Oh.  I know it probably doesn't seem like it, but I've been trying not to disturb trunk too much  lately...</p>",
+        "id": 219219540,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441163
+    },
+    {
+        "content": "<p>I noticed and have appreciated that :)</p>",
+        "id": 219219571,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441188
+    },
+    {
+        "content": "<p>I think we should release ...</p>",
+        "id": 219219590,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441196
+    },
+    {
+        "content": "<p>A stepcode upstream merge will be disruptive, most likely - I can probably revert the wrappers in upstream, although I don't yet know how much work it will be and that may dislocate whoever added them in the first place...</p>",
+        "id": 219219699,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441257
+    },
+    {
+        "content": "<p>so maybe on a branch, and then merge that to extbuild<br>\nthat'll still make it hard to test the extbuild branch if anything is wrong, but it will make the stepcode update separate and easier to test at least</p>",
+        "id": 219219710,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441263
+    },
+    {
+        "content": "<p>Do we have enough changes for a release?</p>",
+        "id": 219219839,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441312
+    },
+    {
+        "content": "<p>can ask or check the history, but I doubt it's a big deal if we need to make ptr public again.  I'd be more concerned that there's some other intended access method.</p>",
+        "id": 219219850,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441318
+    },
+    {
+        "content": "<p>/me looks...</p>",
+        "id": 219219860,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441322
+    },
+    {
+        "content": "<p>sure, there's like 30 items there</p>",
+        "id": 219219883,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441332
+    },
+    {
+        "content": "<p>There's at least one showstopper MGED bug not run to ground I'll have to prioritize if we do that, IIRC</p>",
+        "id": 219219961,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441373
+    },
+    {
+        "content": "<p>the subprocess bug?</p>",
+        "id": 219219990,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441391
+    },
+    {
+        "content": "<p>I was thinking of the dm window not closing properly</p>",
+        "id": 219220059,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441411
+    },
+    {
+        "content": "<p>What's subprocess up to?  I addressed the Windows issue, IIRC...</p>",
+        "id": 219220110,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441439
+    },
+    {
+        "content": "<p>I haven't retested it lately but it's in the todo -- locking up mged after running an rt until you close the framebuffer window</p>",
+        "id": 219220214,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441491
+    },
+    {
+        "content": "<p>Ah, right - that one was platform specific, IIRC.  I don't know if I can reproduce it...</p>",
+        "id": 219220265,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441517
+    },
+    {
+        "content": "<p>OK, so two showstoppers</p>",
+        "id": 219220351,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441547
+    },
+    {
+        "content": "<p>as for stepcode, I'm 75% sure making ptr protected was just part of general cleanup.  if there's no indication in the log that was done for any reason other than good modularity and code updating, I don't think it's an issue to re-expose it.  I can ask on the stepcode list tomorrow, or you can, but I'd definitely do that before injecting a workaround accessor (getters/setters are often frowned upon these days, especially if the alternative is a straight pass-through that has no type encapsulation benefit).</p>",
+        "id": 219220668,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441684
+    },
+    {
+        "content": "<p>would be curious to see if exppp accesses that field, if/how it was changed</p>",
+        "id": 219220762,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441725
+    },
+    {
+        "content": "<p>OK, so gameplan:</p>\n<ol>\n<li>revert the trunk step changes</li>\n<li>make a branch for the step upgrade</li>\n<li>do the upstream sync in the branch</li>\n<li>adjust extbuild's version to match whatever the step upgrade branch has</li>\n<li>fix key bugs for release</li>\n<li>do release</li>\n<li>wait for window when trunk can be unstable/dislocated</li>\n<li>merge stepcode, then extbuild to trunk.</li>\n</ol>",
+        "id": 219220924,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607441786
+    },
+    {
+        "content": "<p>that sounds like a solid to me!</p>",
+        "id": 219221064,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441868
+    },
+    {
+        "content": "<p>damn, that's clarity there</p>",
+        "id": 219221078,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441875
+    },
+    {
+        "content": "<p>could even do a 3.5 merge step upgrade to extbuild so 4 is minimal/nothing</p>",
+        "id": 219221169,
+        "sender_full_name": "Sean",
+        "timestamp": 1607441904
+    },
+    {
+        "content": "<p>I know it's probably not practical, but in principle I'd like to try and establish some time limit/cutoff where the \"OK to merge\" window is declared - these large branches are very difficult to keep current for long timeframes - lots of conflicting merges - and I'd like to put an upper limit on how long that will be necessary.</p>",
+        "id": 219221639,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607442147
+    },
+    {
+        "content": "<p>that's sounds reasonable.</p>",
+        "id": 219222382,
+        "sender_full_name": "Sean",
+        "timestamp": 1607442499
+    },
+    {
+        "content": "<p>what'd you have in mind?</p>",
+        "id": 219222392,
+        "sender_full_name": "Sean",
+        "timestamp": 1607442503
+    },
+    {
+        "content": "<p>I wanted to ask you how things stood with the work that's motivating a stable trunk.</p>",
+        "id": 219222437,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607442530
+    },
+    {
+        "content": "<p>I think the time-table is centered around releasability and testability.  so I'd think the natural way to force closure of a time window is to release, then make a destabilizing merge, then test+dev+fix and then release again, then another destabilizing change, then test+dev+fix etc.  like ships going through the panama canal, the big ships line up one at a time to go through.  trunk's just already had a big change that's not yet stable.</p>",
+        "id": 219222470,
+        "sender_full_name": "Sean",
+        "timestamp": 1607442553
+    },
+    {
+        "content": "<p>Um.  I've had the impression you were doing some significant work on the threading subsystem and needed stability for that?</p>",
+        "id": 219222677,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607442639
+    },
+    {
+        "content": "<p>Personally I'd like an upper limit on the order of 3 months or so for the stepcode and extbuild branches, starting from when I get them both working cleanly (distcheck pass).</p>",
+        "id": 219223269,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607442897
+    },
+    {
+        "content": "<p>yes, I was/am but it's going slow due to a certain project taking / stealing priority.  every time trunk had some big destabilize, I'd have to start over.  it was happening so frequently that I literally have/had 4 debugging sessions on pause at one point and even lost a couple sessions.  that's not on you, that's on me for not figuring out the bugs fast enough.  but then there'd be another change, and I'd have to start over (again) on the big one.</p>",
+        "id": 219223365,
+        "sender_full_name": "Sean",
+        "timestamp": 1607442937
+    },
+    {
+        "content": "<p>nobody can guarantee how fast bugs are found - if it were deterministic we could just replace ourselves with shell scripts ;-)  That's why I wanted to ask you though, since the cost/benefit tradeoff is branch maintenance costs vs debugging dislocation costs.</p>",
+        "id": 219223569,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443019
+    },
+    {
+        "content": "<p>might make sense to move the debugging to a branch at this point, but it's still an issue of having an instability change on trunk followed by more changes that destabilize.  I'm not sure what can be done about that better honestly as you're obviously unable to reproduce or even see some of these issues.</p>",
+        "id": 219223599,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443036
+    },
+    {
+        "content": "<p>and branch is really only an option for the threading bug.  the 3 other debugging sessions I had were investigating trunk instability, disrupted by other trunk instability after you'd move on</p>",
+        "id": 219223803,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443099
+    },
+    {
+        "content": "<p>That's part of why the extbuild work has gone on so long, to be honest - I've been trying really hard to hammer it on as many platforms as I can reach.  There always seems to be one more thing though, however hard I try...</p>",
+        "id": 219223845,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443117
+    },
+    {
+        "content": "<p>Once we've migrated to github, might it make more sense to switch to a more branch+merge request style workflow?</p>",
+        "id": 219223968,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443161
+    },
+    {
+        "content": "<p>Arguably much of the work I've been doing in extbuild and its predecessor would have been better done in my own local branches until ready, but SVN really doesn't work well for that...</p>",
+        "id": 219224119,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443209
+    },
+    {
+        "content": "<p>nah, I don't think that would have been better.  that's exactly the thing I hate about git ... it results in larger branch changes that become even harder to review, so changes either slip in that shouldn't happen or they don't even get seen/reviewed/tested or the patch sits for a long time because it's really hard to give it due diligence.</p>",
+        "id": 219224457,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443327
+    },
+    {
+        "content": "<p>this is a perfect example -- you'd have gone down the stepcode rabbit hole on extbuild and faced with the extbuild merge it'd basically be a huge wad of take-it-or-leave it, which is a really sucky situation to get into for the code's health</p>",
+        "id": 219224614,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443407
+    },
+    {
+        "content": "<p>I can't deny though that trying to review all of the changes in thirdparty_rework and extbuild would be a waste, since at least half of it is me following blind alleys until I find out why something won't work.  That's just useless noise for anyone else...</p>",
+        "id": 219224625,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443415
+    },
+    {
+        "content": "<p>There is an option though in the extbuild situation - in a sense, it's exactly the one we will pursue.  The change is too big, so break it up into smaller pieces and feed them in one at a time.</p>",
+        "id": 219224895,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443510
+    },
+    {
+        "content": "<p>I don't know if you get the S2 commits, but they do this on the regular and it's why they don't have pleasant interactions and why there will be a dozen unrelated thing with each scr merge.  I really don't want us to get into that situation if we can avoid it.</p>",
+        "id": 219224900,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443512
+    },
+    {
+        "content": "<p>my bigger concern right now is this feels like a fire sale...</p>",
+        "id": 219225086,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443590
+    },
+    {
+        "content": "<p>The risk is that whoever made the change won't be willing to do the work to break it up - in my case we know darn well I'm too stubborn to give up, so it's fairly safe</p>",
+        "id": 219225092,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443593
+    },
+    {
+        "content": "<p>?</p>",
+        "id": 219225117,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443605
+    },
+    {
+        "content": "<p>I'd rather have the conversation while we're doing the work instead of weeks/months later when it becomes harder and more time consuming to change</p>",
+        "id": 219225221,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443656
+    },
+    {
+        "content": "<p>something gets intertwined inevitably</p>",
+        "id": 219225249,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443670
+    },
+    {
+        "content": "<p>Fair enough, but the countervailing consideration is getting overwhelmed.  The last couple review processes have been painful for you, and it would be nice to find an approach that's not quite so rough...</p>",
+        "id": 219225556,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443800
+    },
+    {
+        "content": "<p>I've been doing better to keep up since the last release.</p>",
+        "id": 219225715,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443866
+    },
+    {
+        "content": "<p>(Still not following the \"fire sale\"...)</p>",
+        "id": 219225736,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607443877
+    },
+    {
+        "content": "<p>aside from the debugging session issues, 2 of which are nominally on me</p>",
+        "id": 219225752,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443887
+    },
+    {
+        "content": "<p>oh the fire sale aspect is this surge of relatively major changes that feel like they have to all happen at once right now with some urgency because we're under an unusual situation with fewer eyes on us and other distracting demands on our time.</p>",
+        "id": 219226024,
+        "sender_full_name": "Sean",
+        "timestamp": 1607443968
+    },
+    {
+        "content": "<p>Ah.  I suppose that's part of it, but (for me personally) I guess it's also an attempt to create the project I want to be working on/in...</p>",
+        "id": 219226432,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607444090
+    },
+    {
+        "content": "<p>complete restructuring of libged, major rewiring of tcl/tk, fundamental rewiring of command invocations, major build system rewrite,  display management rewrite/merging, hard dependency decoupling (libpng, libz, libregex), repo migration, ... did I forget any? :)</p>",
+        "id": 219226470,
+        "sender_full_name": "Sean",
+        "timestamp": 1607444106
+    },
+    {
+        "content": "<p>I think those are all the ones you've seen :-P</p>",
+        "id": 219226628,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607444170
+    },
+    {
+        "content": "<p>I can probably point at unresolved issues with each of those, when in any other context we probably wouldn't have moved on to more than one or two simultaneously without investigating and doing something to get closures</p>",
+        "id": 219226649,
+        "sender_full_name": "Sean",
+        "timestamp": 1607444186
+    },
+    {
+        "content": "<p>honestly, what have I missed? haha</p>",
+        "id": 219226900,
+        "sender_full_name": "Sean",
+        "timestamp": 1607444290
+    },
+    {
+        "content": "<p>Some out-of-repo work on software rasterization to try and create a platform-agnostic software fallback for 3D rendering</p>",
+        "id": 219226993,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607444332
+    },
+    {
+        "content": "<p>ah, I knew about that one but yeah you're right, out of sight out of mind</p>",
+        "id": 219227073,
+        "sender_full_name": "Sean",
+        "timestamp": 1607444378
+    },
+    {
+        "content": "<p>That one doesn't matter unless/until it becomes viable anyway</p>",
+        "id": 219227278,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607444483
+    },
+    {
+        "content": "<p>to me that one is up there with my incomplete but significant progress side projects (openvdb, ospray, appleseed, libcsg, benchmark, ...).  the instability affects nobody else yet. :)</p>",
+        "id": 219227284,
+        "sender_full_name": "Sean",
+        "timestamp": 1607444484
+    },
+    {
+        "content": "<p>okay, gotta run.. I have a couple dozen renders to kick off here asap... to be continued</p>",
+        "id": 219227427,
+        "sender_full_name": "Sean",
+        "timestamp": 1607444533
+    },
+    {
+        "content": "<p>Roger.  over and out.</p>",
+        "id": 219227451,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607444551
+    },
+    {
+        "content": "<p>@Sean - any suggestions for a known working step file to try with the new stepcode?</p>",
+        "id": 219405675,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607551508
+    },
+    {
+        "content": "<p>I'd have to go back to a prior release to confirm, but I just downloaded random stuff from grabcad and typically had good success (9/10 would succeed if it was a 203).  I'm may have a few tucked away that I saved, I'll check.</p>",
+        "id": 219405954,
+        "sender_full_name": "Sean",
+        "timestamp": 1607551634
+    },
+    {
+        "content": "<p>wonder how hard it would be to add the 214 entities.  the current parsing seems to almost work even with the wrong schema.  ran into this problem just a month ago with a model tim needed.  he had vrml1 (we only do vrml2 and x3d), got step but then it was 214.  had to pull it into commercial to work with it. #fail</p>",
+        "id": 219406237,
+        "sender_full_name": "Sean",
+        "timestamp": 1607551775
+    },
+    {
+        "content": "<p>Looks like <a href=\"https://grabcad.com/library/planetary-gearbox\">https://grabcad.com/library/planetary-gearbox</a> works as well with stepsync as it does with trunk.</p>",
+        "id": 219507362,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607622000
+    },
+    {
+        "content": "<p>The brep generator isn't up to handling all the pieces, but the stepcode portion of the parsing for this file went fine in both trunk and stepsync:  <a href=\"https://grabcad.com/library/xs-650-flat-track-1\">https://grabcad.com/library/xs-650-flat-track-1</a></p>",
+        "id": 219508440,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607622513
+    },
+    {
+        "content": "<p>Woo hoo!  The stepcode upgrade fixed the ninja build on github (old step-g wouldn't run on the Windows runner, but the stepsync test just passed on all three platforms.)</p>",
+        "id": 219508758,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607622664
+    },
+    {
+        "content": "<p>Finally, progress... that github windows runner has been driving me nuts for weeks.</p>",
+        "id": 219510500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607623388
+    },
+    {
+        "content": "<p>cool, any idea what fixed it?</p>",
+        "id": 219528269,
+        "sender_full_name": "Sean",
+        "timestamp": 1607631525
+    },
+    {
+        "content": "<p>rather different cmake logic in stepcode upstream, right?</p>",
+        "id": 219528298,
+        "sender_full_name": "Sean",
+        "timestamp": 1607631541
+    },
+    {
+        "content": "<p>A bit, not enormously - I actually spoke too soon.  stepsync branch works across the board, but extbuild doesn't - I'm guessing it's probably the std::string exposure and stepcode getting built slightly differently in extbuild.  I'll have a look and see if I can get std::string out of the public facing APIs - we're probably not the only codebase that'll have issues with that at some point.</p>",
+        "id": 219562472,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607657656
+    },
+    {
+        "content": "<p>Been getting away with it by building stepcode as part of the primary build all along, but if we're going to treat stepcode as a properly independent 3rd party code the time has probably come to bite the bullet and deal with it.</p>",
+        "id": 219562576,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607657808
+    },
+    {
+        "content": "<p>Yep, applying WinDBG to the ninja build zeros in on std::string, on a part of stepcode where #pragma warning( disable: 4251 ) is applied... which looks like exactly what I'm seeing:  <a href=\"https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4251?view=msvc-160\">https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4251?view=msvc-160</a></p>\n<p>Looks like ignoring that warning is no longer an option...  doing a quick count of those pragmas... 24 of them in stepcode headers.</p>\n<p>/me rolls up sleeves...</p>",
+        "id": 219643470,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607711523
+    },
+    {
+        "content": "<p>That's stuff really hard to get right, either using std or plain c-strings.  It's very difficult memory management for something recursive like step.</p>",
+        "id": 219643645,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711630
+    },
+    {
+        "content": "<p>even your c-string changes may not hold up...</p>",
+        "id": 219643720,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711649
+    },
+    {
+        "content": "<p>OK... so what's the recommended path forward?</p>",
+        "id": 219643798,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607711694
+    },
+    {
+        "content": "<p>I'm not saying it's wrong,... don't get me wrong!  I'm saying it's super hard to get right...</p>",
+        "id": 219643845,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711714
+    },
+    {
+        "content": "<p>it's a huge \"it depends\"</p>",
+        "id": 219643856,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711720
+    },
+    {
+        "content": "<p>like is char *str = std::string(\"foo\") ... when is that char * that was likely dynamically allocated invalid?</p>",
+        "id": 219643911,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711745
+    },
+    {
+        "content": "<p>it's clearly valid for a scope</p>",
+        "id": 219643978,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711764
+    },
+    {
+        "content": "<p>once it goes out of scope, it depends</p>",
+        "id": 219644001,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711776
+    },
+    {
+        "content": "<p>I think what likely is wrong in the current code is that it's passing a reference around everywhere</p>",
+        "id": 219644041,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711793
+    },
+    {
+        "content": "<p>that's done for performance, avoids a copy constructor</p>",
+        "id": 219644051,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711800
+    },
+    {
+        "content": "<p>but it also means it's subject to the original allocation scope</p>",
+        "id": 219644069,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711810
+    },
+    {
+        "content": "<p>and will be invalid if/when it leaves that scope</p>",
+        "id": 219644083,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711821
+    },
+    {
+        "content": "<p>I'm open to suggestions on how to proceed - got to do <em>something</em> unless we want to just keep building stepcode as part of our own build.  (Which is the easy punt, but ignores the issue...)</p>",
+        "id": 219644096,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607711825
+    },
+    {
+        "content": "<p>No no, you're good, this is just food for thought -- things to keep an eye on as you go.  Because this is subtle corruption territory.</p>",
+        "id": 219644185,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711881
+    },
+    {
+        "content": "<p>(As an aside, WinDBG is very handy working with a Ninja Windows build - don't need all of Visual Studio up, but let me backtrace to the issue quickly.)</p>",
+        "id": 219644290,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607711924
+    },
+    {
+        "content": "<p>one easy change that \"should\" be safe but will be wasteful is to convert those references to non-references, which will cause the strings to get copied</p>",
+        "id": 219644340,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711956
+    },
+    {
+        "content": "<p>I wouldn't convert them all, but if you see a problem/corruption, that's a possible solution in isolation</p>",
+        "id": 219644373,
+        "sender_full_name": "Sean",
+        "timestamp": 1607711978
+    },
+    {
+        "content": "<p>Hmm.  Worth a try...</p>",
+        "id": 219644413,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607711999
+    },
+    {
+        "content": "<p>my c++ is actually getting rusty on the basics.  I'd need to write a snippet to see if char *foo = std::string(\"foo\"); is same as std::string s(\"foo\"); char <em>foop = s.c_str(); return foop; /</em>bad */</p>",
+        "id": 219644555,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712061
+    },
+    {
+        "content": "<p>the latter is definitely bad juju because s is on the stack and only lives in that scope, so they c_str() we're returning is invalidated once the scope is left.</p>",
+        "id": 219644626,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712102
+    },
+    {
+        "content": "<p>I don't know the prior for sure, I should</p>",
+        "id": 219644644,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712114
+    },
+    {
+        "content": "<p>it's this issue: <a href=\"https://stackoverflow.com/questions/6456359/what-is-stdstringc-str-lifetime\">https://stackoverflow.com/questions/6456359/what-is-stdstringc-str-lifetime</a></p>",
+        "id": 219644823,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712182
+    },
+    {
+        "content": "<p>Would the former even work at all?  Assigning a std::string constructor to a C string pointer?</p>",
+        "id": 219644869,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607712201
+    },
+    {
+        "content": "<p>eh, that was a slight typo</p>",
+        "id": 219644907,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712213
+    },
+    {
+        "content": "<p>it's the general case of the scope on a std::string str();</p>",
+        "id": 219645153,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712302
+    },
+    {
+        "content": "<p>like your first change, Schema::AddFunction() -- you create a locally scoped std::string fstr(f);<br>\nthen push that back.  What's getting pushed?  If it's a copy, then it's all good.  If it's a reference or pointer to fstr, then I think it'll be invalidated when the scope is gone.   It'll happen to work until some other allocation stomps on fstr's memory and something tries to read the _function_list</p>",
+        "id": 219645386,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712438
+    },
+    {
+        "content": "<p>I thought a push back made a copy, but I guess it depends on the vector/list/map type?</p>",
+        "id": 219645498,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607712483
+    },
+    {
+        "content": "<p>yes</p>",
+        "id": 219645534,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712491
+    },
+    {
+        "content": "<p>I think you could also wrap it in autoptr to avoid having the destructor called until there's no more references to the data.</p>",
+        "id": 219645696,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712574
+    },
+    {
+        "content": "<p>this is one of the messier areas of c++ that become obvious after weeks of having one's nose in a debugger.  which I haven't lately, so I'm amazed how much of this I've forgotten... besides  the gist that it's complicated :)</p>",
+        "id": 219645841,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712637
+    },
+    {
+        "content": "<p>Didn't meant to interrupt, carry on -- just might want to try enabling a memory guard library to catch corruption the second it happens in your testing.  Because having a pointer to destructed data is going to work .. at first.  It'll just present as random corruption later if it's wrong.</p>",
+        "id": 219646050,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712725
+    },
+    {
+        "content": "<p>/me nods - good advise.  Since I know roughly where I have to go now I'll probably start on Linux - any recommended guard techniques these days?</p>",
+        "id": 219646171,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607712778
+    },
+    {
+        "content": "<p>valgrind memcheck is a classic, no?</p>",
+        "id": 219646358,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712861
+    },
+    {
+        "content": "<p>I believe llvm has something good too.</p>",
+        "id": 219646453,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712916
+    },
+    {
+        "content": "<p>right -fsanitize=memory compilation option.  slows everything down, but really helps isolate memory issues.</p>",
+        "id": 219646494,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712939
+    },
+    {
+        "content": "<p>It is, although it doesn't see any of our current problems as far as I can tell - the list elements test reports clean</p>",
+        "id": 219646495,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607712940
+    },
+    {
+        "content": "<p>it could be all good, I'd have to dig deeper on that container</p>",
+        "id": 219646590,
+        "sender_full_name": "Sean",
+        "timestamp": 1607712969
+    },
+    {
+        "content": "<p>AddSupertype_Stmt() looks good for example -- you pass in the char, then allocate a std:;string off it that is stashed in the class (so it stays in scope).</p>",
+        "id": 219646660,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713005
+    },
+    {
+        "content": "<p>Except that didn't fix anything - Windows still had a problem in the same place :-/</p>",
+        "id": 219646781,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713067
+    },
+    {
+        "content": "<p>that's the sort of random corruption I would expect if this is wrong anywhere in the code.  you'll hit a problem when something else happens to allocate over a thing that was released.</p>",
+        "id": 219646927,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713122
+    },
+    {
+        "content": "<p>The target std::string looked odd in the debugger, but I'm not sure why...</p>",
+        "id": 219646947,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713129
+    },
+    {
+        "content": "<p>so that could just happen to be where the corruption becomes visible, not necessarily the cause point</p>",
+        "id": 219646971,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713144
+    },
+    {
+        "content": "<p>That would explain the quirky failure patterns I was seeing earlier.</p>",
+        "id": 219647015,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713163
+    },
+    {
+        "content": "<p>Or lack of patterns, rather.</p>",
+        "id": 219647038,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713172
+    },
+    {
+        "content": "<p>OK, that points to a general cleanup of all the 4251 code as an initial step.</p>",
+        "id": 219647137,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713210
+    },
+    {
+        "content": "<p>always a good thing</p>",
+        "id": 219647194,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713240
+    },
+    {
+        "content": "<p>Almost wish I could deliberately induce the Windows 4251 behavior in the Linux C++ libs</p>",
+        "id": 219647249,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713265
+    },
+    {
+        "content": "<p>if you still see badness, I'd suggest slowly start passing/storing copies</p>",
+        "id": 219647256,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713271
+    },
+    {
+        "content": "<p>if you're in the debugger and have a reproducible case, you may be able to set a watch point on specific memory as it's allocated, and watch where it goes, what happens when it's pushed into a container, read from it, etc</p>",
+        "id": 219647443,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713345
+    },
+    {
+        "content": "<p>advanced debugging, but should be able to tell if / when the destructor is called</p>",
+        "id": 219647511,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713375
+    },
+    {
+        "content": "<p>but will require looking at the context of the current code to determine whether a copy makes sense or if that will screw up the entity management</p>",
+        "id": 219647603,
+        "sender_full_name": "Sean",
+        "timestamp": 1607713428
+    },
+    {
+        "content": "<p>/me nods.  The hard part is going to be the generated code - that'll be a nightmare to follow around, if it comes to that</p>",
+        "id": 219647749,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713490
+    },
+    {
+        "content": "<p>Yeah, copy didn't fix it either.  OK, stay tuned - 4251 week coming up.</p>",
+        "id": 219648176,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607713745
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> I'd like to simplify the stepcode sources a bit and reorganize - consolidate exppp and base into express, for example.  In a  quick look at the C++ step iso pdf the only thing that jumped out at me with regards to library or file specifics was the \"sdai.h\" header - am I missing something that dictates the current structure specifically?</p>",
+        "id": 219719413,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607795881
+    },
+    {
+        "content": "<p>I know function names, etc. are generated according to patterns - I'm thinking more about the stepcode libs and headers themselves rather than what they generate.</p>",
+        "id": 219719486,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607795948
+    },
+    {
+        "content": "<p>what do you mean by consolidate?  exppp is a pretty-printing tool.  I know nothing about base.</p>",
+        "id": 219721701,
+        "sender_full_name": "Sean",
+        "timestamp": 1607798962
+    },
+    {
+        "content": "<p>from what I remember, it's the headers and API that I recall being specified in conformance APs -- i.e., what's must be in the API and how you call into it (e.g., header include names).  probably a good litmus is whether you have to change application logic (esp. our step-g code) or are the changes all internal.</p>",
+        "id": 219721852,
+        "sender_full_name": "Sean",
+        "timestamp": 1607799129
+    },
+    {
+        "content": "<p>exppp isn't part of anything, it a pretty-printer iirc.  It's just a simple example how to call into libexpress.  exppp's code doesn't belong in libexpress any more than a given proc-db tool belongs in libwdb, for example.  but where the example lives doesn't matter much so long as it's an identifiable example and not lost alongside other code.</p>",
+        "id": 219722044,
+        "sender_full_name": "Sean",
+        "timestamp": 1607799431
+    },
+    {
+        "content": "<p>looked at base, it looks like it's pretty irrelevant bu-style code that could get absorbed/disappear</p>",
+        "id": 219722371,
+        "sender_full_name": "Sean",
+        "timestamp": 1607799904
+    },
+    {
+        "content": "<p>looks like sc_getopt() is used by the fedex-linking binaries express</p>",
+        "id": 219722471,
+        "sender_full_name": "Sean",
+        "timestamp": 1607800073
+    },
+    {
+        "content": "<p>looks like lots use sc_memmgr(), so libexpress works there too</p>",
+        "id": 219722528,
+        "sender_full_name": "Sean",
+        "timestamp": 1607800120
+    },
+    {
+        "content": "<p>exp2cxx is the only place that uses sc_trace_printf, so it could move into the exp2cxx processor</p>",
+        "id": 219722546,
+        "sender_full_name": "Sean",
+        "timestamp": 1607800181
+    },
+    {
+        "content": "<p>sc_benchmark.h appears to be used in cllazyfile test and a p21read test</p>",
+        "id": 219722599,
+        "sender_full_name": "Sean",
+        "timestamp": 1607800226
+    },
+    {
+        "content": "<p>Sorry, meant libexppp not the exppp executable itself.</p>",
+        "id": 219737111,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607821510
+    },
+    {
+        "content": "<p>Does anything else link it?  I don't think that code belongs in libexpress.  It's not really express API, it's just some arbitrary function separation someone came up with for exppp.  Maybe separated for unit testing or something.  You could eliminate libexpp and just make it part of exppp's sources if nothing else calls into it.</p>",
+        "id": 219737226,
+        "sender_full_name": "Sean",
+        "timestamp": 1607821692
+    },
+    {
+        "content": "<p>exp2cxx links it</p>",
+        "id": 219737240,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607821736
+    },
+    {
+        "content": "<p>/me figured pretty printing express schemas was a reasonable fit for libexpress... you disagree?</p>",
+        "id": 219737266,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607821791
+    },
+    {
+        "content": "<p>/me checks to see if exp2cxx is actually using libexppp...</p>",
+        "id": 219737387,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607821975
+    },
+    {
+        "content": "<p>yep, get undefined references in exp2cxx without it</p>",
+        "id": 219737449,
+        "sender_full_name": "starseeker",
+        "timestamp": 1607822072
+    },
+    {
+        "content": "<p>I can see how you'd see it like that, but I think the original author(s) was/were on point keeping them separate from a design perspective.</p>\n<p>Pretty printing is a decorative / stylistic presentation property.  It's model vs view in MVC.  It's css vs html in web.   They certainly can be combined, but it's rarely an improvement (design-wise) unless text presentation is intrinsically required due to the API (which it's not for EXPRESS).</p>\n<p>In this instance, it'd add some 50 symbols to a library that already has 400+.   Combining them becomes a (relatively minor) detriment for both users and non-users of either lib.   Having around 50 highly interrelated symbols in a library is actually rather nice.  Our libs aren't exemplary in that regard.</p>\n<p>That all said, it's also not a big enough detriment to draw a strong opinion from me.  Demodularization is an antipractice in general, but if I were to inspect the libexpp symbols in more depth, I'd likely find some that belong in express and others that don't.</p>",
+        "id": 219749035,
+        "sender_full_name": "Sean",
+        "timestamp": 1607844384
+    },
+    {
+        "content": "<p>There we go - finally.  Success on all three platforms.</p>",
+        "id": 220061606,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608076962
+    },
+    {
+        "content": "<p>/me braces himself and fires up the BSD vms...</p>",
+        "id": 220061651,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608077001
+    },
+    {
+        "content": "<p>Woo-hoo!  extbuild distcheck full passing on GhostBSD and Ubuntu, plus a clean github CI run on all three platforms.</p>",
+        "id": 220129026,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608132290
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>1. CHECK revert the trunk step changes\n2. CHECK make a branch for the step upgrade\n3. CHECK do the upstream sync in the branch\n4. CHECK adjust extbuild&#39;s version to match whatever the step upgrade branch has\n5.  fix key bugs for release\n6.  do release\n7.  wait for window when trunk can be unstable/dislocated\n8. merge stepcode, then extbuild to trunk.\n</code></pre></div>\n<p>OK, on to release bugs.  Time to sample the joys of the MGED dm management system...</p>",
+        "id": 220135350,
+        "sender_full_name": "starseeker",
+        "timestamp": 1608135135
+    }
+]

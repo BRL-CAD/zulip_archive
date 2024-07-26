@@ -1,0 +1,76 @@
+<html>
+<head><meta charset="utf-8"><title>Odd return code issue · brlcad · Zulip Chat Archive</title></head>
+<h2>Stream: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/index.html">brlcad</a></h2>
+<h3>Topic: <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Odd.20return.20code.20issue.html">Odd return code issue</a></h3>
+
+<hr>
+
+<base href="https://brlcad.zulipchat.com">
+
+<head><link href="https://brl-cad.github.io/zulip_archive/style.css" rel="stylesheet"></head>
+
+<a name="235201098"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Odd%20return%20code%20issue/near/235201098" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Odd.20return.20code.20issue.html#235201098">(Apr 19 2021 at 15:32)</a>:</h4>
+<p>I'm seeing the following - when calling ged_exec, I'm expecting to get GED_OK assigned:</p>
+<div class="codehilite"><pre><span></span><code>ret = ged_tire(&amp;ged, ac, (const char **)av);
+</code></pre></div>
+<p>Following the execution through the calls, it looks like the function should indeed be returning GED_OK (0),  but ret instead ends up assigned 16:</p>
+<div class="codehilite"><pre><span></span><code>Breakpoint 1, main (ac=2, av=0x7fffffffdff8) at ../src/shapes/tire.c:62
+62      ret = ged_tire(&amp;ged, ac, (const char **)av);
+(gdb) print ret
+$1 = 0
+(gdb) break ged_exec
+Breakpoint 2 at 0x7ffff7f5ffd9: file ../src/libged/exec.cpp, line 40.
+(gdb) c
+Continuing.
+
+Breakpoint 2, ged_exec (gedp=0x7ffff7fc8068 &lt;cmd_map+8&gt;, argc=21845, argv=0x7fffffffe32d) at ../src/libged/exec.cpp:40
+40  {
+(gdb) n
+41      if (!gedp || !argc || !argv) {
+(gdb)
+45      double start = 0.0;
+(gdb)
+46      const char *tstr = getenv(&quot;GED_EXEC_TIME&quot;);
+(gdb)
+47      if (tstr) {
+(gdb)
+59      std::map&lt;std::string, const struct ged_cmd *&gt; *cmap = (std::map&lt;std::string, const struct ged_cmd *&gt; *)ged_cmds;
+(gdb)
+68      if (!cmap-&gt;size()) {
+(gdb)
+72      std::map&lt;std::string, const struct ged_cmd *&gt;::iterator c_it = cmap-&gt;find(std::string(argv[0]));
+(gdb)
+73      if (c_it == cmap-&gt;end()) {
+(gdb)
+78      const struct ged_cmd *cmd = c_it-&gt;second;
+(gdb)
+83      int cret = (*cmd-&gt;i-&gt;cmd)(gedp, argc, argv);
+(gdb)
+85      if (tstr) {
+(gdb) print cret
+$2 = 0
+(gdb) n
+89      return cret;
+(gdb) print cret
+$3 = 0
+(gdb) n
+90  }
+(gdb)
+main (ac=2, av=0x7fffffffdff8) at ../src/shapes/tire.c:65
+65      wdb_close(db_fp);
+(gdb) print ret
+$4 = 16
+(gdb)
+</code></pre></div>
+
+
+
+<a name="235202583"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Odd%20return%20code%20issue/near/235202583" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Odd.20return.20code.20issue.html#235202583">(Apr 19 2021 at 15:42)</a>:</h4>
+<p>Ah, was feeding in argv[0] binary path instead of GED command to ged_exec - that'll do it.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2024 at 13:11 UTC</p>
+</html>
