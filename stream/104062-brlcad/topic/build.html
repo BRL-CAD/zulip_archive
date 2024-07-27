@@ -7006,5 +7006,301 @@ fail to open fb</p>
 
 
 
-<hr><p>Last updated: Jul 26 2024 at 13:48 UTC</p>
+<a name="454374233"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454374233" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454374233">(Jul 26 2024 at 21:12)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> So I've tried three times now to get a clean test on gcc188 and keep hitting this:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>[ 63%] Performing build step for 'TIFF_BLD'
+-- TCL_BLD build command succeeded.  See also /home/sean/brlcad.main/.build/bext_build/tcl/TCL_BLD-prefix/src/TCL_BLD-stamp/TCL_BLD-build-*.log
+[ 63%] Performing install step for 'TCL_BLD'
+CMake Error at /home/sean/brlcad.main/.build/bext_build/tcl/TCL_BLD-prefix/src/TCL_BLD-stamp/TCL_BLD-install-Release.cmake:37 (message):
+  Command failed: 2
+
+   'make' 'install'
+
+  See also
+
+    /home/sean/brlcad.main/.build/bext_build/tcl/TCL_BLD-prefix/src/TCL_BLD-stamp/TCL_BLD-install-*.log
+
+
+-- stdout output is:
+Warning: tclStubInit.c may be out of date.
+Developers may want to run "make genstubs" to regenerate.
+This warning can be safely ignored, do not report as a bug!
+
+-- stderr output is:
+make[3]: *** read jobs pipe: Bad file descriptor.  Stop.
+make[3]: *** Waiting for unfinished jobs....
+</code></pre></div>
+
+
+
+<a name="454374315"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454374315" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454374315">(Jul 26 2024 at 21:13)</a>:</h4>
+<p><span class="user-mention" data-user-id="484201">@Christopher</span> Did you seen anything like that when you tangled with it?</p>
+
+
+
+<a name="454374607"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454374607" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454374607">(Jul 26 2024 at 21:15)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-brlcad/topic/build/near/454374233">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> So I've tried three times now to get a clean test on gcc188 and keep hitting this:</p>
+<p><div class="codehilite" data-code-language="Text only"><pre><span></span><code>[ 63%] Performing build step for 'TIFF_BLD'
+-- TCL_BLD build command succeeded.  See also /home/sean/brlcad.main/.build/bext_build/tcl/TCL_BLD-prefix/src/TCL_BLD-stamp/TCL_BLD-build-*.log
+[ 63%] Performing install step for 'TCL_BLD'
+CMake Error at /home/sean/brlcad.main/.build/bext_build/tcl/TCL_BLD-prefix/src/TCL_BLD-stamp/TCL_BLD-install-Release.cmake:37 (message):
+  Command failed: 2
+
+   'make' 'install'
+
+  See also
+
+    /home/sean/brlcad.main/.build/bext_build/tcl/TCL_BLD-prefix/src/TCL_BLD-stamp/TCL_BLD-install-*.log
+
+
+-- stdout output is:
+Warning: tclStubInit.c may be out of date.
+Developers may want to run "make genstubs" to regenerate.
+This warning can be safely ignored, do not report as a bug!
+
+-- stderr output is:
+make[3]: *** read jobs pipe: Bad file descriptor.  Stop.
+make[3]: *** Waiting for unfinished jobs....
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>I had to build non-parallel to get around that</p>
+
+
+
+<a name="454374998"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454374998" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454374998">(Jul 26 2024 at 21:18)</a>:</h4>
+<p>Weird...  This is during cmake and auto-building bext.</p>
+
+
+
+<a name="454375039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454375039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454375039">(Jul 26 2024 at 21:19)</a>:</h4>
+<p>If I cd to the build dir and just run make, it seems to build, but then of course re-running cmake re-runs install and it barfs again.</p>
+
+
+
+<a name="454375212"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454375212" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454375212">(Jul 26 2024 at 21:20)</a>:</h4>
+<p>I built bext separately (non-parallel) and then could do a brlcad build as normal with -DBRLCAD_EXT_DIR</p>
+
+
+
+<a name="454375700"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454375700" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454375700">(Jul 26 2024 at 21:26)</a>:</h4>
+<p>Where is the parallelism specified in the auto form?  I've hunted and can't seem to find it anywhere I would expect it to be.</p>
+
+
+
+<a name="454375773"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454375773" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454375773">(Jul 26 2024 at 21:26)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  could probably answer that one faster</p>
+
+
+
+<a name="454375990"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454375990" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454375990">(Jul 26 2024 at 21:28)</a>:</h4>
+<p>Probably BRLCAD_EXT_Setup.cmake:227</p>
+
+
+
+<a name="454376071"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454376071" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454376071">(Jul 26 2024 at 21:29)</a>:</h4>
+<p>You can override that at the CMake level up top by specifying -DBRLCAD_EXT_PARALLEL=1 - that's what I do in the Github CI builds, IIRC</p>
+
+
+
+<a name="454376183"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454376183" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454376183">(Jul 26 2024 at 21:30)</a>:</h4>
+<p>If I jump into the bext_build dir and kick things off manually, it does seem to be specific to Tcl and just Tcl.  Something timing related or something getting clobbered or not specified right.</p>
+
+
+
+<a name="454376352"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454376352" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454376352">(Jul 26 2024 at 21:31)</a>:</h4>
+<p>To my recollection I've only hit that parallelism problem in VMs - on physical hardware it doesn't seem to trigger, for whatever reason (at least for me...)</p>
+
+
+
+<a name="454376550"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454376550" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454376550">(Jul 26 2024 at 21:33)</a>:</h4>
+<p>Honestly, on bad days I'm tempted to re-apply my old Tcl CMake build as a patch in bext - the Tcl build is also incompatible somehow with being run inside Visual Studio</p>
+
+
+
+<a name="454377749"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454377749" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454377749">(Jul 26 2024 at 21:43)</a>:</h4>
+<p>Can we just override Tcl so it doesn't try to install in parallel?</p>
+
+
+
+<a name="454381216"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454381216" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454381216">(Jul 26 2024 at 22:10)</a>:</h4>
+<p>Yes, maybe we should just go ahead and do that.</p>
+
+
+
+<a name="454381435"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454381435" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454381435">(Jul 26 2024 at 22:12)</a>:</h4>
+<p>OK, I yanked the -j flag out of the Tcl build instruction in bext.</p>
+
+
+
+<a name="454381751"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454381751" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454381751">(Jul 26 2024 at 22:15)</a>:</h4>
+<p>Don't know if gcc188 is virtualized, not that it should matter, but it's a rather beefy VM if it is.  Cmake did succeed with -DBRLCAD_EXT_PARALLEL=1 so definitely something related with the fact that it's passing through to a make build.</p>
+
+
+
+<a name="454381920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454381920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454381920">(Jul 26 2024 at 22:16)</a>:</h4>
+<p>Now what's strange is that parallel is involved given this is the install step.  Are we running make install in parallel?  That's probably not something we should be doing.</p>
+
+
+
+<a name="454382819"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454382819" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454382819">(Jul 26 2024 at 22:19)</a>:</h4>
+<p>Don't see install in BRLCAD_EXT_Setup.cmake ... so doesn't seem to be that setting?</p>
+
+
+
+<a name="454383122"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454383122" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454383122">(Jul 26 2024 at 22:21)</a>:</h4>
+<p>Looks like that's the only place  BRLCAD_EXT_PARALLEL is used, so it must be one of them... huh.</p>
+
+
+
+<a name="454383370"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454383370" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454383370">(Jul 26 2024 at 22:23)</a>:</h4>
+<p>The BRLCAD_EXT_Setup.cmake line 234 triggers the build of the bext superproject.  The Tcl build was getting it's parallel setting (before I yanked it) from the pcnt variable in bext, which is set in bext/CMakeLists.txt:172</p>
+
+
+
+<a name="454383512"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454383512" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454383512">(Jul 26 2024 at 22:25)</a>:</h4>
+<p>So that's one issue, looks like - anything using pcnt would try to be parallel regardless.</p>
+
+
+
+<a name="454383593"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454383593" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454383593">(Jul 26 2024 at 22:26)</a>:</h4>
+<p>so maybe the Tcl build is OK in parallel ONLY if nothing else is trying to build on the system at the time?</p>
+
+
+
+<a name="454383726"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454383726" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454383726">(Jul 26 2024 at 22:27)</a>:</h4>
+<p>BRLCAD_EXT_PARALLEL=1 was reducing how many ExternalProject_Add targets got fired off, but wasn't turning off the parallelism of the Tcl build itself</p>
+
+
+
+<a name="454383837"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454383837" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454383837">(Jul 26 2024 at 22:28)</a>:</h4>
+<p>So I guess the question is whether yanking the -j$pcnt flag from the Tcl build will make it OK to build the superbuild project in parallel, or if Tcl will be unhappy even if it's building non-parallel itself</p>
+
+
+
+<a name="454384418"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454384418" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454384418">(Jul 26 2024 at 22:33)</a>:</h4>
+<p>As a heads-up <span class="user-mention" data-user-id="102902">@Sean</span> , if I recall correctly Chris had to use the renaming trick for librt to avoid a linking conflict of some sort.</p>
+
+
+
+<a name="454384728"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454384728" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454384728">(Jul 26 2024 at 22:34)</a>:</h4>
+<p><span class="user-mention" data-user-id="484201">@Christopher</span> , was that libassimp pulling the system librt.so.1?</p>
+
+
+
+<a name="454384750"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454384750" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454384750">(Jul 26 2024 at 22:34)</a>:</h4>
+<p>I'd already tried manually forcing pcnt to 1 and was still failing -- looks like that flag is only build, not install.</p>
+
+
+
+<a name="454384866"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454384866" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454384866">(Jul 26 2024 at 22:35)</a>:</h4>
+<p>seems like it's running something like "make install -j8" and that's no-bueno</p>
+
+
+
+<a name="454385030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454385030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454385030">(Jul 26 2024 at 22:36)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-brlcad/topic/build/near/454384728">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="484201">Christopher</span> , was that libassimp pulling the system librt.so.1?</p>
+</blockquote>
+<p>yes, librt. Sean, if you look in my brlcad directory, I have a COMPILE_NOTES text file that I was keeping my tricks in</p>
+
+
+
+<a name="454385056"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454385056" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454385056">(Jul 26 2024 at 22:36)</a>:</h4>
+<p>I don't get it then, because the bext/tcl/CMakeLists.txt:75 instruction is just "make install"...</p>
+
+
+
+<a name="454385281"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454385281" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454385281">(Jul 26 2024 at 22:37)</a>:</h4>
+<p>I saw that</p>
+
+
+
+<a name="454385898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454385898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454385898">(Jul 26 2024 at 22:41)</a>:</h4>
+<p>I mean you can see in the log, it's only on the install step.  Perhaps important that the "make -j8" step in bext_build actually kicks off build <strong>and</strong> install phases internally..</p>
+
+
+
+<a name="454386030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386030">(Jul 26 2024 at 22:42)</a>:</h4>
+<p>You saw the other warning?</p>
+<p>Warning: tclStubInit.c may be out of date.<br>
+Developers may want to run "make genstubs" to regenerate.<br>
+This warning can be safely ignored, do not report as a bug!</p>
+
+
+
+<a name="454386067"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386067" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386067">(Jul 26 2024 at 22:42)</a>:</h4>
+<p>I did, but I'm not sure what the deal is with that one</p>
+
+
+
+<a name="454386305"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386305" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386305">(Jul 26 2024 at 22:44)</a>:</h4>
+<p>If make and install are kicking off, might be the case that the build make returns but isn't done writing to disk or something.  The make install runs, generates tclStubInit.c to satisfy dependencies, writes out, and then it's overwritten with the original build make, thus invalidating it datewise.</p>
+
+
+
+<a name="454386393"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386393" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386393">(Jul 26 2024 at 22:45)</a>:</h4>
+<p>Sounds like some of the fun we had with the step file generation logic</p>
+
+
+
+<a name="454386623"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386623" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386623">(Jul 26 2024 at 22:47)</a>:</h4>
+<p>What about manually injecting a "make genstubs" before "make install" runs as a custom command.  That should deal with any potential race I'd think.</p>
+
+
+
+<a name="454386658"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386658" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386658">(Jul 26 2024 at 22:47)</a>:</h4>
+<p>Where do the " <strong>Performing build step</strong> " messages come from?</p>
+
+
+
+<a name="454386697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/454386697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#454386697">(Jul 26 2024 at 22:47)</a>:</h4>
+<p>I think those are from ExternalProject_Add...</p>
+
+
+
+<hr><p>Last updated: Jul 27 2024 at 00:39 UTC</p>
 </html>
