@@ -1660,5 +1660,89 @@
         "id": 454545008,
         "sender_full_name": "Sean",
         "timestamp": 1722125811
+    },
+    {
+        "content": "<p>This is really possible. I recently saw some algorithms for interpolation between multiple pictures. Maybe we can predict in key directions and then make differences in other directions.</p>",
+        "id": 454604656,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1722166937
+    },
+    {
+        "content": "<p>If the direction is contant, network is learning a func like:<br>\n<a href=\"/user_uploads/1549/FirF5i_t38_4wtaOioudCpRS/屏幕截图-2024-07-28-212551.png\">2024-07-28-212551.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/FirF5i_t38_4wtaOioudCpRS/屏幕截图-2024-07-28-212551.png\" title=\"2024-07-28-212551.png\"><img data-original-dimensions=\"1281x705\" src=\"/user_uploads/thumbnail/1549/FirF5i_t38_4wtaOioudCpRS/屏幕截图-2024-07-28-212551.png/840x560.webp\"></a></div>",
+        "id": 454612969,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1722173227
+    },
+    {
+        "content": "<p>Interpolated fits between different perspectives have been done before:<br>\n<a href=\"/user_uploads/1549/5tRH7xU1qKEypSPE64ZNJSR5/2024-07-28-212847.png\">2024-07-28-212847.png</a><br>\nfrom <a href=\"https://arxiv.org/pdf/2211.00722\">VIINTER: View Interpolation with Implicit Neural Representations of Images</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/5tRH7xU1qKEypSPE64ZNJSR5/2024-07-28-212847.png\" title=\"2024-07-28-212847.png\"><img data-original-dimensions=\"1696x558\" src=\"/user_uploads/thumbnail/1549/5tRH7xU1qKEypSPE64ZNJSR5/2024-07-28-212847.png/840x560.webp\"></a></div>",
+        "id": 454613104,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1722173380
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454544610\">ha scritto</a>:</p>\n<blockquote>\n<p>That's sounding a lot better.  I think it'll still need to get into the 99% realm, but that's a distinct improvement.  What's that 94%-95% look like?</p>\n</blockquote>\n<p>I have not rendered any frame for gaussian splatting network yet because if the percentage are under 0.97 - 0.98, the predicted image is very far from the true one. I prefer first to achieve better results and then plotting it.</p>",
+        "id": 454617963,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722176954
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454544906\">ha scritto</a>:</p>\n<blockquote>\n<p>One thought I had, and it's obviously in a different direction but maybe applicable is what if we try integrating over multiple networks.  That is, use the simple network they demonstrated works well for a single view, but then lets create one for 32 (or 32768) views, get estimated in-hit points from all of them, and integrate spatially.</p>\n</blockquote>\n<p>This idea is not far from the idea of grid encoding of direction which I have already tried without any improvement. In that case I used embeddings for each direction, you suggest using a network for each direction. I can try it. <span aria-label=\"thumbs up\" class=\"emoji emoji-1f44d\" role=\"img\" title=\"thumbs up\">:thumbs_up:</span></p>",
+        "id": 454618704,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722177347
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454613104\">ha scritto</a>:</p>\n<blockquote>\n<p>Interpolated fits between different perspectives have been done before:<br>\n<a href=\"/user_uploads/1549/5tRH7xU1qKEypSPE64ZNJSR5/2024-07-28-212847.png\">2024-07-28-212847.png</a><br>\nfrom <a href=\"https://arxiv.org/pdf/2211.00722\">VIINTER: View Interpolation with Implicit Neural Representations of Images</a></p>\n</blockquote>\n<p>This could work but it means that  we have to change the sampling to fixed view sampling. I have some doubts about the number of views we should sample because:<br>\nIf we choose for example 1 million rays in the training set and we choose  a reasonable number of 1000 rays for each view this means that we have a total of 1000 views.<br>\nIf we distribute uniformly these views around the bounding sphere it means that, remember that theta goes from 0 to pi and phi goes from 0 to 2pi:<br>\nIn my case I can use half of phi because in my case the problem is simpler and the direction is invariant to orientation (so I have theta that goes from 0 to pi and phi that goes from 0 to pi):<br>\nTheta x phi = 3,14 x 3,14 = 9,8596 -&gt; total space<br>\nUniform distribution of views:<br>\n9,8596/1000 views = 0,009859 rad = 0,56° between two views. <br>\nI think it is a reasonable error and it can be easily interpolated.<br>\nIn your case, however, you can't reduce the range of phi (because rgb is not invariant to orientations), so you will have:<br>\nTheta x phi = 3,14 x 6,28 = 19,719 -&gt; total space<br>\n19,719/1000 views = 0,0197 rad = 1,128° between two views. <br>\nAn error of 1° is reasonable also in your case and if my calculations are exact, it could work even in your case but the error is the double of mine.</p>",
+        "id": 454620623,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722178467
+    },
+    {
+        "content": "<p>I believe we should try this approach using NIF architecture and then interpolating them.</p>",
+        "id": 454620794,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722178630
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  I have a doubt about rays and pixels: if we want to render a frame of 100x100 it means that the algorithm sample for each pixel a ray (for a total of 10k rays) or is it different?</p>",
+        "id": 454622260,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722179406
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454617963\">said</a>:</p>\n<blockquote>\n<p>I have not rendered any frame for gaussian splatting network yet because if the percentage are under 0.97 - 0.98, the predicted image is very far from the true one. I prefer first to achieve better results and then plotting it.</p>\n</blockquote>\n<p>That is absolutely not best practice and not recommended to ignore the predicted images solely based on having low percentages.  Not looking gives you no information.  Looking may give no information, or may provide helpful clues as to what isn't encoding well.  </p>\n<p>It can be high frequency detail, it can be a straight up bug where values are simply shifted, it can be low frequency undulations, and more.  It's not in your interest to ignore them even if 19 times out of 20 it's just a \"drunk wet mess\".</p>",
+        "id": 454677762,
+        "sender_full_name": "Sean",
+        "timestamp": 1722208401
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454620794\">said</a>:</p>\n<blockquote>\n<p>I believe we should try this approach using NIF architecture and then interpolating them.</p>\n</blockquote>\n<p>I will just reiterate what we'd discussed earlier, that there should be two different approaches being taken (in general), or even better two different goals (e.g., 3d shape vs 2d image).  There is value in exploring the same method with different implementation detail (on the off chance there is some detail that matters more than anticipated).</p>",
+        "id": 454678116,
+        "sender_full_name": "Sean",
+        "timestamp": 1722208680
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454618704\">said</a>:</p>\n<blockquote>\n<p>This idea is not far from the idea of grid encoding of direction which I have already tried without any improvement. In that case I used embeddings for each direction, you suggest using a network for each direction. I can try it. <span aria-label=\"thumbs up\" class=\"emoji emoji-1f44d\" role=\"img\" title=\"thumbs up\">:thumbs_up:</span></p>\n</blockquote>\n<p>It's not far off, but the separate networks is the key.  AMD really proved that surface illumination can be almost perfectly encoded for a given view.  Maybe if we were to first reproduce their research, that would give more confidence, but lacking that it's not terribly unexpected.</p>\n<p>Now that said, I don't think there's a whole lot of difference with random rays in random dirs -- naively I think that can work with the right network and right amount of training.  Remains to be proven though.  The idea with the 32+ grid views, however, is a compromise, banking on the notion that a single view should converge that view.  In other analysis work we're involved with, there's mathematical proofs that lend evidence towards 32 views being a sweet spot approximation for complete random, converging much faster than pure random.</p>",
+        "id": 454678542,
+        "sender_full_name": "Sean",
+        "timestamp": 1722208977
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454620623\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454613104\">ha scritto</a>:</p>\n<blockquote>\n<p>Interpolated fits between different perspectives have been done before:<br>\n<a href=\"/user_uploads/1549/5tRH7xU1qKEypSPE64ZNJSR5/2024-07-28-212847.png\">2024-07-28-212847.png</a><br>\nfrom <a href=\"https://arxiv.org/pdf/2211.00722\">VIINTER: View Interpolation with Implicit Neural Representations of Images</a></p>\n</blockquote>\n<p>This could work but it means that  we have to change the sampling to fixed view sampling. I have some doubts about the number of views we should sample because:<br>\nIf we choose for example 1 million rays in the training set and we choose  a reasonable number of 1000 rays for each view this means that we have a total of 1000 views.<br>\nIf we distribute uniformly these views around the bounding sphere it means that, remember that theta goes from 0 to pi and phi goes from 0 to 2pi:<br>\nIn my case I can use half of phi because in my case the problem is simpler and the direction is invariant to orientation (so I have theta that goes from 0 to pi and phi that goes from 0 to pi):<br>\nTheta x phi = 3,14 x 3,14 = 9,8596 -&gt; total space<br>\nUniform distribution of views:<br>\n9,8596/1000 views = 0,009859 rad = 0,56° between two views. <br>\nI think it is a reasonable error and it can be easily interpolated.<br>\nIn your case, however, you can't reduce the range of phi (because rgb is not invariant to orientations), so you will have:<br>\nTheta x phi = 3,14 x 6,28 = 19,719 -&gt; total space<br>\n19,719/1000 views = 0,0197 rad = 1,128° between two views. <br>\nAn error of 1° is reasonable also in your case and if my calculations are exact, it could work even in your case but the error is the double of mine.</p>\n</blockquote>\n<p>Again, I would just caution whether we're following research that is attempting to capture shape in the embedding or whether the goal is capturing the shape just barely enough that color, i.e., a visual image can be constructed that \"looks good enough\".  On quick read, that VINTER paper appears to be the latter, but I'd have to read it in more detail.</p>",
+        "id": 454678740,
+        "sender_full_name": "Sean",
+        "timestamp": 1722209117
+    },
+    {
+        "content": "<p>As for total number of views, I think you could try as coarse as 45-degree increments.  Resolution will need to be as fine as the smallest detail, which depends on the model size and detail complexity.  I'd personally start at 1024x1024, about 1M per view.</p>",
+        "id": 454679031,
+        "sender_full_name": "Sean",
+        "timestamp": 1722209301
+    },
+    {
+        "content": "<p>That 1024^2 resolution at 45-degree probably means something like 256 or 512 resolution alignment, whatever that cell size resolves to.</p>",
+        "id": 454679122,
+        "sender_full_name": "Sean",
+        "timestamp": 1722209386
     }
 ]

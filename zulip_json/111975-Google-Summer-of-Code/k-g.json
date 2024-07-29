@@ -1522,5 +1522,65 @@
         "id": 454490305,
         "sender_full_name": "Louis Googl",
         "timestamp": 1722096627
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"215774\">Louis Googl</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/k-g/near/454327816\">said</a>:</p>\n<blockquote>\n<p>regarding the ELEMENT_BEAM do we want to draw it as a line or we take the section and extrude it? in LS-PrePost they draw it as a line. the beams in the following image have an I section (section 1 in the second image) but they are represented as a line. <br>\n<a href=\"/user_uploads/1549/IZJ53IEtIBZWpve3IR_X45Bu/image.png\">image.png</a><br>\n<a href=\"/user_uploads/1549/Srf4nISA_IDkiJOZnPKcN9gt/image.png\">image.png</a></p>\n</blockquote>\n<p>For BRL-CAD, we need all elements as solids. I.e., they should have the real beam shape, if feasible. If that's too complicated or the real shape isn't well defined, a cuboid with corresponding line-of-sight value would be possible.</p>",
+        "id": 454622062,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1722179322
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"215774\">Louis Googl</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/k-g/near/454329654\">said</a>:</p>\n<blockquote>\n<p>another thing I am working on is the distinction between different commands and a command with options <br>\nfor example *PART and *PART_ADAPTIVE_FAILURE are two different commands, but *PART and *PART_CONTACT are the same *PART command with the option CONTACT, also because the order of the options defines what the following cards (lines) contains, so I think we are going to need a vector of strings to hold the options and we need to combine the logic to check partLinesRead and the options vector to know what card we are reading. This will not be necessary for all the options as most of them aren't related to the geometry.<br>\n<a href=\"/user_uploads/1549/bjMq3t50sympMjoIu9Q8KYkW/image.png\">image.png</a><br>\n<a href=\"/user_uploads/1549/58ki2ZeU9vZ7vbsicpWQeh5s/image.png\">image.png</a></p>\n</blockquote>\n<p>In the converter, the distinction is done with the KState enumeration. This addresses the real different stuff. E.g., PART and PART_INERTIA are in fact the same, PART_ADAPTIVE_FAILURE is something different.</p>\n<p>Regarding the options, I'll review your proposal in the PR.</p>",
+        "id": 454623607,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1722179950
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/k-g/near/454622062\">said</a>:</p>\n<blockquote>\n<p>For BRL-CAD, we need all elements as solids. I.e., they should have the real beam shape, if feasible. If that's too complicated or the real shape isn't well defined, a cuboid with corresponding line-of-sight value would be possible.</p>\n</blockquote>\n<p>is there some example code I can look at?.<br>\nfor a beam that have a T section we can devided to two arbs? or is there a methode for extrusion from the section?<br>\n<a href=\"/user_uploads/1549/hnlkX0DWKeGaxYlhQuouXQNq/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/hnlkX0DWKeGaxYlhQuouXQNq/image.png\" title=\"image.png\"><img data-original-dimensions=\"437x421\" src=\"/user_uploads/thumbnail/1549/hnlkX0DWKeGaxYlhQuouXQNq/image.png/840x560.webp\"></a></div>",
+        "id": 454624416,
+        "sender_full_name": "Louis Googl",
+        "timestamp": 1722180326
+    },
+    {
+        "content": "<p>Hmm, theoretically, we have the <strong>extrude</strong> primitive, which extrudes a 2D sketch along a line. Using arbs would be possible too (overlaps wouldn't matter).</p>",
+        "id": 454627291,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1722181674
+    },
+    {
+        "content": "<p>Regarding the options: Do we have a kind of stack there? E.g., for every option a global, section and element value? WE could think about crating an option object, which reacts on the <strong>enter section</strong>, <strong>enter element</strong>, <strong>exit element</strong>, and <strong>exit section</strong> events. (I don't know, if we can really say when we \"exit\" something, maybe we can see the \"enter\"s only.)</p>",
+        "id": 454628522,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1722182131
+    },
+    {
+        "content": "<p>the option card or line follows directly under the command say we have Element_Beam_Section card3 will be there and card2 wouldn't. this is the way to know that you are exiting an element, number of lines is equal to the required card pluse the number of options.<br>\n<a href=\"/user_uploads/1549/bIp451s5kOc2o7tWvW9VNw3G/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/bIp451s5kOc2o7tWvW9VNw3G/image.png\" title=\"image.png\"><img data-original-dimensions=\"1627x497\" src=\"/user_uploads/thumbnail/1549/bIp451s5kOc2o7tWvW9VNw3G/image.png/840x560.webp\"></a></div>",
+        "id": 454633071,
+        "sender_full_name": "Louis Googl",
+        "timestamp": 1722183898
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"215774\">Louis Googl</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/k-g/near/454331044\">said</a>:</p>\n<blockquote>\n<p>another issue is that an option can override properties that are defined in other places, for example if we have *SECTION_BEAM with a certain thickness and then *ELEMENT_BEAM with the option THICKNESS i.e *ELEMENT_BEAM_THICKNESS the latter command overrides the thickness defined in the former command. I am trying to find a way to protect the information provided by the superiour command so it doesn't change if the *SECTION_BEAM comes after *ELEMENT_BEAM_THICKNESS</p>\n</blockquote>\n<p>I understood that *SECTION_BEAM and *ELEMENT_BEAM can be in any order anywhere in the data. The link will be created when parsing KData via the IDs. I.e., the thicknesses have to be stored in the data and evaluated when parsing it.</p>",
+        "id": 454643073,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1722187754
+    },
+    {
+        "content": "<p>yes, now I understand what you meant. exactly the the ID is the link. but after storing the thickness from ELMENT_BEAM_THICKNESS it needs to be protected from change, and if it's taken from SECTION_BEAM it should be modifiable.</p>",
+        "id": 454645395,
+        "sender_full_name": "Louis Googl",
+        "timestamp": 1722189576
+    },
+    {
+        "content": "<p>You need a kind of <code>std::map&lt;std::string, std::string&gt;</code> or <code>std::map&lt;std::string, double&gt;</code> for the options:</p>\n<div class=\"codehilite\"><pre><span></span><code>thickness := default\n\nif SECTION.options[THICKNESS] then\n    thickness := SECTION.options[THICKNESS]\n\nif ELEMENT.options[THICKNESS] then\n    thickness := ELEMENT.options[THICKNESS]\n</code></pre></div>\n<p>(That's pseudo-code, of course.)</p>",
+        "id": 454650136,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1722192102
+    },
+    {
+        "content": "<p>Examples of sketch+extrude are at <a href=\"https://brlcad.org/wiki/Sketch\">https://brlcad.org/wiki/Sketch</a> and <a href=\"https://brlcad.org/wiki/Extrude\">https://brlcad.org/wiki/Extrude</a></p>",
+        "id": 454676974,
+        "sender_full_name": "Sean",
+        "timestamp": 1722207783
     }
 ]
