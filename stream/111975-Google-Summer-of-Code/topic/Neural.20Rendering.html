@@ -2199,5 +2199,41 @@ An error of 1° is reasonable also in your case and if my calculations are exact
 
 
 
-<hr><p>Last updated: Jul 29 2024 at 00:41 UTC</p>
+<a name="454764857"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/454764857" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#454764857">(Jul 29 2024 at 08:52)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454677762">ha scritto</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454617963">said</a>:</p>
+<blockquote>
+<p>I have not rendered any frame for gaussian splatting network yet because if the percentage are under 0.97 - 0.98, the predicted image is very far from the true one. I prefer first to achieve better results and then plotting it.</p>
+</blockquote>
+<p>That is absolutely not best practice and not recommended to ignore the predicted images solely based on having low percentages.  Not looking gives you no information.  Looking may give no information, or may provide helpful clues as to what isn't encoding well.  </p>
+<p>It can be high frequency detail, it can be a straight up bug where values are simply shifted, it can be low frequency undulations, and more.  It's not in your interest to ignore them even if 19 times out of 20 it's just a "drunk wet mess".</p>
+</blockquote>
+<p>Yes, you are totally right. I did not considered to render it because I got that result with only 100K rays and I wanted first to train the NN with at least 1 million rays. Thanks for the advise.</p>
+
+
+
+<a name="454766161"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/454766161" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#454766161">(Jul 29 2024 at 08:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454678542">ha scritto</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/454618704">said</a>:</p>
+<blockquote>
+<p>This idea is not far from the idea of grid encoding of direction which I have already tried without any improvement. In that case I used embeddings for each direction, you suggest using a network for each direction. I can try it. <span aria-label="thumbs up" class="emoji emoji-1f44d" role="img" title="thumbs up">:thumbs_up:</span></p>
+</blockquote>
+<p>It's not far off, but the separate networks is the key.  AMD really proved that surface illumination can be almost perfectly encoded for a given view.  Maybe if we were to first reproduce their research, that would give more confidence, but lacking that it's not terribly unexpected.</p>
+<p>Now that said, I don't think there's a whole lot of difference with random rays in random dirs -- naively I think that can work with the right network and right amount of training.  Remains to be proven though.  The idea with the 32+ grid views, however, is a compromise, banking on the notion that a single view should converge that view.  In other analysis work we're involved with, there's mathematical proofs that lend evidence towards 32 views being a sweet spot approximation for complete random, converging much faster than pure random.</p>
+</blockquote>
+<p>I was wondering... Isn't the limit of the previous NN (NIF network which I got 0.994 for accuracy) was simply that the number of examples in the training set was too low? Maybe we should try with even more samples (more than 1 million) to see how it works.</p>
+
+
+
+<a name="454956525"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/454956525" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#454956525">(Jul 29 2024 at 21:45)</a>:</h4>
+<p>Today I had implemented the adaptive learning for Gaussian splatting architecture. I want first to finish and evaluate this architecture before trying with multiple NIFs.</p>
+
+
+
+<hr><p>Last updated: Jul 30 2024 at 00:40 UTC</p>
 </html>
