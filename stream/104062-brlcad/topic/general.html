@@ -27556,5 +27556,228 @@ model to the corresponding faces in its 2D projections. I came to know recently 
 
 
 
-<hr><p>Last updated: Aug 01 2024 at 00:44 UTC</p>
+<a name="455543811"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455543811" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455543811">(Aug 01 2024 at 04:02)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-brlcad/topic/general/near/455423943">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> Are you referring to the rtbotqueue branch?  I'm not really expecting that to be the answer, was just exploring to see if it was an option to replace the bu_thread_id mechanism as a drop-in.</p>
+</blockquote>
+<p>Yes, that branch.. but that's exactly what my point was.  The bu_thread_id() "mechanism" is for accessing per-cpu memory.  There's nothing from a theory perspective that is faster than per-cpu memory other than not reading/writing memory altogether.</p>
+
+
+
+<a name="455544004"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455544004" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455544004">(Aug 01 2024 at 04:04)</a>:</h4>
+<p>Even that particular implementation we have is a function call to a function that returns a precomputed int.  Might slow a debug build, but those function calls inline on optimized and all accesses are O(1) direct for both read and write.</p>
+
+
+
+<a name="455544595"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455544595" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455544595">(Aug 01 2024 at 04:12)</a>:</h4>
+<p>We need to fix the bug, not implement a workaround...</p>
+<p>Chris's recent comment points at a potential release-halting bug imho...  I definitely would not work around it as it implies something is critically wrong either in the build testing, code, or compiler.  </p>
+<p>If it's not returning a unique int per thread, that's a bug full stop.  Might mean there's something wrong in the thread.cpp implementation, or in the cmake tests that determine which method it uses on windows.</p>
+
+
+
+<a name="455625097"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455625097" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455625097">(Aug 01 2024 at 11:42)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> As mentioned, hlbvh changes aren't in the 7.40 RELEASE branch - we split off 7.40 into RELEASE and started working on 7.42 in main while waiting for the cfarm testing to finish up</p>
+
+
+
+<a name="455625753"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455625753" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455625753">(Aug 01 2024 at 11:46)</a>:</h4>
+<p>When you've got time if you can help us dig into how that bu_thread_id should be working and what it's doing instead it would be helpful.</p>
+
+
+
+<a name="455633805"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455633805" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455633805">(Aug 01 2024 at 12:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-brlcad/topic/general/near/455544595">said</a>:</p>
+<blockquote>
+<p>We need to fix the bug, not implement a workaround...</p>
+<p>Chris's recent comment points at a potential release-halting bug imho...  I definitely would not work around it as it implies something is critically wrong either in the build testing, code, or compiler.  </p>
+<p>If it's not returning a unique int per thread, that's a bug full stop.  Might mean there's something wrong in the thread.cpp implementation, or in the cmake tests that determine which method it uses on windows.</p>
+</blockquote>
+<p>It's not a bug, it's Windows being Windows. The Thread ID's being returned are correct (and unique at that snapshot in time). The problem lies in Windows immediately reusing an ID after a thread terminates.</p>
+
+
+
+<a name="455654907"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455654907" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455654907">(Aug 01 2024 at 13:51)</a>:</h4>
+<p><span class="user-mention" data-user-id="484201">@Christopher</span>  How's it leading to corruption then?  I mean conceptually, that's what IDs and per-cpu buffers are still supposed to ensure that there's no contention reading/writing from them using an ID because they ultimately (should) associate with a particular core/thread and you'll never have two cores/threads concurrent.  </p>
+<p>So even if IDs are reused because a thread is short-lived, that should be fine..</p>
+
+
+
+<a name="455655045"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455655045" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455655045">(Aug 01 2024 at 13:52)</a>:</h4>
+<p>Now what I could see is the IDs growing larger than maxcpus, and a code assuming they're modulo that would be in trouble.</p>
+
+
+
+<a name="455655305"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455655305" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455655305">(Aug 01 2024 at 13:52)</a>:</h4>
+<p>e.g., if it made per_cpu_arrays[maxcpus], and bu_thread_id() going outside that range</p>
+
+
+
+<a name="455661258"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455661258" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455661258">(Aug 01 2024 at 14:18)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-brlcad/topic/general/near/455654907">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="484201">Christopher</span>  How's it leading to corruption then?  I mean conceptually, that's what IDs and per-cpu buffers are still supposed to ensure that there's no contention reading/writing from them using an ID because they ultimately (should) associate with a particular core/thread and you'll never have two cores/threads concurrent.  </p>
+<p>So even if IDs are reused because a thread is short-lived, that should be fine..</p>
+</blockquote>
+<p>Good point... Maybe the problem is with the modulo? </p>
+<p>Thinking through it - a thread id 100%4 and 104%4 would both be writing to the same hit array. Perhaps Windows is just exaggerating the problem since it doesn't increment id's</p>
+
+
+
+<a name="455687568"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455687568" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455687568">(Aug 01 2024 at 15:58)</a>:</h4>
+<p>Oh, yeah wow, no -- that's totally NFG...</p>
+
+
+
+<a name="455687629"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455687629" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455687629">(Aug 01 2024 at 15:58)</a>:</h4>
+<p>I hadn't looked at the code yet, but modulo is definitely no bueno.  If I had a 2-core system and got thread id's 0, 1, and then thread 1 ends and thread 3 starts, it will conflict with thread 0.</p>
+
+
+
+<a name="455687888"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455687888" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455687888">(Aug 01 2024 at 15:59)</a>:</h4>
+<p>yeah. Can't believe it took me that long to see it</p>
+
+
+
+<a name="455688183"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455688183" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455688183">(Aug 01 2024 at 16:00)</a>:</h4>
+<p>Same can/will happen if more threads than cores are created as the thread_id is just increasing.  Easy solution will be to make the per-cpu container be size MAX_PSW</p>
+
+
+
+<a name="455688609"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455688609" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455688609">(Aug 01 2024 at 16:01)</a>:</h4>
+<p>That's supposed to be the hard limit indexable, such that all IDs should be in that range.  I don't think we have all the necessary code protections to ensure someone kicking off 10k threads doesn't end up with a bad time, but that's how rt operates.</p>
+
+
+
+<a name="455690377"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455690377" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455690377">(Aug 01 2024 at 16:06)</a>:</h4>
+<p>what would be the index then - the thread ID itself? Also, we're upfront allocating the arrays which seems like it could cause problems</p>
+
+
+
+<a name="455692123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455692123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455692123">(Aug 01 2024 at 16:11)</a>:</h4>
+<p>you can/should up-front allocate MAX_PSW -- it's a nominal waste of memory, but that's what makes it semaphore-free</p>
+
+
+
+<a name="455692204"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455692204" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455692204">(Aug 01 2024 at 16:11)</a>:</h4>
+<p>just shouldn't be a huge allocation (hopefully)</p>
+
+
+
+<a name="455692301"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455692301" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455692301">(Aug 01 2024 at 16:12)</a>:</h4>
+<p>but yes, then the id is the index into the array</p>
+
+
+
+<a name="455692693"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455692693" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455692693">(Aug 01 2024 at 16:12)</a>:</h4>
+<p>the id is set in parallel.c during thread creation, so it should be some value from 0 to MAX_PSW-1 iirc</p>
+
+
+
+<a name="455694249"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455694249" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455694249">(Aug 01 2024 at 16:17)</a>:</h4>
+<p>the id is just an int, but it's parallel's job to only hand out one per available compute core.  so when a thread exits, parallel can either re-issue a previous id or the next available.</p>
+<p>been a long time, but the magic happens in parallel_mapping() where it keeps track of everything including recursive parallel invocations.  that was part of work years ago to make bu_parallel robust to applications kicking off N threads, and each of those N threads potentially kicking off their own N threads, and works hard to handle that robustly.</p>
+
+
+
+<a name="455694325"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455694325" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455694325">(Aug 01 2024 at 16:17)</a>:</h4>
+<p>I see what they were trying to do now. They used bu_thread_id(), which is the literal os thread ID, instead of bu_parallel_id() which is the CPU number.</p>
+
+
+
+<a name="455696171"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455696171" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455696171">(Aug 01 2024 at 16:22)</a>:</h4>
+<p>AHHhhh.. yeah, that'll do it.</p>
+
+
+
+<a name="455696227"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455696227" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455696227">(Aug 01 2024 at 16:22)</a>:</h4>
+<p>That's not MAX_PSW ranged...</p>
+
+
+
+<a name="455696821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455696821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455696821">(Aug 01 2024 at 16:23)</a>:</h4>
+<p>I think you added that for the temp file debugging a while back, yes?</p>
+
+
+
+<a name="455696976"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455696976" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455696976">(Aug 01 2024 at 16:23)</a>:</h4>
+<p>exactly, hench where my indexing question came from heh. MAX_PSW + the right function appears to do the trick - grabbing some speed metrics now</p>
+
+
+
+<a name="455697413"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455697413" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455697413">(Aug 01 2024 at 16:25)</a>:</h4>
+<p>Yeah, per-cpu buffers would be problematic if the index were even uint16_t for some cases, definitely not uint32 or 64</p>
+
+
+
+<a name="455697773"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455697773" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455697773">(Aug 01 2024 at 16:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/104062-brlcad/topic/general/near/455696821">said</a>:</p>
+<blockquote>
+<p>I think you added that for the temp file debugging a while back, yes?</p>
+</blockquote>
+<p>I added it to generate pseudo-random temp file names in a parallel run.</p>
+
+
+
+<a name="455698876"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455698876" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455698876">(Aug 01 2024 at 16:30)</a>:</h4>
+<p>might be a good candidate for migration to temp.c as a static to avoid confusion, or at least updating the header to make it clear it shouldn't be used with parallel as an index</p>
+
+
+
+<a name="455700502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455700502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Christopher <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455700502">(Aug 01 2024 at 16:36)</a>:</h4>
+<p>I think functionally it moreso belongs in parallel. But definitely needs some better header documentation</p>
+
+
+
+<a name="455705298"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455705298" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455705298">(Aug 01 2024 at 16:57)</a>:</h4>
+<p>Agree it functionally belongs in parallel if it's going to be public API.  </p>
+<p>Static would just be to reduce API footprint if that's the only use.  All public API should (ideally) be used in multiple places too to justify them, but that's long-term maintenance and of course conflicts with works in progress that might only have 0 or 1 places in use.  Will just have to keep an eye out for some place to leverage it meaningfully.</p>
+
+
+
+<a name="455705606"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455705606" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455705606">(Aug 01 2024 at 16:59)</a>:</h4>
+<p>If we had proper logging, I'd want thread ID and parallel ID prefixed on the log lines to know who is saying what</p>
+
+
+
+<a name="455705803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/455705803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#455705803">(Aug 01 2024 at 17:00)</a>:</h4>
+<p>something I've had in mind for yearss, and reminded of just recently with Dwayne's comment about not wanting rt to output anything.</p>
+
+
+
+<hr><p>Last updated: Aug 02 2024 at 00:39 UTC</p>
 </html>

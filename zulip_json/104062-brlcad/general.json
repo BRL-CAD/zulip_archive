@@ -25162,5 +25162,203 @@
         "id": 455424264,
         "sender_full_name": "starseeker",
         "timestamp": 1722443223
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-brlcad/topic/general/near/455423943\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> Are you referring to the rtbotqueue branch?  I'm not really expecting that to be the answer, was just exploring to see if it was an option to replace the bu_thread_id mechanism as a drop-in.</p>\n</blockquote>\n<p>Yes, that branch.. but that's exactly what my point was.  The bu_thread_id() \"mechanism\" is for accessing per-cpu memory.  There's nothing from a theory perspective that is faster than per-cpu memory other than not reading/writing memory altogether.</p>",
+        "id": 455543811,
+        "sender_full_name": "Sean",
+        "timestamp": 1722484947
+    },
+    {
+        "content": "<p>Even that particular implementation we have is a function call to a function that returns a precomputed int.  Might slow a debug build, but those function calls inline on optimized and all accesses are O(1) direct for both read and write.</p>",
+        "id": 455544004,
+        "sender_full_name": "Sean",
+        "timestamp": 1722485098
+    },
+    {
+        "content": "<p>We need to fix the bug, not implement a workaround...</p>\n<p>Chris's recent comment points at a potential release-halting bug imho...  I definitely would not work around it as it implies something is critically wrong either in the build testing, code, or compiler.  </p>\n<p>If it's not returning a unique int per thread, that's a bug full stop.  Might mean there's something wrong in the thread.cpp implementation, or in the cmake tests that determine which method it uses on windows.</p>",
+        "id": 455544595,
+        "sender_full_name": "Sean",
+        "timestamp": 1722485547
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> As mentioned, hlbvh changes aren't in the 7.40 RELEASE branch - we split off 7.40 into RELEASE and started working on 7.42 in main while waiting for the cfarm testing to finish up</p>",
+        "id": 455625097,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722512557
+    },
+    {
+        "content": "<p>When you've got time if you can help us dig into how that bu_thread_id should be working and what it's doing instead it would be helpful.</p>",
+        "id": 455625753,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722512819
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-brlcad/topic/general/near/455544595\">said</a>:</p>\n<blockquote>\n<p>We need to fix the bug, not implement a workaround...</p>\n<p>Chris's recent comment points at a potential release-halting bug imho...  I definitely would not work around it as it implies something is critically wrong either in the build testing, code, or compiler.  </p>\n<p>If it's not returning a unique int per thread, that's a bug full stop.  Might mean there's something wrong in the thread.cpp implementation, or in the cmake tests that determine which method it uses on windows.</p>\n</blockquote>\n<p>It's not a bug, it's Windows being Windows. The Thread ID's being returned are correct (and unique at that snapshot in time). The problem lies in Windows immediately reusing an ID after a thread terminates.</p>",
+        "id": 455633805,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722515014
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"484201\">@Christopher</span>  How's it leading to corruption then?  I mean conceptually, that's what IDs and per-cpu buffers are still supposed to ensure that there's no contention reading/writing from them using an ID because they ultimately (should) associate with a particular core/thread and you'll never have two cores/threads concurrent.  </p>\n<p>So even if IDs are reused because a thread is short-lived, that should be fine..</p>",
+        "id": 455654907,
+        "sender_full_name": "Sean",
+        "timestamp": 1722520294
+    },
+    {
+        "content": "<p>Now what I could see is the IDs growing larger than maxcpus, and a code assuming they're modulo that would be in trouble.</p>",
+        "id": 455655045,
+        "sender_full_name": "Sean",
+        "timestamp": 1722520322
+    },
+    {
+        "content": "<p>e.g., if it made per_cpu_arrays[maxcpus], and bu_thread_id() going outside that range</p>",
+        "id": 455655305,
+        "sender_full_name": "Sean",
+        "timestamp": 1722520371
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-brlcad/topic/general/near/455654907\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"484201\">Christopher</span>  How's it leading to corruption then?  I mean conceptually, that's what IDs and per-cpu buffers are still supposed to ensure that there's no contention reading/writing from them using an ID because they ultimately (should) associate with a particular core/thread and you'll never have two cores/threads concurrent.  </p>\n<p>So even if IDs are reused because a thread is short-lived, that should be fine..</p>\n</blockquote>\n<p>Good point... Maybe the problem is with the modulo? </p>\n<p>Thinking through it - a thread id 100%4 and 104%4 would both be writing to the same hit array. Perhaps Windows is just exaggerating the problem since it doesn't increment id's</p>",
+        "id": 455661258,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722521923
+    },
+    {
+        "content": "<p>Oh, yeah wow, no -- that's totally NFG...</p>",
+        "id": 455687568,
+        "sender_full_name": "Sean",
+        "timestamp": 1722527894
+    },
+    {
+        "content": "<p>I hadn't looked at the code yet, but modulo is definitely no bueno.  If I had a 2-core system and got thread id's 0, 1, and then thread 1 ends and thread 3 starts, it will conflict with thread 0.</p>",
+        "id": 455687629,
+        "sender_full_name": "Sean",
+        "timestamp": 1722527905
+    },
+    {
+        "content": "<p>yeah. Can't believe it took me that long to see it</p>",
+        "id": 455687888,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722527952
+    },
+    {
+        "content": "<p>Same can/will happen if more threads than cores are created as the thread_id is just increasing.  Easy solution will be to make the per-cpu container be size MAX_PSW</p>",
+        "id": 455688183,
+        "sender_full_name": "Sean",
+        "timestamp": 1722528010
+    },
+    {
+        "content": "<p>That's supposed to be the hard limit indexable, such that all IDs should be in that range.  I don't think we have all the necessary code protections to ensure someone kicking off 10k threads doesn't end up with a bad time, but that's how rt operates.</p>",
+        "id": 455688609,
+        "sender_full_name": "Sean",
+        "timestamp": 1722528115
+    },
+    {
+        "content": "<p>what would be the index then - the thread ID itself? Also, we're upfront allocating the arrays which seems like it could cause problems</p>",
+        "id": 455690377,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722528383
+    },
+    {
+        "content": "<p>you can/should up-front allocate MAX_PSW -- it's a nominal waste of memory, but that's what makes it semaphore-free</p>",
+        "id": 455692123,
+        "sender_full_name": "Sean",
+        "timestamp": 1722528693
+    },
+    {
+        "content": "<p>just shouldn't be a huge allocation (hopefully)</p>",
+        "id": 455692204,
+        "sender_full_name": "Sean",
+        "timestamp": 1722528709
+    },
+    {
+        "content": "<p>but yes, then the id is the index into the array</p>",
+        "id": 455692301,
+        "sender_full_name": "Sean",
+        "timestamp": 1722528726
+    },
+    {
+        "content": "<p>the id is set in parallel.c during thread creation, so it should be some value from 0 to MAX_PSW-1 iirc</p>",
+        "id": 455692693,
+        "sender_full_name": "Sean",
+        "timestamp": 1722528774
+    },
+    {
+        "content": "<p>the id is just an int, but it's parallel's job to only hand out one per available compute core.  so when a thread exits, parallel can either re-issue a previous id or the next available.</p>\n<p>been a long time, but the magic happens in parallel_mapping() where it keeps track of everything including recursive parallel invocations.  that was part of work years ago to make bu_parallel robust to applications kicking off N threads, and each of those N threads potentially kicking off their own N threads, and works hard to handle that robustly.</p>",
+        "id": 455694249,
+        "sender_full_name": "Sean",
+        "timestamp": 1722529029
+    },
+    {
+        "content": "<p>I see what they were trying to do now. They used bu_thread_id(), which is the literal os thread ID, instead of bu_parallel_id() which is the CPU number.</p>",
+        "id": 455694325,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722529049
+    },
+    {
+        "content": "<p>AHHhhh.. yeah, that'll do it.</p>",
+        "id": 455696171,
+        "sender_full_name": "Sean",
+        "timestamp": 1722529336
+    },
+    {
+        "content": "<p>That's not MAX_PSW ranged...</p>",
+        "id": 455696227,
+        "sender_full_name": "Sean",
+        "timestamp": 1722529342
+    },
+    {
+        "content": "<p>I think you added that for the temp file debugging a while back, yes?</p>",
+        "id": 455696821,
+        "sender_full_name": "Sean",
+        "timestamp": 1722529416
+    },
+    {
+        "content": "<p>exactly, hench where my indexing question came from heh. MAX_PSW + the right function appears to do the trick - grabbing some speed metrics now</p>",
+        "id": 455696976,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722529438
+    },
+    {
+        "content": "<p>Yeah, per-cpu buffers would be problematic if the index were even uint16_t for some cases, definitely not uint32 or 64</p>",
+        "id": 455697413,
+        "sender_full_name": "Sean",
+        "timestamp": 1722529500
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/104062-brlcad/topic/general/near/455696821\">said</a>:</p>\n<blockquote>\n<p>I think you added that for the temp file debugging a while back, yes?</p>\n</blockquote>\n<p>I added it to generate pseudo-random temp file names in a parallel run.</p>",
+        "id": 455697773,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722529580
+    },
+    {
+        "content": "<p>might be a good candidate for migration to temp.c as a static to avoid confusion, or at least updating the header to make it clear it shouldn't be used with parallel as an index</p>",
+        "id": 455698876,
+        "sender_full_name": "Sean",
+        "timestamp": 1722529823
+    },
+    {
+        "content": "<p>I think functionally it moreso belongs in parallel. But definitely needs some better header documentation</p>",
+        "id": 455700502,
+        "sender_full_name": "Christopher",
+        "timestamp": 1722530182
+    },
+    {
+        "content": "<p>Agree it functionally belongs in parallel if it's going to be public API.  </p>\n<p>Static would just be to reduce API footprint if that's the only use.  All public API should (ideally) be used in multiple places too to justify them, but that's long-term maintenance and of course conflicts with works in progress that might only have 0 or 1 places in use.  Will just have to keep an eye out for some place to leverage it meaningfully.</p>",
+        "id": 455705298,
+        "sender_full_name": "Sean",
+        "timestamp": 1722531457
+    },
+    {
+        "content": "<p>If we had proper logging, I'd want thread ID and parallel ID prefixed on the log lines to know who is saying what</p>",
+        "id": 455705606,
+        "sender_full_name": "Sean",
+        "timestamp": 1722531552
+    },
+    {
+        "content": "<p>something I've had in mind for yearss, and reminded of just recently with Dwayne's comment about not wanting rt to output anything.</p>",
+        "id": 455705803,
+        "sender_full_name": "Sean",
+        "timestamp": 1722531609
     }
 ]

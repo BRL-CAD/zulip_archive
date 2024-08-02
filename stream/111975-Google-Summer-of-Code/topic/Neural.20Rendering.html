@@ -2271,5 +2271,172 @@ An error of 1° is reasonable also in your case and if my calculations are exact
 
 
 
-<hr><p>Last updated: Aug 01 2024 at 00:44 UTC</p>
+<a name="455558171"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455558171" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455558171">(Aug 01 2024 at 06:02)</a>:</h4>
+<p>Shame I didn't notice/read this paper sooner, but looks like this siggraph paper is right on track with what we're trying to achieve with impressive multiviewer results:  <a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+
+
+
+<a name="455619388"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455619388" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455619388">(Aug 01 2024 at 11:07)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455558171">ha scritto</a>:</p>
+<blockquote>
+<p>Shame I didn't notice/read this paper sooner, but looks like this siggraph paper is right on track with what we're trying to achieve with impressive multiviewer results:  <a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+</blockquote>
+<p>This is fantastic, I just tried the software of <a href="https://github.com/NVlabs/instant-ngp">https://github.com/NVlabs/instant-ngp</a> (which is the base code they use) and the training time is of the order of seconds even with my poor GTX 1060!!</p>
+
+
+
+<a name="455626048"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455626048" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455626048">(Aug 01 2024 at 11:48)</a>:</h4>
+<p>Nuts.  instant-ngp code license is non-commercial only</p>
+
+
+
+<a name="455627431"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455627431" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455627431">(Aug 01 2024 at 11:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455626048">said</a>:</p>
+<blockquote>
+<p>Nuts.  instant-ngp code license is non-commercial only</p>
+</blockquote>
+<p>It’s not so bad, all we need to do is understand their paper and the one that Sean sent. The coding part shouldn’t be difficult even if we have to code from 0.</p>
+
+
+
+<a name="455657387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455657387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455657387">(Aug 01 2024 at 14:00)</a>:</h4>
+<p>Yeah, the implementation seems pretty straightforward.  The main limitation is they didn't get a performance gain.  They train for a few minutes, then ray query performance is on par with the ray tracing time.  The one big gain they saw was getting that on-par ray tracing time with an order of magnitude less memory use.  So exceptional compression in the latent space.</p>
+
+
+
+<a name="455659182"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455659182" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455659182">(Aug 01 2024 at 14:08)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455421932">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> please elaborate, (and point to latest code!) what's the resolution of the grid net, what are the layers, how many epochs, how long did training take, how long does lookup take, etc...</p>
+</blockquote>
+<p>There are three resolutions: <br>
+first,I give up bilinear interpolation and try to learn a matrix to express the relationship between neighboring vectors<br>
+second, I consider neighboring vectors in the range 7&times;7 instead of 2&times;2<br>
+third, I use a threshold to reduce noise.<br>
+here is my codes: <a href="https://github.com/Rainy-fall-end/Rendernn/blob/main/networks/gridnet3.py">https://github.com/Rainy-fall-end/Rendernn/blob/main/networks/gridnet3.py</a><br>
+100,000 points need to be sampled, but the model actually converges when <strong>20,000</strong> points are used，The training will take 2 minutes total.(4060)<br>
+The yellow curve is the improved gridnet, the purple one is the original gridnet. <br>
+<a href="/user_uploads/1549/Gzl76_z3fF_bVI5hztuH4h9T/2024-08-01-220614.png">2024-08-01-220614.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Gzl76_z3fF_bVI5hztuH4h9T/2024-08-01-220614.png" title="2024-08-01-220614.png"><img data-original-dimensions="1623x703" src="/user_uploads/thumbnail/1549/Gzl76_z3fF_bVI5hztuH4h9T/2024-08-01-220614.png/840x560.webp"></a></div>
+
+
+
+<a name="455659364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455659364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455659364">(Aug 01 2024 at 14:09)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455558171">said</a>:</p>
+<blockquote>
+<p>Shame I didn't notice/read this paper sooner, but looks like this siggraph paper is right on track with what we're trying to achieve with impressive multiviewer results:  <a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+</blockquote>
+<p>But this one looks so much better than mine....</p>
+
+
+
+<a name="455659469"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455659469" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455659469">(Aug 01 2024 at 14:09)</a>:</h4>
+<p>Cool, thanks!  I'll take a look in more detail.  Looks like it converges pretty quickly?  How long did it take to get to step 200?</p>
+
+
+
+<a name="455659590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455659590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455659590">(Aug 01 2024 at 14:10)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455659364">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455558171">said</a>:</p>
+<blockquote>
+<p>Shame I didn't notice/read this paper sooner, but looks like this siggraph paper is right on track with what we're trying to achieve with impressive multiviewer results:  <a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+</blockquote>
+<p>But this one looks so much better than mine....</p>
+</blockquote>
+<p>Don't worry about that -- this is very ripe area of research.</p>
+
+
+
+<a name="455659621"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455659621" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455659621">(Aug 01 2024 at 14:10)</a>:</h4>
+<p>About 30 seconds.</p>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455659469">said</a>:</p>
+<blockquote>
+<p>Cool, thanks!  I'll take a look in more detail.  Looks like it converges pretty quickly?  How long did it take to get to step 200?</p>
+</blockquote>
+
+
+
+<a name="455659622"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455659622" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455659622">(Aug 01 2024 at 14:10)</a>:</h4>
+<p>It also means it's worth exploring all avenues as the details matter.</p>
+
+
+
+<a name="455660576"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455660576" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455660576">(Aug 01 2024 at 14:15)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455619388">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455558171">ha scritto</a>:</p>
+<blockquote>
+<p>Shame I didn't notice/read this paper sooner, but looks like this siggraph paper is right on track with what we're trying to achieve with impressive multiviewer results:  <a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+</blockquote>
+<p>This is fantastic, I just tried the software of <a href="https://github.com/NVlabs/instant-ngp">https://github.com/NVlabs/instant-ngp</a> (which is the base code they use) and the training time is of the order of seconds even with my poor GTX 1060!!</p>
+</blockquote>
+<p>This looks like it's implemented in C++, are you going to reproduce it in pytorch?</p>
+
+
+
+<a name="455660836"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455660836" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455660836">(Aug 01 2024 at 14:16)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455660576">ha scritto</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455619388">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455558171">ha scritto</a>:</p>
+<blockquote>
+<p>Shame I didn't notice/read this paper sooner, but looks like this siggraph paper is right on track with what we're trying to achieve with impressive multiviewer results:  <a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+</blockquote>
+<p>This is fantastic, I just tried the software of <a href="https://github.com/NVlabs/instant-ngp">https://github.com/NVlabs/instant-ngp</a> (which is the base code they use) and the training time is of the order of seconds even with my poor GTX 1060!!</p>
+</blockquote>
+<p>This looks like it's implemented in C++, are you going to reproduce it in pytorch?</p>
+</blockquote>
+<p>I am still understanding all the ideas of those two papers, but yes probably I will reproduce in pytorch.</p>
+
+
+
+<a name="455686227"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455686227" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455686227">(Aug 01 2024 at 15:53)</a>:</h4>
+<p>The N-BVH paper was an outstanding talk -- will see if I can get a copy, but it's a direct response to AMD's NIF paper.   They key insight was to not use the ray+dir but to instead use 3 sample points along the ray on the interior of the bounding volume along with a BVH.<br>
+<a href="https://weiphil.github.io/portfolio/neural_bvh">https://weiphil.github.io/portfolio/neural_bvh</a></p>
+
+
+
+<a name="455686661"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455686661" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455686661">(Aug 01 2024 at 15:55)</a>:</h4>
+<p>The key insight of using interior points was demonstrated with just 3-10 sample points which of course made training slower as points are added, but achieved essentially perfect occupancy recall even with high frequency detail.  Adding in a BVH was a training optimization so they could reduce it back down to just 3 points per BVH node.</p>
+
+
+
+<a name="455763730"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455763730" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455763730">(Aug 01 2024 at 21:59)</a>:</h4>
+<p>I was studying that paper and had a few questions:</p>
+<ul>
+<li>They mention using a batch size of 2^18 rays, which is 262,144.</li>
+<li>They use a total of 100 batches.</li>
+</ul>
+<p>This means their training set consists of 2^18×100, equating to approximately 26 million rays. Moreover, they state that the training time is at most 2-3 minutes.</p>
+<p>I just discovered that it is indeed possible to use such a large batch size (I had been training NIF with a batch size of just 512 rays until now...). However, theory suggests that using a large batch size can increase variance error. Likely, with such a large training set, they do not encounter this issue.</p>
+<p>What puzzles me most is how they can achieve convergence in just about 2-3 minutes.</p>
+<p>To investigate, I increased the batch size for the NIF model (with which I previously achieved an accuracy of 0.994). As expected, the model trains faster (20 minutes for 1 million rays), and the performance metrics remained roughly the same (just a little worse).</p>
+
+
+
+<a name="455764243"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455764243" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455764243">(Aug 01 2024 at 22:02)</a>:</h4>
+<p>However, convergence for NIF is much slower than their approach, meaning that training a simple NIF requires more time and results in lower accuracy. Likely, the bounding volume hierarchies approach they use significantly helps the neural network.</p>
+
+
+
+<hr><p>Last updated: Aug 02 2024 at 00:39 UTC</p>
 </html>
