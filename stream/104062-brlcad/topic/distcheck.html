@@ -65,5 +65,70 @@ Errors while running CTest
 
 
 
-<hr><p>Last updated: Aug 02 2024 at 00:39 UTC</p>
+<a name="455794065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/455794065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#455794065">(Aug 02 2024 at 01:07)</a>:</h4>
+<p>Just an update, ran make check and the errors are agnostic.  Fails debug and release on those tests, so something newish.</p>
+
+
+
+<a name="455840434"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/455840434" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#455840434">(Aug 02 2024 at 06:08)</a>:</h4>
+<p>Failures are also on RELEASE branch just the same. </p>
+<p>Looking into the lib issues, looks like it's because the unit tests are wired wrong, as if they were installed into bin:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>morrison@Miniagua tests % ./ged_test_tops
+dyld[47269]: Library not loaded: @executable_path/../lib/libtcl8.6.dylib
+  Referenced from: &lt;82312D51-F510-33AC-9283-067C3FBAFF54&gt; /Volumes/X10/brlcad.RELEASE/.build.release/src/libged/tests/ged_test_tops
+  Reason: tried: '/Volumes/X10/brlcad.RELEASE/.build.release/src/libged/lib/libtcl8.6.dylib' (no such file)
+zsh: abort      ./ged_test_tops
+morrison@Miniagua tests % DYLD_LIBRARY_PATH=../../../lib ./ged_test_tops
+Usage: ./ged_test_tops file.g
+morrison@Miniagua tests % otool -L ./ged_test_tops
+./ged_test_tops:
+    @rpath/libged.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libanalyze.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libwdb.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/liboptical.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @executable_path/../lib/libtcl8.6.dylib (compatibility version 8.6.0, current version 8.6.14)
+    @rpath/libdm.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libicv.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libnetpbm.dylib (compatibility version 0.0.0, current version 0.0.0)
+    @rpath/libutahrle.19.dylib (compatibility version 19.0.0, current version 19.0.1)
+    @rpath/librt.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libbrep.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libnmg.dylib (compatibility version 0.0.0, current version 0.0.0)
+    @rpath/libbv.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libbg.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libbn.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libOpenNURBS.dylib (compatibility version 0.0.0, current version 0.0.0)
+    @rpath/libmanifold.2.dylib (compatibility version 2.0.0, current version 2.4.5)
+    @rpath/libassimp.5.dylib (compatibility version 5.0.0, current version 5.4.1)
+    @rpath/libgeogram.1.dylib (compatibility version 1.0.0, current version 1.9.0)
+    @rpath/libpkg.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    @rpath/libbu.20.dylib (compatibility version 20.0.0, current version 20.0.1)
+    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.61.1)
+    @rpath/png.framework/Versions/1.6.43/png (compatibility version 0.0.0, current version 0.0.0)
+    @rpath/libz_brl.1.dylib (compatibility version 1.0.0, current version 1.3.1)
+    @rpath/liblmdb.dylib (compatibility version 0.0.0, current version 0.0.0)
+    @rpath/libregex_brl.1.dylib (compatibility version 1.0.0, current version 1.0.4)
+morrison@Miniagua tests % pwd
+/Volumes/X10/brlcad.RELEASE/.build.release/src/libged/tests
+</code></pre></div>
+
+
+
+<a name="456036621"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456036621" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456036621">(Aug 02 2024 at 20:24)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> investigated the dyld issue a few hours and don't understand why libtcl is being changed/installed with a @executable_path into the lib.  Do you recall why? </p>
+<p>That seems to fundamentally be the issue.  If I replace @executable_path/../lib/libtcl8.6.dylib with @rpath/libtcl8.6.dylib like all the other libs, it works just fine.  I had to replace them in libtcl itself as well as all the libs and apps that link tcl, but presumably they're inheriting from libtcl's original setting.</p>
+<p>I found the section in the patch file where you override it, but wanted to check why before mucking with it.</p>
+
+
+
+<a name="456053022"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456053022" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456053022">(Aug 02 2024 at 22:27)</a>:</h4>
+<p>At a guess I probably was using the settings from elsewhere in our build, and didn't properly clue in that I needed to go that route for libtcl</p>
+
+
+
+<hr><p>Last updated: Aug 03 2024 at 00:39 UTC</p>
 </html>

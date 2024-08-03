@@ -16,5 +16,29 @@
         "id": 455760039,
         "sender_full_name": "Sean",
         "timestamp": 1722547910
+    },
+    {
+        "content": "<p>Just an update, ran make check and the errors are agnostic.  Fails debug and release on those tests, so something newish.</p>",
+        "id": 455794065,
+        "sender_full_name": "Sean",
+        "timestamp": 1722560873
+    },
+    {
+        "content": "<p>Failures are also on RELEASE branch just the same. </p>\n<p>Looking into the lib issues, looks like it's because the unit tests are wired wrong, as if they were installed into bin:</p>\n<div class=\"codehilite\" data-code-language=\"Text only\"><pre><span></span><code>morrison@Miniagua tests % ./ged_test_tops\ndyld[47269]: Library not loaded: @executable_path/../lib/libtcl8.6.dylib\n  Referenced from: &lt;82312D51-F510-33AC-9283-067C3FBAFF54&gt; /Volumes/X10/brlcad.RELEASE/.build.release/src/libged/tests/ged_test_tops\n  Reason: tried: '/Volumes/X10/brlcad.RELEASE/.build.release/src/libged/lib/libtcl8.6.dylib' (no such file)\nzsh: abort      ./ged_test_tops\nmorrison@Miniagua tests % DYLD_LIBRARY_PATH=../../../lib ./ged_test_tops\nUsage: ./ged_test_tops file.g\nmorrison@Miniagua tests % otool -L ./ged_test_tops\n./ged_test_tops:\n    @rpath/libged.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libanalyze.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libwdb.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/liboptical.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @executable_path/../lib/libtcl8.6.dylib (compatibility version 8.6.0, current version 8.6.14)\n    @rpath/libdm.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libicv.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libnetpbm.dylib (compatibility version 0.0.0, current version 0.0.0)\n    @rpath/libutahrle.19.dylib (compatibility version 19.0.0, current version 19.0.1)\n    @rpath/librt.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libbrep.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libnmg.dylib (compatibility version 0.0.0, current version 0.0.0)\n    @rpath/libbv.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libbg.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libbn.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libOpenNURBS.dylib (compatibility version 0.0.0, current version 0.0.0)\n    @rpath/libmanifold.2.dylib (compatibility version 2.0.0, current version 2.4.5)\n    @rpath/libassimp.5.dylib (compatibility version 5.0.0, current version 5.4.1)\n    @rpath/libgeogram.1.dylib (compatibility version 1.0.0, current version 1.9.0)\n    @rpath/libpkg.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    @rpath/libbu.20.dylib (compatibility version 20.0.0, current version 20.0.1)\n    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1336.61.1)\n    @rpath/png.framework/Versions/1.6.43/png (compatibility version 0.0.0, current version 0.0.0)\n    @rpath/libz_brl.1.dylib (compatibility version 1.0.0, current version 1.3.1)\n    @rpath/liblmdb.dylib (compatibility version 0.0.0, current version 0.0.0)\n    @rpath/libregex_brl.1.dylib (compatibility version 1.0.0, current version 1.0.4)\nmorrison@Miniagua tests % pwd\n/Volumes/X10/brlcad.RELEASE/.build.release/src/libged/tests\n</code></pre></div>",
+        "id": 455840434,
+        "sender_full_name": "Sean",
+        "timestamp": 1722578903
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> investigated the dyld issue a few hours and don't understand why libtcl is being changed/installed with a @executable_path into the lib.  Do you recall why? </p>\n<p>That seems to fundamentally be the issue.  If I replace @executable_path/../lib/libtcl8.6.dylib with @rpath/libtcl8.6.dylib like all the other libs, it works just fine.  I had to replace them in libtcl itself as well as all the libs and apps that link tcl, but presumably they're inheriting from libtcl's original setting.</p>\n<p>I found the section in the patch file where you override it, but wanted to check why before mucking with it.</p>",
+        "id": 456036621,
+        "sender_full_name": "Sean",
+        "timestamp": 1722630253
+    },
+    {
+        "content": "<p>At a guess I probably was using the settings from elsewhere in our build, and didn't properly clue in that I needed to go that route for libtcl</p>",
+        "id": 456053022,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722637674
     }
 ]

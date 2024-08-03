@@ -2438,5 +2438,59 @@ The yellow curve is the improved gridnet, the purple one is the original gridnet
 
 
 
-<hr><p>Last updated: Aug 02 2024 at 00:39 UTC</p>
+<a name="455811517"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455811517" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455811517">(Aug 02 2024 at 03:17)</a>:</h4>
+<p>That 262144 is almost certainly a 512x512 grid, 100 different views</p>
+
+
+
+<a name="455811606"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455811606" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455811606">(Aug 02 2024 at 03:17)</a>:</h4>
+<p>Now have to take performance with a grain of salt.  I didn't see the hardware, but it they're on a high-end GPU, that might be an hour of training on a CPU..</p>
+
+
+
+<a name="455812755"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455812755" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455812755">(Aug 02 2024 at 03:24)</a>:</h4>
+<p>In their talk the BVH optimization using 3 samples vs 10 samples cut the training time roughly in half (1min)</p>
+
+
+
+<a name="455868509"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455868509" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455868509">(Aug 02 2024 at 08:17)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455811606">ha scritto</a>:</p>
+<blockquote>
+<p>Now have to take performance with a grain of salt.  I didn't see the hardware, but it they're on a high-end GPU, that might be an hour of training on a CPU..</p>
+</blockquote>
+<p>They used an RTX 3090</p>
+
+
+
+<a name="455868781"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455868781" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455868781">(Aug 02 2024 at 08:18)</a>:</h4>
+<p>How do you estimate that it would be an hour on a CPU?</p>
+
+
+
+<a name="455917973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455917973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455917973">(Aug 02 2024 at 12:05)</a>:</h4>
+<p>I decided to implement first the multi-resolution hash grid and validate it, then on top of this I will add the BVH approach so as to integrate rays in the 3D grid.</p>
+
+
+
+<a name="455987086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/455987086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#455987086">(Aug 02 2024 at 17:09)</a>:</h4>
+<p>I found this wonderful repository <a href="https://github.com/ashawkey/torch-ngp">https://github.com/ashawkey/torch-ngp</a> and I am using this as a base code for the multi-resolution hash grid.</p>
+
+
+
+<a name="456042543"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456042543" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456042543">(Aug 02 2024 at 21:11)</a>:</h4>
+<p>I implemented the multi-resolution hash grid and I tested it on top of my previous NIF network. It's incredible how it converges in just few seconds even on my poor gpu.<br>
+It achieves only 96% of F1 but it was expected since this encoding is not appropriated for rays+dir input (as we have in NIF) but they are appropriated for 3D points (like in NVBH).<br>
+Tomorrow I will focus on this part <span aria-label="+1" class="emoji emoji-1f44d" role="img" title="+1">:+1:</span></p>
+
+
+
+<hr><p>Last updated: Aug 03 2024 at 00:39 UTC</p>
 </html>
