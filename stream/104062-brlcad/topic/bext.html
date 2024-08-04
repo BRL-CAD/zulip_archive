@@ -39,5 +39,55 @@
 
 
 
-<hr><p>Last updated: Aug 03 2024 at 00:39 UTC</p>
+<a name="456109914"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456109914" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456109914">(Aug 03 2024 at 06:02)</a>:</h4>
+<p>okay, so it's currently looking for it that way.. and that possibly explains some other issues I kept running into. </p>
+<p>bit unexpected to have running something in the build dir affect the source tree by default.  I assumed it was cloning into the build dir.  Invoking action was a build action, so it probably shouldn't be touching the source dir.</p>
+<p>Any reason it couldn't just be an external project add like bext is doing?  That way, the clone rule will live in the build logic and the files will be in the build tree.</p>
+
+
+
+<a name="456158063"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456158063" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456158063">(Aug 03 2024 at 13:16)</a>:</h4>
+<p>If the cmake configure does a clone, it <em>is</em> doing it in the build dir.  The submodule in src/ was to allow a single git clone command to download everything needed for any BRL-CAD build config, in a single shot</p>
+
+
+
+<a name="456158228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456158228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456158228">(Aug 03 2024 at 13:17)</a>:</h4>
+<p>If the user clones BRL-CAD with a git clone --recursive, then (and only then) src/bext is populated.  Otherwise, everything happens in the build directory</p>
+
+
+
+<a name="456177994"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456177994" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456177994">(Aug 03 2024 at 15:36)</a>:</h4>
+<p>Ahh, okay, so then it doesn't explain some other issues I kept running into...</p>
+
+
+
+<a name="456178292"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456178292" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456178292">(Aug 03 2024 at 15:38)</a>:</h4>
+<p>Weird.  I never did the recursive, but the auto kept giving me trouble.  I've since switched to a manual build of bext because it would be broken after any change to a submodule (different reasons iirc).</p>
+
+
+
+<a name="456178560"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456178560" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456178560">(Aug 03 2024 at 15:39)</a>:</h4>
+<p>So then sounds like there's three ways -- a recursive clone into src, an auto clone into builddir, or manual BRLCAD_EXT_DIR</p>
+
+
+
+<a name="456197123"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456197123" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456197123">(Aug 03 2024 at 17:50)</a>:</h4>
+<p>Correct.</p>
+
+
+
+<a name="456197324"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456197324" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456197324">(Aug 03 2024 at 17:51)</a>:</h4>
+<p>The first is intended for the "I don't care about disk space, make sure I've got everything I'll ever need" case.  The second is the "only build what I need for this config of BRL-CAD" case.  The third is the "I'm going to be compiling this sucker a lot, I don't want to keep rebuilding this" case.</p>
+
+
+
+<hr><p>Last updated: Aug 04 2024 at 00:43 UTC</p>
 </html>

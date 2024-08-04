@@ -28,5 +28,53 @@
         "id": 456052933,
         "sender_full_name": "starseeker",
         "timestamp": 1722637595
+    },
+    {
+        "content": "<p>okay, so it's currently looking for it that way.. and that possibly explains some other issues I kept running into. </p>\n<p>bit unexpected to have running something in the build dir affect the source tree by default.  I assumed it was cloning into the build dir.  Invoking action was a build action, so it probably shouldn't be touching the source dir.</p>\n<p>Any reason it couldn't just be an external project add like bext is doing?  That way, the clone rule will live in the build logic and the files will be in the build tree.</p>",
+        "id": 456109914,
+        "sender_full_name": "Sean",
+        "timestamp": 1722664935
+    },
+    {
+        "content": "<p>If the cmake configure does a clone, it <em>is</em> doing it in the build dir.  The submodule in src/ was to allow a single git clone command to download everything needed for any BRL-CAD build config, in a single shot</p>",
+        "id": 456158063,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722690997
+    },
+    {
+        "content": "<p>If the user clones BRL-CAD with a git clone --recursive, then (and only then) src/bext is populated.  Otherwise, everything happens in the build directory</p>",
+        "id": 456158228,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722691031
+    },
+    {
+        "content": "<p>Ahh, okay, so then it doesn't explain some other issues I kept running into...</p>",
+        "id": 456177994,
+        "sender_full_name": "Sean",
+        "timestamp": 1722699413
+    },
+    {
+        "content": "<p>Weird.  I never did the recursive, but the auto kept giving me trouble.  I've since switched to a manual build of bext because it would be broken after any change to a submodule (different reasons iirc).</p>",
+        "id": 456178292,
+        "sender_full_name": "Sean",
+        "timestamp": 1722699487
+    },
+    {
+        "content": "<p>So then sounds like there's three ways -- a recursive clone into src, an auto clone into builddir, or manual BRLCAD_EXT_DIR</p>",
+        "id": 456178560,
+        "sender_full_name": "Sean",
+        "timestamp": 1722699572
+    },
+    {
+        "content": "<p>Correct.</p>",
+        "id": 456197123,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722707413
+    },
+    {
+        "content": "<p>The first is intended for the \"I don't care about disk space, make sure I've got everything I'll ever need\" case.  The second is the \"only build what I need for this config of BRL-CAD\" case.  The third is the \"I'm going to be compiling this sucker a lot, I don't want to keep rebuilding this\" case.</p>",
+        "id": 456197324,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722707484
     }
 ]
