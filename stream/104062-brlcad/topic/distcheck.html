@@ -142,5 +142,41 @@ morrison@Miniagua tests % pwd
 
 
 
-<hr><p>Last updated: Aug 05 2024 at 00:41 UTC</p>
+<a name="456720201"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456720201" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456720201">(Aug 05 2024 at 22:33)</a>:</h4>
+<p>I might have an idea about what I was thinking, looking at the Tcl patch.  The first part of the patch, with the logic for CFG_RUNTIME and CFG_INSTALL, depends on Tcl_GetNameOfExecutable having something that will work with the relative paths.</p>
+
+
+
+<a name="456720418"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456720418" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456720418">(Aug 05 2024 at 22:34)</a>:</h4>
+<p>It's basically similar to what happens when _bu_dir_brlcad_root calls  wai_getExecutablePath - except in the Tcl case we don't have the equivalent of a fallback to wai_getModulePath</p>
+
+
+
+<a name="456720655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456720655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456720655">(Aug 05 2024 at 22:36)</a>:</h4>
+<p>In a "normal" Tcl install those paths are absolute to the install path, so it's not an issue, but that's not an option for a relocatable Tcl install.</p>
+
+
+
+<a name="456721000"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456721000" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456721000">(Aug 05 2024 at 22:38)</a>:</h4>
+<p>That may be why I went ahead and set that DYLIB_INSTALL_DIR the way I did, since there wouldn't be any expectation of things working without a suitable path from Tcl_GetNameOfExecutable</p>
+
+
+
+<a name="456726874"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456726874" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456726874">(Aug 05 2024 at 23:28)</a>:</h4>
+<p>I'll try the @rpath setting anyway and we can see what happens</p>
+
+
+
+<a name="456727061"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456727061" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456727061">(Aug 05 2024 at 23:30)</a>:</h4>
+<p>Pushed to main</p>
+
+
+
+<hr><p>Last updated: Aug 06 2024 at 00:40 UTC</p>
 </html>

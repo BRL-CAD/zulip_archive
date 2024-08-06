@@ -2534,5 +2534,63 @@ This is with 6 millions rays.</p>
 
 
 
-<hr><p>Last updated: Aug 05 2024 at 00:41 UTC</p>
+<a name="456674229"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456674229" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456674229">(Aug 05 2024 at 18:34)</a>:</h4>
+<p><a href="/user_uploads/1549/HEKDCZBT8G0lFt_qNtprXj8v/Figure_1.png">Figure_1.png</a><br>
+This is with 6 million rays BUT generated from 22 different and fixed views (512x512x22) instead of using random sampling. Metrics are  higher with this sampling: I got 0.997 in both accuracy and F1.</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/HEKDCZBT8G0lFt_qNtprXj8v/Figure_1.png" title="Figure_1.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/HEKDCZBT8G0lFt_qNtprXj8v/Figure_1.png/840x560.webp"></a></div>
+
+
+
+<a name="456710880"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456710880" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456710880">(Aug 05 2024 at 21:28)</a>:</h4>
+<p>Curious, <span class="user-mention" data-user-id="702819">@Matteo Balice</span> why 22?  That’s what, 16degrees or so in one axis of rotation?</p>
+
+
+
+<a name="456712345"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456712345" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456712345">(Aug 05 2024 at 21:38)</a>:</h4>
+<p>Well that is not exactly 22 views. I finally successfully sampled 100 views (thanks to my Mac M1) each with 512x512 rays for a total of 26 millions. However when I load all these rays on PyTorch I go out of memory… so I decided to cut only 6 millions rays.</p>
+
+
+
+<a name="456712466"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456712466" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456712466">(Aug 05 2024 at 21:39)</a>:</h4>
+<p>But before cutting I randomly shuffle the 26 millions rays, so it is not right to say that they are 22 views.</p>
+
+
+
+<a name="456712648"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456712648" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456712648">(Aug 05 2024 at 21:40)</a>:</h4>
+<p>Now I am trying a way to load more samples</p>
+
+
+
+<a name="456713103"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456713103" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456713103">(Aug 05 2024 at 21:43)</a>:</h4>
+<p>So it’s better to say that we have 60k rays for each view (100 views)</p>
+
+
+
+<a name="456720557"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456720557" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456720557">(Aug 05 2024 at 22:35)</a>:</h4>
+<p><a href="/user_uploads/1549/cW3YboKe-687unME3psHXxvu/Figure_1.png">Figure_1.png</a><br>
+10 millions. Getting better <span aria-label="mechanical arm" class="emoji emoji-1f9be" role="img" title="mechanical arm">:mechanical_arm:</span></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/cW3YboKe-687unME3psHXxvu/Figure_1.png" title="Figure_1.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/cW3YboKe-687unME3psHXxvu/Figure_1.png/840x560.webp"></a></div>
+
+
+
+<a name="456720796"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456720796" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456720796">(Aug 05 2024 at 22:37)</a>:</h4>
+<p>Even though there is no much difference with 6 millions... But I noticed that with 10 millions I did not converge in 10 epochs like in 6 millions case... Probably I need to train more.</p>
+
+
+
+<a name="456722296"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456722296" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456722296">(Aug 05 2024 at 22:49)</a>:</h4>
+<p>(just to be clear: I always print this view because I noticed it’s one of the most difficult to render, but the model is able to render also all the others views)</p>
+
+
+
+<hr><p>Last updated: Aug 06 2024 at 00:40 UTC</p>
 </html>
