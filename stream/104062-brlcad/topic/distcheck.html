@@ -178,5 +178,236 @@ morrison@Miniagua tests % pwd
 
 
 
-<hr><p>Last updated: Aug 06 2024 at 00:40 UTC</p>
+<a name="456873718"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456873718" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456873718">(Aug 06 2024 at 14:38)</a>:</h4>
+<p>At least on a auto debug rebuild, I'm hitting an error that is probably unrelated, but same error I think bill was getting:</p>
+<p>[  6%] Building C object CMakeFiles/itcl3.4.dir/generic/itclStubInit.c.o<br>
+-- stderr output is:</p>
+<p>In file included from /Volumes/X10/brlcad/.build/bext_build/itcl/ITCL_BLD-prefix/src/ITCL_BLD/generic/itclStubInit.c:12:</p>
+<p>/Volumes/X10/brlcad/.build/bext_build/itcl/ITCL_BLD-prefix/src/ITCL_BLD/generic/itclInt.h:50:10: fatal error: 'tclInt.h' file not found</p>
+<p>#include "tclInt.h"</p>
+<p>^~~~~~~~~~</p>
+<p>1 error generated.</p>
+<p>make[5]: *** [CMakeFiles/itcl3.4.dir/generic/itclStubInit.c.o] Error 1</p>
+
+
+
+<a name="456874039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456874039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456874039">(Aug 06 2024 at 14:39)</a>:</h4>
+<p>On a debug BRLCAD_BEXT_DIR build, it gets much much farther, but fails during asc2g:</p>
+<p>[ 62%] Built target asc2g</p>
+<p>[ 62%] <strong>Generating ../share/db/bldg391.g</strong></p>
+<p>[ 62%] Built target bldg391.g</p>
+<p>[ 62%] <strong>Generating ../share/db/m35.g</strong></p>
+<p>[ 62%] Built target m35.g</p>
+<p>[ 62%] <strong>Generating ../share/db/moss.g</strong></p>
+<p>[ 62%] Built target moss.g</p>
+<p>[ 62%] <strong>Generating ../share/db/sphflake.g</strong></p>
+<p>[ 62%] Built target sphflake.g</p>
+<p>[ 62%] <strong>Generating ../share/db/star.g</strong></p>
+<p>[ 62%] Built target star.g</p>
+<p>[ 62%] <strong>Generating ../share/db/world.g</strong></p>
+<p>[ 62%] Built target world.g</p>
+<p>[ 62%] <strong>Generating ../share/db/aet.g</strong></p>
+<p>CMake Error at aet.cmake:36 (message):</p>
+<p>[aet] Failure: 1</p>
+<p>/Volumes/X10/brlcad/.build.debug/bin/asc2g</p>
+<p>/Volumes/X10/brlcad/db/aet.asc;/Volumes/X10/brlcad/.build.debug/share/db/aet.g"</p>
+<p>Failed to process input file (/Volumes/X10/brlcad/db/aet.asc)!</p>
+<p>unknown command: title</p>
+
+
+
+<a name="456874142"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456874142" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456874142">(Aug 06 2024 at 14:39)</a>:</h4>
+<p>release fails also on same asc2g</p>
+
+
+
+<a name="456874425"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456874425" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456874425">(Aug 06 2024 at 14:40)</a>:</h4>
+<p>OK.  The latter means Tcl isn't functioning correctly - probably not initializing correctly.  If you try manually running btclsh or bwish I would expect some kind of error report?</p>
+
+
+
+<a name="456874546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456874546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456874546">(Aug 06 2024 at 14:41)</a>:</h4>
+<p>The tclInt.h bit is Itcl not finding an internal Tcl header it needs to build</p>
+
+
+
+<a name="456874565"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456874565" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456874565">(Aug 06 2024 at 14:41)</a>:</h4>
+<p>Hold on the latter -- it doesn't look like it applied your rpath change</p>
+
+
+
+<a name="456875186"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875186" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875186">(Aug 06 2024 at 14:43)</a>:</h4>
+<p>The Itcl CMakeLists.txt file should be telling the Itcl build where to go looking for Tcl private headers - we should be passing in TCL_SOURCE_DIR to the parent ExternalProject_Add for Itcl</p>
+
+
+
+<a name="456875214"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875214" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875214">(Aug 06 2024 at 14:43)</a>:</h4>
+<p>-DTCL_SOURCE_DIR=${CMAKE_SOURCE_DIR}/tcl/tcl</p>
+
+
+
+<a name="456875274"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875274" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875274">(Aug 06 2024 at 14:44)</a>:</h4>
+<p><em>sigh</em> .. so I must be crazy, but outside of blowing away an entire bext build dir, how "should" I be getting libtcl to recompile correctly?</p>
+
+
+
+<a name="456875367"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875367" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875367">(Aug 06 2024 at 14:44)</a>:</h4>
+<p>If the tcl/tcl submodule isn't populated, that's when I would expect it not to find the header</p>
+
+
+
+<a name="456875458"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875458" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875458">(Aug 06 2024 at 14:44)</a>:</h4>
+<p>I clear the build subdirectory for the specific target I'm wanting to reset.  So, if I needed to start over with Tcl, I'd clear the build/tcl subdirectory</p>
+
+
+
+<a name="456875500"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875500" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875500">(Aug 06 2024 at 14:45)</a>:</h4>
+<p>CMake should automatically re-run and reset things</p>
+
+
+
+<a name="456875552"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875552" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875552">(Aug 06 2024 at 14:45)</a>:</h4>
+<p>just doing a git pull and rebuild is what I'd expect and that didn't work.</p>
+
+
+
+<a name="456875658"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875658" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875658">(Aug 06 2024 at 14:45)</a>:</h4>
+<p>Once the ExternalProject_Add outputs are populated, an update of the source directory doesn't (in my experience) reliably reset things</p>
+
+
+
+<a name="456875663"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875663" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875663">(Aug 06 2024 at 14:45)</a>:</h4>
+<p>so make clean in bext/.build/tcl ?</p>
+
+
+
+<a name="456875765"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875765" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875765">(Aug 06 2024 at 14:46)</a>:</h4>
+<p>That might do it - I would straight up remove bext/.build/tcl</p>
+
+
+
+<a name="456875877"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456875877" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456875877">(Aug 06 2024 at 14:46)</a>:</h4>
+<p>You can then do make TCL_BLD to just redo the Tcl build and dependencies</p>
+
+
+
+<a name="456877154"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456877154" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456877154">(Aug 06 2024 at 14:52)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/stream/104062-brlcad/topic/distcheck/near/456875658">said</a>:</p>
+<blockquote>
+<p>Once the ExternalProject_Add outputs are populated, an update of the source directory doesn't (in my experience) reliably reset things</p>
+</blockquote>
+<p>Is there intuition as to why that's not working?  Is that because of things in our cmake?  What can we do about it barring massive deletions?</p>
+
+
+
+<a name="456877648"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456877648" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456877648">(Aug 06 2024 at 14:54)</a>:</h4>
+<p>Because that's going to bite ... every time we git pull on bext, going to have to either blow everything away whenever there's an update (which is going to be crazy dev cycle times) or hope to catch which subdirs update each pull and manually make-clean each of them (make clean in tcl subdir worked btw)</p>
+
+
+
+<a name="456878309"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456878309" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456878309">(Aug 06 2024 at 14:58)</a>:</h4>
+<p>I'm not completely sure of the reasons.  I do have the parent build always re-executing the build steps every time  the targets are run, specifically to try to catch such things, but I think that may be only the build step.</p>
+
+
+
+<a name="456878502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456878502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456878502">(Aug 06 2024 at 14:58)</a>:</h4>
+<p>I did notice it seems to reliably avoid rework once compile + install is complete</p>
+
+
+
+<a name="456878525"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456878525" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456878525">(Aug 06 2024 at 14:58)</a>:</h4>
+<p>I don't know if it will re-execute the configure step reliably - that may be up to the build system itself (the way CMake spots and knows to re-run configure if the build files change.)</p>
+
+
+
+<a name="456878581"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456878581" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456878581">(Aug 06 2024 at 14:59)</a>:</h4>
+<p>So if Tcl isn't smart about that, we may not be getting reconfigures we need after a source update</p>
+
+
+
+<a name="456878663"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456878663" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456878663">(Aug 06 2024 at 14:59)</a>:</h4>
+<p>Here's another error, bext release rebuild (after clearing and rebuilding tcl):</p>
+<p>CMake Error at /Volumes/X10/brlcad.bext/.build.release/qt/Qt6_BLD-prefix/src/Qt6_BLD-stamp/Qt6_BLD-build-Release.cmake:37 (message):</p>
+<p>Command failed: 1</p>
+<p>'/opt/homebrew/Cellar/cmake/3.28.3/bin/cmake' '-DCMAKE_BUILD_TYPE=Release' '-P' '/Volumes/X10/brlcad.bext/.build.release/qt/qt_build.cmake'</p>
+<p>See also</p>
+<p>/Volumes/X10/brlcad.bext/.build.release/qt/Qt6_BLD-prefix/src/Qt6_BLD-stamp/Qt6_BLD-build-*.log<br>
+-- stdout output is:<br>
+-- stderr output is:</p>
+<p>CMake Error at /Volumes/X10/brlcad.bext/.build.release/qt/qt_build.cmake:18 (message):</p>
+<p>Qt build failed: [ 0%] Built target syncqt</p>
+<p>[ 1%] Built target Core_lib_pri</p>
+<p>[ 1%] Built target qmodule_pri</p>
+<p>Error copying directory from</p>
+<p>"/Volumes/X10/brlcad.bext/.build.release/qt/qt6-build/include/QtCore/.syncqt_staging"</p>
+<p>to</p>
+<p>"/Volumes/X10/brlcad.bext/.build.release/qt/qt6-build/lib/QtCore.framework/Versions/A/Headers".</p>
+<p>make[5]: *** [src/corelib/CMakeFiles/Core_copy_fw_sync_headers] Error 1</p>
+<p>make[4]: *** [src/corelib/CMakeFiles/Core_copy_fw_sync_headers.dir/all]</p>
+
+
+
+<a name="456878811"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456878811" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456878811">(Aug 06 2024 at 15:00)</a>:</h4>
+<p>That one is surprising - that appears to be internal to the Qt build itself</p>
+
+
+
+<a name="456879051"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456879051" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456879051">(Aug 06 2024 at 15:01)</a>:</h4>
+<p>That's why I remove the tcl subdirectory in such a case - it reliably reconfigures and rebuilds from scratch</p>
+
+
+
+<a name="456884506"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/456884506" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#456884506">(Aug 06 2024 at 15:22)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>
+</code></pre></div>
+
+<p>CMake Warning (dev) at /opt/homebrew/Cellar/cmake/3.28.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:438 (message):</p>
+<p>The package name passed to <code>find_package_handle_standard_args</code> (OpenCV)</p>
+<p>does not match the name of the calling package (OPENCV).  This can lead to</p>
+<p>problems in calling code that expects <code>find_package</code> result variables</p>
+<p>(e.g., <code>_FOUND</code>) to follow a certain pattern.</p>
+<p>Call Stack (most recent call first):</p>
+<p>/opt/homebrew/lib/cmake/opencv4/OPENCVConfig.cmake:354 (find_package_handle_standard_args)</p>
+<p>CMakeLists.txt:374 (find_package)</p>
+<p>opencv/CMakeLists.txt:4 (bext_enable)</p>
+<p>This warning is for project developers.  Use -Wno-dev to suppress it.</p>
+<p>CMake Warning (dev) at /opt/homebrew/Cellar/cmake/3.28.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:447 (message):</p>
+<p><code>find_package()</code> specify a version range but the module TCL does not</p>
+<p>support this capability.  Only the lower endpoint of the range will be</p>
+<p>used.</p>
+<p>Call Stack (most recent call first):</p>
+<p>CMake/FindTCL.cmake:461 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)</p>
+<p>tcl/CMakeLists.txt:24 (find_package)</p>
+<p>This warning is for project developers.  Use -Wno-dev to suppress it.</p>
+
+
+
+<hr><p>Last updated: Aug 07 2024 at 00:40 UTC</p>
 </html>

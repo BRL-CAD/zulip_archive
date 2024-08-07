@@ -89,5 +89,29 @@
 
 
 
-<hr><p>Last updated: Aug 06 2024 at 00:40 UTC</p>
+<a name="456929867"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456929867" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456929867">(Aug 06 2024 at 18:47)</a>:</h4>
+<p>Regarding the question of automatically responding to updated sources from git updates... My best guess is it would take some sort of custom UPDATE_COMMAND: <a href="https://cmake.org/cmake/help/latest/module/ExternalProject.html#update-step-options">https://cmake.org/cmake/help/latest/module/ExternalProject.html#update-step-options</a></p>
+
+
+
+<a name="456930885"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456930885" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456930885">(Aug 06 2024 at 18:54)</a>:</h4>
+<p>Sticking  <code>rsync -a --delete</code>  into the Itcl ExternalProject_Add as an UPDATE_COMMAND results in rebuilding  every time, so it appears to be triggering as expected - the trick would be to conditionally trigger based on a change in the original sources, rather than just doing it blindly.  Probably a CMake script could do it...</p>
+
+
+
+<a name="456968338"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456968338" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456968338">(Aug 06 2024 at 22:18)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span> food for thought, thanks for checking.  Might be a little more hairy if updates involve new patches also -- would probably need to catch any change inside the dependency subdir, invalidate it, and proceed as before (ideally).  Not sure it's worth the extra logic though if that'd need to get injected into any places outside update_command (e.g., patching).</p>
+
+
+
+<a name="456968392"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/456968392" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#456968392">(Aug 06 2024 at 22:18)</a>:</h4>
+<p>On a mildly point -- the itcl header patch is no bueno.  There's no Tcl vars accessible to Itcl at that point, so the vars are invalid/empty.</p>
+
+
+
+<hr><p>Last updated: Aug 07 2024 at 00:40 UTC</p>
 </html>

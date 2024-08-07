@@ -88,5 +88,167 @@
         "id": 456727061,
         "sender_full_name": "starseeker",
         "timestamp": 1722900615
+    },
+    {
+        "content": "<p>At least on a auto debug rebuild, I'm hitting an error that is probably unrelated, but same error I think bill was getting:</p>\n<p>[  6%] Building C object CMakeFiles/itcl3.4.dir/generic/itclStubInit.c.o<br>\n-- stderr output is:</p>\n<p>In file included from /Volumes/X10/brlcad/.build/bext_build/itcl/ITCL_BLD-prefix/src/ITCL_BLD/generic/itclStubInit.c:12:</p>\n<p>/Volumes/X10/brlcad/.build/bext_build/itcl/ITCL_BLD-prefix/src/ITCL_BLD/generic/itclInt.h:50:10: fatal error: 'tclInt.h' file not found</p>\n<p>#include \"tclInt.h\"</p>\n<p>^~~~~~~~~~</p>\n<p>1 error generated.</p>\n<p>make[5]: *** [CMakeFiles/itcl3.4.dir/generic/itclStubInit.c.o] Error 1</p>",
+        "id": 456873718,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955089
+    },
+    {
+        "content": "<p>On a debug BRLCAD_BEXT_DIR build, it gets much much farther, but fails during asc2g:</p>\n<p>[ 62%] Built target asc2g</p>\n<p>[ 62%] <strong>Generating ../share/db/bldg391.g</strong></p>\n<p>[ 62%] Built target bldg391.g</p>\n<p>[ 62%] <strong>Generating ../share/db/m35.g</strong></p>\n<p>[ 62%] Built target m35.g</p>\n<p>[ 62%] <strong>Generating ../share/db/moss.g</strong></p>\n<p>[ 62%] Built target moss.g</p>\n<p>[ 62%] <strong>Generating ../share/db/sphflake.g</strong></p>\n<p>[ 62%] Built target sphflake.g</p>\n<p>[ 62%] <strong>Generating ../share/db/star.g</strong></p>\n<p>[ 62%] Built target star.g</p>\n<p>[ 62%] <strong>Generating ../share/db/world.g</strong></p>\n<p>[ 62%] Built target world.g</p>\n<p>[ 62%] <strong>Generating ../share/db/aet.g</strong></p>\n<p>CMake Error at aet.cmake:36 (message):</p>\n<p>[aet] Failure: 1</p>\n<p>/Volumes/X10/brlcad/.build.debug/bin/asc2g</p>\n<p>/Volumes/X10/brlcad/db/aet.asc;/Volumes/X10/brlcad/.build.debug/share/db/aet.g\"</p>\n<p>Failed to process input file (/Volumes/X10/brlcad/db/aet.asc)!</p>\n<p>unknown command: title</p>",
+        "id": 456874039,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955170
+    },
+    {
+        "content": "<p>release fails also on same asc2g</p>",
+        "id": 456874142,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955199
+    },
+    {
+        "content": "<p>OK.  The latter means Tcl isn't functioning correctly - probably not initializing correctly.  If you try manually running btclsh or bwish I would expect some kind of error report?</p>",
+        "id": 456874425,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955246
+    },
+    {
+        "content": "<p>The tclInt.h bit is Itcl not finding an internal Tcl header it needs to build</p>",
+        "id": 456874546,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955268
+    },
+    {
+        "content": "<p>Hold on the latter -- it doesn't look like it applied your rpath change</p>",
+        "id": 456874565,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955271
+    },
+    {
+        "content": "<p>The Itcl CMakeLists.txt file should be telling the Itcl build where to go looking for Tcl private headers - we should be passing in TCL_SOURCE_DIR to the parent ExternalProject_Add for Itcl</p>",
+        "id": 456875186,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955425
+    },
+    {
+        "content": "<p>-DTCL_SOURCE_DIR=${CMAKE_SOURCE_DIR}/tcl/tcl</p>",
+        "id": 456875214,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955437
+    },
+    {
+        "content": "<p><em>sigh</em> .. so I must be crazy, but outside of blowing away an entire bext build dir, how \"should\" I be getting libtcl to recompile correctly?</p>",
+        "id": 456875274,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955444
+    },
+    {
+        "content": "<p>If the tcl/tcl submodule isn't populated, that's when I would expect it not to find the header</p>",
+        "id": 456875367,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955469
+    },
+    {
+        "content": "<p>I clear the build subdirectory for the specific target I'm wanting to reset.  So, if I needed to start over with Tcl, I'd clear the build/tcl subdirectory</p>",
+        "id": 456875458,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955498
+    },
+    {
+        "content": "<p>CMake should automatically re-run and reset things</p>",
+        "id": 456875500,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955508
+    },
+    {
+        "content": "<p>just doing a git pull and rebuild is what I'd expect and that didn't work.</p>",
+        "id": 456875552,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955523
+    },
+    {
+        "content": "<p>Once the ExternalProject_Add outputs are populated, an update of the source directory doesn't (in my experience) reliably reset things</p>",
+        "id": 456875658,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955556
+    },
+    {
+        "content": "<p>so make clean in bext/.build/tcl ?</p>",
+        "id": 456875663,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955556
+    },
+    {
+        "content": "<p>That might do it - I would straight up remove bext/.build/tcl</p>",
+        "id": 456875765,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955576
+    },
+    {
+        "content": "<p>You can then do make TCL_BLD to just redo the Tcl build and dependencies</p>",
+        "id": 456875877,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722955611
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/stream/104062-brlcad/topic/distcheck/near/456875658\">said</a>:</p>\n<blockquote>\n<p>Once the ExternalProject_Add outputs are populated, an update of the source directory doesn't (in my experience) reliably reset things</p>\n</blockquote>\n<p>Is there intuition as to why that's not working?  Is that because of things in our cmake?  What can we do about it barring massive deletions?</p>",
+        "id": 456877154,
+        "sender_full_name": "Sean",
+        "timestamp": 1722955947
+    },
+    {
+        "content": "<p>Because that's going to bite ... every time we git pull on bext, going to have to either blow everything away whenever there's an update (which is going to be crazy dev cycle times) or hope to catch which subdirs update each pull and manually make-clean each of them (make clean in tcl subdir worked btw)</p>",
+        "id": 456877648,
+        "sender_full_name": "Sean",
+        "timestamp": 1722956085
+    },
+    {
+        "content": "<p>I'm not completely sure of the reasons.  I do have the parent build always re-executing the build steps every time  the targets are run, specifically to try to catch such things, but I think that may be only the build step.</p>",
+        "id": 456878309,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722956281
+    },
+    {
+        "content": "<p>I did notice it seems to reliably avoid rework once compile + install is complete</p>",
+        "id": 456878502,
+        "sender_full_name": "Sean",
+        "timestamp": 1722956328
+    },
+    {
+        "content": "<p>I don't know if it will re-execute the configure step reliably - that may be up to the build system itself (the way CMake spots and knows to re-run configure if the build files change.)</p>",
+        "id": 456878525,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722956337
+    },
+    {
+        "content": "<p>So if Tcl isn't smart about that, we may not be getting reconfigures we need after a source update</p>",
+        "id": 456878581,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722956356
+    },
+    {
+        "content": "<p>Here's another error, bext release rebuild (after clearing and rebuilding tcl):</p>\n<p>CMake Error at /Volumes/X10/brlcad.bext/.build.release/qt/Qt6_BLD-prefix/src/Qt6_BLD-stamp/Qt6_BLD-build-Release.cmake:37 (message):</p>\n<p>Command failed: 1</p>\n<p>'/opt/homebrew/Cellar/cmake/3.28.3/bin/cmake' '-DCMAKE_BUILD_TYPE=Release' '-P' '/Volumes/X10/brlcad.bext/.build.release/qt/qt_build.cmake'</p>\n<p>See also</p>\n<p>/Volumes/X10/brlcad.bext/.build.release/qt/Qt6_BLD-prefix/src/Qt6_BLD-stamp/Qt6_BLD-build-*.log<br>\n-- stdout output is:<br>\n-- stderr output is:</p>\n<p>CMake Error at /Volumes/X10/brlcad.bext/.build.release/qt/qt_build.cmake:18 (message):</p>\n<p>Qt build failed: [ 0%] Built target syncqt</p>\n<p>[ 1%] Built target Core_lib_pri</p>\n<p>[ 1%] Built target qmodule_pri</p>\n<p>Error copying directory from</p>\n<p>\"/Volumes/X10/brlcad.bext/.build.release/qt/qt6-build/include/QtCore/.syncqt_staging\"</p>\n<p>to</p>\n<p>\"/Volumes/X10/brlcad.bext/.build.release/qt/qt6-build/lib/QtCore.framework/Versions/A/Headers\".</p>\n<p>make[5]: *** [src/corelib/CMakeFiles/Core_copy_fw_sync_headers] Error 1</p>\n<p>make[4]: *** [src/corelib/CMakeFiles/Core_copy_fw_sync_headers.dir/all]</p>",
+        "id": 456878663,
+        "sender_full_name": "Sean",
+        "timestamp": 1722956378
+    },
+    {
+        "content": "<p>That one is surprising - that appears to be internal to the Qt build itself</p>",
+        "id": 456878811,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722956413
+    },
+    {
+        "content": "<p>That's why I remove the tcl subdirectory in such a case - it reliably reconfigures and rebuilds from scratch</p>",
+        "id": 456879051,
+        "sender_full_name": "starseeker",
+        "timestamp": 1722956467
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>\n</code></pre></div>\n\n<p>CMake Warning (dev) at /opt/homebrew/Cellar/cmake/3.28.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:438 (message):</p>\n<p>The package name passed to <code>find_package_handle_standard_args</code> (OpenCV)</p>\n<p>does not match the name of the calling package (OPENCV).  This can lead to</p>\n<p>problems in calling code that expects <code>find_package</code> result variables</p>\n<p>(e.g., <code>_FOUND</code>) to follow a certain pattern.</p>\n<p>Call Stack (most recent call first):</p>\n<p>/opt/homebrew/lib/cmake/opencv4/OPENCVConfig.cmake:354 (find_package_handle_standard_args)</p>\n<p>CMakeLists.txt:374 (find_package)</p>\n<p>opencv/CMakeLists.txt:4 (bext_enable)</p>\n<p>This warning is for project developers.  Use -Wno-dev to suppress it.</p>\n<p>CMake Warning (dev) at /opt/homebrew/Cellar/cmake/3.28.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:447 (message):</p>\n<p><code>find_package()</code> specify a version range but the module TCL does not</p>\n<p>support this capability.  Only the lower endpoint of the range will be</p>\n<p>used.</p>\n<p>Call Stack (most recent call first):</p>\n<p>CMake/FindTCL.cmake:461 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)</p>\n<p>tcl/CMakeLists.txt:24 (find_package)</p>\n<p>This warning is for project developers.  Use -Wno-dev to suppress it.</p>",
+        "id": 456884506,
+        "sender_full_name": "Sean",
+        "timestamp": 1722957756
     }
 ]

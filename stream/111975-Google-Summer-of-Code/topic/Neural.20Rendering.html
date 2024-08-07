@@ -2592,5 +2592,151 @@ This is with 6 million rays BUT generated from 22 different and fixed views (512
 
 
 
-<hr><p>Last updated: Aug 06 2024 at 00:40 UTC</p>
+<a name="456754441"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456754441" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456754441">(Aug 06 2024 at 03:15)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456336846">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <span class="user-mention silent" data-user-id="103542">Erik</span> Generating 26 million samples takes me several hours. Are there any ways to optimize the ray tracing algorithm in BRL-CAD to speed up the process?</p>
+</blockquote>
+<p>You can consider using multithreading</p>
+
+
+
+<a name="456754872"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456754872" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456754872">(Aug 06 2024 at 03:18)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455494134">said</a>:</p>
+<blockquote>
+<p>Really cool paper implementation on how to encode BREP in a NNet... <a href="https://github.com/samxuxiang/BrepGen">https://github.com/samxuxiang/BrepGen</a></p>
+</blockquote>
+<p>But I remember brl-cad doesn't seem to be based on b-rep modeling?</p>
+
+
+
+<a name="456865886"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456865886" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456865886">(Aug 06 2024 at 14:09)</a>:</h4>
+<p>A great imple implementation of the hash encoding:<a href="https://github.com/yashbhalgat/HashNeRF-pytorch">HashNeRF</a>. It is sad to find that many of my ideas have already been realized, but I'll finish my other ideas on that basis</p>
+
+
+
+<a name="456945655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456945655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456945655">(Aug 06 2024 at 20:09)</a>:</h4>
+<p><a href="/user_uploads/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png">Figure_4.png</a><br>
+This is with 26 million samples. I had to increase the resolution of hash grid but a lot of white dots appears. It seems that we need to add also the BVH approach so as to delete all these noisy dots.</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png" title="Figure_4.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png/840x560.webp"></a></div>
+
+
+
+<a name="456945699"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456945699" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456945699">(Aug 06 2024 at 20:09)</a>:</h4>
+<p>The F1 metric is improved to 0.998</p>
+
+
+
+<a name="456969299"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456969299" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456969299">(Aug 06 2024 at 22:26)</a>:</h4>
+<p>Don't quite understand how you'd run out of memory.. Is that with replicated view information or with offsets?</p>
+
+
+
+<a name="456969830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456969830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456969830">(Aug 06 2024 at 22:30)</a>:</h4>
+<p>Even with independent 6 doubles (xyz+dir), that should be about 1.1GB, and depending on how that's encoded, that could be reduced to just 4 floats (azel on bounding sphere + azel direction) which is about 400MB for 100x512x512 views.</p>
+
+
+
+<a name="456970399"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456970399" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456970399">(Aug 06 2024 at 22:36)</a>:</h4>
+<p>Because when I loaded the dataset, I computed 70 points xyz along each rays. So I had in memory 70 points xyz for 26 millions rays</p>
+
+
+
+<a name="456970442"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456970442" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456970442">(Aug 06 2024 at 22:36)</a>:</h4>
+<p>Now I compute these 70 points only in the forward method of the neural network (so only for the batch).</p>
+
+
+
+<a name="456970465"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456970465" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456970465">(Aug 06 2024 at 22:36)</a>:</h4>
+<p>For the current batch</p>
+
+
+
+<a name="456970542"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456970542" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456970542">(Aug 06 2024 at 22:37)</a>:</h4>
+<p>Tomorrow I will upload the code on GitHub</p>
+
+
+
+<a name="456971066"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456971066" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456971066">(Aug 06 2024 at 22:42)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456754872">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455494134">said</a>:</p>
+<blockquote>
+<p>Really cool paper implementation on how to encode BREP in a NNet... <a href="https://github.com/samxuxiang/BrepGen">https://github.com/samxuxiang/BrepGen</a></p>
+</blockquote>
+<p>But I remember brl-cad doesn't seem to be based on b-rep modeling?</p>
+</blockquote>
+<p>Yes and no, <span class="user-mention" data-user-id="700180">@fall Rainy</span> ...  BRL-CAD does have support for BREP models.  They import, display, and raytrace.  There's even some basic tessellation (conversion) and preliminary export support.  There's just not much support yet for editing and we want ray tracing performance to be better before we push it harder. </p>
+<p>It's fundamentally no different than all the other primitives, can be used in boolean expressions (which raytrace just fine), can be volumetric/solid or plate-mode like meshes.  There's also some direct Boolean evaluation support which is converting BREP used in CSG expressions to BREP without CSG, but that work is incomplete. </p>
+<p>What's really cool about that paper is the figured out how to encode solid geometry (in BREP form) into a NNet.  Not only is that a general concept that extends to other geometry forms, it's a way to actually encode <em>CAD</em> in the latent space, not just SDFs or volume grids or radiance fields.</p>
+
+
+
+<a name="456971232"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456971232" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456971232">(Aug 06 2024 at 22:44)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456970442">said</a>:</p>
+<blockquote>
+<p>Now I compute these 70 points only in the forward method of the neural network (so only for the batch).</p>
+</blockquote>
+<p>Why 70 points??  The paper demonstrated complete convergence with less than 10...</p>
+
+
+
+<a name="456971326"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456971326" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456971326">(Aug 06 2024 at 22:44)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456971232">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456970442">said</a>:</p>
+<blockquote>
+<p>Now I compute these 70 points only in the forward method of the neural network (so only for the batch).</p>
+</blockquote>
+<p>Why 70 points??  The paper demonstrated complete convergence with less than 10...</p>
+</blockquote>
+<p>Yes but because they use the BVH</p>
+
+
+
+<a name="456971346"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456971346" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456971346">(Aug 06 2024 at 22:44)</a>:</h4>
+<p>I don’t have implemented it yet</p>
+
+
+
+<a name="456971408"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456971408" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456971408">(Aug 06 2024 at 22:45)</a>:</h4>
+<p>This will be the next step</p>
+
+
+
+<a name="456974126"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456974126" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456974126">(Aug 06 2024 at 23:13)</a>:</h4>
+<p>If I recall correctly, they did not use BVH in their first iterations -- they went from 3 points to 10 points to get convergence.</p>
+
+
+
+<a name="456974137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456974137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456974137">(Aug 06 2024 at 23:13)</a>:</h4>
+<p>They introduced a BVH to make the performance of 10 points take less time than the original 3 points.</p>
+
+
+
+<a name="456974213"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/456974213" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#456974213">(Aug 06 2024 at 23:14)</a>:</h4>
+<p>So in theory, it should converge just fine with 10 points, just not quickly.  Also means 70 should converge, but in 7x time or more.</p>
+
+
+
+<hr><p>Last updated: Aug 07 2024 at 00:40 UTC</p>
 </html>

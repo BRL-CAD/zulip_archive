@@ -2032,5 +2032,119 @@
         "id": 456722296,
         "sender_full_name": "Matteo Balice",
         "timestamp": 1722898144
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456336846\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <span class=\"user-mention silent\" data-user-id=\"103542\">Erik</span> Generating 26 million samples takes me several hours. Are there any ways to optimize the ray tracing algorithm in BRL-CAD to speed up the process?</p>\n</blockquote>\n<p>You can consider using multithreading</p>",
+        "id": 456754441,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1722914105
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455494134\">said</a>:</p>\n<blockquote>\n<p>Really cool paper implementation on how to encode BREP in a NNet... <a href=\"https://github.com/samxuxiang/BrepGen\">https://github.com/samxuxiang/BrepGen</a></p>\n</blockquote>\n<p>But I remember brl-cad doesn't seem to be based on b-rep modeling?</p>",
+        "id": 456754872,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1722914321
+    },
+    {
+        "content": "<p>A great imple implementation of the hash encoding:<a href=\"https://github.com/yashbhalgat/HashNeRF-pytorch\">HashNeRF</a>. It is sad to find that many of my ideas have already been realized, but I'll finish my other ideas on that basis</p>",
+        "id": 456865886,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1722953394
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png\">Figure_4.png</a><br>\nThis is with 26 million samples. I had to increase the resolution of hash grid but a lot of white dots appears. It seems that we need to add also the BVH approach so as to delete all these noisy dots.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png\" title=\"Figure_4.png\"><img data-original-dimensions=\"640x480\" src=\"/user_uploads/thumbnail/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png/840x560.webp\"></a></div>",
+        "id": 456945655,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722974975
+    },
+    {
+        "content": "<p>The F1 metric is improved to 0.998</p>",
+        "id": 456945699,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722974988
+    },
+    {
+        "content": "<p>Don't quite understand how you'd run out of memory.. Is that with replicated view information or with offsets?</p>",
+        "id": 456969299,
+        "sender_full_name": "Sean",
+        "timestamp": 1722983189
+    },
+    {
+        "content": "<p>Even with independent 6 doubles (xyz+dir), that should be about 1.1GB, and depending on how that's encoded, that could be reduced to just 4 floats (azel on bounding sphere + azel direction) which is about 400MB for 100x512x512 views.</p>",
+        "id": 456969830,
+        "sender_full_name": "Sean",
+        "timestamp": 1722983459
+    },
+    {
+        "content": "<p>Because when I loaded the dataset, I computed 70 points xyz along each rays. So I had in memory 70 points xyz for 26 millions rays</p>",
+        "id": 456970399,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722983771
+    },
+    {
+        "content": "<p>Now I compute these 70 points only in the forward method of the neural network (so only for the batch).</p>",
+        "id": 456970442,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722983800
+    },
+    {
+        "content": "<p>For the current batch</p>",
+        "id": 456970465,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722983819
+    },
+    {
+        "content": "<p>Tomorrow I will upload the code on GitHub</p>",
+        "id": 456970542,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722983875
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456754872\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455494134\">said</a>:</p>\n<blockquote>\n<p>Really cool paper implementation on how to encode BREP in a NNet... <a href=\"https://github.com/samxuxiang/BrepGen\">https://github.com/samxuxiang/BrepGen</a></p>\n</blockquote>\n<p>But I remember brl-cad doesn't seem to be based on b-rep modeling?</p>\n</blockquote>\n<p>Yes and no, <span class=\"user-mention\" data-user-id=\"700180\">@fall Rainy</span> ...  BRL-CAD does have support for BREP models.  They import, display, and raytrace.  There's even some basic tessellation (conversion) and preliminary export support.  There's just not much support yet for editing and we want ray tracing performance to be better before we push it harder. </p>\n<p>It's fundamentally no different than all the other primitives, can be used in boolean expressions (which raytrace just fine), can be volumetric/solid or plate-mode like meshes.  There's also some direct Boolean evaluation support which is converting BREP used in CSG expressions to BREP without CSG, but that work is incomplete. </p>\n<p>What's really cool about that paper is the figured out how to encode solid geometry (in BREP form) into a NNet.  Not only is that a general concept that extends to other geometry forms, it's a way to actually encode <em>CAD</em> in the latent space, not just SDFs or volume grids or radiance fields.</p>",
+        "id": 456971066,
+        "sender_full_name": "Sean",
+        "timestamp": 1722984159
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456970442\">said</a>:</p>\n<blockquote>\n<p>Now I compute these 70 points only in the forward method of the neural network (so only for the batch).</p>\n</blockquote>\n<p>Why 70 points??  The paper demonstrated complete convergence with less than 10...</p>",
+        "id": 456971232,
+        "sender_full_name": "Sean",
+        "timestamp": 1722984241
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456971232\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456970442\">said</a>:</p>\n<blockquote>\n<p>Now I compute these 70 points only in the forward method of the neural network (so only for the batch).</p>\n</blockquote>\n<p>Why 70 points??  The paper demonstrated complete convergence with less than 10...</p>\n</blockquote>\n<p>Yes but because they use the BVH</p>",
+        "id": 456971326,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722984264
+    },
+    {
+        "content": "<p>I don’t have implemented it yet</p>",
+        "id": 456971346,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722984274
+    },
+    {
+        "content": "<p>This will be the next step</p>",
+        "id": 456971408,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1722984323
+    },
+    {
+        "content": "<p>If I recall correctly, they did not use BVH in their first iterations -- they went from 3 points to 10 points to get convergence.</p>",
+        "id": 456974126,
+        "sender_full_name": "Sean",
+        "timestamp": 1722986005
+    },
+    {
+        "content": "<p>They introduced a BVH to make the performance of 10 points take less time than the original 3 points.</p>",
+        "id": 456974137,
+        "sender_full_name": "Sean",
+        "timestamp": 1722986022
+    },
+    {
+        "content": "<p>So in theory, it should converge just fine with 10 points, just not quickly.  Also means 70 should converge, but in 7x time or more.</p>",
+        "id": 456974213,
+        "sender_full_name": "Sean",
+        "timestamp": 1722986066
     }
 ]
