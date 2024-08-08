@@ -2738,5 +2738,54 @@ This is with 26 million samples. I had to increase the resolution of hash grid b
 
 
 
-<hr><p>Last updated: Aug 07 2024 at 00:40 UTC</p>
+<a name="457049083"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457049083" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457049083">(Aug 07 2024 at 08:36)</a>:</h4>
+<p><a href="/user_uploads/1549/Oz6oU-8uxT1MBN3eH92Libw7/Figure_6.png">Figure_6.png</a><br>
+Here there is the figure with only 10 points... As you can see it's pretty weird and the F1 metric is only about 0.97... Instead, with 70 points I got 0.998 of F1</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Oz6oU-8uxT1MBN3eH92Libw7/Figure_6.png" title="Figure_6.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/Oz6oU-8uxT1MBN3eH92Libw7/Figure_6.png/840x560.webp"></a></div>
+
+
+
+<a name="457049562"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457049562" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457049562">(Aug 07 2024 at 08:38)</a>:</h4>
+<p>The accuracy should be higher (according to the paper) IF the points are sampled near the surface. So even with 10 points it should be ok IF they are sampled near the surface. But how can we guarantee that they are sampled there if we do not know the intersection of the ray with the surface?</p>
+
+
+
+<a name="457049858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457049858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457049858">(Aug 07 2024 at 08:40)</a>:</h4>
+<p>This is the reason why I uniformly sample along the ray (all the points have the same distance along the ray)... And this is the reason why increasing the number of points it converges with higher accuracy.</p>
+
+
+
+<a name="457050306"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457050306" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457050306">(Aug 07 2024 at 08:42)</a>:</h4>
+<p>If there is some ideas about smarter sampling along the ray it should improve a lot the model...</p>
+
+
+
+<a name="457054489"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457054489" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457054489">(Aug 07 2024 at 08:58)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/457049083">ha scritto</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/Oz6oU-8uxT1MBN3eH92Libw7/Figure_6.png">Figure_6.png</a><br>
+Here there is the figure with only 10 points... As you can see it's pretty weird and the F1 metric is only about 0.97... Instead, with 70 points I got 0.998 of F1</p>
+</blockquote>
+<p>Let's think for instance at the torus in the figure. Why is it so ugly? In my opinion, since we have rays that start and end in a bounding sphere, if we sample along these rays there is a medium/high probability that all the points sampled aren't close to the torus since this one is very thin. And this is the reason why the cube and the sphere are better represented (because their volume is larger and so it is easier that the points are closer to the cube/sphere).</p>
+
+
+
+<a name="457055582"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457055582" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457055582">(Aug 07 2024 at 09:01)</a>:</h4>
+<p>In my opinion if we use BVHs that wrap the surface, not only we can use less sampling points but I think that also the accuracy must increase.</p>
+
+
+
+<a name="457133692"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457133692" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457133692">(Aug 07 2024 at 15:14)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Is the BVH algorithm already implemented in brl-cad?</p>
+
+
+
+<hr><p>Last updated: Aug 08 2024 at 00:40 UTC</p>
 </html>
