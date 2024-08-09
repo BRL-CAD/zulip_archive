@@ -2787,5 +2787,48 @@ Here there is the figure with only 10 points... As you can see it's pretty weird
 
 
 
-<hr><p>Last updated: Aug 08 2024 at 00:40 UTC</p>
+<a name="457232821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457232821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457232821">(Aug 08 2024 at 00:44)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456945655">said</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png">Figure_4.png</a><br>
+This is with 26 million samples. I had to increase the resolution of hash grid but a lot of white dots appears. It seems that we need to add also the BVH approach so as to delete all these noisy dots.</p>
+</blockquote>
+<p>Add a threshold layer before output may solve this question.</p>
+
+
+
+<a name="457293495"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457293495" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457293495">(Aug 08 2024 at 07:54)</a>:</h4>
+<p>I'd like to combine these tricks with the hashencoder to see how much improvement can be gained</p>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455659182">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455421932">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> please elaborate, (and point to latest code!) what's the resolution of the grid net, what are the layers, how many epochs, how long did training take, how long does lookup take, etc...</p>
+</blockquote>
+<p>There are three resolutions: <br>
+first,I give up bilinear interpolation and try to learn a matrix to express the relationship between neighboring vectors<br>
+second, I consider neighboring vectors in the range 7×7 instead of 2×2<br>
+third, I use a threshold to reduce noise.<br>
+here is my codes: <a href="https://github.com/Rainy-fall-end/Rendernn/blob/main/networks/gridnet3.py">https://github.com/Rainy-fall-end/Rendernn/blob/main/networks/gridnet3.py</a><br>
+100,000 points need to be sampled, but the model actually converges when <strong>20,000</strong> points are used，The training will take 2 minutes total.(4060)<br>
+The yellow curve is the improved gridnet, the purple one is the original gridnet. <br>
+<a href="/user_uploads/1549/Gzl76_z3fF_bVI5hztuH4h9T/2024-08-01-220614.png">2024-08-01-220614.png</a></p>
+</blockquote>
+
+
+
+<a name="457295474"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/457295474" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#457295474">(Aug 08 2024 at 08:02)</a>:</h4>
+<p>Of course, there are some other things that need to be improved</p>
+<ol>
+<li>most of the current hashencoder are for Cartesian coordinates, and I'd like to implement it with spherical coordinates(two version, both dir and pos imported as inputs, only pos imported as inputs)</li>
+<li>Modification of the Neighborhood Algorithm. The range of spherical coordinate is [0,pi] and [0,2pi]. 0 and pi actually represent the same point</li>
+<li>Improved initialization strategy. During my training, I found that I could initialize the output of the model to 0, 0, 0 instead of [127.5,127.5,127.5] and it would be beneficial for the model to converge</li>
+</ol>
+
+
+
+<hr><p>Last updated: Aug 09 2024 at 00:40 UTC</p>
 </html>

@@ -2188,5 +2188,23 @@
         "id": 457133692,
         "sender_full_name": "Matteo Balice",
         "timestamp": 1723043697
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/456945655\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/fOru6sTCYngrm3EryRk07X5E/Figure_4.png\">Figure_4.png</a><br>\nThis is with 26 million samples. I had to increase the resolution of hash grid but a lot of white dots appears. It seems that we need to add also the BVH approach so as to delete all these noisy dots.</p>\n</blockquote>\n<p>Add a threshold layer before output may solve this question.</p>",
+        "id": 457232821,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1723077893
+    },
+    {
+        "content": "<p>I'd like to combine these tricks with the hashencoder to see how much improvement can be gained</p>\n<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455659182\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/455421932\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> please elaborate, (and point to latest code!) what's the resolution of the grid net, what are the layers, how many epochs, how long did training take, how long does lookup take, etc...</p>\n</blockquote>\n<p>There are three resolutions: <br>\nfirst,I give up bilinear interpolation and try to learn a matrix to express the relationship between neighboring vectors<br>\nsecond, I consider neighboring vectors in the range 7×7 instead of 2×2<br>\nthird, I use a threshold to reduce noise.<br>\nhere is my codes: <a href=\"https://github.com/Rainy-fall-end/Rendernn/blob/main/networks/gridnet3.py\">https://github.com/Rainy-fall-end/Rendernn/blob/main/networks/gridnet3.py</a><br>\n100,000 points need to be sampled, but the model actually converges when <strong>20,000</strong> points are used，The training will take 2 minutes total.(4060)<br>\nThe yellow curve is the improved gridnet, the purple one is the original gridnet. <br>\n<a href=\"/user_uploads/1549/Gzl76_z3fF_bVI5hztuH4h9T/2024-08-01-220614.png\">2024-08-01-220614.png</a></p>\n</blockquote>",
+        "id": 457293495,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1723103672
+    },
+    {
+        "content": "<p>Of course, there are some other things that need to be improved</p>\n<ol>\n<li>most of the current hashencoder are for Cartesian coordinates, and I'd like to implement it with spherical coordinates(two version, both dir and pos imported as inputs, only pos imported as inputs)</li>\n<li>Modification of the Neighborhood Algorithm. The range of spherical coordinate is [0,pi] and [0,2pi]. 0 and pi actually represent the same point</li>\n<li>Improved initialization strategy. During my training, I found that I could initialize the output of the model to 0, 0, 0 instead of [127.5,127.5,127.5] and it would be beneficial for the model to converge</li>\n</ol>",
+        "id": 457295474,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1723104173
     }
 ]
