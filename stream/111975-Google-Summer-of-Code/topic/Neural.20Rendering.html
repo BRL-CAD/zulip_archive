@@ -2830,5 +2830,140 @@ The yellow curve is the improved gridnet, the purple one is the original gridnet
 
 
 
-<hr><p>Last updated: Aug 10 2024 at 00:40 UTC</p>
+<a name="459666499"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459666499" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459666499">(Aug 10 2024 at 09:50)</a>:</h4>
+<p><a href="/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png">Figure_13.png</a><br>
+I finally achieved the 0.9991 of F1 overtraining with 200 points for each ray and 26 millions total rays. I modified  the prediction so that for each ray, I take only the maximum of those 200 points and if it is greater than 0.5 it is a hit, otherwise it's a miss. It's like we have a voxel grid, in which for each voxel we have a probability of a hit/miss.</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png" title="Figure_13.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png/840x560.webp"></a></div>
+
+
+
+<a name="459666736"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459666736" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459666736">(Aug 10 2024 at 09:52)</a>:</h4>
+<p>Of course it's much slower BUT I have an idea. We can train the multi-resolution grid in this way (using a lot of points for each ray) but after the training we can take the grid already trained and build another model on top of this (without editing the grid) trying to predict the right "voxel" for each ray. We can leverage the fact that closest rays have closest "voxels" hit.</p>
+
+
+
+<a name="459666991"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459666991" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459666991">(Aug 10 2024 at 09:54)</a>:</h4>
+<p>And trying to build an hashmap (similar as the grid encoding) so that for each input ray we have an O(1) complexity to retrieve the right voxel and then the inference process would be very fast!</p>
+
+
+
+<a name="459667012"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459667012" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459667012">(Aug 10 2024 at 09:54)</a>:</h4>
+<p>If this works, it could be even faster than the paper of nvbh!</p>
+
+
+
+<a name="459715335"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459715335" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459715335">(Aug 10 2024 at 15:43)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/457133692">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> Is the BVH algorithm already implemented in brl-cad?</p>
+</blockquote>
+<p>Yes there is, see src/librt/cut_hlbvh.*</p>
+
+
+
+<a name="459715561"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459715561" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459715561">(Aug 10 2024 at 15:45)</a>:</h4>
+<p>See it in use in clt_prep() in src/librt/prep.cpp</p>
+
+
+
+<a name="459715953"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459715953" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459715953">(Aug 10 2024 at 15:48)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/457295474">said</a>:</p>
+<blockquote>
+<ol start="3">
+<li>Improved initialization strategy. During my training, I found that I could initialize the output of the model to 0, 0, 0 instead of [127.5,127.5,127.5] and it would be beneficial for the model to converge</li>
+</ol>
+</blockquote>
+<p>That's one of the optimizations mentioned in the paper -- the model is not only normalized in position, but also scaled/centered/normalized in size also.  So values are all 0 to 1 or -1 to 1 for XYZ.  That was pretty essential in limiting the training space.</p>
+
+
+
+<a name="459717554"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459717554" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459717554">(Aug 10 2024 at 15:56)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/459666499">said</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png">Figure_13.png</a><br>
+I finally achieved the 0.9991 of F1 overtraining with 200 points for each ray and 26 millions total rays. I modified  the prediction so that for each ray, I take only the maximum of those 200 points and if it is greater than 0.5 it is a hit, otherwise it's a miss. It's like we have a voxel grid, in which for each voxel we have a probability of a hit/miss.</p>
+</blockquote>
+<p>Please show the code for what you're doing here?  That's definitely interesting results, but I'm still not understanding why you need 70 or 200 sample points.  I get that it's sampling like a voxel grid, but that shouldn't be necessary (and degenerates to a simple grid query).  Implies some fundamental difference in setup or evaluation.  What's the network you're using at this point?</p>
+
+
+
+<a name="459717703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459717703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459717703">(Aug 10 2024 at 15:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/459717554">ha scritto</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/459666499">said</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png">Figure_13.png</a><br>
+I finally achieved the 0.9991 of F1 overtraining with 200 points for each ray and 26 millions total rays. I modified  the prediction so that for each ray, I take only the maximum of those 200 points and if it is greater than 0.5 it is a hit, otherwise it's a miss. It's like we have a voxel grid, in which for each voxel we have a probability of a hit/miss.</p>
+</blockquote>
+<p>Please show the code for what you're doing here?  That's definitely interesting results, but I'm still not understanding why you need 70 or 200 sample points.  I get that it's sampling like a voxel grid, but that shouldn't be necessary (and degenerates to a simple grid query).  Implies some fundamental difference in setup or evaluation.  What's the network you're using at this point?</p>
+</blockquote>
+<p>I'm going to upload the code in half an hour more or less.</p>
+
+
+
+<a name="459719976"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459719976" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459719976">(Aug 10 2024 at 16:08)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> <span class="user-mention" data-user-id="700180">@fall Rainy</span>  <a href="https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>
+
+
+
+<a name="459720238"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459720238" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459720238">(Aug 10 2024 at 16:09)</a>:</h4>
+<p>We can summarize the neural network in this picture:</p>
+<p><a href="/user_uploads/1549/UJc1UPO9wgIZQ3IAaCtdbkvA/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/UJc1UPO9wgIZQ3IAaCtdbkvA/image.png" title="image.png"><img data-original-dimensions="1101x733" src="/user_uploads/thumbnail/1549/UJc1UPO9wgIZQ3IAaCtdbkvA/image.png/840x560.webp"></a></div>
+
+
+
+<a name="459720533"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459720533" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459720533">(Aug 10 2024 at 16:10)</a>:</h4>
+<p>In the prediction (forward method),  I take the ray, sample n points along the ray, then I pass this to the encoder and finally the embedding are scaled to a probability [0;1]</p>
+
+
+
+<a name="459720958"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459720958" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459720958">(Aug 10 2024 at 16:12)</a>:</h4>
+<p>In the end, for each ray I take the maximum for all the points sampled and this works well because:</p>
+<ul>
+<li>if the ray is a miss, all the points must have a probability less than 0.5 so taking the maximum it's ok.</li>
+<li>if the ray is a hit, there should be at least one voxel in the ray that has a probability greater than 0.5 and using the maximum it's ok.</li>
+</ul>
+
+
+
+<a name="459721196"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459721196" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459721196">(Aug 10 2024 at 16:15)</a>:</h4>
+<p>This neural network works well in the training of the multi-resolution hash grid. My idea is to use the trained grid of this network as a base for another network much simpler and that uses less points. Do you have some ideas how to achieve this result (I proposed the idea of the hashmap; the paper used the BVH approach for instance)?</p>
+
+
+
+<a name="459723073"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459723073" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459723073">(Aug 10 2024 at 16:31)</a>:</h4>
+<p>I would also remark some differences about the nvbh paper:<br>
+<a href="/user_uploads/1549/GlDBhRy6KFBm6KZZfNjWNuqh/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/GlDBhRy6KFBm6KZZfNjWNuqh/image.png" title="image.png"><img data-original-dimensions="513x175" src="/user_uploads/thumbnail/1549/GlDBhRy6KFBm6KZZfNjWNuqh/image.png/840x560.webp"></a></div><ul>
+<li>They used an MLP network with 4 hidden layers (each with relu) and a sigmoid as output but I simply use one single sigmoid layer as output without any hidden layer. (better in my network)</li>
+<li>They used 8 levels for the grid, I use 4 levels. (better in my network)</li>
+<li>They used a very high base resolution (8^3=512), I simply use 32 or 16 as a base resolution. (better in my network)</li>
+<li>They used 4 features per level, I use 8 features. I have to try with 4 features. (better in their network)</li>
+</ul>
+
+
+
+<a name="459723540"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/459723540" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#459723540">(Aug 10 2024 at 16:35)</a>:</h4>
+<p>Overall my network is much faster than theirs (if we do not take into consideration the sampling points part).</p>
+
+
+
+<hr><p>Last updated: Aug 11 2024 at 00:44 UTC</p>
 </html>

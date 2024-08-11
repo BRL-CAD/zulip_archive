@@ -2206,5 +2206,101 @@
         "id": 457295474,
         "sender_full_name": "fall Rainy",
         "timestamp": 1723104173
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png\">Figure_13.png</a><br>\nI finally achieved the 0.9991 of F1 overtraining with 200 points for each ray and 26 millions total rays. I modified  the prediction so that for each ray, I take only the maximum of those 200 points and if it is greater than 0.5 it is a hit, otherwise it's a miss. It's like we have a voxel grid, in which for each voxel we have a probability of a hit/miss.</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png\" title=\"Figure_13.png\"><img data-original-dimensions=\"640x480\" src=\"/user_uploads/thumbnail/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png/840x560.webp\"></a></div>",
+        "id": 459666499,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723283416
+    },
+    {
+        "content": "<p>Of course it's much slower BUT I have an idea. We can train the multi-resolution grid in this way (using a lot of points for each ray) but after the training we can take the grid already trained and build another model on top of this (without editing the grid) trying to predict the right \"voxel\" for each ray. We can leverage the fact that closest rays have closest \"voxels\" hit.</p>",
+        "id": 459666736,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723283540
+    },
+    {
+        "content": "<p>And trying to build an hashmap (similar as the grid encoding) so that for each input ray we have an O(1) complexity to retrieve the right voxel and then the inference process would be very fast!</p>",
+        "id": 459666991,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723283663
+    },
+    {
+        "content": "<p>If this works, it could be even faster than the paper of nvbh!</p>",
+        "id": 459667012,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723283683
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/457133692\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> Is the BVH algorithm already implemented in brl-cad?</p>\n</blockquote>\n<p>Yes there is, see src/librt/cut_hlbvh.*</p>",
+        "id": 459715335,
+        "sender_full_name": "Sean",
+        "timestamp": 1723304615
+    },
+    {
+        "content": "<p>See it in use in clt_prep() in src/librt/prep.cpp</p>",
+        "id": 459715561,
+        "sender_full_name": "Sean",
+        "timestamp": 1723304742
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/457295474\">said</a>:</p>\n<blockquote>\n<ol start=\"3\">\n<li>Improved initialization strategy. During my training, I found that I could initialize the output of the model to 0, 0, 0 instead of [127.5,127.5,127.5] and it would be beneficial for the model to converge</li>\n</ol>\n</blockquote>\n<p>That's one of the optimizations mentioned in the paper -- the model is not only normalized in position, but also scaled/centered/normalized in size also.  So values are all 0 to 1 or -1 to 1 for XYZ.  That was pretty essential in limiting the training space.</p>",
+        "id": 459715953,
+        "sender_full_name": "Sean",
+        "timestamp": 1723304920
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/459666499\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png\">Figure_13.png</a><br>\nI finally achieved the 0.9991 of F1 overtraining with 200 points for each ray and 26 millions total rays. I modified  the prediction so that for each ray, I take only the maximum of those 200 points and if it is greater than 0.5 it is a hit, otherwise it's a miss. It's like we have a voxel grid, in which for each voxel we have a probability of a hit/miss.</p>\n</blockquote>\n<p>Please show the code for what you're doing here?  That's definitely interesting results, but I'm still not understanding why you need 70 or 200 sample points.  I get that it's sampling like a voxel grid, but that shouldn't be necessary (and degenerates to a simple grid query).  Implies some fundamental difference in setup or evaluation.  What's the network you're using at this point?</p>",
+        "id": 459717554,
+        "sender_full_name": "Sean",
+        "timestamp": 1723305413
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/459717554\">ha scritto</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/459666499\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/a2vxhbcEws9G8fld72oTmFka/Figure_13.png\">Figure_13.png</a><br>\nI finally achieved the 0.9991 of F1 overtraining with 200 points for each ray and 26 millions total rays. I modified  the prediction so that for each ray, I take only the maximum of those 200 points and if it is greater than 0.5 it is a hit, otherwise it's a miss. It's like we have a voxel grid, in which for each voxel we have a probability of a hit/miss.</p>\n</blockquote>\n<p>Please show the code for what you're doing here?  That's definitely interesting results, but I'm still not understanding why you need 70 or 200 sample points.  I get that it's sampling like a voxel grid, but that shouldn't be necessary (and degenerates to a simple grid query).  Implies some fundamental difference in setup or evaluation.  What's the network you're using at this point?</p>\n</blockquote>\n<p>I'm going to upload the code in half an hour more or less.</p>",
+        "id": 459717703,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723305479
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"700180\">@fall Rainy</span>  <a href=\"https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh\">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>",
+        "id": 459719976,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723306080
+    },
+    {
+        "content": "<p>We can summarize the neural network in this picture:</p>\n<p><a href=\"/user_uploads/1549/UJc1UPO9wgIZQ3IAaCtdbkvA/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/UJc1UPO9wgIZQ3IAaCtdbkvA/image.png\" title=\"image.png\"><img data-original-dimensions=\"1101x733\" src=\"/user_uploads/thumbnail/1549/UJc1UPO9wgIZQ3IAaCtdbkvA/image.png/840x560.webp\"></a></div>",
+        "id": 459720238,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723306152
+    },
+    {
+        "content": "<p>In the prediction (forward method),  I take the ray, sample n points along the ray, then I pass this to the encoder and finally the embedding are scaled to a probability [0;1]</p>",
+        "id": 459720533,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723306230
+    },
+    {
+        "content": "<p>In the end, for each ray I take the maximum for all the points sampled and this works well because:</p>\n<ul>\n<li>if the ray is a miss, all the points must have a probability less than 0.5 so taking the maximum it's ok.</li>\n<li>if the ray is a hit, there should be at least one voxel in the ray that has a probability greater than 0.5 and using the maximum it's ok.</li>\n</ul>",
+        "id": 459720958,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723306360
+    },
+    {
+        "content": "<p>This neural network works well in the training of the multi-resolution hash grid. My idea is to use the trained grid of this network as a base for another network much simpler and that uses less points. Do you have some ideas how to achieve this result (I proposed the idea of the hashmap; the paper used the BVH approach for instance)?</p>",
+        "id": 459721196,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723306516
+    },
+    {
+        "content": "<p>I would also remark some differences about the nvbh paper:<br>\n<a href=\"/user_uploads/1549/GlDBhRy6KFBm6KZZfNjWNuqh/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/GlDBhRy6KFBm6KZZfNjWNuqh/image.png\" title=\"image.png\"><img data-original-dimensions=\"513x175\" src=\"/user_uploads/thumbnail/1549/GlDBhRy6KFBm6KZZfNjWNuqh/image.png/840x560.webp\"></a></div><ul>\n<li>They used an MLP network with 4 hidden layers (each with relu) and a sigmoid as output but I simply use one single sigmoid layer as output without any hidden layer. (better in my network)</li>\n<li>They used 8 levels for the grid, I use 4 levels. (better in my network)</li>\n<li>They used a very high base resolution (8^3=512), I simply use 32 or 16 as a base resolution. (better in my network)</li>\n<li>They used 4 features per level, I use 8 features. I have to try with 4 features. (better in their network)</li>\n</ul>",
+        "id": 459723073,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723307469
+    },
+    {
+        "content": "<p>Overall my network is much faster than theirs (if we do not take into consideration the sampling points part).</p>",
+        "id": 459723540,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723307758
     }
 ]
