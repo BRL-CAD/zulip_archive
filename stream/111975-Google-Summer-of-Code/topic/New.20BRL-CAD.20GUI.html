@@ -14939,5 +14939,49 @@ What I found:</p>
 
 
 
-<hr><p>Last updated: Aug 12 2024 at 00:42 UTC</p>
+<a name="460004915"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/460004915" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Vidit Jain <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#460004915">(Aug 12 2024 at 06:20)</a>:</h4>
+<p>The structure looks fine to me</p>
+
+
+
+<a name="460108720"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/460108720" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#460108720">(Aug 12 2024 at 15:49)</a>:</h4>
+<p>I'm afraid, this won't do it. To take effect, QOpenGLWidget::paintGL() or a function called inside has to be touched. E.g.</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">GeometryRenderer::render</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">document</span><span class="o">-&gt;</span><span class="n">getDisplay</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getDisplayManager</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">saveState</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">objectsToBeDisplayedIds</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">objectId</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">objectsToBeDisplayedIds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">objectIdDisplayListIdMap</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="n">objectId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">drawSolid</span><span class="p">(</span><span class="n">objectId</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">visibleDisplayListIds</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">objectIdDisplayListIdMap</span><span class="p">[</span><span class="n">objectId</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">objectsToBeDisplayedIds</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">displayListId</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">visibleDisplayListIds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">document</span><span class="o">-&gt;</span><span class="n">getDisplay</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getDisplayManager</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">drawDList</span><span class="p">(</span><span class="n">displayListId</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">document</span><span class="o">-&gt;</span><span class="n">getDisplay</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getDisplayManager</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">drawSuffix</span><span class="p">();</span>
+<span class="w">    </span><span class="n">document</span><span class="o">-&gt;</span><span class="n">getDisplay</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getDisplayManager</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">restoreState</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">DisplayManager::setSuffix</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">BRLCAD</span><span class="o">::</span><span class="n">VectorList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vectorList</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">suffix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vectorList</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">DisplayManager::clearSuffix</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">suffix</span><span class="p">.</span><span class="n">Clear</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">DisplayManager::drawSuffix</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">drawVList</span><span class="p">(</span><span class="o">&amp;</span><span class="n">suffix</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>No idea if this works, but it should point to the right direction.</p>
+
+
+
+<hr><p>Last updated: Aug 13 2024 at 00:41 UTC</p>
 </html>
