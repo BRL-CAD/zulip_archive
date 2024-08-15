@@ -442,5 +442,169 @@ morrison@Miniagua tests % pwd
 
 
 
-<hr><p>Last updated: Aug 14 2024 at 00:40 UTC</p>
+<a name="462369076"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462369076" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462369076">(Aug 14 2024 at 15:28)</a>:</h4>
+<p>OK, I got a look at the drawing failures</p>
+
+
+
+<a name="462371078"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462371078" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462371078">(Aug 14 2024 at 15:38)</a>:</h4>
+<p>The lod failure is doing an exact check on an image that is off by a single pixel, so that should probably just be switched to an approximate check.</p>
+
+
+
+<a name="462371142"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462371142" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462371142">(Aug 14 2024 at 15:38)</a>:</h4>
+<p>There may be more failures after that one, so I'll have to try and see what happens.</p>
+
+
+
+<a name="462371335"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462371335" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462371335">(Aug 14 2024 at 15:39)</a>:</h4>
+<p>Actually it's one pixel off by one, even</p>
+
+
+
+<a name="462371468"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462371468" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462371468">(Aug 14 2024 at 15:40)</a>:</h4>
+<p>The basic test difference is a bit larger, but looking at the diff image it appears to be a difference in how the tor got tessellated</p>
+
+
+
+<a name="462371524"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462371524" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462371524">(Aug 14 2024 at 15:40)</a>:</h4>
+<p><a href="/user_uploads/1549/_IbH9BMPc9SisQ67kxCP_PXY/v_23_diff.png">v_23_diff.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/_IbH9BMPc9SisQ67kxCP_PXY/v_23_diff.png" title="v_23_diff.png"><img data-original-dimensions="512x512" src="/user_uploads/thumbnail/1549/_IbH9BMPc9SisQ67kxCP_PXY/v_23_diff.png/840x560.webp"></a></div>
+
+
+
+<a name="462372095"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462372095" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462372095">(Aug 14 2024 at 15:42)</a>:</h4>
+<p>Or more likely (since the prior draw of the bot didn't trigger) it's a difference in which lines ended up visible in the "hidden line" draw mode.</p>
+
+
+
+<a name="462372718"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462372718" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462372718">(Aug 14 2024 at 15:44)</a>:</h4>
+<p>Looks like the approximate compare is still a bit too strict for that one, so I'll adjust</p>
+
+
+
+<a name="462372751"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462372751" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462372751">(Aug 14 2024 at 15:44)</a>:</h4>
+<p>The real problem is the third case.</p>
+
+
+
+<a name="462372858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462372858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462372858">(Aug 14 2024 at 15:45)</a>:</h4>
+<p>To my astonishment, it <em>is</em> in fact failing to tessellate the tor primitive</p>
+
+
+
+<a name="462372954"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462372954" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462372954">(Aug 14 2024 at 15:45)</a>:</h4>
+<p>This is due to the select test changing the relative tolerance before facetizing the tor</p>
+
+
+
+<a name="462373160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462373160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462373160">(Aug 14 2024 at 15:46)</a>:</h4>
+<p>Running the process manually we can see more info:</p>
+<div class="codehilite"><pre><span></span><code>mged&gt; facetize -vv tor t2.bot
+/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods NMG --method-opts NMG nmg_debug=0x00000000 tol_abs=0.00000000000000000 tol_rel=0.00010000000000000 tol_norm=0.00000000000000000 --cache-dir /Users/user/.cache/BRL-CAD tor
+Attempting to triangulate tor...
+cut_unimonotone(): infinite loop 0x60000231aac0
+
+cut_unimonotone(): infinite loop
+
+ FAILED.
+/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods CM --method-opts &quot;CM&quot; --cache-dir /Users/user/.cache/BRL-CAD tor
+Attempting to triangulate tor...
+feature_size: 0.000000
+feature_scale: 0.150000
+target_feature_size: 0.761658
+CM: error at size 10.1554
+CM: retrying with size 1.01554
+CM: error at size 1.01554
+CM: retrying with size 0.507772
+CM: surface reconstruction failed: tor
+ FAILED.
+/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods CO3NE --method-opts &quot;CO3NE&quot; --cache-dir /Users/user/.cache/BRL-CAD tor
+Attempting to triangulate tor...
+feature_size: 0.000000
+feature_scale: 0.150000
+target_feature_size: 0.761658
+Geogram result not manifold
+o-[reconstruct ] Elapsed time: 3.013s
+ FAILED.
+/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods SPSR --method-opts &quot;SPSR&quot; --cache-dir /Users/user/.cache/BRL-CAD tor
+Attempting to triangulate tor...
+feature_size: 0.000000
+feature_scale: 0.150000
+target_feature_size: 0.761658
+SPSR: decimating with feature size: 1.30208
+
+bu_mtx_trylock() failed
+
+bu_mtx_trylock() failed
+Saving stack trace to facetize_process-83790-bomb.log
+
+bu_mtx_lock() failed
+
+bu_mtx_lock() failed
+ FAILED.
+
+Primitive tessellation summary:
+
+1 object(s) failed:
+        tor
+</code></pre></div>
+
+
+
+<a name="462373354"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462373354" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462373354">(Aug 14 2024 at 15:47)</a>:</h4>
+<p>It's annoying that the fallback methods fail (the SPSR decimation is where those bu_mtx failures are coming from) but the <em>real</em> problem is the NMG "cut_unimonotone" failure.</p>
+
+
+
+<a name="462373425"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462373425" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462373425">(Aug 14 2024 at 15:47)</a>:</h4>
+<p>For a basic tor like that we should never have gotten to the fallbacks at all</p>
+
+
+
+<a name="462373555"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462373555" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462373555">(Aug 14 2024 at 15:48)</a>:</h4>
+<p>The tol setting from the select.cpp setup is:  "tol rel 0.0001"</p>
+
+
+
+<a name="462373601"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462373601" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462373601">(Aug 14 2024 at 15:48)</a>:</h4>
+<p>A facetize without changing the rel tolerance does succeed</p>
+
+
+
+<a name="462373822"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462373822" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462373822">(Aug 14 2024 at 15:49)</a>:</h4>
+<p>Looks like in the LoD test I changed this to 0.0002, probably to avoid a similar failure.  Not sure why I missed the select.</p>
+
+
+
+<a name="462381021"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462381021" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462381021">(Aug 14 2024 at 16:29)</a>:</h4>
+<p>OK, we'll see if a248e798bc2c passes.  If so I'll pull the necessary changes over to RELEASE.</p>
+
+
+
+<a name="462381137"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/distcheck/near/462381137" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/distcheck.html#462381137">(Aug 14 2024 at 16:30)</a>:</h4>
+<p>At some point we'll need to do something about that NMG failure, but that could be quite the rabbit hole</p>
+
+
+
+<hr><p>Last updated: Aug 15 2024 at 00:39 UTC</p>
 </html>

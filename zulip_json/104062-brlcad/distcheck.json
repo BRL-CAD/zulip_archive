@@ -274,5 +274,119 @@
         "id": 457170169,
         "sender_full_name": "Sean",
         "timestamp": 1723055441
+    },
+    {
+        "content": "<p>OK, I got a look at the drawing failures</p>",
+        "id": 462369076,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723649293
+    },
+    {
+        "content": "<p>The lod failure is doing an exact check on an image that is off by a single pixel, so that should probably just be switched to an approximate check.</p>",
+        "id": 462371078,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723649898
+    },
+    {
+        "content": "<p>There may be more failures after that one, so I'll have to try and see what happens.</p>",
+        "id": 462371142,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723649921
+    },
+    {
+        "content": "<p>Actually it's one pixel off by one, even</p>",
+        "id": 462371335,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723649987
+    },
+    {
+        "content": "<p>The basic test difference is a bit larger, but looking at the diff image it appears to be a difference in how the tor got tessellated</p>",
+        "id": 462371468,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650014
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/_IbH9BMPc9SisQ67kxCP_PXY/v_23_diff.png\">v_23_diff.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/_IbH9BMPc9SisQ67kxCP_PXY/v_23_diff.png\" title=\"v_23_diff.png\"><img data-original-dimensions=\"512x512\" src=\"/user_uploads/thumbnail/1549/_IbH9BMPc9SisQ67kxCP_PXY/v_23_diff.png/840x560.webp\"></a></div>",
+        "id": 462371524,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650026
+    },
+    {
+        "content": "<p>Or more likely (since the prior draw of the bot didn't trigger) it's a difference in which lines ended up visible in the \"hidden line\" draw mode.</p>",
+        "id": 462372095,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650138
+    },
+    {
+        "content": "<p>Looks like the approximate compare is still a bit too strict for that one, so I'll adjust</p>",
+        "id": 462372718,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650287
+    },
+    {
+        "content": "<p>The real problem is the third case.</p>",
+        "id": 462372751,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650294
+    },
+    {
+        "content": "<p>To my astonishment, it <em>is</em> in fact failing to tessellate the tor primitive</p>",
+        "id": 462372858,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650311
+    },
+    {
+        "content": "<p>This is due to the select test changing the relative tolerance before facetizing the tor</p>",
+        "id": 462372954,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650330
+    },
+    {
+        "content": "<p>Running the process manually we can see more info:</p>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; facetize -vv tor t2.bot\n/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods NMG --method-opts NMG nmg_debug=0x00000000 tol_abs=0.00000000000000000 tol_rel=0.00010000000000000 tol_norm=0.00000000000000000 --cache-dir /Users/user/.cache/BRL-CAD tor\nAttempting to triangulate tor...\ncut_unimonotone(): infinite loop 0x60000231aac0\n\ncut_unimonotone(): infinite loop\n\n FAILED.\n/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods CM --method-opts &quot;CM&quot; --cache-dir /Users/user/.cache/BRL-CAD tor\nAttempting to triangulate tor...\nfeature_size: 0.000000\nfeature_scale: 0.150000\ntarget_feature_size: 0.761658\nCM: error at size 10.1554\nCM: retrying with size 1.01554\nCM: error at size 1.01554\nCM: retrying with size 0.507772\nCM: surface reconstruction failed: tor\n FAILED.\n/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods CO3NE --method-opts &quot;CO3NE&quot; --cache-dir /Users/user/.cache/BRL-CAD tor\nAttempting to triangulate tor...\nfeature_size: 0.000000\nfeature_scale: 0.150000\ntarget_feature_size: 0.761658\nGeogram result not manifold\no-[reconstruct ] Elapsed time: 3.013s\n FAILED.\n/Users/user/brlcad/build/bin/ged_exec facetize_process -O /Users/user/.cache/BRL-CAD/facetize_5733869552563525943/facetize_moss_select_tmp.g --methods SPSR --method-opts &quot;SPSR&quot; --cache-dir /Users/user/.cache/BRL-CAD tor\nAttempting to triangulate tor...\nfeature_size: 0.000000\nfeature_scale: 0.150000\ntarget_feature_size: 0.761658\nSPSR: decimating with feature size: 1.30208\n\nbu_mtx_trylock() failed\n\nbu_mtx_trylock() failed\nSaving stack trace to facetize_process-83790-bomb.log\n\nbu_mtx_lock() failed\n\nbu_mtx_lock() failed\n FAILED.\n\nPrimitive tessellation summary:\n\n1 object(s) failed:\n        tor\n</code></pre></div>",
+        "id": 462373160,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650376
+    },
+    {
+        "content": "<p>It's annoying that the fallback methods fail (the SPSR decimation is where those bu_mtx failures are coming from) but the <em>real</em> problem is the NMG \"cut_unimonotone\" failure.</p>",
+        "id": 462373354,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650431
+    },
+    {
+        "content": "<p>For a basic tor like that we should never have gotten to the fallbacks at all</p>",
+        "id": 462373425,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650453
+    },
+    {
+        "content": "<p>The tol setting from the select.cpp setup is:  \"tol rel 0.0001\"</p>",
+        "id": 462373555,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650487
+    },
+    {
+        "content": "<p>A facetize without changing the rel tolerance does succeed</p>",
+        "id": 462373601,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650504
+    },
+    {
+        "content": "<p>Looks like in the LoD test I changed this to 0.0002, probably to avoid a similar failure.  Not sure why I missed the select.</p>",
+        "id": 462373822,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723650585
+    },
+    {
+        "content": "<p>OK, we'll see if a248e798bc2c passes.  If so I'll pull the necessary changes over to RELEASE.</p>",
+        "id": 462381021,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723652981
+    },
+    {
+        "content": "<p>At some point we'll need to do something about that NMG failure, but that could be quite the rabbit hole</p>",
+        "id": 462381137,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723653010
     }
 ]
