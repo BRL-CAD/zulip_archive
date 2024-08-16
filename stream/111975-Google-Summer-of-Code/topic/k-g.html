@@ -2476,5 +2476,47 @@ for the resultant beam type 1 is the I-shape.</p>
 
 
 
-<hr><p>Last updated: Aug 15 2024 at 00:39 UTC</p>
+<a name="462527851"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/462527851" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#462527851">(Aug 15 2024 at 11:06)</a>:</h4>
+<p>this is how it looks like using the Pipe premative, this is a part of the Yaris car model <br>
+<a href="/user_uploads/1549/Zn6ukqtfByy8ySZFq03XBuT5/image.png">image.png</a><br>
+<a href="/user_uploads/1549/UsYyMYIYwNVpmkP_wtw84dfy/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Zn6ukqtfByy8ySZFq03XBuT5/image.png" title="image.png"><img data-original-dimensions="851x819" src="/user_uploads/thumbnail/1549/Zn6ukqtfByy8ySZFq03XBuT5/image.png/840x560.webp"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/UsYyMYIYwNVpmkP_wtw84dfy/image.png" title="image.png"><img data-original-dimensions="1104x817" src="/user_uploads/thumbnail/1549/UsYyMYIYwNVpmkP_wtw84dfy/image.png/840x560.webp"></a></div>
+
+
+
+<a name="462528227"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/462528227" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#462528227">(Aug 15 2024 at 11:09)</a>:</h4>
+<p>it's not perfect though. considering each element by itself will only provide the C0 continuity. This is because the bend radious is not provided by the .k file.<br>
+<a href="/user_uploads/1549/i4_eCCkCF_2vL-XdTuILNWOj/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/i4_eCCkCF_2vL-XdTuILNWOj/image.png" title="image.png"><img data-original-dimensions="525x892" src="/user_uploads/thumbnail/1549/i4_eCCkCF_2vL-XdTuILNWOj/image.png/840x560.webp"></a></div>
+
+
+
+<a name="462528258"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/462528258" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#462528258">(Aug 15 2024 at 11:09)</a>:</h4>
+<p>what do you think?</p>
+
+
+
+<a name="462582733"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/462582733" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#462582733">(Aug 15 2024 at 16:00)</a>:</h4>
+<p>Hmm, some thoughts:</p>
+<ul>
+<li>I think, we can't do much about the bend radius. There is none.</li>
+<li>It looks like you are creating a BRL-CAD primitive for every beam section. The BRL-CAD pipe primitive can however hold the entire beam. You can add all support points to it, like in <a href="https://github.com/BRL-CAD/MOOSE/blob/main/src/Database/Pipe.cpp#L292">https://github.com/BRL-CAD/MOOSE/blob/main/src/Database/Pipe.cpp#L292</a></li>
+<li>I would have called the class Pipe, instead of Beam, in analogy to Arbs and Bot.</li>
+</ul>
+
+
+
+<a name="462586154"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/462586154" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#462586154">(Aug 15 2024 at 16:17)</a>:</h4>
+<p>1- I put a constant value for bending radious, because I read in the documentation that bending radious can't be zero.<br>
+2- I was thinking about this, but I though if I put all the beam elements in 1 pipe premative they are going to be connected together using the facke bending radious I used. I will check the link you provided and modify.<br>
+3- yes I agree, I called it beam because I was thinking to put all beams inside it, but maybe it's going to be very messy.  let's call this one pipe and maybe in the future we can combine all beam elements in one  class</p>
+
+
+
+<hr><p>Last updated: Aug 16 2024 at 00:40 UTC</p>
 </html>
