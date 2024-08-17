@@ -15003,5 +15003,34 @@ I will look into it.</p>
 
 
 
-<hr><p>Last updated: Aug 16 2024 at 00:40 UTC</p>
+<a name="462702805"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/462702805" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Vidit Jain <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#462702805">(Aug 16 2024 at 05:06)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <span class="user-mention" data-user-id="252475">@Himanshu</span> , I have updated the pr <a href="https://github.com/BRL-CAD/arbalest/pull/52/commits/b24000117cc269a45659ee691b639d674bcde920">here</a>.</p>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/462576530">said</a>:</p>
+<blockquote>
+<p>Nice to hear that you got closer to the solution. Some thought about your PR:</p>
+<ul>
+<li>m_selectedObjectDisplayListId is always 0. This variable is never used and not needed. You should remove it.</li>
+<li>SelectMouseAction::Deselect() is never called, so you can remove it?</li>
+<li>DisplayManager::clearSuffix() should be called to remove the selection highlighting from the screen. Maybe in the destructor of SelectMouseAction?</li>
+<li>In SelectMouseAction::eventFilter() you should call setSuffix() from DisplayManager only. Setting the color should be done in DisplayManager::drawSuffix(), protected with a saveState()/restoreState(). Display::forceRerenderFrame() is doing the redraw.</li>
+</ul>
+</blockquote>
+<p>I am not sure about protection with saveState() and restoreState because drawSuffix() is already protected by that in GeometryRenderer::render()</p>
+
+
+
+<a name="462702835"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/462702835" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Vidit Jain <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#462702835">(Aug 16 2024 at 05:06)</a>:</h4>
+<p>(deleted)</p>
+
+
+
+<a name="462829663"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/462829663" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#462829663">(Aug 16 2024 at 17:27)</a>:</h4>
+<p>You are right: The way drawSuffix() is called does not need a saveState()/restoreState().</p>
+
+
+
+<hr><p>Last updated: Aug 17 2024 at 00:39 UTC</p>
 </html>

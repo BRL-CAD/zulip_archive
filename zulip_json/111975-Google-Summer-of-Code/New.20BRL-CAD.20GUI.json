@@ -11374,5 +11374,23 @@
         "id": 462576530,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1723735790
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> <span class=\"user-mention\" data-user-id=\"252475\">@Himanshu</span> , I have updated the pr <a href=\"https://github.com/BRL-CAD/arbalest/pull/52/commits/b24000117cc269a45659ee691b639d674bcde920\">here</a>.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/462576530\">said</a>:</p>\n<blockquote>\n<p>Nice to hear that you got closer to the solution. Some thought about your PR:</p>\n<ul>\n<li>m_selectedObjectDisplayListId is always 0. This variable is never used and not needed. You should remove it.</li>\n<li>SelectMouseAction::Deselect() is never called, so you can remove it?</li>\n<li>DisplayManager::clearSuffix() should be called to remove the selection highlighting from the screen. Maybe in the destructor of SelectMouseAction?</li>\n<li>In SelectMouseAction::eventFilter() you should call setSuffix() from DisplayManager only. Setting the color should be done in DisplayManager::drawSuffix(), protected with a saveState()/restoreState(). Display::forceRerenderFrame() is doing the redraw.</li>\n</ul>\n</blockquote>\n<p>I am not sure about protection with saveState() and restoreState because drawSuffix() is already protected by that in GeometryRenderer::render()</p>",
+        "id": 462702805,
+        "sender_full_name": "Vidit Jain",
+        "timestamp": 1723784770
+    },
+    {
+        "content": "<p>(deleted)</p>",
+        "id": 462702835,
+        "sender_full_name": "Vidit Jain",
+        "timestamp": 1723784791
+    },
+    {
+        "content": "<p>You are right: The way drawSuffix() is called does not need a saveState()/restoreState().</p>",
+        "id": 462829663,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1723829270
     }
 ]
