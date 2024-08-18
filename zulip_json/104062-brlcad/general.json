@@ -25492,5 +25492,65 @@
         "id": 462859049,
         "sender_full_name": "Christopher",
         "timestamp": 1723843866
+    },
+    {
+        "content": "<p>If it's not solid, importing it into blender or some other tool is probably the way to go</p>",
+        "id": 462976698,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723898075
+    },
+    {
+        "content": "<p>It depends a bit on what the modeling intent is.  If it's a bot that's supposed to be a solid but isn't, then there are a few things (particularly in the latest BRL-CAD release) you can try.  If it's a mesh intended to represent a thin \"skin\" - like an airplane's exterior - then to get a raytrace you can mark it as being a plate mode bot</p>",
+        "id": 462996978,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723908277
+    },
+    {
+        "content": "<p>if it came in as a surface despite being a manifold, that might be an issue with the importer</p>",
+        "id": 462997033,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723908304
+    },
+    {
+        "content": "<p>There may be something else going on here though - a quick test turning a plate mode into a surface mode BoT and raytracing it, I still get an image</p>",
+        "id": 462997487,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723908485
+    },
+    {
+        "content": "<div class=\"codehilite\"><pre><span></span><code>mged&gt; l test.bot\ntest.bot:  Bag of triangles (BOT)\n    20 vertices, 10 faces (unoriented)\n    This is a surface with no volume\n    use -v (verbose) for all data\n</code></pre></div>",
+        "id": 462997597,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723908537
+    },
+    {
+        "content": "<p>If someone wants to reproduce, I'm using the Generic_Twin.g example in BRL-CAD.  More or less at random, I picked 7852.1.t0 to test:</p>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; cp 7852.1.t0 test.bot\nmged&gt; bot set type test.bot surf\nmged&gt; bot get type test.bot\nsurface\nmged&gt; e test.bot\nmged&gt; rt\n</code></pre></div>",
+        "id": 462998491,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723908957
+    },
+    {
+        "content": "<p>For me, that raytraces.  So I'm not sure why the gltf import wouldn't...</p>",
+        "id": 462998557,
+        "sender_full_name": "starseeker",
+        "timestamp": 1723908981
+    },
+    {
+        "content": "<p>I checked in blender the mesh I wanted to import and there were a lot of issues: face intersections, holes in the mesh... I couldn't even resolve with the auto tool in blender.</p>",
+        "id": 463017112,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723915482
+    },
+    {
+        "content": "<p>For this reason I have changed the mesh, now it seems to work :)</p>",
+        "id": 463017194,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723915525
+    },
+    {
+        "content": "<p>(I have to raytrace just one of the mesh of this paper <a href=\"https://weiphil.s3.eu-central-1.amazonaws.com/neural_bvh.pdf\">https://weiphil.s3.eu-central-1.amazonaws.com/neural_bvh.pdf</a>, just for comparison purposes)</p>",
+        "id": 463017344,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1723915580
     }
 ]

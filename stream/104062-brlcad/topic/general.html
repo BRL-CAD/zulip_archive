@@ -27936,5 +27936,77 @@ model to the corresponding faces in its 2D projections. I came to know recently 
 
 
 
-<hr><p>Last updated: Aug 17 2024 at 00:39 UTC</p>
+<a name="462976698"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462976698" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462976698">(Aug 17 2024 at 12:34)</a>:</h4>
+<p>If it's not solid, importing it into blender or some other tool is probably the way to go</p>
+
+
+
+<a name="462996978"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462996978" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462996978">(Aug 17 2024 at 15:24)</a>:</h4>
+<p>It depends a bit on what the modeling intent is.  If it's a bot that's supposed to be a solid but isn't, then there are a few things (particularly in the latest BRL-CAD release) you can try.  If it's a mesh intended to represent a thin "skin" - like an airplane's exterior - then to get a raytrace you can mark it as being a plate mode bot</p>
+
+
+
+<a name="462997033"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462997033" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462997033">(Aug 17 2024 at 15:25)</a>:</h4>
+<p>if it came in as a surface despite being a manifold, that might be an issue with the importer</p>
+
+
+
+<a name="462997487"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462997487" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462997487">(Aug 17 2024 at 15:28)</a>:</h4>
+<p>There may be something else going on here though - a quick test turning a plate mode into a surface mode BoT and raytracing it, I still get an image</p>
+
+
+
+<a name="462997597"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462997597" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462997597">(Aug 17 2024 at 15:28)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>mged&gt; l test.bot
+test.bot:  Bag of triangles (BOT)
+    20 vertices, 10 faces (unoriented)
+    This is a surface with no volume
+    use -v (verbose) for all data
+</code></pre></div>
+
+
+
+<a name="462998491"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462998491" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462998491">(Aug 17 2024 at 15:35)</a>:</h4>
+<p>If someone wants to reproduce, I'm using the Generic_Twin.g example in BRL-CAD.  More or less at random, I picked 7852.1.t0 to test:</p>
+<div class="codehilite"><pre><span></span><code>mged&gt; cp 7852.1.t0 test.bot
+mged&gt; bot set type test.bot surf
+mged&gt; bot get type test.bot
+surface
+mged&gt; e test.bot
+mged&gt; rt
+</code></pre></div>
+
+
+
+<a name="462998557"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/462998557" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#462998557">(Aug 17 2024 at 15:36)</a>:</h4>
+<p>For me, that raytraces.  So I'm not sure why the gltf import wouldn't...</p>
+
+
+
+<a name="463017112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/463017112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#463017112">(Aug 17 2024 at 17:24)</a>:</h4>
+<p>I checked in blender the mesh I wanted to import and there were a lot of issues: face intersections, holes in the mesh... I couldn't even resolve with the auto tool in blender.</p>
+
+
+
+<a name="463017194"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/463017194" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#463017194">(Aug 17 2024 at 17:25)</a>:</h4>
+<p>For this reason I have changed the mesh, now it seems to work :)</p>
+
+
+
+<a name="463017344"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/463017344" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#463017344">(Aug 17 2024 at 17:26)</a>:</h4>
+<p>(I have to raytrace just one of the mesh of this paper <a href="https://weiphil.s3.eu-central-1.amazonaws.com/neural_bvh.pdf">https://weiphil.s3.eu-central-1.amazonaws.com/neural_bvh.pdf</a>, just for comparison purposes)</p>
+
+
+
+<hr><p>Last updated: Aug 18 2024 at 00:43 UTC</p>
 </html>
