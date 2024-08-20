@@ -3150,5 +3150,107 @@ Moreover, you have to take into consideration also a small overhead in my render
 
 
 
-<hr><p>Last updated: Aug 19 2024 at 00:41 UTC</p>
+<a name="463380787"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463380787" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463380787">(Aug 19 2024 at 11:46)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> <span class="user-mention" data-user-id="700180">@fall Rainy</span> I have figured out why in my network using N = 200 has the same speed as N = 3. The difference with the NBVH network is that they encode N = 3 points and then they concatenate all of these 3 points in order so as to include also the direction of the vector. But the main difference is that the input of their network has 3 * number of features for each point.<br>
+In my case it is different because I get 200 points BUT I compute in parallel all of these 200 points, so the input of my network is only 1 * number of features for each point because I do not need the direction of the ray (I just have to predict whether the voxel is hit/miss).</p>
+<p><a href="/user_uploads/1549/tspuu5sV8wmSKMepEDucXTd1/photo_2024-08-19_13-41-50.jpg">photo_2024-08-19_13-41-50.jpg</a><br>
+(sorry for my bad handwriting).</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/tspuu5sV8wmSKMepEDucXTd1/photo_2024-08-19_13-41-50.jpg" title="photo_2024-08-19_13-41-50.jpg"><img data-original-dimensions="844x722" src="/user_uploads/thumbnail/1549/tspuu5sV8wmSKMepEDucXTd1/photo_2024-08-19_13-41-50.jpg/840x560.webp"></a></div>
+
+
+
+<a name="463392331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463392331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463392331">(Aug 19 2024 at 12:42)</a>:</h4>
+<p>I had a talk on LinkedIn with Philippe Weier, the author of the nbvh paper and he said to me that the inference time of one ray depends on the time of computing the intersection of the ray with the first node + the time of getting the three points + the time of prediction. Then, if it is a miss, you should add the time of computing the intersection of the second node + etc...</p>
+<p>I believe that their network can be improved using this approach:<br>
+instead of using the bvh, we can simply get N = 201 points and merging them in order in triples of three points (67 triples). In this way we can parallelize all these computations in GPU and take only the informations on the first hit. I think it should be faster than the bvh approach.</p>
+
+
+
+<a name="463393344"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463393344" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463393344">(Aug 19 2024 at 12:45)</a>:</h4>
+<p>It sounds a little like volume rendering</p>
+
+
+
+<a name="463393727"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463393727" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463393727">(Aug 19 2024 at 12:46)</a>:</h4>
+<p>Yes, it's like it</p>
+
+
+
+<a name="463394278"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463394278" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463394278">(Aug 19 2024 at 12:47)</a>:</h4>
+<p>Today I was thinking that the multi resolution hash encoding isn't very far from nif network</p>
+
+
+
+<a name="463394430"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463394430" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463394430">(Aug 19 2024 at 12:47)</a>:</h4>
+<p>For example the grid encode they use has the bilinear interpolation</p>
+
+
+
+<a name="463394535"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463394535" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463394535">(Aug 19 2024 at 12:48)</a>:</h4>
+<p>But it is more like voxels</p>
+
+
+
+<a name="463394659"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463394659" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463394659">(Aug 19 2024 at 12:48)</a>:</h4>
+<p>Maybe attach more information, like whether the point is visible or not, and then do an integration at the end</p>
+
+
+
+<a name="463394902"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463394902" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463394902">(Aug 19 2024 at 12:49)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463394278">said</a>:</p>
+<blockquote>
+<p>Today I was thinking that the multi resolution hash encoding isn't very far from nif network</p>
+</blockquote>
+<p>Yes, it has the advantage of being more efficient in the use of voxels</p>
+
+
+
+<a name="463395163"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463395163" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463395163">(Aug 19 2024 at 12:50)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463394659">ha scritto</a>:</p>
+<blockquote>
+<p>Maybe attach more information, like whether the point is visible or not, and then do an integration at the end</p>
+</blockquote>
+<p>Yes</p>
+
+
+
+<a name="463395404"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463395404" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463395404">(Aug 19 2024 at 12:50)</a>:</h4>
+<p>I'd like to make some attempts as well, do you currently have the code for that?</p>
+
+
+
+<a name="463396279"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463396279" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463396279">(Aug 19 2024 at 12:53)</a>:</h4>
+<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href="https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>
+
+
+
+<a name="463396681"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463396681" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463396681">(Aug 19 2024 at 12:54)</a>:</h4>
+<p>Actually, I think it's kind of like a combination of nbvh and nerf.</p>
+
+
+
+<a name="463397357"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/463397357" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#463397357">(Aug 19 2024 at 12:56)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463396279">said</a>:</p>
+<blockquote>
+<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href="https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>
+</blockquote>
+<p>Thx</p>
+
+
+
+<hr><p>Last updated: Aug 20 2024 at 00:40 UTC</p>
 </html>

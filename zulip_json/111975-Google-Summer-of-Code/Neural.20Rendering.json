@@ -2440,5 +2440,89 @@
         "id": 463153393,
         "sender_full_name": "Matteo Balice",
         "timestamp": 1723981265
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"700180\">@fall Rainy</span> I have figured out why in my network using N = 200 has the same speed as N = 3. The difference with the NBVH network is that they encode N = 3 points and then they concatenate all of these 3 points in order so as to include also the direction of the vector. But the main difference is that the input of their network has 3 * number of features for each point.<br>\nIn my case it is different because I get 200 points BUT I compute in parallel all of these 200 points, so the input of my network is only 1 * number of features for each point because I do not need the direction of the ray (I just have to predict whether the voxel is hit/miss).</p>\n<p><a href=\"/user_uploads/1549/tspuu5sV8wmSKMepEDucXTd1/photo_2024-08-19_13-41-50.jpg\">photo_2024-08-19_13-41-50.jpg</a><br>\n(sorry for my bad handwriting).</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/tspuu5sV8wmSKMepEDucXTd1/photo_2024-08-19_13-41-50.jpg\" title=\"photo_2024-08-19_13-41-50.jpg\"><img data-original-dimensions=\"844x722\" src=\"/user_uploads/thumbnail/1549/tspuu5sV8wmSKMepEDucXTd1/photo_2024-08-19_13-41-50.jpg/840x560.webp\"></a></div>",
+        "id": 463380787,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724068000
+    },
+    {
+        "content": "<p>I had a talk on LinkedIn with Philippe Weier, the author of the nbvh paper and he said to me that the inference time of one ray depends on the time of computing the intersection of the ray with the first node + the time of getting the three points + the time of prediction. Then, if it is a miss, you should add the time of computing the intersection of the second node + etc...</p>\n<p>I believe that their network can be improved using this approach:<br>\ninstead of using the bvh, we can simply get N = 201 points and merging them in order in triples of three points (67 triples). In this way we can parallelize all these computations in GPU and take only the informations on the first hit. I think it should be faster than the bvh approach.</p>",
+        "id": 463392331,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071379
+    },
+    {
+        "content": "<p>It sounds a little like volume rendering</p>",
+        "id": 463393344,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724071543
+    },
+    {
+        "content": "<p>Yes, it's like it</p>",
+        "id": 463393727,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071586
+    },
+    {
+        "content": "<p>Today I was thinking that the multi resolution hash encoding isn't very far from nif network</p>",
+        "id": 463394278,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071657
+    },
+    {
+        "content": "<p>For example the grid encode they use has the bilinear interpolation</p>",
+        "id": 463394430,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071678
+    },
+    {
+        "content": "<p>But it is more like voxels</p>",
+        "id": 463394535,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071693
+    },
+    {
+        "content": "<p>Maybe attach more information, like whether the point is visible or not, and then do an integration at the end</p>",
+        "id": 463394659,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724071718
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463394278\">said</a>:</p>\n<blockquote>\n<p>Today I was thinking that the multi resolution hash encoding isn't very far from nif network</p>\n</blockquote>\n<p>Yes, it has the advantage of being more efficient in the use of voxels</p>",
+        "id": 463394902,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724071766
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463394659\">ha scritto</a>:</p>\n<blockquote>\n<p>Maybe attach more information, like whether the point is visible or not, and then do an integration at the end</p>\n</blockquote>\n<p>Yes</p>",
+        "id": 463395163,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071814
+    },
+    {
+        "content": "<p>I'd like to make some attempts as well, do you currently have the code for that?</p>",
+        "id": 463395404,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724071859
+    },
+    {
+        "content": "<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href=\"https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh\">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>",
+        "id": 463396279,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724071996
+    },
+    {
+        "content": "<p>Actually, I think it's kind of like a combination of nbvh and nerf.</p>",
+        "id": 463396681,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724072064
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463396279\">said</a>:</p>\n<blockquote>\n<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href=\"https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh\">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>\n</blockquote>\n<p>Thx</p>",
+        "id": 463397357,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724072175
     }
 ]
