@@ -2524,5 +2524,245 @@
         "id": 463397357,
         "sender_full_name": "fall Rainy",
         "timestamp": 1724072175
+    },
+    {
+        "content": "<p>I got another improvement in both rendering time and memory. Talking with the author of nbvh he suggested me to use only 1 number as the dimension of each level (and he was right because I only need to predict visibility ie the shape of the object).<br>\nHere it is the grid:<br>\n<a href=\"/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png\" title=\"image.png\"><img data-original-dimensions=\"1116x141\" src=\"/user_uploads/thumbnail/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png/840x560.webp\"></a></div><p>Moreover, now the statistics are:</p>\n<p>memory usage: 4,3mb<br>\nmax inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere, otherwise the time is lower)</p>\n<p>These statistics are indipendent from the object encoded. I have tried with moss.g and statuette (one of their object) and the reason is very simple: I do not use any bvh, so every ray will have the same inference time IF the grid is the same between object. The only thing that can change between objects is the metric F1, because some objects can have small details that are more complex to encode but using this grid is ok both for moss.g and statuette.</p>",
+        "id": 464010858,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724236715
+    },
+    {
+        "content": "<p>I have written some metrics here if you are interested:</p>\n<p>NBVH<br>\nhardware: RTX 4070 12GB<br>\nbatch size: 2^14 (16'384 rays)</p>\n<p>Both models achieve 0.9991 F1 with 26 millions rays in about 10 minutes<br>\nmemory usage: 4,3mb<br>\nmax inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere)</p>\n<p>MOSS MODEL<br>\ntraining set: 1 million rays<br>\ntraining time: 47 seconds<br>\nF1: 0.9958</p>\n<p>training set: 5 million rays<br>\ntraining time: 4 min 10 sec<br>\nF1: 0.9974</p>\n<p>STATUETTE MODEL<br>\ntraining set: 1 million rays<br>\ntraining time: 40 seconds<br>\nF1: 0.9942</p>\n<p>training set: 5 million rays<br>\ntraining time: 4 min<br>\nF1: 0.9972</p>",
+        "id": 464011085,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724236824
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463396279\">said</a>:</p>\n<blockquote>\n<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href=\"https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh\">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>\n</blockquote>\n<p>I read these codes. It still looks like gridnet&amp;hashnet? not nbvh</p>",
+        "id": 464083920,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724252790
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"700180\">fall Rainy</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464083920\">ha scritto</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463396279\">said</a>:</p>\n<blockquote>\n<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href=\"https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh\">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>\n</blockquote>\n<p>I read these codes. It still looks like gridnet&amp;hashnet? not nbvh</p>\n</blockquote>\n<p>Yes I call it nbvh but it is only hashnet and gridnet</p>",
+        "id": 464084356,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724252862
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464010858\">said</a>:</p>\n<blockquote>\n<p>I got another improvement in both rendering time and memory. Talking with the author of nbvh he suggested me to use only 1 number as the dimension of each level (and he was right because I only need to predict visibility ie the shape of the object).<br>\nHere it is the grid:<br>\n<a href=\"/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png\">image.png</a></p>\n<p>Moreover, now the statistics are:</p>\n<p>memory usage: 4,3mb<br>\nmax inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere, otherwise the time is lower)</p>\n<p>These statistics are indipendent from the object encoded. I have tried with moss.g and statuette (one of their object) and the reason is very simple: I do not use any bvh, so every ray will have the same inference time IF the grid is the same between object. The only thing that can change between objects is the metric F1, because some objects can have small details that are more complex to encode but using this grid is ok both for moss.g and statuette.</p>\n</blockquote>\n<p>what do you mean about 1920×1080?</p>",
+        "id": 464084608,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724252924
+    },
+    {
+        "content": "<p>The resolution of the rendering</p>",
+        "id": 464084672,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724252940
+    },
+    {
+        "content": "<p>I am using your rgb training set now and I have one picture to show you</p>",
+        "id": 464085266,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253087
+    },
+    {
+        "content": "<p>I've actually found out before. And for rgb prediction, dimension=3 is better</p>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464010858\">said</a>:</p>\n<blockquote>\n<p>I got another improvement in both rendering time and memory. Talking with the author of nbvh he suggested me to use only 1 number as the dimension of each level (and he was right because I only need to predict visibility ie the shape of the object).<br>\nHere it is the grid:<br>\n<a href=\"/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png\">image.png</a></p>\n<p>Moreover, now the statistics are:</p>\n<p>memory usage: 4,3mb<br>\nmax inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere, otherwise the time is lower)</p>\n<p>These statistics are indipendent from the object encoded. I have tried with moss.g and statuette (one of their object) and the reason is very simple: I do not use any bvh, so every ray will have the same inference time IF the grid is the same between object. The only thing that can change between objects is the metric F1, because some objects can have small details that are more complex to encode but using this grid is ok both for moss.g and statuette.</p>\n</blockquote>",
+        "id": 464085519,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253134
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png\">image.png</a><br>\nThe torch.max is not suitable for rgb prediction</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png\" title=\"image.png\"><img data-original-dimensions=\"492x370\" src=\"/user_uploads/thumbnail/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png/840x560.webp\"></a></div>",
+        "id": 464085960,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253249
+    },
+    {
+        "content": "<p>You can do it with this:</p>\n<div class=\"codehilite\" data-code-language=\"Python\"><pre><span></span><code>        <span class=\"n\">x</span> <span class=\"o\">=</span> <span class=\"bp\">self</span><span class=\"o\">.</span><span class=\"n\">output_layers</span><span class=\"p\">(</span><span class=\"n\">x</span><span class=\"p\">)</span>\n        <span class=\"n\">x</span> <span class=\"o\">=</span> <span class=\"n\">torch</span><span class=\"o\">.</span><span class=\"n\">sigmoid</span><span class=\"p\">(</span><span class=\"n\">x</span><span class=\"p\">)</span> <span class=\"c1\"># map output to 0,1</span>\n        <span class=\"n\">x</span> <span class=\"o\">=</span> <span class=\"n\">F</span><span class=\"o\">.</span><span class=\"n\">threshold</span><span class=\"p\">(</span><span class=\"n\">x</span><span class=\"p\">,</span> <span class=\"mf\">0.1</span><span class=\"p\">,</span> <span class=\"mf\">0.0</span><span class=\"p\">)</span> <span class=\"c1\">#Reducing noise</span>\n        <span class=\"n\">x</span> <span class=\"o\">=</span> <span class=\"n\">x</span> <span class=\"o\">*</span> <span class=\"mi\">255</span> <span class=\"c1\">#map output to 0,255</span>\n</code></pre></div>",
+        "id": 464086346,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253339
+    },
+    {
+        "content": "<p>Is this differentiable?</p>",
+        "id": 464086480,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253368
+    },
+    {
+        "content": "<p>Yes(I think so</p>",
+        "id": 464086533,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253381
+    },
+    {
+        "content": "<p>Because I tried something similar but it wasnt differentiable</p>",
+        "id": 464086559,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253386
+    },
+    {
+        "content": "<p>Have you tried rgb with hashnet&amp;gridnet?</p>",
+        "id": 464086766,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253428
+    },
+    {
+        "content": "<p>This is my res:<br>\n<a href=\"/user_uploads/1549/lK5GZq7FbUR887ubpqW9lG_O/91aa8fe67e981e4ed47dc11c6bda546.png\">91aa8fe67e981e4ed47dc11c6bda546.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/lK5GZq7FbUR887ubpqW9lG_O/91aa8fe67e981e4ed47dc11c6bda546.png\" title=\"91aa8fe67e981e4ed47dc11c6bda546.png\"><img data-original-dimensions=\"766x816\" src=\"/user_uploads/thumbnail/1549/lK5GZq7FbUR887ubpqW9lG_O/91aa8fe67e981e4ed47dc11c6bda546.png/840x560.webp\"></a></div>",
+        "id": 464086972,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253472
+    },
+    {
+        "content": "<p>Does it work with all directions?</p>",
+        "id": 464087161,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253503
+    },
+    {
+        "content": "<p>with 1million rays to train</p>",
+        "id": 464087179,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253507
+    },
+    {
+        "content": "<p>Just for fixed direction</p>",
+        "id": 464087219,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253517
+    },
+    {
+        "content": "<p>Ah ok</p>",
+        "id": 464087351,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253549
+    },
+    {
+        "content": "<p>For all directions, I'm getting similar results to you.</p>",
+        "id": 464087396,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253560
+    },
+    {
+        "content": "<p>For all directions, my predictions for binary classification actually turned out pretty well</p>",
+        "id": 464087573,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253602
+    },
+    {
+        "content": "<p>I'll organize the results tomorrow.</p>",
+        "id": 464087673,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253624
+    },
+    {
+        "content": "<p>ok good</p>",
+        "id": 464087716,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253631
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464085960\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png\">image.png</a><br>\nThe torch.max is not suitable for rgb prediction</p>\n</blockquote>\n<p>This image doesn't look like it's been rendered by brl-cad</p>",
+        "id": 464087935,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253664
+    },
+    {
+        "content": "<p>it's in python</p>",
+        "id": 464088044,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253681
+    },
+    {
+        "content": "<p>OK, got it</p>",
+        "id": 464088116,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253693
+    },
+    {
+        "content": "<p>they are rgb colors of the pygame renderer</p>",
+        "id": 464088283,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253718
+    },
+    {
+        "content": "<p>it's a python library</p>",
+        "id": 464088370,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253727
+    },
+    {
+        "content": "<p>I will show all of my results here: <a href=\"https://docs.google.com/document/d/1-mp9u9IhesOGkq6bs2UvucQAj-iNafe-nx8Xr3rK3a0/edit#heading=h.wqr1x1wu0z7r\">neural rendering</a></p>",
+        "id": 464088484,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253761
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464088283\">said</a>:</p>\n<blockquote>\n<p>they are rgb colors of the pygame renderer</p>\n</blockquote>\n<p>The resulting graph is very nice.</p>",
+        "id": 464088583,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253788
+    },
+    {
+        "content": "<p>which graph</p>",
+        "id": 464088650,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253810
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464085960\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png\">image.png</a><br>\nThe torch.max is not suitable for rgb prediction</p>\n</blockquote>\n<p>this one</p>",
+        "id": 464088738,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253832
+    },
+    {
+        "content": "<p>Looks more like a point cloud map.</p>",
+        "id": 464088876,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253864
+    },
+    {
+        "content": "<p>well, this is because at the moment if the ray intersects 2 or more surfaces, my network does not know which color to show</p>",
+        "id": 464089105,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253929
+    },
+    {
+        "content": "<p>so it seems weird</p>",
+        "id": 464089134,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724253935
+    },
+    {
+        "content": "<p>OK, got it</p>",
+        "id": 464089310,
+        "sender_full_name": "fall Rainy",
+        "timestamp": 1724253976
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/fjMPcdjNRBA6kJb_qx49N5Ad/img-2044_owThMErC.mp4\">img-2044_owThMErC.mp4</a></p>\n<div class=\"message_inline_image message_inline_video\"><a href=\"/user_uploads/1549/fjMPcdjNRBA6kJb_qx49N5Ad/img-2044_owThMErC.mp4\" title=\"img-2044_owThMErC.mp4\"><video preload=\"metadata\" src=\"/user_uploads/1549/fjMPcdjNRBA6kJb_qx49N5Ad/img-2044_owThMErC.mp4\"></video></a></div>",
+        "id": 464138747,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724266216
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"700180\">@fall Rainy</span> I believe it's just a matter of choosing the right loss function and the right hyperparameters.</p>",
+        "id": 464138911,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724266285
+    },
+    {
+        "content": "<p>If we add also the position of where the ray intersects the surface, I believe we will achieve a great accuracy.</p>",
+        "id": 464139218,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724266408
+    },
+    {
+        "content": "<p>(The training set is 1 million)</p>",
+        "id": 464145477,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724267829
     }
 ]

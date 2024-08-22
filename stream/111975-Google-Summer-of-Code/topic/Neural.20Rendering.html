@@ -3252,5 +3252,327 @@ instead of using the bvh, we can simply get N = 201 points and merging them in o
 
 
 
-<hr><p>Last updated: Aug 21 2024 at 00:40 UTC</p>
+<a name="464010858"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464010858" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464010858">(Aug 21 2024 at 10:38)</a>:</h4>
+<p>I got another improvement in both rendering time and memory. Talking with the author of nbvh he suggested me to use only 1 number as the dimension of each level (and he was right because I only need to predict visibility ie the shape of the object).<br>
+Here it is the grid:<br>
+<a href="/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png" title="image.png"><img data-original-dimensions="1116x141" src="/user_uploads/thumbnail/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png/840x560.webp"></a></div><p>Moreover, now the statistics are:</p>
+<p>memory usage: 4,3mb<br>
+max inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere, otherwise the time is lower)</p>
+<p>These statistics are indipendent from the object encoded. I have tried with moss.g and statuette (one of their object) and the reason is very simple: I do not use any bvh, so every ray will have the same inference time IF the grid is the same between object. The only thing that can change between objects is the metric F1, because some objects can have small details that are more complex to encode but using this grid is ok both for moss.g and statuette.</p>
+
+
+
+<a name="464011085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464011085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464011085">(Aug 21 2024 at 10:40)</a>:</h4>
+<p>I have written some metrics here if you are interested:</p>
+<p>NBVH<br>
+hardware: RTX 4070 12GB<br>
+batch size: 2^14 (16'384 rays)</p>
+<p>Both models achieve 0.9991 F1 with 26 millions rays in about 10 minutes<br>
+memory usage: 4,3mb<br>
+max inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere)</p>
+<p>MOSS MODEL<br>
+training set: 1 million rays<br>
+training time: 47 seconds<br>
+F1: 0.9958</p>
+<p>training set: 5 million rays<br>
+training time: 4 min 10 sec<br>
+F1: 0.9974</p>
+<p>STATUETTE MODEL<br>
+training set: 1 million rays<br>
+training time: 40 seconds<br>
+F1: 0.9942</p>
+<p>training set: 5 million rays<br>
+training time: 4 min<br>
+F1: 0.9972</p>
+
+
+
+<a name="464083920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464083920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464083920">(Aug 21 2024 at 15:06)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463396279">said</a>:</p>
+<blockquote>
+<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href="https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>
+</blockquote>
+<p>I read these codes. It still looks like gridnet&amp;hashnet? not nbvh</p>
+
+
+
+<a name="464084356"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464084356" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464084356">(Aug 21 2024 at 15:07)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="700180">fall Rainy</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464083920">ha scritto</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/463396279">said</a>:</p>
+<blockquote>
+<p>No, I have only my network to predict hit/miss here but you can easily adapt for your task <a href="https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh">https://github.com/bralani/rt_volume/tree/neural_rendering/src/rt/nvbh</a></p>
+</blockquote>
+<p>I read these codes. It still looks like gridnet&amp;hashnet? not nbvh</p>
+</blockquote>
+<p>Yes I call it nbvh but it is only hashnet and gridnet</p>
+
+
+
+<a name="464084608"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464084608" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464084608">(Aug 21 2024 at 15:08)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464010858">said</a>:</p>
+<blockquote>
+<p>I got another improvement in both rendering time and memory. Talking with the author of nbvh he suggested me to use only 1 number as the dimension of each level (and he was right because I only need to predict visibility ie the shape of the object).<br>
+Here it is the grid:<br>
+<a href="/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png">image.png</a></p>
+<p>Moreover, now the statistics are:</p>
+<p>memory usage: 4,3mb<br>
+max inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere, otherwise the time is lower)</p>
+<p>These statistics are indipendent from the object encoded. I have tried with moss.g and statuette (one of their object) and the reason is very simple: I do not use any bvh, so every ray will have the same inference time IF the grid is the same between object. The only thing that can change between objects is the metric F1, because some objects can have small details that are more complex to encode but using this grid is ok both for moss.g and statuette.</p>
+</blockquote>
+<p>what do you mean about 1920×1080?</p>
+
+
+
+<a name="464084672"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464084672" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464084672">(Aug 21 2024 at 15:09)</a>:</h4>
+<p>The resolution of the rendering</p>
+
+
+
+<a name="464085266"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464085266" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464085266">(Aug 21 2024 at 15:11)</a>:</h4>
+<p>I am using your rgb training set now and I have one picture to show you</p>
+
+
+
+<a name="464085519"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464085519" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464085519">(Aug 21 2024 at 15:12)</a>:</h4>
+<p>I've actually found out before. And for rgb prediction, dimension=3 is better</p>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464010858">said</a>:</p>
+<blockquote>
+<p>I got another improvement in both rendering time and memory. Talking with the author of nbvh he suggested me to use only 1 number as the dimension of each level (and he was right because I only need to predict visibility ie the shape of the object).<br>
+Here it is the grid:<br>
+<a href="/user_uploads/1549/wcgJrdT6FqnT1BYbTLnbJjlv/image.png">image.png</a></p>
+<p>Moreover, now the statistics are:</p>
+<p>memory usage: 4,3mb<br>
+max inference time: 5,2 ms in 1920x1080 (assuming all rays hit the bounding sphere, otherwise the time is lower)</p>
+<p>These statistics are indipendent from the object encoded. I have tried with moss.g and statuette (one of their object) and the reason is very simple: I do not use any bvh, so every ray will have the same inference time IF the grid is the same between object. The only thing that can change between objects is the metric F1, because some objects can have small details that are more complex to encode but using this grid is ok both for moss.g and statuette.</p>
+</blockquote>
+
+
+
+<a name="464085960"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464085960" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464085960">(Aug 21 2024 at 15:14)</a>:</h4>
+<p><a href="/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png">image.png</a><br>
+The torch.max is not suitable for rgb prediction</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png" title="image.png"><img data-original-dimensions="492x370" src="/user_uploads/thumbnail/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png/840x560.webp"></a></div>
+
+
+
+<a name="464086346"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464086346" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464086346">(Aug 21 2024 at 15:15)</a>:</h4>
+<p>You can do it with this:</p>
+<div class="codehilite" data-code-language="Python"><pre><span></span><code>        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_layers</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># map output to 0,1</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="c1">#Reducing noise</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">255</span> <span class="c1">#map output to 0,255</span>
+</code></pre></div>
+
+
+
+<a name="464086480"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464086480" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464086480">(Aug 21 2024 at 15:16)</a>:</h4>
+<p>Is this differentiable?</p>
+
+
+
+<a name="464086533"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464086533" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464086533">(Aug 21 2024 at 15:16)</a>:</h4>
+<p>Yes(I think so</p>
+
+
+
+<a name="464086559"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464086559" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464086559">(Aug 21 2024 at 15:16)</a>:</h4>
+<p>Because I tried something similar but it wasnt differentiable</p>
+
+
+
+<a name="464086766"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464086766" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464086766">(Aug 21 2024 at 15:17)</a>:</h4>
+<p>Have you tried rgb with hashnet&amp;gridnet?</p>
+
+
+
+<a name="464086972"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464086972" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464086972">(Aug 21 2024 at 15:17)</a>:</h4>
+<p>This is my res:<br>
+<a href="/user_uploads/1549/lK5GZq7FbUR887ubpqW9lG_O/91aa8fe67e981e4ed47dc11c6bda546.png">91aa8fe67e981e4ed47dc11c6bda546.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/lK5GZq7FbUR887ubpqW9lG_O/91aa8fe67e981e4ed47dc11c6bda546.png" title="91aa8fe67e981e4ed47dc11c6bda546.png"><img data-original-dimensions="766x816" src="/user_uploads/thumbnail/1549/lK5GZq7FbUR887ubpqW9lG_O/91aa8fe67e981e4ed47dc11c6bda546.png/840x560.webp"></a></div>
+
+
+
+<a name="464087161"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087161" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087161">(Aug 21 2024 at 15:18)</a>:</h4>
+<p>Does it work with all directions?</p>
+
+
+
+<a name="464087179"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087179" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087179">(Aug 21 2024 at 15:18)</a>:</h4>
+<p>with 1million rays to train</p>
+
+
+
+<a name="464087219"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087219" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087219">(Aug 21 2024 at 15:18)</a>:</h4>
+<p>Just for fixed direction</p>
+
+
+
+<a name="464087351"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087351" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087351">(Aug 21 2024 at 15:19)</a>:</h4>
+<p>Ah ok</p>
+
+
+
+<a name="464087396"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087396" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087396">(Aug 21 2024 at 15:19)</a>:</h4>
+<p>For all directions, I'm getting similar results to you.</p>
+
+
+
+<a name="464087573"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087573" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087573">(Aug 21 2024 at 15:20)</a>:</h4>
+<p>For all directions, my predictions for binary classification actually turned out pretty well</p>
+
+
+
+<a name="464087673"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087673" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087673">(Aug 21 2024 at 15:20)</a>:</h4>
+<p>I'll organize the results tomorrow.</p>
+
+
+
+<a name="464087716"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087716" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087716">(Aug 21 2024 at 15:20)</a>:</h4>
+<p>ok good</p>
+
+
+
+<a name="464087935"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464087935" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464087935">(Aug 21 2024 at 15:21)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464085960">said</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png">image.png</a><br>
+The torch.max is not suitable for rgb prediction</p>
+</blockquote>
+<p>This image doesn't look like it's been rendered by brl-cad</p>
+
+
+
+<a name="464088044"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088044" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088044">(Aug 21 2024 at 15:21)</a>:</h4>
+<p>it's in python</p>
+
+
+
+<a name="464088116"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088116" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088116">(Aug 21 2024 at 15:21)</a>:</h4>
+<p>OK, got it</p>
+
+
+
+<a name="464088283"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088283" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088283">(Aug 21 2024 at 15:21)</a>:</h4>
+<p>they are rgb colors of the pygame renderer</p>
+
+
+
+<a name="464088370"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088370" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088370">(Aug 21 2024 at 15:22)</a>:</h4>
+<p>it's a python library</p>
+
+
+
+<a name="464088484"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088484" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088484">(Aug 21 2024 at 15:22)</a>:</h4>
+<p>I will show all of my results here: <a href="https://docs.google.com/document/d/1-mp9u9IhesOGkq6bs2UvucQAj-iNafe-nx8Xr3rK3a0/edit#heading=h.wqr1x1wu0z7r">neural rendering</a></p>
+
+
+
+<a name="464088583"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088583" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088583">(Aug 21 2024 at 15:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464088283">said</a>:</p>
+<blockquote>
+<p>they are rgb colors of the pygame renderer</p>
+</blockquote>
+<p>The resulting graph is very nice.</p>
+
+
+
+<a name="464088650"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088650" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088650">(Aug 21 2024 at 15:23)</a>:</h4>
+<p>which graph</p>
+
+
+
+<a name="464088738"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088738" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088738">(Aug 21 2024 at 15:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/464085960">said</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/Yzw3H71LfxFycYoA1gQXnAz9/image.png">image.png</a><br>
+The torch.max is not suitable for rgb prediction</p>
+</blockquote>
+<p>this one</p>
+
+
+
+<a name="464088876"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464088876" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464088876">(Aug 21 2024 at 15:24)</a>:</h4>
+<p>Looks more like a point cloud map.</p>
+
+
+
+<a name="464089105"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464089105" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464089105">(Aug 21 2024 at 15:25)</a>:</h4>
+<p>well, this is because at the moment if the ray intersects 2 or more surfaces, my network does not know which color to show</p>
+
+
+
+<a name="464089134"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464089134" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464089134">(Aug 21 2024 at 15:25)</a>:</h4>
+<p>so it seems weird</p>
+
+
+
+<a name="464089310"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464089310" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> fall Rainy <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464089310">(Aug 21 2024 at 15:26)</a>:</h4>
+<p>OK, got it</p>
+
+
+
+<a name="464138747"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464138747" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464138747">(Aug 21 2024 at 18:50)</a>:</h4>
+<p><a href="/user_uploads/1549/fjMPcdjNRBA6kJb_qx49N5Ad/img-2044_owThMErC.mp4">img-2044_owThMErC.mp4</a></p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/fjMPcdjNRBA6kJb_qx49N5Ad/img-2044_owThMErC.mp4" title="img-2044_owThMErC.mp4"><video preload="metadata" src="/user_uploads/1549/fjMPcdjNRBA6kJb_qx49N5Ad/img-2044_owThMErC.mp4"></video></a></div>
+
+
+
+<a name="464138911"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464138911" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464138911">(Aug 21 2024 at 18:51)</a>:</h4>
+<p><span class="user-mention" data-user-id="700180">@fall Rainy</span> I believe it's just a matter of choosing the right loss function and the right hyperparameters.</p>
+
+
+
+<a name="464139218"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464139218" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464139218">(Aug 21 2024 at 18:53)</a>:</h4>
+<p>If we add also the position of where the ray intersects the surface, I believe we will achieve a great accuracy.</p>
+
+
+
+<a name="464145477"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/464145477" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#464145477">(Aug 21 2024 at 19:17)</a>:</h4>
+<p>(The training set is 1 million)</p>
+
+
+
+<hr><p>Last updated: Aug 22 2024 at 00:41 UTC</p>
 </html>
