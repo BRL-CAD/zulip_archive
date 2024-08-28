@@ -4514,5 +4514,155 @@ Try with this training set</p>
 
 
 
-<hr><p>Last updated: Aug 27 2024 at 00:41 UTC</p>
+<a name="465421566"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465421566" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465421566">(Aug 27 2024 at 11:49)</a>:</h4>
+<p>During the sampling part (renderings) I have these warnings (and others similar):</p>
+<p>Root solver reported 3 intersections != {0, 2, 4} on s.nos5a.i<br>
+        shooting point (units mm):  (16599.899526, 396.927869, 1211.109774)<br>
+        shooting direction:         (-0.947094, -0.274243, -0.166745)<br>
+        377.103 366.627 86.6928</p>
+<p>OVERLAP1: /havoc_front/cannopy/cannopy_wipers/2_wiper/2_wipe1_rubber/2_r.wipe1<br>
+OVERLAP2: /havoc_front/cannopy/cannopy_glass/r.glass1<br>
+OVERLAPa: dist=(1.91371, 3.2123) isol=2_s.wipe2 osol=2_s.wipe2<br>
+OVERLAPb: depth 1.29859mm at (15095.9, -244.662, 1677.06) x105 y148 lvl0</p>
+
+
+
+<a name="465421636"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465421636" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465421636">(Aug 27 2024 at 11:50)</a>:</h4>
+<p>Could it be for this reason that the model isn't able to predict well?</p>
+
+
+
+<a name="465476518"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465476518" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465476518">(Aug 27 2024 at 14:57)</a>:</h4>
+<p>Does a_dist contain always the first intersection even if there are more than 1 intersections of the ray on the surface?</p>
+<div class="codehilite"><pre><span></span><code>VJOIN1(hit_point, ap-&gt;a_ray.r_pt, ap-&gt;a_dist, ap-&gt;a_ray.r_dir);
+</code></pre></div>
+<p><span class="user-mention" data-user-id="102902">@Sean</span></p>
+
+
+
+<a name="465483576"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465483576" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465483576">(Aug 27 2024 at 15:27)</a>:</h4>
+<p>This is the shape training only with the loss of hit/miss:<br>
+<a href="/user_uploads/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png" title="image.png"><img data-original-dimensions="361x377" src="/user_uploads/thumbnail/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png/840x560.webp"></a></div><p>And this is the shape training also with the loss of the distance:<br>
+<a href="/user_uploads/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png" title="image.png"><img data-original-dimensions="400x389" src="/user_uploads/thumbnail/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png/840x560.webp"></a></div><p>So the problem must be with the distance... I think that during the sampling part (in brl-cad), if there are more than 1 intersections, a_dist contains the wrong distance and I need only and always the first intersection. Could it be possible?</p>
+
+
+
+<a name="465576331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576331">(Aug 27 2024 at 21:56)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465476518">said</a>:</p>
+<blockquote>
+<p>Does a_dist contain always the first intersection even if there are more than 1 intersections of the ray on the surface?</p>
+<div class="codehilite"><pre><span></span><code>VJOIN1(hit_point, ap-&gt;a_ray.r_pt, ap-&gt;a_dist, ap-&gt;a_ray.r_dir);
+</code></pre></div>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span></p>
+</blockquote>
+<p>No, a_dist isn't even set by librt -- that's an application-specific field so apps (e.g., rt) get to use it however they want.  So code you're using/calling has set or used a_dist and that's what you'll have to refer to in order to determine what is there.</p>
+
+
+
+<a name="465576493"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576493" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576493">(Aug 27 2024 at 21:57)</a>:</h4>
+<p>That shape training doesn't look right -- that looks like just the nose geometry.  I mean it's great that it's recognizable, but missing a lot.  Did you use the 'havoc' object?</p>
+
+
+
+<a name="465576610"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576610" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576610">(Aug 27 2024 at 21:58)</a>:</h4>
+<p>Ah, and I see from your output reporting that you're using "havoc_front" .. you want "havoc" instead.</p>
+
+
+
+<a name="465576617"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576617" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576617">(Aug 27 2024 at 21:58)</a>:</h4>
+<p>No i</p>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465576493">said</a>:</p>
+<blockquote>
+<p>That shape training doesn't look right -- that looks like just the nose geometry.  I mean it's great that it's recognizable, but missing a lot.  Did you use the 'havoc' object?</p>
+</blockquote>
+<p>No I used only the havoc_front</p>
+
+
+
+<a name="465576641"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576641" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576641">(Aug 27 2024 at 21:58)</a>:</h4>
+<p>Ah ok I will train with havoc</p>
+
+
+
+<a name="465576729"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576729" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576729">(Aug 27 2024 at 21:59)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465421636">said</a>:</p>
+<blockquote>
+<p>Could it be for this reason that the model isn't able to predict well?</p>
+</blockquote>
+<p>No, those warnings are innocuous.  They are known issues with the model that just affect a few pixels and do not affect the hit distance values or silhouetting at all.</p>
+
+
+
+<a name="465576838"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576838" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576838">(Aug 27 2024 at 22:00)</a>:</h4>
+<p>It’s strange</p>
+
+
+
+<a name="465576927"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465576927" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465576927">(Aug 27 2024 at 22:00)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465576641">said</a>:</p>
+<blockquote>
+<p>Ah ok I will train with havoc</p>
+</blockquote>
+<p>Yeah, I think it'll be more interesting to use the whole vehicle, especially the long rotors and complexity in certain parts.</p>
+
+
+
+<a name="465577233"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465577233" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465577233">(Aug 27 2024 at 22:03)</a>:</h4>
+<p>Rotors are long and thin, which should approach a worst case for sampling.</p>
+
+
+
+<a name="465577822"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465577822" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465577822">(Aug 27 2024 at 22:08)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465576838">said</a>:</p>
+<blockquote>
+<p>It’s strange</p>
+</blockquote>
+<p>One is the root solver saying it got 3 hits, which can happen on a couple primitives when rays just graze a surface.  We make it print to eventually see if we can special-case the condition but it doesn't affect ray tracing.</p>
+<p>The other is a report of a geometry overlap which is a modeling error, which also doesn't affect the hit results you're using.</p>
+
+
+
+<a name="465578112"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465578112" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465578112">(Aug 27 2024 at 22:11)</a>:</h4>
+<p>I will see whether there are the same errors on the full havoc model</p>
+
+
+
+<a name="465578191"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465578191" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465578191">(Aug 27 2024 at 22:11)</a>:</h4>
+<p>We are certain that the hit informations are right due to the first image here</p>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465483576">said</a>:</p>
+<blockquote>
+<p>This is the shape training only with the loss of hit/miss:<br>
+<a href="/user_uploads/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png">image.png</a></p>
+<p>And this is the shape training also with the loss of the distance:<br>
+<a href="/user_uploads/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png">image.png</a></p>
+<p>So the problem must be with the distance... I think that during the sampling part (in brl-cad), if there are more than 1 intersections, a_dist contains the wrong distance and I need only and always the first intersection. Could it be possible?</p>
+</blockquote>
+
+
+
+<a name="465578372"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/465578372" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#465578372">(Aug 27 2024 at 22:12)</a>:</h4>
+<p>It shouldn’t be too difficult to understand the distance in those areas below the helicopter. I have seen the true model and it is pretty smooth</p>
+
+
+
+<hr><p>Last updated: Aug 28 2024 at 00:41 UTC</p>
 </html>

@@ -1,0 +1,32 @@
+[
+    {
+        "content": "<p>Digging into the lint raytracing crash in main... The following code is crashing (bot.c:1480):</p>\n<div class=\"codehilite\"><pre><span></span><code>          segp-&gt;seg_in = hits[i]; /* struct copy */\n          trip = (triangle_s *)hits[i].hit_private;\n          BOT_UNORIENTED_NORM(ap, &amp;segp-&gt;seg_in, trip-&gt;face_norm, IN_SEG);\n</code></pre></div>\n<p>If I look at the memory contents:</p>\n<div class=\"codehilite\"><pre><span></span><code>(gdb) l\n\n1475\n1476        RT_GET_SEG(segp, ap-&gt;a_resource);\n1477        segp-&gt;seg_stp = stp;\n1478        segp-&gt;seg_in = hits[i]; /* struct copy */\n1479        trip = (triangle_s *)hits[i].hit_private;\n1480        BOT_UNORIENTED_NORM(ap, &amp;segp-&gt;seg_in, trip-&gt;face_norm, IN_SEG);\n1481        segp-&gt;seg_out = hits[i+1];  /* struct copy */\n1482        trip = (triangle_s *)hits[i+1].hit_private;\n1483        BOT_UNORIENTED_NORM(ap, &amp;segp-&gt;seg_out, trip-&gt;face_norm, OUT_SEG);\n1484        BU_LIST_INSERT(&amp;(seghead-&gt;l), &amp;(segp-&gt;l));\n(gdb) print segp-&gt;seg_in\n\n$35 = {hit_magic = 0, hit_dist = 0, hit_point = {0, 0, 0}, hit_normal = {0, 0, 0}, hit_vpriv = {0, 0, 0},\n  hit_private = 0x0, hit_surfno = 0, hit_rayp = 0x0}\n(gdb) print hits[i]\n\n$36 = {hit_magic = 543713652, hit_dist = 1.9994999999998984, hit_point = {0, 0, 0}, hit_normal = {0, 0, 0},\n  hit_vpriv = {-0.99999999999999978, 0.3333333333333337, 0.33333333333331677}, hit_private = 0x55555721dd18,\n  hit_surfno = 1705, hit_rayp = 0x7ffde2bff960}\n(gdb) print i\n\n$37 = 8\n(gdb) print hits[8]\n\n$38 = {hit_magic = 543713652, hit_dist = 1.9994999999998984, hit_point = {0, 0, 0}, hit_normal = {0, 0, 0},\n  hit_vpriv = {-0.99999999999999978, 0.3333333333333337, 0.33333333333331677}, hit_private = 0x55555721dd18,\n  hit_surfno = 1705, hit_rayp = 0x7ffde2bff960}\n(gdb) print trip\n\n$39 = (triangle_s *) 0x0\n(gdb) print (triangle_s *)hits[i].hit_private\n\n$40 = (triangle_s *) 0x55555721dd18\n(gdb)\n</code></pre></div>\n<p>Not quite sure what to make of that - it's as if the struct copy failed.  If I point trip to the segp-&gt;seg_in and segp-&gt;seg_out copies I still get the same crash, but with a different message printout:</p>\n<div class=\"codehilite\"><pre><span></span><code>$ ./bin/mged havoc.g lint r.nos5.bot\nChecking for cyclic paths...\nChecking for references to non-extant objects...\nChecking for invalid objects...\n            adding fictitious entry at 1.996570 (r.nos5.bot)\n            ray = (14561.3 -813.522 308.446) -&gt; (1 0 0)\n        adding fictitious exit at 0.000000 (r.nos5.bot)\n            ray = (14561.3 -813.522 308.446) -&gt; (1 0 0)\n        adding fictitious entry at 2.950000 (r.nos5.bot)\n            ray = (13917.3 -741.636 1243.1) -&gt; (-0.0124236 0.405285 -0.914106)\n        adding fictitious exit at -3.659558 (r.nos5.bot)\n            ray = (14428.2 819.536 329.255) -&gt; (0.0500219 0.998748 0)\n        adding fictitious exit at 0.000000 (r.nos5.bot)\n            ray = (14428.2 819.536 329.255) -&gt; (0.0500219 0.998748 0)\n        adding fictitious entry at 1262.212986 (r.nos5.bot)\n            ray = (13427.9 605.209 1300.15) -&gt; (-0.000665746 1.45872e-06 1)\n        adding fictitious entry at 4.712672 (r.nos5.bot)\n            ray = (16242.7 -280.706 767.48) -&gt; (-1 0 0)\n        adding fictitious entry at 4.712672 (r.nos5.bot)\n            ray = (16242.7 -334.541 826.966) -&gt; (1 0 0)\n        adding fictitious entry at 2.107612 (r.nos5.bot)\n            ray = (16516.7 -200.724 1110.97) -&gt; (-0.196252 0.172898 -0.96519)\n        adding fictitious exit at 1.999500 (r.nos5.bot)\n            ray = (16516.7 -200.724 1110.97) -&gt; (-0.196252 0.172898 -0.96519)\n        adding fictitious exit at 1.999500 (r.nos5.bot)\n            ray = (16516.7 -200.724 1110.97) -&gt; (-0.196252 0.172898 -0.96519)\n        adding fictitious exit at 1.999500 (r.nos5.bot)\n            ray = (16516.7 -200.724 1110.97) -&gt; (-0.196252 0.172898 -0.96519)\n</code></pre></div>\n<p>If I run in valgrind it completes:</p>\n<div class=\"codehilite\"><pre><span></span><code>==352619== Memcheck, a memory error detector\n==352619== Copyright (C) 2002-2022, and GNU GPL&#39;d, by Julian Seward et al.\n==352619== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info\n==352619== Command: ./bin/mged havoc.g lint r.nos5.bot\n==352619==\n==352619== Warning: set address range perms: large range [0x59c93000, 0x159c93000) (defined)\n==352619== Warning: set address range perms: large range [0x159c93000, 0x259c93000) (defined)\nChecking for cyclic paths...\nChecking for references to non-extant objects...\nChecking for invalid objects...\nFound invalid objects:\n    r.nos5.bot [bot:close_face,bot:thin_volume]\n==352619== Warning: set address range perms: large range [0x159c93000, 0x259c93000) (noaccess)\n==352619== Warning: set address range perms: large range [0x59c93000, 0x159c93000) (noaccess)\n==352619==\n==352619== HEAP SUMMARY:\n==352619==     in use at exit: 4,927,346 bytes in 374 blocks\n==352619==   total heap usage: 90,470 allocs, 90,096 frees, 37,850,731 bytes allocated\n</code></pre></div>",
+        "id": 465303653,
+        "sender_full_name": "starseeker",
+        "timestamp": 1724723844
+    },
+    {
+        "content": "<p>I'm using concurrentqueue.h for parallelism in lint - could that be incompatible somehow with the memory being used for hlbvh?</p>",
+        "id": 465303776,
+        "sender_full_name": "starseeker",
+        "timestamp": 1724723910
+    },
+    {
+        "content": "<p>Maybe I should switch to old-school bu_parallel... I was testing out whether we could use that queue to avoid the asymptotic tail of a few long running rays holding up an otherwise parallel ray interrogation, but now I'm thinking that might have been a mistake...</p>",
+        "id": 465303956,
+        "sender_full_name": "starseeker",
+        "timestamp": 1724724014
+    },
+    {
+        "content": "<p>I do wonder about those \"fictitious\" messages and what's going on there, as well...</p>",
+        "id": 465309560,
+        "sender_full_name": "starseeker",
+        "timestamp": 1724726917
+    },
+    {
+        "content": "<p>Yeah, looks like the concurrentqueue.h may have been to blame - setting up using bu_parallel, it runs clean.</p>",
+        "id": 465475777,
+        "sender_full_name": "starseeker",
+        "timestamp": 1724770507
+    }
+]

@@ -3532,5 +3532,107 @@
         "id": 465242629,
         "sender_full_name": "Matteo Balice",
         "timestamp": 1724693786
+    },
+    {
+        "content": "<p>During the sampling part (renderings) I have these warnings (and others similar):</p>\n<p>Root solver reported 3 intersections != {0, 2, 4} on s.nos5a.i<br>\n        shooting point (units mm):  (16599.899526, 396.927869, 1211.109774)<br>\n        shooting direction:         (-0.947094, -0.274243, -0.166745)<br>\n        377.103 366.627 86.6928</p>\n<p>OVERLAP1: /havoc_front/cannopy/cannopy_wipers/2_wiper/2_wipe1_rubber/2_r.wipe1<br>\nOVERLAP2: /havoc_front/cannopy/cannopy_glass/r.glass1<br>\nOVERLAPa: dist=(1.91371, 3.2123) isol=2_s.wipe2 osol=2_s.wipe2<br>\nOVERLAPb: depth 1.29859mm at (15095.9, -244.662, 1677.06) x105 y148 lvl0</p>",
+        "id": 465421566,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724759377
+    },
+    {
+        "content": "<p>Could it be for this reason that the model isn't able to predict well?</p>",
+        "id": 465421636,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724759400
+    },
+    {
+        "content": "<p>Does a_dist contain always the first intersection even if there are more than 1 intersections of the ray on the surface?</p>\n<div class=\"codehilite\"><pre><span></span><code>VJOIN1(hit_point, ap-&gt;a_ray.r_pt, ap-&gt;a_dist, ap-&gt;a_ray.r_dir);\n</code></pre></div>\n<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span></p>",
+        "id": 465476518,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724770667
+    },
+    {
+        "content": "<p>This is the shape training only with the loss of hit/miss:<br>\n<a href=\"/user_uploads/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png\" title=\"image.png\"><img data-original-dimensions=\"361x377\" src=\"/user_uploads/thumbnail/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png/840x560.webp\"></a></div><p>And this is the shape training also with the loss of the distance:<br>\n<a href=\"/user_uploads/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png\" title=\"image.png\"><img data-original-dimensions=\"400x389\" src=\"/user_uploads/thumbnail/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png/840x560.webp\"></a></div><p>So the problem must be with the distance... I think that during the sampling part (in brl-cad), if there are more than 1 intersections, a_dist contains the wrong distance and I need only and always the first intersection. Could it be possible?</p>",
+        "id": 465483576,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724772474
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465476518\">said</a>:</p>\n<blockquote>\n<p>Does a_dist contain always the first intersection even if there are more than 1 intersections of the ray on the surface?</p>\n<div class=\"codehilite\"><pre><span></span><code>VJOIN1(hit_point, ap-&gt;a_ray.r_pt, ap-&gt;a_dist, ap-&gt;a_ray.r_dir);\n</code></pre></div>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span></p>\n</blockquote>\n<p>No, a_dist isn't even set by librt -- that's an application-specific field so apps (e.g., rt) get to use it however they want.  So code you're using/calling has set or used a_dist and that's what you'll have to refer to in order to determine what is there.</p>",
+        "id": 465576331,
+        "sender_full_name": "Sean",
+        "timestamp": 1724795772
+    },
+    {
+        "content": "<p>That shape training doesn't look right -- that looks like just the nose geometry.  I mean it's great that it's recognizable, but missing a lot.  Did you use the 'havoc' object?</p>",
+        "id": 465576493,
+        "sender_full_name": "Sean",
+        "timestamp": 1724795860
+    },
+    {
+        "content": "<p>Ah, and I see from your output reporting that you're using \"havoc_front\" .. you want \"havoc\" instead.</p>",
+        "id": 465576610,
+        "sender_full_name": "Sean",
+        "timestamp": 1724795904
+    },
+    {
+        "content": "<p>No i</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465576493\">said</a>:</p>\n<blockquote>\n<p>That shape training doesn't look right -- that looks like just the nose geometry.  I mean it's great that it's recognizable, but missing a lot.  Did you use the 'havoc' object?</p>\n</blockquote>\n<p>No I used only the havoc_front</p>",
+        "id": 465576617,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724795907
+    },
+    {
+        "content": "<p>Ah ok I will train with havoc</p>",
+        "id": 465576641,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724795927
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465421636\">said</a>:</p>\n<blockquote>\n<p>Could it be for this reason that the model isn't able to predict well?</p>\n</blockquote>\n<p>No, those warnings are innocuous.  They are known issues with the model that just affect a few pixels and do not affect the hit distance values or silhouetting at all.</p>",
+        "id": 465576729,
+        "sender_full_name": "Sean",
+        "timestamp": 1724795978
+    },
+    {
+        "content": "<p>It’s strange</p>",
+        "id": 465576838,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724796009
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465576641\">said</a>:</p>\n<blockquote>\n<p>Ah ok I will train with havoc</p>\n</blockquote>\n<p>Yeah, I think it'll be more interesting to use the whole vehicle, especially the long rotors and complexity in certain parts.</p>",
+        "id": 465576927,
+        "sender_full_name": "Sean",
+        "timestamp": 1724796041
+    },
+    {
+        "content": "<p>Rotors are long and thin, which should approach a worst case for sampling.</p>",
+        "id": 465577233,
+        "sender_full_name": "Sean",
+        "timestamp": 1724796185
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465576838\">said</a>:</p>\n<blockquote>\n<p>It’s strange</p>\n</blockquote>\n<p>One is the root solver saying it got 3 hits, which can happen on a couple primitives when rays just graze a surface.  We make it print to eventually see if we can special-case the condition but it doesn't affect ray tracing.</p>\n<p>The other is a report of a geometry overlap which is a modeling error, which also doesn't affect the hit results you're using.</p>",
+        "id": 465577822,
+        "sender_full_name": "Sean",
+        "timestamp": 1724796503
+    },
+    {
+        "content": "<p>I will see whether there are the same errors on the full havoc model</p>",
+        "id": 465578112,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724796662
+    },
+    {
+        "content": "<p>We are certain that the hit informations are right due to the first image here</p>\n<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/465483576\">said</a>:</p>\n<blockquote>\n<p>This is the shape training only with the loss of hit/miss:<br>\n<a href=\"/user_uploads/1549/wYUe8BNzgPkTE7VZyJu3x3VP/image.png\">image.png</a></p>\n<p>And this is the shape training also with the loss of the distance:<br>\n<a href=\"/user_uploads/1549/FxZLrxDcZwUIc0UVNWp8mnwr/image.png\">image.png</a></p>\n<p>So the problem must be with the distance... I think that during the sampling part (in brl-cad), if there are more than 1 intersections, a_dist contains the wrong distance and I need only and always the first intersection. Could it be possible?</p>\n</blockquote>",
+        "id": 465578191,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724796708
+    },
+    {
+        "content": "<p>It shouldn’t be too difficult to understand the distance in those areas below the helicopter. I have seen the true model and it is pretty smooth</p>",
+        "id": 465578372,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1724796779
     }
 ]
