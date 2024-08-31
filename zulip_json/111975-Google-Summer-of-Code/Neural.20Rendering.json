@@ -3688,5 +3688,65 @@
         "id": 466100345,
         "sender_full_name": "Matteo Balice",
         "timestamp": 1724960825
+    },
+    {
+        "content": "<p>Today I did a big improvement in the number of sample points. Depending on the model, you need a fixed tolerance between each sampling point to ensure good accuracy: for example in moss a good tolerance is 0.01 (remember that we should sample in range 0-1 where 0 means that we are sampling on the origin and 1 means we are sampling on the destination on the bounding sphere).<br>\nThe trivial solution is using the uniform sampling for each ray (it was the solution I used before today). With uniform sampling you need a number of points that is equal to range/tolerance. This is the reason why in moss I need 1/0.01 = 100 points.</p>",
+        "id": 466326561,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725044190
+    },
+    {
+        "content": "<p>But we can do better than this because I tried to plot the distribution of all the rays and it is like this:<br>\n<a href=\"/user_uploads/1549/AFeO0yJVwL3LxySJx3zWQWyE/distribution-rays-moss.png\">distribution-rays-moss.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/AFeO0yJVwL3LxySJx3zWQWyE/distribution-rays-moss.png\" title=\"distribution-rays-moss.png\"><img data-original-dimensions=\"640x480\" src=\"/user_uploads/thumbnail/1549/AFeO0yJVwL3LxySJx3zWQWyE/distribution-rays-moss.png/840x560.webp\"></a></div>",
+        "id": 466326829,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725044309
+    },
+    {
+        "content": "<p>It means that in moss it follows more or less a gaussian distribution with a mean 0.7</p>",
+        "id": 466326930,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725044369
+    },
+    {
+        "content": "<p>In the havoc model it is slightly different and it is a gaussian but with mean 0.5:<br>\n<a href=\"/user_uploads/1549/mMIdaPCTnAeb5O6YtYRIy9iy/distribution-rays-helicopter.png\">distribution-rays-helicopter.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/mMIdaPCTnAeb5O6YtYRIy9iy/distribution-rays-helicopter.png\" title=\"distribution-rays-helicopter.png\"><img data-original-dimensions=\"640x480\" src=\"/user_uploads/thumbnail/1549/mMIdaPCTnAeb5O6YtYRIy9iy/distribution-rays-helicopter.png/840x560.webp\"></a></div>",
+        "id": 466327053,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725044420
+    },
+    {
+        "content": "<p>So a first improvement would be to follow these distribution to sample more samples on the mean and less points far from the mean</p>",
+        "id": 466327316,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725044526
+    },
+    {
+        "content": "<p>But we can do even better: we can divide our bounding sphere into cells (choosing an arbitrary resolution) and precompute the distribution for each pair of cell_origin and cell_destination. This way, the distribution no longer follows a Gaussian pattern but instead aligns with the local distribution in those areas. This represents a significant improvement because, not only do we capture the local distribution, but the range will also be reduced for almost all pairs. This is evident, as similar rays will have similar hit distances, as in this case:</p>\n<p><a href=\"/user_uploads/1549/8W6OmznGYvjI-T-Fe6wESDGw/distribution-rays-helicopter-local.png\">distribution-rays-helicopter-local.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/8W6OmznGYvjI-T-Fe6wESDGw/distribution-rays-helicopter-local.png\" title=\"distribution-rays-helicopter-local.png\"><img data-original-dimensions=\"640x480\" src=\"/user_uploads/thumbnail/1549/8W6OmznGYvjI-T-Fe6wESDGw/distribution-rays-helicopter-local.png/840x560.webp\"></a></div>",
+        "id": 466330264,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725045954
+    },
+    {
+        "content": "<p>Or like this<br>\n<a href=\"/user_uploads/1549/2qEhYiX34x6JIuApFXeSOHPY/distribution-rays-helicopter-local-2.png\">distribution-rays-helicopter-local-2.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/2qEhYiX34x6JIuApFXeSOHPY/distribution-rays-helicopter-local-2.png\" title=\"distribution-rays-helicopter-local-2.png\"><img data-original-dimensions=\"640x480\" src=\"/user_uploads/thumbnail/1549/2qEhYiX34x6JIuApFXeSOHPY/distribution-rays-helicopter-local-2.png/840x560.webp\"></a></div>",
+        "id": 466330398,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725046012
+    },
+    {
+        "content": "<p>Moreover not all the rays have the same length because in a bounding sphere (of ray 1) we have the maximum length for the rays that have exactly length equal to 2 * radius but all the other rays will have a smaller length so we can even sample less points</p>",
+        "id": 466331948,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725046716
+    },
+    {
+        "content": "<p>In these days I will try to merge all these ideas together and I will update you. If you have any other idea let me know :)</p>",
+        "id": 466332090,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725046790
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/6r8lYoOo0pkv8w9duN79v2l-/intersection-prediction.pdf\">intersection-prediction.pdf</a><br>\nThis paper for example use a similar approach to my idea but they use an hashmap based on quantization of input (rays origin + rays destination) instead of cells</p>",
+        "id": 466333904,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725047479
     }
 ]

@@ -4722,5 +4722,75 @@ I changed the loss function and now it is very good :)</p>
 
 
 
-<hr><p>Last updated: Aug 30 2024 at 00:42 UTC</p>
+<a name="466326561"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466326561" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466326561">(Aug 30 2024 at 18:56)</a>:</h4>
+<p>Today I did a big improvement in the number of sample points. Depending on the model, you need a fixed tolerance between each sampling point to ensure good accuracy: for example in moss a good tolerance is 0.01 (remember that we should sample in range 0-1 where 0 means that we are sampling on the origin and 1 means we are sampling on the destination on the bounding sphere).<br>
+The trivial solution is using the uniform sampling for each ray (it was the solution I used before today). With uniform sampling you need a number of points that is equal to range/tolerance. This is the reason why in moss I need 1/0.01 = 100 points.</p>
+
+
+
+<a name="466326829"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466326829" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466326829">(Aug 30 2024 at 18:58)</a>:</h4>
+<p>But we can do better than this because I tried to plot the distribution of all the rays and it is like this:<br>
+<a href="/user_uploads/1549/AFeO0yJVwL3LxySJx3zWQWyE/distribution-rays-moss.png">distribution-rays-moss.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/AFeO0yJVwL3LxySJx3zWQWyE/distribution-rays-moss.png" title="distribution-rays-moss.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/AFeO0yJVwL3LxySJx3zWQWyE/distribution-rays-moss.png/840x560.webp"></a></div>
+
+
+
+<a name="466326930"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466326930" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466326930">(Aug 30 2024 at 18:59)</a>:</h4>
+<p>It means that in moss it follows more or less a gaussian distribution with a mean 0.7</p>
+
+
+
+<a name="466327053"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466327053" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466327053">(Aug 30 2024 at 19:00)</a>:</h4>
+<p>In the havoc model it is slightly different and it is a gaussian but with mean 0.5:<br>
+<a href="/user_uploads/1549/mMIdaPCTnAeb5O6YtYRIy9iy/distribution-rays-helicopter.png">distribution-rays-helicopter.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/mMIdaPCTnAeb5O6YtYRIy9iy/distribution-rays-helicopter.png" title="distribution-rays-helicopter.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/mMIdaPCTnAeb5O6YtYRIy9iy/distribution-rays-helicopter.png/840x560.webp"></a></div>
+
+
+
+<a name="466327316"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466327316" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466327316">(Aug 30 2024 at 19:02)</a>:</h4>
+<p>So a first improvement would be to follow these distribution to sample more samples on the mean and less points far from the mean</p>
+
+
+
+<a name="466330264"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466330264" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466330264">(Aug 30 2024 at 19:25)</a>:</h4>
+<p>But we can do even better: we can divide our bounding sphere into cells (choosing an arbitrary resolution) and precompute the distribution for each pair of cell_origin and cell_destination. This way, the distribution no longer follows a Gaussian pattern but instead aligns with the local distribution in those areas. This represents a significant improvement because, not only do we capture the local distribution, but the range will also be reduced for almost all pairs. This is evident, as similar rays will have similar hit distances, as in this case:</p>
+<p><a href="/user_uploads/1549/8W6OmznGYvjI-T-Fe6wESDGw/distribution-rays-helicopter-local.png">distribution-rays-helicopter-local.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/8W6OmznGYvjI-T-Fe6wESDGw/distribution-rays-helicopter-local.png" title="distribution-rays-helicopter-local.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/8W6OmznGYvjI-T-Fe6wESDGw/distribution-rays-helicopter-local.png/840x560.webp"></a></div>
+
+
+
+<a name="466330398"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466330398" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466330398">(Aug 30 2024 at 19:26)</a>:</h4>
+<p>Or like this<br>
+<a href="/user_uploads/1549/2qEhYiX34x6JIuApFXeSOHPY/distribution-rays-helicopter-local-2.png">distribution-rays-helicopter-local-2.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/2qEhYiX34x6JIuApFXeSOHPY/distribution-rays-helicopter-local-2.png" title="distribution-rays-helicopter-local-2.png"><img data-original-dimensions="640x480" src="/user_uploads/thumbnail/1549/2qEhYiX34x6JIuApFXeSOHPY/distribution-rays-helicopter-local-2.png/840x560.webp"></a></div>
+
+
+
+<a name="466331948"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466331948" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466331948">(Aug 30 2024 at 19:38)</a>:</h4>
+<p>Moreover not all the rays have the same length because in a bounding sphere (of ray 1) we have the maximum length for the rays that have exactly length equal to 2 * radius but all the other rays will have a smaller length so we can even sample less points</p>
+
+
+
+<a name="466332090"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466332090" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466332090">(Aug 30 2024 at 19:39)</a>:</h4>
+<p>In these days I will try to merge all these ideas together and I will update you. If you have any other idea let me know :)</p>
+
+
+
+<a name="466333904"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466333904" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466333904">(Aug 30 2024 at 19:51)</a>:</h4>
+<p><a href="/user_uploads/1549/6r8lYoOo0pkv8w9duN79v2l-/intersection-prediction.pdf">intersection-prediction.pdf</a><br>
+This paper for example use a similar approach to my idea but they use an hashmap based on quantization of input (rays origin + rays destination) instead of cells</p>
+
+
+
+<hr><p>Last updated: Aug 31 2024 at 00:42 UTC</p>
 </html>
