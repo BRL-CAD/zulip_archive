@@ -4792,5 +4792,91 @@ This paper for example use a similar approach to my idea but they use an hashmap
 
 
 
-<hr><p>Last updated: Aug 31 2024 at 00:42 UTC</p>
+<a name="466444639"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466444639" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466444639">(Aug 31 2024 at 04:41)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/466100345">said</a>:</p>
+<blockquote>
+<p><a href="/user_uploads/1549/fiF5ItNwr6Jq0fh62mZJfkv5/pygame-window-2024-08-29-21-45-53.mp4">pygame-window-2024-08-29-21-45-53.mp4</a><br>
+I changed the loss function and now it is very good :)</p>
+</blockquote>
+<p>That is very good indeed!  Very nice shape and color registration all around.  That's considerably better than I would have expected for that model.</p>
+
+
+
+<a name="466445125"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466445125" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466445125">(Aug 31 2024 at 04:44)</a>:</h4>
+<p>So now is that pygame visualizaiton doing real-time inference / lookups from the NNet or do you export the latent space to some fixed representation like mesh or voxels or lightfields, etc.?  If they're real-time lookups, what's the lookup rate?  Is there a significant diff between havoc and moss?</p>
+
+
+
+<a name="466445579"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466445579" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466445579">(Aug 31 2024 at 04:45)</a>:</h4>
+<p>Either way, this is looking very much like you're approaching publication-worthy if you want to take this work to the next level... we could also probably turn it into a feature, depending on how long training takes, how long it takes to load the net, how long inference takes, etc.</p>
+
+
+
+<a name="466496005"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466496005" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466496005">(Aug 31 2024 at 09:08)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/466445125">ha scritto</a>:</p>
+<blockquote>
+<p>So now is that pygame visualizaiton doing real-time inference / lookups from the NNet or do you export the latent space to some fixed representation like mesh or voxels or lightfields, etc.?  If they're real-time lookups, what's the lookup rate?  Is there a significant diff between havoc and moss?</p>
+</blockquote>
+<p>They are real time lookups, you can see the code here <a href="https://github.com/bralani/rt_volume/blob/neural_rendering/src/rt/nvbh/camera.py">https://github.com/bralani/rt_volume/blob/neural_rendering/src/rt/nvbh/camera.py</a>. The inference time for each call of the forward method (ie this instruction output_label, _, _, output_rgb = model(input)) takes an average time of 1-2 ms for the havoc model (remember that in pygame the images are 256x256) but due to the limitations of python I have these metrics:<br>
+Time to generate rays:  3.155 ms  -&gt; time to calculate the origin ray + direction ray for each pixel of the 256x256 camera<br>
+Time to trace rays:  22 ms  -&gt; bottleneck due to the limitations of python (this includes the time to transfer data from cpu to gpu + the formula of intersection ray with sphere + the conversion to cartesian to spherical coordinates + the inference time + the time to transfer data from gpu to cpu. Since the inference time is only 1-2 ms, you can understand that all the time is taken by previous calculations + transfer time).<br>
+Time to render image:  0.99 ms -&gt; time that pygame takes to show the input image<br>
+So summing all together it takes something like 26 ms to render one frame (and it can be much better in C++) so I have an average of 36 FPS (in python).</p>
+
+
+
+<a name="466497782"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466497782" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466497782">(Aug 31 2024 at 09:15)</a>:</h4>
+<p>Instead, with moss model I can use a simpler network (with less resolution) and less sampling points (I have not implemented the smart sampling yet, I am still using the uniform one at the moment) and the times are these ones:<br>
+Time to generate rays:  3,15ms (the same as before)<br>
+Time to trace rays:  15,6 ms (with an inference time that is still of 1-2 ms)<br>
+Time to render image: 0.99 ms<br>
+In this case I have a total time of 19,75 ms with an average 50 FPS.</p>
+
+
+
+<a name="466511439"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466511439" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466511439">(Aug 31 2024 at 10:51)</a>:</h4>
+<p>There was an error in the trace rays method, I did all the calculations on the cpu and I moved to the gpu just before the inference call. Now I move the rays after their generation and the times are these:</p>
+<p>MOSS:<br>
+Time to generate rays: 3,15ms (the same as before)<br>
+Time to trace rays: 10,19 ms (with an inference time that is still of 1-2 ms)<br>
+Time to render image: 0.99 ms<br>
+In this case I have a total time of 14,34 ms with an average 70 FPS.</p>
+<p>HAVOC:<br>
+Time to generate rays: 3,15ms (the same as before)<br>
+Time to trace rays: 14,13 ms (with an inference time that is still of 1-2 ms)<br>
+Time to render image: 0.99 ms<br>
+In this case I have a total time of 18,28 ms with an average 54 FPS.</p>
+
+
+
+<a name="466511846"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466511846" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466511846">(Aug 31 2024 at 10:57)</a>:</h4>
+<p>I know these times are high but I believe they are due to the python overhead</p>
+
+
+
+<a name="466515607"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466515607" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466515607">(Aug 31 2024 at 11:39)</a>:</h4>
+<p>They aren't so high like I was thinking, I have printed rendering times in brl-cad with my mac m1:</p>
+<p>MOSS<br>
+65536 pixels (256x256) in      0.05 sec=50ms<br>
+HAVOC<br>
+65536 pixels (256x256) in      0.23 sec=230ms</p>
+<p>There is an improvement even using python instead of c++.</p>
+
+
+
+<a name="466516041"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/466516041" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#466516041">(Aug 31 2024 at 11:42)</a>:</h4>
+<p>Probably this is because in brl-cad all the rays are traced sequentially or am I wrong?</p>
+
+
+
+<hr><p>Last updated: Sep 01 2024 at 00:51 UTC</p>
 </html>

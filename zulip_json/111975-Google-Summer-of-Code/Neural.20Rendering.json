@@ -3748,5 +3748,59 @@
         "id": 466333904,
         "sender_full_name": "Matteo Balice",
         "timestamp": 1725047479
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/466100345\">said</a>:</p>\n<blockquote>\n<p><a href=\"/user_uploads/1549/fiF5ItNwr6Jq0fh62mZJfkv5/pygame-window-2024-08-29-21-45-53.mp4\">pygame-window-2024-08-29-21-45-53.mp4</a><br>\nI changed the loss function and now it is very good :)</p>\n</blockquote>\n<p>That is very good indeed!  Very nice shape and color registration all around.  That's considerably better than I would have expected for that model.</p>",
+        "id": 466444639,
+        "sender_full_name": "Sean",
+        "timestamp": 1725079280
+    },
+    {
+        "content": "<p>So now is that pygame visualizaiton doing real-time inference / lookups from the NNet or do you export the latent space to some fixed representation like mesh or voxels or lightfields, etc.?  If they're real-time lookups, what's the lookup rate?  Is there a significant diff between havoc and moss?</p>",
+        "id": 466445125,
+        "sender_full_name": "Sean",
+        "timestamp": 1725079440
+    },
+    {
+        "content": "<p>Either way, this is looking very much like you're approaching publication-worthy if you want to take this work to the next level... we could also probably turn it into a feature, depending on how long training takes, how long it takes to load the net, how long inference takes, etc.</p>",
+        "id": 466445579,
+        "sender_full_name": "Sean",
+        "timestamp": 1725079545
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/466445125\">ha scritto</a>:</p>\n<blockquote>\n<p>So now is that pygame visualizaiton doing real-time inference / lookups from the NNet or do you export the latent space to some fixed representation like mesh or voxels or lightfields, etc.?  If they're real-time lookups, what's the lookup rate?  Is there a significant diff between havoc and moss?</p>\n</blockquote>\n<p>They are real time lookups, you can see the code here <a href=\"https://github.com/bralani/rt_volume/blob/neural_rendering/src/rt/nvbh/camera.py\">https://github.com/bralani/rt_volume/blob/neural_rendering/src/rt/nvbh/camera.py</a>. The inference time for each call of the forward method (ie this instruction output_label, _, _, output_rgb = model(input)) takes an average time of 1-2 ms for the havoc model (remember that in pygame the images are 256x256) but due to the limitations of python I have these metrics:<br>\nTime to generate rays:  3.155 ms  -&gt; time to calculate the origin ray + direction ray for each pixel of the 256x256 camera<br>\nTime to trace rays:  22 ms  -&gt; bottleneck due to the limitations of python (this includes the time to transfer data from cpu to gpu + the formula of intersection ray with sphere + the conversion to cartesian to spherical coordinates + the inference time + the time to transfer data from gpu to cpu. Since the inference time is only 1-2 ms, you can understand that all the time is taken by previous calculations + transfer time).<br>\nTime to render image:  0.99 ms -&gt; time that pygame takes to show the input image<br>\nSo summing all together it takes something like 26 ms to render one frame (and it can be much better in C++) so I have an average of 36 FPS (in python).</p>",
+        "id": 466496005,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725095295
+    },
+    {
+        "content": "<p>Instead, with moss model I can use a simpler network (with less resolution) and less sampling points (I have not implemented the smart sampling yet, I am still using the uniform one at the moment) and the times are these ones:<br>\nTime to generate rays:  3,15ms (the same as before)<br>\nTime to trace rays:  15,6 ms (with an inference time that is still of 1-2 ms)<br>\nTime to render image: 0.99 ms<br>\nIn this case I have a total time of 19,75 ms with an average 50 FPS.</p>",
+        "id": 466497782,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725095757
+    },
+    {
+        "content": "<p>There was an error in the trace rays method, I did all the calculations on the cpu and I moved to the gpu just before the inference call. Now I move the rays after their generation and the times are these:</p>\n<p>MOSS:<br>\nTime to generate rays: 3,15ms (the same as before)<br>\nTime to trace rays: 10,19 ms (with an inference time that is still of 1-2 ms)<br>\nTime to render image: 0.99 ms<br>\nIn this case I have a total time of 14,34 ms with an average 70 FPS.</p>\n<p>HAVOC:<br>\nTime to generate rays: 3,15ms (the same as before)<br>\nTime to trace rays: 14,13 ms (with an inference time that is still of 1-2 ms)<br>\nTime to render image: 0.99 ms<br>\nIn this case I have a total time of 18,28 ms with an average 54 FPS.</p>",
+        "id": 466511439,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725101512
+    },
+    {
+        "content": "<p>I know these times are high but I believe they are due to the python overhead</p>",
+        "id": 466511846,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725101821
+    },
+    {
+        "content": "<p>They aren't so high like I was thinking, I have printed rendering times in brl-cad with my mac m1:</p>\n<p>MOSS<br>\n65536 pixels (256x256) in      0.05 sec=50ms<br>\nHAVOC<br>\n65536 pixels (256x256) in      0.23 sec=230ms</p>\n<p>There is an improvement even using python instead of c++.</p>",
+        "id": 466515607,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725104395
+    },
+    {
+        "content": "<p>Probably this is because in brl-cad all the rays are traced sequentially or am I wrong?</p>",
+        "id": 466516041,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725104554
     }
 ]
