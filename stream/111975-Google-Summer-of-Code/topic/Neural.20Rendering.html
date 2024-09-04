@@ -4919,5 +4919,44 @@ Following this sampling alone give us some advantages (but also drawbacks like y
 
 
 
-<hr><p>Last updated: Sep 03 2024 at 00:41 UTC</p>
+<a name="467351499"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467351499" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467351499">(Sep 03 2024 at 20:09)</a>:</h4>
+<p><span class="user-mention" data-user-id="700180">@fall Rainy</span> &amp; <span class="user-mention" data-user-id="702819">@Matteo Balice</span>  CVPR is possible and desirable, but the bar is very high.  They are the premier conference right now for CV-related work including NNet reconstruction.  </p>
+<p>A paper there will need to very clearly demonstrate what the significant contributions are of the work, distinct and compared with other recent papers.  Both efforts have demonstrated contributions, but will take some work to show how well or different they're performing on a test/benchmark common with some other paper (at least one).</p>
+<p>The novel significant contribution will have to be identified first, which is going to be something like some % quality metric, or training convergence metric, or lookup performance metric, or some specific feature that hasn't been demonstrated (like sharp corners or some other measurable improvement).</p>
+
+
+
+<a name="467352250"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467352250" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467352250">(Sep 03 2024 at 20:14)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/466515607">said</a>:</p>
+<blockquote>
+<p>They aren't so high like I was thinking, I have printed rendering times in brl-cad with my mac m1:</p>
+<p>MOSS<br>
+65536 pixels (256x256) in      0.05 sec=50ms<br>
+HAVOC<br>
+65536 pixels (256x256) in      0.23 sec=230ms</p>
+<p>There is an improvement even using python instead of c++.</p>
+</blockquote>
+<p>So <span class="user-mention" data-user-id="702819">@Matteo Balice</span> this is outstanding performance that opens up a potential state-of-the-art contribution.  I'm not sure that's faster than the last paper that did 3 points -- you'd need to test the same models to really demonstrate that -- but it is a "new" capability if you can demonstrate something that ray traces slowly being looked up much faster.  That is, demonstrate this as a viable preprocess acceleration structure for models that are expensive to raytrace. </p>
+<p>Towards exploring that, I'd suggest downloading a 3DM (NURBS) model, running 3dm-g and raytracing it.  It'll be slow as that's an unoptimized representation, but then you can show how long training takes, and how long inference/generation takes at the same resolution.  Suggest 1024x1024 since that's pretty standard and results in convenient 1M primary rays.</p>
+
+
+
+<a name="467355191"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467355191" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467355191">(Sep 03 2024 at 20:36)</a>:</h4>
+<p>Here's the stanford bunny in nurbs format that someone made and posted online where you can see how costly it is:<br>
+<a href="/user_uploads/1549/RcVYBbo1Ry_yjEwqdF2cNDqC/bunny_nurbs.g">bunny_nurbs.g</a></p>
+<p>For me, it takes about 35 sec to prep the first time (uncached) and 45sec to render at 1024 on my laptop, around 22k rays/sec.</p>
+
+
+
+<a name="467355215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467355215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467355215">(Sep 03 2024 at 20:37)</a>:</h4>
+<p><a href="/user_uploads/1549/gFdrtGGebOMpagmxnllMr4wr/Screenshot-2024-09-03-at-4.34.20-PM.png">Screenshot-2024-09-03-at-4.34.20-PM.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/gFdrtGGebOMpagmxnllMr4wr/Screenshot-2024-09-03-at-4.34.20-PM.png" title="Screenshot-2024-09-03-at-4.34.20-PM.png"><img data-original-dimensions="1036x1058" src="/user_uploads/thumbnail/1549/gFdrtGGebOMpagmxnllMr4wr/Screenshot-2024-09-03-at-4.34.20-PM.png/840x560.webp"></a></div>
+
+
+
+<hr><p>Last updated: Sep 04 2024 at 00:42 UTC</p>
 </html>
