@@ -3862,5 +3862,35 @@
         "id": 467355215,
         "sender_full_name": "Sean",
         "timestamp": 1725395821
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/rduCA2Y6x3cexL0-yVaBzuj8/pygame-window-2024-09-04-11-04-27.mp4\">pygame-window-2024-09-04-11-04-27.mp4</a><br>\nHere here is the 256x256 frames resolution trained with 100 different 512x512 frames (in pygame I have implemented only 256x256 views with a small range of the camera).</p>\n<div class=\"message_inline_image message_inline_video\"><a href=\"/user_uploads/1549/rduCA2Y6x3cexL0-yVaBzuj8/pygame-window-2024-09-04-11-04-27.mp4\" title=\"pygame-window-2024-09-04-11-04-27.mp4\"><video preload=\"metadata\" src=\"/user_uploads/1549/rduCA2Y6x3cexL0-yVaBzuj8/pygame-window-2024-09-04-11-04-27.mp4\"></video></a></div><p>Regarding the 1024x1024, these are the times (in python without optimizations): <br>\nTime to generate rays:  49,7 ms<br>\nTime to trace rays:  12 ms<br>\nTime to render image:  3,9 ms<br>\nFor a total time of 65,6 ms and an average 15,24 FPS. If you compare 65,6 ms (NN) with 66 seconds (true ray tracing on my mac M1), the NN is about 1006 times faster.</p>\n<p>The true bottleneck is not the training time or the loading of the net but  the generation of the training set since generating 100 frames in 1024x1024 would require 100 x 66 seconds (on my pc) = almost 2 hours... For this reason I have trained only with 100 frames 512x512 (it has taken something like 30 minutes to generate the training set) and about 10 minutes to train it but I have not implemented the optimizations to reduce the number of sampling points yet (local sampling), so I expect that the training time (and inference) can be even smaller.</p>",
+        "id": 467469572,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725441240
+    },
+    {
+        "content": "<p>I wanted to compare also the \"statuette\" model as in the nbvh paper and in the neural intersection paper, so I downloaded the stl model, converted to .g and ray-traced it. According to the nbvh paper it should take 4,9ms to ray-trace it (1920x1080):</p>\n<p><a href=\"/user_uploads/1549/eMxzASzv2DXR4VkzoZVPMFdb/Screenshot-2024-09-04-alle-16.30.49.png\">Screenshot-2024-09-04-alle-16.30.49.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/eMxzASzv2DXR4VkzoZVPMFdb/Screenshot-2024-09-04-alle-16.30.49.png\" title=\"Screenshot-2024-09-04-alle-16.30.49.png\"><img data-original-dimensions=\"334x294\" src=\"/user_uploads/thumbnail/1549/eMxzASzv2DXR4VkzoZVPMFdb/Screenshot-2024-09-04-alle-16.30.49.png/840x560.webp\"></a></div><p>But in brl-cad it takes several several minutes in 1024x1024... <br>\nUsing only a 256x256 size it takes about 60 seconds:<br>\n<a href=\"/user_uploads/1549/WKEvDmBO1CJ3huZV7P6EbH6l/outputstatuette.png\">outputstatuette.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/WKEvDmBO1CJ3huZV7P6EbH6l/outputstatuette.png\" title=\"outputstatuette.png\"><img data-original-dimensions=\"256x256\" src=\"/user_uploads/thumbnail/1549/WKEvDmBO1CJ3huZV7P6EbH6l/outputstatuette.png/840x560.webp\"></a></div><p>Why is there this behaviour?</p>",
+        "id": 467557205,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725460406
+    },
+    {
+        "content": "<p>The model .g weights 600mb, while the stl is 500mb</p>",
+        "id": 467557744,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725460527
+    },
+    {
+        "content": "<p>P.S:<br>\nSeeing the times to ray trace all those models (according to the nbvh paper) it seems there is a bottleneck in my python code in the generation of the rays since in 1024x1024 it takes me 49 ms and it cannot be so bad.</p>",
+        "id": 467559834,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725460910
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"702819\">Matteo Balice</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/467559834\">ha scritto</a>:</p>\n<blockquote>\n<p>P.S:<br>\nSeeing the times to ray trace all those models (according to the nbvh paper) it seems there is a bottleneck in my python code in the generation of the rays since in 1024x1024 it takes me 49 ms and it cannot be so bad.</p>\n</blockquote>\n<p>I was right, there was a bottleneck in the generation of rays, now it is less than 1ms to generate 1M rays so the bunny model is raytraced in about 16-17 ms.</p>",
+        "id": 467588972,
+        "sender_full_name": "Matteo Balice",
+        "timestamp": 1725465932
     }
 ]

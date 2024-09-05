@@ -4958,5 +4958,53 @@ HAVOC<br>
 
 
 
-<hr><p>Last updated: Sep 04 2024 at 00:42 UTC</p>
+<a name="467469572"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467469572" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467469572">(Sep 04 2024 at 09:14)</a>:</h4>
+<p><a href="/user_uploads/1549/rduCA2Y6x3cexL0-yVaBzuj8/pygame-window-2024-09-04-11-04-27.mp4">pygame-window-2024-09-04-11-04-27.mp4</a><br>
+Here here is the 256x256 frames resolution trained with 100 different 512x512 frames (in pygame I have implemented only 256x256 views with a small range of the camera).</p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/rduCA2Y6x3cexL0-yVaBzuj8/pygame-window-2024-09-04-11-04-27.mp4" title="pygame-window-2024-09-04-11-04-27.mp4"><video preload="metadata" src="/user_uploads/1549/rduCA2Y6x3cexL0-yVaBzuj8/pygame-window-2024-09-04-11-04-27.mp4"></video></a></div><p>Regarding the 1024x1024, these are the times (in python without optimizations): <br>
+Time to generate rays:  49,7 ms<br>
+Time to trace rays:  12 ms<br>
+Time to render image:  3,9 ms<br>
+For a total time of 65,6 ms and an average 15,24 FPS. If you compare 65,6 ms (NN) with 66 seconds (true ray tracing on my mac M1), the NN is about 1006 times faster.</p>
+<p>The true bottleneck is not the training time or the loading of the net but  the generation of the training set since generating 100 frames in 1024x1024 would require 100 x 66 seconds (on my pc) = almost 2 hours... For this reason I have trained only with 100 frames 512x512 (it has taken something like 30 minutes to generate the training set) and about 10 minutes to train it but I have not implemented the optimizations to reduce the number of sampling points yet (local sampling), so I expect that the training time (and inference) can be even smaller.</p>
+
+
+
+<a name="467557205"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467557205" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467557205">(Sep 04 2024 at 14:33)</a>:</h4>
+<p>I wanted to compare also the "statuette" model as in the nbvh paper and in the neural intersection paper, so I downloaded the stl model, converted to .g and ray-traced it. According to the nbvh paper it should take 4,9ms to ray-trace it (1920x1080):</p>
+<p><a href="/user_uploads/1549/eMxzASzv2DXR4VkzoZVPMFdb/Screenshot-2024-09-04-alle-16.30.49.png">Screenshot-2024-09-04-alle-16.30.49.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/eMxzASzv2DXR4VkzoZVPMFdb/Screenshot-2024-09-04-alle-16.30.49.png" title="Screenshot-2024-09-04-alle-16.30.49.png"><img data-original-dimensions="334x294" src="/user_uploads/thumbnail/1549/eMxzASzv2DXR4VkzoZVPMFdb/Screenshot-2024-09-04-alle-16.30.49.png/840x560.webp"></a></div><p>But in brl-cad it takes several several minutes in 1024x1024... <br>
+Using only a 256x256 size it takes about 60 seconds:<br>
+<a href="/user_uploads/1549/WKEvDmBO1CJ3huZV7P6EbH6l/outputstatuette.png">outputstatuette.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/WKEvDmBO1CJ3huZV7P6EbH6l/outputstatuette.png" title="outputstatuette.png"><img data-original-dimensions="256x256" src="/user_uploads/thumbnail/1549/WKEvDmBO1CJ3huZV7P6EbH6l/outputstatuette.png/840x560.webp"></a></div><p>Why is there this behaviour?</p>
+
+
+
+<a name="467557744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467557744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467557744">(Sep 04 2024 at 14:35)</a>:</h4>
+<p>The model .g weights 600mb, while the stl is 500mb</p>
+
+
+
+<a name="467559834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467559834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467559834">(Sep 04 2024 at 14:41)</a>:</h4>
+<p>P.S:<br>
+Seeing the times to ray trace all those models (according to the nbvh paper) it seems there is a bottleneck in my python code in the generation of the rays since in 1024x1024 it takes me 49 ms and it cannot be so bad.</p>
+
+
+
+<a name="467588972"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/467588972" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#467588972">(Sep 04 2024 at 16:05)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="702819">Matteo Balice</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/467559834">ha scritto</a>:</p>
+<blockquote>
+<p>P.S:<br>
+Seeing the times to ray trace all those models (according to the nbvh paper) it seems there is a bottleneck in my python code in the generation of the rays since in 1024x1024 it takes me 49 ms and it cannot be so bad.</p>
+</blockquote>
+<p>I was right, there was a bottleneck in the generation of rays, now it is less than 1ms to generate 1M rays so the bunny model is raytraced in about 16-17 ms.</p>
+
+
+
+<hr><p>Last updated: Sep 05 2024 at 00:42 UTC</p>
 </html>
