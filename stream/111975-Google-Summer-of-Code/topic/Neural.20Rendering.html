@@ -5012,5 +5012,93 @@ Seeing the times to ray trace all those models (according to the nbvh paper) it 
 
 
 
-<hr><p>Last updated: Sep 12 2024 at 00:43 UTC</p>
+<a name="469696669"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469696669" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469696669">(Sep 12 2024 at 14:46)</a>:</h4>
+<p><a href="/user_uploads/1549/E1RoK2AFRjeLtFKoYlkBPxrF/bunny_pred.png">bunny_pred.png</a><br>
+<a href="/user_uploads/1549/pE_hfSL2NJaegIjMFtiIkZpP/bunny_true.png">bunny_true.png</a><br>
+The time is an average of 17ms but I'm trying to figure out why the light does not look like the true one</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/E1RoK2AFRjeLtFKoYlkBPxrF/bunny_pred.png" title="bunny_pred.png"><img data-original-dimensions="1024x1024" src="/user_uploads/thumbnail/1549/E1RoK2AFRjeLtFKoYlkBPxrF/bunny_pred.png/840x560.webp"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/pE_hfSL2NJaegIjMFtiIkZpP/bunny_true.png" title="bunny_true.png"><img data-original-dimensions="1024x1024" src="/user_uploads/thumbnail/1549/pE_hfSL2NJaegIjMFtiIkZpP/bunny_true.png/840x560.webp"></a></div>
+
+
+
+<a name="469697279"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469697279" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469697279">(Sep 12 2024 at 14:48)</a>:</h4>
+<p>The shape is correctly encoded, it seems I have the same problem as in the moss model (the training set was small)</p>
+
+
+
+<a name="469735083"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469735083" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469735083">(Sep 12 2024 at 17:22)</a>:</h4>
+<p>thank you <span class="user-mention" data-user-id="702819">@Matteo Balice</span> that's definitely looking production-viable even with the light source issue.  How long did training take?  How many samples, how much time, etc?</p>
+
+
+
+<a name="469735595"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469735595" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469735595">(Sep 12 2024 at 17:25)</a>:</h4>
+<p>I'm wondering if we could try for actual integration in the time remaining, or if the shift to writing up a paper is more in order.  For integration, it would entail modifying the 'rt' application to have a training mode where some command-line flag would tell it to train/use the neural net in place of the do_pixel() function (since you have color).  Something like rt -N bunny.weights bunny.g bunny</p>
+
+
+
+<a name="469735689"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469735689" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469735689">(Sep 12 2024 at 17:26)</a>:</h4>
+<p>If bunny.weights doesn't exist, it trains.  If it does, it loads and uses it.</p>
+
+
+
+<a name="469766490"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469766490" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469766490">(Sep 12 2024 at 19:45)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/469735083">ha scritto</a>:</p>
+<blockquote>
+<p>thank you <span class="user-mention silent" data-user-id="702819">Matteo Balice</span> that's definitely looking production-viable even with the light source issue.  How long did training take?  How many samples, how much time, etc?</p>
+</blockquote>
+<p>The training set consisted of 100 images with a resolution of 512x512 (approximately 26 million in total). The model was trained for approximately 5 minutes. The F1 loss for shape prediction was around 0.995. Additionally, the average error in predicting the hit position along the ray was about 0.006 -&gt; shape and hit position almost perfect.<br>
+Regarding the RGB prediction, however, I have an average error of 24 (in "rgb" scale).</p>
+<p>Each ray samples 200 points (each point has 3 float32 numbers: x y z) along its path, meaning each ray occupies 200 x (3 x 4 bytes (float32)) = 2,3 KB on the GPU. For training, I use a batch size of 2^13 rays per iteration, resulting in 2^13 x 2,3KB = 19.6 MB in memory.<br>
+During the prediction process, the larger the batch size, the better the GPU parallelism can be utilized. Therefore, I load all 1024x1024 rays simultaneously, which requires 1024 x 1024 x 2,3 KB = 2,5 GB (my GPU allows it but it's ok to execute more iterations of the set of rays, it will be just a little bit slower).</p>
+<p>I believe it is possible to reduce the number of sampling points but I am still working on it, I have not achieved good results for example sampling locally.</p>
+
+
+
+<a name="469767078"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469767078" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469767078">(Sep 12 2024 at 19:48)</a>:</h4>
+<p>I tried also with 500 frames in 256x256 and in this case the light's direction is encoded well but not the intensity.<br>
+<a href="/user_uploads/1549/FnHCM-pWT5XGETeyXO6QXLKb/bunny_1024.png">bunny_1024.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/FnHCM-pWT5XGETeyXO6QXLKb/bunny_1024.png" title="bunny_1024.png"><img data-original-dimensions="1024x1024" src="/user_uploads/thumbnail/1549/FnHCM-pWT5XGETeyXO6QXLKb/bunny_1024.png/840x560.webp"></a></div>
+
+
+
+<a name="469767881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469767881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469767881">(Sep 12 2024 at 19:52)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering/near/469735595">ha scritto</a>:</p>
+<blockquote>
+<p>I'm wondering if we could try for actual integration in the time remaining, or if the shift to writing up a paper is more in order.  For integration, it would entail modifying the 'rt' application to have a training mode where some command-line flag would tell it to train/use the neural net in place of the do_pixel() function (since you have color).  Something like rt -N bunny.weights bunny.g bunny</p>
+</blockquote>
+<p>Regarding the integration there are some points to understand first in order to achieve good results in inference time like I had in python:</p>
+<ul>
+<li>First of all we need batch processing of multiple rays in parallel (for examples 2^13 rays in parallel). Is there already implemented batch processing of rays in brl-cad?</li>
+</ul>
+
+
+
+<a name="469768152"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469768152" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469768152">(Sep 12 2024 at 19:53)</a>:</h4>
+<ul>
+<li>Second, I believe that it's better to write the NN in C++ and not binding with python to speed up even more, but this means that we need to write manually the code in CUDA for the GPU (for example I use the function torch.max in pytorch that are optimized for cuda GPUs).</li>
+</ul>
+
+
+
+<a name="469770376"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469770376" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469770376">(Sep 12 2024 at 20:03)</a>:</h4>
+<p>I believe our approach is more suited to GPUs compared to NBVH, as it involves fewer conditional branches. This is because we completely avoid using BVHs; the only intersection we calculate is with the bounding sphere. After that, the inference process remains consistent for every ray, exploiting the true power of GPUs. This is the reason why even using more sampling point we have good results in inference time.</p>
+
+
+
+<a name="469771106"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Neural%20Rendering/near/469771106" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Matteo Balice <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Neural.20Rendering.html#469771106">(Sep 12 2024 at 20:06)</a>:</h4>
+<p>I discovered one drawback: when I render the scene in 1024x1024 in pygame it's good for the first seconds (16-17 ms for each frame) but after that the memory of GPU goes to 100% and the inference time slow down a lot. Probably this is because they do not use well the garbage collector of tensors accumulated for previous frames (I have a RTX 4070 with 13GB of VRAM).</p>
+
+
+
+<hr><p>Last updated: Sep 13 2024 at 00:43 UTC</p>
 </html>
