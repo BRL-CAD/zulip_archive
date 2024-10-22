@@ -148,5 +148,59 @@
         "id": 477909454,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1729442485
+    },
+    {
+        "content": "<p>-DBRLCAD_EXT_DIR=/home/user/bext_output is usually how I set things up for a pre-existing BEXT build.</p>",
+        "id": 478055853,
+        "sender_full_name": "starseeker",
+        "timestamp": 1729516029
+    },
+    {
+        "content": "<p>If you don't have a pre-existing bext build, you shouldn't need to do anything - configure should take care of things.</p>",
+        "id": 478056051,
+        "sender_full_name": "starseeker",
+        "timestamp": 1729516074
+    },
+    {
+        "content": "<p>You shouldn't need to delve into the lower level variables unless you're (say) trying to have BRL-CAD's configure manage a build from a pre-existing bext source tree clone.  That'd be when to set BRLCAD_EXT_SOURCE_DIR</p>",
+        "id": 478056752,
+        "sender_full_name": "starseeker",
+        "timestamp": 1729516243
+    },
+    {
+        "content": "<p>I don't think there are too many cases where you'd want to override BRLCAD_EXT_BUILD_DIR - about the only thing that comes to mind is if for some reason you're having to do a BRL-CAD build on a small or almost full disk and you want to put the bext build outputs somewhere else, but still want the CMake configure to manage the build.</p>",
+        "id": 478057268,
+        "sender_full_name": "starseeker",
+        "timestamp": 1729516380
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/bext?tab=readme-ov-file#using-the-build-outputs-with-brl-cad\">https://github.com/BRL-CAD/bext?tab=readme-ov-file#using-the-build-outputs-with-brl-cad</a></p>",
+        "id": 478057533,
+        "sender_full_name": "starseeker",
+        "timestamp": 1729516450
+    },
+    {
+        "content": "<p>I was testing with different versions and branches, e.g. devel_k-g and main. There, the bext build was the most time consuming part (over an hour each with hotel WiFi). That's why I would like to have one build for all.</p>",
+        "id": 478060743,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1729517259
+    },
+    {
+        "content": "<p>It looks like BRLCAD_EXT_DIR isn't memorized. What I did:</p>\n<ul>\n<li>I have a well populated build directory of the main branch</li>\n<li>cleaned everything from the build directory of the devel_k-g branch</li>\n<li>rum cmake for the devel_k-g branch with pointing BRLCAD_EXT_DIR to the one in the build directory of the main branch</li>\n</ul>\n<p><span aria-label=\"right\" class=\"emoji emoji-27a1\" role=\"img\" title=\"right\">:right:</span> Until here, it works well. CMake runs some seconds and prepares the build without cloning bext.</p>\n<p>Now, I started the CMake GUI to adjust the install directory. After pressing configure, it started cloning the bext stuff again.</p>",
+        "id": 478067230,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1729518879
+    },
+    {
+        "content": "<p>Ah, I see.  You're right, it's not being written to the cache and a repeat configure forgets about it.  Does  <a href=\"https://github.com/BRL-CAD/brlcad/commit/0144bdd6edc77a7c722c9269343ccc3398213ded\">https://github.com/BRL-CAD/brlcad/commit/0144bdd6edc77a7c722c9269343ccc3398213ded</a> do what you need?</p>",
+        "id": 478073468,
+        "sender_full_name": "starseeker",
+        "timestamp": 1729520387
+    },
+    {
+        "content": "<p><span aria-label=\"+1\" class=\"emoji emoji-1f44d\" role=\"img\" title=\"+1\">:+1:</span> Looks good.</p>\n<p>CMake was fast, now I'm running make.</p>",
+        "id": 478076426,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1729521151
     }
 ]

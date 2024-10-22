@@ -163,5 +163,67 @@
 
 
 
-<hr><p>Last updated: Oct 21 2024 at 00:47 UTC</p>
+<a name="478055853"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478055853" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478055853">(Oct 21 2024 at 13:07)</a>:</h4>
+<p>-DBRLCAD_EXT_DIR=/home/user/bext_output is usually how I set things up for a pre-existing BEXT build.</p>
+
+
+
+<a name="478056051"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478056051" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478056051">(Oct 21 2024 at 13:07)</a>:</h4>
+<p>If you don't have a pre-existing bext build, you shouldn't need to do anything - configure should take care of things.</p>
+
+
+
+<a name="478056752"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478056752" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478056752">(Oct 21 2024 at 13:10)</a>:</h4>
+<p>You shouldn't need to delve into the lower level variables unless you're (say) trying to have BRL-CAD's configure manage a build from a pre-existing bext source tree clone.  That'd be when to set BRLCAD_EXT_SOURCE_DIR</p>
+
+
+
+<a name="478057268"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478057268" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478057268">(Oct 21 2024 at 13:13)</a>:</h4>
+<p>I don't think there are too many cases where you'd want to override BRLCAD_EXT_BUILD_DIR - about the only thing that comes to mind is if for some reason you're having to do a BRL-CAD build on a small or almost full disk and you want to put the bext build outputs somewhere else, but still want the CMake configure to manage the build.</p>
+
+
+
+<a name="478057533"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478057533" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478057533">(Oct 21 2024 at 13:14)</a>:</h4>
+<p><a href="https://github.com/BRL-CAD/bext?tab=readme-ov-file#using-the-build-outputs-with-brl-cad">https://github.com/BRL-CAD/bext?tab=readme-ov-file#using-the-build-outputs-with-brl-cad</a></p>
+
+
+
+<a name="478060743"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478060743" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478060743">(Oct 21 2024 at 13:27)</a>:</h4>
+<p>I was testing with different versions and branches, e.g. devel_k-g and main. There, the bext build was the most time consuming part (over an hour each with hotel WiFi). That's why I would like to have one build for all.</p>
+
+
+
+<a name="478067230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478067230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478067230">(Oct 21 2024 at 13:54)</a>:</h4>
+<p>It looks like BRLCAD_EXT_DIR isn't memorized. What I did:</p>
+<ul>
+<li>I have a well populated build directory of the main branch</li>
+<li>cleaned everything from the build directory of the devel_k-g branch</li>
+<li>rum cmake for the devel_k-g branch with pointing BRLCAD_EXT_DIR to the one in the build directory of the main branch</li>
+</ul>
+<p><span aria-label="right" class="emoji emoji-27a1" role="img" title="right">:right:</span> Until here, it works well. CMake runs some seconds and prepares the build without cloning bext.</p>
+<p>Now, I started the CMake GUI to adjust the install directory. After pressing configure, it started cloning the bext stuff again.</p>
+
+
+
+<a name="478073468"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478073468" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478073468">(Oct 21 2024 at 14:19)</a>:</h4>
+<p>Ah, I see.  You're right, it's not being written to the cache and a repeat configure forgets about it.  Does  <a href="https://github.com/BRL-CAD/brlcad/commit/0144bdd6edc77a7c722c9269343ccc3398213ded">https://github.com/BRL-CAD/brlcad/commit/0144bdd6edc77a7c722c9269343ccc3398213ded</a> do what you need?</p>
+
+
+
+<a name="478076426"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/478076426" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#478076426">(Oct 21 2024 at 14:32)</a>:</h4>
+<p><span aria-label="+1" class="emoji emoji-1f44d" role="img" title="+1">:+1:</span> Looks good.</p>
+<p>CMake was fast, now I'm running make.</p>
+
+
+
+<hr><p>Last updated: Oct 22 2024 at 00:46 UTC</p>
 </html>
