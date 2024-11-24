@@ -517,5 +517,29 @@ rt_gettrees() cleaning up dead solid &#39;tgc4.s&#39;
 
 
 
-<hr><p>Last updated: Nov 23 2024 at 00:47 UTC</p>
+<a name="484097314"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/484097314" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Benjamin Fennell <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#484097314">(Nov 23 2024 at 21:21)</a>:</h4>
+<p>I may have found a bug with the clone command.</p>
+<p>When the name of a primitive or object that is being cloned starts with a number the resultant clones do not inherit a full name. The following is an example:</p>
+<div class="codehilite"><pre><span></span><code>Input: clone 1Test.s
+Output Name: 100
+</code></pre></div>
+<p>It should be noted that this only occurs if the name starts with a number. Which is why the following behaves normally:</p>
+<div class="codehilite"><pre><span></span><code>Input: clone a-1-Test.s
+Output Name: a-101-Test.s
+</code></pre></div>
+<p>I am not sure if this has already been fixed or not, since I am currently using the binary release.</p>
+<p>Here is the database that contains the examples:<br>
+<a href="/user_uploads/1549/22JFCClSpDstIHFTyRUzLpNv/TEMPDB.g">TEMPDB.g</a></p>
+<p>PS. Upon further testing, it would seem that there is a potentially different issue when cloning combinations. The following may help illustrate:</p>
+<div class="codehilite"><pre><span></span><code>Input: comb combination1.c u test.s u 1test.s
+Input: clone combination1.c
+Output name: combination2
+</code></pre></div>
+<p>It would seem that, when dealing with combinations, regardless of where the number is in the name, the name gets truncated after the number to be incremented. </p>
+<p>I will continue to play around with it, and probably try a few different options with clone as well.</p>
+
+
+
+<hr><p>Last updated: Nov 24 2024 at 00:53 UTC</p>
 </html>
