@@ -541,5 +541,34 @@ Output name: combination2
 
 
 
-<hr><p>Last updated: Dec 02 2024 at 00:52 UTC</p>
+<a name="485596831"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/485596831" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Benjamin Fennell <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#485596831">(Dec 02 2024 at 10:58)</a>:</h4>
+<p>I may have potentially found a bug with rt's rendering. Here are two images that may help illustrate:</p>
+<p>Bugged rendering. <a href="/user_uploads/1549/OG25ueyz2_nw8pBuXH_WLgDA/bugged-projection.png">bugged-projection.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/OG25ueyz2_nw8pBuXH_WLgDA/bugged-projection.png" title="bugged-projection.png"><img data-original-dimensions="800x800" src="/user_uploads/thumbnail/1549/OG25ueyz2_nw8pBuXH_WLgDA/bugged-projection.png/840x560.webp"></a></div><p>Workaround rendering. <a href="/user_uploads/1549/DxqkiXllvIsqE1XvBLDkXaFS/workaround-projection.png">workaround-projection.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/DxqkiXllvIsqE1XvBLDkXaFS/workaround-projection.png" title="workaround-projection.png"><img data-original-dimensions="800x800" src="/user_uploads/thumbnail/1549/DxqkiXllvIsqE1XvBLDkXaFS/workaround-projection.png/840x560.webp"></a></div><p>The bugged rendering is drawing the cut plate beyond its actual dimensions. The workaround that I found was to make the cut plate larger in the Z axis, then to cut off the rest of what I did not need.</p>
+<p>Here are the two databases that generated those images:<br>
+<a href="/user_uploads/1549/5KSvYNelpCZq1NId-qDHUiXr/BuggedDB.g">BuggedDB.g</a><br>
+<a href="/user_uploads/1549/v6ywubdRsh2_qbHW-QYNzPwh/WorkaroundDB.g">WorkaroundDB.g</a></p>
+<p>I encountered this bug while scripting BRL-CAD, so I also have scripts which can automatically generate both databases and the above images:<br>
+<a href="/user_uploads/1549/n9JkpjGecD4SvzgjOaW7S8b0/workaroundBugReport.sh">workaroundBugReport.sh</a><br>
+<a href="/user_uploads/1549/z4dBmnWYT_8IMcPbb99rLbIN/bugReport.sh">bugReport.sh</a><br>
+Note, it is assumed that when running these scripts you are in a directory that contains the mged binary.</p>
+<p>Finally, I should mention that I am using the binary distribution, so perhaps this bug has already been fix.</p>
+
+
+
+<a name="485620697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/485620697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#485620697">(Dec 02 2024 at 13:08)</a>:</h4>
+<p>It looks like this is a precision issue. Putting <code>units m;</code> as first command in the mged script seams to resolve it.</p>
+
+
+
+<a name="485641324"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bugs/near/485641324" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Benjamin Fennell <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bugs.html#485641324">(Dec 02 2024 at 14:51)</a>:</h4>
+<p>Oh I see. it was using millimeters by default, and that was too small; similarly  micrometers also don't work, since they to are too small. Thanks for your help!</p>
+
+
+
+<hr><p>Last updated: Dec 03 2024 at 00:51 UTC</p>
 </html>
