@@ -15277,5 +15277,86 @@ CMake Generate step failed.  Build files cannot be regenerated correctly.
 
 
 
-<hr><p>Last updated: Dec 30 2024 at 00:48 UTC</p>
+<a name="491221342"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491221342" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491221342">(Dec 30 2024 at 00:57)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="781132">@LorenzoPegorari</span>, welcome at BRL-CAD!</p>
+<p>Regarding your issues with the MOOSE build, you could try the new_brlcad_build branch of MOOSE. There I made some first steps of including the changes which came with the new brlcad build with bext.</p>
+
+
+
+<a name="491287294"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491287294" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491287294">(Dec 30 2024 at 14:16)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> , thanks for the quick response!</p>
+<p>I've been trying to fix the problem for a few hours but, even though I've made some progress, now I'm stuck.</p>
+<p>So yesterday I was having problems with: <code>BRLCAD_OPENNURBS_HEADERS_DIR</code>,  <code>BRLCAD_OPENNURBS_STATIC_LIBRARY</code> and <code>BRLCAD_POLY2TRI_STATIC_LIBRARY</code>.</p>
+<p>I then, as you suggested, tried building from the "new_brlcad_build" branch of <strong>MOOSE</strong>, but I was getting basically the same problems, now with: <code>BRLCAD_OPENNURBS_HEADERS_DIR</code>,  <code>BRLCAD_OPENNURBS_LIBRARY</code> and <code>BRLCAD_POLY2TRI_LIBRARY</code>.</p>
+<p>I was then able to figure out that the problem with OPENNURBS was simply the fact that it should have been capitalized.</p>
+<p>In the "FindBRLCAD.cmake" file inside the directory "MOOSE/cmake", I made the following changes:</p>
+<ol>
+<li>line 136 : added in PATH_SUFFIXES the path "include/OpenNURBS" (with uppercase "O")</li>
+<li>line 239: changed the required "openNURBS" to "OpenNURBS" (with uppercase "O")</li>
+</ol>
+<p>Now though I'm still having problems with the "poly2tri" library, and I don't know what to do...</p>
+
+
+
+<a name="491287499"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491287499" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491287499">(Dec 30 2024 at 14:19)</a>:</h4>
+<p>This is what I get now when I do <code>cmake ..</code> inside MOOSE/build after the previously described changes:</p>
+<div class="codehilite"><pre><span></span><code>CMake Deprecation Warning at CMakeLists.txt:25 (CMAKE_MINIMUM_REQUIRED):
+  Compatibility with CMake &lt; 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument &lt;min&gt; value or use a ...&lt;max&gt; suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Warning (dev) at cmake/FindBRLCAD.cmake:102 (EXEC_PROGRAM):
+  Policy CMP0153 is not set: The exec_program command should not be called.
+  Run &quot;cmake --help-policy CMP0153&quot; for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  Use execute_process() instead.
+Call Stack (most recent call first):
+  CMakeLists.txt:35 (FIND_PACKAGE)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- BRL-CAD static library suffix: .a
+-- Found BRL-CAD 7.40.3 at /usr/brlcad/rel-7.40.3
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found UUID: /usr/lib/x86_64-linux-gnu/libuuid.so
+-- Configuring done (0.3s)
+CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
+Please set them or make sure they are set and tested correctly in the CMake files:
+BRLCAD_POLY2TRI_LIBRARY
+    linked by target &quot;brlcad&quot; in directory /home/lorenzo/Documents/BRLCAD-Project/MOOSE/src
+
+-- Generating done (0.0s)
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+</code></pre></div>
+
+
+
+<a name="491288194"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491288194" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491288194">(Dec 30 2024 at 14:25)</a>:</h4>
+<p>I think that the problem resides in the fact that inside the directory where I have installed brlcad ("/usr/brlcad/rel-7.40.3"), in the directory "lib", the library <em>poly2tri</em> is not present.</p>
+<p>And I have no clue why it isn't there. <span aria-label="sweat smile" class="emoji emoji-1f605" role="img" title="sweat smile">:sweat_smile:</span></p>
+
+
+
+<hr><p>Last updated: Dec 31 2024 at 00:45 UTC</p>
 </html>
