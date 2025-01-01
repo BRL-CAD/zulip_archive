@@ -11536,5 +11536,53 @@
         "id": 491288194,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1735568751
+    },
+    {
+        "content": "<p>poly2tri was replaced and removed - the code no longer needs to look for it.</p>",
+        "id": 491355411,
+        "sender_full_name": "starseeker",
+        "timestamp": 1735611990
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/brlcad/blob/main/misc/CMake/FindBRLCAD.cmake\">https://github.com/BRL-CAD/brlcad/blob/main/misc/CMake/FindBRLCAD.cmake</a> may be helpful here</p>",
+        "id": 491356211,
+        "sender_full_name": "starseeker",
+        "timestamp": 1735612701
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> , thanks for your help as well.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491355411\">ha scritto</a>:</p>\n<blockquote>\n<p>poly2tri was replaced and removed - the code no longer needs to look for it.</p>\n</blockquote>\n<p>Ok, so why is <code>FindBRLCAD.cmake</code> in the <strong>MOOSE</strong> build looking for it? Should I remove the line 240, where it is explicitly said that <em>poly2tri</em> is required?</p>",
+        "id": 491413566,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735658997
+    },
+    {
+        "content": "<p>If I remove said line, <code>cmake ..</code> inside \"MOOSE/build\" finishes correctly (?), with the following output:</p>\n<div class=\"codehilite\"><pre><span></span><code>CMake Deprecation Warning at CMakeLists.txt:25 (CMAKE_MINIMUM_REQUIRED):\n  Compatibility with CMake &lt; 3.5 will be removed from a future version of\n  CMake.\n\n  Update the VERSION argument &lt;min&gt; value or use a ...&lt;max&gt; suffix to tell\n  CMake that the project does not need compatibility with older versions.\n\n\n-- The C compiler identification is GNU 13.3.0\n-- The CXX compiler identification is GNU 13.3.0\n-- Detecting C compiler ABI info\n-- Detecting C compiler ABI info - done\n-- Check for working C compiler: /usr/bin/cc - skipped\n-- Detecting C compile features\n-- Detecting C compile features - done\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\nCMake Warning (dev) at cmake/FindBRLCAD.cmake:102 (EXEC_PROGRAM):\n  Policy CMP0153 is not set: The exec_program command should not be called.\n  Run &quot;cmake --help-policy CMP0153&quot; for policy details.  Use the cmake_policy\n  command to set the policy and suppress this warning.\n\n  Use execute_process() instead.\nCall Stack (most recent call first):\n  CMakeLists.txt:35 (FIND_PACKAGE)\nThis warning is for project developers.  Use -Wno-dev to suppress it.\n\n-- BRL-CAD static library suffix: .a\n-- Found BRL-CAD 7.40.3 at /home/lorenzo/Downloads/brlcad\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE\n-- Found UUID: /usr/lib/x86_64-linux-gnu/libuuid.so\n-- Configuring done (0.6s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/lorenzo/Documents/BRLCAD-Project/MOOSE/build\n</code></pre></div>",
+        "id": 491413738,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735659093
+    },
+    {
+        "content": "<p>But then, when I try to <code>make</code>, I get the following error:</p>\n<div class=\"codehilite\"><pre><span></span><code>[  3%] Building CXX object src/CMakeFiles/brlcad.dir/Database/Arb8.cpp.o\n[  6%] Building CXX object src/CMakeFiles/brlcad.dir/Database/BagOfTriangles.cpp.o\n[  9%] Building CXX object src/CMakeFiles/brlcad.dir/Database/Combination.cpp.o\n[ 12%] Building CXX object src/CMakeFiles/brlcad.dir/Database/Cone.cpp.o\n[ 16%] Building CXX object src/CMakeFiles/brlcad.dir/Database/ConstDatabase.cpp.o\n/home/lorenzo/Documents/BRLCAD-Project/MOOSE/src/Database/ConstDatabase.cpp: In member function ‘BRLCAD::NonManifoldGeometry* BRLCAD::ConstDatabase::Facetize(const char*) const’:\n/home/lorenzo/Documents/BRLCAD-Project/MOOSE/src/Database/ConstDatabase.cpp:413:66: error: ‘RTG’ was not declared in this scope\n  413 |                nmg_boolean(facetizeTree, ret-&gt;m_internalp, &amp;RTG.rtg_vlfree, &amp;m_rtip-&gt;rti_tol, &amp;rt_uniresource);\n      |                                                             ^~~\n\nmake[2]: *** [src/CMakeFiles/brlcad.dir/build.make:132: src/CMakeFiles/brlcad.dir/Database/ConstDatabase.cpp.o] Error 1\nmake[1]: *** [CMakeFiles/Makefile2:119: src/CMakeFiles/brlcad.dir/all] Error 2\nmake: *** [Makefile:146: all] Error 2\n</code></pre></div>",
+        "id": 491413844,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735659159
+    },
+    {
+        "content": "<p>Am I missing a library? I really don't know what the problem is. I even tried rebuilding <strong>brlcad</strong> from zero, installing it in a directory where administration privileges aren't required, but nothing changed.</p>",
+        "id": 491414243,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735659474
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"781132\">@LorenzoPegorari</span> The MOOSE codebase is not in sync with the very latest BRL-CAD main code.  I can take a quick look and see if I can update it in the next day or two.</p>",
+        "id": 491426882,
+        "sender_full_name": "starseeker",
+        "timestamp": 1735667900
+    },
+    {
+        "content": "<p>That would be extremely helpful <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> , thanks a lot!</p>",
+        "id": 491440001,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735677426
     }
 ]

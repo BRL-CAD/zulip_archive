@@ -15358,5 +15358,112 @@ CMake Generate step failed.  Build files cannot be regenerated correctly.
 
 
 
-<hr><p>Last updated: Dec 31 2024 at 00:45 UTC</p>
+<a name="491355411"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491355411" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491355411">(Dec 31 2024 at 02:26)</a>:</h4>
+<p>poly2tri was replaced and removed - the code no longer needs to look for it.</p>
+
+
+
+<a name="491356211"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491356211" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491356211">(Dec 31 2024 at 02:38)</a>:</h4>
+<p><a href="https://github.com/BRL-CAD/brlcad/blob/main/misc/CMake/FindBRLCAD.cmake">https://github.com/BRL-CAD/brlcad/blob/main/misc/CMake/FindBRLCAD.cmake</a> may be helpful here</p>
+
+
+
+<a name="491413566"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491413566" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491413566">(Dec 31 2024 at 15:29)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="112516">@starseeker</span> , thanks for your help as well.</p>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491355411">ha scritto</a>:</p>
+<blockquote>
+<p>poly2tri was replaced and removed - the code no longer needs to look for it.</p>
+</blockquote>
+<p>Ok, so why is <code>FindBRLCAD.cmake</code> in the <strong>MOOSE</strong> build looking for it? Should I remove the line 240, where it is explicitly said that <em>poly2tri</em> is required?</p>
+
+
+
+<a name="491413738"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491413738" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491413738">(Dec 31 2024 at 15:31)</a>:</h4>
+<p>If I remove said line, <code>cmake ..</code> inside "MOOSE/build" finishes correctly (?), with the following output:</p>
+<div class="codehilite"><pre><span></span><code>CMake Deprecation Warning at CMakeLists.txt:25 (CMAKE_MINIMUM_REQUIRED):
+  Compatibility with CMake &lt; 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument &lt;min&gt; value or use a ...&lt;max&gt; suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Warning (dev) at cmake/FindBRLCAD.cmake:102 (EXEC_PROGRAM):
+  Policy CMP0153 is not set: The exec_program command should not be called.
+  Run &quot;cmake --help-policy CMP0153&quot; for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  Use execute_process() instead.
+Call Stack (most recent call first):
+  CMakeLists.txt:35 (FIND_PACKAGE)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- BRL-CAD static library suffix: .a
+-- Found BRL-CAD 7.40.3 at /home/lorenzo/Downloads/brlcad
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found UUID: /usr/lib/x86_64-linux-gnu/libuuid.so
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/lorenzo/Documents/BRLCAD-Project/MOOSE/build
+</code></pre></div>
+
+
+
+<a name="491413844"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491413844" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491413844">(Dec 31 2024 at 15:32)</a>:</h4>
+<p>But then, when I try to <code>make</code>, I get the following error:</p>
+<div class="codehilite"><pre><span></span><code>[  3%] Building CXX object src/CMakeFiles/brlcad.dir/Database/Arb8.cpp.o
+[  6%] Building CXX object src/CMakeFiles/brlcad.dir/Database/BagOfTriangles.cpp.o
+[  9%] Building CXX object src/CMakeFiles/brlcad.dir/Database/Combination.cpp.o
+[ 12%] Building CXX object src/CMakeFiles/brlcad.dir/Database/Cone.cpp.o
+[ 16%] Building CXX object src/CMakeFiles/brlcad.dir/Database/ConstDatabase.cpp.o
+/home/lorenzo/Documents/BRLCAD-Project/MOOSE/src/Database/ConstDatabase.cpp: In member function ‘BRLCAD::NonManifoldGeometry* BRLCAD::ConstDatabase::Facetize(const char*) const’:
+/home/lorenzo/Documents/BRLCAD-Project/MOOSE/src/Database/ConstDatabase.cpp:413:66: error: ‘RTG’ was not declared in this scope
+  413 |                nmg_boolean(facetizeTree, ret-&gt;m_internalp, &amp;RTG.rtg_vlfree, &amp;m_rtip-&gt;rti_tol, &amp;rt_uniresource);
+      |                                                             ^~~
+
+make[2]: *** [src/CMakeFiles/brlcad.dir/build.make:132: src/CMakeFiles/brlcad.dir/Database/ConstDatabase.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:119: src/CMakeFiles/brlcad.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2
+</code></pre></div>
+
+
+
+<a name="491414243"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491414243" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491414243">(Dec 31 2024 at 15:37)</a>:</h4>
+<p>Am I missing a library? I really don't know what the problem is. I even tried rebuilding <strong>brlcad</strong> from zero, installing it in a directory where administration privileges aren't required, but nothing changed.</p>
+
+
+
+<a name="491426882"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491426882" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491426882">(Dec 31 2024 at 17:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="781132">@LorenzoPegorari</span> The MOOSE codebase is not in sync with the very latest BRL-CAD main code.  I can take a quick look and see if I can update it in the next day or two.</p>
+
+
+
+<a name="491440001"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491440001" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491440001">(Dec 31 2024 at 20:37)</a>:</h4>
+<p>That would be extremely helpful <span class="user-mention" data-user-id="112516">@starseeker</span> , thanks a lot!</p>
+
+
+
+<hr><p>Last updated: Jan 01 2025 at 00:52 UTC</p>
 </html>
