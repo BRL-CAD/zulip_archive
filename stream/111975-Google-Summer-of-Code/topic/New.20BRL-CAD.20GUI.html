@@ -15503,5 +15503,62 @@ make: *** [Makefile:146: all] Error 2
 
 
 
-<hr><p>Last updated: Jan 02 2025 at 00:45 UTC</p>
+<a name="491595379"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491595379" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491595379">(Jan 02 2025 at 11:15)</a>:</h4>
+<p>First, Happy New Year to all of you <span aria-label="fireworks" class="emoji emoji-1f386" role="img" title="fireworks">:fireworks:</span></p>
+<p>And here is the good news: I just successfully compiled and started arbalest from scratch on Debian bookworm <span aria-label="tada" class="emoji emoji-1f389" role="img" title="tada">:tada:</span></p>
+<p>For that, I added the installation of the necessary BRL-CAD libraries to the CMake configuration of MOOSE. I.e., you should pull the latest sources from the MOOSE main branch and <code>make install</code>. The failure of the build of the test programs you saw is suspicious (I don't see it), but hopefully doesn't prevent the installation.</p>
+<p>The real test would be in MOOSE/Examples. Generate the build files with CMake and <code>make Database</code>. This shall generate a printtitle_database executable. To run it, you have to set the LD_LIBRARY_PATH variable to your MOOSE installation's lib directory first. If this works, you should be able to build and run arbalest too.</p>
+
+
+
+<a name="491617215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491617215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491617215">(Jan 02 2025 at 14:22)</a>:</h4>
+<p>The fatal problem in that output is the zlib link failures - it means the FindBRLCAD.cmake isn't locating the bundled copy of zlib compiled with BRL-CAD.  You can work around it by manually setting the ZLIB_* variables in CMakeCache.txt to the correct locations for the BRL-CAD zlib.</p>
+
+
+
+<a name="491650098"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491650098" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491650098">(Jan 02 2025 at 18:38)</a>:</h4>
+<p>Ok so I've been trying for the past few hours, but still no success.</p>
+
+
+
+<a name="491650199"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491650199" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491650199">(Jan 02 2025 at 18:39)</a>:</h4>
+<p>Now it seems like FindBRLCAD.cmake can find the zlib path correctly.</p>
+<p>If I check the CMakeChache.txt I see the following:</p>
+<div class="codehilite"><pre><span></span><code>//Path to a file.
+ZLIB_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+ZLIB_LIBRARY:FILEPATH=/home/lorenzo/Downloads/brlcad/lib/libz_brl.so
+
+//Path to a library.
+ZLIB_STATIC_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libz.so
+</code></pre></div>
+
+
+
+<a name="491650426"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491650426" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491650426">(Jan 02 2025 at 18:41)</a>:</h4>
+<p>But <code>make install</code> is till giving me the same errors. A lot of warnings, and in the end I get this:</p>
+<div class="codehilite"><pre><span></span><code>[ 87%] Built target brlcad
+[ 90%] Building CXX object src/CMakeFiles/generateDataTest.dir/Database/tests/generateData.cpp.o
+[ 93%] Linking CXX executable generateDataTest
+/usr/bin/ld: libbrlcad.so: undefined reference to `brl_deflate&#39;
+/usr/bin/ld: libbrlcad.so: undefined reference to `brl_inflate&#39;
+/usr/bin/ld: libbrlcad.so: undefined reference to `brl_inflateEnd&#39;
+/usr/bin/ld: libbrlcad.so: undefined reference to `brl_deflateInit_&#39;
+/usr/bin/ld: libbrlcad.so: undefined reference to `brl_deflateEnd&#39;
+/usr/bin/ld: libbrlcad.so: undefined reference to `brl_inflateInit_&#39;
+collect2: error: ld returned 1 exit status
+make[2]: *** [src/CMakeFiles/generateDataTest.dir/build.make:110: src/generateDataTest] Error 1
+make[1]: *** [CMakeFiles/Makefile2:145: src/CMakeFiles/generateDataTest.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2
+</code></pre></div>
+
+
+
+<hr><p>Last updated: Jan 03 2025 at 00:46 UTC</p>
 </html>

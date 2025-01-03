@@ -11614,5 +11614,35 @@
         "id": 491514774,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1735751604
+    },
+    {
+        "content": "<p>First, Happy New Year to all of you <span aria-label=\"fireworks\" class=\"emoji emoji-1f386\" role=\"img\" title=\"fireworks\">:fireworks:</span></p>\n<p>And here is the good news: I just successfully compiled and started arbalest from scratch on Debian bookworm <span aria-label=\"tada\" class=\"emoji emoji-1f389\" role=\"img\" title=\"tada\">:tada:</span></p>\n<p>For that, I added the installation of the necessary BRL-CAD libraries to the CMake configuration of MOOSE. I.e., you should pull the latest sources from the MOOSE main branch and <code>make install</code>. The failure of the build of the test programs you saw is suspicious (I don't see it), but hopefully doesn't prevent the installation.</p>\n<p>The real test would be in MOOSE/Examples. Generate the build files with CMake and <code>make Database</code>. This shall generate a printtitle_database executable. To run it, you have to set the LD_LIBRARY_PATH variable to your MOOSE installation's lib directory first. If this works, you should be able to build and run arbalest too.</p>",
+        "id": 491595379,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1735816540
+    },
+    {
+        "content": "<p>The fatal problem in that output is the zlib link failures - it means the FindBRLCAD.cmake isn't locating the bundled copy of zlib compiled with BRL-CAD.  You can work around it by manually setting the ZLIB_* variables in CMakeCache.txt to the correct locations for the BRL-CAD zlib.</p>",
+        "id": 491617215,
+        "sender_full_name": "starseeker",
+        "timestamp": 1735827742
+    },
+    {
+        "content": "<p>Ok so I've been trying for the past few hours, but still no success.</p>",
+        "id": 491650098,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735843134
+    },
+    {
+        "content": "<p>Now it seems like FindBRLCAD.cmake can find the zlib path correctly.</p>\n<p>If I check the CMakeChache.txt I see the following:</p>\n<div class=\"codehilite\"><pre><span></span><code>//Path to a file.\nZLIB_INCLUDE_DIR:PATH=/usr/include\n\n//Path to a library.\nZLIB_LIBRARY:FILEPATH=/home/lorenzo/Downloads/brlcad/lib/libz_brl.so\n\n//Path to a library.\nZLIB_STATIC_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libz.so\n</code></pre></div>",
+        "id": 491650199,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735843186
+    },
+    {
+        "content": "<p>But <code>make install</code> is till giving me the same errors. A lot of warnings, and in the end I get this:</p>\n<div class=\"codehilite\"><pre><span></span><code>[ 87%] Built target brlcad\n[ 90%] Building CXX object src/CMakeFiles/generateDataTest.dir/Database/tests/generateData.cpp.o\n[ 93%] Linking CXX executable generateDataTest\n/usr/bin/ld: libbrlcad.so: undefined reference to `brl_deflate&#39;\n/usr/bin/ld: libbrlcad.so: undefined reference to `brl_inflate&#39;\n/usr/bin/ld: libbrlcad.so: undefined reference to `brl_inflateEnd&#39;\n/usr/bin/ld: libbrlcad.so: undefined reference to `brl_deflateInit_&#39;\n/usr/bin/ld: libbrlcad.so: undefined reference to `brl_deflateEnd&#39;\n/usr/bin/ld: libbrlcad.so: undefined reference to `brl_inflateInit_&#39;\ncollect2: error: ld returned 1 exit status\nmake[2]: *** [src/CMakeFiles/generateDataTest.dir/build.make:110: src/generateDataTest] Error 1\nmake[1]: *** [CMakeFiles/Makefile2:145: src/CMakeFiles/generateDataTest.dir/all] Error 2\nmake: *** [Makefile:146: all] Error 2\n</code></pre></div>",
+        "id": 491650426,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1735843300
     }
 ]
