@@ -15560,5 +15560,241 @@ make: *** [Makefile:146: all] Error 2
 
 
 
-<hr><p>Last updated: Jan 03 2025 at 00:46 UTC</p>
+<a name="491687808"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491687808" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491687808">(Jan 03 2025 at 00:57)</a>:</h4>
+<p>If it's using the ZLIB_STATIC_LIBRARY dir, that won't work</p>
+
+
+
+<a name="491687890"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491687890" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491687890">(Jan 03 2025 at 00:58)</a>:</h4>
+<p>And the ZLIB_INCLUDE_DIR is the system path, which also isn't right (although that shouldn't matter here unless MOOSE is directly using zlib, IIRC)</p>
+
+
+
+<a name="491692478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692478">(Jan 03 2025 at 01:57)</a>:</h4>
+<p>You're right <span class="user-mention" data-user-id="112516">@starseeker</span> , my bad!</p>
+<p>I did also update the other 2 ZLIB paths before, but I was getting another error, so I thought that I was doing something wrong for some reason.</p>
+
+
+
+<a name="491692667"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692667" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692667">(Jan 03 2025 at 01:59)</a>:</h4>
+<p>With the CMakeCache.txt as following:</p>
+<div class="codehilite"><pre><span></span><code>//Path to a file.
+ZLIB_INCLUDE_DIR:PATH=/home/lorenzo/Downloads/brlcad/include
+
+//Path to a library.
+ZLIB_LIBRARY:FILEPATH=/home/lorenzo/Downloads/brlcad/lib/libz_brl.so
+
+//Path to a library.
+ZLIB_STATIC_LIBRARY:FILEPATH=/home/lorenzo/Downloads/brlcad/lib/libz_brl.a
+</code></pre></div>
+<p>I'm getting this different error (always at the end, after <code>[ 87%] Linking CXX shared library libbrlcad.so</code>), when I do <code>make install</code>:</p>
+<div class="codehilite"><pre><span></span><code>/usr/bin/ld: /home/lorenzo/Downloads/brlcad/lib/libz_brl.a(zutil.c.o): warning: relocation against `brl_z_errmsg&#39; in read-only section `.text&#39;
+/usr/bin/ld: /home/lorenzo/Downloads/brlcad/lib/libz_brl.a(deflate.c.o): relocation R_X86_64_PC32 against symbol `brl__length_code&#39; can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: final link failed: bad value
+collect2: error: ld returned 1 exit status
+make[2]: *** [src/CMakeFiles/brlcad.dir/build.make:509: src/libbrlcad.so] Error 1
+make[1]: *** [CMakeFiles/Makefile2:119: src/CMakeFiles/brlcad.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2
+</code></pre></div>
+
+
+
+<a name="491692803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692803">(Jan 03 2025 at 02:00)</a>:</h4>
+<p>Apparently the zlib compile doesn't use fPIC with the static library.</p>
+
+
+
+<a name="491692843"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692843" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692843">(Jan 03 2025 at 02:01)</a>:</h4>
+<p>I thought that this was wrong because, differently from when I did not change CMakeCache.txt, now <em>libbrlcad.so</em> doesn't even get compiled at the end...</p>
+
+
+
+<a name="491692845"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692845" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692845">(Jan 03 2025 at 02:01)</a>:</h4>
+<p>The shortest path would be to tweak the zlib CMake in bext to add it, rebuild, and try with that file</p>
+
+
+
+<a name="491692863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692863">(Jan 03 2025 at 02:01)</a>:</h4>
+<p>Or, alternately, try to link against the shared .so file rather than the .a</p>
+
+
+
+<a name="491692914"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692914" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692914">(Jan 03 2025 at 02:02)</a>:</h4>
+<p>I.e. replace ZLIB_STATIC_LIBRARY with ZLIB_LIBRARY in MOOSE</p>
+
+
+
+<a name="491692938"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491692938" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491692938">(Jan 03 2025 at 02:02)</a>:</h4>
+<p>I almost never use the static libs myself, so it's not too surprising there are some issues in this context</p>
+
+
+
+<a name="491693008"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491693008" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491693008">(Jan 03 2025 at 02:03)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491692914">ha scritto</a>:</p>
+<blockquote>
+<p>I.e. replace ZLIB_STATIC_LIBRARY with ZLIB_LIBRARY in MOOSE</p>
+</blockquote>
+<p>Let me give this a shoot quickly</p>
+
+
+
+<a name="491693391"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491693391" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491693391">(Jan 03 2025 at 02:09)</a>:</h4>
+<p>I think it installed <span aria-label="tada" class="emoji emoji-1f389" role="img" title="tada">:tada:</span></p>
+
+
+
+<a name="491693536"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491693536" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491693536">(Jan 03 2025 at 02:10)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>[100%] Built target getTitleTest
+Install the project...
+-- Install configuration: &quot;&quot;
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Arb8.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/BagOfTriangles.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Combination.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Cone.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/ConstDatabase.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Database.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Ellipsoid.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/EllipticalTorus.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/FileDatabase.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Halfspace.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/HyperbolicCylinder.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Hyperboloid.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/MemoryDatabase.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/NonManifoldGeometry.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Object.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/ParabolicCylinder.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Paraboloid.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Particle.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Pipe.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Sketch.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Sphere.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Torus.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/Database/Unknown.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libbrlcad.so
+-- Set non-toolchain portion of runtime path of &quot;/home/lorenzo/Downloads/MOOSE/lib/libbrlcad.so&quot; to &quot;&quot;
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/ld-linux-x86-64.so.2
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libc.so.6
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libgcc_s.so.1
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libm.so.6
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libregex_brl.so.1
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libregex_brl.so.1.0.4
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libstdc++.so.6
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libstdc++.so.6.0.33
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libuuid.so.1
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libuuid.so.1.3.0
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libz_brl.so.1
+-- Installing: /home/lorenzo/Downloads/MOOSE/lib/libz_brl.so.1.3.1.f-brl
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/globals.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/memory.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/vector.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/VectorList.h
+-- Installing: /home/lorenzo/Downloads/MOOSE/include/brlcad/version.h
+</code></pre></div>
+
+
+
+<a name="491764364"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491764364" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491764364">(Jan 03 2025 at 14:18)</a>:</h4>
+<p>Ok so as I said yesterday I was finally able to install <strong>MOOSE</strong>! Unfortunately it was 3 AM so I couldn't also build and compile <em>arbalest</em>.</p>
+
+
+
+<a name="491764923"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491764923" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491764923">(Jan 03 2025 at 14:23)</a>:</h4>
+<p>Today though I was also able to build and compile <strong>arbalest</strong>! <span aria-label="tada" class="emoji emoji-1f389" role="img" title="tada">:tada:</span> </p>
+<p><a href="/user_uploads/1549/thd_zIbd_pYLlzq5i8IPWPNw/arbalest-screenshot.png">arbalest-screenshot.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/thd_zIbd_pYLlzq5i8IPWPNw/arbalest-screenshot.png" title="arbalest-screenshot.png"><img data-original-dimensions="1713x915" src="/user_uploads/thumbnail/1549/thd_zIbd_pYLlzq5i8IPWPNw/arbalest-screenshot.png/840x560.webp"></a></div>
+
+
+
+<a name="491765945"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491765945" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491765945">(Jan 03 2025 at 14:32)</a>:</h4>
+<p>It is giving me some problems, for example:</p>
+<ul>
+<li>for some reason the buttons on top left have black background</li>
+<li>in the terminal it keeps printing the following 2 warnings: <code>BU_ASSERT FAILED</code> and <code>qt.qpa.wayland : Wayland does not support QWindow::requestActivate()</code></li>
+<li>lot of stuff broken when I open a sample database, for example I cant see anything, but I can see the raytrace viewport</li>
+</ul>
+<p>For example with "goliath.g": <a href="/user_uploads/1549/qP0sSuH26AZOPL6SvjSe3rE0/arbalest-errors-screenshot.png">arbalest-errors-screenshot.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/qP0sSuH26AZOPL6SvjSe3rE0/arbalest-errors-screenshot.png" title="arbalest-errors-screenshot.png"><img data-original-dimensions="1711x915" src="/user_uploads/thumbnail/1549/qP0sSuH26AZOPL6SvjSe3rE0/arbalest-errors-screenshot.png/840x560.webp"></a></div>
+
+
+
+<a name="491766030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491766030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491766030">(Jan 03 2025 at 14:33)</a>:</h4>
+<p>This problems I belive are coming from the fact that I am using Qt5.15.3 instead of Qt5.14.2</p>
+
+
+
+<a name="491766144"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491766144" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491766144">(Jan 03 2025 at 14:34)</a>:</h4>
+<p>Anyway from now on I will play with it and see what I can come up with.</p>
+
+
+
+<a name="491766210"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491766210" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491766210">(Jan 03 2025 at 14:35)</a>:</h4>
+<p>Oh, and thanks <strong>a lot</strong> to <span class="user-mention" data-user-id="112516">@starseeker</span> and <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> for your support!</p>
+
+
+
+<a name="491777772"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491777772" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491777772">(Jan 03 2025 at 16:07)</a>:</h4>
+<p>The Qt version shouldn't be the cause for the display issues. I'm using Qt 5.15.8 ... but with X11 backend. I guess that Qt5 has some issues with Wayland. Its official support ended however some years ago.</p>
+<p>You could try to build arbalest with Qt6. As a first step, you can fix the compiler warnings regarding depreciated functions (they are probably not part of Qt6).</p>
+
+
+
+<a name="491779915"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491779915" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491779915">(Jan 03 2025 at 16:25)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491777772">ha scritto</a>:</p>
+<blockquote>
+<p>You could try to build arbalest with Qt6. As a first step, you can fix the compiler warnings regarding depreciated functions (they are probably not part of Qt6).</p>
+</blockquote>
+<p>Mmh that seems like a really good starting point. Thanks for the advice!</p>
+
+
+
+<a name="491780140"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491780140" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491780140">(Jan 03 2025 at 16:27)</a>:</h4>
+<p>I have an exam in a few days (January 8), so I will work on this after that.</p>
+
+
+
+<a name="491795017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491795017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491795017">(Jan 03 2025 at 18:32)</a>:</h4>
+<p>For what it's worth, I hacked on arbalest a while back to force it to build with Qt6:  <a href="https://github.com/starseeker/arbalest">https://github.com/starseeker/arbalest</a></p>
+
+
+
+<a name="491795088"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491795088" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491795088">(Jan 03 2025 at 18:33)</a>:</h4>
+<p>I rebased it to the latest, but I don't know if that'll still build.  Still, it might have some helpful hints on where to start with Qt6</p>
+
+
+
+<a name="491796155"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/491796155" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#491796155">(Jan 03 2025 at 18:42)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491795017">ha scritto</a>:</p>
+<blockquote>
+<p>For what it's worth, I hacked on arbalest a while back to force it to build with Qt6:  <a href="https://github.com/starseeker/arbalest">https://github.com/starseeker/arbalest</a></p>
+</blockquote>
+<p>That's amazing! I'll surely use what you've already done as a general guideline.</p>
+
+
+
+<hr><p>Last updated: Jan 04 2025 at 00:45 UTC</p>
 </html>
