@@ -11812,5 +11812,41 @@
         "id": 494603943,
         "sender_full_name": "Sean",
         "timestamp": 1737262309
+    },
+    {
+        "content": "<p>Thanks a lot for the support <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> !</p>",
+        "id": 494837009,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1737386509
+    },
+    {
+        "content": "<p>In the past few days I fixed every error and warning given when trying to compile <strong>arbalest</strong> with Qt6.</p>\n<p>I still need to go through the code to see if there is anything else that I can improve with everything that was introduced with Qt6, but, aside from that, everything seems to work correctly.</p>\n<p>If anyone wants to try to build and compile <strong>arbalest</strong> with Qt6 on their system, you can find the code <a href=\"https://github.com/LorenzoPegorari/arbalest\">here</a>.</p>\n<p>Unfortunately I'm still having that same weird bug that was the reason for this entire migration.</p>\n<p>I described that bug here:</p>\n<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491765945\">ha scritto</a>:</p>\n<blockquote>\n<p>It is giving me some problems, for example:</p>\n<ul>\n<li>for some reason the buttons on top left have black background</li>\n<li>in the terminal it keeps printing the following 2 warnings: <code>BU_ASSERT FAILED</code> and <code>qt.qpa.wayland : Wayland does not support QWindow::requestActivate()</code></li>\n<li>lot of stuff broken when I open a sample database, for example I cant see anything, but I can see the raytrace viewport</li>\n</ul>\n<p>For example with \"goliath.g\": <a href=\"/user_uploads/1549/qP0sSuH26AZOPL6SvjSe3rE0/arbalest-errors-screenshot.png\">arbalest-errors-screenshot.png</a></p>\n</blockquote>",
+        "id": 494838157,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1737386775
+    },
+    {
+        "content": "<p>So, unfortunately, I have to conclude that doing what Daniel suggested didn't help:</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491777772\">ha scritto</a>:</p>\n<blockquote>\n<p>The Qt version shouldn't be the cause for the display issues. I'm using Qt 5.15.8 ... but with X11 backend. I guess that Qt5 has some issues with Wayland. Its official support ended however some years ago.</p>\n<p>You could try to build arbalest with Qt6. As a first step, you can fix the compiler warnings regarding depreciated functions (they are probably not part of Qt6).</p>\n</blockquote>",
+        "id": 494838593,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1737386888
+    },
+    {
+        "content": "<p>I wanted to try to fix this problem by myself, but after a few days of work, I'm still struggling to even understand where it's coming from, so I might need some help.</p>\n<p>Let me try to explain the problems that I'm having as precisely as possible.</p>\n<p>First of all, I'm on a Ubuntu 24.04.1 LTS Virtual Machine (on VMWare Workstation Pro 17). On Ubuntu, from the login screen, I can choose to use <em>Wayland</em> or <em>X11</em> in the backend.</p>\n<p>With both backends (Wayland and X11), on both the <a href=\"https://github.com/BRL-CAD/arbalest\">Qt5 (\"old\")</a> and <a href=\"https://github.com/LorenzoPegorari/arbalest\">Qt6 (\"migrated\")</a> build, I get the following:</p>\n<ul>\n<li>after I load a database, if I click the button to draw a primitive shape, nothing shows up in the window, and in the terminal I get <code>BU_ASSERT FAILED</code>,</li>\n<li>some of the buttons on the top right have a black background.</li>\n</ul>\n<p>With Wayland backend, on both the Qt5 (\"old\") and Qt6 (\"migrated\") build, I get the following:</p>\n<ul>\n<li>when I close the <strong>arbalest</strong> window, I get a <code>segmentation fault (core dumped)</code>,</li>\n<li>I cannot move the window around (I can resize it, but not move it).</li>\n</ul>\n<p>With Wayland backend, only on the Qt5 build, I also get the following:</p>\n<ul>\n<li><code>QScoketNotifier: Can only be used with threads started with QThread</code> is printed when opening <strong>arbalest</strong>.</li>\n</ul>",
+        "id": 494842092,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1737387705
+    },
+    {
+        "content": "<p>I made this quick images to show more clearly the problems that I'm having:</p>\n<p><a href=\"/user_uploads/1549/GfUx9PJqHtMK5N8y_HF8eWid/arbalest-x11-test.png\">arbalest-x11-test.png</a><br>\n<a href=\"/user_uploads/1549/eNIg8lNTkTPy9DhE_qRlcaui/arbalest-wayland-test.png\">arbalest-wayland-test.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/GfUx9PJqHtMK5N8y_HF8eWid/arbalest-x11-test.png\" title=\"arbalest-x11-test.png\"><img data-original-content-type=\"image/png\" data-original-dimensions=\"1656x887\" src=\"/user_uploads/thumbnail/1549/GfUx9PJqHtMK5N8y_HF8eWid/arbalest-x11-test.png/840x560.webp\"></a></div><div class=\"message_inline_image\"><a href=\"/user_uploads/1549/eNIg8lNTkTPy9DhE_qRlcaui/arbalest-wayland-test.png\" title=\"arbalest-wayland-test.png\"><img data-original-content-type=\"image/png\" data-original-dimensions=\"1660x892\" src=\"/user_uploads/thumbnail/1549/eNIg8lNTkTPy9DhE_qRlcaui/arbalest-wayland-test.png/840x560.webp\"></a></div>",
+        "id": 494845050,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1737388417
+    },
+    {
+        "content": "<p>Do you guys have any suggestions? Should I try to build <strong>arbalest</strong> on a different Linux distro, just to test if it is a Ubuntu related problem?</p>",
+        "id": 494845980,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1737388675
     }
 ]

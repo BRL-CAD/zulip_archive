@@ -15816,5 +15816,79 @@ Install the project...
 
 
 
-<hr><p>Last updated: Jan 20 2025 at 00:46 UTC</p>
+<a name="494837009"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/494837009" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#494837009">(Jan 20 2025 at 15:21)</a>:</h4>
+<p>Thanks a lot for the support <span class="user-mention" data-user-id="102902">@Sean</span> !</p>
+
+
+
+<a name="494838157"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/494838157" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#494838157">(Jan 20 2025 at 15:26)</a>:</h4>
+<p>In the past few days I fixed every error and warning given when trying to compile <strong>arbalest</strong> with Qt6.</p>
+<p>I still need to go through the code to see if there is anything else that I can improve with everything that was introduced with Qt6, but, aside from that, everything seems to work correctly.</p>
+<p>If anyone wants to try to build and compile <strong>arbalest</strong> with Qt6 on their system, you can find the code <a href="https://github.com/LorenzoPegorari/arbalest">here</a>.</p>
+<p>Unfortunately I'm still having that same weird bug that was the reason for this entire migration.</p>
+<p>I described that bug here:</p>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491765945">ha scritto</a>:</p>
+<blockquote>
+<p>It is giving me some problems, for example:</p>
+<ul>
+<li>for some reason the buttons on top left have black background</li>
+<li>in the terminal it keeps printing the following 2 warnings: <code>BU_ASSERT FAILED</code> and <code>qt.qpa.wayland : Wayland does not support QWindow::requestActivate()</code></li>
+<li>lot of stuff broken when I open a sample database, for example I cant see anything, but I can see the raytrace viewport</li>
+</ul>
+<p>For example with "goliath.g": <a href="/user_uploads/1549/qP0sSuH26AZOPL6SvjSe3rE0/arbalest-errors-screenshot.png">arbalest-errors-screenshot.png</a></p>
+</blockquote>
+
+
+
+<a name="494838593"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/494838593" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#494838593">(Jan 20 2025 at 15:28)</a>:</h4>
+<p>So, unfortunately, I have to conclude that doing what Daniel suggested didn't help:</p>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/491777772">ha scritto</a>:</p>
+<blockquote>
+<p>The Qt version shouldn't be the cause for the display issues. I'm using Qt 5.15.8 ... but with X11 backend. I guess that Qt5 has some issues with Wayland. Its official support ended however some years ago.</p>
+<p>You could try to build arbalest with Qt6. As a first step, you can fix the compiler warnings regarding depreciated functions (they are probably not part of Qt6).</p>
+</blockquote>
+
+
+
+<a name="494842092"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/494842092" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#494842092">(Jan 20 2025 at 15:41)</a>:</h4>
+<p>I wanted to try to fix this problem by myself, but after a few days of work, I'm still struggling to even understand where it's coming from, so I might need some help.</p>
+<p>Let me try to explain the problems that I'm having as precisely as possible.</p>
+<p>First of all, I'm on a Ubuntu 24.04.1 LTS Virtual Machine (on VMWare Workstation Pro 17). On Ubuntu, from the login screen, I can choose to use <em>Wayland</em> or <em>X11</em> in the backend.</p>
+<p>With both backends (Wayland and X11), on both the <a href="https://github.com/BRL-CAD/arbalest">Qt5 ("old")</a> and <a href="https://github.com/LorenzoPegorari/arbalest">Qt6 ("migrated")</a> build, I get the following:</p>
+<ul>
+<li>after I load a database, if I click the button to draw a primitive shape, nothing shows up in the window, and in the terminal I get <code>BU_ASSERT FAILED</code>,</li>
+<li>some of the buttons on the top right have a black background.</li>
+</ul>
+<p>With Wayland backend, on both the Qt5 ("old") and Qt6 ("migrated") build, I get the following:</p>
+<ul>
+<li>when I close the <strong>arbalest</strong> window, I get a <code>segmentation fault (core dumped)</code>,</li>
+<li>I cannot move the window around (I can resize it, but not move it).</li>
+</ul>
+<p>With Wayland backend, only on the Qt5 build, I also get the following:</p>
+<ul>
+<li><code>QScoketNotifier: Can only be used with threads started with QThread</code> is printed when opening <strong>arbalest</strong>.</li>
+</ul>
+
+
+
+<a name="494845050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/494845050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#494845050">(Jan 20 2025 at 15:53)</a>:</h4>
+<p>I made this quick images to show more clearly the problems that I'm having:</p>
+<p><a href="/user_uploads/1549/GfUx9PJqHtMK5N8y_HF8eWid/arbalest-x11-test.png">arbalest-x11-test.png</a><br>
+<a href="/user_uploads/1549/eNIg8lNTkTPy9DhE_qRlcaui/arbalest-wayland-test.png">arbalest-wayland-test.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/GfUx9PJqHtMK5N8y_HF8eWid/arbalest-x11-test.png" title="arbalest-x11-test.png"><img data-original-content-type="image/png" data-original-dimensions="1656x887" src="/user_uploads/thumbnail/1549/GfUx9PJqHtMK5N8y_HF8eWid/arbalest-x11-test.png/840x560.webp"></a></div><div class="message_inline_image"><a href="/user_uploads/1549/eNIg8lNTkTPy9DhE_qRlcaui/arbalest-wayland-test.png" title="arbalest-wayland-test.png"><img data-original-content-type="image/png" data-original-dimensions="1660x892" src="/user_uploads/thumbnail/1549/eNIg8lNTkTPy9DhE_qRlcaui/arbalest-wayland-test.png/840x560.webp"></a></div>
+
+
+
+<a name="494845980"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/494845980" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#494845980">(Jan 20 2025 at 15:57)</a>:</h4>
+<p>Do you guys have any suggestions? Should I try to build <strong>arbalest</strong> on a different Linux distro, just to test if it is a Ubuntu related problem?</p>
+
+
+
+<hr><p>Last updated: Jan 21 2025 at 00:44 UTC</p>
 </html>
