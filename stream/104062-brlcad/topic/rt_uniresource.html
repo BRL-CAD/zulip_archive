@@ -15,5 +15,65 @@
 
 
 
-<hr><p>Last updated: Feb 07 2025 at 01:02 UTC</p>
+<a name="498240088"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240088" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240088">(Feb 07 2025 at 01:05)</a>:</h4>
+<p>I mean we could, but it's also possible to hang a parallel structure off the rt_uniresource, in which case you might just have rt_uni with ncpu&gt;1</p>
+
+
+
+<a name="498240132"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240132" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240132">(Feb 07 2025 at 01:05)</a>:</h4>
+<p>OK, so there is a way to do that legitimately?  Fair enough.</p>
+
+
+
+<a name="498240417"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240417" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240417">(Feb 07 2025 at 01:08)</a>:</h4>
+<p>"Legitimate" is up for debate.</p>
+
+
+
+<a name="498240454"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240454" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240454">(Feb 07 2025 at 01:08)</a>:</h4>
+<p>We do say that the resources are supposed to be per thread of execution, so even if it's technically possible, that's not documented use.</p>
+
+
+
+<a name="498240518"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240518" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240518">(Feb 07 2025 at 01:09)</a>:</h4>
+<p>And definitely not kosher for passing rt_uniresource around to librt functions from different threads simultaneously.</p>
+
+
+
+<a name="498240546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240546">(Feb 07 2025 at 01:09)</a>:</h4>
+<p>What about doing the check by default and having some sort of #ifdef REALLY_WANT_PARALLEL_UNIRESOURCE guard to allow a code that's specifically trying something wonky to disable it?</p>
+
+
+
+<a name="498240552"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240552" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240552">(Feb 07 2025 at 01:09)</a>:</h4>
+<p>There are statistical aggregators in there that assue one per thread</p>
+
+
+
+<a name="498240631"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240631" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240631">(Feb 07 2025 at 01:10)</a>:</h4>
+<p>I wouldn't bother.  If you want to add it, just update the doc for rt_uniresource to state the limitation/expectation.</p>
+
+
+
+<a name="498240697"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240697" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240697">(Feb 07 2025 at 01:11)</a>:</h4>
+<p>Maybe make sure it's consistent with the docs for struct resource, but that might be good already.</p>
+
+
+
+<a name="498240816"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/rt_uniresource/near/498240816" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/rt_uniresource.html#498240816">(Feb 07 2025 at 01:12)</a>:</h4>
+<p>Gotcha.  I'll look more closely tomorrow.</p>
+
+
+
+<hr><p>Last updated: Feb 08 2025 at 00:44 UTC</p>
 </html>
