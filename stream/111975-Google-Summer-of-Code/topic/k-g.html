@@ -3568,5 +3568,68 @@ I will try to prepare a patch related to that but if you think that addressing o
 
 
 
-<hr><p>Last updated: Mar 20 2025 at 00:49 UTC</p>
+<a name="506885803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/506885803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#506885803">(Mar 20 2025 at 06:02)</a>:</h4>
+<p>on quick review, it looks like read_line() returns for both newline and carriage return separately, so it's causing the stateful parsing in parse_k() to get confused by an element immediately followed by a blank line (the carriage return).  applied a quick fix that should do the trick.</p>
+
+
+
+<a name="506886129"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/506886129" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#506886129">(Mar 20 2025 at 06:05)</a>:</h4>
+<p>Welcome <span class="user-mention" data-user-id="883255">@Andrea Braghin</span> !  looking forward to talking with you more about code and project ideas.  Have you had a chance to explore features at all?  Can be a bit overwhelming. Feel free to ask questions.  What are your interests coding-wise?</p>
+
+
+
+<a name="506920902"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/506920902" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#506920902">(Mar 20 2025 at 09:40)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/506885803">said</a>:</p>
+<blockquote>
+<p>on quick review, it looks like read_line() returns for both newline and carriage return separately, so it's causing the stateful parsing in parse_k() to get confused by an element immediately followed by a blank line (the carriage return).  applied a quick fix that should do the trick.</p>
+</blockquote>
+<p>Nice fix, I was gussing that it's somthing related to line endings.</p>
+
+
+
+<a name="506926238"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/506926238" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#506926238">(Mar 20 2025 at 10:03)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/506472422">said</a>:</p>
+<blockquote>
+<p>BTW, after changing the line ends from Windows to UNIX, I could convert it on Debian Linux too. However, why is 1_.pipe part of the 1_ region as well as of the all.g group?</p>
+</blockquote>
+<p>It is because we wanted to creat a region for each part for this file it looks trivial but if we have a part that is composd of 100s of arbs they all belong to that part's region and we can draw them separity but they also belong to the all.g group. In the ThreebeamIn1.k file we have 3 beams with a pipe section which translates to one pipe in BRL-CAD, so the pipe in .g file is like a bag of pipes, but if they were to be arbs we would have 3 objects.</p>
+
+
+
+<a name="506961076"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/506961076" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Andrea Braghin <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#506961076">(Mar 20 2025 at 12:37)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/506886129">ha scritto</a>:</p>
+<blockquote>
+<p>Welcome <span class="user-mention silent" data-user-id="883255">Andrea Braghin</span> !  looking forward to talking with you more about code and project ideas.  Have you had a chance to explore features at all?  Can be a bit overwhelming. Feel free to ask questions.  What are your interests coding-wise?</p>
+</blockquote>
+<p>Thank you <span class="user-mention" data-user-id="102902">@Sean</span> ! <br>
+I am interested both in Finite Element and improving my C++ skills. As I am doing a bit of research on applied AI, my long term goal is to be able to apply optimization algorithms to the FE workflow. I find this project a great learning opportunity and a introduction to open source coding which is new for me.<br>
+At the moment I am following both <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  and <span class="user-mention" data-user-id="215774">@Louis Googl</span> advices to get a hand of the coding style and the converter.</p>
+
+
+
+<a name="506962546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/506962546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Andrea Braghin <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#506962546">(Mar 20 2025 at 12:42)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/506472422">ha scritto</a>:</p>
+<blockquote>
+<p>BTW, after changing the line ends from Windows to UNIX, I could convert it on Debian Linux too. However, why is 1_.pipe part of the 1_ region as well as of the all.g group?</p>
+</blockquote>
+<p>Speaking of regions, while I was checking the Yaris file I've noticed, in addition to the existing errors, that all the regions share the same Id which is always "0". It seems that you are giving different id for each region but it's not being recorded correctly in the .g file </p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">mk_lcomb</span><span class="p">(</span><span class="n">wdbp</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="p">.</span><span class="n">getBaseName</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">geometry_head</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">rgb</span><span class="p">,</span><span class="w"> </span><span class="o">++</span><span class="n">region_id</span><span class="p">);</span>
+</code></pre></div>
+<p>I am not sure it is crucial issue, I don't see any related problem</p>
+
+
+
+<a name="507020078"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/507020078" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#507020078">(Mar 20 2025 at 16:23)</a>:</h4>
+<p>It is not crucial and the ID can be changed afterwards, but this is something what should be fixed.</p>
+
+
+
+<hr><p>Last updated: Mar 21 2025 at 00:50 UTC</p>
 </html>
