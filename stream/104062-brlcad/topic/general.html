@@ -28975,5 +28975,30 @@ then you can build using visual studio normally by opening the solution and buil
 
 
 
-<hr><p>Last updated: Mar 23 2025 at 00:54 UTC</p>
+<a name="507560271"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/507560271" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#507560271">(Mar 23 2025 at 12:23)</a>:</h4>
+<p>Who sets <code>rt_vlfree</code>? It looks like it's <code>{magic = 0, forw = 0x0, back = 0x0}</code> with MOOSE. Is this a problem for <code>BV_ADD_VLIST</code>'s <code>_free_hd</code>?</p>
+
+
+
+<a name="507599449"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/507599449" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#507599449">(Mar 23 2025 at 19:56)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> recently changed, but set inside librt_init() during library static init (see src/librt/rt_init.cpp).  </p>
+<p>we did have a talk about how that's potentially problematic since init ordering is not guaranteed.  sounds like you might have a case where someone is accessing rt_vlfree() before librt_init() has run.</p>
+
+
+
+<a name="507599705"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/507599705" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#507599705">(Mar 23 2025 at 19:59)</a>:</h4>
+<p>it was previously in the RTG struct rt_g global and apps had to manually run BU_LIST_INIT(&amp;RTG.rtg_vlfree);  which now must either be BU_LIST_INIT(&amp;rt_vlfree); or librt_init() has to have run first.</p>
+
+
+
+<a name="507599725"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/507599725" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#507599725">(Mar 23 2025 at 19:59)</a>:</h4>
+<p>changed in 20212c0132b90c0a5037cb05bff0509754c2c601</p>
+
+
+
+<hr><p>Last updated: Mar 24 2025 at 00:52 UTC</p>
 </html>

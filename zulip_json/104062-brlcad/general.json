@@ -26308,5 +26308,29 @@
         "id": 505783785,
         "sender_full_name": "Sean",
         "timestamp": 1741995167
+    },
+    {
+        "content": "<p>Who sets <code>rt_vlfree</code>? It looks like it's <code>{magic = 0, forw = 0x0, back = 0x0}</code> with MOOSE. Is this a problem for <code>BV_ADD_VLIST</code>'s <code>_free_hd</code>?</p>",
+        "id": 507560271,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1742732589
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> recently changed, but set inside librt_init() during library static init (see src/librt/rt_init.cpp).  </p>\n<p>we did have a talk about how that's potentially problematic since init ordering is not guaranteed.  sounds like you might have a case where someone is accessing rt_vlfree() before librt_init() has run.</p>",
+        "id": 507599449,
+        "sender_full_name": "Sean",
+        "timestamp": 1742759808
+    },
+    {
+        "content": "<p>it was previously in the RTG struct rt_g global and apps had to manually run BU_LIST_INIT(&amp;RTG.rtg_vlfree);  which now must either be BU_LIST_INIT(&amp;rt_vlfree); or librt_init() has to have run first.</p>",
+        "id": 507599705,
+        "sender_full_name": "Sean",
+        "timestamp": 1742759970
+    },
+    {
+        "content": "<p>changed in 20212c0132b90c0a5037cb05bff0509754c2c601</p>",
+        "id": 507599725,
+        "sender_full_name": "Sean",
+        "timestamp": 1742759989
     }
 ]

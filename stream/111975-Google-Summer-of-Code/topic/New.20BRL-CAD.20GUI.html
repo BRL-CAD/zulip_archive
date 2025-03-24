@@ -16045,5 +16045,208 @@ Install the project...
 
 
 
-<hr><p>Last updated: Mar 23 2025 at 00:54 UTC</p>
+<a name="507561684"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507561684" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507561684">(Mar 23 2025 at 12:40)</a>:</h4>
+<p><a href="https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf">https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf</a> should fix the drawing issue on Linux. You need to rebuild ans install MOOSE to take effect.</p>
+
+
+
+<a name="507565020"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507565020" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507565020">(Mar 23 2025 at 13:25)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507561684">ha scritto</a>:</p>
+<blockquote>
+<p><a href="https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf">https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf</a> should fix the drawing issue on Linux. You need to rebuild ans install MOOSE to take effect.</p>
+</blockquote>
+<p>Brilliant! It works fine now. Thanks a lot Daniel!</p>
+
+
+
+<a name="507589003"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507589003" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507589003">(Mar 23 2025 at 18:07)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="781132">@LorenzoPegorari</span>, I had a look at your pull request and will discuss it here, if it's okay.</p>
+<p>You put a lot of work in it, and it doesn't look bad, but - you put 3 topics into one PR. This is not a good idea. Possible, if everything is perfect, but it makes it difficult to discuss the changes.</p>
+<p><strong>Migration from Qt5 to Qt6:</strong></p>
+<ul>
+<li>What's wrong with <code>Display</code>?</li>
+<li>Why didn't you wrote all Qt6 components in one <code>find_package()</code> statement?</li>
+</ul>
+<p><strong>Cleaner code:</strong><br>
+Arbalest doesn't follow the rules written down in HACKING, for, lets call them historical, reasons. However, your setting of brackets in class definitions make it worse (see line 772 in HACKING). Some spaces were really messed up, and you corrected them. Nevertheless, this is an own area of discussion.</p>
+<p><strong>New Functionality:</strong><br>
+Honestly, I haven't looked at how the behavior is changed by your code. I only saw that you even more hacked the standard decoration of the window for Linux. It is however already proven that this won't work for other window managers, especially on macOS. Rather, the way to go would be to remove such hacks from arbalest and use the standard elements from Qt and the window managers instead. This would improve the potability.</p>
+<p>Use themes instead. The basic native look and feel will be done by the native Qt libraries and window managers on Windows, Linux (KDE, Gnome, ...), and macOS (Aqua). Keep always in mind that we want to write a portable software. It's probably the easiest way to use a multi platform framework as Qt for the OS and window manager specific stuff.</p>
+
+
+
+<a name="507602737"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507602737" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507602737">(Mar 23 2025 at 20:31)</a>:</h4>
+<p>I just installed brlcad and later MOOSE. But MOOSE build failed. One thing I noticed I build BRLCAD using release instead of debug. And by default release was there. How?</p>
+
+
+
+<a name="507602834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507602834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507602834">(Mar 23 2025 at 20:32)</a>:</h4>
+<p><a href="/user_uploads/1549/E-mJ_ChqJSaEgKxrMkoOj9jA/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/E-mJ_ChqJSaEgKxrMkoOj9jA/image.png" title="image.png"><img data-original-content-type="image/png" data-original-dimensions="736x61" src="/user_uploads/thumbnail/1549/E-mJ_ChqJSaEgKxrMkoOj9jA/image.png/840x560.webp"></a></div>
+
+
+
+<a name="507602939"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507602939" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507602939">(Mar 23 2025 at 20:34)</a>:</h4>
+<p>Moose build failed due to not able to find <code>brlcad.lib</code> inside <code>Debug</code> since it is built in <code>Release</code>:</p>
+<div class="codehilite"><pre><span></span><code>2&gt;C:\Users\Himanshu\Desktop\brlcadWorkspace\MOOSE\src\globals.cpp(38,5): error C2561: &#39;BRLCAD::MajorVersion&#39;: function must return a value
+2&gt;    C:\Users\Himanshu\Desktop\brlcadWorkspace\MOOSE\src\globals.cpp(37,33):
+2&gt;    see declaration of &#39;BRLCAD::MajorVersion&#39;
+2&gt;C:\Users\Himanshu\Desktop\brlcadWorkspace\MOOSE\src\globals.cpp(43,5): error C2561: &#39;BRLCAD::MinorVersion&#39;: function must return a value
+2&gt;    C:\Users\Himanshu\Desktop\brlcadWorkspace\MOOSE\src\globals.cpp(42,33):
+2&gt;    see declaration of &#39;BRLCAD::MinorVersion&#39;
+2&gt;C:\Users\Himanshu\Desktop\brlcadWorkspace\MOOSE\src\globals.cpp(48,5): error C2561: &#39;BRLCAD::PatchVersion&#39;: function must return a value
+2&gt;    C:\Users\Himanshu\Desktop\brlcadWorkspace\MOOSE\src\globals.cpp(47,33):
+2&gt;    see declaration of &#39;BRLCAD::PatchVersion&#39;
+2&gt;VectorList.cpp
+2&gt;Generating Code...
+2&gt;Done building project &quot;brlcad.vcxproj&quot; -- FAILED.
+3&gt;------ Build started: Project: getTitleTest, Configuration: Debug x64 ------
+4&gt;------ Build started: Project: generateDataTest, Configuration: Debug x64 ------
+3&gt;getTitle.cpp
+4&gt;generateData.cpp
+3&gt;LINK : fatal error LNK1104: cannot open file &#39;Debug\brlcad.lib&#39;
+3&gt;Done building project &quot;getTitleTest.vcxproj&quot; -- FAILED.
+4&gt;LINK : fatal error LNK1104: cannot open file &#39;Debug\brlcad.lib&#39;
+4&gt;Done building project &quot;generateDataTest.vcxproj&quot; -- FAILED.
+5&gt;------ Build started: Project: ALL_BUILD, Configuration: Debug x64 ------
+========== Build: 2 succeeded, 3 failed, 0 up-to-date, 0 skipped ==========
+========== Build completed at 01:57 AM and took 26.675 seconds ==========
+</code></pre></div>
+
+
+
+<a name="507603691"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507603691" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507603691">(Mar 23 2025 at 20:43)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003">ha scritto</a>:</p>
+<blockquote>
+<p>Hi @LorenzoPegorari, I had a look at your pull request and will discuss it here, if it's okay.</p>
+</blockquote>
+<p>Thanks for taking a look at the PR. No problem if we discuss it here.</p>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003">ha scritto</a>:</p>
+<blockquote>
+<p>you put 3 topics into one PR. This is not a good idea. Possible, if everything is perfect, but it makes it difficult to discuss the changes.</p>
+</blockquote>
+<p>I honestly agree. I should have done 3 different PRs. I only did it to put out my code ASAP. My fault.</p>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003">ha scritto</a>:</p>
+<blockquote>
+<p><strong>Migration from Qt5 to Qt6:</strong></p>
+<ul>
+<li>What's wrong with <code>Display</code>?</li>
+<li>Why didn't you wrote all Qt6 components in one <code>find_package()</code> statement?</li>
+</ul>
+</blockquote>
+<p>The problem with <code>Display</code> is that it generates a conflicting declaration error with <code>typedef struct _XDisplay Display</code> present in <code>QtGui</code>. The better way to fix this issue is obviously to wrap all Arbalest code inside a <code>namespace Arbalest</code>, but this might not be worth the effort, at least for now.</p>
+<p>Regarding the <code>find_package()</code>statement, that is simply a mistake on my part.</p>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003">ha scritto</a>:</p>
+<blockquote>
+<p><strong>Cleaner code:</strong><br>
+Arbalest doesn't follow the rules written down in HACKING</p>
+</blockquote>
+<p>That is something that I didn't know. Shouldn't it follow some style rules though? Defining them would be little effort and very helpful to have a more readable and consistent source code.</p>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003">ha scritto</a>:</p>
+<blockquote>
+<p><strong>New Functionality:</strong><br>
+It is however already proven that this won't work for other window managers, especially on macOS.</p>
+</blockquote>
+<p>I also didn't know that it was decided to revert these hacks and to use standard elements from Qt. I added this functionality because it was listed as a TODO.</p>
+
+
+
+<a name="507604086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507604086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507604086">(Mar 23 2025 at 20:47)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I will close my previous PR, fix what needs to be fixed, and do one single PR regarding the migration from Qt5 to Qt6.</p>
+<p>I might also work on going back to using standard elements from Qt for the title bar.</p>
+
+
+
+<a name="507604593"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507604593" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507604593">(Mar 23 2025 at 20:52)</a>:</h4>
+<p><span class="user-mention" data-user-id="252475">@Himanshu</span>  InitializeBuildType() in brlcad's main CMakeLists.txt is run which defaults to Release when it has not been specified.  That's so unsuspecting users will be performance by default.  I don't know if MOOSE pulls that value or if it passes forward, or if you have something else going on.</p>
+
+
+
+<a name="507604675"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507604675" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507604675">(Mar 23 2025 at 20:53)</a>:</h4>
+<p>They will need to match, so you'll want to either set brlcad's to Debug and let MOOSE default to Debug or let brlcad stay on Release and specify Release to MOOSE.  We should/could make them match, but Release on brlcad is a relatively new setting.</p>
+
+
+
+<a name="507604973"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507604973" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507604973">(Mar 23 2025 at 20:57)</a>:</h4>
+<p><span class="user-mention" data-user-id="781132">@LorenzoPegorari</span> Great to hear that you're working on that.  If you can, feel free to submit a couple tiny PRs, even if they seem smaller than the overall change you're going for.  It's nice for the first couple to be easy to review until we get to know you and you get to know the other devs, then transitioning to bigger PRs once we get the little things out of the way.</p>
+
+
+
+<a name="507605125"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507605125" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507605125">(Mar 23 2025 at 20:59)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507604593">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="252475">Himanshu</span>  InitializeBuildType() in brlcad's main CMakeLists.txt is run which defaults to Release when it has not been specified.  That's so unsuspecting users will be performance by default.  I don't know if MOOSE pulls that value or if it passes forward, or if you have something else going on.</p>
+</blockquote>
+<p>Today I build BRLCAD as fresh and saw Debug directory was missing inside build. So I thought may be it got built in release and cmake showed me Release. But there was not option for Debug too in cmake. Am I missing something here?</p>
+
+
+
+<a name="507605824"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507605824" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507605824">(Mar 23 2025 at 21:04)</a>:</h4>
+<p>What do you mean?  You can't specify Debug?</p>
+
+
+
+<a name="507605896"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507605896" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507605896">(Mar 23 2025 at 21:04)</a>:</h4>
+<p>sounds like you're on Windows -- you should be able to just select Debug unless you ran CMake manually.  If you ran manually, you specify Debug there as CMAKE_BUILD_TYPE=Debug</p>
+
+
+
+<a name="507605914"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507605914" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507605914">(Mar 23 2025 at 21:05)</a>:</h4>
+<p>If you just open the source dir and let configure run, you can select Debug or Release on the menu.</p>
+
+
+
+<a name="507605966"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507605966" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507605966">(Mar 23 2025 at 21:05)</a>:</h4>
+<p>Alternatively, you can go to the cmake variables page in visual studio and set CMAKE_BUILD_TYPE there as well.</p>
+
+
+
+<a name="507606228"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507606228" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507606228">(Mar 23 2025 at 21:08)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507605896">said</a>:</p>
+<blockquote>
+<p>sounds like you're on Windows -- you should be able to just select Debug unless you ran CMake manually.  If you ran manually, you specify Debug there as CMAKE_BUILD_TYPE=Debug</p>
+</blockquote>
+<p>I ran cmake manually and there I saw Relase for CMAKE_BUILD_TYPE. I noticed after I failed building MOOSE that Debug/ dir is missing.</p>
+
+
+
+<a name="507606550"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/507606550" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#507606550">(Mar 23 2025 at 21:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/506888239">ha scritto</a>:</p>
+<blockquote>
+<p>One potential GSoC area of research for arbalest I'd put out there (which others might not agree with, and that's okay also) is figuring out if there's a path for merging arbalest and qged, which are separate Qt efforts.  </p>
+</blockquote>
+<p>Hey Sean. This idea sounds extremely interesting, but also really complicated to tackle. As soon as you mentioned this to me, I immediately built <strong>qged</strong> to see how it functions and spent a few days tinkering with it.</p>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/506888239">ha scritto</a>:</p>
+<blockquote>
+<p>...  That same low-level access lets it easily call libged for accessing commands like mged and archer have via CLI. ...[snip]... Figuring out that plan and/or doing the work would be helpful if successfully executed. ...[snip]... Even simply figuring out something targeted like modularly getting qged's display or CLI features (e.g., as independent qt widgets perhaps?) into arbalest without violating arbalest's clean implementation, making the mods necessary to maintain the clean API encapsulation, would be awesome.</p>
+</blockquote>
+<p>I decided to go through this problem focusing <strong>ONLY </strong>on how to implement a <em>qged-like CLI</em> into <strong>arbalest</strong>. In my opinion, the best way to do this is to extend <strong>MOOSE</strong> in order to include a interface for <strong>libged</strong>. This will be another step to make MOOSE the foundation for the new BRL-CAD GUI.</p>
+<p>This could be the general overview behind my GSoC proposal:</p>
+<ol>
+<li>to create a (primitive) CLI for <strong>arbalest</strong>,</li>
+<li>to extend the MOOSE API to support <strong>libged</strong> (as much as possible, since this is gonna be a lot of work imho).</li>
+</ol>
+<p>What do you think about this idea <span class="user-mention" data-user-id="102902">@Sean</span> ? Also I would love a feedback by <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> , since he is the main developer behind MOOSE.</p>
+
+
+
+<hr><p>Last updated: Mar 24 2025 at 00:52 UTC</p>
 </html>

@@ -11968,5 +11968,113 @@
         "id": 506888599,
         "sender_full_name": "Sean",
         "timestamp": 1742452016
+    },
+    {
+        "content": "<p><a href=\"https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf\">https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf</a> should fix the drawing issue on Linux. You need to rebuild ans install MOOSE to take effect.</p>",
+        "id": 507561684,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1742733647
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507561684\">ha scritto</a>:</p>\n<blockquote>\n<p><a href=\"https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf\">https://github.com/BRL-CAD/MOOSE/commit/926efe95fe3eef6dac59fe07be02e28bcdb62ccf</a> should fix the drawing issue on Linux. You need to rebuild ans install MOOSE to take effect.</p>\n</blockquote>\n<p>Brilliant! It works fine now. Thanks a lot Daniel!</p>",
+        "id": 507565020,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1742736311
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"781132\">@LorenzoPegorari</span>, I had a look at your pull request and will discuss it here, if it's okay.</p>\n<p>You put a lot of work in it, and it doesn't look bad, but - you put 3 topics into one PR. This is not a good idea. Possible, if everything is perfect, but it makes it difficult to discuss the changes.</p>\n<p><strong>Migration from Qt5 to Qt6:</strong></p>\n<ul>\n<li>What's wrong with <code>Display</code>?</li>\n<li>Why didn't you wrote all Qt6 components in one <code>find_package()</code> statement?</li>\n</ul>\n<p><strong>Cleaner code:</strong><br>\nArbalest doesn't follow the rules written down in HACKING, for, lets call them historical, reasons. However, your setting of brackets in class definitions make it worse (see line 772 in HACKING). Some spaces were really messed up, and you corrected them. Nevertheless, this is an own area of discussion.</p>\n<p><strong>New Functionality:</strong><br>\nHonestly, I haven't looked at how the behavior is changed by your code. I only saw that you even more hacked the standard decoration of the window for Linux. It is however already proven that this won't work for other window managers, especially on macOS. Rather, the way to go would be to remove such hacks from arbalest and use the standard elements from Qt and the window managers instead. This would improve the potability.</p>\n<p>Use themes instead. The basic native look and feel will be done by the native Qt libraries and window managers on Windows, Linux (KDE, Gnome, ...), and macOS (Aqua). Keep always in mind that we want to write a portable software. It's probably the easiest way to use a multi platform framework as Qt for the OS and window manager specific stuff.</p>",
+        "id": 507589003,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1742753238
+    },
+    {
+        "content": "<p>I just installed brlcad and later MOOSE. But MOOSE build failed. One thing I noticed I build BRLCAD using release instead of debug. And by default release was there. How?</p>",
+        "id": 507602737,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1742761910
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/E-mJ_ChqJSaEgKxrMkoOj9jA/image.png\">image.png</a></p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/E-mJ_ChqJSaEgKxrMkoOj9jA/image.png\" title=\"image.png\"><img data-original-content-type=\"image/png\" data-original-dimensions=\"736x61\" src=\"/user_uploads/thumbnail/1549/E-mJ_ChqJSaEgKxrMkoOj9jA/image.png/840x560.webp\"></a></div>",
+        "id": 507602834,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1742761957
+    },
+    {
+        "content": "<p>Moose build failed due to not able to find <code>brlcad.lib</code> inside <code>Debug</code> since it is built in <code>Release</code>:</p>\n<div class=\"codehilite\"><pre><span></span><code>2&gt;C:\\Users\\Himanshu\\Desktop\\brlcadWorkspace\\MOOSE\\src\\globals.cpp(38,5): error C2561: &#39;BRLCAD::MajorVersion&#39;: function must return a value\n2&gt;    C:\\Users\\Himanshu\\Desktop\\brlcadWorkspace\\MOOSE\\src\\globals.cpp(37,33):\n2&gt;    see declaration of &#39;BRLCAD::MajorVersion&#39;\n2&gt;C:\\Users\\Himanshu\\Desktop\\brlcadWorkspace\\MOOSE\\src\\globals.cpp(43,5): error C2561: &#39;BRLCAD::MinorVersion&#39;: function must return a value\n2&gt;    C:\\Users\\Himanshu\\Desktop\\brlcadWorkspace\\MOOSE\\src\\globals.cpp(42,33):\n2&gt;    see declaration of &#39;BRLCAD::MinorVersion&#39;\n2&gt;C:\\Users\\Himanshu\\Desktop\\brlcadWorkspace\\MOOSE\\src\\globals.cpp(48,5): error C2561: &#39;BRLCAD::PatchVersion&#39;: function must return a value\n2&gt;    C:\\Users\\Himanshu\\Desktop\\brlcadWorkspace\\MOOSE\\src\\globals.cpp(47,33):\n2&gt;    see declaration of &#39;BRLCAD::PatchVersion&#39;\n2&gt;VectorList.cpp\n2&gt;Generating Code...\n2&gt;Done building project &quot;brlcad.vcxproj&quot; -- FAILED.\n3&gt;------ Build started: Project: getTitleTest, Configuration: Debug x64 ------\n4&gt;------ Build started: Project: generateDataTest, Configuration: Debug x64 ------\n3&gt;getTitle.cpp\n4&gt;generateData.cpp\n3&gt;LINK : fatal error LNK1104: cannot open file &#39;Debug\\brlcad.lib&#39;\n3&gt;Done building project &quot;getTitleTest.vcxproj&quot; -- FAILED.\n4&gt;LINK : fatal error LNK1104: cannot open file &#39;Debug\\brlcad.lib&#39;\n4&gt;Done building project &quot;generateDataTest.vcxproj&quot; -- FAILED.\n5&gt;------ Build started: Project: ALL_BUILD, Configuration: Debug x64 ------\n========== Build: 2 succeeded, 3 failed, 0 up-to-date, 0 skipped ==========\n========== Build completed at 01:57 AM and took 26.675 seconds ==========\n</code></pre></div>",
+        "id": 507602939,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1742762042
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003\">ha scritto</a>:</p>\n<blockquote>\n<p>Hi @LorenzoPegorari, I had a look at your pull request and will discuss it here, if it's okay.</p>\n</blockquote>\n<p>Thanks for taking a look at the PR. No problem if we discuss it here.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003\">ha scritto</a>:</p>\n<blockquote>\n<p>you put 3 topics into one PR. This is not a good idea. Possible, if everything is perfect, but it makes it difficult to discuss the changes.</p>\n</blockquote>\n<p>I honestly agree. I should have done 3 different PRs. I only did it to put out my code ASAP. My fault.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003\">ha scritto</a>:</p>\n<blockquote>\n<p><strong>Migration from Qt5 to Qt6:</strong></p>\n<ul>\n<li>What's wrong with <code>Display</code>?</li>\n<li>Why didn't you wrote all Qt6 components in one <code>find_package()</code> statement?</li>\n</ul>\n</blockquote>\n<p>The problem with <code>Display</code> is that it generates a conflicting declaration error with <code>typedef struct _XDisplay Display</code> present in <code>QtGui</code>. The better way to fix this issue is obviously to wrap all Arbalest code inside a <code>namespace Arbalest</code>, but this might not be worth the effort, at least for now.</p>\n<p>Regarding the <code>find_package()</code>statement, that is simply a mistake on my part.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003\">ha scritto</a>:</p>\n<blockquote>\n<p><strong>Cleaner code:</strong><br>\nArbalest doesn't follow the rules written down in HACKING</p>\n</blockquote>\n<p>That is something that I didn't know. Shouldn't it follow some style rules though? Defining them would be little effort and very helpful to have a more readable and consistent source code.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507589003\">ha scritto</a>:</p>\n<blockquote>\n<p><strong>New Functionality:</strong><br>\nIt is however already proven that this won't work for other window managers, especially on macOS.</p>\n</blockquote>\n<p>I also didn't know that it was decided to revert these hacks and to use standard elements from Qt. I added this functionality because it was listed as a TODO.</p>",
+        "id": 507603691,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1742762580
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I will close my previous PR, fix what needs to be fixed, and do one single PR regarding the migration from Qt5 to Qt6.</p>\n<p>I might also work on going back to using standard elements from Qt for the title bar.</p>",
+        "id": 507604086,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1742762848
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"252475\">@Himanshu</span>  InitializeBuildType() in brlcad's main CMakeLists.txt is run which defaults to Release when it has not been specified.  That's so unsuspecting users will be performance by default.  I don't know if MOOSE pulls that value or if it passes forward, or if you have something else going on.</p>",
+        "id": 507604593,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763162
+    },
+    {
+        "content": "<p>They will need to match, so you'll want to either set brlcad's to Debug and let MOOSE default to Debug or let brlcad stay on Release and specify Release to MOOSE.  We should/could make them match, but Release on brlcad is a relatively new setting.</p>",
+        "id": 507604675,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763239
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"781132\">@LorenzoPegorari</span> Great to hear that you're working on that.  If you can, feel free to submit a couple tiny PRs, even if they seem smaller than the overall change you're going for.  It's nice for the first couple to be easy to review until we get to know you and you get to know the other devs, then transitioning to bigger PRs once we get the little things out of the way.</p>",
+        "id": 507604973,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763445
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507604593\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"252475\">Himanshu</span>  InitializeBuildType() in brlcad's main CMakeLists.txt is run which defaults to Release when it has not been specified.  That's so unsuspecting users will be performance by default.  I don't know if MOOSE pulls that value or if it passes forward, or if you have something else going on.</p>\n</blockquote>\n<p>Today I build BRLCAD as fresh and saw Debug directory was missing inside build. So I thought may be it got built in release and cmake showed me Release. But there was not option for Debug too in cmake. Am I missing something here?</p>",
+        "id": 507605125,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1742763545
+    },
+    {
+        "content": "<p>What do you mean?  You can't specify Debug?</p>",
+        "id": 507605824,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763857
+    },
+    {
+        "content": "<p>sounds like you're on Windows -- you should be able to just select Debug unless you ran CMake manually.  If you ran manually, you specify Debug there as CMAKE_BUILD_TYPE=Debug</p>",
+        "id": 507605896,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763893
+    },
+    {
+        "content": "<p>If you just open the source dir and let configure run, you can select Debug or Release on the menu.</p>",
+        "id": 507605914,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763911
+    },
+    {
+        "content": "<p>Alternatively, you can go to the cmake variables page in visual studio and set CMAKE_BUILD_TYPE there as well.</p>",
+        "id": 507605966,
+        "sender_full_name": "Sean",
+        "timestamp": 1742763955
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/507605896\">said</a>:</p>\n<blockquote>\n<p>sounds like you're on Windows -- you should be able to just select Debug unless you ran CMake manually.  If you ran manually, you specify Debug there as CMAKE_BUILD_TYPE=Debug</p>\n</blockquote>\n<p>I ran cmake manually and there I saw Relase for CMAKE_BUILD_TYPE. I noticed after I failed building MOOSE that Debug/ dir is missing.</p>",
+        "id": 507606228,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1742764124
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/506888239\">ha scritto</a>:</p>\n<blockquote>\n<p>One potential GSoC area of research for arbalest I'd put out there (which others might not agree with, and that's okay also) is figuring out if there's a path for merging arbalest and qged, which are separate Qt efforts.  </p>\n</blockquote>\n<p>Hey Sean. This idea sounds extremely interesting, but also really complicated to tackle. As soon as you mentioned this to me, I immediately built <strong>qged</strong> to see how it functions and spent a few days tinkering with it.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/506888239\">ha scritto</a>:</p>\n<blockquote>\n<p>...  That same low-level access lets it easily call libged for accessing commands like mged and archer have via CLI. ...[snip]... Figuring out that plan and/or doing the work would be helpful if successfully executed. ...[snip]... Even simply figuring out something targeted like modularly getting qged's display or CLI features (e.g., as independent qt widgets perhaps?) into arbalest without violating arbalest's clean implementation, making the mods necessary to maintain the clean API encapsulation, would be awesome.</p>\n</blockquote>\n<p>I decided to go through this problem focusing <strong>ONLY </strong>on how to implement a <em>qged-like CLI</em> into <strong>arbalest</strong>. In my opinion, the best way to do this is to extend <strong>MOOSE</strong> in order to include a interface for <strong>libged</strong>. This will be another step to make MOOSE the foundation for the new BRL-CAD GUI.</p>\n<p>This could be the general overview behind my GSoC proposal:</p>\n<ol>\n<li>to create a (primitive) CLI for <strong>arbalest</strong>,</li>\n<li>to extend the MOOSE API to support <strong>libged</strong> (as much as possible, since this is gonna be a lot of work imho).</li>\n</ol>\n<p>What do you think about this idea <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> ? Also I would love a feedback by <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> , since he is the main developer behind MOOSE.</p>",
+        "id": 507606550,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1742764377
     }
 ]
