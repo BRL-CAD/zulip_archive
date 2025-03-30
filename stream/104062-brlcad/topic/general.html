@@ -29000,5 +29000,24 @@ then you can build using visual studio normally by opening the solution and buil
 
 
 
-<hr><p>Last updated: Mar 29 2025 at 00:50 UTC</p>
+<a name="508923571"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/508923571" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#508923571">(Mar 29 2025 at 13:43)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/general/near/507599449">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> recently changed, but set inside librt_init() during library static init (see src/librt/rt_init.cpp).  </p>
+<p>we did have a talk about how that's potentially problematic since init ordering is not guaranteed.  sounds like you might have a case where someone is accessing rt_vlfree() before librt_init() has run.</p>
+</blockquote>
+<p>Hmm, what you are doing in rt_init.cpp is risky. Linkers like to ignore object files which contain only stuff nowhere used. They call it optimization. Maybe, merge it with global.c?</p>
+<p>fuzz_ged_test seems to have a similar issue, it calls BU_LIST_INIT(&amp;rt_vlfree); explicitly too.</p>
+
+
+
+<a name="508941478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/508941478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#508941478">(Mar 29 2025 at 17:16)</a>:</h4>
+<p>I didn't make that particular change, but we have been using that pattern for years in libbu -- it relies on a feature of c++ that shouldn't be optimizable-away.  That's how the semaphores are registered and initialized for multithreading, for example.</p>
+<p>There definitely are some implications that need to be thought through more carefully though as this is a higher-level library that libbu.  More chance to end up in a cyclic init situation.</p>
+
+
+
+<hr><p>Last updated: Mar 30 2025 at 00:55 UTC</p>
 </html>

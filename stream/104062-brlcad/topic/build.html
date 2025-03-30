@@ -7486,5 +7486,604 @@ This warning can be safely ignored, do not report as a bug!</p>
 
 
 
-<hr><p>Last updated: Mar 29 2025 at 00:50 UTC</p>
+<a name="508890555"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508890555" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508890555">(Mar 29 2025 at 06:05)</a>:</h4>
+<p>thanks for letting me know Daniel, I've been trying to get that tcl build working tri-platform for a couple weeks now.  each platform fix seems to break another.  I'll unroll that change and see if we can't get there another way still.</p>
+
+
+
+<a name="508912208"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508912208" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508912208">(Mar 29 2025 at 11:05)</a>:</h4>
+<p>You could test for <a href="http://tclConfig.sh">tclConfig.sh</a> in tk_configure.cmake as well to make sure that the development files arte installed too.</p>
+
+
+
+<a name="508914828"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508914828" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508914828">(Mar 29 2025 at 11:44)</a>:</h4>
+<p>PS: Tell me, if there is something to test.</p>
+
+
+
+<a name="508921122"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508921122" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508921122">(Mar 29 2025 at 13:10)</a>:</h4>
+<p>brlcad doesn't build on Fedora. i'm trying to build main branch, is there some problem with that or it can be fixed?</p>
+<p>it gives:</p>
+<div class="codehilite"><pre><span></span><code>gmake[5]: *** [CMakeFiles/Tkhtml.dir/build.make:294: CMakeFiles/Tkhtml.dir/src/htmlprop.c.o] Error 1
+gmake[4]: *** [CMakeFiles/Makefile2:85: CMakeFiles/Tkhtml.dir/all] Error 2
+gmake[3]: *** [Makefile:136: all] Error 2
+
+CMake Error at /home/abnv/DEV_BRLCAD/brlcad/build/bext_build/tkhtml/TKHTML_BLD-prefix/src/TKHTML_BLD-stamp/TKHTML_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [tkhtml/CMakeFiles/TKHTML_BLD-install.dir/build.make:83: tkhtml/TKHTML_BLD-prefix/src/TKHTML_BLD-stamp/TKHTML_BLD-build] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:3153: tkhtml/CMakeFiles/TKHTML_BLD-install.dir/all] Error 2
+CMake Error at /home/abnv/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:37 (message):
+  Command failed: 2
+
+   &#39;/usr/bin/gmake&#39;
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>gmake[3]: *** [Makefile:156: all] Error 2
+
+CMake Error at /home/abnv/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [geogram/CMakeFiles/GEOGRAM_BLD-install.dir/build.make:83: geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build] Error 1
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (_message):
+  Unable to successfully build bext dependency repository
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:443 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:529 (brlcad_ext_setup)
+  CMakeLists.txt:2091 (brlcad_bext_process)
+</code></pre></div>
+
+
+
+<a name="508921577"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508921577" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508921577">(Mar 29 2025 at 13:17)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="893188">abnv</span> <a href="#narrow/channel/104062-brlcad/topic/build/near/508921122">said</a>:</p>
+<blockquote>
+<p>brlcad doesn't build on Fedora. i'm trying to build main branch, is there some problem with that or it can be fixed?</p>
+<p>it gives:</p>
+<div class="codehilite"><pre><span></span><code>gmake[5]: *** [CMakeFiles/Tkhtml.dir/build.make:294: CMakeFiles/Tkhtml.dir/src/htmlprop.c.o] Error 1
+gmake[4]: *** [CMakeFiles/Makefile2:85: CMakeFiles/Tkhtml.dir/all] Error 2
+gmake[3]: *** [Makefile:136: all] Error 2
+
+CMake Error at /home/abnv/DEV_BRLCAD/brlcad/build/bext_build/tkhtml/TKHTML_BLD-prefix/src/TKHTML_BLD-stamp/TKHTML_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [tkhtml/CMakeFiles/TKHTML_BLD-install.dir/build.make:83: tkhtml/TKHTML_BLD-prefix/src/TKHTML_BLD-stamp/TKHTML_BLD-build] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:3153: tkhtml/CMakeFiles/TKHTML_BLD-install.dir/all] Error 2
+CMake Error at /home/abnv/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:37 (message):
+  Command failed: 2
+
+   &#39;/usr/bin/gmake&#39;
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>gmake[3]: *** [Makefile:156: all] Error 2
+
+CMake Error at /home/abnv/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [geogram/CMakeFiles/GEOGRAM_BLD-install.dir/build.make:83: geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build] Error 1
+</code></pre></div>
+<p><div class="codehilite"><pre><span></span><code>CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (_message):
+  Unable to successfully build bext dependency repository
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:443 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:529 (brlcad_ext_setup)
+  CMakeLists.txt:2091 (brlcad_bext_process)
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>sorry didn't mention. <br>
+It's Fedora 40.</p>
+
+
+
+<a name="508921859"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508921859" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508921859">(Mar 29 2025 at 13:20)</a>:</h4>
+<p>You log snippets don't contain information about the original error, only follow-up stuff. Can you provide more info?</p>
+
+
+
+<a name="508922340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508922340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508922340">(Mar 29 2025 at 13:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/104062-brlcad/topic/build/near/508921859">said</a>:</p>
+<blockquote>
+<p>You log snippets don't contain information about the original error, only follow-up stuff. Can you provide more info?</p>
+</blockquote>
+<p>sorry, i'm refresh trying again. so i'll post this time. thank you.</p>
+
+
+
+<a name="508922469"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508922469" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508922469">(Mar 29 2025 at 13:28)</a>:</h4>
+<p>just my query, for development purposes, is it necessary to build main branch? or we can try on stable versions. </p>
+<p>or i'll face similar issue on stable releases?</p>
+
+
+
+<a name="508923769"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508923769" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508923769">(Mar 29 2025 at 13:45)</a>:</h4>
+<p>You could of course try a stable release, but if you want to do BRL-CAD development, you need the mein branch.</p>
+
+
+
+<a name="508926200"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508926200" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508926200">(Mar 29 2025 at 14:16)</a>:</h4>
+<p><a href="https://pastebin.com/Ukx6KZKx">https://pastebin.com/Ukx6KZKx</a></p>
+<p>problem started around here:</p>
+<div class="codehilite"><pre><span></span><code>[ 58%] Building C object CMakeFiles/Tkhtml.dir/src/htmllayout.c.o
+[ 62%] Building C object CMakeFiles/Tkhtml.dir/src/htmlparse.c.o
+[ 65%] Building C object CMakeFiles/Tkhtml.dir/src/htmlprop.c.o
+
+-- stderr output is:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext/tkhtml/tkhtml/src/htmlprop.c: In function &#39;propertyValuesSetColor&#39;:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext/tkhtml/tkhtml/src/htmlprop.c:1186:67: error: passing argument 2 of &#39;getInheritPointer&#39; from incompatible pointer type [-Wincompatible-pointer-types]
+ 1186 |         HtmlColor **pInherit = (HtmlColor **)getInheritPointer(p, pCVar);
+      |                                                                   ^~~~~
+      |                                                                   |
+      |                                                                   HtmlColor **
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext/tkhtml/tkhtml/src/htmlprop.c:1033:65: note: expected &#39;unsigned char *&#39; but argument is of type &#39;HtmlColor **&#39;
+ 1033 | getInheritPointer (HtmlComputedValuesCreator *p, unsigned char *pVar)
+      |                                                  ~~~~~~~~~~~~~~~^~~~
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext/tkhtml/tkhtml/src/htmlprop.c: In function &#39;propertyValuesSetSize&#39;:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext/tkhtml/tkhtml/src/htmlprop.c:1689:61: error: passing argument 2 of &#39;getInheritPointer&#39; from incompatible pointer type [-Wincompatible-pointer-types]
+ 1689 |                 int *pInherit = (int *)getInheritPointer(p, pIVal);
+      |                                                             ^~~~~
+      |                                                             |
+      |                                                             int *
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext/tkhtml/tkhtml/src/htmlprop.c:1033:65: note: expected &#39;unsigned char *&#39; but argument is of type &#39;int *&#39;
+ 1033 | getInheritPointer (HtmlComputedValuesCreator *p, unsigned char *pVar)
+      |                                                  ~~~~~~~~~~~~~~~^~~~
+gmake[5]: *** [CMakeFiles/Tkhtml.dir/build.make:294: CMakeFiles/Tkhtml.dir/src/htmlprop.c.o] Error 1
+gmake[4]: *** [CMakeFiles/Makefile2:85: CMakeFiles/Tkhtml.dir/all] Error 2
+gmake[3]: *** [Makefile:136: all] Error 2
+
+CMake Error at /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/tkhtml/TKHTML_BLD-prefix/src/TKHTML_BLD-stamp/TKHTML_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [tkhtml/CMakeFiles/TKHTML_BLD-install.dir/build.make:83: tkhtml/TKHTML_BLD-prefix/src/TKHTML_BLD-stamp/TKHTML_BLD-build] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:3153: tkhtml/CMakeFiles/TKHTML_BLD-install.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+-- TKTABLE_BLD build command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/tktable/TKTABLE_BLD-prefix/src/TKTABLE_BLD-stamp/TKTABLE_BLD-build-*.log
+[ 85%] Performing install step for &#39;TKTABLE_BLD&#39;
+-- TKTABLE_BLD install command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/tktable/TKTABLE_BLD-prefix/src/TKTABLE_BLD-stamp/TKTABLE_BLD-install-*.log
+[ 85%] Built target TKTABLE_BLD-install
+-- OPENCV_BLD configure command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/opencv/OPENCV_BLD-prefix/src/OPENCV_BLD-stamp/OPENCV_BLD-configure-*.log
+[ 85%] Performing build step for &#39;OPENCV_BLD&#39;
+-- LIEF_BLD build command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/lief/LIEF_BLD-prefix/src/LIEF_BLD-stamp/LIEF_BLD-build-*.log
+[ 85%] Performing install step for &#39;LIEF_BLD&#39;
+-- LIEF_BLD install command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/lief/LIEF_BLD-prefix/src/LIEF_BLD-stamp/LIEF_BLD-install-*.log
+[ 85%] Built target LIEF_BLD-install
+CMake Error at /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:37 (message):
+  Command failed: 2
+
+   &#39;/usr/bin/gmake&#39;
+
+  See also
+
+    /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-*.log
+
+
+-- stdout output is:
+...skipping to end...
+lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgssvx.c.o
+[ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/factory.cpp.o
+[ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrf.c.o
+[ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrs.c.o
+[ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slacon2.c.o
+[ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/file_system.cpp.o
+[ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/geofile.cpp.o
+</code></pre></div>
+
+
+
+<a name="508926223"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508926223" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508926223">(Mar 29 2025 at 14:16)</a>:</h4>
+<p>then again starts at:</p>
+<div class="codehilite"><pre><span></span><code>[ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/bibliography.cpp.o
+[ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
+[ 83%] Linking CXX shared library ../../../lib/libgeogram.so
+[ 83%] Built target geogram
+
+-- stderr output is:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/third_party/numerics/SUPERLU/slacon2.c: In function &#39;slacon2_&#39;:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/third_party/numerics/SUPERLU/slacon2.c:163:27: error: passing argument 2 of &#39;idamax_&#39; from incompatible pointer type [-Wincompatible-pointer-types]
+  163 |     isave[1] = idamax_(n, &amp;x[0], &amp;c__1);  /* j */
+      |                           ^~~~~
+      |                           |
+      |                           float *
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/third_party/numerics/SUPERLU/slacon2.c:25:27: note: expected &#39;double *&#39; but argument is of type &#39;float *&#39;
+   25 | extern int idamax_(int *, double *, int *);
+      |                           ^~~~~~~~
+gmake[5]: *** [src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/build.make:7930: src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slacon2.c.o] Error 1
+gmake[4]: *** [CMakeFiles/Makefile2:227: src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/all] Error 2
+gmake[4]: *** Waiting for unfinished jobs....
+In file included from /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/image/image_serializer_stb.cpp:85:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/third_party/stb_image/stb_image.h: In function &#39;int stbi__parse_png_file(stbi__png*, int, int)&#39;:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/third_party/stb_image/stb_image.h:5166:56: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 5166 |                   for (k = 0; k &lt; s-&gt;img_n; ++k) tc[k] = (stbi_uc)(stbi__get16be(s) &amp; 255) * stbi__depth_scale_table[z-&gt;depth]; // non 8-bit images will be larger
+      |                                                  ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/third_party/stb_image/stb_image.h:5082:25: note: at offset 3 into destination object &#39;tc&#39; of size 3
+ 5082 |    stbi_uc has_trans=0, tc[3]={0};
+      |                         ^~
+gmake[3]: *** [Makefile:156: all] Error 2
+
+CMake Error at /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [geogram/CMakeFiles/GEOGRAM_BLD-install.dir/build.make:83: geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:2737: geogram/CMakeFiles/GEOGRAM_BLD-install.dir/all] Error 2
+-- PROJ_BLD build command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/proj/PROJ_BLD-prefix/src/PROJ_BLD-stamp/PROJ_BLD-build-*.log
+[ 85%] Performing install step for &#39;PROJ_BLD&#39;
+-- PROJ_BLD install command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/proj/PROJ_BLD-prefix/src/PROJ_BLD-stamp/PROJ_BLD-install-*.log
+[ 85%] Built target PROJ_BLD-install
+-- ASSETIMPORT_BLD build command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/assetimport/ASSETIMPORT_BLD-prefix/src/ASSETIMPORT_BLD-stamp/ASSETIMPORT_BLD-build-*.log
+[ 85%] Performing install step for &#39;ASSETIMPORT_BLD&#39;
+-- ASSETIMPORT_BLD install command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/assetimport/ASSETIMPORT_BLD-prefix/src/ASSETIMPORT_BLD-stamp/ASSETIMPORT_BLD-install-*.log
+[ 85%] Built target ASSETIMPORT_BLD-install
+-- OPENCV_BLD build command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/opencv/OPENCV_BLD-prefix/src/OPENCV_BLD-stamp/OPENCV_BLD-build-*.log
+[ 86%] Performing install step for &#39;OPENCV_BLD&#39;
+-- OPENCV_BLD install command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/opencv/OPENCV_BLD-prefix/src/OPENCV_BLD-stamp/OPENCV_BLD-install-*.log
+[ 86%] Built target OPENCV_BLD-install
+gmake: *** [Makefile:91: all] Error 2
+CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (_message):
+  Unable to successfully build bext dependency repository
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:443 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:529 (brlcad_ext_setup)
+  CMakeLists.txt:2091 (brlcad_bext_process)
+
+
+-- Configuring incomplete, errors occurred!
+</code></pre></div>
+
+
+
+<a name="508930964"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508930964" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508930964">(Mar 29 2025 at 15:13)</a>:</h4>
+<p>I haven't seen these errors before. But, they seem to be in fact warnings, which are treated as errors. You can try to rerun cmake with <code>-DBRLCAD_ENABLE_STRICT=OFF</code> option.</p>
+
+
+
+<a name="508932315"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508932315" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508932315">(Mar 29 2025 at 15:31)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/build/near/450779034">said</a>:</p>
+<blockquote>
+<p>Okay, so looks like it's a 3.28.1 cmake and 2.20.4 git.  Initial error was this:</p>
+<div class="codehilite" data-code-language="Text only"><pre><span></span><code>**********************************************************
+*** Configuring BRL-CAD Release 7.38.3, Build 20240710 ***
+**********************************************************
+-- Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY OPENGL_glx_LIBRARY OPENGL_INCLUDE_DIR)
+-- Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR)
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE)
+-- Could NOT find MPI_C (missing: MPI_C_LIB_NAMES MPI_C_HEADER_DIR MPI_C_WORKS)
+-- Could NOT find MPI (missing: MPI_C_FOUND C)
+X11 detected and enabled
+-- Performing Test HAVE_WORKING_REALPATH
+-- Performing Test HAVE_WORKING_REALPATH - Failed
+Attempting to prepare our own version of the bext dependencies
+
+BRLCAD_EXT_SOURCE_DIR: /home/sean/brlcad.main/.build/bext
+BRLCAD_EXT_BUILD_DIR: /home/sean/brlcad.main/.build/bext_build
+/home/gitlost/bin/cmake -S /home/sean/brlcad.main/.build/bext -B /home/sean/brlcad.main/.build/bext_build --DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/sean/brlcad.main/.build
+usage: git submodule [--quiet] add [-b &lt;branch&gt;] [-f|--force] [--name &lt;name&gt;] [--reference &lt;repository&gt;] [--] &lt;repository&gt; [&lt;path&gt;]
+   or: git submodule [--quiet] status [--cached] [--recursive] [--] [&lt;path&gt;...]
+   or: git submodule [--quiet] init [--] [&lt;path&gt;...]
+   or: git submodule [--quiet] deinit [-f|--force] (--all| [--] &lt;path&gt;...)
+   or: git submodule [--quiet] update [--init] [--remote] [-N|--no-fetch] [-f|--force] [--checkout|--merge|--rebase] [--[no-]recommend-shallow] [--reference &lt;repository&gt;] [--recursive] [--] [&lt;path&gt;...]
+   or: git submodule [--quiet] summary [--cached|--files] [--summary-limit &lt;n&gt;] [commit] [--] [&lt;path&gt;...]
+   or: git submodule [--quiet] foreach [--recursive] &lt;command&gt;
+   or: git submodule [--quiet] sync [--recursive] [--] [&lt;path&gt;...]
+   or: git submodule [--quiet] absorbgitdirs [--] [&lt;path&gt;...]
+CMake Error at /home/gitlost/share/cmake-3.28/Modules/ExternalProject.cmake:3238 (message):
+  No download info given for 'PATCH_BLD' and its source directory:
+
+   /home/sean/brlcad.main/.build/bext/patch/patch
+
+  is not an existing non-empty directory.  Please specify one of:
+
+   * SOURCE_DIR with an existing non-empty directory
+   * DOWNLOAD_COMMAND
+   * URL
+   * GIT_REPOSITORY
+   * SVN_REPOSITORY
+   * HG_REPOSITORY
+   * CVS_REPOSITORY and CVS_MODULE
+Call Stack (most recent call first):
+  /home/gitlost/share/cmake-3.28/Modules/ExternalProject.cmake:4422 (_ep_add_download_command)
+  patch/CMakeLists.txt:35 (ExternalProject_Add)
+
+
+-- Configuring incomplete, errors occurred!
+CMake Error at misc/CMake/BRLCAD_Util.cmake:90 (_message):
+  Unable to successfully configure bext dependency repository for building
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:218 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:121 (brlcad_ext_setup)
+  CMakeLists.txt:1989 (include)
+</code></pre></div>
+<p>Then updating to git 2.38, it throws:</p>
+<p><div class="codehilite" data-code-language="Text only"><pre><span></span><code>sean@gcc111:[/home/sean/brlcad.main/.build]cmake .. -DBRLCAD_BUNDLED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+CMAKE_SOURCE_DIR: /home/sean/brlcad.main
+CMAKE_BINARY_DIR: /home/sean/brlcad.main/.build
+CMake Warning at CMakeLists.txt:208 (message):
+  BRL-CAD requires a source for external components, but no BRLCAD_EXT_DIR is
+  set.  To use a pre-compiled set of components, set BRLCAD_EXT_DIR to a
+  directory location containing the install and noinstall folders (the
+  outputs produced by building https://github.com/BRL-CAD/bext).
+
+
+CMake Warning at CMakeLists.txt:210 (message):
+  Because no BRLCAD_EXT_DIR was successfully configured, BRL-CAD will attempt
+  to download, configure and build its own bext copy locally during the
+  configure process.
+
+
+**********************************************************
+*** Configuring BRL-CAD Release 7.38.3, Build 20240711 ***
+**********************************************************
+-- Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY OPENGL_glx_LIBRARY OPENGL_INCLUDE_DIR)
+-- Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR)
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE)
+-- Could NOT find MPI_C (missing: MPI_C_LIB_NAMES MPI_C_HEADER_DIR MPI_C_WORKS)
+-- Could NOT find MPI (missing: MPI_C_FOUND C)
+X11 detected and enabled
+-- Performing Test HAVE_WORKING_REALPATH
+-- Performing Test HAVE_WORKING_REALPATH - Failed
+Attempting to prepare our own version of the bext dependencies
+
+Cloning into 'bext'...
+warning: templates not found in /home/avar/share/git-core/templates
+git: 'remote-https' is not a git command. See 'git --help'.
+CMake Error at misc/CMake/BRLCAD_Util.cmake:90 (_message):
+  bext directory /home/sean/brlcad.main/.build/bext is not present
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:141 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:121 (brlcad_ext_setup)
+  CMakeLists.txt:1989 (include)
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>though I'm again trying to build it ( <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  suggestion) </p>
+<p>This error is similar to mine. were you <span class="user-mention" data-user-id="102902">@Sean</span>  able to fix it?</p>
+
+
+
+<a name="508933063"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508933063" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508933063">(Mar 29 2025 at 15:41)</a>:</h4>
+<p><a href="/user_uploads/1549/l0wz_wtk3g9P8Y-W82xSy93_/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/l0wz_wtk3g9P8Y-W82xSy93_/image.png" title="image.png"><img data-original-content-type="image/png" data-original-dimensions="1750x618" src="/user_uploads/thumbnail/1549/l0wz_wtk3g9P8Y-W82xSy93_/image.png/840x560.webp"></a></div><p>I tried the using the fix. But, Build again failed. Got same error.</p>
+
+
+
+<a name="508933191"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508933191" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508933191">(Mar 29 2025 at 15:43)</a>:</h4>
+<p>should i try building "bext" first itself then do brlcad?</p>
+
+
+
+<a name="508933336"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508933336" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508933336">(Mar 29 2025 at 15:45)</a>:</h4>
+<p>maybe i'll shift to debian after this attempt. (time crunch)</p>
+
+
+
+<a name="508933367"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508933367" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508933367">(Mar 29 2025 at 15:45)</a>:</h4>
+<p>i hope it works good on debian?</p>
+
+
+
+<a name="508934742"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508934742" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508934742">(Mar 29 2025 at 16:03)</a>:</h4>
+<p>The error is different. Previously, it was in TkHTML, now it's in OpenNURBS. Again, from your message I can see only that there was an error, but not what caused it.</p>
+<p>My last build with Debian bookworm was successful, some days ago.</p>
+
+
+
+<a name="508944050"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508944050" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508944050">(Mar 29 2025 at 17:51)</a>:</h4>
+<p><a href="https://pastebin.com/byCFapms">https://pastebin.com/byCFapms</a></p>
+<p>first instance when error shown:</p>
+<div class="codehilite"><pre><span></span><code>[ 64%] Performing patch step for &#39;PROJ_BLD&#39;
+patching file cmake/FindSQLite3.cmake
+patching file CMakeLists.txt
+Hunk #1 succeeded at 199 (offset 2 lines).
+[ 65%] Performing configure step for &#39;PROJ_BLD&#39;
+CMake Error at /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:37 (message):
+  Command failed: 2
+
+   &#39;/usr/bin/gmake&#39;
+
+  See also
+
+    /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-*.log
+
+
+-- stdout output is:
+...skipping to end...
+ing C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scolumn_dfs.c.o
+[ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scomplex.c.o
+</code></pre></div>
+<p>Second instance:</p>
+<div class="codehilite"><pre><span></span><code>[ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
+[ 83%] Linking CXX shared library ../../../lib/libgeogram.so
+[ 83%] Built target geogram
+
+-- stderr output is:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/third_party/numerics/SUPERLU/slacon2.c: In function &#39;slacon2_&#39;:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/third_party/numerics/SUPERLU/slacon2.c:163:27: error: passing argument 2 of &#39;idamax_&#39; from incompatible pointer type [-Wincompatible-pointer-types]
+  163 |     isave[1] = idamax_(n, &amp;x[0], &amp;c__1);  /* j */
+      |                           ^~~~~
+      |                           |
+      |                           float *
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/third_party/numerics/SUPERLU/slacon2.c:25:27: note: expected &#39;double *&#39; but argument is of type &#39;float *&#39;
+   25 | extern int idamax_(int *, double *, int *);
+      |                           ^~~~~~~~
+gmake[5]: *** [src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/build.make:7930: src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slacon2.c.o] Error 1
+gmake[4]: *** [CMakeFiles/Makefile2:227: src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/all] Error 2
+gmake[4]: *** Waiting for unfinished jobs....
+In file included from /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/image/image_serializer_stb.cpp:85:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/third_party/stb_image/stb_image.h: In function &#39;int stbi__parse_png_file(stbi__png*, int, int)&#39;:
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/third_party/stb_image/stb_image.h:5166:56: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 5166 |                   for (k = 0; k &lt; s-&gt;img_n; ++k) tc[k] = (stbi_uc)(stbi__get16be(s) &amp; 255) * stbi__depth_scale_table[z-&gt;depth]; // non 8-bit images will be larger
+      |                                                  ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD/src/lib/geogram/third_party/stb_image/stb_image.h:5082:25: note: at offset 3 into destination object &#39;tc&#39; of size 3
+ 5082 |    stbi_uc has_trans=0, tc[3]={0};
+      |                         ^~
+gmake[3]: *** [Makefile:156: all] Error 2
+
+CMake Error at /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build-Release.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+gmake[2]: *** [geogram/CMakeFiles/GEOGRAM_BLD-install.dir/build.make:83: geogram/GEOGRAM_BLD-prefix/src/GEOGRAM_BLD-stamp/GEOGRAM_BLD-build] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:2737: geogram/CMakeFiles/GEOGRAM_BLD-install.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+-- PROJ_BLD configure command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/proj/PROJ_BLD-prefix/src/PROJ_BLD-stamp/PROJ_BLD-configure-*.log
+[ 65%] Performing build step for &#39;PROJ_BLD&#39;
+-- TIFF_BLD configure command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/tiff/TIFF_BLD-prefix/src/TIFF_BLD-stamp/TIFF_BLD-configure-*.log
+[ 65%] Performing build step for &#39;TIFF_BLD&#39;
+</code></pre></div>
+<p>and</p>
+<div class="codehilite"><pre><span></span><code>-- OPENNURBS_BLD install command succeeded.  See also /home/abhinav/aaabnv/FreeBRLCAD/DEV_BRLCAD/brlcad/build/bext_build/opennurbs/OPENNURBS_BLD-prefix/src/OPENNURBS_BLD-stamp/OPENNURBS_BLD-install-*.log
+[ 66%] Built target OPENNURBS_BLD-install
+gmake: *** [Makefile:91: all] Error 2
+CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (_message):
+  Unable to successfully build bext dependency repository
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:443 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:529 (brlcad_ext_setup)
+  CMakeLists.txt:2091 (brlcad_bext_process)
+
+
+-- Configuring incomplete, errors occurred!
+</code></pre></div>
+
+
+
+<a name="508945311"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508945311" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508945311">(Mar 29 2025 at 18:08)</a>:</h4>
+<p>while checking for libraries(stage 4): </p>
+<div class="codehilite"><pre><span></span><code>--   Package &#39;mpi-c&#39;, required by &#39;virtual:world&#39;, not found
+-- Could NOT find MPI_C (missing: MPI_C_LIB_NAMES MPI_C_HEADER_DIR MPI_C_WORKS)
+-- Could NOT find MPI (missing: MPI_C_FOUND C)
+</code></pre></div>
+<p>in stage 5 - Check for headers:</p>
+<p>so many .h files are "not found"</p>
+<div class="codehilite"><pre><span></span><code>-- Looking for include file conio.h - not found
+-- Looking for include file direct.h - not found
+-- Looking for include file dslib.h - not found
+-- Looking for include file gl/device.h - not found
+-- Looking for include file gl/glext.h - not found
+-- Looking for include file gl/wglext.h - not found
+-- Looking for include file io.h - not found
+-- Looking for include file mach/host_info.h - not found
+-- Looking for include file mach/mach_host.h - not found
+-- Looking for include file mach/thread_policy.h - not found
+-- Looking for include file process.h - not found
+-- Looking for include file pthread_np.h - not found
+-- Looking for include file strsafe.h - not found
+-- Looking for include file sys/cpuset.h - not found
+-- Looking for include file sys/ioctl_compat.h - not found
+-- Looking for include file sys/machd.h - not found
+-- Looking for include file process.h - not found
+-- Looking for include file pthread_np.h - not found
+-- Looking for include file strsafe.h - not found
+-- Looking for include file sys/cpuset.h - not found
+-- Looking for include file sys/ioctl_compat.h - not found
+-- Looking for include file sys/sched.h - not found
+-- Looking for include file sys/sysctl.h - not found
+-- Looking for include file sys/sysmp.h - not found
+-- Looking for include file ulocks.h - not found
+-- Looking for include file uuid.h - not found
+</code></pre></div>
+<p>stage 7 - functions which were not found:</p>
+<div class="codehilite"><pre><span></span><code>-- Looking for XQueryExtension - not found
+-- Looking for _putenv_s - not found
+-- Looking for _splitpath - not found
+-- Looking for _strtoi64 - not found
+-- Looking for funopen - not found
+-- Looking for getenv_s - not found
+-- Looking for getprogname - not found
+-- Looking for proc_pidpath - not found
+-- Looking for sysctl - not found
+-- Looking for sysmp - not found
+-- Looking for ntohll - not found
+-- Looking for htonll - not found
+</code></pre></div>
+
+
+
+<a name="508958006"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508958006" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508958006">(Mar 29 2025 at 21:05)</a>:</h4>
+<p>finally, i was successfully able to build it. <br>
+I installed old gcc-13 compiler, that worked. </p>
+<p>also, is this pop-up weird at launch of "archer", atleast 3-4 times repeatedly I got it after using <br>
+<a href="/user_uploads/1549/xFHseQBNy_er3nYQWYkd8hVk/Screenshot-from-2025-03-30-06-17-45.png">Screenshot from 2025-03-30 06-17-45.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/xFHseQBNy_er3nYQWYkd8hVk/Screenshot-from-2025-03-30-06-17-45.png" title="Screenshot from 2025-03-30 06-17-45.png"><img data-original-content-type="image/png" data-original-dimensions="706x236" src="/user_uploads/thumbnail/1549/xFHseQBNy_er3nYQWYkd8hVk/Screenshot-from-2025-03-30-06-17-45.png/840x560.webp"></a></div><div class="codehilite"><pre><span></span><code>bin/archer
+</code></pre></div>
+
+
+
+<a name="508961938"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508961938" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508961938">(Mar 29 2025 at 22:05)</a>:</h4>
+<p>The CMake "not found" messages are no errors. They result from testing different environments (compilers, operating systems, ...). The reals errors come from e.g. a double/float mismatch.</p>
+<p>On which kind of hardware do you build, Samsung Galaxy?</p>
+
+
+
+<a name="508963345"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508963345" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508963345">(Mar 29 2025 at 22:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/104062-brlcad/topic/build/near/508961938">said</a>:</p>
+<blockquote>
+<p>The CMake "not found" messages are no errors. They result from testing different environments (compilers, operating systems, ...). The reals errors come from e.g. a double/float mismatch.</p>
+<p>On which kind of hardware do you build, Samsung Galaxy?</p>
+</blockquote>
+<p>actually, no. I've just named my device as "Samsung Galaxy" to make it unrecognizable as laptop, because most of time my hotspot is on.<br>
+If i could do it on samsung galaxy, i would have been proud of myself.</p>
+<p>Old compilers were not strict as New ones are. SO new compilers created problem &amp; assumed them as potential errors.</p>
+
+
+
+<a name="508963762"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508963762" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> abnv <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508963762">(Mar 29 2025 at 22:32)</a>:</h4>
+<p>I'm also having problem with building FreeCAD. It's more difficult because some of dependency is not available for fedora. In such case, I wish I was on ubuntu or debian (less struggle). I was strongly thinking of migrating to Debian. But BRLCAD <span aria-label="check" class="emoji emoji-2705" role="img" title="check">:check:</span> is done now.<br>
+for freecad, tomorrow I will try again.</p>
+
+
+
+<a name="508965369"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508965369" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508965369">(Mar 29 2025 at 22:56)</a>:</h4>
+<p>Thx for posting you full build log <span class="user-mention" data-user-id="893188">@abnv</span> … that’s interesting and a new (to me) build failure.  If I had to guess, you have a super recent gcc that appears to have some new checks.  Appears to have found an issue in geogram (a third party library we use).</p>
+
+
+
+<a name="508965427"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508965427" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508965427">(Mar 29 2025 at 22:57)</a>:</h4>
+<p>If you want to fix it proper, that probably entails copying that float array into a double before passing it.</p>
+
+
+
+<a name="508965511"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508965511" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508965511">(Mar 29 2025 at 22:58)</a>:</h4>
+<p>If you just want the error to go away, probably can just comment out their code as it’s not critical to anything in BRL-CAD I think.</p>
+
+
+
+<a name="508965553"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/508965553" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#508965553">(Mar 29 2025 at 22:59)</a>:</h4>
+<p>Since you’re on Linux, you can cd to the path listed in the error, and make mods there.</p>
+
+
+
+<hr><p>Last updated: Mar 30 2025 at 00:55 UTC</p>
 </html>

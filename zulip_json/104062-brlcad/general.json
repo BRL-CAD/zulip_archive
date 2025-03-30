@@ -26332,5 +26332,17 @@
         "id": 507599725,
         "sender_full_name": "Sean",
         "timestamp": 1742759989
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/104062-brlcad/topic/general/near/507599449\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> recently changed, but set inside librt_init() during library static init (see src/librt/rt_init.cpp).  </p>\n<p>we did have a talk about how that's potentially problematic since init ordering is not guaranteed.  sounds like you might have a case where someone is accessing rt_vlfree() before librt_init() has run.</p>\n</blockquote>\n<p>Hmm, what you are doing in rt_init.cpp is risky. Linkers like to ignore object files which contain only stuff nowhere used. They call it optimization. Maybe, merge it with global.c?</p>\n<p>fuzz_ged_test seems to have a similar issue, it calls BU_LIST_INIT(&amp;rt_vlfree); explicitly too.</p>",
+        "id": 508923571,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1743255810
+    },
+    {
+        "content": "<p>I didn't make that particular change, but we have been using that pattern for years in libbu -- it relies on a feature of c++ that shouldn't be optimizable-away.  That's how the semaphores are registered and initialized for multithreading, for example.</p>\n<p>There definitely are some implications that need to be thought through more carefully though as this is a higher-level library that libbu.  More chance to end up in a cyclic init situation.</p>",
+        "id": 508941478,
+        "sender_full_name": "Sean",
+        "timestamp": 1743268560
     }
 ]
