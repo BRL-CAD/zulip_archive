@@ -26344,5 +26344,47 @@
         "id": 508941478,
         "sender_full_name": "Sean",
         "timestamp": 1743268560
+    },
+    {
+        "content": "<p>fuzz_ged_test was probably just missed when I did the rt_init.cpp change.</p>",
+        "id": 508985497,
+        "sender_full_name": "starseeker",
+        "timestamp": 1743305693
+    },
+    {
+        "content": "<p>For the moment I believe there should be no harm in doing the explicit initialization BU_LIST_INIT(&amp;rt_vlfree) in the client code - as long as no manipulation of the rt_vlfree list has taken place, a double init should do no harm.   I believe that is also the case for rt_uniresource, which is the other potentially problematic init from rt_init.cpp</p>",
+        "id": 508985772,
+        "sender_full_name": "starseeker",
+        "timestamp": 1743305956
+    },
+    {
+        "content": "<p>The problem rt_init.cpp is trying to solve is avoiding the need for user level applications to be aware that they have to initialize those resources for certain things to work correctly.  If there is a better answer to that problem I'd be delighted to hear it...</p>",
+        "id": 508985956,
+        "sender_full_name": "starseeker",
+        "timestamp": 1743306122
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> It does sound like MOOSE somehow went for an rt_vlfree access before the librt_init routine was called - I wonder how that happened.</p>",
+        "id": 508986005,
+        "sender_full_name": "starseeker",
+        "timestamp": 1743306163
+    },
+    {
+        "content": "<p>I would have thought by the time an app was doing things that would involve rt_vlfree we'd already have librt loaded, but I guess not...</p>",
+        "id": 508986120,
+        "sender_full_name": "starseeker",
+        "timestamp": 1743306258
+    },
+    {
+        "content": "<p>Maybe the behavior varies when static libraries are used rather than dynamic libraries?  Perhaps being dynamic would make librt_init more likely to be called as expected (i.e. before rt_vlfree use?)</p>",
+        "id": 508986231,
+        "sender_full_name": "starseeker",
+        "timestamp": 1743306363
+    },
+    {
+        "content": "<p>In addition, on Windows librt_init() is called, but not on Linux.</p>",
+        "id": 509049990,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1743356893
     }
 ]
