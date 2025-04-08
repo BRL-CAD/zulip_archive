@@ -29061,5 +29061,19 @@ then you can build using visual studio normally by opening the solution and buil
 
 
 
-<hr><p>Last updated: Apr 07 2025 at 00:53 UTC</p>
+<a name="510707556"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/510707556" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#510707556">(Apr 07 2025 at 15:46)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>, I see that you but back the explicit rt_vlfree and rt_uniresource initialization. This may not be necessary. The idea with putting the initialization in the constructor of a static object was good. However, we have to prevent this part of code from to be removed by the linker, because it considers it as unused.</p>
+<p>I did the following to test it:</p>
+<ul>
+<li>renamed src/librt/globals.c to ~.cpp</li>
+<li>moved the content of src/librt/rt_init.cpp to src/librt/globals.cpp</li>
+<li>removed src/librt/rt_init.cpp</li>
+<li>changed the file names in src/librt/CMakeLists.txt</li>
+</ul>
+<p>After that, I got an initialized rt_vlfree in MOOSE.</p>
+
+
+
+<hr><p>Last updated: Apr 08 2025 at 00:51 UTC</p>
 </html>
