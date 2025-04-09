@@ -26392,5 +26392,53 @@
         "id": 510707556,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1744040792
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> Hrm.  So is the key change having the globals be in a C++ file along with rt_init code, or is it having them in the same file, or is the name globals.cpp somehow special to the compiler?</p>",
+        "id": 510793310,
+        "sender_full_name": "starseeker",
+        "timestamp": 1744073748
+    },
+    {
+        "content": "<p>I realized that the content of globals.c won't be removed. rt_vlfree was NULL in MOOSE too. Because this kind of optimization happens object-file (and therefore source-file) wise, and the two source files have similar content (both initialize the same global variables), my solution was to merge them. The resulting source file must contain C++ code (because of the constructor) and should be a continuation of the good old globals.c.</p>",
+        "id": 510869134,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1744100652
+    },
+    {
+        "content": "<p>I see.  If the name rt_init.cpp will work,  I think my vote would be to move the globals.c content there for consistency.</p>",
+        "id": 510895140,
+        "sender_full_name": "starseeker",
+        "timestamp": 1744108187
+    },
+    {
+        "content": "<p>Would you like to make the commit, or should I take care of it?  (You don't need to undo the init restoration commit, I'll clean that up after the merger)</p>",
+        "id": 510895470,
+        "sender_full_name": "starseeker",
+        "timestamp": 1744108301
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/104062-brlcad/topic/general/near/510707556\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span>, I see that you but back the explicit rt_vlfree and rt_uniresource initialization. This may not be necessary. The idea with putting the initialization in the constructor of a static object was good. However, we have to prevent this part of code from to be removed by the linker, because it considers it as unused.</p>\n<p>I did the following to test it:</p>\n<ul>\n<li>renamed src/librt/globals.c to ~.cpp</li>\n<li>moved the content of src/librt/rt_init.cpp to src/librt/globals.cpp</li>\n<li>removed src/librt/rt_init.cpp</li>\n<li>changed the file names in src/librt/CMakeLists.txt</li>\n</ul>\n<p>After that, I got an initialized rt_vlfree in MOOSE.</p>\n</blockquote>\n<p>Gonna try this since build is complaing <code>rt_vlfree</code> is not defined.</p>",
+        "id": 510997255,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1744135769
+    },
+    {
+        "content": "<p>Which build? Windows?</p>",
+        "id": 511002686,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1744137546
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/channel/104062-brlcad/topic/general/near/510895470\">said</a>:</p>\n<blockquote>\n<p>Would you like to make the commit, or should I take care of it?  (You don't need to undo the init restoration commit, I'll clean that up after the merger)</p>\n</blockquote>\n<p>I put it on my list ;)</p>",
+        "id": 511002920,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1744137623
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/104062-brlcad/topic/general/near/511002686\">said</a>:</p>\n<blockquote>\n<p>Which build? Windows?</p>\n</blockquote>\n<p>Yes for windows.</p>",
+        "id": 511016025,
+        "sender_full_name": "Himanshu",
+        "timestamp": 1744142568
     }
 ]

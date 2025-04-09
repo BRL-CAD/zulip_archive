@@ -29075,5 +29075,73 @@ then you can build using visual studio normally by opening the solution and buil
 
 
 
-<hr><p>Last updated: Apr 08 2025 at 00:51 UTC</p>
+<a name="510793310"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/510793310" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#510793310">(Apr 08 2025 at 00:55)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Hrm.  So is the key change having the globals be in a C++ file along with rt_init code, or is it having them in the same file, or is the name globals.cpp somehow special to the compiler?</p>
+
+
+
+<a name="510869134"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/510869134" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#510869134">(Apr 08 2025 at 08:24)</a>:</h4>
+<p>I realized that the content of globals.c won't be removed. rt_vlfree was NULL in MOOSE too. Because this kind of optimization happens object-file (and therefore source-file) wise, and the two source files have similar content (both initialize the same global variables), my solution was to merge them. The resulting source file must contain C++ code (because of the constructor) and should be a continuation of the good old globals.c.</p>
+
+
+
+<a name="510895140"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/510895140" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#510895140">(Apr 08 2025 at 10:29)</a>:</h4>
+<p>I see.  If the name rt_init.cpp will work,  I think my vote would be to move the globals.c content there for consistency.</p>
+
+
+
+<a name="510895470"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/510895470" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#510895470">(Apr 08 2025 at 10:31)</a>:</h4>
+<p>Would you like to make the commit, or should I take care of it?  (You don't need to undo the init restoration commit, I'll clean that up after the merger)</p>
+
+
+
+<a name="510997255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/510997255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#510997255">(Apr 08 2025 at 18:09)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/104062-brlcad/topic/general/near/510707556">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span>, I see that you but back the explicit rt_vlfree and rt_uniresource initialization. This may not be necessary. The idea with putting the initialization in the constructor of a static object was good. However, we have to prevent this part of code from to be removed by the linker, because it considers it as unused.</p>
+<p>I did the following to test it:</p>
+<ul>
+<li>renamed src/librt/globals.c to ~.cpp</li>
+<li>moved the content of src/librt/rt_init.cpp to src/librt/globals.cpp</li>
+<li>removed src/librt/rt_init.cpp</li>
+<li>changed the file names in src/librt/CMakeLists.txt</li>
+</ul>
+<p>After that, I got an initialized rt_vlfree in MOOSE.</p>
+</blockquote>
+<p>Gonna try this since build is complaing <code>rt_vlfree</code> is not defined.</p>
+
+
+
+<a name="511002686"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/511002686" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#511002686">(Apr 08 2025 at 18:39)</a>:</h4>
+<p>Which build? Windows?</p>
+
+
+
+<a name="511002920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/511002920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#511002920">(Apr 08 2025 at 18:40)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/104062-brlcad/topic/general/near/510895470">said</a>:</p>
+<blockquote>
+<p>Would you like to make the commit, or should I take care of it?  (You don't need to undo the init restoration commit, I'll clean that up after the merger)</p>
+</blockquote>
+<p>I put it on my list ;)</p>
+
+
+
+<a name="511016025"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/511016025" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#511016025">(Apr 08 2025 at 20:02)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/104062-brlcad/topic/general/near/511002686">said</a>:</p>
+<blockquote>
+<p>Which build? Windows?</p>
+</blockquote>
+<p>Yes for windows.</p>
+
+
+
+<hr><p>Last updated: Apr 09 2025 at 00:51 UTC</p>
 </html>
