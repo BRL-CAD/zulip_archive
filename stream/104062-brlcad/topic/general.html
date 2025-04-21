@@ -29454,5 +29454,52 @@ BTW, the corresponding header is rt/global.h.</p>
 
 
 
-<hr><p>Last updated: Apr 20 2025 at 00:56 UTC</p>
+<a name="513256323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/513256323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#513256323">(Apr 20 2025 at 09:22)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/104062-brlcad/topic/general/near/513187082">said</a>:</p>
+<blockquote>
+<p>The regex_brl.dll is needed.</p>
+<p>You could remove the RUNTIME_DEPENDENCY_SET stuff from the CMakeLists.txt and try again.</p>
+</blockquote>
+<p>Yeah I removed that and when I am trying to build arbalest, it throws <code>std::byte</code> error:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="mi">2</span><span class="o">&gt;</span><span class="n">C</span><span class="o">:</span><span class="err">\</span><span class="n">Program</span><span class="w"> </span><span class="n">Files</span><span class="w"> </span><span class="p">(</span><span class="n">x86</span><span class="p">)</span><span class="err">\</span><span class="n">Windows</span><span class="w"> </span><span class="n">Kits</span><span class="err">\</span><span class="mi">10</span><span class="err">\</span><span class="n">Include</span><span class="err">\</span><span class="mf">10.0.22621.0</span><span class="err">\</span><span class="n">um</span><span class="err">\</span><span class="n">oaidl</span><span class="p">.</span><span class="n">h</span><span class="p">(</span><span class="mi">571</span><span class="p">,</span><span class="mi">21</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="n">C2872</span><span class="o">:</span><span class="w"> </span><span class="err">'</span><span class="n">byte</span><span class="err">'</span><span class="o">:</span><span class="w"> </span><span class="n">ambiguous</span><span class="w"> </span><span class="n">symbol</span>
+<span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">compiling</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="err">'</span><span class="n">include</span><span class="o">/</span><span class="n">moc_ObjectTreeRowButtons</span><span class="p">.</span><span class="n">cpp</span><span class="err">'</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">&gt;</span><span class="w">    </span><span class="n">C</span><span class="o">:</span><span class="err">\</span><span class="n">Program</span><span class="w"> </span><span class="n">Files</span><span class="w"> </span><span class="p">(</span><span class="n">x86</span><span class="p">)</span><span class="err">\</span><span class="n">Windows</span><span class="w"> </span><span class="n">Kits</span><span class="err">\</span><span class="mi">10</span><span class="err">\</span><span class="n">Include</span><span class="err">\</span><span class="mf">10.0.22621.0</span><span class="err">\</span><span class="n">shared</span><span class="err">\</span><span class="n">rpcndr</span><span class="p">.</span><span class="n">h</span><span class="p">(</span><span class="mi">202</span><span class="p">,</span><span class="mi">23</span><span class="p">)</span><span class="o">:</span>
+<span class="mi">2</span><span class="o">&gt;</span><span class="w">    </span><span class="n">could</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="err">'</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">byte</span><span class="err">'</span>
+<span class="mi">2</span><span class="o">&gt;</span><span class="w">    </span><span class="n">C</span><span class="o">:</span><span class="err">\</span><span class="n">Program</span><span class="w"> </span><span class="n">Files</span><span class="err">\</span><span class="n">Microsoft</span><span class="w"> </span><span class="n">Visual</span><span class="w"> </span><span class="n">Studio</span><span class="err">\</span><span class="mi">2022</span><span class="err">\</span><span class="n">Community</span><span class="err">\</span><span class="n">VC</span><span class="err">\</span><span class="n">Tools</span><span class="err">\</span><span class="n">MSVC</span><span class="err">\</span><span class="mf">14.43.34808</span><span class="err">\</span><span class="n">include</span><span class="err">\</span><span class="n">cstddef</span><span class="p">(</span><span class="mi">34</span><span class="p">,</span><span class="mi">24</span><span class="p">)</span><span class="o">:</span>
+<span class="mi">2</span><span class="o">&gt;</span><span class="w">    </span><span class="k">or</span><span class="w">       </span><span class="err">'</span><span class="n">std</span><span class="o">::</span><span class="n">byte</span><span class="err">'</span>
+</code></pre></div>
+<p>and I fixed this error in <code>ViewportManger.h</code> where <code>windows.h</code> is defined.</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="cp">#ifdef _WIN32</span>
+<span class="cp">#define WIN32_LEAN_AND_MEAN</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Windows.h&gt;</span>
+<span class="cp">#endif</span>
+</code></pre></div>
+
+
+
+<a name="513257586"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/513257586" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#513257586">(Apr 20 2025 at 09:39)</a>:</h4>
+<p>Finally I am able to build this in windows:<br>
+<a href="/user_uploads/1549/O75GNdH0G4HQsWvKaknu4y2o/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/O75GNdH0G4HQsWvKaknu4y2o/image.png" title="image.png"><img data-original-content-type="image/png" data-original-dimensions="2559x1599" src="/user_uploads/thumbnail/1549/O75GNdH0G4HQsWvKaknu4y2o/image.png/840x560.webp"></a></div>
+
+
+
+<a name="513257777"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/513257777" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Himanshu <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#513257777">(Apr 20 2025 at 09:41)</a>:</h4>
+<p>And my Debug directory end up like this:<br>
+<a href="/user_uploads/1549/6_cmPVUJ1kgxc4kgjaU5fAev/image.png">image.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/6_cmPVUJ1kgxc4kgjaU5fAev/image.png" title="image.png"><img data-original-content-type="image/png" data-original-dimensions="1389x655" src="/user_uploads/thumbnail/1549/6_cmPVUJ1kgxc4kgjaU5fAev/image.png/840x560.webp"></a></div>
+
+
+
+<a name="513302678"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general/near/513302678" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.html#513302678">(Apr 20 2025 at 20:06)</a>:</h4>
+<p>That's odd, always something new.</p>
+<p>I ones have to look for a static regex library.</p>
+
+
+
+<hr><p>Last updated: Apr 21 2025 at 00:55 UTC</p>
 </html>
