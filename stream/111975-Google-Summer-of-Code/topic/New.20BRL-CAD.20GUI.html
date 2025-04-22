@@ -16682,5 +16682,178 @@ These three if we combine will be a bigger project. It will be better to stick o
 
 
 
-<hr><p>Last updated: Apr 21 2025 at 00:55 UTC</p>
+<a name="513408690"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513408690" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513408690">(Apr 21 2025 at 14:20)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/513302775">ha scritto</a>:</p>
+<blockquote>
+<p>I did these tests yesterday without any issue. Can you debug these programs?</p>
+</blockquote>
+<p>Ok so, I ran <code>generateDataTest</code> using <code>gdb</code>, and I got the following:</p>
+<div class="codehilite"><pre><span></span><code>Starting program: /home/lorenzo/Documents/BRL-CAD/MOOSE/build/src/generateDataTest
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library &quot;/lib/x86_64-linux-gnu/libthread_db.so.1&quot;.
+warning: could not find &#39;.gnu_debugaltlink&#39; file for /lib/x86_64-linux-gnu/libQt6Gui.so.6
+warning: could not find &#39;.gnu_debugaltlink&#39; file for /lib/x86_64-linux-gnu/libQt6OpenGL.so.6
+warning: could not find &#39;.gnu_debugaltlink&#39; file for /lib/x86_64-linux-gnu/libglib-2.0.so.0
+warning: could not find &#39;.gnu_debugaltlink&#39; file for /lib/x86_64-linux-gnu/libbrotlidec.so.1
+warning: could not find &#39;.gnu_debugaltlink&#39; file for /lib/x86_64-linux-gnu/libbrotlicommon.so.1
+warning: could not find &#39;.gnu_debugaltlink&#39; file for /lib/x86_64-linux-gnu/libcap.so.2
+Usage: /home/lorenzo/Documents/BRL-CAD/MOOSE/build/src/generateDataTest &lt;test type&gt;free(): double free detected in tcache 2
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=&lt;optimized out&gt;) at ./nptl/pthread_kill.c:44
+warning: 44     ./nptl/pthread_kill.c: No such file or directory
+</code></pre></div>
+
+
+
+<a name="513409054"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513409054" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513409054">(Apr 21 2025 at 14:23)</a>:</h4>
+<p>Using <code>bt full</code> afterwards gets me the following output:</p>
+<div class="codehilite"><pre><span></span><code>#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=&lt;optimized out&gt;) at ./nptl/pthread_kill.c:44
+        tid = &lt;optimized out&gt;
+        ret = 0
+        pd = &lt;optimized out&gt;
+        old_mask = {__val = {0}}
+        ret = &lt;optimized out&gt;
+        pd = &lt;optimized out&gt;
+        old_mask = &lt;optimized out&gt;
+        ret = &lt;optimized out&gt;
+        tid = &lt;optimized out&gt;
+        ret = &lt;optimized out&gt;
+        resultvar = &lt;optimized out&gt;
+        resultvar = &lt;optimized out&gt;
+        __arg3 = &lt;optimized out&gt;
+        __arg2 = &lt;optimized out&gt;
+        __arg1 = &lt;optimized out&gt;
+        _a3 = &lt;optimized out&gt;
+        _a2 = &lt;optimized out&gt;
+        _a1 = &lt;optimized out&gt;
+        __futex = &lt;optimized out&gt;
+        resultvar = &lt;optimized out&gt;
+        __arg3 = &lt;optimized out&gt;
+        __arg2 = &lt;optimized out&gt;
+        __arg1 = &lt;optimized out&gt;
+        _a3 = &lt;optimized out&gt;
+        _a2 = &lt;optimized out&gt;
+        _a1 = &lt;optimized out&gt;
+        __futex = &lt;optimized out&gt;
+        __private = &lt;optimized out&gt;
+        __oldval = &lt;optimized out&gt;
+#1  __pthread_kill_internal (signo=6, threadid=&lt;optimized out&gt;) at ./nptl/pthread_kill.c:78
+No locals.
+#2  __GI___pthread_kill (threadid=&lt;optimized out&gt;, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+No locals.
+#3  0x00007ffff404527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+        ret = &lt;optimized out&gt;
+#4  0x00007ffff40288ff in __GI_abort () at ./stdlib/abort.c:79
+        save_stage = 1
+        act = {__sigaction_handler = {sa_handler = 0x20, sa_sigaction = 0x20}, sa_mask = {__val = {93824993258816, 93824993269472, 93824993267488,
+              4643211215818981376, 0, 4657847914607935488, 0, 4841369599423283200, 0, 13831198063404271081, 0, 4294967552, 0, 0, 140737288251297, 0}},
+          sa_flags = 621441280, sa_restorer = 0xbff2495b9b4845e9}
+#5  0x00007ffff40297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff41ce8d7 &quot;%s\n&quot;) at ../sysdeps/posix/libc_fatal.c:134
+        ap = {{gp_offset = 16, fp_offset = 3709838579, overflow_arg_area = 0x7fffffffcdb0, reg_save_area = 0x7fffffffcd40}}
+        fd = 2
+        iov = {{iov_base = 0x7ffff41d1bf0, iov_len = 40}, {iov_base = 0x7ffff41ce8d9, iov_len = 1}, {iov_base = 0x7fffffffce97, iov_len = 140737488342688}, {
+            iov_base = 0x7fffffffce20, iov_len = 140737353901340}, {iov_base = 0x0, iov_len = 140737354130144}, {iov_base = 0x7ffff7fc7750 &lt;_dl_close&gt;,
+            iov_len = 140737488342576}, {iov_base = 0x0, iov_len = 18446744073709551448}}
+        iovcnt = &lt;optimized out&gt;
+        total = &lt;optimized out&gt;
+        cp = &lt;optimized out&gt;
+#6  0x00007ffff40a8ff5 in malloc_printerr (str=str@entry=0x7ffff41d1bf0 &quot;free(): double free detected in tcache 2&quot;) at ./malloc/malloc.c:5772
+No locals.
+#7  0x00007ffff40ab55f in _int_free (av=0x7ffff4203ac0 &lt;main_arena&gt;, p=&lt;optimized out&gt;, have_lock=0) at ./malloc/malloc.c:4541
+        tmp = &lt;optimized out&gt;
+        cnt = &lt;optimized out&gt;
+        e = &lt;optimized out&gt;
+        tc_idx = &lt;optimized out&gt;
+        size = &lt;optimized out&gt;
+        fb = &lt;optimized out&gt;
+#8  0x00007ffff40addae in __GI___libc_free (mem=0x55555566db90) at ./malloc/malloc.c:3398
+        ar_ptr = &lt;optimized out&gt;
+        p = 0x55555566db80
+        err = 2
+#9  0x00007ffff53c0a69 in onrealloc () from /home/lorenzo/Downloads/MOOSE/lib/libbrlcad.so
+No symbol table info available.
+#10 0x00007ffff4fd1fb2 in ON_HatchPattern::~ON_HatchPattern() () from /home/lorenzo/Downloads/MOOSE/lib/libbrlcad.so
+No symbol table info available.
+#11 0x00007ffff4047382 in __cxa_finalize (d=0x7ffff11356c0) at ./stdlib/cxa_finalize.c:82
+        check = &lt;optimized out&gt;
+        cxafn = &lt;optimized out&gt;
+        cxaarg = &lt;optimized out&gt;
+        f = 0x55555558f890
+        funcs = 0x55555558f620
+        restart = &lt;optimized out&gt;
+#12 0x00007ffff0aacf97 in __do_global_dtors_aux () from /home/lorenzo/Downloads/brlcad/lib/libOpenNURBS.so
+No symbol table info available.
+#13 0x00007fffffffcf20 in ?? ()
+No symbol table info available.
+#14 0x00007ffff7fc60f2 in _dl_call_fini (closure_map=0x55555557ff60) at ./elf/dl-call_fini.c:43
+        array = 0x7ffff110ae78
+        sz = &lt;optimized out&gt;
+        map = 0x55555557ff60
+        fini_array = &lt;optimized out&gt;
+        fini = &lt;optimized out&gt;
+Backtrace stopped: frame did not save the PC
+</code></pre></div>
+
+
+
+<a name="513409403"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513409403" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513409403">(Apr 21 2025 at 14:25)</a>:</h4>
+<p>So the problem seems to be related to BRLCAD's <strong>libOpenNURBS.so</strong> dynamic library. I'm not entirely sure how to fix this tho...</p>
+
+
+
+<a name="513441768"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513441768" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513441768">(Apr 21 2025 at 17:40)</a>:</h4>
+<p>Woah, what have you done done with your computer <span aria-label="face with spiral eyes" class="emoji emoji-1f635-200d-1f4ab" role="img" title="face with spiral eyes">:face_with_spiral_eyes:</span> Where does the Qt stuff come from?<br>
+You work with Ubuntu 24.04.1 LTS?</p>
+
+
+
+<a name="513446792"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513446792" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513446792">(Apr 21 2025 at 18:13)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/513441768">ha scritto</a>:</p>
+<blockquote>
+<p>Woah, what have you done done with your computer <span aria-label="face with spiral eyes" class="emoji emoji-1f635-200d-1f4ab" role="img" title="face with spiral eyes">:face_with_spiral_eyes:</span> Where does the Qt stuff come from?<br>
+You work with Ubuntu 24.04.1 LTS?</p>
+</blockquote>
+<p>It's not like I've done anything insane with it. <span aria-label="joy" class="emoji emoji-1f602" role="img" title="joy">:joy:</span> </p>
+<p>It is a fresh VMWare Workstation Pro 17 virtual machine running Ubuntu 24.04.1 LTS. I created this VM to have a fresh and separated environment for BRL-CAD related stuff. I kept a log of (almost) everything that I did to it.</p>
+<p>I have no idea where the Qt stuff comes from... <span aria-label="sweat smile" class="emoji emoji-1f605" role="img" title="sweat smile">:sweat_smile:</span></p>
+
+
+
+<a name="513447593"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513447593" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513447593">(Apr 21 2025 at 18:19)</a>:</h4>
+<p>It's no big deal tho if it is a problem related to something that I've done to my machine.</p>
+<p>Indeed, that's why I used a VM and why I kept a log of everything that I did in the first place. I knew that I was gonna break a lot of stuff, considering that this is my first experience with some "real" code.</p>
+<p>Well, I know what I will do this evening: rebuild everything from scratch <span aria-label="joy" class="emoji emoji-1f602" role="img" title="joy">:joy:</span> </p>
+<p>Thank you so much for your patience and for putting up with my mistakes for the past months tho</p>
+
+
+
+<a name="513467018"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513467018" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513467018">(Apr 21 2025 at 20:42)</a>:</h4>
+<p>I don't consider it as yours fault. You did something different than we did before. Now, it's interesting to explore it and see how we can fix it. At least, I plan to set up a VM with Ubuntu too.</p>
+
+
+
+<a name="513474439"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/513474439" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#513474439">(Apr 21 2025 at 21:44)</a>:</h4>
+<p>Ok, reinstalled everything (brlcad, MOOSE and arbalest) from scratch, and now everything works perfectly fine. All tests are successful.</p>
+<p>I did exactly what I've done before (according to my logs). The only differences are:</p>
+<ul>
+<li>I didn't download the following packages:<br>
+    - qtbase5-dev<br>
+    - qt6-svg-dev<br>
+    - libxcb-cursor-dev<br>
+    - libxcb-cursor0</li>
+<li>I didn't play around with VSCode configs.</li>
+</ul>
+
+
+
+<hr><p>Last updated: Apr 22 2025 at 00:52 UTC</p>
 </html>
