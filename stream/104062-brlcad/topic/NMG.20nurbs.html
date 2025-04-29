@@ -27,5 +27,65 @@
 
 
 
-<hr><p>Last updated: Apr 28 2025 at 00:55 UTC</p>
+<a name="514740380"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514740380" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514740380">(Apr 28 2025 at 07:33)</a>:</h4>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>  Biggest issue I can think of is that the bspline conversion to OpenNURBS has some problems, often doesn't work.  It was a quick and dirty demo.  Ray tracing and conversion only sometimes works, if that particular model was luckily encoded in a particular way expected.</p>
+<p>I wouldn't think it makes sense to chop away at libnmg unless the long-term plan <em>is</em> to keep it.  Otherwise, that's just going to potentially introduce bugs in cases that are currently working.  They'll of course be unexpected too, and likely discovered well after the damage is done.</p>
+
+
+
+<a name="514742014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514742014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514742014">(Apr 28 2025 at 07:42)</a>:</h4>
+<p>I'd like long-term plan to be driven by numbers, conversion statistics.  If we establish (and ideally expand) a CI conversion corpus, then nmg's replacement or enhancement will be apparent.</p>
+<p>I'm doubtful manifold will produce a better result any time soon, just from the geometry theory perspective (we will have already thrown away surface intersection information at the time of boolean eval), but if/when the numbers show vastly superior conversion statistics, that would easily justify a decision.  The same issue holds with stripping the nurbs boolean eval logic.  It's large and complex, and potentially replaceable by manifold, but I know from a theory perspective it will likely be inferior -- it's value is more in cases that fail as a backup method.  Same should hold true for nmg, but it all of course depends.  We can likely contrive examples in support of either direction -- hence my inclination to let it be data-driven, user-centric.</p>
+
+
+
+<a name="514775665"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514775665" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514775665">(Apr 28 2025 at 10:22)</a>:</h4>
+<p>Hmm.  Maybe a good student/gsoc project topic would be to get robust bspline-&gt;brep conversion working.</p>
+
+
+
+<a name="514775740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514775740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514775740">(Apr 28 2025 at 10:23)</a>:</h4>
+<p>Compared to the raytracing part of NURBS I would expect that to be a lot more tractable, since its a data translation problem rather than an analytic problem.</p>
+
+
+
+<a name="514775846"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514775846" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514775846">(Apr 28 2025 at 10:23)</a>:</h4>
+<p>If the long term plan isn't to keep libnmg that's another discussion, since it is deeply embedded in things like the individual primitive tessellation routines.</p>
+
+
+
+<a name="514830109"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514830109" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514830109">(Apr 28 2025 at 14:30)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/104062-brlcad/topic/NMG.20nurbs/near/514775665">said</a>:</p>
+<blockquote>
+<p>Hmm.  Maybe a good student/gsoc project topic would be to get robust bspline-&gt;brep conversion working.</p>
+</blockquote>
+<p>Possibly.  That'd likely require someone with 4+ years CS background, not terribly common.  And not just a coding issue, have to understand what the data represents (e.g., should the knots be replicated or not? what about the starting and ending cv's?).</p>
+
+
+
+<a name="514830390"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514830390" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514830390">(Apr 28 2025 at 14:32)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/104062-brlcad/topic/NMG.20nurbs/near/514775846">said</a>:</p>
+<blockquote>
+<p>If the long term plan isn't to keep libnmg that's another discussion, since it is deeply embedded in things like the individual primitive tessellation routines.</p>
+</blockquote>
+<p>Kind of was making the opposite argument -- personally, see little value aiming to purge libnmg long or short term.  I think we should keep/maintain/improve it (at least foreseeable future).  I just wouldn't be terribly opposed if the stats for an alternative were compelling or if manifold takes over more of its feature space. </p>
+<p>libnmg has significant value in my perspective both from a theory and implementation perspective, but undeniably complex code.  It takes a LOT of mental effort to get it all in context to make meaningful improvements.  Easy to make a faulty assumptions that makes things worse (Richard).  We've already tempted fate repeated with mods that only resulted in less end user capability (typically bugs and added failures that we discovered later).</p>
+
+
+
+<a name="514917884"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/NMG%20nurbs/near/514917884" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/NMG.20nurbs.html#514917884">(Apr 28 2025 at 23:00)</a>:</h4>
+<p>That's basically what I was hoping to do - replace the nmg boolean with Manifold's.  There are some features the Blender folks are interested in related to tracking face IDs and such that might be very useful when it comes to reassembling an NMG from the triangle boolean output, although I've not experimented with it myself.</p>
+<p>However, since the libnmg nurbs capabilities are (in my mind anyway) not where new development should be aimed, I'd still like to phase them out have have libnmg just be a polygon/planar focused library with libbrep taking on the nurbs responsibilities.</p>
+
+
+
+<hr><p>Last updated: Apr 29 2025 at 00:53 UTC</p>
 </html>
