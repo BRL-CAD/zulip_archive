@@ -35,5 +35,91 @@ error！！！</p>
 
 
 
-<hr><p>Last updated: Jun 01 2025 at 01:06 UTC</p>
+<a name="521495475"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521495475" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> claymonkey <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521495475">(Jun 01 2025 at 02:17)</a>:</h4>
+<p>(deleted)</p>
+
+
+
+<a name="521495515"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521495515" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> claymonkey <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521495515">(Jun 01 2025 at 02:17)</a>:</h4>
+<p>Try to parse the CAD file by yourself and convert it into a creatable BREP type.</p>
+
+
+
+<a name="521505821"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521505821" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521505821">(Jun 01 2025 at 04:22)</a>:</h4>
+<p><span class="user-mention" data-user-id="782450">@claymonkey</span> so just for the technical challenge?  or some other purpose? parsing and converting from iges/step to some brep in-memory structure is not exactly an end-use case..  </p>
+<p>If you're working with BRL-CAD, the 3dm-g is by far the best brep import method that imports faithfully &amp; natively using OpenNURBS.  Next best is step-g if it's an ap203e1 file.  The iges-g importer hasn't been tested or used in production use for nearly a decade, but it has extensive code for multiple import methods and encoding types (including automatic re-encoding of bspline to NURBS) but also less reliable if there are any errors in the geometry.</p>
+
+
+
+<a name="521527716"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521527716" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> claymonkey <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521527716">(Jun 01 2025 at 08:35)</a>:</h4>
+<p>Because I found that the Brep type of openNurbs is quite similar to that of opencascad, when some programs do not support certain operations, I thought of using the underlying feedback information to create corresponding ones, hoping that other open-source methods can handle them more precisely.</p>
+
+
+
+<a name="521556957"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521556957" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521556957">(Jun 01 2025 at 13:58)</a>:</h4>
+<p>It is indeed similar, but not 1-1 identical if memory serves.</p>
+
+
+
+<a name="521557028"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521557028" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521557028">(Jun 01 2025 at 13:59)</a>:</h4>
+<p>so are you looking to bridge geometry from some application built on opencascade into brl-cad, to some operation that brl-cad handles better, and then convert it back?</p>
+
+
+
+<a name="521557467"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521557467" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> claymonkey <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521557467">(Jun 01 2025 at 14:03)</a>:</h4>
+<p>Yes, if multiple software functions are combined, then only common cad types can be used for conversion. After all, brep will not be exactly the same</p>
+
+
+
+<a name="521557568"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521557568" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521557568">(Jun 01 2025 at 14:04)</a>:</h4>
+<p>that would certainly be feasible for brep and/or polygonal types I'd think</p>
+
+
+
+<a name="521557893"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521557893" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521557893">(Jun 01 2025 at 14:07)</a>:</h4>
+<p>problematic encodings are typically:  implicits, csg booleans, volumetric/voxel data, level sets, subdivision surfaces, t-splines, medial axis, signed distance fields, and parametric ops like sweep/loft/extrude</p>
+
+
+
+<a name="521558037"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521558037" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521558037">(Jun 01 2025 at 14:09)</a>:</h4>
+<p>brep is more amenable, includes triangles, polygons, bezier patches, b-spline patches, and nurbs surfaces</p>
+
+
+
+<a name="521558374"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521558374" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> claymonkey <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521558374">(Jun 01 2025 at 14:12)</a>:</h4>
+<p>Perhaps FACE can be parsed as a combination of the basic NurbsSurface and CurvesToTrimed<br>
+. Then perhaps in any logic, there will be corresponding creation methods.</p>
+
+
+
+<a name="521616069"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521616069" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521616069">(Jun 01 2025 at 23:54)</a>:</h4>
+<p>There was some work done a while back on opennurbs -&gt; opencascade, IIRC - I think it was this?  <a href="https://www.cnblogs.com/opencascade/p/opennurbs2opencascade.html">https://www.cnblogs.com/opencascade/p/opennurbs2opencascade.html</a></p>
+
+
+
+<a name="521616154"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521616154" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521616154">(Jun 01 2025 at 23:55)</a>:</h4>
+<p>I recall hunting around a while back because going to/from opennurbs and opencascade data types would be a  keystone of a converter of .g geometry to/from FreeCAD</p>
+
+
+
+<a name="521616276"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/521616276" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#521616276">(Jun 01 2025 at 23:56)</a>:</h4>
+<p>It would be really awesome if we had two way communication with FreeCAD, but my recollection is that the problem is fairly involved - NURBS BRep objects have a LOT of subtypes, and there are subtleties that need to be taken into account.</p>
+
+
+
+<hr><p>Last updated: Jun 02 2025 at 00:57 UTC</p>
 </html>
