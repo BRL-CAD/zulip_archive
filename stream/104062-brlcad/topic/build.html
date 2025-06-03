@@ -8281,5 +8281,74 @@ make: *** [Makefile:146: all] Error 2
 
 
 
-<hr><p>Last updated: Jun 02 2025 at 00:57 UTC</p>
+<a name="521819730"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/521819730" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#521819730">(Jun 02 2025 at 18:49)</a>:</h4>
+<p>Hey, after trying for a lot of time, I think that I need some help to build brlcad, MOOSE and arbalest on Windows.</p>
+<p>First of all I'm on a Windows 11 VM (using VMWare Workstation Pro 17).</p>
+<p>Right now I've done the following steps:</p>
+<ul>
+<li>installed Git, CMake and Visual Studio 2022</li>
+<li>built brlcad successfully with CMake (from inside VS2022), using the following arguments:<br>
+    - <code>DBRLCAD_ENABLE_STRICT=OFF</code><br>
+    - <code>DBRLCAD_ENABLE_COMPILER_WARNINGS=OFF</code><br>
+    - <code>DBRLCAD_BUNDLED_LIBS=ON</code><br>
+    - <code>DBRLCAD_VERSION=7.40.3</code></li>
+</ul>
+<p>When I try to compile it tho, I get the following error:</p>
+<div class="codehilite"><pre><span></span><code>  [3412/4391] Generating attr_std_table.xml
+  [3413/4391] Generating attr_std_list.xml
+  [3414/4391] Generating ../../../bin/yedit.exe
+  FAILED: bin/yedit.exe C:/Users/User/Documents/BRL-CAD/brlcad/out/build/x64-Debug/bin/yedit.exe
+  C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\User\Documents\BRL-CAD\brlcad\out\build\x64-Debug\misc\tools\yori &amp;&amp; "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy C:/Users/User/Documents/BRL-CAD/brlcad/out/build/x64-Debug/misc/tools/yori/YEDIT_BLD-prefix/src/YEDIT_BLD/edit/yedit.exe C:/Users/User/Documents/BRL-CAD/brlcad/out/build/x64-Debug/bin/yedit.exe"
+  Error copying file "C:/Users/User/Documents/BRL-CAD/brlcad/out/build/x64-Debug/misc/tools/yori/YEDIT_BLD-prefix/src/YEDIT_BLD/edit/yedit.exe" to "C:/Users/User/Documents/BRL-CAD/brlcad/out/build/x64-Debug/bin/yedit.exe".
+  [3415/4391] No install step for 'BrlcadBugs'
+  ninja: build stopped: subcommand failed.
+
+Rebuild All failed.
+</code></pre></div>
+<p><a href="/user_uploads/1549/XqM06HXlo7v8K1XV0Pp_5LvZ/Screenshot-2025-06-02-204917.png">Screenshot 2025-06-02 204917.png</a></p>
+<div class="message_inline_image"><a href="/user_uploads/1549/XqM06HXlo7v8K1XV0Pp_5LvZ/Screenshot-2025-06-02-204917.png" title="Screenshot 2025-06-02 204917.png"><img data-original-content-type="image/png" data-original-dimensions="1335x331" src="/user_uploads/thumbnail/1549/XqM06HXlo7v8K1XV0Pp_5LvZ/Screenshot-2025-06-02-204917.png/840x560.webp"></a></div>
+
+
+
+<a name="521824900"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/521824900" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Pavel Jansa <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#521824900">(Jun 02 2025 at 19:17)</a>:</h4>
+<p>Hi, I am trying to build 7.40.2 release on MacOS following the instructions in README. </p>
+<div class="codehilite"><pre><span></span><code>[ 48%] Built target OPENNURBS_BLD-install
+-- PNG_BLD install command succeeded.  See also /Users/pawleeq/Downloads/brlcad-7.40.2/build/bext_build/png/PNG_BLD-prefix/src/PNG_BLD-stamp/PNG_BLD-install-*.log
+[ 51%] Built target PNG_BLD-install
+gmake: *** [Makefile:91: all] Error 2
+CMake Error at misc/CMake/BRLCAD_Util.cmake:90 (_message):
+  Unable to successfully build bext dependency repository
+Call Stack (most recent call first):
+  misc/CMake/BRLCAD_EXT_Setup.cmake:239 (message)
+  misc/CMake/BRLCAD_ExternalDeps.cmake:121 (brlcad_ext_setup)
+  CMakeLists.txt:1995 (include)
+
+
+-- Configuring incomplete, errors occurred!
+</code></pre></div>
+<p>Any clue please?</p>
+
+
+
+<a name="521863780"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/521863780" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#521863780">(Jun 02 2025 at 23:39)</a>:</h4>
+<p>For the yedit issue, just comment out this line:  <a href="https://github.com/BRL-CAD/brlcad/blob/main/misc/tools/CMakeLists.txt#L12">https://github.com/BRL-CAD/brlcad/blob/main/misc/tools/CMakeLists.txt#L12</a></p>
+
+
+
+<a name="521863952"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/521863952" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#521863952">(Jun 02 2025 at 23:40)</a>:</h4>
+<p>I've asked about that error upstream - I didn't hear anything directly, but this might be the fix:  <a href="https://github.com/malxau/yori/commit/431dc07dd2b9814acd34d8125f9bdb53a10ceaaf">https://github.com/malxau/yori/commit/431dc07dd2b9814acd34d8125f9bdb53a10ceaaf</a></p>
+
+
+
+<a name="521864022"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/521864022" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#521864022">(Jun 02 2025 at 23:41)</a>:</h4>
+<p>For the MacOS issue - we don't have enough of the log there to know what failed.</p>
+
+
+
+<hr><p>Last updated: Jun 03 2025 at 00:56 UTC</p>
 </html>
