@@ -17018,5 +17018,25 @@ You work with Ubuntu 24.04.1 LTS?</p>
 
 
 
-<hr><p>Last updated: Jun 07 2025 at 00:54 UTC</p>
+<a name="522902831"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/522902831" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#522902831">(Jun 07 2025 at 15:42)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/522630225">said</a>:</p>
+<blockquote>
+<p>I opened another PR "<a href="https://github.com/BRL-CAD/arbalest/pull/60">Reverted the hacks done to create a personalized title bar</a>".</p>
+</blockquote>
+<p>I don't like the</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">setWindowIcon</span><span class="p">(</span><span class="o">*</span><span class="k">new</span><span class="w"> </span><span class="n">QIcon</span><span class="p">(</span><span class="o">*</span><span class="k">new</span><span class="w"> </span><span class="n">QBitmap</span><span class="p">(</span><span class="s">":/icons/arbalest_icon.png"</span><span class="p">)));</span>
+</code></pre></div>
+<p>line. First, it could be better written as</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">QBitmap</span><span class="p">(</span><span class="s">":/icons/arbalest_icon.png"</span><span class="p">)));</span>
+</code></pre></div>
+<p>without wasting memory. Then, <code>QBitmap</code> is monochrome. Why not <code>QPixmap</code>? However, wouldn't be</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="s">":/icons/arbalest_icon.png"</span><span class="p">));</span>
+</code></pre></div>
+<p>even better? And at last, doesn't <code>QGuiApplication::setWindowIcon()</code> set the <strong>application</strong> icon (i.e. the default window icon)?</p>
+<p>I know that this line came from the previously existing code, and changing it would probably go too far for this PR, but...</p>
+
+
+
+<hr><p>Last updated: Jun 08 2025 at 01:00 UTC</p>
 </html>

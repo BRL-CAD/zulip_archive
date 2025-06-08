@@ -12520,5 +12520,11 @@
         "id": 522630225,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1749140690
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/522630225\">said</a>:</p>\n<blockquote>\n<p>I opened another PR \"<a href=\"https://github.com/BRL-CAD/arbalest/pull/60\">Reverted the hacks done to create a personalized title bar</a>\".</p>\n</blockquote>\n<p>I don't like the</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">setWindowIcon</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"k\">new</span><span class=\"w\"> </span><span class=\"n\">QIcon</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"k\">new</span><span class=\"w\"> </span><span class=\"n\">QBitmap</span><span class=\"p\">(</span><span class=\"s\">\":/icons/arbalest_icon.png\"</span><span class=\"p\">)));</span>\n</code></pre></div>\n<p>line. First, it could be better written as</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">setWindowIcon</span><span class=\"p\">(</span><span class=\"n\">QIcon</span><span class=\"p\">(</span><span class=\"n\">QBitmap</span><span class=\"p\">(</span><span class=\"s\">\":/icons/arbalest_icon.png\"</span><span class=\"p\">)));</span>\n</code></pre></div>\n<p>without wasting memory. Then, <code>QBitmap</code> is monochrome. Why not <code>QPixmap</code>? However, wouldn't be</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">setWindowIcon</span><span class=\"p\">(</span><span class=\"n\">QIcon</span><span class=\"p\">(</span><span class=\"s\">\":/icons/arbalest_icon.png\"</span><span class=\"p\">));</span>\n</code></pre></div>\n<p>even better? And at last, doesn't <code>QGuiApplication::setWindowIcon()</code> set the <strong>application</strong> icon (i.e. the default window icon)?</p>\n<p>I know that this line came from the previously existing code, and changing it would probably go too far for this PR, but...</p>",
+        "id": 522902831,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1749310923
     }
 ]
