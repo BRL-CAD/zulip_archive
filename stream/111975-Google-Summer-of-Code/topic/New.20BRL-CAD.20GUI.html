@@ -17081,5 +17081,63 @@ You work with Ubuntu 24.04.1 LTS?</p>
 
 
 
-<hr><p>Last updated: Jun 13 2025 at 00:56 UTC</p>
+<a name="524024154"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524024154" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524024154">(Jun 13 2025 at 23:05)</a>:</h4>
+<p>Hey mentors, I have big news!</p>
+<p>I just finished standardizing how <em>arbalest-simple</em> <code>QStyleSheet</code> is interpreted on Linux (Ubuntu 24.04.1 LTS) and on Windows (Windows 11)! Obviously these reworked style and themes were created keeping in mind the soon-to-be feature to support theme creation/editing directly from the app.</p>
+<p>Also, even bigger news, I just finished implementing and testing support  for <strong>changing themes at runtime without closing and reopening the app</strong>!</p>
+
+
+
+<a name="524024195"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524024195" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524024195">(Jun 13 2025 at 23:05)</a>:</h4>
+<p>Images and videos of these changes can be seen on my <a href="https://lorenzopegorari.github.io/GSoC25-report/logs">logs</a>.</p>
+
+
+
+<a name="524024321"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524024321" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524024321">(Jun 13 2025 at 23:07)</a>:</h4>
+<p>Tomorrow I will create the PR for this code (probably separated into 2-3 PRs).</p>
+
+
+
+<a name="524025807"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524025807" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524025807">(Jun 13 2025 at 23:26)</a>:</h4>
+<p>I have found only one problem that I need some help with: adding icons through the <code>QStyleSheet</code>.</p>
+<p>Basically, the "x" icon to close a document and a down arrow icon that I added for the ComboBox, are added with the following code inside the <code>QStyleSheet</code>:</p>
+<div class="codehilite"><pre><span></span><code>#documentAreaTabBar::close-button {
+    image: url(:/icons/sadeep_created_close-tab.png);
+}
+
+QComboBox::down-arrow {
+    image: url(:/icons/baseline_down_arrow_black_48dp.png);
+}
+</code></pre></div>
+<p>The goal is to make these 2 icons' colors modifiable (consistently with all the other icons). Unfortunately there is no way to cleanly achieve this.</p>
+<hr>
+<p>From outside the <code>QStyleSheet</code> I haven't found a way to easily set these images.</p>
+<p>The only way to do this apparently is to use <code>QStyle</code>, but <a href="https://www.qtcentre.org/threads/34489-Style-sheet-and-QStyle-cohabitation"><code>QStyle</code> and <code>QStyleSheet</code> cohabitation is a dangerous situation</a>.</p>
+<p>And <a href="https://doc.qt.io/qt-6/qstyle.html#creating-a-custom-style">from the docs</a>:</p>
+<blockquote>
+<p><strong>Warning:</strong> Qt style sheets are currently not supported for custom QStyle subclasses. We plan to address this in some future release.</p>
+</blockquote>
+<hr>
+<p>From inside the <code>QStyleSheet</code>, <a href="https://stackoverflow.com/questions/71979624/qt-stylesheet-to-use-an-image-from-memory">there isn't a way to read images from data</a>, but only from a path to a file.</p>
+<p>This means that the only solution seems to be the following:</p>
+<ul>
+<li>open the <code>QIcon</code></li>
+<li>use <code>QPixmap</code> to change its color</li>
+<li>write the modified icon to disk</li>
+<li>make the<code>QStyleSheet</code> read the modified icon from disk</li>
+</ul>
+
+
+
+<a name="524025843"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524025843" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524025843">(Jun 13 2025 at 23:26)</a>:</h4>
+<p>Any feedback regarding this situation is greatly appreciated!</p>
+
+
+
+<hr><p>Last updated: Jun 14 2025 at 00:54 UTC</p>
 </html>
