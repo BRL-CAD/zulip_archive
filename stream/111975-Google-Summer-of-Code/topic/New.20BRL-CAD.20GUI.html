@@ -17139,5 +17139,45 @@ QComboBox::down-arrow {
 
 
 
-<hr><p>Last updated: Jun 14 2025 at 00:54 UTC</p>
+<a name="524070953"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524070953" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524070953">(Jun 14 2025 at 15:11)</a>:</h4>
+<p><span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span> Why are these icons different from the others?<br>
+There are only two versions of each icon, couldn't be both present as file?</p>
+<p>However, <code>:/icons/sadeep_created_close-tab.png</code> isn't a file, but a resource path. You could have a look at <a href="https://doc.qt.io/qt-6/qresource.html">QResource</a>:</p>
+<blockquote>
+<p>This can often be useful when loading a large set of application icons that may change based on a setting, or that can be edited by a user and later recreated.</p>
+</blockquote>
+<p><code>QStyleSheet</code> may not be able to read images from data, but maybe from Base64 encoded strings like</p>
+<div class="codehilite"><pre><span></span><code>data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==
+</code></pre></div>
+
+
+
+<a name="524083224"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524083224" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524083224">(Jun 14 2025 at 19:19)</a>:</h4>
+<p>These 2 icons are different from the other ones because they are set within the stylesheet using:</p>
+<div class="codehilite"><pre><span></span><code>image: url(:/icons/image_name.png);
+</code></pre></div>
+<p>While all the other icons are set using:</p>
+<div class="codehilite"><pre><span></span><code>QIcon icon;
+setIcon(icon.addPixmap(QPixmap::fromImage(coloredIcon(&quot;:/icons//image_name.png&quot;, &quot;$Color-Icon&quot;))));
+</code></pre></div>
+
+
+
+<a name="524083420"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524083420" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524083420">(Jun 14 2025 at 19:23)</a>:</h4>
+<p>This means that there is no easy way to color these icons (like <code>coloredIcon()</code> does), because these images can only be referenced from their path only.</p>
+<p>There is no way to read the image, change its color accordingly to the theme, and then set this modified icon through <code>image:</code>.</p>
+<p>The only way to do this seems to be to save the modified icon to disk, and then modify the icon path that <code>image:</code> reads</p>
+
+
+
+<a name="524083483"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/524083483" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#524083483">(Jun 14 2025 at 19:25)</a>:</h4>
+<p>I did some reasearch and from my understanding <code>QStyleSheet</code> does not support Base64 encoded images...</p>
+
+
+
+<hr><p>Last updated: Jun 15 2025 at 01:01 UTC</p>
 </html>

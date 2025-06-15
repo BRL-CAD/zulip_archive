@@ -12592,5 +12592,29 @@
         "id": 524025843,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1749857195
+    },
+    {
+        "content": "<p><span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span> Why are these icons different from the others?<br>\nThere are only two versions of each icon, couldn't be both present as file?</p>\n<p>However, <code>:/icons/sadeep_created_close-tab.png</code> isn't a file, but a resource path. You could have a look at <a href=\"https://doc.qt.io/qt-6/qresource.html\">QResource</a>:</p>\n<blockquote>\n<p>This can often be useful when loading a large set of application icons that may change based on a setting, or that can be edited by a user and later recreated.</p>\n</blockquote>\n<p><code>QStyleSheet</code> may not be able to read images from data, but maybe from Base64 encoded strings like</p>\n<div class=\"codehilite\"><pre><span></span><code>data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==\n</code></pre></div>",
+        "id": 524070953,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1749913876
+    },
+    {
+        "content": "<p>These 2 icons are different from the other ones because they are set within the stylesheet using:</p>\n<div class=\"codehilite\"><pre><span></span><code>image: url(:/icons/image_name.png);\n</code></pre></div>\n<p>While all the other icons are set using:</p>\n<div class=\"codehilite\"><pre><span></span><code>QIcon icon;\nsetIcon(icon.addPixmap(QPixmap::fromImage(coloredIcon(&quot;:/icons//image_name.png&quot;, &quot;$Color-Icon&quot;))));\n</code></pre></div>",
+        "id": 524083224,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1749928747
+    },
+    {
+        "content": "<p>This means that there is no easy way to color these icons (like <code>coloredIcon()</code> does), because these images can only be referenced from their path only.</p>\n<p>There is no way to read the image, change its color accordingly to the theme, and then set this modified icon through <code>image:</code>.</p>\n<p>The only way to do this seems to be to save the modified icon to disk, and then modify the icon path that <code>image:</code> reads</p>",
+        "id": 524083420,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1749929000
+    },
+    {
+        "content": "<p>I did some reasearch and from my understanding <code>QStyleSheet</code> does not support Base64 encoded images...</p>",
+        "id": 524083483,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1749929109
     }
 ]
