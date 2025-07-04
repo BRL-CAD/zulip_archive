@@ -17461,5 +17461,74 @@ However, I'll dive deeper into QStyle. Maybe, I see a solution there.</p>
 
 
 
-<hr><p>Last updated: Jul 03 2025 at 00:56 UTC</p>
+<a name="527082404"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527082404" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527082404">(Jul 03 2025 at 22:38)</a>:</h4>
+<p>I might have a plan for how to create the CLI in a clean and "simple" (meaning that it will be very simple to understand and clean, but it will be a lot of work to achieve) way. I would love some honest and hard feedback regarding this.</p>
+<hr>
+<h1>MOOSE</h1>
+<p>On <strong>MOOSE</strong>'s side of things, the module <code>CommandString</code> will have many more "<em>ged</em> wrappers".</p>
+<p>"<code>CompleteCommand</code>" will, given a <code>char *</code> (or a <code>std::string</code>, or a <code>QString</code>, or a list of one of those), act like a wrapper for <code>ged_cmd_completions</code>.</p>
+<p>"<code>CompleteGeometry</code>" will be pretty much the same as "<code>CompleteCommand</code>", but for <code>ged_geom_completions</code>.</p>
+<p>This same idea will apply also for <code>ged_cmd_exists</code>, <code>ged_cmd_valid</code>, <code>ged_cmd_lookup</code>, and so on...</p>
+<hr>
+<h1>Arbalest</h1>
+<p>On <strong>arbalest</strong>'s side of things, there will be 2 new widgets: <code>Console</code> and <code>ConsoleCompleter</code>.</p>
+<h2>Console</h2>
+<p><code>Console</code> will be initialized in <code>MainWindow::prepareDockables</code> and placed inside a <code>ConsoleDockable</code> that will be positioned in the <code>Qt::BottomDockWidgetArea</code>.</p>
+<p>A reference to the <code>Console</code> will be stored inside <code>MainWindow</code>.</p>
+<p><code>Console</code> will need a pointer to the currently active <code>Document</code> (when the active <code>Document</code> is changed, inside <code>MainWindow::onActiveDocumentChanged</code> the setter <code>Console::setActiveDocument</code> will be called with the new active <code>Document</code> as an argument).</p>
+<p>The main method <code>Console::keyPressEvent</code> will handle everything pretty similarly to <code>pqImplementation::keyPressEvent</code>. When enter/return is pressed, the <code>Console</code> will check if the command is valid, and if so execute it.</p>
+<h2>ConsoleCompleter</h2>
+<p><code>ConsoleCompleter</code> will work kinda like <code>GEDShellCompleter</code>. It will suggest a command based on what the user has already typed in the <code>Console</code>.</p>
+<hr>
+<h1>Execution of commands</h1>
+<p>This is the most important part of the project. When the <code>ged_exec</code> wrapper "<code>Parse</code>" executes a certain <em>ged</em> command, there will be many things happening to both the database and the GUI:</p>
+<ul>
+<li>some stuff should be printed (eg: "ls") -&gt; <code>Console</code> output</li>
+<li>some object is added (eg: "make") -&gt; <code>ObjectTree</code> is changed, redraw <code>ObjectTreeWidget</code>, rerender <code>Viewports</code></li>
+<li>some object is modified (eg: "p") -&gt;  <code>ObjectTree</code> is changed, redraw <code>Properties</code>, rerender <code>Viewports</code></li>
+<li>some object is removed (eg: "kill") -&gt;  <code>ObjectTree</code> is changed, redraw <code>ObjectTreeWidget</code>, rerender <code>Viewports</code></li>
+<li>some object's visibilty is changed (eg: "draw", "erase") -&gt;  <code>ObjectTree</code> is changed, redraw <code>ObjectTreeWidget</code>, rerender <code>Viewports</code></li>
+<li>other stuff (eg: "quit") -&gt; quit application</li>
+</ul>
+<p>Imo it's a bad idea to make it so that the <code>Console</code> should handle all of this complexity by, based on the command executed, calling all the methods to modify the <code>ObjectTree</code>, change objects' visibilty state, redraw the <code>ObjectTreeWidget</code>/<code>Properties</code> if necessary,  refresh the <code>GeometryRenderer</code>, rerender the <code>Viewports</code>, and so on.</p>
+<p>The best way to handle all this complexity (again, this is my opinion) is to make it so to not "make the GUI handle the <code>ObjectTree</code>", but to "<strong>make the <code>ObjectTree</code>handle the GUI</strong>".</p>
+<p>I will give an example on what I mean by this statement: let's say that I want to add an "Arb8". I have two ways of doing this:</p>
+<ul>
+<li>Menu bar -&gt; Create -&gt; Arb8</li>
+<li>CLI -&gt; "make test arb8"</li>
+</ul>
+<p>Both of these ways will modify the database by adding a new object through MOOSE. The first one will use <code>Database::Add</code> and the second one will use <code>CommandString::Parse</code>.</p>
+<p>Then, the presence of this new object should modify something in the GUI (again, I'm talking about <code>ObjectTree</code>, <code>ObjectTreeWidget</code>, <code>Viewport</code>, <code>Properties</code>, ...). Instead of making it so that the menu bar <code>QAction</code> or the <code>Console</code> has to call a bunch of stuff to make these things in order (for example when <code>QAction createArb8Act</code> is pressed, it adds and "Arb8", and then calls a bunch of stuff to readjust the GUI accordingly), the <code>ObjectTree</code> itself could handle all of this by:</p>
+<ol>
+<li>adding the object to the db</li>
+<li>
+<p>realizing that a new object has been added to the db, so:</p>
+<p>- the new object should be present in the object tree widget<br>
+  - the new object visibilty state should be "visible"<br>
+  - the new object should be selected<br>
+  - ...</p>
+</li>
+<li>
+<p>realizing that an object is now "visible", so:</p>
+<p>- the object should be drawn<br>
+  - the object should be seen as "visible" in the object tree widget<br>
+  - the object's parent should be seen as "has children visible" in the object tree widget<br>
+  - ...</p>
+</li>
+<li>
+<p>realizing that an object is now "selected", so:</p>
+<p>- the object should be seen as selected in the object tree widget<br>
+  - the object properties should appear in the properties dockable<br>
+  - ...</p>
+</li>
+<li>
+<p>...</p>
+</li>
+</ol>
+<p>So basically the <code>ObjectTree</code> will modifiy its database and its internal properties (eg: <code>objectIdVisibilityStateMap</code>), and then modify the GUI accordingly. This way all the GUI parts of arbalest will be much cleaner and more related to GUI stuff, while <code>ObjectTree</code> will be the most "complex and low level" part of arbalest, that will handle 99% of the calls to the underlying MOOSE's/brlcad's stuff.</p>
+
+
+
+<hr><p>Last updated: Jul 04 2025 at 00:56 UTC</p>
 </html>
