@@ -8434,5 +8434,298 @@ Call Stack (most recent call first):
 
 
 
-<hr><p>Last updated: Jul 04 2025 at 00:56 UTC</p>
+<a name="527195679"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/527195679" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#527195679">(Jul 04 2025 at 14:56)</a>:</h4>
+<p>I'm not able to build brlcad with Qt6 enbaled for some reason. I do the following command:</p>
+<div class="codehilite"><pre><span></span><code>cmake .. -DBRLCAD_ENABLE_STRICT=OFF -DBRLCAD_ENABLE_COMPILER_WARNINGS=OFF -DBRLCAD_BUNDLED_LIBS=ON -DCMAKE_BUILD_TYPE=Debug -DBRLCAD_ENABLE_QT=ON -DQt6_DIR=&quot;/usr/lib/x86_64-linux-gnu/cmake/Qt6&quot;
+</code></pre></div>
+<p>Where "<code>/usr/lib/x86_64-linux-gnu/cmake/Qt6</code>" is the path to the file "<code>Qt6Config.cmake</code>".</p>
+<p>I'm getting these errors though. What am I doing wrong?</p>
+<div class="codehilite"><pre><span></span><code>...
+
+------------- BRL-CAD Release 7.40.3, Build 20250704 - Debug Build -------------
+
+        Prefix: /home/lorenzo/Downloads/brlcad
+      Binaries: /home/lorenzo/Downloads/brlcad/bin
+     Libraries: /home/lorenzo/Downloads/brlcad/lib
+  Manual pages: /home/lorenzo/Downloads/brlcad/share/man
+Data resources: /home/lorenzo/Downloads/brlcad/share
+
+CC       = /usr/bin/cc
+CXX      = /usr/bin/c++
+CFLAGS   = -std=c11 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -m64 -g -ggdb3 -fstack-protector-all
+CXXFLAGS = -std=c++17 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -ftemplate-depth-128 -m64 -g -ggdb3 -fstack-protector-all
+LDFLAGS  = -m64 -g -ggdb3
+
+
+Asset Import Library.................: Bundled
+Eigen................................: Bundled
+Geogram..............................: Bundled
+Geospatial Data Abstraction Library..: Bundled
+Lightning Memory-Mapped Database.....: Bundled
+Netpbm...............................: Bundled
+OpenCV...............................: Bundled
+OpenMesh.............................: Bundled
+OpenNURBS............................: Bundled
+OSMesa...............................: Bundled
+Portable Network Graphics............: Bundled
+Qt...................................: System
+Regex Library........................: Bundled
+STEPcode.............................: Bundled
+Tcl..................................: Bundled
+Tk...................................: Bundled
+UtahRLE..............................: Bundled
+Zlib.................................: Bundled
+
+OpenGL support (optional) ..........: ON
+X11 support (optional) .............: ON
+Qt support (optional) ..............: ON
+Run-time debuggability (optional) ..: ON
+
+Build 32/64-bit release ............: 64BIT (Auto)
+Build with optimization ............: OFF
+Build static libraries .............: ON
+Build dynamic libraries ............: ON
+Install example geometry models ....: ON
+Generate extra docs ................: ON (html/man)
+
+Elapsed configuration time: 45 seconds
+-- Configuring done (45.0s)
+CMake Error at misc/CMake/BRLCAD_Targets.cmake:268 (target_link_libraries):
+  Target &quot;qt_test_server&quot; links to:
+
+    Qt6::Network
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+Call Stack (most recent call first):
+  src/libpkg/example_qt/CMakeLists.txt:17 (brlcad_addexec)
+
+
+CMake Error at src/libdm/qtgl/CMakeLists.txt:35 (target_link_libraries):
+  Target &quot;dm-qtgl&quot; links to:
+
+    Qt6::OpenGL
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+
+
+CMake Error at misc/CMake/BRLCAD_Targets.cmake:486 (target_link_libraries):
+  Target &quot;libqtcad&quot; links to:
+
+    Qt6::OpenGL
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+Call Stack (most recent call first):
+  src/libqtcad/CMakeLists.txt:118 (brlcad_addlib)
+
+
+CMake Error at src/qged/CMakeLists.txt:59 (target_link_libraries):
+  Target &quot;qged&quot; links to:
+
+    Qt6::Network
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+
+
+CMake Error at misc/CMake/BRLCAD_Targets.cmake:268 (target_link_libraries):
+  Target &quot;qisst&quot; links to:
+
+    Qt6::OpenGL
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+Call Stack (most recent call first):
+  src/isst/CMakeLists.txt:61 (brlcad_addexec)
+
+
+-- Generating done (9.7s)
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+</code></pre></div>
+
+
+
+<a name="527207913"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/527207913" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#527207913">(Jul 04 2025 at 16:26)</a>:</h4>
+<p>When using system Qt (which, I think, is a good idea), you have to make sure that all necessary components are installed. To find their packages can be tricky.</p>
+
+
+
+<a name="527218473"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/527218473" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> iabnvkr <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#527218473">(Jul 04 2025 at 17:51)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/104062-brlcad/topic/build/near/527195679">said</a>:</p>
+<blockquote>
+<p>I'm not able to build brlcad with Qt6 enbaled for some reason. I do the following command:</p>
+<div class="codehilite"><pre><span></span><code>cmake .. -DBRLCAD_ENABLE_STRICT=OFF -DBRLCAD_ENABLE_COMPILER_WARNINGS=OFF -DBRLCAD_BUNDLED_LIBS=ON -DCMAKE_BUILD_TYPE=Debug -DBRLCAD_ENABLE_QT=ON -DQt6_DIR=&quot;/usr/lib/x86_64-linux-gnu/cmake/Qt6&quot;
+</code></pre></div>
+<p>Where "<code>/usr/lib/x86_64-linux-gnu/cmake/Qt6</code>" is the path to the file "<code>Qt6Config.cmake</code>".</p>
+<p>I'm getting these errors though. What am I doing wrong?</p>
+<p><div class="codehilite"><pre><span></span><code>...
+
+------------- BRL-CAD Release 7.40.3, Build 20250704 - Debug Build -------------
+
+        Prefix: /home/lorenzo/Downloads/brlcad
+      Binaries: /home/lorenzo/Downloads/brlcad/bin
+     Libraries: /home/lorenzo/Downloads/brlcad/lib
+  Manual pages: /home/lorenzo/Downloads/brlcad/share/man
+Data resources: /home/lorenzo/Downloads/brlcad/share
+
+CC       = /usr/bin/cc
+CXX      = /usr/bin/c++
+CFLAGS   = -std=c11 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -m64 -g -ggdb3 -fstack-protector-all
+CXXFLAGS = -std=c++17 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -ftemplate-depth-128 -m64 -g -ggdb3 -fstack-protector-all
+LDFLAGS  = -m64 -g -ggdb3
+
+
+Asset Import Library.................: Bundled
+Eigen................................: Bundled
+Geogram..............................: Bundled
+Geospatial Data Abstraction Library..: Bundled
+Lightning Memory-Mapped Database.....: Bundled
+Netpbm...............................: Bundled
+OpenCV...............................: Bundled
+OpenMesh.............................: Bundled
+OpenNURBS............................: Bundled
+OSMesa...............................: Bundled
+Portable Network Graphics............: Bundled
+Qt...................................: System
+Regex Library........................: Bundled
+STEPcode.............................: Bundled
+Tcl..................................: Bundled
+Tk...................................: Bundled
+UtahRLE..............................: Bundled
+Zlib.................................: Bundled
+
+OpenGL support (optional) ..........: ON
+X11 support (optional) .............: ON
+Qt support (optional) ..............: ON
+Run-time debuggability (optional) ..: ON
+
+Build 32/64-bit release ............: 64BIT (Auto)
+Build with optimization ............: OFF
+Build static libraries .............: ON
+Build dynamic libraries ............: ON
+Install example geometry models ....: ON
+Generate extra docs ................: ON (html/man)
+
+Elapsed configuration time: 45 seconds
+-- Configuring done (45.0s)
+CMake Error at misc/CMake/BRLCAD_Targets.cmake:268 (target_link_libraries):
+  Target &quot;qt_test_server&quot; links to:
+
+    Qt6::Network
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+Call Stack (most recent call first):
+  src/libpkg/example_qt/CMakeLists.txt:17 (brlcad_addexec)
+
+
+CMake Error at src/libdm/qtgl/CMakeLists.txt:35 (target_link_libraries):
+  Target &quot;dm-qtgl&quot; links to:
+
+    Qt6::OpenGL
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+
+
+CMake Error at misc/CMake/BRLCAD_Targets.cmake:486 (target_link_libraries):
+  Target &quot;libqtcad&quot; links to:
+
+    Qt6::OpenGL
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+Call Stack (most recent call first):
+  src/libqtcad/CMakeLists.txt:118 (brlcad_addlib)
+
+
+CMake Error at src/qged/CMakeLists.txt:59 (target_link_libraries):
+  Target &quot;qged&quot; links to:
+
+    Qt6::Network
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+
+
+CMake Error at misc/CMake/BRLCAD_Targets.cmake:268 (target_link_libraries):
+  Target &quot;qisst&quot; links to:
+
+    Qt6::OpenGL
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+
+Call Stack (most recent call first):
+  src/isst/CMakeLists.txt:61 (brlcad_addexec)
+
+
+-- Generating done (9.7s)
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>still stuck or issue fixed?</p>
+
+
+
+<a name="527218651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/build/near/527218651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/build.html#527218651">(Jul 04 2025 at 17:53)</a>:</h4>
+<p>Fixed it, Qt6OpenGL and Qt6Network were already installed (infact I have built brlcad with Qt succesfully before), but for some reason it wasn't finding them. I simply reinstalled them</p>
+
+
+
+<hr><p>Last updated: Jul 05 2025 at 00:54 UTC</p>
 </html>
