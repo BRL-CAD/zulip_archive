@@ -12862,5 +12862,119 @@
         "id": 527216279,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1751649920
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> , when I do <code>make test arb8</code> it fails, and I can't understand why.</p>\n<p>I'm initializing MOOSE's <code>CommandString</code> by giving him a reference to a <code>MemoryDatabase</code>.</p>\n<p>Then I'm calling the method <code>Parse()</code>, giving him the following <code>std::vector&lt;const char*&gt;</code>:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">std</span><span class=\"o\">::</span><span class=\"n\">vector</span><span class=\"o\">&lt;</span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"kt\">char</span><span class=\"o\">*&gt;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"s\">\"make\"</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"s\">\"test\"</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"s\">\"arb8\"</span><span class=\"p\">};</span>\n</code></pre></div>\n<p>And what happens it that I get the following output in <code>stdout</code>:</p>\n<div class=\"codehilite\"><pre><span></span><code>Database write failure.\n</code></pre></div>",
+        "id": 527277478,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751719516
+    },
+    {
+        "content": "<p>Hmm, interesting. What I found out so far:<br>\nIt looks like rt_db_put_internal() in GED_DB_PUT_INTERNAL (include/ged/objects.h) fails for inmem databases. I was able to trace it down to line 120 in src/librt/db5_alloc.c <code>if (dp-&gt;d_flags &amp; RT_DIR_INMEM) {</code>, where the inmem flag is not set, and therefore the alloc fails. But, why?</p>\n<p>For simple tests, you can build MOOSE/Examples und modify PrintTitle.cpp according your needs.</p>",
+        "id": 527292770,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1751734663
+    },
+    {
+        "content": "<p>Interesting, I guessed that it was a problem regarding the MemoryDatabase.</p>",
+        "id": 527293421,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751735508
+    },
+    {
+        "content": "<p>The object creation with the C++ API works, e.g. with arbalest's creation menu.</p>\n<p>The <code>directory</code> structure is a temporary pointer to a database object. Where does it get the database type information from <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>",
+        "id": 527297220,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1751740018
+    },
+    {
+        "content": "<p>If my understanding is correct, when arbalest calls <code>MemoryDatabase::Add</code>, the method:</p>\n<ul>\n<li>checks for the object's validity</li>\n<li>checks the object's type id</li>\n<li><code>wdb_export</code> \"writes\" the correct object type inside the database</li>\n<li><strong><code>db_lookup</code> gets a reference to the written object</strong></li>\n<li>this reference is used to modify its attributes to the correct ones</li>\n</ul>",
+        "id": 527302520,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751746986
+    },
+    {
+        "content": "<p>And libged's make command uses <code>db_diradd</code> and <code>rt_db_get_internal</code>.</p>",
+        "id": 527304006,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1751749006
+    },
+    {
+        "content": "<p>oh, it's (inside <code>db_diradd</code>):</p>\n<div class=\"codehilite\"><pre><span></span><code>dp-&gt;d_flags = flags &amp; ~(RT_DIR_INMEM);\n</code></pre></div>",
+        "id": 527305000,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751750287
+    },
+    {
+        "content": "<p>so, it was intentionally not handling in-memory databases, because it was never tested for them?</p>",
+        "id": 527305260,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751750627
+    },
+    {
+        "content": "<p>Not \"intentionally\", but untested is likely.  Inmem databases haven't been made robust across the whole API because their handling is a bit different.  They work for large swaths of commands and API, but there are plenty of places untested or not yet considered.</p>",
+        "id": 527305482,
+        "sender_full_name": "Sean",
+        "timestamp": 1751750915
+    },
+    {
+        "content": "<p>Mmh got it, very interesting. So the right way to go is to test inmem dbs for the make command (and I guess other ged commands), correct?</p>",
+        "id": 527305703,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751751204
+    },
+    {
+        "content": "<p>It is the intention that they should work anywhere a dbip is taken, so the only appreciable difference to a caller is whether they used db_open_inmem() or db_open().  Even some of the parallel API like like db_dirbuild_inmem() probably shouldn't exist (but currently do for that special handling).</p>",
+        "id": 527305724,
+        "sender_full_name": "Sean",
+        "timestamp": 1751751227
+    },
+    {
+        "content": "<p>Makes sense</p>",
+        "id": 527305774,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751751280
+    },
+    {
+        "content": "<p>I would love to understand inmem dbs and test them, but that seems rather complex (probably even outside of my skills) and time consuming</p>",
+        "id": 527305943,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751751501
+    },
+    {
+        "content": "<p>What would you suggest is the right approach to make the <code>make</code> ged command work correctly for MOOSE's <code>CommandString::Parse</code>?</p>",
+        "id": 527306017,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751751586
+    },
+    {
+        "content": "<p>Gets to the lower levels of librt database handling.  Not terribly hard, but it is complex.  There's some open questions that we've simply not had a need/motivation yet to check and fix like why db_diradd() excludes inmem (probably only because there is db_inmem(), but unresolved).  That's likely the cause of woe with the 'make' command.</p>",
+        "id": 527306209,
+        "sender_full_name": "Sean",
+        "timestamp": 1751751838
+    },
+    {
+        "content": "<p>make calls into ged_make_core which I believe ends up calling GED_DB_DIRADD() macro which naively calls db_diradd() and strips any inmem flag.  Not sure what that means on an inmem dbip or why it's even doing that.  Probably shouldn't.</p>",
+        "id": 527306323,
+        "sender_full_name": "Sean",
+        "timestamp": 1751752006
+    },
+    {
+        "content": "<p>Are there any other commands that have problems with inmem dbs that you know of?</p>",
+        "id": 527306492,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751752241
+    },
+    {
+        "content": "<p>I know that off the top of your head it must be impossible to answer my question precisely, but like, do you have the feeling that other commands might not work like <code>make</code> for inmem dbs?</p>",
+        "id": 527306582,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1751752374
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527306492\">said</a>:</p>\n<blockquote>\n<p>Are there any other commands that have problems with inmem dbs that you know of?</p>\n</blockquote>\n<p>Yeah, not off the top of my head.  There's hundreds of commands... :)</p>\n<p>But you're also right in noticing 'make' is a bit special as it's one of only a handful that create geometry (make, in, and a handful of specialized ones like rcc-cap or type-specific like pnts).</p>",
+        "id": 527307522,
+        "sender_full_name": "Sean",
+        "timestamp": 1751753690
     }
 ]
