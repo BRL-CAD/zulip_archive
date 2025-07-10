@@ -13090,5 +13090,53 @@
         "id": 527765082,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1752005317
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527762490\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527732964\">said</a>:</p>\n<blockquote>\n<p>Also, while I am at it, I have the following question: <strong>must</strong> objects inside of a database have all unique names?</p>\n</blockquote>\n<p>Yep, the name is the key. When a new object with a name already in use is created, it overwrites the existing object.</p>\n</blockquote>\n<p>While is is best they all be unique, it does not technically need to be unique.  You can concatenate two .g's together and the result is a valid .g file with potentially duplicate object names.</p>\n<p>Now if you are using the API and you write out an object with the same name as an existing, it will typically perform an update/overwrite.  It is however still possible to do a db update that sets duplicate names with the right low-level use of librt.</p>\n<p>When the directory is built (db_dirbuild()), duplicate entries are automatically renamed on the fly and disambiguated in the in-memory db hash, but they remain duplicate on disk until they get renamed or re-exported.</p>",
+        "id": 527804842,
+        "sender_full_name": "Sean",
+        "timestamp": 1752034855
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527764547\">said</a>:</p>\n<blockquote>\n<p>That would be amazing! Having a way to have a list of the names of the objects that are modified by the command would be a godsend! (I mean that, for example, <code>killall</code> would return <strong>ALL</strong> objects killed)</p>\n</blockquote>\n<p>It wouldn't be terribly hard to add a notification/callback layer into libged for all commands.  The design intent there has been transactional so all commands will eventually be easily trigger callbacks for add/delete/update actions as well as basic view action needs like draw/redraw/erase.  For qtcad, it does get notifications using callbacks I believe in the libqtcad layer.</p>\n<p>There isn't anything in the lowest librt layer nor a general mechanism yet in libbu.</p>",
+        "id": 527805935,
+        "sender_full_name": "Sean",
+        "timestamp": 1752035830
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527764829\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527763695\">ha scritto</a>:</p>\n<blockquote>\n<p>Does it work with qtcad?</p>\n</blockquote>\n<p>What are you refering to?</p>\n</blockquote>\n<p>Right, the executable is <strong>qged</strong> and it uses <strong>libqtcad</strong>.</p>",
+        "id": 527826949,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752047417
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527805935\">said</a>:</p>\n<blockquote>\n<p>There isn't anything in the lowest librt layer nor a general mechanism yet in libbu.</p>\n</blockquote>\n<p><strong>dbi_changed_clbks</strong>?</p>",
+        "id": 527837093,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752050641
+    },
+    {
+        "content": "<p>dbi_changed_clbks and dbi_update_nref_clbks were added for qged specifically so I could respond to database changes in the interface - trying to do it anywhere else involves trying to spot changes after the fact in some fashion which risks missing changes and being out of sync.</p>",
+        "id": 527870065,
+        "sender_full_name": "starseeker",
+        "timestamp": 1752061618
+    },
+    {
+        "content": "<p>As for libged, there's a fairly new per-command clbk registration - see ged_clbk_set</p>",
+        "id": 527870334,
+        "sender_full_name": "starseeker",
+        "timestamp": 1752061702
+    },
+    {
+        "content": "<p>I have been exploring a lot of stuff regarding what you all told me, and I'm doing major improvements to the CLI. Thank you so much for the help!</p>",
+        "id": 527971455,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752097734
+    },
+    {
+        "content": "<p>I have a few more questions, mostly just because I'm curious:</p>\n<ul>\n<li>how do <code>views</code> work? How are they implemented in <em>mged</em>/<em>qged</em>? Any idea on how to include them in <em>arbalest</em> to support certain commands?</li>\n<li><code>QgModel</code> is really advanced in representing a database! Why was <code>QgModel</code> not used inside <em>arbalest</em>? Is it a bad idea to use it instead of <code>ObjectTree</code>?</li>\n<li>why was <code>libqtcad</code>created as a <em>brlcad library</em>, and not as a <em>MOOSE module</em>? Having a <em>MOOSE module</em> that can achieve what <code>libqtcad</code> does makes sense in my head.</li>\n</ul>",
+        "id": 527982851,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752106199
     }
 ]

@@ -17869,5 +17869,85 @@ It looks like rt_db_put_internal() in GED_DB_PUT_INTERNAL (include/ged/objects.h
 
 
 
-<hr><p>Last updated: Jul 09 2025 at 00:58 UTC</p>
+<a name="527804842"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527804842" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527804842">(Jul 09 2025 at 04:20)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527762490">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527732964">said</a>:</p>
+<blockquote>
+<p>Also, while I am at it, I have the following question: <strong>must</strong> objects inside of a database have all unique names?</p>
+</blockquote>
+<p>Yep, the name is the key. When a new object with a name already in use is created, it overwrites the existing object.</p>
+</blockquote>
+<p>While is is best they all be unique, it does not technically need to be unique.  You can concatenate two .g's together and the result is a valid .g file with potentially duplicate object names.</p>
+<p>Now if you are using the API and you write out an object with the same name as an existing, it will typically perform an update/overwrite.  It is however still possible to do a db update that sets duplicate names with the right low-level use of librt.</p>
+<p>When the directory is built (db_dirbuild()), duplicate entries are automatically renamed on the fly and disambiguated in the in-memory db hash, but they remain duplicate on disk until they get renamed or re-exported.</p>
+
+
+
+<a name="527805935"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527805935" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527805935">(Jul 09 2025 at 04:37)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527764547">said</a>:</p>
+<blockquote>
+<p>That would be amazing! Having a way to have a list of the names of the objects that are modified by the command would be a godsend! (I mean that, for example, <code>killall</code> would return <strong>ALL</strong> objects killed)</p>
+</blockquote>
+<p>It wouldn't be terribly hard to add a notification/callback layer into libged for all commands.  The design intent there has been transactional so all commands will eventually be easily trigger callbacks for add/delete/update actions as well as basic view action needs like draw/redraw/erase.  For qtcad, it does get notifications using callbacks I believe in the libqtcad layer.</p>
+<p>There isn't anything in the lowest librt layer nor a general mechanism yet in libbu.</p>
+
+
+
+<a name="527826949"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527826949" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527826949">(Jul 09 2025 at 07:50)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527764829">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527763695">ha scritto</a>:</p>
+<blockquote>
+<p>Does it work with qtcad?</p>
+</blockquote>
+<p>What are you refering to?</p>
+</blockquote>
+<p>Right, the executable is <strong>qged</strong> and it uses <strong>libqtcad</strong>.</p>
+
+
+
+<a name="527837093"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527837093" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527837093">(Jul 09 2025 at 08:44)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/527805935">said</a>:</p>
+<blockquote>
+<p>There isn't anything in the lowest librt layer nor a general mechanism yet in libbu.</p>
+</blockquote>
+<p><strong>dbi_changed_clbks</strong>?</p>
+
+
+
+<a name="527870065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527870065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527870065">(Jul 09 2025 at 11:46)</a>:</h4>
+<p>dbi_changed_clbks and dbi_update_nref_clbks were added for qged specifically so I could respond to database changes in the interface - trying to do it anywhere else involves trying to spot changes after the fact in some fashion which risks missing changes and being out of sync.</p>
+
+
+
+<a name="527870334"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527870334" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527870334">(Jul 09 2025 at 11:48)</a>:</h4>
+<p>As for libged, there's a fairly new per-command clbk registration - see ged_clbk_set</p>
+
+
+
+<a name="527971455"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527971455" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527971455">(Jul 09 2025 at 21:48)</a>:</h4>
+<p>I have been exploring a lot of stuff regarding what you all told me, and I'm doing major improvements to the CLI. Thank you so much for the help!</p>
+
+
+
+<a name="527982851"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/527982851" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#527982851">(Jul 10 2025 at 00:09)</a>:</h4>
+<p>I have a few more questions, mostly just because I'm curious:</p>
+<ul>
+<li>how do <code>views</code> work? How are they implemented in <em>mged</em>/<em>qged</em>? Any idea on how to include them in <em>arbalest</em> to support certain commands?</li>
+<li><code>QgModel</code> is really advanced in representing a database! Why was <code>QgModel</code> not used inside <em>arbalest</em>? Is it a bad idea to use it instead of <code>ObjectTree</code>?</li>
+<li>why was <code>libqtcad</code>created as a <em>brlcad library</em>, and not as a <em>MOOSE module</em>? Having a <em>MOOSE module</em> that can achieve what <code>libqtcad</code> does makes sense in my head.</li>
+</ul>
+
+
+
+<hr><p>Last updated: Jul 10 2025 at 00:57 UTC</p>
 </html>
