@@ -17949,5 +17949,57 @@ It looks like rt_db_put_internal() in GED_DB_PUT_INTERNAL (include/ged/objects.h
 
 
 
-<hr><p>Last updated: Jul 11 2025 at 00:58 UTC</p>
+<a name="528314007"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/528314007" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#528314007">(Jul 11 2025 at 11:02)</a>:</h4>
+<p><span class="user-mention" data-user-id="781132">@LorenzoPegorari</span> Well, I can offer my perspective, but as the primary qged/libqtcad author you should take it with a grain of salt.</p>
+<ol>
+<li>
+<p>If by "views" you are referring to bview structures, you can kind of think of them as cameras - they're a bit more than that but they serve a very similar role (and I'm trying to migrate them more in that direction.)  A libdm rendering of a view is what is displayed by the libqtcad widgets in qged.  Some LIBGED commands need a notion of a view to do their work, so LIBGED will generally provide at least one default view so they can run.  MGED's setup is a bit different, mostly in how it manages scene objects, but I'm currently in the process of reworking how that is handled for qged as well so stand by.  (My first attempt ended up being rather awkward, and this time around I have a somewhat better idea of what I need to achieve.)</p>
+</li>
+<li>
+<p>Thanks for that - I did do a lot of work on QgModel and it's underlying libged dbi.h classes, although there again I'm currently in the process of reworking the design to improve debuggability in the dbi2 branch.  I'd have to look at the timelines to see if QgModel was developed after ObjectTree, but either way there is something of a design philosophy difference between the qged and arbalest efforts - I'm not shy about directly using the main BRL-CAD library APIs (adding and improving as needed) and arbalest deliberately avoids that.</p>
+</li>
+<li>
+<p>libqtcad was created to support the qged effort, so it doesn't go through the MOOSE APIs.  MOOSE is deliberately separate from the main BRL-CAD, and I wanted (and want) qged to be part of the core BRL-CAD application stack.  Remember earlier <span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/526667966">said</a>:</p>
+</li>
+</ol>
+<blockquote>
+<p>libqtcad are somehow the arbalest GUI classes implemented directly on top of librt and co.. But, Qt has to stay out of MOOSE and librt out of arbalest.</p>
+</blockquote>
+<p>So i practice that's where reuse has been a bit limited.  If anything libqtcad does is of interest for arbalest it can certainly be used as a source of code/ideas, but there are differing design philosophies at play.  MOOSE talks to BRL-CAD libraries, but since libqtcad is a BRL-CAD library and MOOSE doesn't want to have Qt as a dependency that doesn't work architecturally.</p>
+<p>Now, Qt aside, the QgModel tries to leverage a LIBGED level C++ data model set up in ged/dbi.h, and THAT might be reusable between the two technology stacks as some sort of backing for a MOOSE layer (maybe?) since it does not require Qt.  However, I'd hold off on exploring that for now since I'm in the process of completely reworking the ged/dbi.h design - if you're curious you can watch the thrashing in the dbi2 branch, but be aware dbi2 (very much UNLIKE main) gets rebased regularly so it's not something to base your own branches on.  I'm just pushing to dbi2 to have a non-local repository of the work if something bad were to happen and to have something to refer to for discussions at need.</p>
+
+
+
+<a name="528317161"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/528317161" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#528317161">(Jul 11 2025 at 11:20)</a>:</h4>
+<p>Well <span class="user-mention" data-user-id="112516">@starseeker</span> , thank you so much for this precise and complete message!</p>
+<p>I understood everything. Just wanted to point out that I didn't catch anywhere the fact that MOOSE doesn't want Qt as a dependency. Infact, I was asking myself why a "Qt module" for MOOSE wasn't thought of (something similar to libqtcad)</p>
+
+
+
+<a name="528415064"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/528415064" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#528415064">(Jul 11 2025 at 22:54)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> , I have a question regarding how MOOSE traverses a database tree.</p>
+<hr>
+<p>Let's say that I have an object structured in this way (if I use <code>tree</code>):</p>
+<div class="codehilite"><pre><span></span><code>region1.c
+    |______sph1.s
+    |______sph2.s
+</code></pre></div>
+<p>And if I use <code>t</code>, I get:</p>
+<div class="codehilite"><pre><span></span><code>region1.c    sph1.s    sph2.s
+</code></pre></div>
+<hr>
+<p>Let's say that I do the command <code>kill sph1.s</code>.</p>
+<p>Then the tree would remain the same, but doing the command <code>t</code> would output the following:</p>
+<div class="codehilite"><pre><span></span><code>region1.c    sph2.s
+</code></pre></div>
+<hr>
+<p>Now, this all makes sense, because I destroyed the object, but the combination is still referencing an object with that name (which is now deleted).</p>
+<p>Is there any way to recognize this situation through MOOSE? Meaning, while arbalest <code>ObjectTree</code> walks the database tree, is there a way to recognize the situation in which "a leaf is non-existent"?</p>
+
+
+
+<hr><p>Last updated: Jul 12 2025 at 00:59 UTC</p>
 </html>
