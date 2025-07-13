@@ -13156,5 +13156,167 @@
         "id": 528415064,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1752274499
+    },
+    {
+        "content": "<p>When an object is destroyed, but its references stay untouched, the combinations are still the same (with sph1.s). Their evaluation has of course changed, because the object with key sph1.s was removed.</p>\n<p>You can check if an object is contained in the database with BRLCAD::ConstDatabase::Get().</p>",
+        "id": 528464783,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752332804
+    },
+    {
+        "content": "<p>And it should return false if the object doesn't exists, correct?</p>",
+        "id": 528465001,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752333005
+    },
+    {
+        "content": "<p>Well, there are two versions of it and non of them returns a bool ;)</p>\n<p>I would use the version with the functional and hand over a small piece of code which sets a bool if its function was called.</p>",
+        "id": 528465283,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752333279
+    },
+    {
+        "content": "<p>Oh yeah, I was looking at <code>Database</code> instead.</p>",
+        "id": 528465476,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752333428
+    },
+    {
+        "content": "<p>And <code>Database::Get</code> returns <code>true</code> if it can write the modified object in the database</p>",
+        "id": 528465712,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752333654
+    },
+    {
+        "content": "<p>Right. If the object doesn't exist, it returns true.</p>",
+        "id": 528465770,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752333708
+    },
+    {
+        "content": "<p>Ookk now I get it</p>",
+        "id": 528465791,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752333731
+    },
+    {
+        "content": "<p>The return value signals something, which cannot be recognized by the user.</p>",
+        "id": 528465857,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752333799
+    },
+    {
+        "content": "<p>Btw, I'm in the process of reworking the <code>ObjectTree</code> in order to support some GED commands (eg: kill, killtree, killall, make, in, comb, ...).</p>\n<p>I'm trying to rework it in such a way that these supports will work for both GED commands and GUI actions.</p>",
+        "id": 528466601,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752334530
+    },
+    {
+        "content": "<p>Without a fully functioning <code>ObjectTree</code>, then the commands of the console would be useless</p>",
+        "id": 528466671,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752334578
+    },
+    {
+        "content": "<p>And also, I'm already finding certain databases that break how the <code>ObjectTree</code> works now, so these issues need to be fixed as well</p>",
+        "id": 528466795,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752334655
+    },
+    {
+        "content": "<p>When these supports will be working, then handling commands that modify the database will simply become a matter of recognizing which objects changed (through <code>dbi_changed_clbks</code>), and modify them through these already in-place supports</p>",
+        "id": 528467050,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752334836
+    },
+    {
+        "content": "<p>Also, for the sake of simplicity, while still handling 99% of the cases, I'm assuming that all objects have an unique name. Even though I recognize that this is not always true.</p>",
+        "id": 528467145,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752334924
+    },
+    {
+        "content": "<p>Hmm, you would need a call-back for dbi_changed_clbks in MOOSE to do this.</p>",
+        "id": 528467174,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752334954
+    },
+    {
+        "content": "<p>Yep, I was thinking of adding one to the CommandString module</p>",
+        "id": 528467199,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752334979
+    },
+    {
+        "content": "<p>Some way to store added/modified/remove objects, maybe inside an unordered_set somewhere</p>",
+        "id": 528467246,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752335017
+    },
+    {
+        "content": "<p>Why CommandString?</p>",
+        "id": 528467260,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752335034
+    },
+    {
+        "content": "<p>Because, if I understood correctly, the callback is only called when an object is modified though a GED command? But your question makes me assume that I am wrong...</p>",
+        "id": 528467324,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752335110
+    },
+    {
+        "content": "<p>Yep, dbi_changed_clbks is in librt.</p>",
+        "id": 528467355,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752335156
+    },
+    {
+        "content": "<p>Mmh got it. Then I guess it should be added to <code>Database</code> (since <code>ConstDatabase</code> cannot be modified).</p>",
+        "id": 528467433,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752335231
+    },
+    {
+        "content": "<p>The database cannot be modified with ConstDatabase methods, but signals could still be emitted - in general.</p>",
+        "id": 528467504,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752335317
+    },
+    {
+        "content": "<p>Mmh, do you have any idea how to cleanly add <code>dbi_changed_clbks</code> to MOOSE?</p>\n<p>Tbh I haven't really looked into it. For the time being I just stuffed it inside CommandString just to test <code>ObjectTree</code></p>",
+        "id": 528467672,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752335507
+    },
+    {
+        "content": "<p>The librt fucntion is <code>db_add_changed_clbk()</code> declared in rt/db_instance.h.</p>\n<p>However, I'll look at this too.</p>",
+        "id": 528468340,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752336288
+    },
+    {
+        "content": "<p>This is my idea for the addition to brlcad/Database/ConstDatabase.h:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"w\">        </span><span class=\"c1\">/// @name signalling of database changes</span>\n<span class=\"w\">        </span><span class=\"c1\">//@{</span>\n<span class=\"w\">        </span><span class=\"k\">enum</span><span class=\"w\"> </span><span class=\"nc\">ChangeType</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">            </span><span class=\"n\">Modify</span><span class=\"p\">,</span>\n<span class=\"w\">            </span><span class=\"n\">Add</span><span class=\"p\">,</span>\n<span class=\"w\">            </span><span class=\"n\">Remove</span>\n<span class=\"w\">        </span><span class=\"p\">};</span>\n\n<span class=\"w\">        </span><span class=\"c1\">/// signal handler (to be implemented by the caller)</span>\n<span class=\"w\">        </span><span class=\"k\">typedef</span><span class=\"w\"> </span><span class=\"n\">std</span><span class=\"o\">::</span><span class=\"n\">function</span><span class=\"o\">&lt;</span><span class=\"kt\">void</span><span class=\"p\">(</span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"n\">Object</span><span class=\"o\">&amp;</span><span class=\"w\"> </span><span class=\"n\">object</span>\n<span class=\"w\">                                   </span><span class=\"n\">ChangeType</span><span class=\"w\">    </span><span class=\"n\">changeType</span><span class=\"p\">)</span><span class=\"o\">&gt;</span><span class=\"w\"> </span><span class=\"n\">ChangeSignalHandler</span><span class=\"p\">;</span>\n\n<span class=\"w\">        </span><span class=\"kt\">void</span><span class=\"w\"> </span><span class=\"nf\">RegisterChangeSignalHandler</span><span class=\"p\">(</span><span class=\"n\">ChangeSignalHandler</span><span class=\"o\">&amp;</span><span class=\"w\"> </span><span class=\"n\">changeSignalHandler</span><span class=\"p\">);</span>\n<span class=\"w\">        </span><span class=\"kt\">void</span><span class=\"w\"> </span><span class=\"nf\">DeRegisterChangeSignalHandler</span><span class=\"p\">(</span><span class=\"n\">ChangeSignalHandler</span><span class=\"o\">&amp;</span><span class=\"w\"> </span><span class=\"n\">changeSignalHandler</span><span class=\"p\">);</span>\n<span class=\"w\">        </span><span class=\"c1\">//@}</span>\n</code></pre></div>",
+        "id": 528469218,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752337231
+    },
+    {
+        "content": "<p>The implementation would need a bit...</p>",
+        "id": 528469245,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752337254
+    },
+    {
+        "content": "<p>This is amazing! That would be perfect!</p>",
+        "id": 528469524,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752337589
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/528317161\">said</a>:</p>\n<blockquote>\n<p>I understood everything. Just wanted to point out that I didn't catch anywhere the fact that MOOSE doesn't want Qt as a dependency. Infact, I was asking myself why a \"Qt module\" for MOOSE wasn't thought of (something similar to libqtcad)</p>\n</blockquote>\n<p>The thing here is MOOSE, not arbalest. MOOSE is a thin layer on BRL-CAD's core libraries, which shall make it feasible to use them on system level, i.e. as a library. It shall have a painless API and be easy to deploy (only a single DLL, shared object, ...). The important, complex programs here are the ones which use MOOSE. They usually have already a vector library, therefore MOOSE shall not provide another one, and they may have a GUI or not, but MOOSE shall not speculate which GUI toolkit they could use. I't very similar to the first principle of the <a href=\"https://en.wikipedia.org/wiki/Unix_philosophy\">UNIX philosophy</a>: MOOSE shall do the geometry handling well, but not more.</p>\n<p>arbalest is just an attempt on how a GUI for MOOSE could look like.</p>",
+        "id": 528472400,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752340644
     }
 ]
