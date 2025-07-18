@@ -13384,5 +13384,137 @@
         "id": 529180333,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1752708152
+    },
+    {
+        "content": "<p>Ah, so it gets the book-keeping wrong when an item is referenced by a comb but does not exist, it sounds.  You don't actually have to kill an object for that to happen.  You can make a comb with non-existent entries.  \"comb foo a u b - c\"</p>",
+        "id": 529188363,
+        "sender_full_name": "Sean",
+        "timestamp": 1752715389
+    },
+    {
+        "content": "<p>I have found a problem which invalidates my previous statements regarding the new ObjectTree. I'm working on it ASAP.</p>",
+        "id": 529323448,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752772269
+    },
+    {
+        "content": "<p>Ok, I fixed it. I'll update the PR right now. I also already update the Google Sheet that I linked above.</p>",
+        "id": 529342385,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752780152
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529099327\">said</a>:</p>\n<blockquote>\n<p>Everything should be explained in the code comments. If you don't understand something, let me know, and I will be more precise and try to make the comments more exhaustive.</p>\n</blockquote>\n<p>What is <code>BRLCAD::CommandString* parser;</code> for?</p>",
+        "id": 529343054,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752780478
+    },
+    {
+        "content": "<p>Ups, right now for nothing! Didn't mean to include it. I used it while testing the Console.</p>",
+        "id": 529343296,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752780596
+    },
+    {
+        "content": "<p>BTW, it isn't so unusual that a combination is created before the solids it references to.</p>",
+        "id": 529343325,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752780609
+    },
+    {
+        "content": "<p>I've update it!</p>",
+        "id": 529343942,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752780907
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529343325\">ha scritto</a>:</p>\n<blockquote>\n<p>BTW, it isn't so unusual that a combination is created before the solids it references to.</p>\n</blockquote>\n<p>Yep, I know. My reworking of the ObjectTree should handle these situations.</p>",
+        "id": 529344124,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752780985
+    },
+    {
+        "content": "<p>Btw, the code is still really rough, but I hope that my idea comes across at least.</p>",
+        "id": 529344176,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781011
+    },
+    {
+        "content": "<p>The usage of 2 different classes, one for the actual tree items, and one for their \"immutable and shared data\".</p>",
+        "id": 529344250,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781042
+    },
+    {
+        "content": "<p>It is definitely faster according to my tests (as shown above in the Google Sheet), but it also should easily permit the creation of new objects at different levels of the tree, and also extend or remove object from combinations really easily by using MOOSE's TreeNode::Apply() and by adding a new element to the correct ObjectTreeItem</p>",
+        "id": 529344613,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781209
+    },
+    {
+        "content": "<p>What I want to do is a system that will work both for the console GED commands, and for some advanced GUI actions that will come in the future (I'm thinking, like, an \"add object to the combination\" button)</p>",
+        "id": 529344724,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781260
+    },
+    {
+        "content": "<p>I need some time to have a deeper look at your ObjectTree. Maybe this weekend.</p>",
+        "id": 529345067,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752781422
+    },
+    {
+        "content": "<p>It's absolutely fine.</p>",
+        "id": 529345111,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781439
+    },
+    {
+        "content": "<p>Last thing that I wanted to point out, is that I also tried to create a system that allowed to easily add more informations to both the database objects and their representation in the item tree. For example, in the future, if we want to add a symbol near the name of each element of the object tree that indicates the class of the object (arb8, sphere, ...), that will be relly simple to add!</p>",
+        "id": 529345520,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781597
+    },
+    {
+        "content": "<p>One final thing: the ObjectTreeWidget example that I pushed will compile and work, but it will have many problems caused by other parts of the GUI using the old ObjectTree. But, as said before, it is just an example.</p>",
+        "id": 529345856,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752781762
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529344724\">said</a>:</p>\n<blockquote>\n<p>What I want to do is a system that will work both for the console GED commands, and for some advanced GUI actions that will come in the future (I'm thinking, like, a \"add object to the combination\" button)</p>\n</blockquote>\n<p>You probably think in the right direction. I'm not happy with the ged integration, because these commands require a standard brlcad installation, which breaks with the idea of having a single (or few) libraries.</p>\n<p>Integrating libged via CommandString is okay for now, but the goal should be to make these functionality accessible via GUI elements.</p>",
+        "id": 529346035,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752781841
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529345520\">said</a>:</p>\n<blockquote>\n<p>Last thing that I wanted to point out, is that I also tried to create a system that allowed to easily add more informations to both the database objects and their representation in the item tree. For example, in the future, if we want to add a symbol near the name of each element of the object tree that indicates the class of the object (arb8, sphere, ...), that will be relly simple to add!</p>\n</blockquote>\n<p>Sounds good, but there are many primitives ;)</p>",
+        "id": 529346185,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752781914
+    },
+    {
+        "content": "<p>I think that qged does that though, so maybe in the future... <span aria-label=\"slight smile\" class=\"emoji emoji-1f642\" role=\"img\" title=\"slight smile\">:slight_smile:</span></p>",
+        "id": 529346423,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752782009
+    },
+    {
+        "content": "<p>I'm afraid, the <a href=\"https://github.com/BRL-CAD/brlcad/tree/main/src/libqtcad/images/primitives\">list</a> isn't complete, and arb4, ..., arb8 are in fact the same primitive.</p>",
+        "id": 529347056,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752782250
+    },
+    {
+        "content": "<p>But, it's a good starting point. Some primitives are really exotic.</p>",
+        "id": 529347239,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1752782331
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529346035\">ha scritto</a>:</p>\n<blockquote>\n<p>I'm not happy with the ged integration, because these commands require a standard brlcad installation, which breaks with the idea of having a single (or few) libraries.</p>\n<p>Integrating libged via CommandString is okay for now, but the goal should be to make these functionality accessible via GUI elements.</p>\n</blockquote>\n<p>I'm sorry, I didn't really understand the statement above. May I ask you to be more precise?</p>",
+        "id": 529347661,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1752782480
     }
 ]
