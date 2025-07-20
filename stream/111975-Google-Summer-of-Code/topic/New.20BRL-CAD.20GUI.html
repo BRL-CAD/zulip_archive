@@ -18435,5 +18435,57 @@ It looks like rt_db_put_internal() in GED_DB_PUT_INTERNAL (include/ged/objects.h
 
 
 
-<hr><p>Last updated: Jul 19 2025 at 00:57 UTC</p>
+<a name="529552268"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529552268" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529552268">(Jul 19 2025 at 05:07)</a>:</h4>
+<p>For what it's worth, there are currently six executables that are currently invoked as a subprocess in libged (rt, rtcheck, rtwizard, nirt, brlman, and ged_exec).  I don't think any of them introduce additional dependency requirements above moose existing.</p>
+<p>The last tool (ged_exec) is primarily thread isolation for facetize, so it doesn't bring the app down if it crashes.  The rest would need to be copied into moose, at least until the <em>rt</em> tools get refactored as API calls.</p>
+<p>Libged itself doesn't introduce any new libraries that aren't already required by the base librt/libbn/libbu/etc as it is architected as a layer just over librt.</p>
+
+
+
+<a name="529592757"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529592757" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529592757">(Jul 19 2025 at 17:01)</a>:</h4>
+<p>Libged loads (for example) <a href="http://libged-adc.so">libged-adc.so</a>. Libged-adc loads <a href="http://libbu.so">libbu.so</a>. Thus, libbu symbols are loaded twice: First with <a href="http://libbrlcad.so">libbrlcad.so</a> and then again with <a href="http://libbu.so">libbu.so</a>. This causes a "double free or corruption" error when a MOOSE program exits too, because bu_dlunload() will be called twice.</p>
+<p>Libged may be a layer just over librt, but not over libbrlcad;)</p>
+
+
+
+<a name="529603148"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529603148" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529603148">(Jul 19 2025 at 17:51)</a>:</h4>
+<p>Hmm.  Is there a good global way to register somehow that libbrlcad is already loaded and satisfies the libbu requirement, so the libbu dl loader knows it doesn't need to repeat?</p>
+
+
+
+<a name="529605221"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529605221" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529605221">(Jul 19 2025 at 18:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="781132">@LorenzoPegorari</span>, what you told us about your work on Object Tree sounds promising. It doesn't align directly with your project plan, but one goal was to improve the user experience. Therefore, you should improve it step by step. Create a series of mergeable pull requests, until you reach your desired functionality.</p>
+<p>In addition, you should work on the console widget, as stated in your project plan. Remember that the API is MOOSE, not librt. The libqtcad classes are for inspiration. They won't give you the solution. Keep it simple, for the start. This way, you can create something mergeable fast. E.g., command completion can be added in one of the follow-up steps.</p>
+<p>Learning from libqtcad, and thus from librt, libbu, ..., is very valuable, even if their functions cannot be called directly in arbalest. MOOSE is a thin layer over them. If something important is missing, it had to be added to MOOSE. That's why I'm grateful for pointing out that signalling of database changes is missing. I'm still working on it. Maybe, I cane come up with a solution tomorrow, but I cannot promise. I've a lot on my plate.</p>
+
+
+
+<a name="529606017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529606017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529606017">(Jul 19 2025 at 18:47)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529603148">said</a>:</p>
+<blockquote>
+<p>Hmm.  Is there a good global way to register somehow that libbrlcad is already loaded and satisfies the libbu requirement, so the libbu dl loader knows it doesn't need to repeat?</p>
+</blockquote>
+<p>There are probably more issues, when multiple instances of a library are loaded just because they got different names. E.g., libbu is now in libbrlcad, which loads libged-adc, which loads plain libbu. The library unloading may be only one of them.</p>
+<p>I've some experience with handling dynamically loadable libraries, which can be used as modules in a tailorable software. There, I hand over a handle with the API functions. I.e., the module libraries don't need to load the core library. They are not linked to it.</p>
+
+
+
+<a name="529606985"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529606985" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529606985">(Jul 19 2025 at 19:06)</a>:</h4>
+<p>Well, <span class="user-mention" data-user-id="102902">@Sean</span>  should weigh in, but I'm definitely interested if there's a better answer than the one we're using now.</p>
+
+
+
+<a name="529607057"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/529607057" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#529607057">(Jul 19 2025 at 19:08)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Is there a good example somewhere of an implementation of that pattern (ideally cross platform?)</p>
+
+
+
+<hr><p>Last updated: Jul 20 2025 at 01:05 UTC</p>
 </html>
