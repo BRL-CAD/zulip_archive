@@ -58,5 +58,35 @@
         "id": 282147949,
         "sender_full_name": "Sean",
         "timestamp": 1652378560
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529607057\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> Is there a good example somewhere of an implementation of that pattern (ideally cross platform?)</p>\n</blockquote>\n<p><span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>, <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>, I think, this is more a general architectural discussion now:</p>\n<p>Cross platform: yes, Open source: no. However, here are some principles and practice:</p>",
+        "id": 529680578,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1753009879
+    },
+    {
+        "content": "<p>For the OS part, I use Qt. Doing this for every OS separately with its low-level functions would be error-prone and like a hare and tortoise game, when they decide to change something in their API for the new version. I.e., I do shared library handling with Qt.</p>",
+        "id": 529680655,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1753009968
+    },
+    {
+        "content": "<p>There, I search for something like</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">BRLCAD_MODULE_EXPORT</span><span class=\"w\"> </span><span class=\"kt\">void</span><span class=\"w\"> </span><span class=\"n\">RegisterBrlCadModule</span><span class=\"p\">(</span><span class=\"n\">BrlCadModuleRegisterCallback</span><span class=\"o\">&amp;</span><span class=\"w\"> </span><span class=\"n\">callback</span><span class=\"p\">);</span>\n</code></pre></div>\n<p>in the shared libraries. (In fact, it's C call and it looks for a <strong>RegisterBrlCadModule</strong> only.)</p>\n<p>If <code>RegisterBrlCadModule</code> is found, it will be executed with a <code>BrlCadModuleCallback</code> object, which has methods like</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"kt\">void</span><span class=\"w\"> </span><span class=\"nf\">RegisterGedCommand</span><span class=\"p\">(</span><span class=\"n\">GedCommand</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"n\">create</span><span class=\"p\">)(</span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">Core</span><span class=\"o\">&amp;</span><span class=\"p\">)</span>\n<span class=\"w\">                        </span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"kt\">char</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">commandName</span><span class=\"p\">,</span>\n<span class=\"w\">                        </span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"kt\">char</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">helpString</span><span class=\"p\">);</span>\n</code></pre></div>\n<p>I.e., what's typed after <strong>commandName</strong> will be handed over to the corresponding <code>GedCommand</code> object.</p>",
+        "id": 529682166,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1753011362
+    },
+    {
+        "content": "<p>Then, there are the \"call-backs\" to the core. One could imagine to make the important librt functionality, which cannot reached via <code>BRLCAD::Database</code>, accessible via a <code>BRLCAD::Core</code> object. But libbu stuff?</p>\n<p>This can be done as a header-only implementation. For more complex objects, an additional source file can be provided, which had to be compiled and linked to the module's binary.</p>",
+        "id": 529682966,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1753012100
+    },
+    {
+        "content": "<p>The memory management needs special attention. When the core and the module use different registries, one side cannot free what the other allocated. This already happens when booth sides where build with different versions of MS Visual Studio.</p>\n<p>This issue can be solved by providing virtual functions for features, which require allocation or freeing of heap memory. Sometimes, even destructing of objects had to be done this way.</p>",
+        "id": 529683457,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1753012575
     }
 ]

@@ -73,5 +73,51 @@
 
 
 
-<hr><p>Last updated: Jul 20 2025 at 01:05 UTC</p>
+<a name="529680578"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Architecture/near/529680578" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Architecture.html#529680578">(Jul 20 2025 at 11:11)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529607057">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> Is there a good example somewhere of an implementation of that pattern (ideally cross platform?)</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="112516">@starseeker</span>, <span class="user-mention" data-user-id="102902">@Sean</span>, I think, this is more a general architectural discussion now:</p>
+<p>Cross platform: yes, Open source: no. However, here are some principles and practice:</p>
+
+
+
+<a name="529680655"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Architecture/near/529680655" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Architecture.html#529680655">(Jul 20 2025 at 11:12)</a>:</h4>
+<p>For the OS part, I use Qt. Doing this for every OS separately with its low-level functions would be error-prone and like a hare and tortoise game, when they decide to change something in their API for the new version. I.e., I do shared library handling with Qt.</p>
+
+
+
+<a name="529682166"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Architecture/near/529682166" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Architecture.html#529682166">(Jul 20 2025 at 11:36)</a>:</h4>
+<p>There, I search for something like</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">BRLCAD_MODULE_EXPORT</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">RegisterBrlCadModule</span><span class="p">(</span><span class="n">BrlCadModuleRegisterCallback</span><span class="o">&amp;</span><span class="w"> </span><span class="n">callback</span><span class="p">);</span>
+</code></pre></div>
+<p>in the shared libraries. (In fact, it's C call and it looks for a <strong>RegisterBrlCadModule</strong> only.)</p>
+<p>If <code>RegisterBrlCadModule</code> is found, it will be executed with a <code>BrlCadModuleCallback</code> object, which has methods like</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">RegisterGedCommand</span><span class="p">(</span><span class="n">GedCommand</span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">create</span><span class="p">)(</span><span class="n">BRLCAD</span><span class="o">::</span><span class="n">Core</span><span class="o">&amp;</span><span class="p">)</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">commandName</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">helpString</span><span class="p">);</span>
+</code></pre></div>
+<p>I.e., what's typed after <strong>commandName</strong> will be handed over to the corresponding <code>GedCommand</code> object.</p>
+
+
+
+<a name="529682966"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Architecture/near/529682966" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Architecture.html#529682966">(Jul 20 2025 at 11:48)</a>:</h4>
+<p>Then, there are the "call-backs" to the core. One could imagine to make the important librt functionality, which cannot reached via <code>BRLCAD::Database</code>, accessible via a <code>BRLCAD::Core</code> object. But libbu stuff?</p>
+<p>This can be done as a header-only implementation. For more complex objects, an additional source file can be provided, which had to be compiled and linked to the module's binary.</p>
+
+
+
+<a name="529683457"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Architecture/near/529683457" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Architecture.html#529683457">(Jul 20 2025 at 11:56)</a>:</h4>
+<p>The memory management needs special attention. When the core and the module use different registries, one side cannot free what the other allocated. This already happens when booth sides where build with different versions of MS Visual Studio.</p>
+<p>This issue can be solved by providing virtual functions for features, which require allocation or freeing of heap memory. Sometimes, even destructing of objects had to be done this way.</p>
+
+
+
+<hr><p>Last updated: Jul 21 2025 at 01:03 UTC</p>
 </html>
