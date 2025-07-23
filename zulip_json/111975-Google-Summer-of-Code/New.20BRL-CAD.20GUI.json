@@ -13570,5 +13570,17 @@
         "id": 529694119,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1753023811
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529592757\">said</a>:</p>\n<blockquote>\n<p>Libged loads (for example) <a href=\"http://libged-adc.so\">libged-adc.so</a>. Libged-adc loads <a href=\"http://libbu.so\">libbu.so</a>. Thus, libbu symbols are loaded twice: First with <a href=\"http://libbrlcad.so\">libbrlcad.so</a> and then again with <a href=\"http://libbu.so\">libbu.so</a>. This causes a \"double free or corruption\" error when a MOOSE program exits too, because bu_dlunload() will be called twice.</p>\n<p>Libged may be a layer just over librt, but not over libbrlcad;)</p>\n</blockquote>\n<p>That doesn't make sense to me.  The <a href=\"http://libbu.so\">libbu.so</a> load is not an explicit dynamic load, so the dynamic linker is entirely responsible for tracking it loading -- and it shouldn't be unloaded until exit is called (and even then only once).  </p>\n<p>It's been a long time since I looked, but is <a href=\"http://libbrlcad.so\">libbrlcad.so</a> packing in all the libs statically?  If so, perhaps that's the issue as the dynamic linker would have no idea and we're essentially assuming dynamic with how the semaphore system is initialized as a library static initialization step.</p>",
+        "id": 530092808,
+        "sender_full_name": "Sean",
+        "timestamp": 1753172643
+    },
+    {
+        "content": "<p>Dynamic loading is of course subtley different on different platforms, so something else could be going on, but I have trouble seeing how there'd be a bu_dlunload() on libbu at all unless someone wrote some code to explicitly load it as well.</p>\n<p>Without seeing a backtrace, I'd guess bu init allocated semaphores inside a static instance as well as a dynamic instance of libbu, and that potentially being a source of double-free at exit.  That has really nothing to do with libged dynamic loading other than libged introducing a dynamic load of libbu on top of the same symbols and initialization happening when <a href=\"http://libbrlcad.so\">libbrlcad.so</a> is loaded.</p>\n<p>Come to think of it, even if it's not static -- if libbrlcad is the concatenation of libbu object files, then libbrlcad is going to be performing the exact same static initialization as libbu via the bu_init.o object file, and potentially with race conditions with ged_init.o since it relies on libbu.  They're ordering is not guaranteed inside a monolith lib.</p>",
+        "id": 530095033,
+        "sender_full_name": "Sean",
+        "timestamp": 1753173388
     }
 ]
