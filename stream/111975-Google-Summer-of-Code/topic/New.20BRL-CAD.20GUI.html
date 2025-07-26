@@ -18519,5 +18519,23 @@ It looks like rt_db_put_internal() in GED_DB_PUT_INTERNAL (include/ged/objects.h
 
 
 
-<hr><p>Last updated: Jul 25 2025 at 00:59 UTC</p>
+<a name="530803574"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/530803574" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#530803574">(Jul 25 2025 at 15:55)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/530092808">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/529592757">said</a>:</p>
+<blockquote>
+<p>Libged loads (for example) <a href="http://libged-adc.so">libged-adc.so</a>. Libged-adc loads <a href="http://libbu.so">libbu.so</a>. Thus, libbu symbols are loaded twice: First with <a href="http://libbrlcad.so">libbrlcad.so</a> and then again with <a href="http://libbu.so">libbu.so</a>. This causes a "double free or corruption" error when a MOOSE program exits too, because bu_dlunload() will be called twice.</p>
+<p>Libged may be a layer just over librt, but not over libbrlcad;)</p>
+</blockquote>
+<p>That doesn't make sense to me.  The <a href="http://libbu.so">libbu.so</a> load is not an explicit dynamic load, so the dynamic linker is entirely responsible for tracking it loading -- and it shouldn't be unloaded until exit is called (and even then only once).  </p>
+<p>It's been a long time since I looked, but is <a href="http://libbrlcad.so">libbrlcad.so</a> packing in all the libs statically?  If so, perhaps that's the issue as the dynamic linker would have no idea and we're essentially assuming dynamic with how the semaphore system is initialized as a library static initialization step.</p>
+</blockquote>
+<p>The problem is not unloading <a href="http://libbu.so">libbu.so</a> but the libged libraries, e.g. <a href="http://libged-adc.so">libged-adc.so</a>. And, the error occurs when exit is called. And yes, <a href="http://libbrlcad.so">libbrlcad.so</a> is statically linked to libbu etc..</p>
+<p>When <a href="http://libged-adc.so">libged-adc.so</a> is build, there is no <a href="http://libbrlcad.so">libbrlcad.so</a>. (The MOOSE build requires a brlcad installation.) I.e., the linker of the libged libraries sets <a href="http://libbu.so">libbu.so</a> as a (dynamic) dependency. This leads to a conflict between the static version of libbu included in <a href="http://libbrlcad.so">libbrlcad.so</a> and the plain <a href="http://libbu.so">libbu.so</a> loaded when <a href="http://libbrlcad.so">libbrlcad.so</a> loads <a href="http://libged-adc.so">libged-adc.so</a> (via its statically linked libbu part).</p>
+<p>In particular, the unloading of the libged libraries is called twice on exit.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2025 at 00:58 UTC</p>
 </html>
