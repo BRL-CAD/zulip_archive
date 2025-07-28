@@ -18555,5 +18555,55 @@ It looks like rt_db_put_internal() in GED_DB_PUT_INTERNAL (include/ged/objects.h
 
 
 
-<hr><p>Last updated: Jul 27 2025 at 01:05 UTC</p>
+<a name="531141067"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531141067" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531141067">(Jul 27 2025 at 13:33)</a>:</h4>
+<p><span class="user-mention" data-user-id="781132">@LorenzoPegorari</span>, your PR has several issues, see my comments. The most serious one is that it doesn't compile.</p>
+<p>However, to speed it up, I just pushed my version of <code>CompleteCommand()</code> and <code>CompleteObject()</code> to the repository. They use call-backs instead of std::vector. This may look like an additional complication, but its not. See it as a mechanism for injecting your code in these functions. There is no need for creating a temporary std::vector. You can pass the strings directly to Qt.</p>
+
+
+
+<a name="531150871"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531150871" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531150871">(Jul 27 2025 at 14:33)</a>:</h4>
+<p>Omg I'm so dumb... I pushed the changes and they compiled obv. Then I simply wanted to make the variables not capitalized, so I changed their name and built everything again to check if it worked, but I compiled without including the CommandString module... and then force pushed without realizing...</p>
+
+
+
+<a name="531151167"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531151167" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531151167">(Jul 27 2025 at 14:34)</a>:</h4>
+<p>Anyway, if the problem was in how the methods worked themselves, that didn't change anything.</p>
+
+
+
+<a name="531151232"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531151232" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531151232">(Jul 27 2025 at 14:35)</a>:</h4>
+<p>Sorry for my mistakes. I will check the new methods when I get home.</p>
+
+
+
+<a name="531154546"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531154546" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531154546">(Jul 27 2025 at 14:54)</a>:</h4>
+<p>And the bu/str.h include is necessary too ;)</p>
+
+
+
+<a name="531174884"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531174884" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531174884">(Jul 27 2025 at 16:56)</a>:</h4>
+<p>Didn't I include it? I'm pretty sure I did. <span aria-label="sweat" class="emoji emoji-1f613" role="img" title="sweat">:sweat:</span></p>
+
+
+
+<a name="531176160"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531176160" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531176160">(Jul 27 2025 at 17:04)</a>:</h4>
+<p>Sorry, you are right, you did <span aria-label="awe" class="emoji emoji-1fae2" role="img" title="awe">:awe:</span><br>
+Must have missed it.</p>
+
+
+
+<a name="531208733"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531208733" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531208733">(Jul 27 2025 at 20:39)</a>:</h4>
+<p>Unfortunately for personal reasons I cant finish working on the Console PR right now, and tomorrow morning I will be traveling, so I will finish the work tomorrow afternoon and push the PR when it's finished.</p>
+
+
+
+<hr><p>Last updated: Jul 28 2025 at 01:54 UTC</p>
 </html>
