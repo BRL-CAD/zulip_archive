@@ -18646,5 +18646,109 @@ Must have missed it.</p>
 
 
 
-<hr><p>Last updated: Jul 30 2025 at 01:00 UTC</p>
+<a name="531755948"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531755948" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531755948">(Jul 30 2025 at 06:03)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/531630527">said</a>:</p>
+<blockquote>
+<ul>
+<li>"Database write/read failure" for commands like<code>make</code>,<code>r</code>, <code>comb</code>, <code>in</code>, ... (possibly caused by using inmem databases)</li>
+</ul>
+</blockquote>
+<p><span class="user-mention" data-user-id="781132">@LorenzoPegorari</span> do you think you can either provide a backtrace from where exactly that happens, or create an isolated test case (using moose or otherwise) so I can look into what's happening?  Any one of those commands should be adequate.</p>
+
+
+
+<a name="531757324"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531757324" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531757324">(Jul 30 2025 at 06:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Thanks for the explanation -- what I hypothesize is happening is the static linking of libbu into libbrlcad is causing libbrlcad to perform its library initialization when it's linked against.  I can see a couple ways the semaphore autoinit code would not be resilient to being multiply deconstructed on exit.</p>
+<p>The super easy solution would be to insert/use some define awareness when static linking occurs that disables automatic initialization, but then we'd have to make sure that doesn't cause other problems (e.g., with bu_semaphore use).  The more robust solution is probably to make sure the lib initializer is globally protected against multiple calls to init and deconstruct.  Since the primary symptom is a double-free, that should imply a means to coordinate them.</p>
+
+
+
+<a name="531759009"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531759009" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531759009">(Jul 30 2025 at 06:28)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/531755948">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/531630527">said</a>:</p>
+<blockquote>
+<ul>
+<li>"Database write/read failure" for commands like<code>make</code>,<code>r</code>, <code>comb</code>, <code>in</code>, ... (possibly caused by using inmem databases)</li>
+</ul>
+</blockquote>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> do you think you can either provide a backtrace from where exactly that happens, or create an isolated test case (using moose or otherwise) so I can look into what's happening?  Any one of those commands should be adequate.</p>
+</blockquote>
+<p>Build the <a href="https://github.com/BRL-CAD/MOOSE/tree/main/Examples">MOOSE Examples</a> and modyfy <a href="https://github.com/BRL-CAD/MOOSE/blob/main/Examples/CommandString/PrintTitle.cpp">CommandString/PrintTitle.cpp</a> to</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;brlcad/Database/MemoryDatabase.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;brlcad/CommandString/CommandString.h&gt;</span>
+
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span>
+<span class="p">(</span>
+<span class="w">    </span><span class="kt">int</span><span class="w">   </span><span class="n">argc</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">argv</span><span class="p">[]</span>
+<span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Usage: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" &lt;BRL-CAD Database&gt;"</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">BRLCAD</span><span class="o">::</span><span class="n">MemoryDatabase</span><span class="w"> </span><span class="n">database</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">database</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">BRLCAD</span><span class="o">::</span><span class="n">CommandString</span><span class="w">    </span><span class="n">parser</span><span class="p">(</span><span class="n">database</span><span class="p">);</span>
+<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">arguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s">"make"</span><span class="p">,</span><span class="w"> </span><span class="s">"test2"</span><span class="p">,</span><span class="w"> </span><span class="s">"arb8"</span><span class="p">};</span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">Parse</span><span class="p">(</span><span class="n">arguments</span><span class="p">))</span>
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">Results</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Could not parse file: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Could not load file: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>for example.</p>
+
+
+
+<a name="531847837"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531847837" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531847837">(Jul 30 2025 at 13:46)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> , also Daniel, I looked into the ged_exec function. It returns many informations outside of if the execution was successful or not: it can return GED_MORE if the command given is a multi input command, or GED_EXIT if the command is for a clean application shutdown, etc...</p>
+<p>It might be necessary to make it so that Parse can return such informations. I don't know the best way to such thing. Maybe simply make it so that the return status contains more informations? Or maybe a overloaded method that has another parameter that gets changed if ged_exec returns GED_HELP, GED_MORE, ...?</p>
+<p>Also, why does the "clear" command not return GED_CLEAR (similarly to "EXIT" returning GED_EXIT)?</p>
+
+
+
+<a name="531905526"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531905526" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531905526">(Jul 30 2025 at 18:36)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I have seen your comments of the PR, I will fix them ASAP.</p>
+<p>I'm also working on adding support for multi inputs commands.</p>
+<p>I will open another PR for MOOSE (hopefully the solution that I have found is good), and then update the current Console PR accordingly.</p>
+
+
+
+<a name="531936251"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/531936251" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#531936251">(Jul 30 2025 at 21:42)</a>:</h4>
+<p>The <a href="https://github.com/BRL-CAD/arbalest/pull/67">Console PR</a> is updated. I added:</p>
+<ul>
+<li>license and copyright</li>
+<li>fixed some tiny stuff</li>
+<li>added support for multi input commands based on the new PR that I have done for MOOSE.</li>
+</ul>
+<p>The <a href="https://github.com/BRL-CAD/MOOSE/pull/3">new PR for MOOSE</a> is an overloaded Parse method that can return additional informations if ged_exec returns an error. As always with my PRs for MOOSE, this is just my personal take on the issue. There might be a better/cleaner way to achieve what I did.</p>
+
+
+
+<hr><p>Last updated: Jul 31 2025 at 01:00 UTC</p>
 </html>
