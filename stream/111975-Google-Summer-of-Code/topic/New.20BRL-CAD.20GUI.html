@@ -18750,5 +18750,52 @@ Must have missed it.</p>
 
 
 
-<hr><p>Last updated: Jul 31 2025 at 01:00 UTC</p>
+<a name="532149622"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/532149622" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#532149622">(Jul 31 2025 at 19:10)</a>:</h4>
+<p>Hmm, I'll have a look at it, of course. I may need some days.</p>
+
+
+
+<a name="532150291"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/532150291" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#532150291">(Jul 31 2025 at 19:15)</a>:</h4>
+<p>To give you an idea of how I'm thinking: The first two code lines in your MOOSE PR are</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="w">        </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParseErrorType</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Ok</span><span class="p">,</span><span class="w">       </span><span class="c1">// No error information, or command was successful</span>
+</code></pre></div>
+<p>This doesn't go together. <strong>No error</strong> is not an error type, because it isn't even an error. Other "ParseErrorType"s aren't errors too. Therefore, I have an issue with it <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span></p>
+
+
+
+<a name="532150460"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/532150460" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#532150460">(Jul 31 2025 at 19:16)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/532149622">said</a>:</p>
+<blockquote>
+<p>Hmm, I'll have a look at it, of course. I may need some days.</p>
+</blockquote>
+<p>All the time you need. I will work on the ObjectTree callbacks in the mean time.</p>
+
+
+
+<a name="532150965"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/532150965" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#532150965">(Jul 31 2025 at 19:19)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/532150291">said</a>:</p>
+<blockquote>
+<p>To give you an idea of how I'm thinking: The first two code lines in your MOOSE PR are</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="w">        </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParseErrorType</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Ok</span><span class="p">,</span><span class="w">       </span><span class="c1">// No error information, or command was successful</span>
+</code></pre></div>
+<p>This doesn't go together. <strong>No error</strong> is not an error type, because it isn't even an error. Other "ParseErrorType"s aren't errors too. Therefore, I have an issue with it <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span></p>
+</blockquote>
+<p>Mmh I understand. Then Parse shouldn't also return error if it isn't an error. Mmh, maybe remove "Ok", and then make it so that Parse returns 1 only when it is an actual error, and returns additional information in all other cases?</p>
+
+
+
+<a name="532183740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/532183740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#532183740">(Jul 31 2025 at 23:06)</a>:</h4>
+<p>I have remade everything from scrap regarding the <a href="https://github.com/BRL-CAD/MOOSE/pull/3">MOOSE PR</a>, and created 2 different methods that work in different manners: one using an argument to return informations and one using callbacks.</p>
+<p>I'm hopeful that at least one of these methods can be the best possible solution.</p>
+
+
+
+<hr><p>Last updated: Aug 01 2025 at 01:07 UTC</p>
 </html>
