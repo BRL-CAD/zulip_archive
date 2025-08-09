@@ -18880,5 +18880,94 @@ Must have missed it.</p>
 
 
 
-<hr><p>Last updated: Aug 08 2025 at 01:01 UTC</p>
+<a name="533497167"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533497167" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533497167">(Aug 08 2025 at 16:54)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> , I have been working on implementing the <code>ChangeSignalHandlers</code> for the new <code>ObjectTree</code> for the past few days. Unfortunately, I think that I have found 2 bugs regarding the "<em><code>ChangeSignalHandler</code> update</em>" that you did.</p>
+<hr>
+<p>The first issue arises when an object is added to the database, whether with <code>Database::Add()</code> or <code>CommandParse::Parse()</code>.</p>
+<p>In the first case (<code>Database::Add()</code>), the call stack is the following: <code>wdb_export</code> -&gt; <code>wdb_put_internal</code> -&gt; <code>wdb_export_external</code> -&gt; <code>db_diradd</code> -&gt; callback function.<br>
+Subsequentially: <code>DatabaseChangedHook</code> -&gt; <code>SignalChange</code> -&gt; <code>GetInternal</code> -&gt; <em><code>rt_db_get_internal</code></em> -&gt; <code>rt_db_get_internal5</code> -&gt; <code>db_get_external</code>.<br>
+In this situation <code>rt_db_get_internal</code> always returns <strong>-2</strong>, and this means that the created object is always treated as an <code>Unknown</code> object. This happens because the check:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">dp</span><span class="o">-&gt;</span><span class="n">d_flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">RT_DIR_INMEM</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">dp</span><span class="o">-&gt;</span><span class="n">d_addr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RT_DIR_PHONY_ADDR</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w">      </span><span class="cm">/* was dummy DB entry */</span>
+</code></pre></div>
+<p>inside the function <code>db_get_external</code> is always true, which then makes:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">db_get_external</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ext</span><span class="p">,</span><span class="w"> </span><span class="n">dp</span><span class="p">,</span><span class="w"> </span><span class="n">dbip</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span><span class="w">      </span><span class="cm">/* FAIL */</span>
+</code></pre></div>
+<p>inside the function <code>rt_db_get_internal5</code> also always true.</p>
+<p>In the second case (<code>CommandParse::Parse()</code>), let's say using the command "make test arb8", the call stack is the following: <code>wdb_export</code> -&gt; <code>ged_exec</code> -&gt; <code>ged_make_core</code> -&gt; <code>db_diradd</code> -&gt; callback function.<br>
+Subsequentially: <code>DatabaseChangedHook</code> -&gt; <code>SignalChange</code> -&gt; <code>GetInternal</code> -&gt; <em><code>rt_db_get_internal</code></em> -&gt; <code>rt_db_get_internal5</code> -&gt; <code>db_get_external</code>.<br>
+In this situation <code>rt_db_get_internal</code> always returns <strong>-2</strong> for the same exact reasons as above.</p>
+<p>My considerations are the following:</p>
+<ol>
+<li>removing the exclusion of the inmem flag<code>dp-&gt;d_flags = flags &amp; ~(RT_DIR_INMEM);</code> [inside <code>db_diradd</code>] <strong>does not</strong> solve the issue, because the last assignement <code>flags = db_flags_internal(ip);</code> [inside <code>wdb_put_internal]</code> already does not contain the <code>RT_DIR_INMEM</code> flag. More over, it seems to me that it is <code>db_inmem(dp, ep, flags, wdbp-&gt;dbip);</code> [inside <code>wdb_export_external</code>, just after calling <code>db_diradd</code>] that has the job of assigning the <code>RT_DIR_INMEM</code> flag...</li>
+<li>does it even make sense in the first place to call <code>rt_db_get_internal</code> during a call to <code>wdb_put_internal</code>? Does it make sense to try to retrieve an object from a db during the call to write said object in the db?</li>
+</ol>
+<hr>
+<p>The second issue arises only at the end of the execution described in the above issue in the first case (<code>Database::Add()</code>) : when the actual registered callback function (meaning the function registered with <code>RegisterChangeSignalHandler</code>) gets called, a <strong>segmentation fault</strong> happens.</p>
+<p>My considerations are the following:</p>
+<ol>
+<li>I have tried for a while now to understand the cause of this issue. I have runned <code>fsanitize=address</code>, and it tells me that the error is a <strong>stack-use-after-return</strong>. I unfortunately don't have any more infos...</li>
+</ol>
+
+
+
+<a name="533500281"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533500281" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533500281">(Aug 08 2025 at 17:16)</a>:</h4>
+<p>I suspect RT_DIR_PHONY_ADDR to be the problem. This means that the object doesn't exist yet. Maybe, <code>const Object&amp; object</code> should be changed to <code>const char* objectName</code>.</p>
+
+
+
+<a name="533501263"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533501263" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533501263">(Aug 08 2025 at 17:23)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/532830715">said</a>:</p>
+<blockquote>
+<p>As for other comments, GED_CLEAR doesn't fit the pattern --<br>
+...</p>
+</blockquote>
+<p>Hmm, <code>grep -R GED_CLEAR</code> doesn't find anything  <span aria-label="hmm" class="emoji emoji-1f928" role="img" title="hmm">:hmm:</span></p>
+<p>However, the GED_~ defines are flags used somewhere in libged, not neccessarily return codes of ged_exec().</p>
+
+
+
+<a name="533501557"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533501557" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533501557">(Aug 08 2025 at 17:26)</a>:</h4>
+<p>BTW, some libged functionality can be overridden via ged_clbk_set().</p>
+
+
+
+<a name="533502878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533502878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533502878">(Aug 08 2025 at 17:35)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533500281">said</a>:</p>
+<blockquote>
+<p>I suspect RT_DIR_PHONY_ADDR to be the problem. This means that the object doesn't exist yet. Maybe, <code>const Object&amp; object</code> should be changed to <code>const char* objectName</code>.</p>
+</blockquote>
+<p>I will look into it right now! Thx for putting me on the right tracks.</p>
+
+
+
+<a name="533503248"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533503248" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533503248">(Aug 08 2025 at 17:38)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533501557">said</a>:</p>
+<blockquote>
+<p>BTW, some libged functionality can be overridden via ged_clbk_set().</p>
+</blockquote>
+<p>This is very interesting, I wasn't thinking about the GED callbacks... It could be viable to use them, for example, for returning a CommandString::State::ClearRequired as a temporary solution... But maybe that's a bit too fishy...</p>
+
+
+
+<a name="533510487"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533510487" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533510487">(Aug 08 2025 at 18:38)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I adapted the Console PR to the changes you've made, but now some commands don't work as expected. I explained the problems in the <a href="https://github.com/BRL-CAD/arbalest/pull/67#issuecomment-3168973190">PR comment</a>.</p>
+
+
+
+<a name="533517588"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533517588" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533517588">(Aug 08 2025 at 19:42)</a>:</h4>
+<p>I'll check it...</p>
+
+
+
+<hr><p>Last updated: Aug 09 2025 at 00:56 UTC</p>
 </html>
