@@ -13960,5 +13960,59 @@
         "id": 533667829,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1754849536
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533500281\">ha scritto</a>:</p>\n<blockquote>\n<p>Maybe, <code>const Object&amp; object</code> should be changed to <code>const char* objectName</code>.</p>\n</blockquote>\n<p>I have found another issue that supports the idea of changing <code>const Object&amp; object</code> to <code>const char* objectName</code>.</p>\n<p>When a command such has \"kill obj\" is executed, <code>ged_exec</code> calls <code>ged_kill_core</code>, which then calls <code>db_delete</code>, that sets <code>dp.d_len = 0;</code>.</p>\n<p>When <code>db_delete</code> returns, <code>db_dirdelete</code> gets called, which, at the end, calls the callback function.</p>\n<p>This produces the following call stack: <code>DatabaseChangedHook</code> -&gt; <code>SignalChange</code> -&gt; <code>GetInternal</code> -&gt; <code>rt_db_get_internal</code> -&gt; <code>rt_db_get_internal5</code> -&gt; <code>db_get_external</code>.</p>\n<p>Inside <code>db_get_external</code>, the following lines get executed:</p>\n<div class=\"codehilite\" data-code-language=\"C\"><pre><span></span><code><span class=\"n\">ep</span><span class=\"o\">-&gt;</span><span class=\"n\">ext_nbytes</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">dp</span><span class=\"o\">-&gt;</span><span class=\"n\">d_len</span><span class=\"p\">;</span><span class=\"w\">  </span><span class=\"c1\">// = 0</span>\n<span class=\"n\">ep</span><span class=\"o\">-&gt;</span><span class=\"n\">ext_buf</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"kt\">uint8_t</span><span class=\"w\"> </span><span class=\"o\">*</span><span class=\"p\">)</span><span class=\"n\">bu_malloc</span><span class=\"p\">(</span><span class=\"n\">ep</span><span class=\"o\">-&gt;</span><span class=\"n\">ext_nbytes</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"s\">\"db_get_ext ext_buf\"</span><span class=\"p\">);</span><span class=\"w\">  </span><span class=\"c1\">// malloc(0)</span>\n</code></pre></div>\n<p>and so we get the following errors:</p>\n<div class=\"codehilite\"><pre><span></span><code>ERROR: alloc size=0 (cnt=1, sz=0) db_get_ext ext_buf\nERROR: bu_malloc(0)\n</code></pre></div>",
+        "id": 533793085,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1754918457
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I've created <a href=\"https://github.com/BRL-CAD/MOOSE/pull/5\">this PR</a> just for the fun of it :)</p>\n<p>If you don't like it just close it and you can tackle the issue yourself!</p>",
+        "id": 533803508,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1754921628
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533663960\">said</a>:</p>\n<blockquote>\n<p>Now PR#66 is also ready to be merged/final review. I'va also ready another PR to fix how non-existent objects segmentation fault in the ObjectTreeWidget</p>\n</blockquote>\n<p>I saw it. It is  a large one. I may need some time reviewing it.</p>",
+        "id": 533827356,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1754929274
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533803508\">said</a>:</p>\n<blockquote>\n<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> I've created <a href=\"https://github.com/BRL-CAD/MOOSE/pull/5\">this PR</a> just for the fun of it :)</p>\n<p>If you don't like it just close it and you can tackle the issue yourself!</p>\n</blockquote>\n<p>It's good. (However, I commented it ;)<br>\nI think, you need to queue a Qt signal in arbalest when the call-back is called. It will be executed, when the program returns to the event loop. At this time, the new objects should exist.</p>",
+        "id": 533827913,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1754929500
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533827913\">ha scritto</a>:</p>\n<blockquote>\n<p>It's good. (However, I commented it ;)</p>\n</blockquote>\n<p>Fixed it!</p>",
+        "id": 533829066,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1754929916
+    },
+    {
+        "content": "<p>Well, not all occurrences ;)</p>",
+        "id": 533829387,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1754930041
+    },
+    {
+        "content": "<p>Got it! Let me point out though that there are many instances of <code>m_pDir != 0</code> in the code.</p>",
+        "id": 533830143,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1754930280
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533827913\">ha scritto</a>:</p>\n<blockquote>\n<p>I think, you need to queue a Qt signal in arbalest when the call-back is called. It will be executed, when the program returns to the event loop. At this time, the new objects should exist.</p>\n</blockquote>\n<p>This is a really really good idea!</p>",
+        "id": 533831156,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1754930613
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533830143\">said</a>:</p>\n<blockquote>\n<p>Got it! Let me point out though that there are many instances of <code>m_pDir != 0</code> in the code.</p>\n</blockquote>\n<p>I know. The code has a long history. The copyright statements start at 2008, but the real origins may be earlier. I haven't reviewed and changed everything when creating MOOSE from the <a href=\"https://github.com/BRL-CAD/rt-cubed/tree/main/src/coreInterface\">C++ core interface</a>, but MOOSE (opposite to the legacy C++ core interface) should use modern C++ idioms, whenever its touched.</p>",
+        "id": 533831374,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1754930692
     }
 ]

@@ -19086,5 +19086,97 @@ Sometimes, I put assertions in my code to check my assumptions.</p>
 
 
 
-<hr><p>Last updated: Aug 11 2025 at 01:02 UTC</p>
+<a name="533793085"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533793085" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533793085">(Aug 11 2025 at 13:20)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533500281">ha scritto</a>:</p>
+<blockquote>
+<p>Maybe, <code>const Object&amp; object</code> should be changed to <code>const char* objectName</code>.</p>
+</blockquote>
+<p>I have found another issue that supports the idea of changing <code>const Object&amp; object</code> to <code>const char* objectName</code>.</p>
+<p>When a command such has "kill obj" is executed, <code>ged_exec</code> calls <code>ged_kill_core</code>, which then calls <code>db_delete</code>, that sets <code>dp.d_len = 0;</code>.</p>
+<p>When <code>db_delete</code> returns, <code>db_dirdelete</code> gets called, which, at the end, calls the callback function.</p>
+<p>This produces the following call stack: <code>DatabaseChangedHook</code> -&gt; <code>SignalChange</code> -&gt; <code>GetInternal</code> -&gt; <code>rt_db_get_internal</code> -&gt; <code>rt_db_get_internal5</code> -&gt; <code>db_get_external</code>.</p>
+<p>Inside <code>db_get_external</code>, the following lines get executed:</p>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="n">ep</span><span class="o">-&gt;</span><span class="n">ext_nbytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dp</span><span class="o">-&gt;</span><span class="n">d_len</span><span class="p">;</span><span class="w">  </span><span class="c1">// = 0</span>
+<span class="n">ep</span><span class="o">-&gt;</span><span class="n">ext_buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">bu_malloc</span><span class="p">(</span><span class="n">ep</span><span class="o">-&gt;</span><span class="n">ext_nbytes</span><span class="p">,</span><span class="w"> </span><span class="s">"db_get_ext ext_buf"</span><span class="p">);</span><span class="w">  </span><span class="c1">// malloc(0)</span>
+</code></pre></div>
+<p>and so we get the following errors:</p>
+<div class="codehilite"><pre><span></span><code>ERROR: alloc size=0 (cnt=1, sz=0) db_get_ext ext_buf
+ERROR: bu_malloc(0)
+</code></pre></div>
+
+
+
+<a name="533803508"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533803508" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533803508">(Aug 11 2025 at 14:13)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> I've created <a href="https://github.com/BRL-CAD/MOOSE/pull/5">this PR</a> just for the fun of it :)</p>
+<p>If you don't like it just close it and you can tackle the issue yourself!</p>
+
+
+
+<a name="533827356"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533827356" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533827356">(Aug 11 2025 at 16:21)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533663960">said</a>:</p>
+<blockquote>
+<p>Now PR#66 is also ready to be merged/final review. I'va also ready another PR to fix how non-existent objects segmentation fault in the ObjectTreeWidget</p>
+</blockquote>
+<p>I saw it. It is  a large one. I may need some time reviewing it.</p>
+
+
+
+<a name="533827913"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533827913" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533827913">(Aug 11 2025 at 16:25)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533803508">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> I've created <a href="https://github.com/BRL-CAD/MOOSE/pull/5">this PR</a> just for the fun of it :)</p>
+<p>If you don't like it just close it and you can tackle the issue yourself!</p>
+</blockquote>
+<p>It's good. (However, I commented it ;)<br>
+I think, you need to queue a Qt signal in arbalest when the call-back is called. It will be executed, when the program returns to the event loop. At this time, the new objects should exist.</p>
+
+
+
+<a name="533829066"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533829066" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533829066">(Aug 11 2025 at 16:31)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533827913">ha scritto</a>:</p>
+<blockquote>
+<p>It's good. (However, I commented it ;)</p>
+</blockquote>
+<p>Fixed it!</p>
+
+
+
+<a name="533829387"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533829387" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533829387">(Aug 11 2025 at 16:34)</a>:</h4>
+<p>Well, not all occurrences ;)</p>
+
+
+
+<a name="533830143"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533830143" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533830143">(Aug 11 2025 at 16:38)</a>:</h4>
+<p>Got it! Let me point out though that there are many instances of <code>m_pDir != 0</code> in the code.</p>
+
+
+
+<a name="533831156"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533831156" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533831156">(Aug 11 2025 at 16:43)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533827913">ha scritto</a>:</p>
+<blockquote>
+<p>I think, you need to queue a Qt signal in arbalest when the call-back is called. It will be executed, when the program returns to the event loop. At this time, the new objects should exist.</p>
+</blockquote>
+<p>This is a really really good idea!</p>
+
+
+
+<a name="533831374"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/533831374" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#533831374">(Aug 11 2025 at 16:44)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533830143">said</a>:</p>
+<blockquote>
+<p>Got it! Let me point out though that there are many instances of <code>m_pDir != 0</code> in the code.</p>
+</blockquote>
+<p>I know. The code has a long history. The copyright statements start at 2008, but the real origins may be earlier. I haven't reviewed and changed everything when creating MOOSE from the <a href="https://github.com/BRL-CAD/rt-cubed/tree/main/src/coreInterface">C++ core interface</a>, but MOOSE (opposite to the legacy C++ core interface) should use modern C++ idioms, whenever its touched.</p>
+
+
+
+<hr><p>Last updated: Aug 12 2025 at 00:56 UTC</p>
 </html>
