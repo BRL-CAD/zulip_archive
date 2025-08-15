@@ -172,5 +172,53 @@
         "id": 534191365,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1755077262
+    },
+    {
+        "content": "<p>BTW, I was successful in compiling a MOOSE based brlcad.dll with only OS-dependencies, i.e. static C runtime linking. Its size is only 6.5 MB. Maybe, I'll prepare a release based on version 7.42.0.</p>",
+        "id": 534441788,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755163504
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> Which version of Visual Studio are you building with?</p>",
+        "id": 534458478,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755170403
+    },
+    {
+        "content": "<p>We didn't see any issues with _Thread_local in our testing, which included Visual Studio 2022, so I'm a little curious.</p>",
+        "id": 534458651,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755170471
+    },
+    {
+        "content": "<p>I'm using Visual Studio 16 (2019). Some of the more modern features (which may include C++11) may be not be supported by it.</p>",
+        "id": 534459269,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755170719
+    },
+    {
+        "content": "<p>If you add this right before the _Thread_local usage, does it work?  </p>\n<div class=\"codehilite\"><pre><span></span><code>#if defined(HAVE_WINDOWS_H) &amp;&amp; !defined(_Thread_local)\n#  define _Thread_local __declspec(thread)\n#endif\n</code></pre></div>",
+        "id": 534459323,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755170736
+    },
+    {
+        "content": "<p>Ah, yeah - that would explain it.  I'm more surprised the fuzzer tests tried to build at all - our tests for the compiler options must need tweaking.</p>",
+        "id": 534459494,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755170801
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/channel/104062-brlcad/topic/BRL-CAD.20release/near/534459323\">said</a>:</p>\n<blockquote>\n<p>If you add this right before the _Thread_local usage, does it work?  </p>\n<p><div class=\"codehilite\"><pre><span></span><code>#if defined(HAVE_WINDOWS_H) &amp;&amp; !defined(_Thread_local)\n#  define _Thread_local __declspec(thread)\n#endif\n</code></pre></div><br>\n</p>\n</blockquote>\n<p>It works for MSVC 2019.</p>",
+        "id": 534471481,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755174111
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Would it be worth a block in common.h to ensure _Thread_local is always defined?</p>",
+        "id": 534526650,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755191586
     }
 ]

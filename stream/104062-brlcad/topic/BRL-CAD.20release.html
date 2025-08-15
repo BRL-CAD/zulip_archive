@@ -197,5 +197,66 @@ I haven't done much tests yet, but the BrlCadViewer seems to work, at least.</p>
 
 
 
-<hr><p>Last updated: Aug 14 2025 at 00:57 UTC</p>
+<a name="534441788"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534441788" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534441788">(Aug 14 2025 at 09:25)</a>:</h4>
+<p>BTW, I was successful in compiling a MOOSE based brlcad.dll with only OS-dependencies, i.e. static C runtime linking. Its size is only 6.5 MB. Maybe, I'll prepare a release based on version 7.42.0.</p>
+
+
+
+<a name="534458478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534458478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534458478">(Aug 14 2025 at 11:20)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> Which version of Visual Studio are you building with?</p>
+
+
+
+<a name="534458651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534458651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534458651">(Aug 14 2025 at 11:21)</a>:</h4>
+<p>We didn't see any issues with _Thread_local in our testing, which included Visual Studio 2022, so I'm a little curious.</p>
+
+
+
+<a name="534459269"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534459269" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534459269">(Aug 14 2025 at 11:25)</a>:</h4>
+<p>I'm using Visual Studio 16 (2019). Some of the more modern features (which may include C++11) may be not be supported by it.</p>
+
+
+
+<a name="534459323"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534459323" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534459323">(Aug 14 2025 at 11:25)</a>:</h4>
+<p>If you add this right before the _Thread_local usage, does it work?  </p>
+<div class="codehilite"><pre><span></span><code>#if defined(HAVE_WINDOWS_H) &amp;&amp; !defined(_Thread_local)
+#  define _Thread_local __declspec(thread)
+#endif
+</code></pre></div>
+
+
+
+<a name="534459494"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534459494" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534459494">(Aug 14 2025 at 11:26)</a>:</h4>
+<p>Ah, yeah - that would explain it.  I'm more surprised the fuzzer tests tried to build at all - our tests for the compiler options must need tweaking.</p>
+
+
+
+<a name="534471481"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534471481" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534471481">(Aug 14 2025 at 12:21)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/104062-brlcad/topic/BRL-CAD.20release/near/534459323">said</a>:</p>
+<blockquote>
+<p>If you add this right before the _Thread_local usage, does it work?  </p>
+<p><div class="codehilite"><pre><span></span><code>#if defined(HAVE_WINDOWS_H) &amp;&amp; !defined(_Thread_local)
+#  define _Thread_local __declspec(thread)
+#endif
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>It works for MSVC 2019.</p>
+
+
+
+<a name="534526650"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534526650" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534526650">(Aug 14 2025 at 17:13)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> Would it be worth a block in common.h to ensure _Thread_local is always defined?</p>
+
+
+
+<hr><p>Last updated: Aug 15 2025 at 00:57 UTC</p>
 </html>
