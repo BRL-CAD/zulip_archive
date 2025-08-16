@@ -14014,5 +14014,47 @@
         "id": 533831374,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1754930692
+    },
+    {
+        "content": "<p>The arbalest program icon looks odd: <br>\n<a href=\"/user_uploads/1549/-IJzQJwaYnvufcGdNDgz0q0e/image.png\">image.png</a><br>\n<span class=\"user-mention\" data-user-id=\"781132\">@LorenzoPegorari</span>, can you reproduce it?</p>\n<div class=\"message_inline_image\"><a href=\"/user_uploads/1549/-IJzQJwaYnvufcGdNDgz0q0e/image.png\" title=\"image.png\"><img data-original-content-type=\"image/png\" data-original-dimensions=\"96x93\" src=\"/user_uploads/thumbnail/1549/-IJzQJwaYnvufcGdNDgz0q0e/image.png/840x560.webp\"></a></div>",
+        "id": 534686153,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755278225
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533571292\">said</a>:</p>\n<blockquote>\n<p>It seems to me that <code>GED_MORE</code> and <code>GED_HELP</code> do not (always?) combine with <code>BRLCAD_ERROR</code>.</p>\n</blockquote>\n<p>Yeah, I think there's only one case (out of hundreds) where they do get combined despite the header saying and implying they should be.  Looks like incomplete effort put into making it consistent.  Looks like it can just be treated as a return code, but we can certainly change it if needed since it was primarily a migration of logic from mged to libged to get its current state.  </p>\n<p>My initial glance, I'm not seeing value combining them as bit flags (e.g., I wouldn't combine MORE and USAGE for example, or SHUTDOWN or really any of those flags.  They're more like independent exception types where one is being thrown.  Could keep them as bitflags for future expansion, but that definitely would change all caller code to have to bitmask.</p>",
+        "id": 534691686,
+        "sender_full_name": "Sean",
+        "timestamp": 1755280960
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533793085\">said</a>:</p>\n<blockquote>\n<p>...<br>\nand so we get the following errors:</p>\n<p><div class=\"codehilite\"><pre><span></span><code>ERROR: alloc size=0 (cnt=1, sz=0) db_get_ext ext_buf\nERROR: bu_malloc(0)\n</code></pre></div><br>\n</p>\n</blockquote>\n<p>I think this is a great example of something that should get fixed in librt.  The code is making a blind assumption that d_len is non-zero and it probably shouldn't as it can trivially skip the malloc.  Just need to ensure there isn't logic assuming non-NULL ext_buf if we allow it to be NULL.</p>",
+        "id": 534692090,
+        "sender_full_name": "Sean",
+        "timestamp": 1755281140
+    },
+    {
+        "content": "<p>That's all said to note that sometimes the best/easiest/simplest fix will be to adjust something inside librt, and I have no rejection against doing that where it makes sense.  MOOSE is a perfect testing ground for teasing out invalid assumptions and unnecessary checks in librt, or expanding support for inmems and such.</p>\n<p>Obviously not saying that to add/change workflow, but just saying you don't have to take an immutable perspective.  I just changed whole swaths of logic in librt that was assuming we had a valid ray trace instance pointer to support calling from code that didn't need an rtip, for example.</p>",
+        "id": 534692588,
+        "sender_full_name": "Sean",
+        "timestamp": 1755281362
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/534686153\">said</a>:</p>\n<blockquote>\n<p>The arbalest program icon looks odd.</p>\n<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span>, can you reproduce it?</p>\n</blockquote>\n<p>That's... weird. You are using Debian Breeze, correct? And which Qt version are you using?</p>",
+        "id": 534695255,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755282656
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> , I already opened the <a href=\"https://github.com/BRL-CAD/arbalest/pull/68\">PR</a> we discussed before to make <code>ObjectTreeWidget</code> handle non-existent objects.</p>\n<p>It's rather simple and straight forward.</p>",
+        "id": 534695527,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755282802
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/534692588\">said</a>:</p>\n<blockquote>\n<p>That's all said to note that sometimes the best/easiest/simplest fix will be to adjust something inside librt, and I have no rejection against doing that where it makes sense.</p>\n</blockquote>\n<p>You are right. Working only with arbalest, and a tiny bit with MOOSE, makes me many times subconsciously assume that the brlcad code is \"always right\" and \"perfect\"...</p>",
+        "id": 534696078,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755283062
     }
 ]

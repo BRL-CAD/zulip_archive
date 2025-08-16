@@ -19178,5 +19178,75 @@ I think, you need to queue a Qt signal in arbalest when the call-back is called.
 
 
 
-<hr><p>Last updated: Aug 15 2025 at 00:57 UTC</p>
+<a name="534686153"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534686153" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534686153">(Aug 15 2025 at 17:17)</a>:</h4>
+<p>The arbalest program icon looks odd: <br>
+<a href="/user_uploads/1549/-IJzQJwaYnvufcGdNDgz0q0e/image.png">image.png</a><br>
+<span class="user-mention" data-user-id="781132">@LorenzoPegorari</span>, can you reproduce it?</p>
+<div class="message_inline_image"><a href="/user_uploads/1549/-IJzQJwaYnvufcGdNDgz0q0e/image.png" title="image.png"><img data-original-content-type="image/png" data-original-dimensions="96x93" src="/user_uploads/thumbnail/1549/-IJzQJwaYnvufcGdNDgz0q0e/image.png/840x560.webp"></a></div>
+
+
+
+<a name="534691686"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534691686" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534691686">(Aug 15 2025 at 18:02)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533571292">said</a>:</p>
+<blockquote>
+<p>It seems to me that <code>GED_MORE</code> and <code>GED_HELP</code> do not (always?) combine with <code>BRLCAD_ERROR</code>.</p>
+</blockquote>
+<p>Yeah, I think there's only one case (out of hundreds) where they do get combined despite the header saying and implying they should be.  Looks like incomplete effort put into making it consistent.  Looks like it can just be treated as a return code, but we can certainly change it if needed since it was primarily a migration of logic from mged to libged to get its current state.  </p>
+<p>My initial glance, I'm not seeing value combining them as bit flags (e.g., I wouldn't combine MORE and USAGE for example, or SHUTDOWN or really any of those flags.  They're more like independent exception types where one is being thrown.  Could keep them as bitflags for future expansion, but that definitely would change all caller code to have to bitmask.</p>
+
+
+
+<a name="534692090"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534692090" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534692090">(Aug 15 2025 at 18:05)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/533793085">said</a>:</p>
+<blockquote>
+<p>...<br>
+and so we get the following errors:</p>
+<p><div class="codehilite"><pre><span></span><code>ERROR: alloc size=0 (cnt=1, sz=0) db_get_ext ext_buf
+ERROR: bu_malloc(0)
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>I think this is a great example of something that should get fixed in librt.  The code is making a blind assumption that d_len is non-zero and it probably shouldn't as it can trivially skip the malloc.  Just need to ensure there isn't logic assuming non-NULL ext_buf if we allow it to be NULL.</p>
+
+
+
+<a name="534692588"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534692588" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534692588">(Aug 15 2025 at 18:09)</a>:</h4>
+<p>That's all said to note that sometimes the best/easiest/simplest fix will be to adjust something inside librt, and I have no rejection against doing that where it makes sense.  MOOSE is a perfect testing ground for teasing out invalid assumptions and unnecessary checks in librt, or expanding support for inmems and such.</p>
+<p>Obviously not saying that to add/change workflow, but just saying you don't have to take an immutable perspective.  I just changed whole swaths of logic in librt that was assuming we had a valid ray trace instance pointer to support calling from code that didn't need an rtip, for example.</p>
+
+
+
+<a name="534695255"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534695255" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534695255">(Aug 15 2025 at 18:30)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/534686153">said</a>:</p>
+<blockquote>
+<p>The arbalest program icon looks odd.</p>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span>, can you reproduce it?</p>
+</blockquote>
+<p>That's... weird. You are using Debian Breeze, correct? And which Qt version are you using?</p>
+
+
+
+<a name="534695527"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534695527" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534695527">(Aug 15 2025 at 18:33)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> , I already opened the <a href="https://github.com/BRL-CAD/arbalest/pull/68">PR</a> we discussed before to make <code>ObjectTreeWidget</code> handle non-existent objects.</p>
+<p>It's rather simple and straight forward.</p>
+
+
+
+<a name="534696078"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/534696078" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#534696078">(Aug 15 2025 at 18:37)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/534692588">said</a>:</p>
+<blockquote>
+<p>That's all said to note that sometimes the best/easiest/simplest fix will be to adjust something inside librt, and I have no rejection against doing that where it makes sense.</p>
+</blockquote>
+<p>You are right. Working only with arbalest, and a tiny bit with MOOSE, makes me many times subconsciously assume that the brlcad code is "always right" and "perfect"...</p>
+
+
+
+<hr><p>Last updated: Aug 16 2025 at 00:54 UTC</p>
 </html>
