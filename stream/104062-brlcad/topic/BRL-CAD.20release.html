@@ -287,5 +287,55 @@ I haven't done much tests yet, but the BrlCadViewer seems to work, at least.</p>
 
 
 
-<hr><p>Last updated: Aug 16 2025 at 00:54 UTC</p>
+<a name="534732798"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534732798" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534732798">(Aug 16 2025 at 02:40)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span> So I don't get yelled at again - is this overkill?  </p>
+<div class="codehilite"><pre><span></span><code>/* Make sure _Thread_local is defined.  Note that if __declspec(thread) or
+ * __thread  are used, they will only work for &quot;plain old data&quot; types
+ * with trivial constructors/destructors. */
+# if !defined(_Thread_local)
+#   if defined(__cplusplus)
+#     if __cplusplus &gt;= 201103L  // C++11 has thread_local keyword
+#       define _Thread_local thread_local
+#     elif defined(HAVE_WINDOWS_H)
+#       define _Thread_local __declspec(thread)
+#     elif defined(__GNUC__) || defined(__clang__)
+#       define _Thread_local __thread
+#     endif
+#   else
+#     if defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 202311L
+#       define _Thread_local thread_local // C23: thread_local is the standard keyword
+#     elif defined(HAVE_WINDOWS_H)
+#       define _Thread_local __declspec(thread)
+#     elif defined(__GNUC__) || defined(__clang__)
+#       define _Thread_local __thread
+#     endif
+#   endif
+# endif
+</code></pre></div>
+
+
+
+<a name="534738765"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534738765" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534738765">(Aug 16 2025 at 05:01)</a>:</h4>
+<p>I'm sorry <span class="user-mention" data-user-id="112516">@starseeker</span> I didn't mean anything to come across as yelling, just code health / maintenance commentary.</p>
+<p>Assuming it works, I think the code block you have there looks good!</p>
+<p>For the comment, I'd suggest tightening that up to not explain C/C++, but rather the implication.  It's a platform toggle so __declspec() and __thread ARE used, not "if"...  Maybe:</p>
+<p>/* make sure we have local threading, only to be used on C "POD" types */</p>
+
+
+
+<a name="534738930"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534738930" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534738930">(Aug 16 2025 at 05:04)</a>:</h4>
+<p>Might be good to introduce a THREADLOCAL and use that (similar to EXTERNVARINT, NORETURN, etc) given _Thread_local is actually deprecated... (it's thread_local to sync with C++)</p>
+
+
+
+<a name="534760961"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534760961" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534760961">(Aug 16 2025 at 12:55)</a>:</h4>
+<p>THREADLOCAL sounds good - is "POD" common enough shorthand that we can assume it is universally understood?  Just for myself, I had to ask GPT to clarify what it stood for - it's new to me.</p>
+
+
+
+<hr><p>Last updated: Aug 17 2025 at 01:01 UTC</p>
 </html>

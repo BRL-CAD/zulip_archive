@@ -244,5 +244,29 @@
         "id": 534681487,
         "sender_full_name": "Sean",
         "timestamp": 1755275948
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> So I don't get yelled at again - is this overkill?  </p>\n<div class=\"codehilite\"><pre><span></span><code>/* Make sure _Thread_local is defined.  Note that if __declspec(thread) or\n * __thread  are used, they will only work for &quot;plain old data&quot; types\n * with trivial constructors/destructors. */\n# if !defined(_Thread_local)\n#   if defined(__cplusplus)\n#     if __cplusplus &gt;= 201103L  // C++11 has thread_local keyword\n#       define _Thread_local thread_local\n#     elif defined(HAVE_WINDOWS_H)\n#       define _Thread_local __declspec(thread)\n#     elif defined(__GNUC__) || defined(__clang__)\n#       define _Thread_local __thread\n#     endif\n#   else\n#     if defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 202311L\n#       define _Thread_local thread_local // C23: thread_local is the standard keyword\n#     elif defined(HAVE_WINDOWS_H)\n#       define _Thread_local __declspec(thread)\n#     elif defined(__GNUC__) || defined(__clang__)\n#       define _Thread_local __thread\n#     endif\n#   endif\n# endif\n</code></pre></div>",
+        "id": 534732798,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755312002
+    },
+    {
+        "content": "<p>I'm sorry <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> I didn't mean anything to come across as yelling, just code health / maintenance commentary.</p>\n<p>Assuming it works, I think the code block you have there looks good!</p>\n<p>For the comment, I'd suggest tightening that up to not explain C/C++, but rather the implication.  It's a platform toggle so __declspec() and __thread ARE used, not \"if\"...  Maybe:</p>\n<p>/* make sure we have local threading, only to be used on C \"POD\" types */</p>",
+        "id": 534738765,
+        "sender_full_name": "Sean",
+        "timestamp": 1755320473
+    },
+    {
+        "content": "<p>Might be good to introduce a THREADLOCAL and use that (similar to EXTERNVARINT, NORETURN, etc) given _Thread_local is actually deprecated... (it's thread_local to sync with C++)</p>",
+        "id": 534738930,
+        "sender_full_name": "Sean",
+        "timestamp": 1755320697
+    },
+    {
+        "content": "<p>THREADLOCAL sounds good - is \"POD\" common enough shorthand that we can assume it is universally understood?  Just for myself, I had to ask GPT to clarify what it stood for - it's new to me.</p>",
+        "id": 534760961,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755348907
     }
 ]
