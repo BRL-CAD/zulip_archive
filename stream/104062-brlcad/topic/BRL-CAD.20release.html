@@ -337,5 +337,54 @@ I haven't done much tests yet, but the BrlCadViewer seems to work, at least.</p>
 
 
 
-<hr><p>Last updated: Aug 17 2025 at 01:01 UTC</p>
+<a name="534796770"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534796770" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534796770">(Aug 17 2025 at 02:49)</a>:</h4>
+<p>If we go with THREADLOCAL, I think it boils down to this?</p>
+<div class="codehilite"><pre><span></span><code>/* Make sure THREADLOCAL is defined, only usable on C &quot;POD&quot; types */
+#ifndef THREADLOCAL
+#  if defined(__cplusplus) &amp;&amp; __cplusplus &gt;= 201103L
+#    define THREADLOCAL thread_local // C++11: thread_local is standard
+#  elif !defined(__cplusplus) &amp;&amp; defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 202311L
+#    define THREADLOCAL thread_local // C23: thread_local is standard
+#  elif !defined(__cplusplus) &amp;&amp; defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 201112L
+#    define THREADLOCAL _Thread_local // C11: _Thread_local is standard
+#  elif defined(HAVE_WINDOWS_H)
+#    define THREADLOCAL __declspec(thread)
+#  elif defined(__GNUC__) || defined(__clang__)
+#    define THREADLOCAL __thread
+#  endif
+#endif
+</code></pre></div>
+
+
+
+<a name="534798880"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534798880" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534798880">(Aug 17 2025 at 03:56)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/104062-brlcad/topic/BRL-CAD.20release/near/534760961">said</a>:</p>
+<blockquote>
+<p>THREADLOCAL sounds good - is "POD" common enough shorthand that we can assume it is universally understood?  Just for myself, I had to ask GPT to clarify what it stood for - it's new to me.</p>
+</blockquote>
+<p>Stroustrup's book "The C++ Programming Language" is worth reading if you haven't yet.  POD was a concept it coined way back in the 90's, and it's mentioned in many other books since.</p>
+
+
+
+<a name="534798919"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534798919" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534798919">(Aug 17 2025 at 03:57)</a>:</h4>
+<p>I believe the c++98 standard referenced it directly as well, and c++11 formalized/clarified a change to it's meaning -- essentially compatibility with C types.</p>
+
+
+
+<a name="534799134"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534799134" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534799134">(Aug 17 2025 at 04:03)</a>:</h4>
+<p>block looks good to me at a glance.  would be worth adding a #else with #error (or #define it to thread_local as the fallback) just so we don't accidentally fall through with THREADLOCAL undefined and we end up with global vars and threading issues.</p>
+
+
+
+<a name="534850136"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/BRL-CAD%20release/near/534850136" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Nathan McCorkle <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/BRL-CAD.20release.html#534850136">(Aug 17 2025 at 22:20)</a>:</h4>
+<p>does anyone have a windows build with qged ?</p>
+
+
+
+<hr><p>Last updated: Aug 18 2025 at 01:00 UTC</p>
 </html>

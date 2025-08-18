@@ -268,5 +268,35 @@
         "id": 534760961,
         "sender_full_name": "starseeker",
         "timestamp": 1755348907
+    },
+    {
+        "content": "<p>If we go with THREADLOCAL, I think it boils down to this?</p>\n<div class=\"codehilite\"><pre><span></span><code>/* Make sure THREADLOCAL is defined, only usable on C &quot;POD&quot; types */\n#ifndef THREADLOCAL\n#  if defined(__cplusplus) &amp;&amp; __cplusplus &gt;= 201103L\n#    define THREADLOCAL thread_local // C++11: thread_local is standard\n#  elif !defined(__cplusplus) &amp;&amp; defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 202311L\n#    define THREADLOCAL thread_local // C23: thread_local is standard\n#  elif !defined(__cplusplus) &amp;&amp; defined(__STDC_VERSION__) &amp;&amp; __STDC_VERSION__ &gt;= 201112L\n#    define THREADLOCAL _Thread_local // C11: _Thread_local is standard\n#  elif defined(HAVE_WINDOWS_H)\n#    define THREADLOCAL __declspec(thread)\n#  elif defined(__GNUC__) || defined(__clang__)\n#    define THREADLOCAL __thread\n#  endif\n#endif\n</code></pre></div>",
+        "id": 534796770,
+        "sender_full_name": "starseeker",
+        "timestamp": 1755398993
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"112516\">starseeker</span> <a href=\"#narrow/channel/104062-brlcad/topic/BRL-CAD.20release/near/534760961\">said</a>:</p>\n<blockquote>\n<p>THREADLOCAL sounds good - is \"POD\" common enough shorthand that we can assume it is universally understood?  Just for myself, I had to ask GPT to clarify what it stood for - it's new to me.</p>\n</blockquote>\n<p>Stroustrup's book \"The C++ Programming Language\" is worth reading if you haven't yet.  POD was a concept it coined way back in the 90's, and it's mentioned in many other books since.</p>",
+        "id": 534798880,
+        "sender_full_name": "Sean",
+        "timestamp": 1755402980
+    },
+    {
+        "content": "<p>I believe the c++98 standard referenced it directly as well, and c++11 formalized/clarified a change to it's meaning -- essentially compatibility with C types.</p>",
+        "id": 534798919,
+        "sender_full_name": "Sean",
+        "timestamp": 1755403045
+    },
+    {
+        "content": "<p>block looks good to me at a glance.  would be worth adding a #else with #error (or #define it to thread_local as the fallback) just so we don't accidentally fall through with THREADLOCAL undefined and we end up with global vars and threading issues.</p>",
+        "id": 534799134,
+        "sender_full_name": "Sean",
+        "timestamp": 1755403391
+    },
+    {
+        "content": "<p>does anyone have a windows build with qged ?</p>",
+        "id": 534850136,
+        "sender_full_name": "Nathan McCorkle",
+        "timestamp": 1755469206
     }
 ]

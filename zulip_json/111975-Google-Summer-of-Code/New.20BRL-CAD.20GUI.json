@@ -14062,5 +14062,29 @@
         "id": 534738513,
         "sender_full_name": "Sean",
         "timestamp": 1755320098
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> I'm having an issue, and I don't understand why.</p>\n<p>Inside of the <code>ObjectTree</code> constructor I have the following code:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">database</span><span class=\"o\">-&gt;</span><span class=\"n\">RegisterChangeSignalHandler</span><span class=\"p\">([</span><span class=\"o\">=</span><span class=\"p\">](</span>\n<span class=\"w\">    </span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"kt\">char</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">objectName</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">ConstDatabase</span><span class=\"o\">::</span><span class=\"n\">ChangeType</span><span class=\"w\"> </span><span class=\"n\">changeType</span>\n<span class=\"p\">)</span><span class=\"w\"> </span><span class=\"o\">-&gt;</span><span class=\"w\"> </span><span class=\"kt\">void</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">        </span><span class=\"c1\">// the function is empty!</span>\n<span class=\"p\">});</span>\n</code></pre></div>\n<p>For whatever reason, every time the callback function is called, I get a segmentation fault, and I don't understand why. The weirdest thing is that this problem didn't occurr before... only now.</p>",
+        "id": 534838146,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755453896
+    },
+    {
+        "content": "<p>Also, to handle certain commands like <code>killall</code> and <code>killrefs</code>, it seems like something similar to <code>ChangeSignalHandler</code> is also necessary for <code>db_add_update_nref_clbk</code> and <code>db_rm_update_nref_clbk</code>.</p>\n<p>I'm working on it right now, and it doesn't seem <em>that</em> complex to achieve. The only issue that I'm having is that I don't know the best way to define <code>db_op_t</code> and <code>matp_t</code> inside of <code>ConstDatabase.h</code> without including the headers in which they are defined.</p>\n<p>What I mean is that I cannot simply \"forward declare\" these types, like it's done with <code>struct rt_i</code>, <code>struct resource</code> and <code>struct directory</code>.</p>",
+        "id": 534838427,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755454239
+    },
+    {
+        "content": "<p>The functional object must be persistent. The object, you hand over to RegisterChangeSignalHandler(), will be destroyer after the registration method call.</p>",
+        "id": 534842050,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755458624
+    },
+    {
+        "content": "<p>Oh yeah, of course</p>",
+        "id": 534842499,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755459361
     }
 ]
