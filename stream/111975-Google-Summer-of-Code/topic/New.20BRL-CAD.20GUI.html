@@ -19289,5 +19289,34 @@ ERROR: bu_malloc(0)
 
 
 
-<hr><p>Last updated: Aug 21 2025 at 00:52 UTC</p>
+<a name="535569077"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535569077" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535569077">(Aug 21 2025 at 19:51)</a>:</h4>
+<p>I have some news regarding the last part of the project, the database callbacks to modify the <code>ObjectTree</code>.</p>
+<p>First of all, I realized that the database callback implemented aren't enough, because certain commands can modify the database tree without calling a add/modify/delete object callback. An example of such commands is <code>killrefs</code>.</p>
+<p>Now, to handle these type of changes, I thought that a <code>db_add_update_nref_clbk</code> method inside of MOOSE was necessary. So I implemented that, but it doesn't work in the way that I expected.</p>
+<p>The "update nref callbacks" basically go through the entire database tree, listing for non-solid object, the object the references that it has. Imo, that doesn't make much sense. Why should it list ALL objects references, instead of the modified objects references only?</p>
+<p>This means that using the "update nref callbacks" is basically the same as simply going through the entire database tree using MOOSE's <code>FirstTopObject</code> and <code>Get</code> methods recursively. So I'm right now almost finished in creating a <code>updateObjectTree</code> method that does exactly that, and it seems to work. Still haven't checked for the amount of time it take to update the <code>ObjectTree</code>, but it seems fine.</p>
+<p>But I have to ask myself: does this make sense? I personally think that the "update nref callbacks" should work differently, only giving informations about the objects which references have changed. This would be a much cleaner implementation imo. Or maybe, but this is just my idea, the "database change callbacks" should be called when the refs of an object are changed (because, I mean, doesn't that mean the the object was modified?).</p>
+<p>What is your opinion <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> ?</p>
+
+
+
+<a name="535569616"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535569616" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535569616">(Aug 21 2025 at 19:55)</a>:</h4>
+<p>Also, one last issue that there seem to be a problem when using <code>Get</code> with an object created through <code>comb</code> or similar commands.</p>
+<p>Basically the following if statement:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">BRLCAD</span><span class="o">::</span><span class="n">Combination</span><span class="o">*</span><span class="w"> </span><span class="n">combination</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">dynamic_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">BRLCAD</span><span class="o">::</span><span class="n">Combination</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">object</span><span class="p">))</span>
+</code></pre></div>
+<p>is never true, even if it should be.</p>
+<p>I'm pretty sure that this is just a problem related to the in-mem databases.</p>
+
+
+
+<a name="535569965"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535569965" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535569965">(Aug 21 2025 at 19:57)</a>:</h4>
+<p>Anyway, I'll open the final PR in a few hours. We can leave it open until the best course of action is decided.</p>
+
+
+
+<hr><p>Last updated: Aug 22 2025 at 00:53 UTC</p>
 </html>

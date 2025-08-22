@@ -14086,5 +14086,23 @@
         "id": 534842499,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1755459361
+    },
+    {
+        "content": "<p>I have some news regarding the last part of the project, the database callbacks to modify the <code>ObjectTree</code>.</p>\n<p>First of all, I realized that the database callback implemented aren't enough, because certain commands can modify the database tree without calling a add/modify/delete object callback. An example of such commands is <code>killrefs</code>.</p>\n<p>Now, to handle these type of changes, I thought that a <code>db_add_update_nref_clbk</code> method inside of MOOSE was necessary. So I implemented that, but it doesn't work in the way that I expected.</p>\n<p>The \"update nref callbacks\" basically go through the entire database tree, listing for non-solid object, the object the references that it has. Imo, that doesn't make much sense. Why should it list ALL objects references, instead of the modified objects references only?</p>\n<p>This means that using the \"update nref callbacks\" is basically the same as simply going through the entire database tree using MOOSE's <code>FirstTopObject</code> and <code>Get</code> methods recursively. So I'm right now almost finished in creating a <code>updateObjectTree</code> method that does exactly that, and it seems to work. Still haven't checked for the amount of time it take to update the <code>ObjectTree</code>, but it seems fine.</p>\n<p>But I have to ask myself: does this make sense? I personally think that the \"update nref callbacks\" should work differently, only giving informations about the objects which references have changed. This would be a much cleaner implementation imo. Or maybe, but this is just my idea, the \"database change callbacks\" should be called when the refs of an object are changed (because, I mean, doesn't that mean the the object was modified?).</p>\n<p>What is your opinion <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> ?</p>",
+        "id": 535569077,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755805884
+    },
+    {
+        "content": "<p>Also, one last issue that there seem to be a problem when using <code>Get</code> with an object created through <code>comb</code> or similar commands.</p>\n<p>Basically the following if statement:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"k\">if</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">Combination</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">combination</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"k\">dynamic_cast</span><span class=\"o\">&lt;</span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">Combination</span><span class=\"o\">*&gt;</span><span class=\"p\">(</span><span class=\"o\">&amp;</span><span class=\"n\">object</span><span class=\"p\">))</span>\n</code></pre></div>\n<p>is never true, even if it should be.</p>\n<p>I'm pretty sure that this is just a problem related to the in-mem databases.</p>",
+        "id": 535569616,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755806101
+    },
+    {
+        "content": "<p>Anyway, I'll open the final PR in a few hours. We can leave it open until the best course of action is decided.</p>",
+        "id": 535569965,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755806250
     }
 ]
