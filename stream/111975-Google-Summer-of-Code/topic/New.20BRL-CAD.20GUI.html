@@ -19336,5 +19336,131 @@ ERROR: bu_malloc(0)
 
 
 
-<hr><p>Last updated: Aug 23 2025 at 00:51 UTC</p>
+<a name="535814881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535814881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535814881">(Aug 23 2025 at 16:02)</a>:</h4>
+<p>Regarding db_add_update_nref_clbk(): There is only one place, where it's used. In src/libqtcad/QgModel.cpp. There, only one message is catched: The end of a db_update_nref cycle.</p>
+<p>Would this make sense, to signal that there was a db_update_nref cycle?</p>
+
+
+
+<a name="535815514"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535815514" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535815514">(Aug 23 2025 at 16:15)</a>:</h4>
+<p>Mmh, I guess that could make sense...</p>
+<p>Are you impling the possibility of adding a ConstDatabase method that registers a callback that should be called whenever  the end of a db_update_nref cycle is reached, in order to signal that there was a db_update_nref cycle?</p>
+
+
+
+<a name="535815613"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535815613" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535815613">(Aug 23 2025 at 16:18)</a>:</h4>
+<p>Probably not. It looks like this call-back is used for qged internal stuff only:</p>
+<ul>
+<li>db-changed-callback sets a flag to true</li>
+<li>db_update_nref() is called</li>
+<li>db-update-nref-callback sets the flag to false</li>
+</ul>
+
+
+
+<a name="535815705"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535815705" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535815705">(Aug 23 2025 at 16:20)</a>:</h4>
+<p>Or, with other words, if an object changed, the references should be checked?</p>
+
+
+
+<a name="535815815"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535815815" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535815815">(Aug 23 2025 at 16:22)</a>:</h4>
+<p>I'm unsure, but in qged, the db-update-nref has no direct effect on the object tree.</p>
+
+
+
+<a name="535815950"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535815950" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535815950">(Aug 23 2025 at 16:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535815705">ha scritto</a>:</p>
+<blockquote>
+<p>Or, with other words, if an object changed, the references should be checked?</p>
+</blockquote>
+<p>From my understanding, even if no object is added/changed/removed. The command <code>killrefs</code> is an example of such behavior.</p>
+
+
+
+<a name="535816547"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535816547" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535816547">(Aug 23 2025 at 16:39)</a>:</h4>
+<p>Then, <code>ChangeType::References</code> together with <code>objectName = nullptr</code> would be helpful?</p>
+
+
+
+<a name="535816715"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535816715" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535816715">(Aug 23 2025 at 16:43)</a>:</h4>
+<p>I don't think so. <code>killrefs</code> for example doesn't call the <code>ChangeSignalHandler</code> at all I'm pretty sure.</p>
+
+
+
+<a name="535816793"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535816793" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535816793">(Aug 23 2025 at 16:44)</a>:</h4>
+<p>Currently not, but if it listens to the update nrefs as well...</p>
+
+
+
+<a name="535816871"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535816871" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535816871">(Aug 23 2025 at 16:46)</a>:</h4>
+<p>Ooh, I see. That should make sense then.</p>
+
+
+
+<a name="535816963"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535816963" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535816963">(Aug 23 2025 at 16:48)</a>:</h4>
+<p>This would require a <code>ConstDatabase::ReferenceChangedHook</code>, etc..</p>
+
+
+
+<a name="535817374"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535817374" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535817374">(Aug 23 2025 at 16:57)</a>:</h4>
+<p>Also Daniel, have you taken a look at the video and the messages in my latest PR? What's your opinion on that?</p>
+
+
+
+<a name="535817844"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535817844" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535817844">(Aug 23 2025 at 17:07)</a>:</h4>
+<p>Well, the one thing is the in-mem database issue, which had to be fixed in librt. I.e., you can ignore it.</p>
+<p>Then, you think about reworking the <code>ObjectTreeWidget</code> class. Go on <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span></p>
+
+
+
+<a name="535818769"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535818769" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535818769">(Aug 23 2025 at 17:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535817844">ha scritto</a>:</p>
+<blockquote>
+<p>Then, you think about reworking the <code>ObjectTreeWidget</code> class. Go on <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span></p>
+</blockquote>
+<p>Do you like the idea of kinda mergin <code>ObjectTree</code> and <code>ObjectTreeWidget</code>? Also, should the new code be in a new PR, or should it improve the already opened PR?</p>
+
+
+
+<a name="535860446"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535860446" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535860446">(Aug 23 2025 at 19:51)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535818769">said</a>:</p>
+<blockquote>
+<p>Do you like the idea of kinda mergin <code>ObjectTree</code> and <code>ObjectTreeWidget</code>?</p>
+</blockquote>
+<p>I leave it up to you, but it's probable easier to follow if everything is in ObjectTreeWidget.</p>
+
+
+
+<a name="535860478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535860478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535860478">(Aug 23 2025 at 19:52)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535818769">said</a>:</p>
+<blockquote>
+<p>Also, should the new code be in a new PR, or should it improve the already opened PR?</p>
+</blockquote>
+<p>I accepted your PR. Therefore, you can start working on a new one.</p>
+
+
+
+<a name="535860510"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/535860510" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#535860510">(Aug 23 2025 at 19:52)</a>:</h4>
+<p>BTW, somehow the highlighting feature for the selected objects is gone.</p>
+
+
+
+<hr><p>Last updated: Aug 24 2025 at 00:59 UTC</p>
 </html>

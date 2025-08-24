@@ -14122,5 +14122,107 @@
         "id": 535769040,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1755906842
+    },
+    {
+        "content": "<p>Regarding db_add_update_nref_clbk(): There is only one place, where it's used. In src/libqtcad/QgModel.cpp. There, only one message is catched: The end of a db_update_nref cycle.</p>\n<p>Would this make sense, to signal that there was a db_update_nref cycle?</p>",
+        "id": 535814881,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755964955
+    },
+    {
+        "content": "<p>Mmh, I guess that could make sense...</p>\n<p>Are you impling the possibility of adding a ConstDatabase method that registers a callback that should be called whenever  the end of a db_update_nref cycle is reached, in order to signal that there was a db_update_nref cycle?</p>",
+        "id": 535815514,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755965742
+    },
+    {
+        "content": "<p>Probably not. It looks like this call-back is used for qged internal stuff only:</p>\n<ul>\n<li>db-changed-callback sets a flag to true</li>\n<li>db_update_nref() is called</li>\n<li>db-update-nref-callback sets the flag to false</li>\n</ul>",
+        "id": 535815613,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755965885
+    },
+    {
+        "content": "<p>Or, with other words, if an object changed, the references should be checked?</p>",
+        "id": 535815705,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755966003
+    },
+    {
+        "content": "<p>I'm unsure, but in qged, the db-update-nref has no direct effect on the object tree.</p>",
+        "id": 535815815,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755966173
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535815705\">ha scritto</a>:</p>\n<blockquote>\n<p>Or, with other words, if an object changed, the references should be checked?</p>\n</blockquote>\n<p>From my understanding, even if no object is added/changed/removed. The command <code>killrefs</code> is an example of such behavior.</p>",
+        "id": 535815950,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755966403
+    },
+    {
+        "content": "<p>Then, <code>ChangeType::References</code> together with <code>objectName = nullptr</code> would be helpful?</p>",
+        "id": 535816547,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755967168
+    },
+    {
+        "content": "<p>I don't think so. <code>killrefs</code> for example doesn't call the <code>ChangeSignalHandler</code> at all I'm pretty sure.</p>",
+        "id": 535816715,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755967393
+    },
+    {
+        "content": "<p>Currently not, but if it listens to the update nrefs as well...</p>",
+        "id": 535816793,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755967498
+    },
+    {
+        "content": "<p>Ooh, I see. That should make sense then.</p>",
+        "id": 535816871,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755967594
+    },
+    {
+        "content": "<p>This would require a <code>ConstDatabase::ReferenceChangedHook</code>, etc..</p>",
+        "id": 535816963,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755967712
+    },
+    {
+        "content": "<p>Also Daniel, have you taken a look at the video and the messages in my latest PR? What's your opinion on that?</p>",
+        "id": 535817374,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755968237
+    },
+    {
+        "content": "<p>Well, the one thing is the in-mem database issue, which had to be fixed in librt. I.e., you can ignore it.</p>\n<p>Then, you think about reworking the <code>ObjectTreeWidget</code> class. Go on <span aria-label=\"wink\" class=\"emoji emoji-1f609\" role=\"img\" title=\"wink\">:wink:</span></p>",
+        "id": 535817844,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755968837
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535817844\">ha scritto</a>:</p>\n<blockquote>\n<p>Then, you think about reworking the <code>ObjectTreeWidget</code> class. Go on <span aria-label=\"wink\" class=\"emoji emoji-1f609\" role=\"img\" title=\"wink\">:wink:</span></p>\n</blockquote>\n<p>Do you like the idea of kinda mergin <code>ObjectTree</code> and <code>ObjectTreeWidget</code>? Also, should the new code be in a new PR, or should it improve the already opened PR?</p>",
+        "id": 535818769,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1755969976
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535818769\">said</a>:</p>\n<blockquote>\n<p>Do you like the idea of kinda mergin <code>ObjectTree</code> and <code>ObjectTreeWidget</code>?</p>\n</blockquote>\n<p>I leave it up to you, but it's probable easier to follow if everything is in ObjectTreeWidget.</p>",
+        "id": 535860446,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755978687
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/535818769\">said</a>:</p>\n<blockquote>\n<p>Also, should the new code be in a new PR, or should it improve the already opened PR?</p>\n</blockquote>\n<p>I accepted your PR. Therefore, you can start working on a new one.</p>",
+        "id": 535860478,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755978732
+    },
+    {
+        "content": "<p>BTW, somehow the highlighting feature for the selected objects is gone.</p>",
+        "id": 535860510,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1755978774
     }
 ]
