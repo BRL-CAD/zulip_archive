@@ -19592,5 +19592,43 @@ When an object was selected with the mouse, it was highlighted. But, maybe, it's
 
 
 
-<hr><p>Last updated: Sep 01 2025 at 01:02 UTC</p>
+<a name="537158534"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/537158534" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#537158534">(Sep 01 2025 at 18:49)</a>:</h4>
+<p>By best wishes for your exams!</p>
+<p>I plan to create a binary arbalest release for windows, which shall replace my BrlCadViewer. Therefore, a clean-up of arbalest's code is very helpful in preparation.</p>
+<p>Before, I want to create a first release of the new brlcad.dll (aka MOOSE). It's the base of arbalest. I.e., I have to clean up MOOSE's code first.</p>
+
+
+
+<a name="537158812"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/537158812" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#537158812">(Sep 01 2025 at 18:52)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="781132">LorenzoPegorari</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/536107314">said</a>:</p>
+<blockquote>
+<p>I also want to report that the line of code:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">BRLCAD</span><span class="o">::</span><span class="n">ConstDatabase</span><span class="o">::</span><span class="n">TopObjectIterator</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">database</span><span class="o">-&gt;</span><span class="n">FirstTopObject</span><span class="p">();</span>
+</code></pre></div>
+<p>for whatever reason triggers the callback <code>ChangeType::References</code>.</p>
+<p>That does not cause problems in the code that I submitted though.</p>
+</blockquote>
+<p>I would like to suppress the ChangeType::References signal there. Do you know, which function causes it? db_lookup() or rt_db_get_internal()?</p>
+
+
+
+<a name="537165479"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/New%20BRL-CAD%20GUI/near/537165479" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> LorenzoPegorari <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI.html#537165479">(Sep 01 2025 at 19:57)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/537158812">ha scritto</a>:</p>
+<blockquote>
+<p>I would like to suppress the ChangeType::References signal there. Do you know, which function causes it? db_lookup() or rt_db_get_internal()?</p>
+</blockquote>
+<p>From my understanding, it's just:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">ConstDatabase</span><span class="o">::</span><span class="n">TopObjectIterator</span><span class="w"> </span><span class="nf">ConstDatabase::FirstTopObject</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</code></pre></div>
+<p>initially calling:</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">db_update_nref</span><span class="p">(</span><span class="n">m_rtip</span><span class="o">-&gt;</span><span class="n">rti_dbip</span><span class="p">,</span><span class="w"> </span><span class="n">m_resp</span><span class="p">);</span>
+</code></pre></div>
+<p>to, I guess, update the top-level objects before actually returning the first top-level object.</p>
+
+
+
+<hr><p>Last updated: Sep 02 2025 at 00:52 UTC</p>
 </html>

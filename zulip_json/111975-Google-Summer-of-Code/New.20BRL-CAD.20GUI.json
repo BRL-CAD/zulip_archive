@@ -14338,5 +14338,23 @@
         "id": 537009059,
         "sender_full_name": "LorenzoPegorari",
         "timestamp": 1756675096
+    },
+    {
+        "content": "<p>By best wishes for your exams!</p>\n<p>I plan to create a binary arbalest release for windows, which shall replace my BrlCadViewer. Therefore, a clean-up of arbalest's code is very helpful in preparation.</p>\n<p>Before, I want to create a first release of the new brlcad.dll (aka MOOSE). It's the base of arbalest. I.e., I have to clean up MOOSE's code first.</p>",
+        "id": 537158534,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1756752584
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"781132\">LorenzoPegorari</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/536107314\">said</a>:</p>\n<blockquote>\n<p>I also want to report that the line of code:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">BRLCAD</span><span class=\"o\">::</span><span class=\"n\">ConstDatabase</span><span class=\"o\">::</span><span class=\"n\">TopObjectIterator</span><span class=\"w\"> </span><span class=\"n\">it</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">database</span><span class=\"o\">-&gt;</span><span class=\"n\">FirstTopObject</span><span class=\"p\">();</span>\n</code></pre></div>\n<p>for whatever reason triggers the callback <code>ChangeType::References</code>.</p>\n<p>That does not cause problems in the code that I submitted though.</p>\n</blockquote>\n<p>I would like to suppress the ChangeType::References signal there. Do you know, which function causes it? db_lookup() or rt_db_get_internal()?</p>",
+        "id": 537158812,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1756752771
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/New.20BRL-CAD.20GUI/near/537158812\">ha scritto</a>:</p>\n<blockquote>\n<p>I would like to suppress the ChangeType::References signal there. Do you know, which function causes it? db_lookup() or rt_db_get_internal()?</p>\n</blockquote>\n<p>From my understanding, it's just:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">ConstDatabase</span><span class=\"o\">::</span><span class=\"n\">TopObjectIterator</span><span class=\"w\"> </span><span class=\"nf\">ConstDatabase::FirstTopObject</span><span class=\"p\">(</span><span class=\"kt\">void</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"k\">const</span><span class=\"p\">;</span>\n</code></pre></div>\n<p>initially calling:</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"n\">db_update_nref</span><span class=\"p\">(</span><span class=\"n\">m_rtip</span><span class=\"o\">-&gt;</span><span class=\"n\">rti_dbip</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">m_resp</span><span class=\"p\">);</span>\n</code></pre></div>\n<p>to, I guess, update the top-level objects before actually returning the first top-level object.</p>",
+        "id": 537165479,
+        "sender_full_name": "LorenzoPegorari",
+        "timestamp": 1756756664
     }
 ]
