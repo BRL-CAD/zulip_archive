@@ -4644,5 +4644,47 @@ As you probably can see I was trying to use them as boolean operators. The issue
 
 
 
-<hr><p>Last updated: Sep 11 2025 at 00:51 UTC</p>
+<a name="538803548"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/538803548" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#538803548">(Sep 11 2025 at 08:54)</a>:</h4>
+<p>The case you are trying to handle is when multiple sections are defined under the same keyword where their length i.e. Number of cards is unknown appriory. You start with nCards=2. What about using nCards +=1 and nCards -=1 ? What is the advantage of having a bool? Is there any reason to treat elemform and Icomp differently to an option? Other than you encounter them later?</p>
+
+
+
+<a name="538918799"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/538918799" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Andrea Braghin <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#538918799">(Sep 11 2025 at 18:12)</a>:</h4>
+<p>Elform and Icomp 's values are parsed in the first card of the Section. From there you know how many cards there will be. The boolean approach does not seem very robust. I am trying to make it independent by the number of card. += and -= would be definetly more flexible.<br>
+I am figuring it out <span aria-label="fingers crossed" class="emoji emoji-1f91e" role="img" title="fingers crossed">:fingers_crossed:</span> <br>
+Thanks</p>
+
+
+
+<a name="538919922"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/538919922" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#538919922">(Sep 11 2025 at 18:21)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="883255">Andrea Braghin</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/538104669">said</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="215774">Louis Googl</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/538029911">ha scritto</a>:</p>
+<blockquote>
+<p><span class="user-mention silent" data-user-id="883255">Andrea Braghin</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/k-g/near/538028526">said</a>:</p>
+<blockquote>
+<p>do you mean I should maintain a running counter that resets whenever a new keyword is encountered?</p>
+</blockquote>
+<p>what you did the draft PR is a good approach, the sectionLinesRead is the counter and numberOfCardsInSection will tell you how many cards there is ( igrnorable or not ) so when you finish a section you can reset the counter i.e SectionLinesRead. the case you have here is special because both cards are necessary. just imagin having an additional card that you need to ignore</p>
+</blockquote>
+<p>Can you please confirm the acceptance rules for card counting and skipping so we can fix the logic?</p>
+<p>Specifically, is this correct? For each keyword-section, count all cards (including ones I ignore) until the next keyword, then reset the counter. In the switch, known cards are handled; default just “skip/break” but still increments the section counter. Should skipped cards be logged as debug or also raise a warning?</p>
+<p>“Unexpected section length” = counted cards ≠ expected number for that keyword. Should this be a error only when a required card is missing or just a warning?</p>
+</blockquote>
+<p>I don't think there is something called accepted rules. The goal is to convert k file to g file, anything that prevents that or produces a faulty results is not accepted .<br>
+What would skipped cards logging help for debugging? <br>
+When a required card is missing can you convert the geometry? Of course there should be an error when you are missing a required card.</p>
+
+
+
+<a name="538920124"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/k-g/near/538920124" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Louis Googl <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/k-g.html#538920124">(Sep 11 2025 at 18:23)</a>:</h4>
+<p>Just be creative and free make decisions on your own.  We are not going to hurt you if you make mistakes <span aria-label="rolling on the floor laughing" class="emoji emoji-1f923" role="img" title="rolling on the floor laughing">:rolling_on_the_floor_laughing:</span></p>
+
+
+
+<hr><p>Last updated: Sep 12 2025 at 00:49 UTC</p>
 </html>
