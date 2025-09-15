@@ -15,5 +15,108 @@
 
 
 
-<hr><p>Last updated: Sep 14 2025 at 00:54 UTC</p>
+<a name="539387177"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MacOS%20build/near/539387177" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Pavel Jansa <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MacOS.20build.html#539387177">(Sep 14 2025 at 06:51)</a>:</h4>
+<p>Hi. I have MacOS 15.6.1, Xcode 16.4, XQuartz 2.8.5 and make cmake 3.31.7. I cloned git repo (7.42.1) and in build directory executed cmake .. -G Xcode. It ended like this: <a href="https://pastebin.com/hkV9fxPT">https://pastebin.com/hkV9fxPT</a></p>
+<p>If you give me detailed instructions I can share debugging reports but I am not able to figure out configure and compile issues by myself.</p>
+
+
+
+<a name="539392481"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MacOS%20build/near/539392481" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Pavel Jansa <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MacOS.20build.html#539392481">(Sep 14 2025 at 08:44)</a>:</h4>
+<p>OK, switching to cmake 4.1.1 got me a bit closer. Configuration ends up well, but generating build files fails in this manner: <a href="https://pastebin.com/kgcWJrCv">https://pastebin.com/kgcWJrCv</a></p>
+
+
+
+<a name="539395142"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MacOS%20build/near/539395142" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Pavel Jansa <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MacOS.20build.html#539395142">(Sep 14 2025 at 09:42)</a>:</h4>
+<p><a href="/user_uploads/1549/FYLt5LyY_9qLrklGy4whwKTW/build.log">build.log</a><br>
+Hmm this is another attempt to build.</p>
+
+
+
+<a name="539398550"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MacOS%20build/near/539398550" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Pavel Jansa <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MacOS.20build.html#539398550">(Sep 14 2025 at 10:52)</a>:</h4>
+<p><a href="/user_uploads/1549/eF8yGWfDt6fccbjYtgiVkIqL/PastedText.txt">PastedText.txt</a></p>
+<p><a href="/user_uploads/1549/RGg7suYIegUJS6FN1uFxozXp/CMakeCache.txt">CMakeCache.txt</a><br>
+<a href="/user_uploads/1549/ydQlmg38ixDwW9PfqFgQv22_/BRLCAD.xcodeproj">BRLCAD.xcodeproj</a></p>
+
+
+
+<a name="539404262"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MacOS%20build/near/539404262" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Pavel Jansa <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MacOS.20build.html#539404262">(Sep 14 2025 at 12:18)</a>:</h4>
+<p>To to clarify (or add to) the mess I made above:</p>
+<div class="codehilite"><pre><span></span><code>cmake .. -G Xcode -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$HOME/brlcad-dev
+</code></pre></div>
+<p>leads to</p>
+<div class="codehilite"><pre><span></span><code>------------- BRL-CAD Release 7.42.1, Build 20250914 - Debug Build -------------
+
+        Prefix: /Users/pawleeq/brlcad-dev
+      Binaries: /Users/pawleeq/brlcad-dev/bin
+     Libraries: /Users/pawleeq/brlcad-dev/lib
+  Manual pages: /Users/pawleeq/brlcad-dev/share/man
+Data resources: /Users/pawleeq/brlcad-dev/share
+
+CC       = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
+CXX      = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
+CFLAGS   = -std=c11 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -m64 -g -ggdb3 -Qunused-arguments -fstack-protector-all -pedantic
+           -Wall -Wextra -Wundef -Wfloat-equal -Wshadow -Wbad-function-cast
+           -Wc++-compat -Winline -Wno-long-long -Wno-variadic-macros
+           -Wdocumentation -Werror
+CXXFLAGS = -std=c++17 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -pipe
+           -fvisibility=hidden -fno-strict-aliasing -fno-common -fexceptions
+           -ftemplate-depth-128 -m64 -g -ggdb3 -Qunused-arguments
+           -fstack-protector-all -pedantic -Wall -Wextra -Wundef -Wfloat-equal
+           -Wshadow -Wbad-function-cast -Winline -Wno-long-long
+           -Wno-variadic-macros -Wdocumentation -Werror
+LDFLAGS  = -m64 -g -ggdb3
+
+
+Asset Import Library.................: System
+Eigen................................: System
+Geogram..............................: Bundled
+Geospatial Data Abstraction Library..: System
+Lightning Memory-Mapped Database.....: Bundled
+Manifold.............................: Bundled
+Netpbm...............................: System
+OpenCV...............................: Bundled
+OpenMesh.............................: Bundled
+OpenNURBS............................: Bundled
+OSMesa...............................: Bundled
+Portable Network Graphics............: Bundled
+Regex Library........................: Bundled
+STEPcode.............................: Bundled
+Tcl..................................: Bundled
+Tk...................................: Bundled
+UtahRLE..............................: Bundled
+Zlib.................................: System
+
+OpenGL support (optional) ..........: ON
+X11 support (optional) .............: ON
+Qt support (optional) ..............: OFF
+Run-time debuggability (optional) ..: ON
+
+Build 32/64-bit release ............: 64BIT (Auto)
+Build with optimization ............: OFF
+Build static libraries .............: ON
+Build dynamic libraries ............: ON
+Install example geometry models ....: ON
+Generate extra docs ................: ON (html/man)
+
+Elapsed configuration time: 2 minutes 6 seconds
+-- Configuring done (127.4s)
+-- Generating done (4.9s)
+-- Build files have been written to: /Users/pawleeq/brlcad/build
+</code></pre></div>
+<p>In order to build I do</p>
+<div class="codehilite"><pre><span></span><code>xcodebuild -project BRLCAD.xcodeproj -scheme install -configuration Debug build | tee install.log
+</code></pre></div>
+<p>Resulting log is attached. Please ignore my previous attempts.<br>
+<a href="/user_uploads/1549/P7prNgA_C4HOSYU1sxfKaR8A/install.log">install.log</a></p>
+
+
+
+<hr><p>Last updated: Sep 15 2025 at 00:54 UTC</p>
 </html>
