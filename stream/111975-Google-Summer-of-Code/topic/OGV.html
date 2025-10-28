@@ -7830,5 +7830,82 @@ Update:  I am exploring the project and how things are set up. Probably it will 
 
 
 
-<hr><p>Last updated: Oct 27 2025 at 00:57 UTC</p>
+<a name="547303567"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547303567" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547303567">(Oct 27 2025 at 15:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/OGV/near/534682660">said</a>:</p>
+<blockquote>
+<p>instead of docker, we'll be using bastille which is built atop freebsd jails, but is a very similar userland experience.  biggest difference is that it's "not docker" so any existing dockerfile or similar logic has to get set up in bastille.</p>
+</blockquote>
+<p>Hey <span class="user-mention" data-user-id="102902">@Sean</span> , I have actually started experimenting with this and am looking to test it on the new server we have<br>
+Can you please share the access so that i can deploy it there somehow and see if it works properly...</p>
+
+
+
+<a name="547303764"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547303764" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547303764">(Oct 27 2025 at 15:13)</a>:</h4>
+<p>If this works ill target OGV next for the ease of containerised deployment</p>
+
+
+
+<a name="547304303"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547304303" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Satjeet Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547304303">(Oct 27 2025 at 15:15)</a>:</h4>
+<p><span class="user-mention" data-user-id="764314">@Simarjot Singh</span> sir, in <code>upload.controller.ts</code> we have declared a function <code>cleanupUploadedFiles</code> although we have declared all upload related services in <code>upload.service.ts</code> any specific reason for declaring that specific function in <code>upload.controller.ts</code>?</p>
+
+
+
+<a name="547342948"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547342948" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Simarjot Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547342948">(Oct 27 2025 at 18:04)</a>:</h4>
+<p><span class="user-mention" data-user-id="980628">@Satjeet Singh</span>  said:</p>
+<blockquote>
+<p>@Simarjot Singh sir, in <code>upload.controller.ts</code> we have declared a function <code>cleanupUploadedFiles</code> although we have declared all upload related services in <code>upload.service.ts</code> any specific reason for declaring that specific function in <code>upload.controller.ts</code>?</p>
+</blockquote>
+<p>The <strong><code>cleanupUploadedFiles</code></strong> function was kept in the <strong>controller</strong> because it’s more of a <strong>request-level utility</strong> rather than a core business logic operation. Its main role is to handle temporary files created during a specific API request — essentially part of the request lifecycle rather than an upload service responsibility.</p>
+<p>The <strong><code>upload.service.ts</code></strong> handles reusable upload-related logic that could be shared across different modules, while this cleanup step is only relevant in the context of handling a particular request flow in the controller.</p>
+
+
+
+<a name="547343703"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547343703" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Satjeet Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547343703">(Oct 27 2025 at 18:08)</a>:</h4>
+<p>ok <span class="user-mention" data-user-id="764314">@Simarjot Singh</span> sir, also I was exploring model viewer in which we have orbit controls which mainly I think handles the view of object and how we interact, so I was wondering how we end up this these particular features, like we require these only and there are enough.</p>
+<div class="codehilite"><pre><span></span><code>  &lt;OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          minDistance={0.05}
+          maxDistance={100}
+          rotateSpeed={0.8}
+          panSpeed={0.8}
+          zoomSpeed={1.2}
+          dampingFactor={0.05}
+          enableDamping={true}
+          autoRotate={autoRotate}
+          autoRotateSpeed={1}
+          keyPanSpeed={10}
+          screenSpacePanning={true}
+          maxPolarAngle={Math.PI}
+          minPolarAngle={0}
+          maxAzimuthAngle={Infinity}
+          minAzimuthAngle={-Infinity}
+        /&gt;
+</code></pre></div>
+
+
+
+<a name="547343894"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547343894" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Satjeet Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547343894">(Oct 27 2025 at 18:09)</a>:</h4>
+<p><span class="user-mention" data-user-id="764314">@Simarjot Singh</span> sir , also for the lighting as well.</p>
+<div class="codehilite"><pre><span></span><code>     &lt;ambientLight intensity={0.6} /&gt;
+        &lt;directionalLight position={[10, 10, 5]} intensity={1.2} /&gt;
+        &lt;directionalLight position={[-10, -10, -5]} intensity={0.8} /&gt;
+        &lt;directionalLight position={[0, 10, 0]} intensity={0.6} /&gt;
+        &lt;directionalLight position={[0, -10, 0]} intensity={0.4} /&gt;
+        &lt;pointLight position={[5, 5, 5]} intensity={0.8} /&gt;
+        &lt;pointLight position={[-5, -5, -5]} intensity={0.6} /&gt;
+        &lt;pointLight position={[0, 0, 10]} intensity={0.4} /&gt;
+        &lt;pointLight position={[0, 0, -10]} intensity={0.4} /&gt;
+</code></pre></div>
+
+
+
+<hr><p>Last updated: Oct 28 2025 at 00:51 UTC</p>
 </html>
