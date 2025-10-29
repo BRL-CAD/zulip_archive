@@ -7907,5 +7907,122 @@ Can you please share the access so that i can deploy it there somehow and see if
 
 
 
-<hr><p>Last updated: Oct 28 2025 at 00:51 UTC</p>
+<a name="547560565"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547560565" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Satjeet Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547560565">(Oct 28 2025 at 18:10)</a>:</h4>
+<p><span class="user-mention" data-user-id="764314">@Simarjot Singh</span> sir, in <code>gcv-conversion-module</code> we are converting the uploaded file to various formats to do that we are interacting with gcv tool in <code>ConvertFile.ts</code>and we are creating a promise for all the requested formats through code:</p>
+<div class="codehilite"><pre><span></span><code>    return new Promise&lt;ConversionFileResult&gt;((resolve, reject) =&gt; {
+      const gcv = spawn(&quot;gcv&quot;, [file.filePath, outputPath]);
+
+      let stderr = &quot;&quot;;
+      gcv.stderr.on(&quot;data&quot;, (data) =&gt; (stderr += data.toString()));
+
+      gcv.on(&quot;error&quot;, (error) =&gt; {
+        reject(
+          new Error(`Failed to start gcv for ${format}: ${error.message}`)
+        );
+      });
+
+      gcv.on(&quot;close&quot;, (code) =&gt; {
+        if (code === 0 &amp;&amp; fs.existsSync(outputPath)) {
+          resolve({
+            success: true as const,
+            filePath: outputPath,
+            filename: `${fileNameWithoutExt}.${format}`,
+          });
+        } else {
+          reject(new Error(`gcv failed for ${format}: ${stderr}`));
+        }
+      });
+    });
+  });
+</code></pre></div>
+<p>But gcv tool is a I guess more of a CLI tool but to convert file to various formats we are not using any CLI commands or something then how gcv is functioning here?</p>
+
+
+
+<a name="547572758"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547572758" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Simarjot Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547572758">(Oct 28 2025 at 19:24)</a>:</h4>
+<p><span class="user-mention" data-user-id="980628">@Satjeet Singh</span>  said:</p>
+<blockquote>
+<p>Satjeet Singh: ok @Simarjot Singh sir, also I was exploring model viewer in which we have orbit controls which mainly I think handles the view of object and how we interact, so I was wondering how we end up this these particular features, like we require these only and there are enough.<br>
+</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code>&lt;OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          minDistance={0.05}
+          maxDistance={100}
+          rotateSpeed={0.8}
+          panSpeed={0.8}
+          zoomSpeed={1.2}
+          dampingFactor={0.05}
+          enableDamping={true}
+          autoRotate={autoRotate}
+          autoRotateSpeed={1}
+          keyPanSpeed={10}
+          screenSpacePanning={true}
+          maxPolarAngle={Math.PI}
+          minPolarAngle={0}
+          maxAzimuthAngle={Infinity}
+          minAzimuthAngle={-Infinity}
+        /&gt;
+</code></pre></div>
+<blockquote>
+<p>Satjeet Singh: @Simarjot Singh sir , also for the lighting as well.</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code> &lt;ambientLight intensity={0.6} /&gt;
+        &lt;directionalLight position={[10, 10, 5]} intensity={1.2} /&gt;
+        &lt;directionalLight position={[-10, -10, -5]} intensity={0.8} /&gt;
+        &lt;directionalLight position={[0, 10, 0]} intensity={0.6} /&gt;
+        &lt;directionalLight position={[0, -10, 0]} intensity={0.4} /&gt;
+        &lt;pointLight position={[5, 5, 5]} intensity={0.8} /&gt;
+        &lt;pointLight position={[-5, -5, -5]} intensity={0.6} /&gt;
+        &lt;pointLight position={[0, 0, 10]} intensity={0.4} /&gt;
+        &lt;pointLight position={[0, 0, -10]} intensity={0.4} /&gt;
+</code></pre></div>
+<p>Yes <span class="user-mention" data-user-id="980628">@Satjeet Singh</span>  the three.js has many prebuilt things and on top we have used react-fibre and react deri</p>
+
+
+
+<a name="547573359"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/547573359" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Simarjot Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#547573359">(Oct 28 2025 at 19:27)</a>:</h4>
+<p><span class="user-mention" data-user-id="980628">@Satjeet Singh</span>  said: </p>
+<blockquote>
+<p>@Simarjot Singh sir, in <code>gcv-conversion-module</code> we are converting the uploaded file to various formats to do that we are interacting with gcv tool in <code>ConvertFile.ts</code>and we are creating a promise for all the requested formats through code:</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code>    return new Promise&lt;ConversionFileResult&gt;((resolve, reject) =&gt; {
+      const gcv = spawn(&quot;gcv&quot;, [file.filePath, outputPath]);
+
+      let stderr = &quot;&quot;;
+      gcv.stderr.on(&quot;data&quot;, (data) =&gt; (stderr += data.toString()));
+
+      gcv.on(&quot;error&quot;, (error) =&gt; {
+        reject(
+          new Error(`Failed to start gcv for ${format}: ${error.message}`)
+        );
+      });
+
+      gcv.on(&quot;close&quot;, (code) =&gt; {
+        if (code === 0 &amp;&amp; fs.existsSync(outputPath)) {
+          resolve({
+            success: true as const,
+            filePath: outputPath,
+            filename: `${fileNameWithoutExt}.${format}`,
+          });
+        } else {
+          reject(new Error(`gcv failed for ${format}: ${stderr}`));
+        }
+      });
+    });
+  });
+</code></pre></div>
+<blockquote>
+<p>But gcv tool is a I guess more of a CLI tool but to convert file to various formats we are not using any CLI commands or something then how gcv is functioning here?</p>
+</blockquote>
+<p>Yes <code>gcv</code> is a CLI tool and for handling the CLI we have used the <code>spawn</code></p>
+
+
+
+<hr><p>Last updated: Oct 29 2025 at 00:55 UTC</p>
 </html>
