@@ -8065,5 +8065,39 @@ Can you please share the access so that i can deploy it there somehow and see if
 
 
 
-<hr><p>Last updated: Nov 06 2025 at 00:54 UTC</p>
+<a name="554162331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/554162331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Simarjot Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#554162331">(Nov 06 2025 at 18:29)</a>:</h4>
+<blockquote>
+<p>@Simarjot Singh I have used classes to initialise the three.js renderer. The OGV will just provide the container in which we want to embed the canvas and control settings, and the OGV also provides initial settings, including the URL to simply use the OGV viewer. Now, could you help me decide how we should implement the control settings part, I have thought that we will use an HTML template and store all our HTML code in the template and will embed that in the container that OGV will provide us next we will add event listeners to interact with the class we have implemented to change the control settings. What are your views on this?<br>
+Great <span class="user-mention silent" data-user-id="980628">Satjeet Singh</span>  That’s a good starting point, but I think we can take it a step further for better scalability and framework independence.</p>
+</blockquote>
+<p>Instead of keeping all the control settings in an HTML template, we can structure the viewer in a <strong>declarative, component-like way</strong> — something like:</p>
+<div class="codehilite"><pre><span></span><code>&lt;OGV&gt;
+  &lt;Settings&gt;
+    &lt;Zoom /&gt;
+    &lt;Autorotate /&gt;
+  &lt;/Settings&gt;
+&lt;/OGV&gt;
+</code></pre></div>
+<p>Each tag (like <code>&lt;Zoom&gt;</code> or <code>&lt;Autorotate&gt;</code>) would be implemented as a <strong>Web Component (Custom Element)</strong>. This keeps everything modular and allows each control to handle its own UI and logic while communicating with the main renderer through standard DOM events.</p>
+<p>What do you think <span class="user-mention" data-user-id="474942">@Divyanshu Garg</span></p>
+
+
+
+<a name="554163023"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/554163023" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Simarjot Singh <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#554163023">(Nov 06 2025 at 18:33)</a>:</h4>
+<blockquote>
+<p>@Simarjot Singh also like in OGV we used the ogv viewer as a dependency now when we want to do migration how we should configure it to keep a check that things are working while we are doing migration or we should fully migrate the project then test it?</p>
+</blockquote>
+<p>The best way to handle this is by <strong>linking the local OGV viewer package</strong> directly so changes reflect instantly in the main project. You can use <code>npm link</code></p>
+
+
+
+<a name="554163204"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/OGV/near/554163204" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/OGV.html#554163204">(Nov 06 2025 at 18:33)</a>:</h4>
+<p><span class="user-mention" data-user-id="764314">@Simarjot Singh</span> agreed, part of the idea is to make the component independently usable by anyone using the package as well as us to use it in the converter</p>
+
+
+
+<hr><p>Last updated: Nov 07 2025 at 00:54 UTC</p>
 </html>
