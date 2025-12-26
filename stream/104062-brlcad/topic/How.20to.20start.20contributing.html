@@ -183,5 +183,21 @@ yes i did it.</p>
 
 
 
-<hr><p>Last updated: Dec 25 2025 at 00:57 UTC</p>
+<a name="565383682"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565383682" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565383682">(Dec 25 2025 at 17:45)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="1008386">@Aayush Sharma</span>, welcome!<br>
+If you want to stay with core BRL-CAD, the NMG stuff (non-manifold geometry, src/libnmg, src/librt/primitives/nmg) hast still some annoying ... features. E.g. pl_ray() in src/librt/primitives/nmg/nmg.c. What's the point of that?</p>
+
+
+
+<a name="565386361"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565386361" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aayush Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565386361">(Dec 25 2025 at 18:58)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  Thanks for pointing me to it , I took a closer look at pl_ray().</p>
+<p>From reading the code in src/librt/primitives/nmg/nmg.c, pl_ray() appears to be a diagnostic plotting helper rather than part of the normal raytrace output path. It walks the rd_hit hitmiss list and writes a .plot3 file that visualizes the ray segments, color-coded by NMG ray state (INSIDE / ON / OUTSIDE), including state transitions and the ray continuation past the last hit.</p>
+<p>So it looks mainly intended for debugging or visually inspecting NMG ray classification behavior, not for production raytracing. That would also explain the direct file output, hardcoded naming, and lack of documentation or runtime control, which makes it feel like legacy/debug cruft today.</p>
+<p>A reasonable next step on my side would be to trace where pl_ray() is actually invoked (and under what conditions), and see whether it’s still exercised by any current debug paths, or whether it should be better documented, guarded, or potentially deprecated. Let me know if that aligns with what you had in mind, or if there’s historical context I should be aware of first.</p>
+
+
+
+<hr><p>Last updated: Dec 26 2025 at 00:58 UTC</p>
 </html>

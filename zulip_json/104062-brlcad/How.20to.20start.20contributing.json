@@ -82,5 +82,17 @@
         "id": 565081158,
         "sender_full_name": "Aayush Sharma",
         "timestamp": 1766445496
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"1008386\">@Aayush Sharma</span>, welcome!<br>\nIf you want to stay with core BRL-CAD, the NMG stuff (non-manifold geometry, src/libnmg, src/librt/primitives/nmg) hast still some annoying ... features. E.g. pl_ray() in src/librt/primitives/nmg/nmg.c. What's the point of that?</p>",
+        "id": 565383682,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1766684736
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  Thanks for pointing me to it , I took a closer look at pl_ray().</p>\n<p>From reading the code in src/librt/primitives/nmg/nmg.c, pl_ray() appears to be a diagnostic plotting helper rather than part of the normal raytrace output path. It walks the rd_hit hitmiss list and writes a .plot3 file that visualizes the ray segments, color-coded by NMG ray state (INSIDE / ON / OUTSIDE), including state transitions and the ray continuation past the last hit.</p>\n<p>So it looks mainly intended for debugging or visually inspecting NMG ray classification behavior, not for production raytracing. That would also explain the direct file output, hardcoded naming, and lack of documentation or runtime control, which makes it feel like legacy/debug cruft today.</p>\n<p>A reasonable next step on my side would be to trace where pl_ray() is actually invoked (and under what conditions), and see whether it’s still exercised by any current debug paths, or whether it should be better documented, guarded, or potentially deprecated. Let me know if that aligns with what you had in mind, or if there’s historical context I should be aware of first.</p>",
+        "id": 565386361,
+        "sender_full_name": "Aayush Sharma",
+        "timestamp": 1766689091
     }
 ]
