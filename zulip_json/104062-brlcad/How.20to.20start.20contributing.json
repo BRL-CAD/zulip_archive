@@ -100,5 +100,11 @@
         "id": 565469450,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1766780600
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span>  Thanks, that makes sense.</p>\n<p>After tracing the call sites, I see two places where pl_ray() is triggered. One is inside nmg_ray_segs() under NMG_DEBUG_RT_SEGS, but the other is in unresolved(), where pl_ray(rd) is called unconditionally when a state transition cannot be fixed.</p>\n<p>That unconditional call in unresolved() seems to explain why plot3 files get written even without explicit debug intent, and why it can spam the working directory when NMG ray issues occur.</p>\n<p>As a first step, I think it would make sense to guard pl_ray() behind an appropriate librt debug flag (or possibly reuse an existing one) so that plot files are only generated when explicitly requested. That would avoid unexpected disk output while preserving the debugging capability.</p>\n<p>If that sounds reasonable, I can work on identifying the most appropriate librt debug flag and prepare a small patch to gate pl_ray() accordingly.</p>",
+        "id": 565521017,
+        "sender_full_name": "Aayush Sharma",
+        "timestamp": 1766856196
     }
 ]

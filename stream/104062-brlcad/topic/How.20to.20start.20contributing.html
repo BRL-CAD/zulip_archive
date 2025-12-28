@@ -206,5 +206,15 @@ If you want to stay with core BRL-CAD, the NMG stuff (non-manifold geometry, src
 
 
 
-<hr><p>Last updated: Dec 27 2025 at 00:56 UTC</p>
+<a name="565521017"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565521017" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aayush Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565521017">(Dec 27 2025 at 17:23)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  Thanks, that makes sense.</p>
+<p>After tracing the call sites, I see two places where pl_ray() is triggered. One is inside nmg_ray_segs() under NMG_DEBUG_RT_SEGS, but the other is in unresolved(), where pl_ray(rd) is called unconditionally when a state transition cannot be fixed.</p>
+<p>That unconditional call in unresolved() seems to explain why plot3 files get written even without explicit debug intent, and why it can spam the working directory when NMG ray issues occur.</p>
+<p>As a first step, I think it would make sense to guard pl_ray() behind an appropriate librt debug flag (or possibly reuse an existing one) so that plot files are only generated when explicitly requested. That would avoid unexpected disk output while preserving the debugging capability.</p>
+<p>If that sounds reasonable, I can work on identifying the most appropriate librt debug flag and prepare a small patch to gate pl_ray() accordingly.</p>
+
+
+
+<hr><p>Last updated: Dec 28 2025 at 01:05 UTC</p>
 </html>
