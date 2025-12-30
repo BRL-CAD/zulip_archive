@@ -112,5 +112,23 @@
         "id": 565592352,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1766951542
+    },
+    {
+        "content": "<p>HI <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> </p>\n<p>While working on a cache writability redundant permission cleanup PR in src/librt/cache.c, Copilot pointed out something that I missed. The removed check in cache_try_store() was verifying writable and executable permission on cache-&gt;dir, whereas cache_init() currently checks for writability.</p>\n<p>PR Link: <a href=\"https://github.com/BRL-CAD/brlcad/pull/210\">https://github.com/BRL-CAD/brlcad/pull/210</a></p>\n<p>Since execute permission on a directory is required to traverse into it, removing the check entirely may be incorrect unless that permission is checked before.</p>\n<p>Going forward now, I see two possible solutions for this and I want to know which aligns better with the organization's expectations.</p>\n<ol>\n<li>Move the executable permission to cache_init() and keep the cache_try_store() free of permission checks</li>\n<li>Keep the executable permission check inside cache_try_store(), as writable permission is already checked earlier.</li>\n</ol>\n<p>Please let me know which approach you would prefer and I will update my PR accordingly.</p>\n<p>Thanks.</p>",
+        "id": 565619151,
+        "sender_full_name": "Rishith Kumar Guntuka",
+        "timestamp": 1766989681
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"1006359\">@Rishith Kumar Guntuka</span>: If simply removing the lines from cache_try_store() would be the solution, it would probably be done by the original author <span aria-label=\"wink\" class=\"emoji emoji-1f609\" role=\"img\" title=\"wink\">:wink:</span></p>\n<p>Personally, I'm in favour of the first solution, but the authors spend a lot of work in designing and implementing the cache mechanism. You should ask them about the rationale behind their intentional imperfect code. (I'm none of them.)</p>",
+        "id": 565699074,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1767027643
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> </p>\n<p>I'm working on a small redundancy cleanup in src/librt/cache.c, and I have noticed that executable + writable check in cache_try_store() is marked [FIXME: Redundant].</p>\n<ul>\n<li>cache_init() verifies the writability permission</li>\n<li>cache_try_store() additionally checks for executable (traversal) permission</li>\n</ul>\n<p>Before moving the executable permission to cache_init() and removing it from cache_try_store(), I would like to understand what was your intent on that.</p>\n<p>I'd really appreciate any guidance on that.</p>",
+        "id": 565704540,
+        "sender_full_name": "Rishith Kumar Guntuka",
+        "timestamp": 1767030610
     }
 ]

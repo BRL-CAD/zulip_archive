@@ -222,5 +222,41 @@ If you want to stay with core BRL-CAD, the NMG stuff (non-manifold geometry, src
 
 
 
-<hr><p>Last updated: Dec 29 2025 at 01:03 UTC</p>
+<a name="565619151"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565619151" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rishith Kumar Guntuka <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565619151">(Dec 29 2025 at 06:28)</a>:</h4>
+<p>HI <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> </p>
+<p>While working on a cache writability redundant permission cleanup PR in src/librt/cache.c, Copilot pointed out something that I missed. The removed check in cache_try_store() was verifying writable and executable permission on cache-&gt;dir, whereas cache_init() currently checks for writability.</p>
+<p>PR Link: <a href="https://github.com/BRL-CAD/brlcad/pull/210">https://github.com/BRL-CAD/brlcad/pull/210</a></p>
+<p>Since execute permission on a directory is required to traverse into it, removing the check entirely may be incorrect unless that permission is checked before.</p>
+<p>Going forward now, I see two possible solutions for this and I want to know which aligns better with the organization's expectations.</p>
+<ol>
+<li>Move the executable permission to cache_init() and keep the cache_try_store() free of permission checks</li>
+<li>Keep the executable permission check inside cache_try_store(), as writable permission is already checked earlier.</li>
+</ol>
+<p>Please let me know which approach you would prefer and I will update my PR accordingly.</p>
+<p>Thanks.</p>
+
+
+
+<a name="565699074"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565699074" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565699074">(Dec 29 2025 at 17:00)</a>:</h4>
+<p><span class="user-mention" data-user-id="1006359">@Rishith Kumar Guntuka</span>: If simply removing the lines from cache_try_store() would be the solution, it would probably be done by the original author <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span></p>
+<p>Personally, I'm in favour of the first solution, but the authors spend a lot of work in designing and implementing the cache mechanism. You should ask them about the rationale behind their intentional imperfect code. (I'm none of them.)</p>
+
+
+
+<a name="565704540"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565704540" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rishith Kumar Guntuka <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565704540">(Dec 29 2025 at 17:50)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="112516">@starseeker</span> </p>
+<p>I'm working on a small redundancy cleanup in src/librt/cache.c, and I have noticed that executable + writable check in cache_try_store() is marked [FIXME: Redundant].</p>
+<ul>
+<li>cache_init() verifies the writability permission</li>
+<li>cache_try_store() additionally checks for executable (traversal) permission</li>
+</ul>
+<p>Before moving the executable permission to cache_init() and removing it from cache_try_store(), I would like to understand what was your intent on that.</p>
+<p>I'd really appreciate any guidance on that.</p>
+
+
+
+<hr><p>Last updated: Dec 30 2025 at 00:58 UTC</p>
 </html>
