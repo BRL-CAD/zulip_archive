@@ -258,5 +258,47 @@ If you want to stay with core BRL-CAD, the NMG stuff (non-manifold geometry, src
 
 
 
-<hr><p>Last updated: Dec 31 2025 at 00:59 UTC</p>
+<a name="565929048"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565929048" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aayush Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565929048">(Dec 31 2025 at 20:05)</a>:</h4>
+<p>Hi @Daniel Rossberg,<br>
+Just a quick follow-up on the pl_ray() debug-guard discussion. I wanted to check whether I should go ahead and prepare a small patch (e.g., guarding it behind a librt debug flag) and let  <span class="user-mention" data-user-id="102902">@Sean</span>  <span class="user-mention" data-user-id="112516">@starseeker</span>  review it when they have time,seems they are too busy <span aria-label="sweat smile" class="emoji emoji-1f605" role="img" title="sweat smile">:sweat_smile:</span> or wait for explicit confirmation first.<br>
+I’m happy to proceed in whichever way you prefer.<br>
+Thanks!</p>
+
+
+
+<a name="565934410"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565934410" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565934410">(Dec 31 2025 at 21:31)</a>:</h4>
+<p><span class="user-mention" data-user-id="1008386">@Aayush Sharma</span> end of year craziness, but on the surface what you're suggesting sounds reasonable.  I do believe there is already a flag for plotting but will have to look it up.  Note there are multiple sets of debug flags (for librt, libbn, libbu each).</p>
+
+
+
+<a name="565934748"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565934748" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565934748">(Dec 31 2025 at 21:37)</a>:</h4>
+<p><span class="user-mention" data-user-id="1006359">@Rishith Kumar Guntuka</span> no comment yet on the correctness or intent of the existing code as it's had multiple revisions since I last worked on it, but there is undoubtedly room for improvements, consolidation, better testing, etc. One specific issue still unimplemented is making sure the cache system only uses a specifiable amount of disk space (e.g., 1GB) and doesn't fill up the hard drive regardless of caching -- auto-expiring the oldest cached items to keep things within usage limits. </p>
+<p>As for permissions, keep in mind permissions might change between the time we initialize and the time a write is actually occurring or the cache store is being traversed.  Shouldn't be inefficient, but should be resilient to the extent possible as actual I/O or syscalls are performed to ensure things are operating within expected parameters.</p>
+
+
+
+<a name="565934764"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565934764" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565934764">(Dec 31 2025 at 21:38)</a>:</h4>
+<p>again, i've not reviewed that code lately, but just food for thought :)</p>
+
+
+
+<a name="565934779"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565934779" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aayush Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565934779">(Dec 31 2025 at 21:38)</a>:</h4>
+<p>Thanks <span class="user-mention" data-user-id="102902">@Sean</span> , that helps a lot.<br>
+I’ll look for existing plotting-related debug flags across librt (and libbn/libbu if applicable) to see whether one already fits this use case before proposing anything new.<br>
+Once I’ve identified the most appropriate flag (or confirmed there isn’t a suitable one), I’ll follow up with a concrete proposal for guarding pl_ray().</p>
+
+
+
+<a name="565934861"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/565934861" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#565934861">(Dec 31 2025 at 21:40)</a>:</h4>
+<p>sounds good.  the flags are defined in the top-level include/ dir for each lib (I'd expected them in a globals.h or defines.h header)</p>
+
+
+
+<hr><p>Last updated: Jan 01 2026 at 01:05 UTC</p>
 </html>
