@@ -232,5 +232,26 @@ I’m Shayan. I’m a working professional with experience in Node.js, React, an
 
 
 
-<hr><p>Last updated: Jan 02 2026 at 00:59 UTC</p>
+<a name="566052722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566052722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566052722">(Jan 02 2026 at 12:26)</a>:</h4>
+<p><span class="user-mention" data-user-id="102902">@Sean</span>  Hi, I wanted to share a brief update and ask for some guidance.<br>
+I’ve been working on building BRL-CAD from source on Windows. I was able to clone the repository and set up the toolchain, and initially tried the Visual Studio generator. Due to long configure times and generator issues, I switched to using Ninja, which has been more stable so far.</p>
+<p>At the moment, I’m running into problems during the <code>bext</code> external dependency build step, and I’ve been trying clean rebuilds and different configuration options to understand it better. I wanted to check whether this is the right approach on Windows, or if there’s a recommended setup or workflow you’d suggest for this stage.</p>
+<p>Thanks — I’d appreciate any pointers.</p>
+
+
+
+<a name="566078983"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566078983" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566078983">(Jan 02 2026 at 16:55)</a>:</h4>
+<p>The long configuration time for brlcad is expected, because it includes the build of the external dependencies in bext. You can try to build bext separately instead:</p>
+<ul>
+<li>In your (empty) bext build directory: <code>cmake &lt;path to the bext sources&gt; -DCMAKE_BUILD_TYPE=Debug</code></li>
+<li>If this doesn't work, you can try to add <code> -DENABLE_ALL=ON</code> at the end of the cmake command</li>
+<li>In your (empty) brlcad build directory: <code>cmake &lt;path to the brlcad sources&gt; -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=&lt;path to a directory, where you can install the program without administrator rights&gt; -DBRLCAD_EXT_DIR=&lt;path to the bext build directory from the step before&gt;</code></li>
+<li>Build brlcad with MS Visual Studio by opening the solution file and building the ALL_BUILD project (INSTALL installs the programs in the directory given in the previous step)</li>
+</ul>
+
+
+
+<hr><p>Last updated: Jan 03 2026 at 00:56 UTC</p>
 </html>

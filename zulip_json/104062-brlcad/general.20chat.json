@@ -178,5 +178,17 @@
         "id": 565933184,
         "sender_full_name": "Sean",
         "timestamp": 1767215390
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span>  Hi, I wanted to share a brief update and ask for some guidance.<br>\nI’ve been working on building BRL-CAD from source on Windows. I was able to clone the repository and set up the toolchain, and initially tried the Visual Studio generator. Due to long configure times and generator issues, I switched to using Ninja, which has been more stable so far.</p>\n<p>At the moment, I’m running into problems during the <code>bext</code> external dependency build step, and I’ve been trying clean rebuilds and different configuration options to understand it better. I wanted to check whether this is the right approach on Windows, or if there’s a recommended setup or workflow you’d suggest for this stage.</p>\n<p>Thanks — I’d appreciate any pointers.</p>",
+        "id": 566052722,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1767356771
+    },
+    {
+        "content": "<p>The long configuration time for brlcad is expected, because it includes the build of the external dependencies in bext. You can try to build bext separately instead:</p>\n<ul>\n<li>In your (empty) bext build directory: <code>cmake &lt;path to the bext sources&gt; -DCMAKE_BUILD_TYPE=Debug</code></li>\n<li>If this doesn't work, you can try to add <code> -DENABLE_ALL=ON</code> at the end of the cmake command</li>\n<li>In your (empty) brlcad build directory: <code>cmake &lt;path to the brlcad sources&gt; -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=&lt;path to a directory, where you can install the program without administrator rights&gt; -DBRLCAD_EXT_DIR=&lt;path to the bext build directory from the step before&gt;</code></li>\n<li>Build brlcad with MS Visual Studio by opening the solution file and building the ALL_BUILD project (INSTALL installs the programs in the directory given in the previous step)</li>\n</ul>",
+        "id": 566078983,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1767372935
     }
 ]
