@@ -316,5 +316,47 @@ I’ve opened the PR for the pl_ray() debug guard as discussed. While that’s u
 
 
 
-<hr><p>Last updated: Jan 04 2026 at 01:06 UTC</p>
+<a name="566204803"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/566204803" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#566204803">(Jan 04 2026 at 07:35)</a>:</h4>
+<p>Thanks <span class="user-mention" data-user-id="1008386">@Aayush Sharma</span>, that's a nice simple start.  </p>
+<p>Something really useful you could help with is a quality knob on the 'gist' command line tool (see src/gtools/gist).  Right now it is cli with options for controlling output resolution (ppi is the main one, but alternatively width and height).  However when gist runs it invokes several commands that have their own quality settings (e.g., see commits f5b9e8a7e5d4e941d9561e56771f6dd28394cc2b and 98eab98f6a2f5d9d1c86cd182619a5291ffbef12 for a couple examples) which typically has huge impact on runtimes..</p>
+<p>We need some way for a user to say they want low vs high quality (aka draft/final or other characterizations) -- some quality knob or switch that then directs the underlying utilities to spend far less/more time accordingly.  Alternatively could find some way to tie quality with the ppi setting, though I suppose it's conceivable to want low-resolution with high-quality rendering and high resolution with low-quality rendering -- but more common is definitely low-res + low quality OR high-res + high quality.</p>
+<p>When someone is just starting to use the tool, you usually want a fast preview to make sure everything looks right.  Once that preview is good, the next want is to crank up the quality for whatever resolution level was requested.</p>
+
+
+
+<a name="566234516"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/566234516" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rishith Kumar Guntuka <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#566234516">(Jan 04 2026 at 16:52)</a>:</h4>
+<p>Thanks <span class="user-mention" data-user-id="102902">@Sean</span> for the insights about permission changing at the time of initialization and time of use, it really helped me understand the reason behind.</p>
+<p>Based on that, I’m considering introducing a small helper function (e.g., cache_check_dir_perms()) that takes the cache directory and required permission flags, and using it at the appropriate points in the code (during initialization and at time-of-write) instead of removing checks completely. The goal would be to centralize permission logic without breaking things if permissions change while the program is running.</p>
+<p>Coming to this:</p>
+<blockquote>
+<p>One specific issue still unimplemented is making sure the cache system only uses a specifiable amount of disk space (e.g., 1GB) and doesn't fill up the hard drive regardless of caching -- auto-expiring the oldest cached items to keep things within usage limits.</p>
+</blockquote>
+<p>Regarding the cache size limit you mentioned, I explored a few possible approaches and wanted to confirm which aligns best:</p>
+<ol>
+<li>
+<p>Touch on access deletion - explicitly updating timestamps on successful cache reads (via syscalls) and deleting based on those timestamps which is true LRU, but adds extra I/O on reads.</p>
+</li>
+<li>
+<p>Memory data structures (e.g., queues/maps)- true LRU but significantly more complex &amp; costly for disk cache because it requires more writes and crash recovery when the brlcad closes, all RAM stored data is lost.</p>
+</li>
+<li>
+<p>Filesystem metadata based deletion - by scanning cache entries, sorting by modification time, and deleting the oldest files(which were created long ago) until under the limit which is simpler and commonly used, though it approximates LRU rather than tracking read access.</p>
+</li>
+</ol>
+<p>I don’t have a strong preference yet and wanted to check which of these approaches you feel is most appropriate before going further.</p>
+
+
+
+<a name="566258848"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/How%20to%20start%20contributing/near/566258848" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Aayush Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/How.20to.20start.20contributing.html#566258848">(Jan 05 2026 at 00:02)</a>:</h4>
+<p>Thanks <span class="user-mention" data-user-id="102902">@Sean</span>  I did a detailed analysis of the gist pipeline and the utilities it invokes.</p>
+<p>gist currently calls rt, rtedge, rtwizard, rtarea, gqa, and mged, and several quality-affecting parameters have a significant impact on runtime. The main cost drivers are render size (-s, O(n²), currently hardcoded at 1024), ambient samples for rt (currently hardcoded at 8), and gqa grid resolution. There is also a FIXME in PerspectiveGatherer.cpp noting the need for low/high quality configurability.</p>
+<p>Based on this, I’d suggest a small Phase 1 change: introduce a --quality low|medium|high preset that maps to reasonable defaults for these parameters while keeping the current behavior as the default. This would support fast preview workflows as well as higher-quality final renders without exposing a large number of new options initially.</p>
+<p>If this approach sounds reasonable, I’m happy to start with a minimal, incremental implementation (touching Options, PerspectiveGatherer, and InformationGatherer).</p>
+
+
+
+<hr><p>Last updated: Jan 05 2026 at 01:05 UTC</p>
 </html>

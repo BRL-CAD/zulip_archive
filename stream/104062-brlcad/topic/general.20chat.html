@@ -253,5 +253,31 @@ I’ve been working on building BRL-CAD from source on Windows. I was able to cl
 
 
 
-<hr><p>Last updated: Jan 04 2026 at 01:06 UTC</p>
+<a name="566205065"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566205065" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566205065">(Jan 04 2026 at 07:42)</a>:</h4>
+<p>Everything Daniel said <span class="user-mention" data-user-id="892744">@Kanchan Borole</span> </p>
+<p>Ninja is definitely the faster path though I more often test the default non-ninja generator path myself.  Configure will take a long time because it downloads and compiles all external deps like Daniel mentioned.  Both should work though -- if they don't please share the first couple error.</p>
+<p>Note that by default the cmake build of the "brlcad" repo automatically obtains and compiles the "bext" repo.  If you clone and compile "bext" yourself, you do want to set that BRLCAD_EXT_DIR variable.  I do not usually open the solution myself unless I'm building a release, instead just relying on the default visual studio cmake configuration and compilation of everything.  Others here do regularly open the solution as their preferred approach which has way more options.</p>
+
+
+
+<a name="566210773"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566210773" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566210773">(Jan 04 2026 at 09:41)</a>:</h4>
+<p>Thanks <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span>  and <span class="user-mention" data-user-id="102902">@Sean</span>  for the guidance.</p>
+<p>I followed the suggested workflow and tried building <strong>bext separately</strong> using Ninja in a clean build directory. The CMake configuration completed successfully, but the build consistently fails during External Project steps (notably PROJ / GDAL / GEOGRAM), with errors related to missing PROJ libraries and dependency build failures.</p>
+<p>I then tried the alternative approach of opening the <strong>brlcad repository directly in Visual Studio</strong> and relying on the default CMake configuration to build bext automatically, but it still ends with -<br>
+CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (_message):<br>
+  Unable to successfully build bext dependency repository</p>
+<p>At this stage, I wanted to ask what the recommended next step would be on Windows — whether there’s a preferred workaround (partial build, disabling certain deps, prebuilt deps).</p>
+
+
+
+<a name="566232968"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566232968" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566232968">(Jan 04 2026 at 16:20)</a>:</h4>
+<p>From your description, it looks like the PROJ build fails. Why? What's the CMake output regarding the compilation error there? What's in the logfiles?<br>
+(Currently, I've no Visual Studio at hand.)</p>
+
+
+
+<hr><p>Last updated: Jan 05 2026 at 01:05 UTC</p>
 </html>
