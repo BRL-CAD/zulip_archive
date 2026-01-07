@@ -279,5 +279,36 @@ CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (_message):<br>
 
 
 
-<hr><p>Last updated: Jan 06 2026 at 00:59 UTC</p>
+<a name="566540219"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566540219" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566540219">(Jan 06 2026 at 13:07)</a>:</h4>
+<p>Earlier, I was building using Command Prompt with Ninja(Bext Separately), and in that attempt the build failed while compiling the PROJ external dependency (GDAL/PROJ-related errors).</p>
+<p>After that, I cleaned everything and opened the brlcad folder directly in Visual Studio to let CMake handle bext automatically. In this fresh Visual Studio configuration, the build now stops earlier in the dependency chain at GEOGRAM, so PROJ is not reached or downloaded in this run, which is why PROJ logs are not present now.</p>
+<p>The current failure in Visual Studio is:<br>
+[CMake] Building Custom Rule .../bext/gdal/CMakeLists.txt<br>
+[CMake] Completed 'TKTABLE_BLD'<br>
+[CMake] Completed 'GDAL_BLD'<br>
+[CMake] CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (message):<br>
+[CMake]   Unable to successfully build bext dependency repository<br>
+[CMake] Call Stack (most recent call first):<br>
+[CMake]   misc/CMake/BRLCAD_EXT_Setup.cmake:442 (message)<br>
+[CMake]   misc/CMake/BRLCAD_ExternalDeps.cmake:529 (brlcad_ext_setup)<br>
+[CMake]   CMakeLists.txt:2114 (brlcad_bext_process)</p>
+<p>I’m attaching a Word file with the relevant CMake output and logs (screenshots  attaching aren’t working on my system currently). Please let me know whether you’d like me to rerun specifically to reproduce the PROJ failure again, or if debugging GEOGRAM first is the correct next step on Windows.<br>
+Word File Link - <a href="https://docs.google.com/document/d/1kQzoFzuWVjckSlX53hVw0G1QuUAm3Aig/edit?usp=drive_link&amp;ouid=117474697357203901480&amp;rtpof=true&amp;sd=true">https://docs.google.com/document/d/1kQzoFzuWVjckSlX53hVw0G1QuUAm3Aig/edit?usp=drive_link&amp;ouid=117474697357203901480&amp;rtpof=true&amp;sd=true</a></p>
+
+
+
+<a name="566639779"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566639779" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566639779">(Jan 07 2026 at 00:04)</a>:</h4>
+<p>downloading and compiling external deps during the cmake phase is lame, especially for systems with lots of CPUs available. Can they be cloned and folded in during the ninja/make phase?</p>
+
+
+
+<a name="566639997"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/566639997" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#566639997">(Jan 07 2026 at 00:06)</a>:</h4>
+<p>I'm all in on ninja, regressing to make when ninja is available is a loss, though the capability should be maintained. CMake is pretty good about this in general</p>
+
+
+
+<hr><p>Last updated: Jan 07 2026 at 01:00 UTC</p>
 </html>

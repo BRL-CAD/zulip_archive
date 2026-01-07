@@ -208,5 +208,23 @@
         "id": 566232968,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1767543638
+    },
+    {
+        "content": "<p>Earlier, I was building using Command Prompt with Ninja(Bext Separately), and in that attempt the build failed while compiling the PROJ external dependency (GDAL/PROJ-related errors).</p>\n<p>After that, I cleaned everything and opened the brlcad folder directly in Visual Studio to let CMake handle bext automatically. In this fresh Visual Studio configuration, the build now stops earlier in the dependency chain at GEOGRAM, so PROJ is not reached or downloaded in this run, which is why PROJ logs are not present now.</p>\n<p>The current failure in Visual Studio is:<br>\n[CMake] Building Custom Rule .../bext/gdal/CMakeLists.txt<br>\n[CMake] Completed 'TKTABLE_BLD'<br>\n[CMake] Completed 'GDAL_BLD'<br>\n[CMake] CMake Error at misc/CMake/BRLCAD_Util.cmake:102 (message):<br>\n[CMake]   Unable to successfully build bext dependency repository<br>\n[CMake] Call Stack (most recent call first):<br>\n[CMake]   misc/CMake/BRLCAD_EXT_Setup.cmake:442 (message)<br>\n[CMake]   misc/CMake/BRLCAD_ExternalDeps.cmake:529 (brlcad_ext_setup)<br>\n[CMake]   CMakeLists.txt:2114 (brlcad_bext_process)</p>\n<p>I’m attaching a Word file with the relevant CMake output and logs (screenshots  attaching aren’t working on my system currently). Please let me know whether you’d like me to rerun specifically to reproduce the PROJ failure again, or if debugging GEOGRAM first is the correct next step on Windows.<br>\nWord File Link - <a href=\"https://docs.google.com/document/d/1kQzoFzuWVjckSlX53hVw0G1QuUAm3Aig/edit?usp=drive_link&amp;ouid=117474697357203901480&amp;rtpof=true&amp;sd=true\">https://docs.google.com/document/d/1kQzoFzuWVjckSlX53hVw0G1QuUAm3Aig/edit?usp=drive_link&amp;ouid=117474697357203901480&amp;rtpof=true&amp;sd=true</a></p>",
+        "id": 566540219,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1767704837
+    },
+    {
+        "content": "<p>downloading and compiling external deps during the cmake phase is lame, especially for systems with lots of CPUs available. Can they be cloned and folded in during the ninja/make phase?</p>",
+        "id": 566639779,
+        "sender_full_name": "Erik",
+        "timestamp": 1767744241
+    },
+    {
+        "content": "<p>I'm all in on ninja, regressing to make when ninja is available is a loss, though the capability should be maintained. CMake is pretty good about this in general</p>",
+        "id": 566639997,
+        "sender_full_name": "Erik",
+        "timestamp": 1767744390
     }
 ]
