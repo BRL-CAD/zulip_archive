@@ -346,5 +346,21 @@ Custom build for GEOGRAM_BLD exited with code 1</p>
 
 
 
-<hr><p>Last updated: Jan 13 2026 at 00:56 UTC</p>
+<a name="567682578"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/567682578" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#567682578">(Jan 13 2026 at 04:27)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="103542">Erik</span> <a href="#narrow/channel/104062-brlcad/topic//near/566639779">said</a>:</p>
+<blockquote>
+<p>downloading and compiling external deps during the cmake phase is lame, especially for systems with lots of CPUs available. Can they be cloned and folded in during the ninja/make phase?</p>
+</blockquote>
+<p><span class="user-mention" data-user-id="103542">@Erik</span>   Unfortunately, the answer to that is a hard no.  It has to do with how and when CMake's find_package needs to make information about dependencies available.  Our previous generation build system actually did do that in the build phase (the only large scale project I am aware of to actually make that function correctly) but the necessary custom machinery was too extensive to be generally maintainable.  Qt, in particular, cannot be successfully managed as a dependency the way we were doing it in the previous iteration (although it's not the only problem child.</p>
+
+
+
+<a name="567682663"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/general%20chat/near/567682663" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/general.20chat.html#567682663">(Jan 13 2026 at 04:28)</a>:</h4>
+<p>That's why the recommended approach for serious development is to build bext yourself separately, and then point the BRL-CAD CMake to the prepared bext outputs.  It avoids more than the minimum copy and prep work during configure.</p>
+
+
+
+<hr><p>Last updated: Jan 14 2026 at 01:02 UTC</p>
 </html>
