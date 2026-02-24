@@ -89,5 +89,38 @@ but here i am uploading the text file having the complete log when i ran this se
 
 
 
-<hr><p>Last updated: Feb 23 2026 at 01:13 UTC</p>
+<a name="575305862"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Building%20BRL-CAD/near/575305862" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Abhishek <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Building.20BRL-CAD.html#575305862">(Feb 23 2026 at 14:04)</a>:</h4>
+<p><span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> correct me if wrong,so here is how should i proceed.<br>
+1.Build Bext locally first - as per the bext <a href="https://github.com/BRL-CAD/bext?tab=readme-ov-file#using-the-build-outputs-with-brl-cad">Readme</a> </p>
+<p>- <code>mkdir bext_build</code><br>
+<code>cd bext_build</code></p>
+<p>- <code>cmake ../bext -DENABLE_ALL=ON -DCMAKE_BUILD_TYPE=Release</code><br>
+   - <code>cmake --build . --config Release --parallel 8</code><br>
+         ps: i didnt understand this way of building BRL-CAD  <a href="https://github.com/BRL-%20%20%20%20CAD/bext?tab=readme-ov-file#using-the-build-outputs-with-brl-cad">link</a> <br>
+2.Then proceed to build BRL-CAD</p>
+
+
+
+<a name="575307341"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Building%20BRL-CAD/near/575307341" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Abhishek <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Building.20BRL-CAD.html#575307341">(Feb 23 2026 at 14:11)</a>:</h4>
+<p>Do i have to build BRLCAD in the parent folder(bext) and then proceed to BRLCAD build ?</p>
+
+
+
+<a name="575312801"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Building%20BRL-CAD/near/575312801" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Abhishek <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Building.20BRL-CAD.html#575312801">(Feb 23 2026 at 14:36)</a>:</h4>
+<p>Instead of Bext i just turn this flag on = <code>-DBRLCAD_BUNDLED_LIBS=ON</code> in the brlcad build only.</p>
+
+
+
+<a name="575375273"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Building%20BRL-CAD/near/575375273" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Building.20BRL-CAD.html#575375273">(Feb 23 2026 at 18:52)</a>:</h4>
+<p><span class="user-mention" data-user-id="1027461">@Abhishek</span> yes, you're on the right track -- you build all of bext which <em>just</em> builds all of the 3rd party dependencies.  This is not building BRL-CAD.  This is building the dependencies that BRL-CAD requires like libpng, tcl/tk, opencv, zlib, and 60+ other deps.  Once you build "bext", THEN you follow the instructions in that link you didn't understand to actually build BRL-CAD itself.</p>
+<p>You'll specify BRLCAD_EXT_DIR in your "brlcad" clone'd repo cmake to tell it where you built the "bext" dependencies.</p>
+<p>As for where you build, that part doesn't matter much so long as you specify the right paths later.</p>
+
+
+
+<hr><p>Last updated: Feb 24 2026 at 01:12 UTC</p>
 </html>

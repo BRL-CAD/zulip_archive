@@ -217,5 +217,150 @@ These are the deliverables in my mind as of now. Please share your feedback and 
 
 
 
-<hr><p>Last updated: Feb 23 2026 at 01:13 UTC</p>
+<a name="575335727"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575335727" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575335727">(Feb 23 2026 at 16:09)</a>:</h4>
+<p>Hello <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> </p>
+<p>I’m interested in contributing to the Python Bindings project for BRL-CAD in GSoC.</p>
+<p>I have already built BRL-CAD from source on Ubuntu and submitted a small pull request (I fixed a font saving issue in .mgedrc) , so I’m becoming familiar with the codebase and workflow.</p>
+<p>For this project, I plan to first study the existing efforts (like the one referenced in the project details), understand the current database interfaces, and then design a clean and minimal Python API for reading and modifying BRL-CAD databases.</p>
+<p>I would appreciate any guidance on preferred architectural direction or good starting points in the codebase.</p>
+<p>Thank you!</p>
+
+
+
+<a name="575378252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575378252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575378252">(Feb 23 2026 at 19:08)</a>:</h4>
+<p><span class="user-mention" data-user-id="1031145">@Waleed Ahmed</span> glad to see you already have a PR in!  I'll leave opinion on preferred architectural direction to Daniel, but just note that bindings have been worked twice previously so would be great if your proposal/plan describe active effort to either mitigate risks of being incomplete and/or has some means for tracking completeness status or very specifically defined unambiguous scope, etc.</p>
+
+
+
+<a name="575379791"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575379791" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575379791">(Feb 23 2026 at 19:17)</a>:</h4>
+<p>It will help for you to be at least minimally familiar with the existing libraries involved, which will likely be LIBRT (main geometry library, huge), LIBWDB (library for writing/creating geometry, small), and the underlying helper libraries it exposes (LIBBU for basic utilities, LIBBN for basic numerics, LIBBG for some basic geometry helper routines).  Be sure to look at the prior efforts by kanzure and nmz787 to see how they approached it!</p>
+<p>At a much higher level just for awareness is LIBGED which is a command library that has all 350 or so commands exposed to users (it's a scripting argc/argv-style string API).  There's also a prior effort to expose Python as a 1st-class procedural primitive, so you could create and raytrace geometry dynamically, on the fly, by creating a new entity type that runs code that generates and evaluates geometry on the fly.  Involving either would be a project in themselves, but helps to understand the contexts and prior work.</p>
+
+
+
+<a name="575380014"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575380014" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575380014">(Feb 23 2026 at 19:18)</a>:</h4>
+<p>Thank you for the clarification, <span class="user-mention" data-user-id="102902">@Sean</span> .<br>
+Given that previous binding efforts struggled with completion, I plan to begin by studying those implementations to understand where they stalled (scope expansion, build integration complexity).<br>
+For my proposal, I would define a strictly bounded Phase 1 scope. For example:<br>
+Select a small, high-value subset of functionality (10–15 clearly defined functions from a specific library component).<br>
+Explicitly document the target function list before implementation.<br>
+Track completeness via:<br>
+A checklist of wrapped functions<br>
+Unit tests for each exposed binding<br>
+Example usage scripts<br>
+Ensure Phase 1 produces a stable, independently usable Python module.<br>
+Subsequent phases would expand the API surface incrementally, using the same measurable structure. This way, even if development stops at any point, the completed phases remain stable, documented, and extendable.</p>
+
+
+
+<a name="575380420"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575380420" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575380420">(Feb 23 2026 at 19:21)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/575379791">said</a>:</p>
+<blockquote>
+<p>It will help for you to be at least minimally familiar with the existing libraries involved, which will likely be LIBRT (main geometry library, huge), LIBWDB (library for writing/creating geometry, small), and the underlying helper libraries it exposes (LIBBU for basic utilities, LIBBN for basic numerics, LIBBG for some basic geometry helper routines).  Be sure to look at the prior efforts by kanzure and nmz787 to see how they approached it!</p>
+<p>At a much higher level just for awareness is LIBGED which is a command library that has all 350 or so commands exposed to users (it's a scripting argc/argv-style string API).  There's also a prior effort to expose Python as a 1st-class procedural primitive, so you could create and raytrace geometry dynamically, on the fly, by creating a new entity type that runs code that generates and evaluates geometry on the fly.  Involving either would be a project in themselves, but helps to understand the contexts and prior work.</p>
+</blockquote>
+<p>Thank you I would start doing that as soon as possible and will be getting guidance if I find myself stuck somewhere</p>
+
+
+
+<a name="575381130"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575381130" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575381130">(Feb 23 2026 at 19:25)</a>:</h4>
+<p>Kanzure's original effort was outstanding and showed much promise but the initial implementation was centered around ctypes which went through waves of being difficult to maintain/compile/keep working.  The examples showed pretty good mirroring of our C/C++ code examples, for example: <a href="https://github.com/kanzure/python-brlcad/blob/master/examples/ctypes/wdb_example.py">https://github.com/kanzure/python-brlcad/blob/master/examples/ctypes/wdb_example.py</a> </p>
+<p>and then a python-module improved version later:  <a href="https://github.com/kanzure/python-brlcad/blob/master/examples/wdb_example.py">https://github.com/kanzure/python-brlcad/blob/master/examples/wdb_example.py</a></p>
+
+
+
+<a name="575381829"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575381829" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575381829">(Feb 23 2026 at 19:29)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/575381130">said</a>:</p>
+<blockquote>
+<p>Kanzure's original effort was outstanding and showed much promise but the initial implementation was centered around ctypes which went through waves of being difficult to maintain/compile/keep working.  The examples showed pretty good mirroring of our C/C++ code examples, for example: <a href="https://github.com/kanzure/python-brlcad/blob/master/examples/ctypes/wdb_example.py">https://github.com/kanzure/python-brlcad/blob/master/examples/ctypes/wdb_example.py</a> </p>
+<p>and then a python-module improved version later:  <a href="https://github.com/kanzure/python-brlcad/blob/master/examples/wdb_example.py">https://github.com/kanzure/python-brlcad/blob/master/examples/wdb_example.py</a></p>
+</blockquote>
+<p>Thank you for the additional context.<br>
+For the bindings approach, I’m currently considering avoiding a ctypes-based implementation due to long-term maintainability concerns, and instead exploring a C-extension strategy.<br>
+Before going further, I wanted to ask whether introducing a small C++ bridge layer would be acceptable for this effort. If so, a pybind11-based approach could potentially provide stronger type safety and easier long-term maintenance. If a pure C interface is preferred, I would instead plan around the CPython C API directly.<br>
+I will also review kanzure’s and nmz787’s prior efforts carefully to better understand their architectural decisions and where complexity arose, so I can factor that into a more concrete proposal.<br>
+I’d like to make sure whatever approach I take is sustainable and aligned with the project’s long-term direction.</p>
+
+
+
+<a name="575381836"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575381836" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575381836">(Feb 23 2026 at 19:29)</a>:</h4>
+<p>nmz787 on the other hand took quite a different approach, which you can see in these couple examples:</p>
+<p><a href="https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/multi_part_example.py">https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/multi_part_example.py</a><br>
+<a href="https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/mems_hello_world.py">https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/mems_hello_world.py</a></p>
+<p>and this approach basically was python that output tcl/mged/libged scripts that would be then consumed by existing tools to actually make geometry.</p>
+
+
+
+<a name="575382282"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575382282" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575382282">(Feb 23 2026 at 19:32)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/575381836">said</a>:</p>
+<blockquote>
+<p>nmz787 on the other hand took quite a different approach, which you can see in these couple examples:</p>
+<p><a href="https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/multi_part_example.py">https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/multi_part_example.py</a><br>
+<a href="https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/mems_hello_world.py">https://github.com/nmz787/python-brlcad-tcl/blob/master/examples/mems_hello_world.py</a></p>
+<p>and this approach basically was python that output tcl/mged/libged scripts that would be then consumed by existing tools to actually make geometry.</p>
+</blockquote>
+<p>From what I understand, kanzure’s approach went deeper into actual library bindings, while nmz787’s approach used Python to generate TCL/MGED/LIBGED scripts that existing tools would execute.<br>
+The second approach seems simpler and more stable long-term, but also more indirect since it works at the command-string level instead of exposing structured APIs.<br>
+I’ll take some time to properly review both implementations so I can better understand the tradeoffs before deciding on a directio</p>
+
+
+
+<a name="575382498"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575382498" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575382498">(Feb 23 2026 at 19:33)</a>:</h4>
+<p>Both of them are primarily documented by way of examples so it's hard to tell how complete/incomplete they are, but kanzure's does have a nice article writeup that someone else did afterwards:  <a href="https://medium.com/@Mr_Jaypee/brl-cads-python-procedural-geometry-990e3c286a63">https://medium.com/@Mr_Jaypee/brl-cads-python-procedural-geometry-990e3c286a63</a></p>
+
+
+
+<a name="575382807"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575382807" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575382807">(Feb 23 2026 at 19:35)</a>:</h4>
+<p>Second approach is definitely simpler, but arguably NOT stable long-term as the CLI is constantly undergoing change and it's architecturally not python bindings, but just python code writing out scripts.</p>
+
+
+
+<a name="575383279"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575383279" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575383279">(Feb 23 2026 at 19:37)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/575382807">said</a>:</p>
+<blockquote>
+<p>Second approach is definitely simpler, but arguably NOT stable long-term as the CLI is constantly undergoing change and it's architecturally not python bindings, but just python code writing out scripts.</p>
+</blockquote>
+<p>Thank you for correcting me there.<br>
+I apologize for not diving deep enough yet to understand how actively the CLI evolves and how that affects long-term stability. I’ll take more time to study the architecture and prior efforts more carefully so I can better evaluate the tradeoffs before proposing a direction.</p>
+
+
+
+<a name="575383652"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575383652" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575383652">(Feb 23 2026 at 19:40)</a>:</h4>
+<p>Ah, the article is refreshing my memory -- the version of ctypesgen that kanzure used (back circa 2013) had some issues which caused headaches, which Jaipal worked on in <a href="https://github.com/Killthebug/python-brlcad">https://github.com/Killthebug/python-brlcad</a></p>
+
+
+
+<a name="575383704"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575383704" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575383704">(Feb 23 2026 at 19:40)</a>:</h4>
+<p>that's still ctypes-based</p>
+
+
+
+<a name="575383744"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575383744" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575383744">(Feb 23 2026 at 19:40)</a>:</h4>
+<p>(which is fine, just noting the method)</p>
+
+
+
+<a name="575384570"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/575384570" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#575384570">(Feb 23 2026 at 19:45)</a>:</h4>
+<p>Really thankful for all the feedback you gave.<br>
+I'll certainly reach you back on this matter soon when I'm stuck at some place.</p>
+
+
+
+<hr><p>Last updated: Feb 24 2026 at 01:12 UTC</p>
 </html>
