@@ -256,5 +256,41 @@
         "id": 577846279,
         "sender_full_name": "Waleed Ahmed",
         "timestamp": 1772835053
+    },
+    {
+        "content": "<p>Definitely!</p>\n<blockquote>\n<p>My goal is to design something that feels natural for Python scripting, especially for tasks like procedural geometry generation.</p>\n</blockquote>\n<p>That's it. Of course, it must reflect BRL-CAD's methodology of geometry handling, but in a way, which attracts Python programmers.</p>\n<p>For the back-end, you could consider MOOSE. It has an object-oriented design already.</p>",
+        "id": 577924382,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1772897333
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/577924382\">said</a>:</p>\n<blockquote>\n<p>Definitely!</p>\n<blockquote>\n<p>My goal is to design something that feels natural for Python scripting, especially for tasks like procedural geometry generation.</p>\n</blockquote>\n<p>That's it. Of course, it must reflect BRL-CAD's methodology of geometry handling, but in a way, which attracts Python programmers.</p>\n<p>For the back-end, you could consider MOOSE. It has an object-oriented design already.</p>\n</blockquote>\n<p>Thanks, that’s very helpful.</p>\n<p>Using MOOSE as the backend sounds interesting since it already provides a more object-oriented design. Do you think it would be a good foundation for Python bindings, or is it still evolving?</p>\n<p>I’m trying to understand whether building on top of MOOSE would help reduce the need for an additional adapter layer.</p>",
+        "id": 577925016,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1772897944
+    },
+    {
+        "content": "<p>The design of MOOSE is based on the C++ core interface in <a href=\"https://github.com/BRL-CAD/rt-cubed\">rt^3</a>, which goes back to 2008. It is well tested and very stable. It may still get new features, but it is designed as a stable foundation for programs using it. And, I'm thinking about adding a build option for dynamical linking with the core libraries. This would solve an issue with CommandString.</p>\n<p>The drawback is something else: It has a C++ API and the C++ byte code is compiler specific. I.e., binding MOOSE to Python would require a layer which translates C++ to plain C.</p>",
+        "id": 577927029,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1772899894
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/577927029\">said</a>:</p>\n<blockquote>\n<p>The design of MOOSE is based on the C++ core interface in <a href=\"https://github.com/BRL-CAD/rt-cubed\">rt^3</a>, which goes back to 2008. It is well tested and very stable. It may still get new features, but it is designed as a stable foundation for programs using it. And, I'm thinking about adding a build option for dynamical linking with the core libraries. This would solve an issue with CommandString.</p>\n<p>The drawback is something else: It has a C++ API and the C++ byte code is compiler specific. I.e., binding MOOSE to Python would require a layer which translates C++ to plain C.</p>\n</blockquote>\n<p>I’ve been thinking more about the Python integration design and would like your opinion on a possible architecture.</p>\n<p>The idea is to focus on a Pythonic high-level API (a small modeling DSL / scene-graph style interface) where users build geometry using objects and boolean operations in Python. Internally, this would translate to a minimal, stable bridge layer that communicates with MOOSE/BRL-CAD. The goal would be to keep the low-level binding surface small and maintainable, while making the Python API feel natural for procedural CAD workflows.</p>\n<p>From a maintenance perspective, the intention is to avoid exposing large portions of the internal API directly and instead map only core concepts (primitives, combinations, transforms). This should allow the project to expand gradually without requiring extensive per-function bindings.</p>\n<p>Do you think this direction aligns better with BRL-CAD’s methodology and long-term maintainability goals? I would really appreciate your feedback on whether this structure makes sense for the proposal.</p>",
+        "id": 577933442,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1772906700
+    },
+    {
+        "content": "<p>I thought that I wrote that I'm in favour of starting with the Python API design. Therefore yes, this looks good.</p>\n<p>You should include the following features of BRL-CAD databases in your design considerations:</p>\n<ul>\n<li>3 types of databases: read only, writable, and in-memory</li>\n<li>The objects in the database can have attributes</li>\n<li>The combination objects have Boolean operations and matrices</li>\n</ul>\n<p>For the primitives' design, start with the simple ones (e.g. sphere), then do the more complex ones (e.g. arb8), and at last do the ones with complex substructure (e.g. bag of triangles). You don't need to come with a complete design for all primitives. Sketching the designs for 3 representatives is enough.</p>",
+        "id": 577938997,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1772913488
+    },
+    {
+        "content": "<p>Thanks, Daniel! I’ll begin drafting the proposal.</p>",
+        "id": 577939336,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1772913902
     }
 ]
