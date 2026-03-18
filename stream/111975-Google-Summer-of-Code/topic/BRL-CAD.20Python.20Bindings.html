@@ -521,5 +521,38 @@ I think that gives a better long-term balance between maintainability and stabil
 
 
 
-<hr><p>Last updated: Mar 17 2026 at 01:13 UTC</p>
+<a name="579979923"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/579979923" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Rohit S <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#579979923">(Mar 17 2026 at 15:32)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102939">@Daniel Rossberg</span> <span class="user-mention" data-user-id="102902">@Sean</span> ,<br>
+Following your feedback, I've been working on the pre-proposal groundwork. Here's a summary of what I've done so far:</p>
+<ol>
+<li>
+<p>Submitted a procedural geometry generator (random_csg.c) to src/proc-db which generates random BRL-CAD primitives combined with boolean operations and writes them to a .g database via libwdb.<br>
+PR: <a href="https://github.com/BRL-CAD/brlcad/pull/224">https://github.com/BRL-CAD/brlcad/pull/224</a></p>
+</li>
+<li>
+<p>Python Bindings Prototype<br>
+Repo: <a href="https://github.com/rohits1450/python-brlcad">https://github.com/rohits1450/python-brlcad</a>, explained clearly in its <strong>README</strong><br>
+Built a two-layer architecture:</p>
+</li>
+</ol>
+<ul>
+<li>Internal layer: C wrapper (brlcad_wrap.c) over librt/libwdb, compiled via CFFI</li>
+<li>Public layer: Pythonic API (brlcad/ package), Database, GeometryObject, BoundingBox classes</li>
+</ul>
+<ol start="3">
+<li>Procedural Geometry Generator from Python<br>
+Built a Python script that mathematically generates a rhombicuboctahedron (24 vertices, 44 triangulated faces) and writes it to BRL-CAD as a BOT primitive via libwdb, rendered and verified in MGED.<br>
+<img alt="Screenshot 2026-03-17 194108.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="750x715" data-original-src="/user_uploads/1549/PXks1QBMWc3dCzSMl71-jm3x/Screenshot-2026-03-17-194108.png" src="/user_uploads/thumbnail/1549/PXks1QBMWc3dCzSMl71-jm3x/Screenshot-2026-03-17-194108.png/840x560.webp"></li>
+</ol>
+<p>Binding approach decision:<br>
+I'm planning to go with a C binding via CFFI  rather than MOOSE, for ABI stability across MSVC/GCC/Clang. The public API will be Pythonic, users interact with Python classes, never raw C functions.</p>
+<p>Before I draft the formal proposal, I'd love your feedback on this work.</p>
+<p>Any specific functionality you'd like to see covered in the proposal scope?</p>
+<p>Thank you for your time and guidance!<br>
+— Rohit S</p>
+
+
+
+<hr><p>Last updated: Mar 18 2026 at 01:17 UTC</p>
 </html>
