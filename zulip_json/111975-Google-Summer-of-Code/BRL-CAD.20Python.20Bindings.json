@@ -334,5 +334,29 @@
         "id": 579979923,
         "sender_full_name": "Rohit S",
         "timestamp": 1773761541
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"1053852\">@Rohit S</span> very impressive breadth of efforts, but that's also a relatively big dump of works all at once that becomes tedious to review and discuss when there are issues or questions.  </p>\n<p>For #1, I reviewed and responded to PR224 with several points of feedback/changes requested.</p>\n<p>For #2, I would like to see more of your discussion on the architecture and design, not swaths of generated code already running in a particular direction.  If anything, maybe show examples of the final end-goal, which you kind of show with the readme, test_open, and rhombicuboctahedron examples, all of which look to be in a good direction but with glaring issues (imho) and suboptimal design.  Moreover, I'm guessing you used a coding agent to get you this far which is fine, but should be disclosed, and all the more reason to indicate just what direction and end state would be the goal if this is your coding pace for .. months. </p>\n<p>I'd like to see what wdb_example looks like in your final python end-state.  Not functional, but how it \"should\" look like if it were a TDD test prior to implementation.</p>\n<p>For #3, it's the most unappealing of the lot to me.   The end result gets there, but that code looks horrible.  It unnecessarily tries a generic convex hull wrap on the points first and if that fails it resorts to manual... ???  Also, deduplicating points that it just created seems nuts.  I would characterize that as AI garbage.  A better approach from a procedural standpoint would have been to demonstrate how the python might look to create the R24 using plates (arb8's and arb6's). That demo really only showcases one useful thing from a design perspective (i.e., brlcad_create_bot()).</p>",
+        "id": 580105873,
+        "sender_full_name": "Sean",
+        "timestamp": 1773812525
+    },
+    {
+        "content": "<p>back to discussing design, I think it is reasonable (and now quite well demonstrated) the efficacy of going to CFFI.  It'll be interesting to see how well that extends to all entity types, though you did already show a couple simple types and one advanced (bot).  In your design consideration, did you look at all at pybind11?  Curious how that option path would measure up in comparison with CFFI seeing how it's a simple header-only binding layer (that could work with the C libs or MOOSE).</p>\n<p>Again, would also like to see a more developed concrete example of what the design will look like (architecturally and code example non-functionally) at the end of GSoC.  How easy/easier is might be to do something like your random_csg.c proc-db in python instead of C as creating the prims, adding wmembers, and writing out combs is definitely error-prone and a somewhat complicated design in C.  I'd like to see how you'd support composability, transformations, set attributes, rename things, handle errors, etc.</p>",
+        "id": 580106462,
+        "sender_full_name": "Sean",
+        "timestamp": 1773812922
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> <span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> Hey there guys <br>\nso i was experimenting with the python bindings and was making a prototype past few days. I have designed a layered python API for BRL-CAD that separates high level scene construction from the backend C interface. At the top, users interact with chainable, composable Shape objects and CSG operations entirely in Python, allowing in-memory manipulation of attributes like color and shader. This is then exported through a controlled CFFI wrapper that communicates with a small C adapter, which handles creation, selection, and updates of BRL-CAD primitives and combinations in the .g database. <br>\nI made this whole project in multiple stages so i tested all stages in detail with python codes for each stage and also attached the test codes in my github repo <a href=\"https://github.com/AWaleed-Ahmed/python-bindings-prototype\">https://github.com/AWaleed-Ahmed/python-bindings-prototype</a><br>\nheres how my api usage is <br>\n<img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"768x268\" data-original-src=\"/user_uploads/1549/6kx3Nl3oW0eRqpHUFg8VNSKk/image.png\" src=\"/user_uploads/thumbnail/1549/6kx3Nl3oW0eRqpHUFg8VNSKk/image.png/840x560.webp\"></p>\n<p>and also here is the pipeline of this prototype <br>\n<img alt=\"mermaid-diagram(2).png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"1014x4050\" data-original-src=\"/user_uploads/1549/MqIhfjZyoqXX6SIlcXIyZDgC/mermaid-diagram2.png\" src=\"/user_uploads/thumbnail/1549/MqIhfjZyoqXX6SIlcXIyZDgC/mermaid-diagram2.png/840x560.webp\"></p>\n<p>Can you tell me if this seems like a good approach for the proposal, Ofcourse i do intend to add further functionality in the proposal and in the actual project</p>",
+        "id": 580286911,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1773866410
+    },
+    {
+        "content": "<p>This prototype supports dynamic in-memory updates of object attributes, allowing changes to colors, shaders, and transformations without recreating the scene, and is designed with maintainability and composability in mind for long-term extensibility.</p>",
+        "id": 580287856,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1773866861
     }
 ]
