@@ -370,5 +370,17 @@
         "id": 580537045,
         "sender_full_name": "Waleed Ahmed",
         "timestamp": 1773958382
+    },
+    {
+        "content": "<p>There is nothing wrong to use AI, but you are the one who has to answer. And here is the place to talk about the design and to help you shaping your proposal.</p>\n<p>Regarding transformations: It wouldn't be correct to say that the primitives don't know about transformations (e.g., the <strong>push</strong> and <strong>xpush</strong> commands apply transformations to primitives), but that's more an optional feature of the primitives. I recommend to use the matrix feature of the combinations as target for transformations instead.</p>\n<p>Regarding your Python API design: In <code>s1 = Sphere(...</code>, you create the impression that Sphere is an object of its own, but <strong>brlcad_create_sphere()</strong> assigns it to a database file. My point is that the Python is right  (<strong>rt_ell_internal</strong> is the structure in the BRL-CAD core, which can hold an \"independent\" sphere), but it would require a lot of work to write the adapter layer for it ... except it would be based on MOOSE, where all this object design was already done.</p>",
+        "id": 580851134,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1774127342
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/580851134\">said</a>:</p>\n<blockquote>\n<p>There is nothing wrong to use AI, but you are the one who has to answer. And here is the place to talk about the design and to help you shaping your proposal.</p>\n<p>Regarding transformations: It wouldn't be correct to say that the primitives don't know about transformations (e.g., the <strong>push</strong> and <strong>xpush</strong> commands apply transformations to primitives), but that's more an optional feature of the primitives. I recommend to use the matrix feature of the combinations as target for transformations instead.</p>\n<p>Regarding your Python API design: In <code>s1 = Sphere(...</code>, you create the impression that Sphere is an object of its own, but <strong>brlcad_create_sphere()</strong> assigns it to a database file. My point is that the Python is right  (<strong>rt_ell_internal</strong> is the structure in the BRL-CAD core, which can hold an \"independent\" sphere), but it would require a lot of work to write the adapter layer for it ... except it would be based on MOOSE, where all this object design was already done.</p>\n</blockquote>\n<p>I tested both points that you raised.</p>\n<p>For transformations, I applied matrix on members in comb tree and now the members of the combination tree are now like <code>u sph_1 [20, 0, 0] scale 1</code> and top-level transformed primitives are represented via explicit wrapper combinations when needed. I am treating primitive-level transforms as advanced/explicit behavior, not the default API path.</p>\n<p>I also tested MOOSE integration path in python using an <code>export_moose()</code> bridge and checked the scenes with multiple objects and CSG operations. I am thankful for the MOOSE approach you suggested, I apologize not looking into it deeply when you mentioned it earlier.</p>",
+        "id": 580854719,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1774130443
     }
 ]
