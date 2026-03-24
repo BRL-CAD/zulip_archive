@@ -185,5 +185,23 @@ Yes some of the details were based on assumptions and some were a result of expe
 
 
 
-<hr><p>Last updated: Mar 23 2026 at 01:17 UTC</p>
+<a name="581167478"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/581167478" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#581167478">(Mar 23 2026 at 16:39)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102902">@Sean</span> </p>
+<p>Just a follow up, I explored how commands could be piped through both MOOSE and the current MGED/archer exec pipelines and did some more reading into how I could use existing libraries and make this more future proof.</p>
+<p>I am thinking of going for a C++ based socket for piping in commands so its more future proof for MOOSE (and has minimal friction to port once it matures)</p>
+<p>I am thinking of having a C++ socket that receives strings coming in from the Python FastMCP server (flat commands like 'in sph1 sph 0 0 0 5' with no json). This could be caught by the C++ listener and then broken down by bu_argv_from_string from libbu to break it into argc/argv strings safely </p>
+<p>This above part can be the same for both MGED/Archer and the upcoming arbalest as both of them have the ability to run argc/argv commands for backwards compatibility with the rest of the BRLCAD libraries. (for example if i am running a libged command, in MGED/Archer it could be using ged_exec and in MOOSE it could be using CommandString::Parse) </p>
+<p>To avoid complex mutex locking and race conditions, the socket itself could be watched by the main thread's event loop. For Phase 1 (MGED/Archer), this means registering the socket file descriptor with Tcl_CreateFileHandler. For Arbalest/MOOSE later, some one can just swap that Tcl hook for a Qt event loop hook. (This synchronous approach feels a lot safer than attempting background thread execution, which would require heavy file-locking, though I'm not sure if there would be any limitations with any particular command modalities in this case as there was with Tcl uplevel injections so please let me know if there are).</p>
+<p>The pipeline would be:<br>
+Event Loop Trigger -&gt; Read Socket -&gt; Parse (libbu) -&gt; Execute</p>
+<p>Also on a side note, I think that proposing a C++ socket connection that could actually enable the user to safely pipe commands over an exposed port could be very impactful even without an MCP directly attached in the particular proposal, as it could actually lead to users building many different web based or local extensions to BRL-CAD that could be able to execute commands safely. While building the MCP I kind of wished there was one, where I could just run a script and be able to send commands to the software via a port. Would it be a good idea to propose that socket connection itself as a proposal considering the future possibilities in extensions/plugins and MCPs it could unlock?</p>
+<p>I remember neovim had a  bunch of similar projects last year, focusing more on building the functionality to support more AI integrations for the future in a couple of projects (especially the one that had built primitives to streamline AI plugin development)<br>
+<a href="https://summerofcode.withgoogle.com/archive/2025/organizations/neovim">https://summerofcode.withgoogle.com/archive/2025/organizations/neovim</a></p>
+<p>I am thinking of making the initial decoupled MCP extension more specific with lighter automation commands, but more focus towards actually building an extension agnostic C++ socket pipeline to run those commands. It would be focused more building the infrastructure required to support future extensions and MCPs in BRLCAD and demonstrating its capabilities with a lighter more specific MCP.</p>
+<p>Would that be a better direction for the proposal?</p>
+
+
+
+<hr><p>Last updated: Mar 24 2026 at 01:10 UTC</p>
 </html>
