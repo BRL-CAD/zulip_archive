@@ -46,5 +46,41 @@
 
 
 
-<hr><p>Last updated: Mar 31 2026 at 01:22 UTC</p>
+<a name="582690207"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/surface%20skinning/near/582690207" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Bilge Arıkca <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/surface.20skinning.html#582690207">(Mar 31 2026 at 02:12)</a>:</h4>
+<p>Bilge Arıkca:</p>
+<p>I did searched the workflows generally used and lastly used techniques. Among traditional workflows voxel based one became my favorite. And I choosed “Faithfull Contouring” among latest methods it seemed easier to implement voxel based workflow and also seems effective to me. (maybe i am missing smt but idk)<br>
+-divide your 3D object into robust voxels</p>
+<ul>
+<li>use flood fill method to ignore internal shapes</li>
+<li>morphological closing process tofilter small cracks</li>
+<li>use dual contouring</li>
+<li>vertex projection (for waterthight effect)</li>
+</ul>
+<p>As you said it’s low risk and effective. I think that we can change dual contouring with faithfull contouring.</p>
+<p>Here is my little summary on faithfull contouring : Actually it Works similar to dual contouring in its base but skips some intermediate steps. It finds active voxels, calculate centroids and uses them as vertexes, anchor fitting with Quadratic Error Minimalization (QEF), then mapping those vertexes. Real difference derives from how they choose that centroids within voxels, in dual contouring uses tangent planes and find where they intersect, faithfull contouring uses triangulated mesh as an extra, it find the points where our raw triangular mesh and voxels intersect and put the vertexes on those points.</p>
+<p>Why we want to use faithfull contouring : It solves the open surface and internal cavities problem because it doesnt treat the vertexes as inner and outer, it doesnt use a strict surface it gets along with the raw shape itself, also it preserve sharp edges and allows us to meshing in high resolution without needing hyper memory or RAM. And its kinda hybrid.</p>
+<p>I also found some other latest techniques just like, one shot method for winding points, adaptively sampled distance fields, topological ofsetts etc. There is also “Tri-Plane Representation” it messes my mind a little but i dont think that would fit the best. Those techniques has their own advantages however implementing those or making them work without huge RAM capacity is a little hard. So i didnt based them. And about our hybrid design problem i think faithfull contouring could solve volumetric shapes, triangles, boolean operations etc. However i am not sure about nurbs and still dont know how we can really implement those smooth lines into our mesh maybe we could choose vertexes on them at a fixed frequency?<br>
+(And about ray casting please tell me we are not using this and its just usefull for lidars )</p>
+<p>Bilge Arıkca: And about my experience with representation formats, I never got familiar with them in code level but I dealt with CSG hierarchy and Implicit tree a lot. This year I started using NTopology for our lightweighting processes for our rover parts and designing and airless tyre we used topology optimization and implicit modelling together. While making our models we used scratch like blocks existing in ntop consisting boolean operations different mesh styles and to convert our models into usable cads we tried lots of different workflows and processes i got familiar with how those operations and different types of meshes really work and how can i produce smt without crashes. (they gave me headaches because of lattice structures and the complex geometry thats why i want to deep dive into this topic btw)</p>
+<p>Bilge Arıkca: For the last part I have some questions,</p>
+<ul>
+<li>I really couldnt find which folder to download source code in github as the wiki page is closed for a while (i swear i am not dumb but i just couldnt)</li>
+<li>do i have to really choose one strict method before the official proposal and use that method and workflow</li>
+<li>after downloading the source code i guess i should take a look the parts about existing meshing process</li>
+<li>how brl-cad's existing meshing process works in logic which methods are used currently</li>
+<li>do i have a feedback chance if i upload my proposal within this week before the application time is over</li>
+</ul>
+<p>Tbh, I really enjoyed the research and finding about how the things actually works and a little comprehension of the underlying math like set theory applications and algortihms used for graphics are incredible. I didn't deep dive into formulas so much however everything seems so exciting.</p>
+
+
+
+<a name="582690916"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/surface%20skinning/near/582690916" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Bilge Arıkca <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/surface.20skinning.html#582690916">(Mar 31 2026 at 02:19)</a>:</h4>
+<p>Hii Sean, I know it is kind of last minute and if you can't take a look at my draft it is not a problem. It took much more than I expected to finalize my draft. But anyways here it is, I assume a bad one is better than a nonexistent one.  My foundings are in here already. I didnt fill up optional spaces yet. Other than that I am fully open for your feedback and criticism on my proposal. Thanks for bearing with me through the setup phase and for taking a look at my proposal even if you can't. </p>
+<p><a href="/user_uploads/1549/ULH17Bj4bI1yy_3Px-oGk2yW/GSoC-BRL-CAD-Bilge.docx">GSoC BRL-CAD Bilge.docx</a></p>
+
+
+
+<hr><p>Last updated: Apr 01 2026 at 01:29 UTC</p>
 </html>
