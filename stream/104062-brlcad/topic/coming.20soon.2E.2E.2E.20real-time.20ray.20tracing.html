@@ -15,5 +15,46 @@
 
 
 
-<hr><p>Last updated: Apr 11 2026 at 01:19 UTC</p>
+<a name="584959830"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/coming%20soon...%20real-time%20ray%20tracing/near/584959830" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing.html#584959830">(Apr 11 2026 at 15:14)</a>:</h4>
+<p>If anyone would like to test this new interface out and provide feedback, please let me know and you can get a test binary (Windows only).</p>
+
+
+
+<a name="584959889"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/coming%20soon...%20real-time%20ray%20tracing/near/584959889" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing.html#584959889">(Apr 11 2026 at 15:15)</a>:</h4>
+<p>is it csg, or precomputed? cuda/rocm?</p>
+
+
+
+<a name="584961778"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/coming%20soon...%20real-time%20ray%20tracing/near/584961778" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing.html#584961778">(Apr 11 2026 at 15:43)</a>:</h4>
+<p>It's real-time LIBRT, so anything we can RT,.</p>
+
+
+
+<a name="584961862"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/coming%20soon...%20real-time%20ray%20tracing/near/584961862" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Erik <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing.html#584961862">(Apr 11 2026 at 15:45)</a>:</h4>
+<p>neat!</p>
+
+
+
+<a name="584962373"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/coming%20soon...%20real-time%20ray%20tracing/near/584962373" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing.html#584962373">(Apr 11 2026 at 15:52)</a>:</h4>
+<p>Yeah, it's a pretty exciting advancement.  I prototyped this back in 2019 but it was raw, multithreading was broken, no colors, a hacked proof-of-concept.  This is way more polished.</p>
+<p>It's Intel OSPRay (+ IMGGUI) + LIBRT + Qt.  Loads LIBRT as an OSPRay plugin so that it can load a .g model.  Then as OSPRay/Embree dispatches rays for rendering and encounters anything in our bounding volume, it hands off to LIBRT for rt_shootray() evaluation.  LIBRT passes back hit info, normal, color, object IDs, etc, and OSPRay performs the optics based on the current renderer.  OSPRay comes with three: a basic scivis renderer, an ambient occlusion renderer, and a path tracer (shown).</p>
+
+
+
+<a name="584962745"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/coming%20soon...%20real-time%20ray%20tracing/near/584962745" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing.html#584962745">(Apr 11 2026 at 15:58)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="103542">Erik</span> <a href="#narrow/channel/104062-brlcad/topic/coming.20soon.2E.2E.2E.20real-time.20ray.20tracing/near/584959889">said</a>:</p>
+<blockquote>
+<p>is it csg, or precomputed? cuda/rocm?</p>
+</blockquote>
+<p>Dusting off our opencl code path is on my short-term TODO for sure.. we got someone to finish up the boolean eval piece a couple years ago under GSoC but didn't have time to validate it.  Then probably need to refactor that all to SPIR-V (i.e., get off opencl) so it can just be natively managed and not forked intersection code.</p>
+
+
+
+<hr><p>Last updated: Apr 12 2026 at 01:29 UTC</p>
 </html>
