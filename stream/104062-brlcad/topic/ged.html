@@ -43,5 +43,36 @@
 
 
 
-<hr><p>Last updated: Apr 18 2026 at 01:22 UTC</p>
+<a name="586283712"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/586283712" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#586283712">(Apr 18 2026 at 14:48)</a>:</h4>
+<p>Hopefully <span class="user-mention" data-user-id="112516">@starseeker</span> can chime in because I'm having trouble making sense of the plugin.h interface.  way too many layers of complexity and preprocessor hell imho.</p>
+<p>it looks like the REGISTER_GED_COMMAND() macro is ultimately what is creating that symbol (a struct pointer).  I just don't see where that is coming from.</p>
+<p>GED_DECLARE_COMMAND_SET -&gt; GED_DECLARE_COMMAND_METADATA -&gt; LIST_MACRO -&gt; GED__DECL_META_X -&gt; .. appears to result in the former struct ged_cmd_impl declaration, so that's not it.</p>
+
+
+
+<a name="586283904"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/586283904" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#586283904">(Apr 18 2026 at 14:51)</a>:</h4>
+<p>there appears to be three different preprocessor symbols that control visibility, LIBGED_STATIC_CORE and GED_PLUGIN_ONLY and GED_PLUGIN so presumably something is mismatched there.</p>
+
+
+
+<a name="586284404"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/586284404" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#586284404">(Apr 18 2026 at 14:59)</a>:</h4>
+<p>Looks like LIBGED_STATIC_CORE is on by default, so it's declaring those entry points but then somehow they're not actually available.  Quick guess would be to try setting -DLIBGED_STATIC_CORE=OFF when building BRL-CAD might be a workaround but presumably something needs to be fixed declaration-wise for the static lib to be right (if it's referencing __ged_cmd_ptr_*'s that don't exist in the .a, that's a mistake).  If you nm -a libged.a, do you see <code>__ged_cmd_ptr_fbclear_cmd</code> ?</p>
+
+
+
+<a name="586288288"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/586288288" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#586288288">(Apr 18 2026 at 15:50)</a>:</h4>
+<p>The static libged.a has round about have the size of the dynamic <a href="http://libged.so">libged.so</a>. Usually, the static libraries are larger than the dynamic ones. E.g., librt.a has more than 3 times the size of <a href="http://librt.so">librt.so</a>. (I've Debug build.) Therefore, there seems to be something missing.</p>
+<div class="codehilite"><pre><span></span><code>nm -a libged.a | grep fbclear
+                 U __ged_cmd_ptr_fbclear_cmd
+0000000000007568 T ged_exec_fbclear
+0000000000000648 d _ZZ16ged_exec_fbclearE7cmdname
+</code></pre></div>
+
+
+
+<hr><p>Last updated: Apr 19 2026 at 01:45 UTC</p>
 </html>

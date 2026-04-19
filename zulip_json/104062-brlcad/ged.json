@@ -28,5 +28,29 @@
         "id": 585938084,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1776354116
+    },
+    {
+        "content": "<p>Hopefully <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span> can chime in because I'm having trouble making sense of the plugin.h interface.  way too many layers of complexity and preprocessor hell imho.</p>\n<p>it looks like the REGISTER_GED_COMMAND() macro is ultimately what is creating that symbol (a struct pointer).  I just don't see where that is coming from.</p>\n<p>GED_DECLARE_COMMAND_SET -&gt; GED_DECLARE_COMMAND_METADATA -&gt; LIST_MACRO -&gt; GED__DECL_META_X -&gt; .. appears to result in the former struct ged_cmd_impl declaration, so that's not it.</p>",
+        "id": 586283712,
+        "sender_full_name": "Sean",
+        "timestamp": 1776523723
+    },
+    {
+        "content": "<p>there appears to be three different preprocessor symbols that control visibility, LIBGED_STATIC_CORE and GED_PLUGIN_ONLY and GED_PLUGIN so presumably something is mismatched there.</p>",
+        "id": 586283904,
+        "sender_full_name": "Sean",
+        "timestamp": 1776523912
+    },
+    {
+        "content": "<p>Looks like LIBGED_STATIC_CORE is on by default, so it's declaring those entry points but then somehow they're not actually available.  Quick guess would be to try setting -DLIBGED_STATIC_CORE=OFF when building BRL-CAD might be a workaround but presumably something needs to be fixed declaration-wise for the static lib to be right (if it's referencing __ged_cmd_ptr_*'s that don't exist in the .a, that's a mistake).  If you nm -a libged.a, do you see <code>__ged_cmd_ptr_fbclear_cmd</code> ?</p>",
+        "id": 586284404,
+        "sender_full_name": "Sean",
+        "timestamp": 1776524362
+    },
+    {
+        "content": "<p>The static libged.a has round about have the size of the dynamic <a href=\"http://libged.so\">libged.so</a>. Usually, the static libraries are larger than the dynamic ones. E.g., librt.a has more than 3 times the size of <a href=\"http://librt.so\">librt.so</a>. (I've Debug build.) Therefore, there seems to be something missing.</p>\n<div class=\"codehilite\"><pre><span></span><code>nm -a libged.a | grep fbclear\n                 U __ged_cmd_ptr_fbclear_cmd\n0000000000007568 T ged_exec_fbclear\n0000000000000648 d _ZZ16ged_exec_fbclearE7cmdname\n</code></pre></div>",
+        "id": 586288288,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1776527412
     }
 ]
