@@ -164,5 +164,30 @@
 
 
 
-<hr><p>Last updated: Apr 28 2026 at 01:58 UTC</p>
+<a name="591433035"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/591433035" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#591433035">(Apr 28 2026 at 16:37)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="112516">starseeker</span> <a href="#narrow/channel/104062-brlcad/topic/ged/near/591250434">said</a>:</p>
+<blockquote>
+<p>Is the problem that we have multiple libraries depending on manifold?  Or some other issue?</p>
+</blockquote>
+<p>At first glance, the problem is that the manifold library has to be linked dynamically, but MOOSE follows an "everything in one library" principle. I had to think about this.</p>
+<p>I want to keep this principle, but I'm aware that it can be hold for the core only. GED is however very much everything, not only the core. Therefore, I cannot expect to have everything in one large BLOB when including libged.</p>
+<p>As alternative, I added a CMake flag BRLCAD_STATIC_LINK to MOOSE, which switches the linkage type to dynamic, if not set. And, I thought about unsetting this flag, i.e. requiring dynamic linkage, if MODULE_COMMANDSTRING is set.</p>
+<p>Currently, my plan is to not unset BRLCAD_STATIC_LINK if MODULE_COMMANDSTRING is set, link as much as possible statically, but there will remain some external dependencies.</p>
+
+
+
+<a name="591442169"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/591442169" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#591442169">(Apr 28 2026 at 17:21)</a>:</h4>
+<p>Pushed my MOOSE stuff to GitHub.</p>
+
+
+
+<a name="591450006"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/ged/near/591450006" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/ged.html#591450006">(Apr 28 2026 at 17:58)</a>:</h4>
+<p>I still get linker errors when linking arbalest with the new libbrlcad. But, the dynamic version works.</p>
+
+
+
+<hr><p>Last updated: Apr 29 2026 at 02:00 UTC</p>
 </html>
