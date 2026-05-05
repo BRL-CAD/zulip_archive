@@ -1031,5 +1031,59 @@ On windows, I believe they would need to setup cmake separately then try buildin
 
 
 
-<hr><p>Last updated: May 04 2026 at 01:54 UTC</p>
+<a name="592627797"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/592627797" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#592627797">(May 04 2026 at 03:57)</a>:</h4>
+<p>With Visual Studio, you do not need to install CMake separately. Just open a Visual Studio command shell and send the cmake command line from there. I think, that's the whole point with setting up the Windows build: Don't use the standard shell but the one provided wirh Visual Studio, which sets the neccessary environment variables.</p>
+
+
+
+<a name="592658775"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/592658775" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#592658775">(May 04 2026 at 07:02)</a>:</h4>
+<p>I had no idea about that sorry it's been a while since I used VS code on windows.</p>
+
+
+
+<a name="592660536"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/592660536" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#592660536">(May 04 2026 at 07:11)</a>:</h4>
+<p>I successfully built the bext dependencies separately, but encountered an issue where the BRL-CAD CMake configuration reported a SHA1 mismatch between my local bext and the latest BRL-CAD clone. This caused it to ignore my <code>-DBRLCAD_EXT_DIR</code> flag and attempt a fresh internal clone of the dependencies.<br>
+I have verified my previous full installation of brlcad which I did earlier in feb<br>
+I have<br>
+<code> mged -v
+BRL-CAD Release 7.42.1  MGED Geometry Editor
+    Thu, 19 Feb 2026 03:22:03 UTC, Compilation 0
+    home@Home
+BRL-CAD Release 7.42.1  The BRL-CAD Display Manager/Framebuffer Library
+    Thu, 19 Feb 2026 03:22:03 UTC, Compilation 0
+    home@Home
+BRL-CAD Release 7.42.1  The BRL-CAD Display Manager/Framebuffer Library
+    Thu, 19 Feb 2026 03:22:03 UTC, Compilation 0
+    home@Home
+BRL-CAD Release 7.42.1  The BRL-CAD Ray-Tracing Library
+    Thu, 19 Feb 2026 03:22:03 UTC, Compilation 0
+    home@Home
+BRL-CAD Release 7.42.1  The BRL-CAD Numerical Computation Library
+    Thu, 19 Feb 2026 03:22:03 UTC, Compilation 0
+    home@Home
+BRL-CAD Release 7.42.1  The BRL-CAD Utility Library
+    Thu, 19 Feb 2026 03:22:03 UTC, Compilation 0
+    home@Home
+</code><br>
+for now will this work for MOOSE?</p>
+
+
+
+<a name="592766569"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/592766569" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#592766569">(May 04 2026 at 15:06)</a>:</h4>
+<p>I'm afraid, no. There were some changes to the core libraries and corresponding adjustments to MOOSE in the last weeks, which made it incompatible.</p>
+<p>The SHA1 mismatch you saw, was the git-revision-test of the brlcad build. There it compares the checked-out bext revision with a hard-coded "good" revision in the brlcad CMake set-up. However, if these revisions are not the same, it shouldn't cause a recompilation of bext <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+
+
+
+<a name="592776436"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/592776436" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#592776436">(May 04 2026 at 15:45)</a>:</h4>
+<p>Oh turns out I was giving the wrong bext install path, its fixed now. I built <code>BRL-CAD Release 7.43.0</code> and will be trying the MOOSE build.</p>
+
+
+
+<hr><p>Last updated: May 05 2026 at 01:55 UTC</p>
 </html>
