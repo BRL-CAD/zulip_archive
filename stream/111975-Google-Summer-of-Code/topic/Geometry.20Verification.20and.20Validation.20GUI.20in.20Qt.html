@@ -237,5 +237,117 @@ Happy to have you here</p>
 
 
 
-<hr><p>Last updated: May 06 2026 at 01:53 UTC</p>
+<a name="593212115"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593212115" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593212115">(May 06 2026 at 09:55)</a>:</h4>
+<p>Hi, I was able to successfully  built MOOSE (all tests passed). However, I’m currently facing an issue while building Arbalest.<br>
+The build reaches 100%, but it fails at the linking stage with multiple undefined reference errors related to BRL-CAD functions (like <code>bu_malloc</code>, <code>rt_shootray</code>, etc.) and also <code>BRLCAD::CommandString</code>. There is also a warning about <code>librt.so.20</code> not being found, which seems to be coming from <code>/usr/local/lib/libbrlcad.so</code>.</p>
+<p>My current setup is:<br>
+BRL-CAD installed at: <code>/usr/brlcad/dev-7.43.0</code><br>
+MOOSE installed at: <code>/usr/local</code></p>
+<p>And I configured Arbalest using:<br>
+<code>cmake ..  -DBRLCAD_BASE_DIR=/usr/brlcad/dev-7.43.0   -DBRLCAD_MOOSE_DIR=/usr/local</code><br>
+It looks like there might be a linking mismatch or conflicting BRL-CAD libraries being picked up.<br>
+Could you please guide me on how to resolve this linking issue?</p>
+
+
+
+<a name="593212402"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593212402" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593212402">(May 06 2026 at 09:56)</a>:</h4>
+<p>Missing methods mostly indicate a version mismatch issue <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+
+
+
+<a name="593214049"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593214049" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593214049">(May 06 2026 at 10:03)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102902">@Sean</span> , Thanks for the clarification — that helps a lot.<br>
+I’ll keep this in mind and focus on how to modularize the existing V&amp;V logic accordingly.</p>
+
+
+
+<a name="593215113"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593215113" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593215113">(May 06 2026 at 10:09)</a>:</h4>
+<p><span class="user-mention" data-user-id="892744">@Kanchan Borole</span> can you please check if you have an older installations?<br>
+I just checked the codebase the 2 methods you mentioned are there in version 7.43.0</p>
+
+
+
+<a name="593218009"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593218009" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593218009">(May 06 2026 at 10:24)</a>:</h4>
+<p>Thanks — that makes sense. I wasn’t able to see any older installation in /usr/local on my side, but I may be missing something. I’ll do a clean rebuild and double-check the linking to ensure it’s using the correct BRL-CAD version.</p>
+
+
+
+<a name="593219256"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593219256" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593219256">(May 06 2026 at 10:31)</a>:</h4>
+<p>BRLCAD_MOOSE_DIR has to point to the directory, where you installed MOOSE. I.e., what's your directory layout?</p>
+<ul>
+<li>brlcad source dir?</li>
+<li>brlcad install dir?</li>
+<li>MOOSE source dir?</li>
+<li>MOOSE install dir?</li>
+</ul>
+
+
+
+<a name="593219995"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593219995" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593219995">(May 06 2026 at 10:35)</a>:</h4>
+<p>Here is my current setup:<br>
+BRL-CAD source dir: ~/gsoc/src/brlcad<br>
+BRL-CAD install dir: /usr/brlcad/dev-7.43.0<br>
+MOOSE source dir: ~/gsoc/src/moose<br>
+MOOSE install dir: /usr/local<br>
+Please let me know if this looks correct or if I should change anything.</p>
+
+
+
+<a name="593222834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593222834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593222834">(May 06 2026 at 10:48)</a>:</h4>
+<p>OK, first, I recommend to install the stuff somewhere at ~/gsoc, because you do not need to become root for installation then. E.g., ~/gsoc/inst/brlcad and ~/gsoc/inst/moose.</p>
+<p>You can change the installation paths by changing CMAKE_INSTALL_PREFIX with the CMake gui, for example.</p>
+
+
+
+<a name="593223621"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593223621" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593223621">(May 06 2026 at 10:52)</a>:</h4>
+<p>Then, <code>cmake ~/gsoc/src/arbalest -DCMAKE_BUILD_TYPE=Debug -DBRLCAD_MOOSE_DIR=~/gsoc/inst/moose</code> should create you a working build set-up for arbalest.</p>
+
+
+
+<a name="593230316"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593230316" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593230316">(May 06 2026 at 11:29)</a>:</h4>
+<p>Probably Arbalest will need some updates to build against latest main - I have a branch with work like that for MOOSE, but I haven't checked Arbalest yet (juggling a lot of balls right now)</p>
+
+
+
+<a name="593240129"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593240129" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593240129">(May 06 2026 at 12:12)</a>:</h4>
+<p>There were no changes to arbalest neccessary. The MOOSE API is unchanged <span aria-label="grinning face with smiling eyes" class="emoji emoji-1f601" role="img" title="grinning face with smiling eyes">:grinning_face_with_smiling_eyes:</span></p>
+<p>I keep testing arbalest.</p>
+
+
+
+<a name="593291400"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593291400" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593291400">(May 06 2026 at 15:28)</a>:</h4>
+<p>Hey <span class="user-mention" data-user-id="892744">@Kanchan Borole</span> <br>
+I went ahead and started messing around the installation, and here is <br>
+<a href="/user_uploads/1549/6aadBwfr75zlj9Z3gQzbWftG/ISSUE.md">ISSUE.md</a><br>
+a MD file which might help you with the issues you are facing</p>
+
+
+
+<a name="593340835"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593340835" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593340835">(May 06 2026 at 19:20)</a>:</h4>
+<p>Hmm, setting BRLCAD_VERSION shouldn't be necessary on Linux. It should be set by calling brlcad-config. Unfortunately, this script doesn't work on Windows.</p>
+<p>In general, when configuring the MOOSE or arbalest build, read the output carefully. The error messages should contain a hint how to resolve them.</p>
+<p>In addition, the brlcad installation binary directory should be included in the PATH environment variable of your command shell. This makes it easier to call the BRL-CAD programs (mged, archer, and some more of the 300+(?) command line tools).</p>
+
+
+
+<a name="593387143"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/593387143" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#593387143">(May 07 2026 at 00:10)</a>:</h4>
+<p>I'm trying to work on a modern find_package Config.cmake solution that will make things a little easier, fwiw.  It's not done yet - I'm still trying to figure out shared vs. static issues properly - but if I can get it right we can hopefully reduce brlcad-config to a small program that provides the correct inputs so a CMake build will find our Config.cmake file and take it from there (and make it work on Windows while we're at it)</p>
+
+
+
+<hr><p>Last updated: May 07 2026 at 01:58 UTC</p>
 </html>

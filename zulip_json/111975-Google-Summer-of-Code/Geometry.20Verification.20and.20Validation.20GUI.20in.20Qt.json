@@ -172,5 +172,89 @@
         "id": 593057217,
         "sender_full_name": "Sean",
         "timestamp": 1777999848
+    },
+    {
+        "content": "<p>Hi, I was able to successfully  built MOOSE (all tests passed). However, I’m currently facing an issue while building Arbalest.<br>\nThe build reaches 100%, but it fails at the linking stage with multiple undefined reference errors related to BRL-CAD functions (like <code>bu_malloc</code>, <code>rt_shootray</code>, etc.) and also <code>BRLCAD::CommandString</code>. There is also a warning about <code>librt.so.20</code> not being found, which seems to be coming from <code>/usr/local/lib/libbrlcad.so</code>.</p>\n<p>My current setup is:<br>\nBRL-CAD installed at: <code>/usr/brlcad/dev-7.43.0</code><br>\nMOOSE installed at: <code>/usr/local</code></p>\n<p>And I configured Arbalest using:<br>\n<code>cmake ..  -DBRLCAD_BASE_DIR=/usr/brlcad/dev-7.43.0   -DBRLCAD_MOOSE_DIR=/usr/local</code><br>\nIt looks like there might be a linking mismatch or conflicting BRL-CAD libraries being picked up.<br>\nCould you please guide me on how to resolve this linking issue?</p>",
+        "id": 593212115,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1778061333
+    },
+    {
+        "content": "<p>Missing methods mostly indicate a version mismatch issue <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>",
+        "id": 593212402,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1778061411
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> , Thanks for the clarification — that helps a lot.<br>\nI’ll keep this in mind and focus on how to modularize the existing V&amp;V logic accordingly.</p>",
+        "id": 593214049,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1778061817
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"892744\">@Kanchan Borole</span> can you please check if you have an older installations?<br>\nI just checked the codebase the 2 methods you mentioned are there in version 7.43.0</p>",
+        "id": 593215113,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1778062159
+    },
+    {
+        "content": "<p>Thanks — that makes sense. I wasn’t able to see any older installation in /usr/local on my side, but I may be missing something. I’ll do a clean rebuild and double-check the linking to ensure it’s using the correct BRL-CAD version.</p>",
+        "id": 593218009,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1778063097
+    },
+    {
+        "content": "<p>BRLCAD_MOOSE_DIR has to point to the directory, where you installed MOOSE. I.e., what's your directory layout?</p>\n<ul>\n<li>brlcad source dir?</li>\n<li>brlcad install dir?</li>\n<li>MOOSE source dir?</li>\n<li>MOOSE install dir?</li>\n</ul>",
+        "id": 593219256,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778063504
+    },
+    {
+        "content": "<p>Here is my current setup:<br>\nBRL-CAD source dir: ~/gsoc/src/brlcad<br>\nBRL-CAD install dir: /usr/brlcad/dev-7.43.0<br>\nMOOSE source dir: ~/gsoc/src/moose<br>\nMOOSE install dir: /usr/local<br>\nPlease let me know if this looks correct or if I should change anything.</p>",
+        "id": 593219995,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1778063719
+    },
+    {
+        "content": "<p>OK, first, I recommend to install the stuff somewhere at ~/gsoc, because you do not need to become root for installation then. E.g., ~/gsoc/inst/brlcad and ~/gsoc/inst/moose.</p>\n<p>You can change the installation paths by changing CMAKE_INSTALL_PREFIX with the CMake gui, for example.</p>",
+        "id": 593222834,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778064534
+    },
+    {
+        "content": "<p>Then, <code>cmake ~/gsoc/src/arbalest -DCMAKE_BUILD_TYPE=Debug -DBRLCAD_MOOSE_DIR=~/gsoc/inst/moose</code> should create you a working build set-up for arbalest.</p>",
+        "id": 593223621,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778064770
+    },
+    {
+        "content": "<p>Probably Arbalest will need some updates to build against latest main - I have a branch with work like that for MOOSE, but I haven't checked Arbalest yet (juggling a lot of balls right now)</p>",
+        "id": 593230316,
+        "sender_full_name": "starseeker",
+        "timestamp": 1778066955
+    },
+    {
+        "content": "<p>There were no changes to arbalest neccessary. The MOOSE API is unchanged <span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>\n<p>I keep testing arbalest.</p>",
+        "id": 593240129,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778069548
+    },
+    {
+        "content": "<p>Hey <span class=\"user-mention\" data-user-id=\"892744\">@Kanchan Borole</span> <br>\nI went ahead and started messing around the installation, and here is <br>\n<a href=\"/user_uploads/1549/6aadBwfr75zlj9Z3gQzbWftG/ISSUE.md\">ISSUE.md</a><br>\na MD file which might help you with the issues you are facing</p>",
+        "id": 593291400,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1778081309
+    },
+    {
+        "content": "<p>Hmm, setting BRLCAD_VERSION shouldn't be necessary on Linux. It should be set by calling brlcad-config. Unfortunately, this script doesn't work on Windows.</p>\n<p>In general, when configuring the MOOSE or arbalest build, read the output carefully. The error messages should contain a hint how to resolve them.</p>\n<p>In addition, the brlcad installation binary directory should be included in the PATH environment variable of your command shell. This makes it easier to call the BRL-CAD programs (mged, archer, and some more of the 300+(?) command line tools).</p>",
+        "id": 593340835,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778095228
+    },
+    {
+        "content": "<p>I'm trying to work on a modern find_package Config.cmake solution that will make things a little easier, fwiw.  It's not done yet - I'm still trying to figure out shared vs. static issues properly - but if I can get it right we can hopefully reduce brlcad-config to a small program that provides the correct inputs so a CMake build will find our Config.cmake file and take it from there (and make it work on Windows while we're at it)</p>",
+        "id": 593387143,
+        "sender_full_name": "starseeker",
+        "timestamp": 1778112613
     }
 ]
