@@ -202,5 +202,17 @@
         "id": 593229549,
         "sender_full_name": "starseeker",
         "timestamp": 1778066720
+    },
+    {
+        "content": "<p>Hi again<br>\nso while digging into the spawn architecture for the MCP listener I had a question about <code>bu_process_create</code>. </p>\n<p>My use case needs the Python subprocess to inherit the pkg pipe fds from <code>pkg_pair()</code>  but I noticed the child process has a close loop <code>for (int i = 3; i &lt; 20; i++) close(i)</code> before execvp, and on Windows it uses <code>STARTUPINFO</code> rather than <code>STARTUPINFOEX</code> with <code>PROC_THREAD_ATTRIBUTE_HANDLE_LIST</code>.</p>\n<p>Would those prevent the pkg fds from surviving into the Python process? Or is there an existing pattern in the codebase I should be following for this kind of fd inheritance? Trying to figure out whether I need a custom spawn wrapper scoped to the MCP extension or if there's already a clean way to handle this.</p>",
+        "id": 593421624,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1778130690
+    },
+    {
+        "content": "<p>existing uses of <code>bu_process_create</code> in the codebase communicate via the stdio redirects (fd 0/1/2), so the close loop is fine for them. My case is different since I need extra pkg fds to survive beyond stdio as I want my child process to be talking to both the LLM client (over stdio) and then BRL-CAD (an additional pkg pair)</p>",
+        "id": 593422424,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1778131161
     }
 ]
