@@ -1155,5 +1155,47 @@ I am finally free from my exams. We can now discuss the C API design whenever yo
 
 
 
-<hr><p>Last updated: May 16 2026 at 02:00 UTC</p>
+<a name="595436602"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595436602" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595436602">(May 16 2026 at 02:25)</a>:</h4>
+<p>I'll try that out today and see how i can replicate it.</p>
+
+
+
+<a name="595494004"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595494004" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595494004">(May 16 2026 at 14:41)</a>:</h4>
+<p>Some remarks:</p>
+<p>The C keywords (function and type names, ...) start with <strong>Brl</strong>.<br>
+Because C doesn't know about namespaces, it's usual to use prefixes to distinguish features from different libraries or modules. BRL-CAD core libraries use the <code>brl_</code> prefix to mark BRL-CAD versions of some functions. For the C++ classes, I use <code>BRLCAD</code> as namespace. But, Brlcad or BrlCad as prefix for C would be a bit to long. So, I ended up with Brl. In addition, I want to stay with the <strong>CamelCase</strong> naming convention in MOOSE.</p>
+<p>The keywords for the C API are directly derived from the corresponding C++ names:</p>
+<ul>
+<li>BrlConstDatabase =&gt; BRLCAD::ConstDatabase</li>
+<li>BrlConstDatabaseLoad =&gt; BRLCAD::ConstDatabase::Load</li>
+</ul>
+<p>I created a <strong>Handle</strong> class.<br>
+The motivation is to have more save casts. Every handle for a C++ class has the same type in C. There were given different names, e.g. BrlConstDatabase, but they are all <code>void*</code> at the end. If nobody makes a mistake, things like <a href="https://github.com/BRL-CAD/MOOSE/blob/993aba1d7010559e2b405081c9b3ffb952db40ba/src/C/ConstDatabase.cpp">the old Constdatabase.cpp</a> will work. But, something really bad can happen, if the handles will be mixed up.</p>
+<p>That's why I put a magic number at the beginning of the C++ classes, very much like in the BRL-CAD core's structures. An alternative would have been to use a proxy structure like</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">magic</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w">       </span><span class="n">instance</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>But, this makes only sense if</p>
+<ul>
+<li>The proxy would be used on the client's side as automatic (i.e. on the stack) variable or</li>
+<li>It wouldn't be possible to change the C++ classes.</li>
+</ul>
+<p>However, in our case we had to manage two pointers instead of one with this solution. That's why I rejected it.</p>
+<p>The magic numbers in Handle are memory addresses: pointers to strings. To check them, only the pointers have to be compared. The strings behind them are useful for debugging.</p>
+<p>Alternatively to my solution, the list of magic addresses could be static const members of the Handle class. But, I want to express that they are somehow private to the classes they belong, and only published them in Handle.h.</p>
+<p>BTW, the destructor of Handle has to be virtual, at least if build with the GNU compiler. That's because the derived classes have virtual functions and the first entry in their instances binary representations is the pointer to their virtual functions table. If Handle would not be a virtual class itself, after a hard cast to Handle, m_magic would point to the virtual functions table, not the magic number.</p>
+
+
+
+<a name="595494336"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595494336" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595494336">(May 16 2026 at 14:44)</a>:</h4>
+<p>Maybe, I should mention too that everything is only drafted. It would be on you, to fully implement it. Even <code>CastConstDatabase()</code> isn't complete. What could be missing there <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+
+
+
+<hr><p>Last updated: May 17 2026 at 02:04 UTC</p>
 </html>

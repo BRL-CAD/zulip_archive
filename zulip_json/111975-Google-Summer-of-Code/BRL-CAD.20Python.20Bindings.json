@@ -772,5 +772,23 @@
         "id": 595378541,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1778872160
+    },
+    {
+        "content": "<p>I'll try that out today and see how i can replicate it.</p>",
+        "id": 595436602,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1778898326
+    },
+    {
+        "content": "<p>Some remarks:</p>\n<p>The C keywords (function and type names, ...) start with <strong>Brl</strong>.<br>\nBecause C doesn't know about namespaces, it's usual to use prefixes to distinguish features from different libraries or modules. BRL-CAD core libraries use the <code>brl_</code> prefix to mark BRL-CAD versions of some functions. For the C++ classes, I use <code>BRLCAD</code> as namespace. But, Brlcad or BrlCad as prefix for C would be a bit to long. So, I ended up with Brl. In addition, I want to stay with the <strong>CamelCase</strong> naming convention in MOOSE.</p>\n<p>The keywords for the C API are directly derived from the corresponding C++ names:</p>\n<ul>\n<li>BrlConstDatabase =&gt; BRLCAD::ConstDatabase</li>\n<li>BrlConstDatabaseLoad =&gt; BRLCAD::ConstDatabase::Load</li>\n</ul>\n<p>I created a <strong>Handle</strong> class.<br>\nThe motivation is to have more save casts. Every handle for a C++ class has the same type in C. There were given different names, e.g. BrlConstDatabase, but they are all <code>void*</code> at the end. If nobody makes a mistake, things like <a href=\"https://github.com/BRL-CAD/MOOSE/blob/993aba1d7010559e2b405081c9b3ffb952db40ba/src/C/ConstDatabase.cpp\">the old Constdatabase.cpp</a> will work. But, something really bad can happen, if the handles will be mixed up.</p>\n<p>That's why I put a magic number at the beginning of the C++ classes, very much like in the BRL-CAD core's structures. An alternative would have been to use a proxy structure like</p>\n<div class=\"codehilite\" data-code-language=\"C++\"><pre><span></span><code><span class=\"k\">struct</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"k\">const</span><span class=\"w\"> </span><span class=\"kt\">char</span><span class=\"o\">*</span><span class=\"w\"> </span><span class=\"n\">magic</span><span class=\"p\">;</span>\n<span class=\"w\">    </span><span class=\"kt\">void</span><span class=\"o\">*</span><span class=\"w\">       </span><span class=\"n\">instance</span><span class=\"p\">;</span>\n<span class=\"p\">};</span>\n</code></pre></div>\n<p>But, this makes only sense if</p>\n<ul>\n<li>The proxy would be used on the client's side as automatic (i.e. on the stack) variable or</li>\n<li>It wouldn't be possible to change the C++ classes.</li>\n</ul>\n<p>However, in our case we had to manage two pointers instead of one with this solution. That's why I rejected it.</p>\n<p>The magic numbers in Handle are memory addresses: pointers to strings. To check them, only the pointers have to be compared. The strings behind them are useful for debugging.</p>\n<p>Alternatively to my solution, the list of magic addresses could be static const members of the Handle class. But, I want to express that they are somehow private to the classes they belong, and only published them in Handle.h.</p>\n<p>BTW, the destructor of Handle has to be virtual, at least if build with the GNU compiler. That's because the derived classes have virtual functions and the first entry in their instances binary representations is the pointer to their virtual functions table. If Handle would not be a virtual class itself, after a hard cast to Handle, m_magic would point to the virtual functions table, not the magic number.</p>",
+        "id": 595494004,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778942483
+    },
+    {
+        "content": "<p>Maybe, I should mention too that everything is only drafted. It would be on you, to fully implement it. Even <code>CastConstDatabase()</code> isn't complete. What could be missing there <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>",
+        "id": 595494336,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1778942677
     }
 ]
