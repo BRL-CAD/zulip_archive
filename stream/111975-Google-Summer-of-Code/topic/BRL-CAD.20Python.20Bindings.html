@@ -1197,5 +1197,93 @@ The motivation is to have more save casts. Every handle for a C++ class has the 
 
 
 
-<hr><p>Last updated: May 17 2026 at 02:04 UTC</p>
+<a name="595582900"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595582900" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595582900">(May 17 2026 at 07:57)</a>:</h4>
+<p>Could it be that we're missing a nullpointer check in <code>CastConstDatabase()</code>? While <code>Magic(handle)</code> internally guards against null handles and prevents a segmentation fault, <code>CastConstDatabase()</code> should immediately gate incoming pointers.</p>
+<p>Also another thing which I would be needing for my python part is a proper error message/status code because if <code>CastConstDatabase()</code>returns nullptr then python will have a silent error and debugging it will be a bit tedious. </p>
+<p>I'm still looking at the new files then I'll have a go for it in python.</p>
+
+
+
+<a name="595587863"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595587863" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595587863">(May 17 2026 at 08:56)</a>:</h4>
+<p>I made the python code for the getTitle test, I'm just testing how its going and give you an update.</p>
+
+
+
+<a name="595591143"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595591143" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595591143">(May 17 2026 at 09:33)</a>:</h4>
+<p>I ran a side by side with the getTitle.c and my python test, its working successfully. Have a look at it and tell me if you find something that doesn't fit. <br>
+repo link: <a href="https://github.com/AWaleed-Ahmed/brlcad-python-bindings.git">https://github.com/AWaleed-Ahmed/brlcad-python-bindings.git</a></p>
+
+
+
+<a name="595603183"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595603183" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595603183">(May 17 2026 at 11:32)</a>:</h4>
+<p><strong>CastConstDatabase()</strong>:<br>
+No, an additional null pointer test shouldn't be necessary. I had another point in mind. Something, which cannot be found by a simple code review: FileDatabase and MemoryDatabase are ConstDatabases too. I.e., they should be considered in CastConstDatabase() as well. However, there aren't magics defined for them yet.</p>
+
+
+
+<a name="595604288"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595604288" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595604288">(May 17 2026 at 11:42)</a>:</h4>
+<p><strong>logs:</strong><br>
+You have a point there. I postponed it for later. In include/brlcad/globals.h, you can see, how it's done in C++. Log messages can be send with bu_log(), for example. For C/Python I want to provide a call-back mechanism, similar to the one for LogHandler.</p>
+
+
+
+<a name="595612437"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595612437" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595612437">(May 17 2026 at 12:57)</a>:</h4>
+<p><strong>your python test:</strong><br>
+You started in the right direction by dividing it in two parts:</p>
+<ul>
+<li>A Python module bridging from C to Python classes with ctypes</li>
+<li>A Python program performing the test with the above module</li>
+</ul>
+<p>Well, the name of the module "src.bindings" doesn't look good <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span><br>
+You should do some enquiries to come up with a better name.</p>
+<p>However, inspired by <a href="https://en.wikipedia.org/wiki/PyQt">PyQt</a>, I wrote the following notional code for getTitle:</p>
+<div class="codehilite" data-code-language="Python"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">BrlCad.Database</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstDatabase</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">ConstDatabase</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">db</span><span class="o">.</span><span class="n">Load</span><span class="p">(</span><span class="n">sample_g_file</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">db</span><span class="o">.</span><span class="n">Title</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"get title"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Success</span>
+
+<span class="k">return</span> <span class="n">Fail</span>
+</code></pre></div>
+<p>The code isn't complete. It shall just show, how working with BRL-CAD in Python should look like. And, it is much closer to the Python example in your proposal.</p>
+<p>BTW, you shouldn't use exceptions, if there are better solutions.</p>
+
+
+
+<a name="595614320"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595614320" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595614320">(May 17 2026 at 13:14)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/595603183">said</a>:</p>
+<blockquote>
+<p><strong>CastConstDatabase()</strong>:<br>
+No, an additional null pointer test shouldn't be necessary. I had another point in mind. Something, which cannot be found by a simple code review: FileDatabase and MemoryDatabase are ConstDatabases too. I.e., they should be considered in CastConstDatabase() as well. However, there aren't magics defined for them yet.</p>
+</blockquote>
+<p>Ohh I just looked up <code>FileDatabase.h</code> and <code>MemoryDatabase.h</code>, didn't realise there was this part left out.</p>
+
+
+
+<a name="595614480"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595614480" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595614480">(May 17 2026 at 13:16)</a>:</h4>
+<p>Also I'll name it as BrlCad.Database like that example code you wrote if that works and refactor the code with the changes you suggested and commit them soon.</p>
+
+
+
+<a name="595626300"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595626300" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595626300">(May 17 2026 at 15:12)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/595614320">said</a>:</p>
+<blockquote>
+<p>Ohh I just looked up <code>FileDatabase.h</code> and <code>MemoryDatabase.h</code>, didn't realise there was this part left out.</p>
+</blockquote>
+<p>I wanted to point out that I did some first steps only. The main work is still on you.</p>
+
+
+
+<hr><p>Last updated: May 18 2026 at 02:25 UTC</p>
 </html>
