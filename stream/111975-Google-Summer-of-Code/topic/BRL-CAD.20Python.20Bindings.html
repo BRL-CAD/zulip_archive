@@ -1285,5 +1285,42 @@ No, an additional null pointer test shouldn't be necessary. I had another point 
 
 
 
-<hr><p>Last updated: May 18 2026 at 02:25 UTC</p>
+<a name="595704264"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595704264" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595704264">(May 18 2026 at 03:22)</a>:</h4>
+<p>I made the changes we talked about yesterday. Can you review them and I'll start working on how I'll be implementing the open/close life cycle for both inmemory and file Databases. Do you have some documentation I should look up first regarding it?</p>
+
+
+
+<a name="595872219"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595872219" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595872219">(May 18 2026 at 16:22)</a>:</h4>
+<p>I've been messing around with our <code>ConstDatabase</code> implementation against a physical <code>.g</code> file on disk (specifically extracting the database title header). I'll push the changes and then I'll be waiting for the the<code>filedatabase</code>and <code>memorydatabase</code> function signatures.</p>
+
+
+
+<a name="595876022"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595876022" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595876022">(May 18 2026 at 16:40)</a>:</h4>
+<p>You can implement these signatures by yourself and create a PR. Use the corresponding change to Arb8.cpp as template.</p>
+
+
+
+<a name="595876920"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595876920" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595876920">(May 18 2026 at 16:44)</a>:</h4>
+<p>Alright I'll be working on it.</p>
+
+
+
+<a name="595881119"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595881119" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595881119">(May 18 2026 at 17:03)</a>:</h4>
+<p>BTW, I looked at your updated python test. It's much better than the previous one. But, the module implementation in src is still the old one, right?</p>
+<p>You called the Python module <strong>brlcad</strong> and omitted the Database submodule, why? I don't question your decision! I just want to know your motives - or rather make sure that you thought about them ;)</p>
+
+
+
+<a name="595885794"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/595885794" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#595885794">(May 18 2026 at 17:24)</a>:</h4>
+<p>About removing the Database submodule layer. I wanted public API clean for Python. And since managing these geometric databases is the primary interaction point for this library, exposing ConstDatabase, FileDatabase, and MemoryDatabase directly at the top-level namespace (via the package boundary __init__.py) removes redundant boilerplate for the user (e.g., from brlcad import ConstDatabase instead of from brlcad.Database import ConstDatabase). What do you think?</p>
+
+
+
+<hr><p>Last updated: May 19 2026 at 02:14 UTC</p>
 </html>
