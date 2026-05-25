@@ -256,5 +256,17 @@
         "id": 595850074,
         "sender_full_name": "Sean",
         "timestamp": 1779116483
+    },
+    {
+        "content": "<p>The reason why the IPC stuff is a concern here because when we're trying to integrate our BRL-CAD listener with an MCP, where usually the MCP is instantiated by the client (could be VS code, cursor or a custom client)</p>\n<p>So its an independent process to process communication (which means that the current IPC mechanisms within libpkg, which rely on inheriting passed fds from child processes) might not suffice from my understanding (Though I could be missing something here)</p>\n<p>I'd basically need the capability of 2 independent processes (BRLCAD and the MCP)  finding each other on a system. <br>\nThats currenly not possible with libpkg (except for the TCP part in it) as it does not have any spawn independent IPC mechanisms  so something like a unix domain socket would solve it (right now theres a handler in libpkg but that also expects a passed fd to talk to a child process)</p>\n<p>I am currently scaffolding the adapter in a source build for the libbu argc/argv splitter and the ged execution part first with a basic TCP based approach first and then exploring some other ipc before the end of summer (only the IPC would need to be swapped out, with the rest of the chain being the same)</p>\n<p>Perhaps we could even provide both the TCP based and a local IPC based solution as alternatives/options for future extensions</p>",
+        "id": 597380369,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1779608973
+    },
+    {
+        "content": "<p>also one question:</p>\n<p>Where would the adapter for the MCP go? Shall I make a new library called libmcp or something? or is there a spot where auxiliary extensions like this usually go to? Also could I get a feature branch for this where I could send my PRs? (considering only the listener/parser is a part of the actual BRL-CAD source code, and the actual python MCP is a decoupled repository)</p>",
+        "id": 597380535,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1779609220
     }
 ]
