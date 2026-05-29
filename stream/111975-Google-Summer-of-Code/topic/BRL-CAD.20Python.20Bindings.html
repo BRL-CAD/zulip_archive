@@ -1488,5 +1488,40 @@ No, an additional null pointer test shouldn't be necessary. I had another point 
 
 
 
-<hr><p>Last updated: May 28 2026 at 02:04 UTC</p>
+<a name="598372082"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598372082" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598372082">(May 28 2026 at 16:08)</a>:</h4>
+<p>I added setPoint in my first draft of the C/arb8.cpp but I removed it since I only wanted to test out the creation of Arb8. Except the <code>setPoint()</code> I believe there is the <code>NumberOfVertices()</code> and <code>isValid()</code> for validating if we even made the Arb8 of the points required or not. Am I missing any other function? (apart from the default constructor and the additional 5,6,7 point constructors...I'll add these in an upcoming PR)</p>
+
+
+
+<a name="598373340"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598373340" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598373340">(May 28 2026 at 16:14)</a>:</h4>
+<p>Should I make a PR for these additional functions? Then I can create, modify and validate an Arb8 in python.</p>
+
+
+
+<a name="598379181"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598379181" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598379181">(May 28 2026 at 16:45)</a>:</h4>
+<p>On a side note, I am missing a <code>setTitle()</code> function for the generateData.cpp replication in Python. Should I open a PR to make C/Database.cpp , I'll add the function there since MemoryDatabase also inherits the same function if I'm not wrong?</p>
+
+
+
+<a name="598393172"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598393172" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598393172">(May 28 2026 at 17:58)</a>:</h4>
+<p>Sure, you can open pull requests, and you should do it. (...but which <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span>...)</p>
+<p>You mention setPoint(), NumberOfVertices(), and isValid(). Unfortunately, there is no method setPoint(), but <strong>S</strong>etPoint() <span aria-label="wink" class="emoji emoji-1f609" role="img" title="wink">:wink:</span> Formal correctness is very important. You have to preserve the MOOSE coding conventions.</p>
+<p>In addition, <strong>I</strong>sValid() isn't really a method of Arb8, but of Object, the base class of all primitives.</p>
+<p>And finally, I wouldn't consider any of these methods as necessary for the creation of Arb8s. The geometry is defined already with the points in the constructor. But, to add an object to the database, it has to get a name. SetName() is another method of Object.</p>
+<p><strong>S</strong>etTitle() is a method of Database, the base class of FileDatabase and MemoryDatabase.</p>
+<p>Therefore, you could implement C versions of these methods and open a PR.</p>
+
+
+
+<a name="598399084"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598399084" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598399084">(May 28 2026 at 18:27)</a>:</h4>
+<p>Alright, thanks for the clarification. I'll do these tasks in the coming days.</p>
+
+
+
+<hr><p>Last updated: May 29 2026 at 02:09 UTC</p>
 </html>
