@@ -373,5 +373,24 @@ Thats currenly not possible with libpkg (except for the TCP part in it) as it do
 
 
 
-<hr><p>Last updated: May 30 2026 at 02:04 UTC</p>
+<a name="598726998"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/598726998" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#598726998">(May 30 2026 at 15:28)</a>:</h4>
+<p><span class="user-mention" data-user-id="1032821">@Raghav Sharma</span> I think we're getting on the same page of understanding.  I'm expecting the MCP would be instantiated by MGED (i.e., it's the client).  This means really any IPC can be viable including libpkg's mechanism.  Another easy option available to you is QProcess since Qt is also fair game as an already-existing dependency we're moving towards -- that is very similar to libpkg and works well cross-platform with named pipes if that's easier that figuring out libpkg.  That said, I do think both can be made to work.</p>
+<p>For now, go with what is familiar to you and we can look into adapting it later -- sounds like that's the basic TCP-based approach you mentioned, which I think is also fine (for now).  TCP will 100% work of course, but it just introduces a whole class of security implications and triggers additional requirements if we want to install this in corporate environments.  For example, our research lab use cases require all TCP communication to be authenticated and encrypted, which would mean establishing some sort of PKI handshake and integrating encryption for on-the-wire packets.  We could do all that -- it's just a major distraction and pain to get right, imho.  I'd be more in favor of spending time adding named pipe support directly to libpkg, or even just directly embedding named pipes + QProcess as the main IPC method before doing all the auth/encrypt stuff.</p>
+
+
+
+<a name="598728149"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/598728149" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#598728149">(May 30 2026 at 15:44)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1032821">Raghav Sharma</span> <a href="#narrow/channel/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29/near/597380535">said</a>:</p>
+<blockquote>
+<p>Where would the adapter for the MCP go? Shall I make a new library called libmcp or something? or is there a spot where auxiliary extensions like this usually go to? Also could I get a feature branch for this where I could send my PRs? (considering only the listener/parser is a part of the actual BRL-CAD source code, and the actual python MCP is a decoupled repository)</p>
+</blockquote>
+<p>Great question.  I think a library sounds best givne the intent to allow mged (and other apps) to become an mcp or if even to allow apps like it to communicate with mcp servers.  That means something like libmcp but I think that's way too generic -- maybe libmcpcad, libcadai, libgedai, ... something like that.  Then it'd be src/libgedai and include/gedai.h (and subheaders if any in include/gedai/) for public API.   </p>
+<p>If the intent is complete standalone server (which I don't think is our goal here?), then it would live in something like src/mcpserv to mirror src/fbserv/.</p>
+<p>Pick a name you like and I can stub in a feature branch for it.  (doesn't it do that automatically if you just submit a branch PR??)</p>
+
+
+
+<hr><p>Last updated: May 31 2026 at 02:31 UTC</p>
 </html>

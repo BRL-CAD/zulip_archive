@@ -315,5 +315,51 @@ It was the latest bext main with a build from scratch: <code>cmake ../../../bext
 
 
 
-<hr><p>Last updated: May 30 2026 at 02:04 UTC</p>
+<a name="598719970"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598719970" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598719970">(May 30 2026 at 13:47)</a>:</h4>
+<p>The error message was</p>
+<div class="codehilite"><pre><span></span><code>[ 24%] Performing patch step for &#39;ZLIB_BLD&#39;
+patching file CMakeLists.txt
+Reversed (or previously applied) patch detected!  Skipping patch.
+6 out of 6 hunks ignored -- saving rejects to file CMakeLists.txt.rej
+patching file deflate.c
+Reversed (or previously applied) patch detected!  Skipping patch.
+1 out of 1 hunk ignored -- saving rejects to file deflate.c.rej
+patching file gzguts.h
+Reversed (or previously applied) patch detected!  Skipping patch.
+1 out of 1 hunk ignored -- saving rejects to file gzguts.h.rej
+patching file gzread.c
+Reversed (or previously applied) patch detected!  Skipping patch.
+1 out of 1 hunk ignored -- saving rejects to file gzread.c.rej
+patching file inftrees.c
+Reversed (or previously applied) patch detected!  Skipping patch.
+1 out of 1 hunk ignored -- saving rejects to file inftrees.c.rej
+patching file win32/zlib1.rc
+Reversed (or previously applied) patch detected!  Skipping patch.
+1 out of 1 hunk ignored -- saving rejects to file win32/zlib1.rc.rej
+patching file zconf.h.in
+Reversed (or previously applied) patch detected!  Skipping patch.
+5 out of 5 hunks ignored -- saving rejects to file zconf.h.in.rej
+make[2]: *** [zlib/CMakeFiles/ZLIB_BLD-install.dir/build.make:94: zlib/ZLIB_BLD-prefix/src/ZLIB_BLD-stamp/ZLIB_BLD-patch] Error 1
+make[1]: *** [CMakeFiles/Makefile2:1758: zlib/CMakeFiles/ZLIB_BLD-install.dir/all] Error 2
+make: *** [Makefile:91: all] Error 2
+</code></pre></div>
+<p>Then, I looked at the mentioned files and it looks like the patches were applied successfully, but the build script values this as an error.</p>
+<p>Then, I removed everything from the zlib directory in the build directory and run make again. After that, zlib could be build.</p>
+
+
+
+<a name="598720136"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598720136" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598720136">(May 30 2026 at 13:49)</a>:</h4>
+<p>Could it be that the patches were applied twice during configuration and build?</p>
+
+
+
+<a name="598858806"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598858806" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598858806">(May 30 2026 at 21:30)</a>:</h4>
+<p>There are some intermediate states I've occasionally hit where it tries to re-apply patches to already patched copies of the sources - I'm not quite sure what the specific triggers are.  I usually just do what you did to clear the error.</p>
+
+
+
+<hr><p>Last updated: May 31 2026 at 02:31 UTC</p>
 </html>
