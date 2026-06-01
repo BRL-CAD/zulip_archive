@@ -361,5 +361,127 @@ make: *** [Makefile:91: all] Error 2
 
 
 
-<hr><p>Last updated: May 31 2026 at 02:31 UTC</p>
+<a name="598976307"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598976307" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598976307">(May 31 2026 at 12:08)</a>:</h4>
+<p>I looked and could not find a smoking gun on how it'd end up in a multiple patch state.  best guess is either a cmake bug (likely) and/or some obscure subproject_add race condition where the sentinel files aren't gatekeeping the patching properly.  seems plausible on things like libz since there are multiple subproject_adds that depend on it, so a parallel build will have multiple attempts to set it up.</p>
+<p>with no cause evident, we can address the symptom and make already-applied patches non-fatal.  I added a wrapper that checks whether the patch is already applied.  if it's already applied, it makes the return code successful.  that allows the build to proceed as it would have had the patching succeeded.</p>
+
+
+
+<a name="598982443"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598982443" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598982443">(May 31 2026 at 13:41)</a>:</h4>
+<p>Maybe, I should mention that I did a recursive clone of bext, before running cmake.</p>
+
+
+
+<a name="598983034"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598983034" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598983034">(May 31 2026 at 13:49)</a>:</h4>
+<p>However, the really annoying errors in the bext build are the ones like:</p>
+<div class="codehilite"><pre><span></span><code>[ 90%] Performing build step for &#39;ITK_BLD&#39;
+CMake Error at /home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build-Debug.cmake:37 (message):
+  Command failed: 2
+
+   &#39;make&#39;
+
+  See also
+
+    /home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build-*.log
+
+
+-- stdout output is:
+[ 11%] Building C object CMakeFiles/itk3.4.dir/generic/itkStubInit.c.o
+[ 22%] Building C object CMakeFiles/itk3.4.dir/generic/itkStubLib.c.o
+[ 33%] Building C object CMakeFiles/itk3.4.dir/generic/itk_archetype.c.o
+
+-- stderr output is:
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c: In function ‘Itk_CreateGenericOptTable’:
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3991:48: error: passing argument 4 of ‘tclStubsPtr-&gt;tcl_SplitList’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3991 |     if (Tcl_SplitList(interp, options, &amp;confc, &amp;confv) != TCL_OK) {
+      |                                                ^~~~~~
+      |                                                |
+      |                                                char ***
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3991:48: note: expected ‘const char ***’ but argument is of type ‘char ***’
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3995:52: error: passing argument 4 of ‘tclStubsPtr-&gt;tcl_SplitList’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3995 |         if (Tcl_SplitList(interp, confv[i], &amp;optc, &amp;optv) != TCL_OK) {
+      |                                                    ^~~~~
+      |                                                    |
+      |                                                    char ***
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3995:52: note: expected ‘const char ***’ but argument is of type ‘char ***’
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c: In function ‘Itk_CreateGenericOpt’:
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:4129:49: error: passing argument 4 of ‘tclStubsPtr-&gt;tcl_SplitList’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 4129 |     result = Tcl_SplitList(interp, info, &amp;optc, &amp;optv);
+      |                                                 ^~~~~
+      |                                                 |
+      |                                                 char ***
+/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:4129:49: note: expected ‘const char ***’ but argument is of type ‘char ***’
+make[5]: *** [CMakeFiles/itk3.4.dir/build.make:107: CMakeFiles/itk3.4.dir/generic/itk_archetype.c.o] Error 1
+make[4]: *** [CMakeFiles/Makefile2:90: CMakeFiles/itk3.4.dir/all] Error 2
+make[3]: *** [Makefile:136: all] Error 2
+
+CMake Error at /home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build-Debug.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+make[2]: *** [itk/CMakeFiles/ITK_BLD-install.dir/build.make:83: itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build] Eror 1
+make[1]: *** [CMakeFiles/Makefile2:3729: itk/CMakeFiles/ITK_BLD-install.dir/all] Error 2
+make: *** [Makefile:91: all] Error 2
+</code></pre></div>
+
+
+
+<a name="598983150"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598983150" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598983150">(May 31 2026 at 13:51)</a>:</h4>
+<p>In my eyes, this is a bug in the gcc 14 compiler.</p>
+<p>The errors can be suppressed by explicit casts or compiler switch.</p>
+
+
+
+<a name="598995571"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/598995571" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#598995571">(May 31 2026 at 15:15)</a>:</h4>
+<p>Constness mismatch -- either something the newer compiler is just doing for fun, or there's some difference in build flags under the hood.  Either way, easy enough to patch on our end since that older itk is out of sync constwise with tcl - I just added a patch for that error to itk.  Are there more?</p>
+
+
+
+<a name="599016401"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599016401" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599016401">(May 31 2026 at 18:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/bext/near/598995571">said</a>:</p>
+<blockquote>
+<p>Constness mismatch -- either something the newer compiler is just doing for fun, or there's some difference in build flags under the hood.  Either way, easy enough to patch on our end since that older itk is out of sync constwise with tcl - I just added a patch for that error to itk.  Are there more?</p>
+</blockquote>
+<p>Yes, there where more. I'll test again and report - maybe tomorrow.</p>
+
+
+
+<a name="599016871"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599016871" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599016871">(May 31 2026 at 18:31)</a>:</h4>
+<p>I tested bext on MS Windows with the latest Visual Studio 2026 Community version.</p>
+<ul>
+<li>Simple clone of bext repository</li>
+<li>First run of cmake gave the following error:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>Submodule &#39;itk3/itk&#39; (https://github.com/BRL-CAD/itk) registered for path &#39;itk&#39;
+Cloning into &#39;C:/Users/rossberg/Documents/Devel/BRL-CAD/bext/itk/itk&#39;...
+fatal: unable to access &#39;https://github.com/BRL-CAD/itk/&#39;: Recv failure: Connection was reset
+fatal: Fetched in submodule path &#39;itk&#39;, but it did not contain 0d1dc9780c59c2b81e78a1351652fd4488fe67c0. Direct fetching of that commit failed.
+CMake Error: File C:/Users/rossberg/Documents/Devel/BRL-CAD/bext/itk/itk/license.terms does not exist.
+CMake Error at itk/CMakeLists.txt:96 (configure_file):
+  configure_file Problem configuring file
+</code></pre></div>
+<ul>
+<li>Second run of cmake: No error message anymore:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>From https://github.com/BRL-CAD/itk
+ * branch            0d1dc9780c59c2b81e78a1351652fd4488fe67c0 -&gt; FETCH_HEAD
+Submodule path &#39;itk&#39;: checked out &#39;0d1dc9780c59c2b81e78a1351652fd4488fe67c0&#39;
+</code></pre></div>
+
+
+
+<a name="599017047"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599017047" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599017047">(May 31 2026 at 18:33)</a>:</h4>
+<p>Network issue? Shouldn't be, but can't rule out.</p>
+
+
+
+<hr><p>Last updated: Jun 01 2026 at 02:41 UTC</p>
 </html>

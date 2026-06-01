@@ -304,5 +304,53 @@
         "id": 598858806,
         "sender_full_name": "starseeker",
         "timestamp": 1780176649
+    },
+    {
+        "content": "<p>I looked and could not find a smoking gun on how it'd end up in a multiple patch state.  best guess is either a cmake bug (likely) and/or some obscure subproject_add race condition where the sentinel files aren't gatekeeping the patching properly.  seems plausible on things like libz since there are multiple subproject_adds that depend on it, so a parallel build will have multiple attempts to set it up.</p>\n<p>with no cause evident, we can address the symptom and make already-applied patches non-fatal.  I added a wrapper that checks whether the patch is already applied.  if it's already applied, it makes the return code successful.  that allows the build to proceed as it would have had the patching succeeded.</p>",
+        "id": 598976307,
+        "sender_full_name": "Sean",
+        "timestamp": 1780229302
+    },
+    {
+        "content": "<p>Maybe, I should mention that I did a recursive clone of bext, before running cmake.</p>",
+        "id": 598982443,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780234917
+    },
+    {
+        "content": "<p>However, the really annoying errors in the bext build are the ones like:</p>\n<div class=\"codehilite\"><pre><span></span><code>[ 90%] Performing build step for &#39;ITK_BLD&#39;\nCMake Error at /home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build-Debug.cmake:37 (message):\n  Command failed: 2\n\n   &#39;make&#39;\n\n  See also\n\n    /home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build-*.log\n\n\n-- stdout output is:\n[ 11%] Building C object CMakeFiles/itk3.4.dir/generic/itkStubInit.c.o\n[ 22%] Building C object CMakeFiles/itk3.4.dir/generic/itkStubLib.c.o\n[ 33%] Building C object CMakeFiles/itk3.4.dir/generic/itk_archetype.c.o\n\n-- stderr output is:\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c: In function ‘Itk_CreateGenericOptTable’:\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3991:48: error: passing argument 4 of ‘tclStubsPtr-&gt;tcl_SplitList’ from incompatible pointer type [-Wincompatible-pointer-types]\n 3991 |     if (Tcl_SplitList(interp, options, &amp;confc, &amp;confv) != TCL_OK) {\n      |                                                ^~~~~~\n      |                                                |\n      |                                                char ***\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3991:48: note: expected ‘const char ***’ but argument is of type ‘char ***’\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3995:52: error: passing argument 4 of ‘tclStubsPtr-&gt;tcl_SplitList’ from incompatible pointer type [-Wincompatible-pointer-types]\n 3995 |         if (Tcl_SplitList(interp, confv[i], &amp;optc, &amp;optv) != TCL_OK) {\n      |                                                    ^~~~~\n      |                                                    |\n      |                                                    char ***\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:3995:52: note: expected ‘const char ***’ but argument is of type ‘char ***’\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c: In function ‘Itk_CreateGenericOpt’:\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:4129:49: error: passing argument 4 of ‘tclStubsPtr-&gt;tcl_SplitList’ from incompatible pointer type [-Wincompatible-pointer-types]\n 4129 |     result = Tcl_SplitList(interp, info, &amp;optc, &amp;optv);\n      |                                                 ^~~~~\n      |                                                 |\n      |                                                 char ***\n/home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD/generic/itk_archetype.c:4129:49: note: expected ‘const char ***’ but argument is of type ‘char ***’\nmake[5]: *** [CMakeFiles/itk3.4.dir/build.make:107: CMakeFiles/itk3.4.dir/generic/itk_archetype.c.o] Error 1\nmake[4]: *** [CMakeFiles/Makefile2:90: CMakeFiles/itk3.4.dir/all] Error 2\nmake[3]: *** [Makefile:136: all] Error 2\n\nCMake Error at /home/rossberg/Devel/BRL-CAD/build/bext/Debug/itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build-Debug.cmake:47 (message):\n  Stopping after outputting logs.\n\n\nmake[2]: *** [itk/CMakeFiles/ITK_BLD-install.dir/build.make:83: itk/ITK_BLD-prefix/src/ITK_BLD-stamp/ITK_BLD-build] Eror 1\nmake[1]: *** [CMakeFiles/Makefile2:3729: itk/CMakeFiles/ITK_BLD-install.dir/all] Error 2\nmake: *** [Makefile:91: all] Error 2\n</code></pre></div>",
+        "id": 598983034,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780235345
+    },
+    {
+        "content": "<p>In my eyes, this is a bug in the gcc 14 compiler.</p>\n<p>The errors can be suppressed by explicit casts or compiler switch.</p>",
+        "id": 598983150,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780235478
+    },
+    {
+        "content": "<p>Constness mismatch -- either something the newer compiler is just doing for fun, or there's some difference in build flags under the hood.  Either way, easy enough to patch on our end since that older itk is out of sync constwise with tcl - I just added a patch for that error to itk.  Are there more?</p>",
+        "id": 598995571,
+        "sender_full_name": "Sean",
+        "timestamp": 1780240518
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102902\">Sean</span> <a href=\"#narrow/channel/104062-brlcad/topic/bext/near/598995571\">said</a>:</p>\n<blockquote>\n<p>Constness mismatch -- either something the newer compiler is just doing for fun, or there's some difference in build flags under the hood.  Either way, easy enough to patch on our end since that older itk is out of sync constwise with tcl - I just added a patch for that error to itk.  Are there more?</p>\n</blockquote>\n<p>Yes, there where more. I'll test again and report - maybe tomorrow.</p>",
+        "id": 599016401,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780251997
+    },
+    {
+        "content": "<p>I tested bext on MS Windows with the latest Visual Studio 2026 Community version.</p>\n<ul>\n<li>Simple clone of bext repository</li>\n<li>First run of cmake gave the following error:</li>\n</ul>\n<div class=\"codehilite\"><pre><span></span><code>Submodule &#39;itk3/itk&#39; (https://github.com/BRL-CAD/itk) registered for path &#39;itk&#39;\nCloning into &#39;C:/Users/rossberg/Documents/Devel/BRL-CAD/bext/itk/itk&#39;...\nfatal: unable to access &#39;https://github.com/BRL-CAD/itk/&#39;: Recv failure: Connection was reset\nfatal: Fetched in submodule path &#39;itk&#39;, but it did not contain 0d1dc9780c59c2b81e78a1351652fd4488fe67c0. Direct fetching of that commit failed.\nCMake Error: File C:/Users/rossberg/Documents/Devel/BRL-CAD/bext/itk/itk/license.terms does not exist.\nCMake Error at itk/CMakeLists.txt:96 (configure_file):\n  configure_file Problem configuring file\n</code></pre></div>\n<ul>\n<li>Second run of cmake: No error message anymore:</li>\n</ul>\n<div class=\"codehilite\"><pre><span></span><code>From https://github.com/BRL-CAD/itk\n * branch            0d1dc9780c59c2b81e78a1351652fd4488fe67c0 -&gt; FETCH_HEAD\nSubmodule path &#39;itk&#39;: checked out &#39;0d1dc9780c59c2b81e78a1351652fd4488fe67c0&#39;\n</code></pre></div>",
+        "id": 599016871,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780252280
+    },
+    {
+        "content": "<p>Network issue? Shouldn't be, but can't rule out.</p>",
+        "id": 599017047,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780252419
     }
 ]

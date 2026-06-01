@@ -1565,5 +1565,37 @@ No, an additional null pointer test shouldn't be necessary. I had another point 
 
 
 
-<hr><p>Last updated: May 31 2026 at 02:31 UTC</p>
+<a name="598945101"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598945101" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598945101">(May 31 2026 at 05:14)</a>:</h4>
+<p>I'll work on completing the implementation of ConstDatabase soon. Can you tell me if there's anything to look out for?</p>
+
+
+
+<a name="598984053"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598984053" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598984053">(May 31 2026 at 14:03)</a>:</h4>
+<p>The most challenging part is probably Plot(). VectorList is a very complex class. It has the largest MOOSE header file.</p>
+
+
+
+<a name="598986347"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598986347" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598986347">(May 31 2026 at 14:38)</a>:</h4>
+<p>In addition, you should prevent the abstract base classes Database and Object from being created in Python, e.g. by raising an exception:</p>
+<div class="codehilite" data-code-language="Python"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Database</span><span class="p">(</span><span class="n">ConstDatabase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"Database cannot be instantiated, create an instance from a derived class instead"</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+<a name="598993230"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/598993230" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#598993230">(May 31 2026 at 14:40)</a>:</h4>
+<p>From the <a href="https://docs.python.org/3/library/exceptions.html#NotImplementedError">Python manual</a>:</p>
+<blockquote>
+<p><em>exception</em> <strong>NotImplementedError</strong></p>
+<p>This exception is derived from <a href="https://docs.python.org/3/library/exceptions.html#RuntimeError"><code>RuntimeError</code></a>. In user defined base classes, abstract methods should raise this exception when they require derived classes to override the method, or while the class is being developed to indicate that the real implementation still needs to be added.</p>
+</blockquote>
+
+
+
+<hr><p>Last updated: Jun 01 2026 at 02:41 UTC</p>
 </html>
