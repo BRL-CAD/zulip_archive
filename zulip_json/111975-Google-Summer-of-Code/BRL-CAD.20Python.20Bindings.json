@@ -1126,5 +1126,65 @@
         "id": 598993230,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1780238457
+    },
+    {
+        "content": "<p>Are the Facetize  and NonManifoldGeometry functions necessary?</p>",
+        "id": 599202786,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1780331169
+    },
+    {
+        "content": "<p>For now I have implemented Plot, FirstTopObject, TopObjectIteratorGood, TopObjectIteratorNext, TopObjectIteratorName, DeleteTopObjectIterator, Get, Select, UnSelectAll, SelectionIsEmpty, BoundingBoxMinima and BoundingBoxMaxima. Are there any functions in here that are extra or ones that I'm missing?</p>",
+        "id": 599203159,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1780331273
+    },
+    {
+        "content": "<p>BTW for Plot() I added a BrlVectorList header and added a cast for it. (Implemented minimal <code>BrlNewVectorList</code>, <code>BrlDeleteVectorList</code>and <code>BrlVectorListClear</code>)</p>",
+        "id": 599203215,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1780331289
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"102939\">Daniel Rossberg</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/598986347\">said</a>:</p>\n<blockquote>\n<p>In addition, you should prevent the abstract base classes Database and Object from being created in Python, e.g. by raising an exception:</p>\n<p><div class=\"codehilite\" data-code-language=\"Python\"><pre><span></span><code><span class=\"k\">class</span><span class=\"w\"> </span><span class=\"nc\">Database</span><span class=\"p\">(</span><span class=\"n\">ConstDatabase</span><span class=\"p\">):</span>\n    <span class=\"k\">def</span><span class=\"w\"> </span><span class=\"fm\">__init__</span><span class=\"p\">(</span><span class=\"bp\">self</span><span class=\"p\">):</span>\n        <span class=\"k\">raise</span> <span class=\"ne\">NotImplementedError</span><span class=\"p\">(</span><span class=\"s2\">\"Database cannot be instantiated, create an instance from a derived class instead\"</span><span class=\"p\">)</span>\n</code></pre></div><br>\n</p>\n</blockquote>\n<p>I'll do this once I finalize consDatabase implementation. Also wanted to ask about the MOOSE src/Python implementation. Currently, what I'm doing is that I simply made Database.py and added all the different database classes in there and made Geometry.py and added the arb8 functions there but when I'm doing these implementations in MOOSE by the end of the project, do I keep the same file names and seperation as in my repo or do I need to follow the file separation like in MOOSE and have different files for each database implementation for example: FileDatabase.py , ConstDatabase.py etc. If I need to follow the file schema as in MOOSE then I believe it would be better to develop src/Python right from the start instead of leaving it for later.</p>",
+        "id": 599204633,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1780331685
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"1031145\">Waleed Ahmed</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599202786\">said</a>:</p>\n<blockquote>\n<p>Are the Facetize  and NonManifoldGeometry functions necessary?</p>\n</blockquote>\n<p>Yes, because they provide a very popular feature: Generation of a triangle boundary representation of the geometry. With this, it can be displayed with OpenGL, for example.</p>",
+        "id": 599232566,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780340120
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"1031145\">Waleed Ahmed</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599203159\">said</a>:</p>\n<blockquote>\n<p>For now I have implemented Plot, FirstTopObject, TopObjectIteratorGood, TopObjectIteratorNext, TopObjectIteratorName, DeleteTopObjectIterator, Get, Select, UnSelectAll, SelectionIsEmpty, BoundingBoxMinima and BoundingBoxMaxima. Are there any functions in here that are extra or ones that I'm missing?</p>\n</blockquote>\n<p>Well, just the public methods of the ConstDatabase class. Some are not so complicated (e.g. SelectionIsEmpty()), some need a bit consideration (e.g. BoundingBoxMinima()), and some a bit more consideration (e.g. ShootRay()).</p>",
+        "id": 599233604,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780340497
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"1031145\">Waleed Ahmed</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599203215\">said</a>:</p>\n<blockquote>\n<p>BTW for Plot() I added a BrlVectorList header and added a cast for it. (Implemented minimal <code>BrlNewVectorList</code>, <code>BrlDeleteVectorList</code>and <code>BrlVectorListClear</code>)</p>\n</blockquote>\n<p>It's okay to postpone the full implementation of VectorList.</p>",
+        "id": 599233879,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780340603
+    },
+    {
+        "content": "<p><span class=\"user-mention silent\" data-user-id=\"1031145\">Waleed Ahmed</span> <a href=\"#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599204633\">said</a>:</p>\n<blockquote>\n<p>I'll do this once I finalize consDatabase implementation. Also wanted to ask about the MOOSE src/Python implementation. Currently, what I'm doing is that I simply made Database.py and added all the different database classes in there and made Geometry.py and added the arb8 functions there but when I'm doing these implementations in MOOSE by the end of the project, do I keep the same file names and seperation as in my repo or do I need to follow the file separation like in MOOSE and have different files for each database implementation for example: FileDatabase.py , ConstDatabase.py etc. If I need to follow the file schema as in MOOSE then I believe it would be better to develop src/Python right from the start instead of leaving it for later.</p>\n</blockquote>\n<p>You have more freedom designing the Python side than the C API. I keep an eye on the consistency of the MOOSE  C/C++ code. The Python code is new and its layout isn't fixed yet.</p>\n<p>You are free in determining which files you want to have there. However, even here it could be a good idea to have one file per class, just for gaining a better overview. But this is not a must.</p>\n<p>I think, you should keep the Python sources in your repository. This way, you don't need to wait for your pull requests to be accepted. At the end, you copy everything into src/Python. I.e., you can develop as if you are already in src/Python.</p>\n<p>BTW, you should give your Python sources a copyright header.</p>",
+        "id": 599237579,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780341962
+    },
+    {
+        "content": "<p>Can I use a header similar to the one used in MOOSE files?</p>",
+        "id": 599237898,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1780342057
+    },
+    {
+        "content": "<p>Yes, this was what I was thinking at.</p>",
+        "id": 599238267,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1780342199
     }
 ]

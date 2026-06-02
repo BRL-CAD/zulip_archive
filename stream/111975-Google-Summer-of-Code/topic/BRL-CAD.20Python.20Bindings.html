@@ -1597,5 +1597,93 @@ No, an additional null pointer test shouldn't be necessary. I had another point 
 
 
 
-<hr><p>Last updated: Jun 01 2026 at 02:41 UTC</p>
+<a name="599202786"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599202786" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599202786">(Jun 01 2026 at 16:26)</a>:</h4>
+<p>Are the Facetize  and NonManifoldGeometry functions necessary?</p>
+
+
+
+<a name="599203159"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599203159" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599203159">(Jun 01 2026 at 16:27)</a>:</h4>
+<p>For now I have implemented Plot, FirstTopObject, TopObjectIteratorGood, TopObjectIteratorNext, TopObjectIteratorName, DeleteTopObjectIterator, Get, Select, UnSelectAll, SelectionIsEmpty, BoundingBoxMinima and BoundingBoxMaxima. Are there any functions in here that are extra or ones that I'm missing?</p>
+
+
+
+<a name="599203215"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599203215" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599203215">(Jun 01 2026 at 16:28)</a>:</h4>
+<p>BTW for Plot() I added a BrlVectorList header and added a cast for it. (Implemented minimal <code>BrlNewVectorList</code>, <code>BrlDeleteVectorList</code>and <code>BrlVectorListClear</code>)</p>
+
+
+
+<a name="599204633"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599204633" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599204633">(Jun 01 2026 at 16:34)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102939">Daniel Rossberg</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/598986347">said</a>:</p>
+<blockquote>
+<p>In addition, you should prevent the abstract base classes Database and Object from being created in Python, e.g. by raising an exception:</p>
+<p><div class="codehilite" data-code-language="Python"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Database</span><span class="p">(</span><span class="n">ConstDatabase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"Database cannot be instantiated, create an instance from a derived class instead"</span><span class="p">)</span>
+</code></pre></div><br>
+</p>
+</blockquote>
+<p>I'll do this once I finalize consDatabase implementation. Also wanted to ask about the MOOSE src/Python implementation. Currently, what I'm doing is that I simply made Database.py and added all the different database classes in there and made Geometry.py and added the arb8 functions there but when I'm doing these implementations in MOOSE by the end of the project, do I keep the same file names and seperation as in my repo or do I need to follow the file separation like in MOOSE and have different files for each database implementation for example: FileDatabase.py , ConstDatabase.py etc. If I need to follow the file schema as in MOOSE then I believe it would be better to develop src/Python right from the start instead of leaving it for later.</p>
+
+
+
+<a name="599232566"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599232566" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599232566">(Jun 01 2026 at 18:55)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599202786">said</a>:</p>
+<blockquote>
+<p>Are the Facetize  and NonManifoldGeometry functions necessary?</p>
+</blockquote>
+<p>Yes, because they provide a very popular feature: Generation of a triangle boundary representation of the geometry. With this, it can be displayed with OpenGL, for example.</p>
+
+
+
+<a name="599233604"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599233604" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599233604">(Jun 01 2026 at 19:01)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599203159">said</a>:</p>
+<blockquote>
+<p>For now I have implemented Plot, FirstTopObject, TopObjectIteratorGood, TopObjectIteratorNext, TopObjectIteratorName, DeleteTopObjectIterator, Get, Select, UnSelectAll, SelectionIsEmpty, BoundingBoxMinima and BoundingBoxMaxima. Are there any functions in here that are extra or ones that I'm missing?</p>
+</blockquote>
+<p>Well, just the public methods of the ConstDatabase class. Some are not so complicated (e.g. SelectionIsEmpty()), some need a bit consideration (e.g. BoundingBoxMinima()), and some a bit more consideration (e.g. ShootRay()).</p>
+
+
+
+<a name="599233879"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599233879" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599233879">(Jun 01 2026 at 19:03)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599203215">said</a>:</p>
+<blockquote>
+<p>BTW for Plot() I added a BrlVectorList header and added a cast for it. (Implemented minimal <code>BrlNewVectorList</code>, <code>BrlDeleteVectorList</code>and <code>BrlVectorListClear</code>)</p>
+</blockquote>
+<p>It's okay to postpone the full implementation of VectorList.</p>
+
+
+
+<a name="599237579"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599237579" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599237579">(Jun 01 2026 at 19:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/599204633">said</a>:</p>
+<blockquote>
+<p>I'll do this once I finalize consDatabase implementation. Also wanted to ask about the MOOSE src/Python implementation. Currently, what I'm doing is that I simply made Database.py and added all the different database classes in there and made Geometry.py and added the arb8 functions there but when I'm doing these implementations in MOOSE by the end of the project, do I keep the same file names and seperation as in my repo or do I need to follow the file separation like in MOOSE and have different files for each database implementation for example: FileDatabase.py , ConstDatabase.py etc. If I need to follow the file schema as in MOOSE then I believe it would be better to develop src/Python right from the start instead of leaving it for later.</p>
+</blockquote>
+<p>You have more freedom designing the Python side than the C API. I keep an eye on the consistency of the MOOSE  C/C++ code. The Python code is new and its layout isn't fixed yet.</p>
+<p>You are free in determining which files you want to have there. However, even here it could be a good idea to have one file per class, just for gaining a better overview. But this is not a must.</p>
+<p>I think, you should keep the Python sources in your repository. This way, you don't need to wait for your pull requests to be accepted. At the end, you copy everything into src/Python. I.e., you can develop as if you are already in src/Python.</p>
+<p>BTW, you should give your Python sources a copyright header.</p>
+
+
+
+<a name="599237898"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599237898" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599237898">(Jun 01 2026 at 19:27)</a>:</h4>
+<p>Can I use a header similar to the one used in MOOSE files?</p>
+
+
+
+<a name="599238267"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/599238267" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#599238267">(Jun 01 2026 at 19:29)</a>:</h4>
+<p>Yes, this was what I was thinking at.</p>
+
+
+
+<hr><p>Last updated: Jun 02 2026 at 02:39 UTC</p>
 </html>
