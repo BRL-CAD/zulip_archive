@@ -489,5 +489,112 @@ Submodule path &#39;itk&#39;: checked out &#39;0d1dc9780c59c2b81e78a1351652fd448
 
 
 
-<hr><p>Last updated: Jun 02 2026 at 02:39 UTC</p>
+<a name="599412403"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599412403" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599412403">(Jun 02 2026 at 11:31)</a>:</h4>
+<p>Next gcc 14 error message:</p>
+<div class="codehilite"><pre><span></span><code>/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmlprop.c: In function ‘propertyValuesSetColor’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmlprop.c:1186:67: error: passing argument 2 of ‘getInheritPointer’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 1186 |         HtmlColor **pInherit = (HtmlColor **)getInheritPointer(p, pCVar);
+      |                                                                   ^~~~~
+      |                                                                   |
+      |                                                                   HtmlColor **
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmlprop.c:1033:65: note: expected ‘unsigned char *’ but argument is of type ‘HtmlColor **’
+ 1033 | getInheritPointer (HtmlComputedValuesCreator *p, unsigned char *pVar)
+      |                                                  ~~~~~~~~~~~~~~~^~~~
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmlprop.c: In function ‘propertyValuesSetSize’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmlprop.c:1689:61: error: passing argument 2 of ‘getInheritPointer’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 1689 |                 int *pInherit = (int *)getInheritPointer(p, pIVal);
+      |                                                             ^~~~~
+      |                                                             |
+      |                                                             int *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmlprop.c:1033:65: note: expected ‘unsigned char *’ but argument is of type ‘int *’
+ 1033 | getInheritPointer (HtmlComputedValuesCreator *p, unsigned char *pVar)
+      |                                                  ~~~~~~~~~~~~~~~^~~~
+</code></pre></div>
+<p>I added <code>(unsigned char*)</code> casts.</p>
+
+
+
+<a name="599414399"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599414399" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599414399">(Jun 02 2026 at 11:40)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltable.c: In function ‘rowGroupIterate’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltable.c:1158:31: error: passing argument 2 of ‘rowIterate’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 1158 |             rowIterate(pTree, &amp;sRow, p);
+      |                               ^~~~~
+      |                               |
+      |                               HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltable.c:1061:40: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+ 1061 | rowIterate (HtmlTree *pTree, HtmlNode *pNode, RowIterateContext *p)
+      |                              ~~~~~~~~~~^~~~~
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltable.c: In function ‘tableIterate’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltable.c:1284:36: error: passing argument 2 of ‘rowGroupIterate’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 1284 |             rowGroupIterate(pTree, &amp;sRowGroup, &amp;sRowContext);
+      |                                    ^~~~~~~~~~
+      |                                    |
+      |                                    HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltable.c:1118:45: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+ 1118 | rowGroupIterate (HtmlTree *pTree, HtmlNode *pNode, RowIterateContext *p)
+      |                                   ~~~~~~~~~~^~~~~
+</code></pre></div>
+<p>I added <code>(HtmlNode*)</code> casts.</p>
+
+
+
+<a name="599416045"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599416045" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599416045">(Jun 02 2026 at 11:46)</a>:</h4>
+<div class="codehilite"><pre><span></span><code>/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c: In function ‘fragmentAddElement’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:3078:40: error: passing argument 2 of ‘implicitCloseCount’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3078 |     implicitCloseCount(pTree, pFragment-&gt;pCurrent, eType, &amp;nClose);
+      |                               ~~~~~~~~~^~~~~~~~~~
+      |                                        |
+      |                                        HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:123:48: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+  123 | implicitCloseCount (HtmlTree *pTree, HtmlNode *pCurrent, int eTag, int *pNClose)
+      |                                      ~~~~~~~~~~^~~~~~~~
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:3108:46: error: passing argument 2 of ‘nodeHandlerCallbacks’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3108 |         nodeHandlerCallbacks(pTree, pFragment-&gt;pCurrent);
+      |                                     ~~~~~~~~~^~~~~~~~~~
+      |                                              |
+      |                                              HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:468:50: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+  468 | nodeHandlerCallbacks (HtmlTree *pTree, HtmlNode *pNode)
+      |                                        ~~~~~~~~~~^~~~~
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c: In function ‘fragmentAddClosingTag’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:3122:25: error: passing argument 1 of ‘explicitCloseCount’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3122 |     explicitCloseCount(p-&gt;pCurrent, eType, zType, &amp;nClose);
+      |                        ~^~~~~~~~~~
+      |                         |
+      |                         HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:94:15: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+   94 |     HtmlNode *pCurrent,     /* Node currently being constructed */
+      |     ~~~~~~~~~~^~~~~~~~
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:3125:38: error: passing argument 2 of ‘nodeHandlerCallbacks’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3125 |         nodeHandlerCallbacks(pTree, p-&gt;pCurrent);
+      |                                     ~^~~~~~~~~~
+      |                                      |
+      |                                      HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:468:50: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+  468 | nodeHandlerCallbacks (HtmlTree *pTree, HtmlNode *pNode)
+      |                                        ~~~~~~~~~~^~~~~
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c: In function ‘HtmlParseFragment’:
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:3150:45: error: passing argument 2 of ‘nodeHandlerCallbacks’ from incompatible pointer type [-Wincompatible-pointer-types]
+ 3150 |         nodeHandlerCallbacks(pTree, sContext.pCurrent);
+      |                                     ~~~~~~~~^~~~~~~~~
+      |                                             |
+      |                                             HtmlElementNode *
+/home/rossberg/Devel/BRL-CAD/bext/tkhtml/tkhtml/src/htmltree.c:468:50: note: expected ‘HtmlNode *’ but argument is of type ‘HtmlElementNode *’
+  468 | nodeHandlerCallbacks (HtmlTree *pTree, HtmlNode *pNode)
+      |                                        ~~~~~~~~~~^~~~~
+</code></pre></div>
+<p>I added <code>(HtmlNode*)</code> casts.</p>
+
+
+
+<a name="599416117"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/bext/near/599416117" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/bext.html#599416117">(Jun 02 2026 at 11:46)</a>:</h4>
+<p>That's all.</p>
+
+
+
+<hr><p>Last updated: Jun 03 2026 at 02:47 UTC</p>
 </html>
