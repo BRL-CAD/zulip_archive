@@ -1886,5 +1886,28 @@ No, an additional null pointer test shouldn't be necessary. I had another point 
 
 
 
-<hr><p>Last updated: Jun 13 2026 at 02:28 UTC</p>
+<a name="602886865"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/602886865" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#602886865">(Jun 13 2026 at 18:41)</a>:</h4>
+<p>I pushed my changes. Most important is probably the one to BrlConstDatabaseLoad(). I adapted it to the logic of the other Boolean parameters/returns. Now, it's easier to use:</p>
+<div class="codehilite" data-code-language="C"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">BrlConstDatabaseLoad</span><span class="p">(</span><span class="o">~</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// database is populated</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+<a name="602887334"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/602887334" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#602887334">(Jun 13 2026 at 18:44)</a>:</h4>
+<p>You had a lot of unsuited casts in your code, like</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">BrlData</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CastHandle</span><span class="p">(</span><span class="n">ellipsoid</span><span class="p">);</span>
+</code></pre></div>
+<p>I replaced them with expressions like</p>
+<div class="codehilite" data-code-language="C++"><pre><span></span><code><span class="n">Ellipsoid</span><span class="o">*</span><span class="w"> </span><span class="n">ell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CastEllipsoid</span><span class="p">(</span><span class="n">ellipsoid</span><span class="p">);</span>
+</code></pre></div>
+<p>This is what the cast functions are for ;)</p>
+
+
+
+<hr><p>Last updated: Jun 14 2026 at 02:39 UTC</p>
 </html>
