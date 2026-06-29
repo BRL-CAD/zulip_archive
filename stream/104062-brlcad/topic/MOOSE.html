@@ -703,5 +703,59 @@ Generating done (0.0s)
 
 
 
-<hr><p>Last updated: Jun 28 2026 at 02:32 UTC</p>
+<a name="606964287"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/606964287" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#606964287">(Jun 28 2026 at 05:14)</a>:</h4>
+<p>Our build logic is assuming the OpenSSL::SSL target is provided by the openssl find_package - however, your CMake seems to be finding it but not defining that target.  Can you tell how your CMake's find_package for OpenSSL is reporting what it finds?</p>
+
+
+
+<a name="606981722"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/606981722" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#606981722">(Jun 28 2026 at 10:38)</a>:</h4>
+<p>The message of <code>FIND_PACKAGE(OpenSSL COMPONENTS SSL Crypto)</code> can be seen in the first line of the output:</p>
+<div class="codehilite"><pre><span></span><code>Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version &quot;3.5.6&quot;) found components: SSL Crypto
+</code></pre></div>
+<p>To get some debug output, I cleared the CMake cache ... and the error was gone <span aria-label="grinning face with smiling eyes" class="emoji emoji-1f601" role="img" title="grinning face with smiling eyes">:grinning_face_with_smiling_eyes:</span></p>
+
+
+
+<a name="606982305"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/606982305" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#606982305">(Jun 28 2026 at 10:49)</a>:</h4>
+<p>But it's reproducible:</p>
+<ul>
+<li><code>TARGET_LINK_LIBRARIES(... BRLCAD::ged)</code> but no <code>FIND_PACKAGE(OpenSSL ...)</code> ==&gt; OpenSSL error</li>
+<li>Adding <code>FIND_PACKAGE(OpenSSL ...)</code> ==&gt; the OpenSSL error is still there</li>
+<li>Clearing the CMake cache ==&gt; it works</li>
+</ul>
+
+
+
+<a name="606996311"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/606996311" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#606996311">(Jun 28 2026 at 15:00)</a>:</h4>
+<p>Looks like it was the order of the <code> FIND_PACKAGE(...)</code> calls. I did BRLCAD before OpenSSL.</p>
+
+
+
+<a name="606996702"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/606996702" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#606996702">(Jun 28 2026 at 15:07)</a>:</h4>
+<p>Is there a static zlib? There is a libz_brl.a, but I can see the ZLIB::ZLIB target only.</p>
+
+
+
+<a name="607010756"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/607010756" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#607010756">(Jun 28 2026 at 18:17)</a>:</h4>
+<p>There is - I don't recall offhand if our FindZLIB.cmake sets up the target correctly for static libraries.  I'll see if I can look into it in the next day or two</p>
+
+
+
+<a name="607014122"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/607014122" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#607014122">(Jun 28 2026 at 19:25)</a>:</h4>
+<p>The config uses probably the FindZLIB.cmake provided by BRLCAD in the modules directory. It doesn't know about "static".</p>
+<p>BTW, line 108</p>
+<div class="codehilite"><pre><span></span><code>    list(APPEND CMAKE_FIND_LIBRARY_SUFFIXES &quot;.dll.a&quot;)
+</code></pre></div>
+<p>looks odd.</p>
+
+
+
+<hr><p>Last updated: Jun 29 2026 at 02:32 UTC</p>
 </html>

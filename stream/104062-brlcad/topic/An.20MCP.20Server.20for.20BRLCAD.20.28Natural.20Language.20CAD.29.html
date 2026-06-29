@@ -430,5 +430,40 @@ For that could I be added as a member to the BRL-CAD org on github? Or could you
 
 
 
-<hr><p>Last updated: Jun 28 2026 at 02:32 UTC</p>
+<a name="607002264"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/607002264" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#607002264">(Jun 28 2026 at 16:34)</a>:</h4>
+<p><a href="/user_uploads/1549/VS6e6bEhY8Ywltpb31RUzhG_/vokoscreenNG-2026-06-28_21-54-36.mkv">vokoscreenNG-2026-06-28_21-54-36.mkv</a></p>
+<p>Another quick demo. This one shows the analytics path running through the <code>libmcpcad</code> listener (PR #238) via TCP.</p>
+<p>In the video, I ask for the spheres in the database, along with their analytics and bounding boxes. The agent handles this by:</p>
+<ul>
+<li>Finding the spheres using headless pattern-matching search.</li>
+<li>Pulling the volume, surface area, and bounding boxes directly from BRL-CAD's native <code>analyze</code> and <code>bb</code> commands. The engine is doing the actual math, rather than relying on the LLM to calculate the geometry.</li>
+<li>Keeping context between turns, so it remembers we are talking about those specific spheres without me having to restate them. (I'm handling context pinning within the agent so that it remembers the past tool executions in the form of a sliding window)</li>
+</ul>
+<p>As discussed, it's still running on TCP for now. Because the parse/exec/framing layer is transport-agnostic, the next step is to swap the transport to a <code>libpkg</code> named-pipe/QProcess path where MGED spawns the MCP. This won't disrupt the rest of the chain, and the executor and framing updates are being pushed to the PR incrementally.</p>
+<p>(On a side note, I'm also waiting on the bu_log/help-capture issue. I'm just waiting on your call for the man-page/tutor path before I start building that out.)</p>
+
+
+
+<a name="607002398"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/607002398" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#607002398">(Jun 28 2026 at 16:35)</a>:</h4>
+<p><a href="/user_uploads/1549/ig15VDFJoLKfKpLFpqKgTpXd/vokoscreenNG-2026-06-28_21-54-36.mp4">vokoscreenNG-2026-06-28_21-54-36.mp4</a></p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/ig15VDFJoLKfKpLFpqKgTpXd/vokoscreenNG-2026-06-28_21-54-36.mp4" title="vokoscreenNG-2026-06-28_21-54-36.mp4"><video preload="metadata" src="/user_uploads/1549/ig15VDFJoLKfKpLFpqKgTpXd/vokoscreenNG-2026-06-28_21-54-36.mp4"></video></a></div><p>*video converted to MP4 as zulip doesn't seem to handle mkv</p>
+
+
+
+<a name="607003502"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/607003502" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#607003502">(Jun 28 2026 at 16:51)</a>:</h4>
+<p>also just a quick check-in on planning. Since I'm gonna be back in college next week, I'd want to pace the second half of the project realistically rather than trying to ship everything at once.</p>
+<p>The main pieces left are:</p>
+<ul>
+<li>The IPC transport swap</li>
+<li>The discovery/tutor path (pending your call on <code>bu_log</code>)</li>
+<li>Hardening the user-story workflows</li>
+</ul>
+<p>Which of these would you consider the highest priority right now? I’ll focus my energy there first and let the rest follow. also whats the procedure for the mid-term review? Should I prepare anything specifically for that?</p>
+
+
+
+<hr><p>Last updated: Jun 29 2026 at 02:32 UTC</p>
 </html>

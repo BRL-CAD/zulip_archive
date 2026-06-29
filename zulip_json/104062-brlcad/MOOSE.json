@@ -514,5 +514,47 @@
         "id": 606906845,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1782567581
+    },
+    {
+        "content": "<p>Our build logic is assuming the OpenSSL::SSL target is provided by the openssl find_package - however, your CMake seems to be finding it but not defining that target.  Can you tell how your CMake's find_package for OpenSSL is reporting what it finds?</p>",
+        "id": 606964287,
+        "sender_full_name": "starseeker",
+        "timestamp": 1782623651
+    },
+    {
+        "content": "<p>The message of <code>FIND_PACKAGE(OpenSSL COMPONENTS SSL Crypto)</code> can be seen in the first line of the output:</p>\n<div class=\"codehilite\"><pre><span></span><code>Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version &quot;3.5.6&quot;) found components: SSL Crypto\n</code></pre></div>\n<p>To get some debug output, I cleared the CMake cache ... and the error was gone <span aria-label=\"grinning face with smiling eyes\" class=\"emoji emoji-1f601\" role=\"img\" title=\"grinning face with smiling eyes\">:grinning_face_with_smiling_eyes:</span></p>",
+        "id": 606981722,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782643119
+    },
+    {
+        "content": "<p>But it's reproducible:</p>\n<ul>\n<li><code>TARGET_LINK_LIBRARIES(... BRLCAD::ged)</code> but no <code>FIND_PACKAGE(OpenSSL ...)</code> ==&gt; OpenSSL error</li>\n<li>Adding <code>FIND_PACKAGE(OpenSSL ...)</code> ==&gt; the OpenSSL error is still there</li>\n<li>Clearing the CMake cache ==&gt; it works</li>\n</ul>",
+        "id": 606982305,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782643782
+    },
+    {
+        "content": "<p>Looks like it was the order of the <code> FIND_PACKAGE(...)</code> calls. I did BRLCAD before OpenSSL.</p>",
+        "id": 606996311,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782658856
+    },
+    {
+        "content": "<p>Is there a static zlib? There is a libz_brl.a, but I can see the ZLIB::ZLIB target only.</p>",
+        "id": 606996702,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782659237
+    },
+    {
+        "content": "<p>There is - I don't recall offhand if our FindZLIB.cmake sets up the target correctly for static libraries.  I'll see if I can look into it in the next day or two</p>",
+        "id": 607010756,
+        "sender_full_name": "starseeker",
+        "timestamp": 1782670644
+    },
+    {
+        "content": "<p>The config uses probably the FindZLIB.cmake provided by BRLCAD in the modules directory. It doesn't know about \"static\".</p>\n<p>BTW, line 108</p>\n<div class=\"codehilite\"><pre><span></span><code>    list(APPEND CMAKE_FIND_LIBRARY_SUFFIXES &quot;.dll.a&quot;)\n</code></pre></div>\n<p>looks odd.</p>",
+        "id": 607014122,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782674736
     }
 ]
