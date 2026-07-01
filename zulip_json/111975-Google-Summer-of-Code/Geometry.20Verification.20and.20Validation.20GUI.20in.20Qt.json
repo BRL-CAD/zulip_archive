@@ -706,5 +706,47 @@
         "id": 607201338,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1782753835
+    },
+    {
+        "content": "<p>Thanks for checking the results and for the explanation.<br>\nOne more question: before I prepare the commit, would you recommend that I refactor the implementation to follow Isaac's ObjectName/ObjectPath approach, or should I keep my current implementation?</p>",
+        "id": 607315038,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1782807529
+    },
+    {
+        "content": "<p>What do you prefer? At the end, everything should work, that's sure. But, which way do you prefer.</p>\n<p>BTW, I'm in favour for more frequent, smaller commits.</p>",
+        "id": 607349815,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782818571
+    },
+    {
+        "content": "<p>I think I'd prefer the ObjectName/ObjectPath approach. It seems cleaner and more consistent for handling the commands, so I'll refactor the implementation accordingly.</p>",
+        "id": 607375565,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1782825808
+    },
+    {
+        "content": "<p>I have committed the changes. Could you please review them? Let me know if any improvements are needed.</p>",
+        "id": 607411316,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1782833960
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"474942\">@Divyanshu Garg</span>, <span class=\"user-mention\" data-user-id=\"252475\">@Himanshu</span>, what do you think? can you test it?</p>",
+        "id": 607430347,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782839439
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"102939\">@Daniel Rossberg</span> Ill take it, will review the code</p>",
+        "id": 607453370,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1782846264
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"892744\">@Kanchan Borole</span>, reviewed the PR — builds and runs well, and moving the V&amp;V checks onto real libged commands is a great step. One blocking issue to flag:</p>\n<p>Both gqa checks key off strings gqa never outputs (VVBackendTests.cpp:69-87)</p>\n<p>Both \"No null region\" and \"Overlaps cleared to gridsize with tolerance\" run the same gqa command (gqa -Ao -g 32mm,4mm -t 0.3mm &lt;path&gt;), then decide pass/fail by looking for a word in the output that gqa never actually prints. Because that word is never there, each check always lands on the same result no matter what the model looks like:</p>\n<ul>\n<li>\"No null region\" looks for the word \"null\" in the output. gqa doesn't use that word — it lists unhit regions as \"&lt;path&gt; was not hit\". So the check never finds anything and always passes, missing the very regions it's supposed to catch.</li>\n<li>\"Overlaps cleared\" looks for \"No Overlaps\" to decide it's clean. gqa never prints that phrase either, so the \"pass\" path can never run — the check always reports \"Error: Overlaps detected\", even on a model that has zero overlaps.</li>\n</ul>",
+        "id": 607473426,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1782853610
     }
 ]
