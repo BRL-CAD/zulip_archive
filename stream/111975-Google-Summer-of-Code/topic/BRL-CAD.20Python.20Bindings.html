@@ -2107,5 +2107,79 @@ BTW, you need TreeNode only. Ignore ConstTreeNode.</p>
 
 
 
-<hr><p>Last updated: Jul 01 2026 at 02:33 UTC</p>
+<a name="607540952"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/607540952" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#607540952">(Jul 01 2026 at 07:20)</a>:</h4>
+<p>I guess the 2nd one is better too because we can just use use <code>dynamic_cast</code> inside <code>BrlConstDatabaseGet</code> to determine the correct wrapper to construct before returning the handle. I was thinking something like this: </p>
+<div class="codehilite"><pre><span></span><code>BrlObject BrlConstDatabaseGet(BrlConstDatabase db, const char* objectName) {
+    if (db == nullptr) return nullptr;
+
+    ConstDatabase* constDatabase = CastConstDatabase(db);
+    if (constDatabase == nullptr) return nullptr;
+
+    BRLCAD::Object* obj = constDatabase-&gt;Get(objectName);
+    if (obj == nullptr) return nullptr;
+
+    // Check for concrete types and construct the concrete wrapper
+    if (auto comb = dynamic_cast&lt;BRLCAD::Combination*&gt;(obj)) {
+        return new CombinationData(comb);
+    }
+    else if (auto sphere = dynamic_cast&lt;BRLCAD::Sphere*&gt;(obj)) {
+        return new SphereData(sphere);
+    }
+    else if (auto arb8 = dynamic_cast&lt;BRLCAD::Arb8*&gt;(obj)) {
+        return new Arb8Data(arb8);
+    }
+    // ... add other primitives here ...
+
+    // Fallback for types we haven&#39;t wrapped explicitly yet
+    return new ObjectData(obj);
+}
+</code></pre></div>
+
+
+
+<a name="607551578"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/607551578" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#607551578">(Jul 01 2026 at 08:17)</a>:</h4>
+<p>In general yes, but there are more than one place, where this is needed. I recommend therefore to write an internal function, like <code>BrlObject DowncastObject(BRLCAD::Object* object);</code>, which does the trick. You can put it to the cast-functions.</p>
+
+
+
+<a name="607556878"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/607556878" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#607556878">(Jul 01 2026 at 08:42)</a>:</h4>
+<p>okay I'll work on it.</p>
+
+
+
+<a name="607557331"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/607557331" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#607557331">(Jul 01 2026 at 08:44)</a>:</h4>
+<p>BTW, to distinguish the handles with Python, you can use the <strong>Type</strong> and <strong>ClassName</strong> functions.</p>
+
+
+
+<a name="607568147"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/607568147" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#607568147">(Jul 01 2026 at 09:35)</a>:</h4>
+<p>So, I'll be declaring a new internal function: <code>BrlObject DowncastObject(BRLCAD::Object* object);</code><br>
+and then implement <code>DowncastObject</code> using a series of type-string checks to cover all currently supported primitives:</p>
+<ul>
+<li><code>BRLCAD::Combination</code> -&gt; <code>new CombinationData(static_cast&lt;BRLCAD::Combination*&gt;(object))</code></li>
+<li>
+<p><code>BRLCAD::Sphere</code> -&gt; <code>new SphereData(static_cast&lt;BRLCAD::Sphere*&gt;(object))</code>...etc <br>
+and </p>
+</li>
+<li>
+<p>In <code>BrlConstDatabaseGet</code>, replace the line: <code>ret = new ObjectData(constDatabase-&gt;Get(objectName));</code></p>
+</li>
+<li>With the new downcasting utility: <code>ret = DowncastObject(constDatabase-&gt;Get(objectName));</code><br>
+does this sound good?</li>
+</ul>
+
+
+
+<a name="607597039"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/607597039" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#607597039">(Jul 01 2026 at 12:13)</a>:</h4>
+<p>I'll push these new changes with another primitive addition PR.</p>
+
+
+
+<hr><p>Last updated: Jul 02 2026 at 02:12 UTC</p>
 </html>

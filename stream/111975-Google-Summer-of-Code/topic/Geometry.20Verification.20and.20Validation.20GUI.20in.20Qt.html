@@ -1034,5 +1034,104 @@ One more question: before I prepare the commit, would you recommend that I refac
 
 
 
-<hr><p>Last updated: Jul 01 2026 at 02:33 UTC</p>
+<a name="607533590"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/607533590" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#607533590">(Jul 01 2026 at 06:29)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="474942">@Divyanshu Garg</span> , Thanks for the review and the feedback! <br>
+I updated the parsing logic to separate the two checks and tested it with <code>havoc.g</code>.  The results are now: <br>
+<a href="/user_uploads/1549/4qRCSNAZGQu01yktW0nOSKwe/PastedText.txt">PastedText.txt</a></p>
+<p>Here's the updated logic:</p>
+<div class="codehilite"><pre><span></span><code> else if (testName == &quot;No null region&quot;)
+    {
+        result = executeCommand(db, {Arg(&quot;gqa&quot;), Arg(&quot;-Ao&quot;), Arg(&quot;-g&quot;, ArgType::None), Arg(&quot;32mm,4mm&quot;, ArgType::None), Arg(&quot;-t&quot;, ArgType::None), Arg(&quot;0.3mm&quot;, ArgType::None), Arg(&quot;$OBJECT&quot;, ArgType::ObjectPath)}, fullPath);
+        QStringList lines = result.split(&#39;\n&#39;);
+        QStringList nullRegions;
+
+        for (const QString &amp;line : lines)
+        {
+            if (line.contains(&quot;was not hit&quot;, Qt::CaseInsensitive))
+            {
+                nullRegions &lt;&lt; line.trimmed();
+            }
+        }
+
+        if (!nullRegions.isEmpty())
+        {
+            return &quot;Error: Null regions detected:\n&quot; + nullRegions.join(&quot;\n&quot;);
+        }
+
+        return &quot;No issues found (PASSED)&quot;;
+    }
+    else if (testName == &quot;Overlaps cleared to gridsize with tolerance&quot;)
+    {
+        result = executeCommand(db, {Arg(&quot;gqa&quot;), Arg(&quot;-Ao&quot;), Arg(&quot;-g&quot;, ArgType::None), Arg(&quot;32mm,4mm&quot;, ArgType::None), Arg(&quot;-t&quot;, ArgType::None), Arg(&quot;0.3mm&quot;, ArgType::None), Arg(&quot;$OBJECT&quot;, ArgType::ObjectPath)}, fullPath);
+        QStringList lines = result.split(&#39;\n&#39;);
+
+        bool startParsing = false;
+        QStringList overlaps;
+
+        for (const QString &amp;line : lines)
+        {
+            QString trimmed = line.trimmed();
+
+            if (trimmed.startsWith(&quot;list Overlaps&quot;, Qt::CaseInsensitive))
+            {
+                startParsing = true;
+                continue;
+            }
+
+            if (!startParsing)
+                continue;
+
+            if (trimmed.isEmpty())
+                continue;
+
+            if (trimmed.contains(&quot;was not hit&quot;, Qt::CaseInsensitive))
+                break;
+
+            overlaps &lt;&lt; trimmed;
+        }
+
+        if (!overlaps.isEmpty())
+        {
+            return &quot;Error: Overlaps detected:\n&quot; + overlaps.join(&quot;\n&quot;);
+        }
+
+        return &quot;No issues found (PASSED)&quot;;
+    }
+</code></pre></div>
+<p>Does this approach look correct, or would you recommend any further improvements before I prepare the commit?</p>
+
+
+
+<a name="607648881"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/607648881" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#607648881">(Jul 01 2026 at 15:51)</a>:</h4>
+<p><span class="user-mention" data-user-id="892744">@Kanchan Borole</span> This fix looks good, you may push the code, we can do a final review and work on next things</p>
+
+
+
+<a name="607657247"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/607657247" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#607657247">(Jul 01 2026 at 16:30)</a>:</h4>
+<p>I have committed the changes. Could you please check?</p>
+
+
+
+<a name="607660477"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/607660477" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#607660477">(Jul 01 2026 at 16:48)</a>:</h4>
+<p><span class="user-mention" data-user-id="892744">@Kanchan Borole</span> The changes look legit, one good practice is to fix the issues and respond on the comments made on the PR, this helps to track if the issues marked were addressed or not, Ill approve the PR and kindly respond to the comments that has been fixed. We can merge the PR once we have one more approval</p>
+
+
+
+<a name="607660705"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/607660705" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Divyanshu Garg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#607660705">(Jul 01 2026 at 16:49)</a>:</h4>
+<p>Marked the PR ready to review and approved it</p>
+
+
+
+<a name="607670131"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/607670131" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#607670131">(Jul 01 2026 at 17:40)</a>:</h4>
+<p>Merged the PR.</p>
+
+
+
+<hr><p>Last updated: Jul 02 2026 at 02:12 UTC</p>
 </html>

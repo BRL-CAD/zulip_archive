@@ -1552,5 +1552,41 @@
         "id": 607431362,
         "sender_full_name": "Daniel Rossberg",
         "timestamp": 1782839737
+    },
+    {
+        "content": "<p>I guess the 2nd one is better too because we can just use use <code>dynamic_cast</code> inside <code>BrlConstDatabaseGet</code> to determine the correct wrapper to construct before returning the handle. I was thinking something like this: </p>\n<div class=\"codehilite\"><pre><span></span><code>BrlObject BrlConstDatabaseGet(BrlConstDatabase db, const char* objectName) {\n    if (db == nullptr) return nullptr;\n\n    ConstDatabase* constDatabase = CastConstDatabase(db);\n    if (constDatabase == nullptr) return nullptr;\n\n    BRLCAD::Object* obj = constDatabase-&gt;Get(objectName);\n    if (obj == nullptr) return nullptr;\n\n    // Check for concrete types and construct the concrete wrapper\n    if (auto comb = dynamic_cast&lt;BRLCAD::Combination*&gt;(obj)) {\n        return new CombinationData(comb);\n    }\n    else if (auto sphere = dynamic_cast&lt;BRLCAD::Sphere*&gt;(obj)) {\n        return new SphereData(sphere);\n    }\n    else if (auto arb8 = dynamic_cast&lt;BRLCAD::Arb8*&gt;(obj)) {\n        return new Arb8Data(arb8);\n    }\n    // ... add other primitives here ...\n\n    // Fallback for types we haven&#39;t wrapped explicitly yet\n    return new ObjectData(obj);\n}\n</code></pre></div>",
+        "id": 607540952,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1782890453
+    },
+    {
+        "content": "<p>In general yes, but there are more than one place, where this is needed. I recommend therefore to write an internal function, like <code>BrlObject DowncastObject(BRLCAD::Object* object);</code>, which does the trick. You can put it to the cast-functions.</p>",
+        "id": 607551578,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782893840
+    },
+    {
+        "content": "<p>okay I'll work on it.</p>",
+        "id": 607556878,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1782895324
+    },
+    {
+        "content": "<p>BTW, to distinguish the handles with Python, you can use the <strong>Type</strong> and <strong>ClassName</strong> functions.</p>",
+        "id": 607557331,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782895472
+    },
+    {
+        "content": "<p>So, I'll be declaring a new internal function: <code>BrlObject DowncastObject(BRLCAD::Object* object);</code><br>\nand then implement <code>DowncastObject</code> using a series of type-string checks to cover all currently supported primitives:</p>\n<ul>\n<li><code>BRLCAD::Combination</code> -&gt; <code>new CombinationData(static_cast&lt;BRLCAD::Combination*&gt;(object))</code></li>\n<li>\n<p><code>BRLCAD::Sphere</code> -&gt; <code>new SphereData(static_cast&lt;BRLCAD::Sphere*&gt;(object))</code>...etc <br>\nand </p>\n</li>\n<li>\n<p>In <code>BrlConstDatabaseGet</code>, replace the line: <code>ret = new ObjectData(constDatabase-&gt;Get(objectName));</code></p>\n</li>\n<li>With the new downcasting utility: <code>ret = DowncastObject(constDatabase-&gt;Get(objectName));</code><br>\ndoes this sound good?</li>\n</ul>",
+        "id": 607568147,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1782898548
+    },
+    {
+        "content": "<p>I'll push these new changes with another primitive addition PR.</p>",
+        "id": 607597039,
+        "sender_full_name": "Waleed Ahmed",
+        "timestamp": 1782908007
     }
 ]

@@ -748,5 +748,41 @@
         "id": 607473426,
         "sender_full_name": "Divyanshu Garg",
         "timestamp": 1782853610
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"474942\">@Divyanshu Garg</span> , Thanks for the review and the feedback! <br>\nI updated the parsing logic to separate the two checks and tested it with <code>havoc.g</code>.  The results are now: <br>\n<a href=\"/user_uploads/1549/4qRCSNAZGQu01yktW0nOSKwe/PastedText.txt\">PastedText.txt</a></p>\n<p>Here's the updated logic:</p>\n<div class=\"codehilite\"><pre><span></span><code> else if (testName == &quot;No null region&quot;)\n    {\n        result = executeCommand(db, {Arg(&quot;gqa&quot;), Arg(&quot;-Ao&quot;), Arg(&quot;-g&quot;, ArgType::None), Arg(&quot;32mm,4mm&quot;, ArgType::None), Arg(&quot;-t&quot;, ArgType::None), Arg(&quot;0.3mm&quot;, ArgType::None), Arg(&quot;$OBJECT&quot;, ArgType::ObjectPath)}, fullPath);\n        QStringList lines = result.split(&#39;\\n&#39;);\n        QStringList nullRegions;\n\n        for (const QString &amp;line : lines)\n        {\n            if (line.contains(&quot;was not hit&quot;, Qt::CaseInsensitive))\n            {\n                nullRegions &lt;&lt; line.trimmed();\n            }\n        }\n\n        if (!nullRegions.isEmpty())\n        {\n            return &quot;Error: Null regions detected:\\n&quot; + nullRegions.join(&quot;\\n&quot;);\n        }\n\n        return &quot;No issues found (PASSED)&quot;;\n    }\n    else if (testName == &quot;Overlaps cleared to gridsize with tolerance&quot;)\n    {\n        result = executeCommand(db, {Arg(&quot;gqa&quot;), Arg(&quot;-Ao&quot;), Arg(&quot;-g&quot;, ArgType::None), Arg(&quot;32mm,4mm&quot;, ArgType::None), Arg(&quot;-t&quot;, ArgType::None), Arg(&quot;0.3mm&quot;, ArgType::None), Arg(&quot;$OBJECT&quot;, ArgType::ObjectPath)}, fullPath);\n        QStringList lines = result.split(&#39;\\n&#39;);\n\n        bool startParsing = false;\n        QStringList overlaps;\n\n        for (const QString &amp;line : lines)\n        {\n            QString trimmed = line.trimmed();\n\n            if (trimmed.startsWith(&quot;list Overlaps&quot;, Qt::CaseInsensitive))\n            {\n                startParsing = true;\n                continue;\n            }\n\n            if (!startParsing)\n                continue;\n\n            if (trimmed.isEmpty())\n                continue;\n\n            if (trimmed.contains(&quot;was not hit&quot;, Qt::CaseInsensitive))\n                break;\n\n            overlaps &lt;&lt; trimmed;\n        }\n\n        if (!overlaps.isEmpty())\n        {\n            return &quot;Error: Overlaps detected:\\n&quot; + overlaps.join(&quot;\\n&quot;);\n        }\n\n        return &quot;No issues found (PASSED)&quot;;\n    }\n</code></pre></div>\n<p>Does this approach look correct, or would you recommend any further improvements before I prepare the commit?</p>",
+        "id": 607533590,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1782887359
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"892744\">@Kanchan Borole</span> This fix looks good, you may push the code, we can do a final review and work on next things</p>",
+        "id": 607648881,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1782921073
+    },
+    {
+        "content": "<p>I have committed the changes. Could you please check?</p>",
+        "id": 607657247,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1782923441
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"892744\">@Kanchan Borole</span> The changes look legit, one good practice is to fix the issues and respond on the comments made on the PR, this helps to track if the issues marked were addressed or not, Ill approve the PR and kindly respond to the comments that has been fixed. We can merge the PR once we have one more approval</p>",
+        "id": 607660477,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1782924502
+    },
+    {
+        "content": "<p>Marked the PR ready to review and approved it</p>",
+        "id": 607660705,
+        "sender_full_name": "Divyanshu Garg",
+        "timestamp": 1782924583
+    },
+    {
+        "content": "<p>Merged the PR.</p>",
+        "id": 607670131,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1782927622
     }
 ]
