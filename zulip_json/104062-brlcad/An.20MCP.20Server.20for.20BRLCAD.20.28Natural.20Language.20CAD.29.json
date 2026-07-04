@@ -370,5 +370,29 @@
         "id": 607933968,
         "sender_full_name": "Sean",
         "timestamp": 1783025040
+    },
+    {
+        "content": "<p>Hi <span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> ,</p>\n<p>I took a shot at one of the chores you mentioned about resolving overlaps and built it into a working agent capability. I wanted to show you where it landed and get your read on whether this is the showcase direction worth developing.</p>\n<p>The agent basically finds interferences using gqa and resolves them non-destructively by moving the misplaced part. It avoids subtracting one from the other, since subtraction carves out geometry that should stay intact, which isn't how you'd actually fix a positioning error in practice. It calculates the minimal move to clear the interference, picks a sensible exit direction, and then verifies with gqa that the overlap is completely gone.</p>\n<p>I've been testing it on real models and will bring rendered before and after shots to show you. As a quick example, I dropped a ground slab so it intersected a toy jeep's wheels. The agent slid the slab down just enough to clear them and verified zero overlaps afterward. It also handles things like a plate full of bolts sunk to different depths by backing each one out its own minimal amount in one pass. It even handles cascades, so if fixing one overlap creates a new one, it rescans and resolves that too until the scene is clean.</p>\n<p>I went with a few specific design choices here. By default, it moves the smaller part, like a bolt instead of the plate, and there is an option to anchor structural parts so they never move. It also moves the whole assembly instead of just a leaf. Since gqa reports leaf regions but otranslate moves a subtree, moving just the leaf tears the part, so it resolves the meaningful assembly instead. Lastly, it fails gracefully. If clearing a part would require sliding it indefinitely, it just refuses and explains the issue rather than mangling the geometry.</p>\n<p>The main catch right now is that it resolves overlaps greedily, pair by pair, rather than acting as a global optimizer. In a tightly packed cascade, it can converge to an ugly configuration. Doing this perfectly is essentially simultaneous constraint solving, which is a physics-engine-scale problem that I don't think fits the scope. Because of that, I've framed it as an assisted tool that is reliable for common cases, rather than a full solver.</p>\n<p>Let me know if this feels like the kind of showcase you had in mind. I'm also curious to hear your thoughts on the move-vs-subtract default and whether the greedy limitation is the right place to draw the line for our scope.</p>",
+        "id": 608102473,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1783096587
+    },
+    {
+        "content": "<p><img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"508x652\" data-original-src=\"/user_uploads/1549/wdgdnG-sq-tVcASXGj-T103y/image.png\" src=\"/user_uploads/thumbnail/1549/wdgdnG-sq-tVcASXGj-T103y/image.png/840x560.webp\"></p>\n<p>Example with the toy jeep's wheels intersecting the ground plane</p>",
+        "id": 608102518,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1783096607
+    },
+    {
+        "content": "<p><img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"480x707\" data-original-src=\"/user_uploads/1549/FPmTAiL1IAD7qlYlPB7OtgcP/image.png\" src=\"/user_uploads/thumbnail/1549/FPmTAiL1IAD7qlYlPB7OtgcP/image.png/840x560.webp\"><br>\nExample with some bolts evenly sunk into a plate (this was a headless rt render)</p>",
+        "id": 608102765,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1783096717
+    },
+    {
+        "content": "<p>Another interesting idea:</p>\n<p>So as a developer I've been using a lot of headless rendering piped into a temp folder read by claude code  while building a little non-deterministic unit test suite for myself while debugging the MCP.</p>\n<p>Making me wonder if adding a png render piped  into a VLM pipeline could be a nice addition to the MCP, basically giving the agent eyes into the database, helping the user perform actions like ask about components visually (eg: \"Move the grey colored pipe to the right\")</p>\n<p>A certain limitation worth documenting would be that the MCP is heavily dependant upon the user's data hygiene practices while naming certain components in text (eg: the agent would be able to identify a component named wheel.r1 better than the same component named r2121. in the second case the agent would be very confused if I asked it to move the right wheel, as it would have no context about what's constituting a wheel in that scene)</p>\n<p>A vision capability could possibly help address that, though that again would be fairly experimental</p>",
+        "id": 608104140,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1783097310
     }
 ]
