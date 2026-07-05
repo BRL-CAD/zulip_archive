@@ -43,5 +43,15 @@ pixel[BU_COLOR_INDEX_RED] = 12; pixel[BU_COLOR_INDEX_BLU] = 23; pixel[BU_COLOR_I
 
 
 
-<hr><p>Last updated: Jul 04 2026 at 01:55 UTC</p>
+<a name="608186086"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/colors/near/608186086" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/colors.html#608186086">(Jul 04 2026 at 11:23)</a>:</h4>
+<p>Here's another idea (which I'll check with you first this time ;-) )  I think what prompted that was an undef complicating something in a unity build with headed include rework, so rather than renaming away from RED what if we encapsulate the necessary voodoo to make us locally independent of any system RED/GRN/BLU defines - something along the lines of:</p>
+<p>_BU_RGB_DEFS_BEGIN</p>
+<p>our code here...</p>
+<p>_BU_RGB_DEFS_END</p>
+<p>That way we would have a succinct way to guarantee what we need locally no matter what the system includes do, and we could avoid any unity build issues because we wouldn't have to worry about bu/colors.h being included somewhere else and our undef RED being out of order for avoiding the system conflict.  That might even let us avoid the toplevel RED et. al. defines completely, but I don't really have a strong opinion about that.  Thoughts?</p>
+
+
+
+<hr><p>Last updated: Jul 05 2026 at 02:03 UTC</p>
 </html>

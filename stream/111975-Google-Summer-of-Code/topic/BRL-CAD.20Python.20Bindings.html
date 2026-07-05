@@ -2181,5 +2181,48 @@ does this sound good?</li>
 
 
 
-<hr><p>Last updated: Jul 04 2026 at 01:55 UTC</p>
+<a name="608179784"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/608179784" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#608179784">(Jul 04 2026 at 09:38)</a>:</h4>
+<p>I was implementing C/bagOfTriangles.cpp and I'm kinda stuck at SetThickness() because in the src/Database/BagOfTriangles.cpp we have:</p>
+<div class="codehilite"><pre><span></span><code>void BagOfTriangles::Face::SetThickness
+(
+    double value
+) {
+    assert(m_bot != nullptr);
+    assert(m_bot-&gt;thickness != nullptr); //this part is giving me an error
+    assert(m_bot-&gt;mode != RT_BOT_SOLID);
+    assert(m_bot-&gt;mode != RT_BOT_SURFACE);
+
+    if (m_bot != nullptr) {
+        if (m_bot-&gt;thickness == nullptr)
+            m_bot-&gt;thickness = static_cast&lt;fastf_t*&gt;(bu_calloc(m_bot-&gt;num_faces, sizeof(fastf_t), &quot;BRLAD::BagOfTriangles::Face::SetThickness(): thickness&quot;));
+
+        m_bot-&gt;thickness[m_faceIndex] = value;
+    }
+}
+</code></pre></div>
+<p>It's asserting that m_bot-&gt;thickness != nullptr but in the later code we got <br>
+if (m_bot-&gt;thickness == nullptr).. so what do we do about this? I suggest we could comment out the assert and see how that works.</p>
+
+
+
+<a name="608202748"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/608202748" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#608202748">(Jul 04 2026 at 15:44)</a>:</h4>
+<p>Indeed, it looks like a NULL thickness is legitimate there. Same for BagOfTriangles::Face::Thickness();</p>
+
+
+
+<a name="608211731"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/608211731" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#608211731">(Jul 04 2026 at 17:49)</a>:</h4>
+<p>So should I comment both those parts out for the PR?</p>
+
+
+
+<a name="608217541"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/608217541" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#608217541">(Jul 04 2026 at 19:37)</a>:</h4>
+<p>Why comment out? Remove them! The revision control system takes care for how the previous version looked like.</p>
+
+
+
+<hr><p>Last updated: Jul 05 2026 at 02:03 UTC</p>
 </html>
