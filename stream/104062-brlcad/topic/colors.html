@@ -53,5 +53,30 @@ pixel[BU_COLOR_INDEX_RED] = 12; pixel[BU_COLOR_INDEX_BLU] = 23; pixel[BU_COLOR_I
 
 
 
-<hr><p>Last updated: Jul 08 2026 at 01:45 UTC</p>
+<a name="609052651"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/colors/near/609052651" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/colors.html#609052651">(Jul 08 2026 at 18:10)</a>:</h4>
+<p>if it's system induced, we could just ifdef/undef in common.h</p>
+
+
+
+<a name="609053581"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/colors/near/609053581" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/colors.html#609053581">(Jul 08 2026 at 18:16)</a>:</h4>
+<p>maybe but still adds some overhead on our part to maintain.  I guess I'd really want to see whatever new error that can't be resolved before adding some wrapper baggage everywhere we use the color defines.</p>
+<p>they're in hundreds of files and have survived decades.  seems like there's an easier solution to fix whatever issue pops up new given how rare there has been an issue.  could be header order is wrong, could be common.h could undo some damage, could be a simple undef, etc..</p>
+
+
+
+<a name="609111385"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/colors/near/609111385" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/colors.html#609111385">(Jul 09 2026 at 00:26)</a>:</h4>
+<p>All right - I think I got a localized minimal fix in the one place it was giving me trouble, so I'll leave it alone.</p>
+
+
+
+<a name="609111498"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/colors/near/609111498" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/colors.html#609111498">(Jul 09 2026 at 00:29)</a>:</h4>
+<p>I think what was happening was something in the unity included color.h earlier, that set the guard for color.h being included, then the file in question did the undef, and when we would have been counting on color.h include to define it again via stand-alone file include we didn't get it because it had already been included earlier due to unity bundling.  An ifndef check covers it for the one problem case.</p>
+
+
+
+<hr><p>Last updated: Jul 09 2026 at 01:56 UTC</p>
 </html>
