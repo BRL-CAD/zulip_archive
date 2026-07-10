@@ -595,5 +595,46 @@ Example with some bolts evenly sunk into a plate (this was a headless rt render)
 
 
 
-<hr><p>Last updated: Jul 09 2026 at 01:56 UTC</p>
+<a name="609321536"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/609321536" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#609321536">(Jul 09 2026 at 20:48)</a>:</h4>
+<p>Hi <span class="user-mention" data-user-id="102902">@Sean</span> <br>
+the bolt case you're right, subtract was probably the correct fix there since the bolts are embedded in the plate. That kind of decision is one I could leave on the user's side rather than the tool's (something like options offered to the user in a TUI)</p>
+<p>A quick note on how the resolution actually works, since it's real tool usage rather than a heuristic guess. For each overlapping pair, the agent:</p>
+<ol>
+<li>Confirms the overlap : runs <code>gqa</code> to verify it and read its depth, using an explicit grid (bare <code>gqa</code> auto-refines and hangs on coincident faces).</li>
+<li>Finds the minimal move: binary-searches the move distance using <code>gqa</code> as a yes/no oracle, so it lands on the smallest clearing move instead of overshooting the way a bounding-box clearance would.</li>
+<li>Applies it : with <code>otranslate</code> on the subtree.</li>
+<li>Verifies : re-runs <code>gqa</code> to confirm the overlap is gone.</li>
+</ol>
+<p>So it's basically like Kanchan's V&amp;V + an auto overlap resolver <br>
+(now as this is a turn based greedy collision solver it has limitations so it can never solve very nested collisions completely, for something like that we'd have to write our own physics engine which might be overkill for this)</p>
+<p>but this approach does work for small time V&amp;V and glint fixes</p>
+
+
+
+<a name="609323155"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/609323155" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#609323155">(Jul 09 2026 at 20:58)</a>:</h4>
+<p>Apart from this, I am also exploring the other chore that you mentioned of creating showcase renderings with advanced lighting. It's all headless through rt, so it slots into the same MCP pipeline as another tool</p>
+<p>So far I've got a three-point studio light rig working (each light is a light-shader region with bright and shadows set), rendered with rt's full lighting model (-l0, which gives shadows plus reflection and refraction) and converted to PNG with pix-png. Hypersampling (-H) handles anti-aliasing, and I place the lights relative to the camera per view so the same model looks consistently lit from any angle.</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1636x643" data-original-src="/user_uploads/1549/X0W8_FTdAwyXkWewxiturMdR/image.png" src="/user_uploads/thumbnail/1549/X0W8_FTdAwyXkWewxiturMdR/image.png/840x560.webp"></p>
+<p>A bunch of isometric views I've made with curl calls into the TCP socket with claude code (using the claude code agent harness for quick iterations, then solidifying the findings into the formalized MCP tool)</p>
+<p>(also managed to segment the ktank's outer surface and made it transparent for the showcase, all done by the MCP)</p>
+
+
+
+<a name="609323328"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/609323328" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#609323328">(Jul 09 2026 at 20:59)</a>:</h4>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1632x674" data-original-src="/user_uploads/1549/7uD1sGG1oapn8-_SOykI7h_k/image.png" src="/user_uploads/thumbnail/1549/7uD1sGG1oapn8-_SOykI7h_k/image.png/840x560.webp"></p>
+<p>Also some side views</p>
+
+
+
+<a name="609324834"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/609324834" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#609324834">(Jul 09 2026 at 21:08)</a>:</h4>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1655x608" data-original-src="/user_uploads/1549/2Fw7F0-oWLeu5Z1iSbVW2Tiq/image.png" src="/user_uploads/thumbnail/1549/2Fw7F0-oWLeu5Z1iSbVW2Tiq/image.png/840x560.webp"></p>
+<p>An amusing finding: we can actually use claude code now for ops within BRL-CAD after the TCP socket implementation (I could also try building claude skills and shell scripts for it, though its a little more heuristic and probabilistic  than proper MCP tools. The MCP tools however can be interfaced to claude code, tempted to explore that too as we could benchmark some SOTA models like that, though the IPC switch later on won't let us have this, perhaps we could have both IPC and TCP in the library side by side for the different use cases later on)</p>
+
+
+
+<hr><p>Last updated: Jul 10 2026 at 01:55 UTC</p>
 </html>
