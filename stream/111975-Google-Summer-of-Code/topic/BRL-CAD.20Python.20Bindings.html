@@ -2260,5 +2260,88 @@ if (m_bot-&gt;thickness == nullptr).. so what do we do about this? I suggest we 
 
 
 
-<hr><p>Last updated: Jul 12 2026 at 01:46 UTC</p>
+<a name="609698257"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/609698257" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#609698257">(Jul 12 2026 at 15:15)</a>:</h4>
+<p>So I was testing the FacePoint and FaceNormal functions after their changes but I'm running into an error. I was basically trying to call SetNormal() and there's a segfault happening which I believe is in <code>EnsureFaceNormals</code> in src/Database/BagOfTriangles.cpp. If <code>face_normals</code> is initially null, it skips allocating <code>bot.normals</code>. Calling <code>SetNormal</code> then dereferences this null pointer. Right now its looking like: </p>
+<div class="codehilite"><pre><span></span><code>    if (bot.num_faces &gt; 0) {
+        // SCENARIO A: face_normals doesn&#39;t exist yet
+        if (bot.face_normals == nullptr)
+            bot.face_normals = static_cast&lt;int*&gt;(bu_calloc(3 * bot.num_faces, sizeof(int), ...));
+
+        // SCENARIO B: face_normals exists, but is too small
+        else if (bot.num_faces &gt; bot.num_face_normals) {
+            bot.face_normals = static_cast&lt;int*&gt;(bu_realloc(bot.face_normals, ...));
+
+            // THE MISSING LOOP:
+            for (size_t i = bot.num_face_normals; i &lt; bot.num_faces; ++i) {
+                fastf_t defaultNormal[3] = {0};
+                int     newIndex         = AddNormal(defaultNormal, bot);
+                // ... maps face_normals to newIndex ...
+            }
+        }
+        bot.num_face_normals = bot.num_faces;
+    }
+</code></pre></div>
+<p>Can I fix this?</p>
+
+
+
+<a name="609702755"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/609702755" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#609702755">(Jul 12 2026 at 16:25)</a>:</h4>
+<p>You are probably the first one using this <span aria-label="sweat smile" class="emoji emoji-1f605" role="img" title="sweat smile">:sweat_smile:</span><br>
+I have to check this, because it hast other implications too...</p>
+
+
+
+<a name="609703069"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/609703069" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Waleed Ahmed <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#609703069">(Jul 12 2026 at 16:30)</a>:</h4>
+<p>Till then I'll clean the Python Bindings and I'm thinking I should slowly start committing the files in src/Python/ but one question is that do I add the Python Wheel configurations over there too? Is there some way that people can build the Python Module and use it as needed just by building MOOSE normally with all modules builds turned on?</p>
+
+
+
+<a name="609708950"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/609708950" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#609708950">(Jul 12 2026 at 17:48)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/609698257">said</a>:</p>
+<blockquote>
+<p>So I was testing the FacePoint and FaceNormal functions after their changes but I'm running into an error. I was basically trying to call SetNormal() and there's a segfault happening which I believe is in <code>EnsureFaceNormals</code> in src/Database/BagOfTriangles.cpp. If <code>face_normals</code> is initially null, it skips allocating <code>bot.normals</code>. Calling <code>SetNormal</code> then dereferences this null pointer. Right now its looking like: </p>
+<div class="codehilite"><pre><span></span><code>    if (bot.num_faces &gt; 0) {
+        // SCENARIO A: face_normals doesn&#39;t exist yet
+        if (bot.face_normals == nullptr)
+            bot.face_normals = static_cast&lt;int*&gt;(bu_calloc(3 * bot.num_faces, sizeof(int), ...));
+
+        // SCENARIO B: face_normals exists, but is too small
+        else if (bot.num_faces &gt; bot.num_face_normals) {
+            bot.face_normals = static_cast&lt;int*&gt;(bu_realloc(bot.face_normals, ...));
+
+            // THE MISSING LOOP:
+            for (size_t i = bot.num_face_normals; i &lt; bot.num_faces; ++i) {
+                fastf_t defaultNormal[3] = {0};
+                int     newIndex         = AddNormal(defaultNormal, bot);
+                // ... maps face_normals to newIndex ...
+            }
+        }
+        bot.num_face_normals = bot.num_faces;
+    }
+</code></pre></div>
+<p>Can I fix this?</p>
+</blockquote>
+<p>You can do the change. However,</p>
+<ul>
+<li>You need to AddNormal() only once. The result (index of the normal in the array) well be always the same.</li>
+<li>BagOfTriangles::Face::Normal() needs probably a test for <code>bot.face_normals != nullptr</code>.</li>
+</ul>
+
+
+
+<a name="609709252"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/BRL-CAD%20Python%20Bindings/near/609709252" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings.html#609709252">(Jul 12 2026 at 17:51)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="1031145">Waleed Ahmed</span> <a href="#narrow/channel/111975-Google-Summer-of-Code/topic/BRL-CAD.20Python.20Bindings/near/609703069">said</a>:</p>
+<blockquote>
+<p>Till then I'll clean the Python Bindings and I'm thinking I should slowly start committing the files in src/Python/ but one question is that do I add the Python Wheel configurations over there too? Is there some way that people can build the Python Module and use it as needed just by building MOOSE normally with all modules builds turned on?</p>
+</blockquote>
+<p>For the moment, I don't see the Wheel generation as part of the CMake build. But, it won't hurt to add the config for it as starting point.</p>
+
+
+
+<hr><p>Last updated: Jul 13 2026 at 01:49 UTC</p>
 </html>
