@@ -556,5 +556,23 @@
         "id": 611436372,
         "sender_full_name": "Raghav Sharma",
         "timestamp": 1784379396
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/IawMzoAMJphmlE56Z2y4JBys/workingrender.mp4\">workingrender.mp4</a></p>\n<div class=\"message_inline_image message_inline_video\"><a href=\"/user_uploads/1549/IawMzoAMJphmlE56Z2y4JBys/workingrender.mp4\" title=\"workingrender.mp4\"><video preload=\"metadata\" src=\"/user_uploads/1549/IawMzoAMJphmlE56Z2y4JBys/workingrender.mp4\"></video></a></div><p>Good news!<br>\nI got this workflow working with ged_rt (so we don't need opendb for file path, as ged_rt handles that internally)<br>\nThere is a slight difference in the workflow now, with polling being involved for the .pix files coming from rt (as the process for rendering the .pix files now lies within the rt subprocess at the listener end rather than being a subprocess at the MCP)</p>\n<p>pix-png remains to be a subprocess at the MCP end.</p>",
+        "id": 611562728,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1784505588
+    },
+    {
+        "content": "<p>opendb seemed to have some problems when being injected into the event loop. As the commands run through the MGED command table before they hit ged_exec theres some  commands like opendb and closedb which run through some wrappers (<a href=\"https://github.com/BRL-CAD/brlcad/blob/main/src/mged/f_db.c\">https://github.com/BRL-CAD/brlcad/blob/main/src/mged/f_db.c</a> for opendb, which has a callback which is causing MGED to segfault whenever opendb reaches ged_exec directly instead of running through the wrapper)</p>\n<p><img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"849x359\" data-original-src=\"/user_uploads/1549/1woxqNx7MU54ydp75dbovrIS/image.png\" src=\"/user_uploads/thumbnail/1549/1woxqNx7MU54ydp75dbovrIS/image.png/840x560.webp\"></p>\n<p>(this callback here to be precise)</p>\n<p>the ctx passed into _post_opendb_failed seems to arrive with a null argv (only when directly injected by the MCP while MGED is running) which causes a null deref on line 50 which ends up crashing the application</p>\n<p><img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"878x195\" data-original-src=\"/user_uploads/1549/FSS_rGjEPwvKO7_dpMTf8Qhq/image.png\" src=\"/user_uploads/thumbnail/1549/FSS_rGjEPwvKO7_dpMTf8Qhq/image.png/840x560.webp\"></p>\n<p>I've been tracing the issue with the help of AI (I'm still in the process of understanding it, to be honest)</p>\n<p>Should I put effort on exploring  and solving this immediately? Would the MCP require access to file path of the current db quite often for workflows, or can I leave it for later? Most tools do seem to run fine on the socket and none of the other experimental workflows have required this yet</p>",
+        "id": 611564167,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1784506897
+    },
+    {
+        "content": "<p>Also, is there a specific format for the one pager in which I should document the workflows in?  (The render one and the gqa one)</p>\n<p>What all should I include in that?</p>",
+        "id": 611566139,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1784508899
     }
 ]

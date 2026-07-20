@@ -869,5 +869,34 @@ I'm gonna check whats the issue with opendb under gdb and get back on that. Once
 
 
 
-<hr><p>Last updated: Jul 19 2026 at 01:43 UTC</p>
+<a name="611562728"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611562728" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611562728">(Jul 19 2026 at 23:59)</a>:</h4>
+<p><a href="/user_uploads/1549/IawMzoAMJphmlE56Z2y4JBys/workingrender.mp4">workingrender.mp4</a></p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/IawMzoAMJphmlE56Z2y4JBys/workingrender.mp4" title="workingrender.mp4"><video preload="metadata" src="/user_uploads/1549/IawMzoAMJphmlE56Z2y4JBys/workingrender.mp4"></video></a></div><p>Good news!<br>
+I got this workflow working with ged_rt (so we don't need opendb for file path, as ged_rt handles that internally)<br>
+There is a slight difference in the workflow now, with polling being involved for the .pix files coming from rt (as the process for rendering the .pix files now lies within the rt subprocess at the listener end rather than being a subprocess at the MCP)</p>
+<p>pix-png remains to be a subprocess at the MCP end.</p>
+
+
+
+<a name="611564167"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611564167" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611564167">(Jul 20 2026 at 00:21)</a>:</h4>
+<p>opendb seemed to have some problems when being injected into the event loop. As the commands run through the MGED command table before they hit ged_exec theres some  commands like opendb and closedb which run through some wrappers (<a href="https://github.com/BRL-CAD/brlcad/blob/main/src/mged/f_db.c">https://github.com/BRL-CAD/brlcad/blob/main/src/mged/f_db.c</a> for opendb, which has a callback which is causing MGED to segfault whenever opendb reaches ged_exec directly instead of running through the wrapper)</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="849x359" data-original-src="/user_uploads/1549/1woxqNx7MU54ydp75dbovrIS/image.png" src="/user_uploads/thumbnail/1549/1woxqNx7MU54ydp75dbovrIS/image.png/840x560.webp"></p>
+<p>(this callback here to be precise)</p>
+<p>the ctx passed into _post_opendb_failed seems to arrive with a null argv (only when directly injected by the MCP while MGED is running) which causes a null deref on line 50 which ends up crashing the application</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="878x195" data-original-src="/user_uploads/1549/FSS_rGjEPwvKO7_dpMTf8Qhq/image.png" src="/user_uploads/thumbnail/1549/FSS_rGjEPwvKO7_dpMTf8Qhq/image.png/840x560.webp"></p>
+<p>I've been tracing the issue with the help of AI (I'm still in the process of understanding it, to be honest)</p>
+<p>Should I put effort on exploring  and solving this immediately? Would the MCP require access to file path of the current db quite often for workflows, or can I leave it for later? Most tools do seem to run fine on the socket and none of the other experimental workflows have required this yet</p>
+
+
+
+<a name="611566139"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611566139" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611566139">(Jul 20 2026 at 00:54)</a>:</h4>
+<p>Also, is there a specific format for the one pager in which I should document the workflows in?  (The render one and the gqa one)</p>
+<p>What all should I include in that?</p>
+
+
+
+<hr><p>Last updated: Jul 20 2026 at 01:59 UTC</p>
 </html>
