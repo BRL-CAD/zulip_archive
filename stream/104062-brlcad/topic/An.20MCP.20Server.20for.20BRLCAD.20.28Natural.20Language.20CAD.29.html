@@ -907,5 +907,102 @@ I've brightened the ambient lighting to 1</p>
 
 
 
-<hr><p>Last updated: Jul 21 2026 at 01:44 UTC</p>
+<a name="611810943"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611810943" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611810943">(Jul 21 2026 at 05:42)</a>:</h4>
+<p><span class="user-mention" data-user-id="1032821">@Raghav Sharma</span> appreciate the updates and the videos are great.  I'd really like to see the technical details -- what is the skill/workflow/prompt write-up that it's using?  what's the recipe?  it definitely needs adjustment as there are actions performed by users every time when doing production renders that it's not doing that will save incredible amounts of time.  also like to hear more about how exactly it's all working.  you have a skill/workflow description written up somewhere -- is it loaded on startup, hard-coded in the code, dynamically loaded at runtime?  what about the individual piece-parts?</p>
+
+
+
+<a name="611811026"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611811026" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611811026">(Jul 21 2026 at 05:43)</a>:</h4>
+<p>few things -- get rid of pix unless you're using a command that requires it.  you can render directly to png.</p>
+
+
+
+<a name="611811278"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611811278" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611811278">(Jul 21 2026 at 05:45)</a>:</h4>
+<p>and another reason I want to see the workflow -- it should not be rendering full/final rendering until it confirms all the settings.  for example, it should render a tiny stamp first to make sure layout is optimal and lighting is balanced.  then it renders a stamp with A and ao dialed in.  One then should it render the full image with AO, lights, and such enabled.</p>
+
+
+
+<a name="611811782"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611811782" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611811782">(Jul 21 2026 at 05:50)</a>:</h4>
+<p>you could create a collage of images (there's a pix tool for compositing automatically), but I think just the requested highlight image is adequate.  the workflow can be a "make this look really great automatically" and the skill figures out how best to achieve that along with any other constraints or requests the user specifies (e.g., random colors or specific colors, include a background environment, different lighting setups, ground plane, etc)</p>
+
+
+
+<a name="611816103"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611816103" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611816103">(Jul 21 2026 at 06:30)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29/near/611810943">said</a>:</p>
+<blockquote>
+<p>@Raghav Sharma appreciate the updates and the videos are great. I'd really like to see the technical details -- what is the skill/workflow/prompt write-up that it's using? what's the recipe? it definitely needs adjustment as there are actions performed by users every time when doing production renders that it's not doing that will save incredible amounts of time. also like to hear more about how exactly it's all working. you have a skill/workflow description written up somewhere -- is it loaded on startup, hard-coded in the code, dynamically loaded at runtime? what about the individual piece-parts?</p>
+</blockquote>
+<p>theres one system prompt for the agent (which is hardcoded in code, maybe i could modularise it as a loadable skill?) and docstrings defined for each MCP tool</p>
+<p>I am using the fastMCP framework in python that basically lets me define tools under decorators that get imported at the start time of my LLM client. in my current workflow I have 12 tools defined for different purposes and the docstrings for those tools are loaded in every turn along with the system prompt of the agent. Based on my queries the LLM client can pick the tool for execution and then pass the parameters. </p>
+<p><a href="https://github.com/rs0125/BRLCAD_MCP/blob/main/src/brlcad_mcp/client/agent.py">https://github.com/rs0125/BRLCAD_MCP/blob/main/src/brlcad_mcp/client/agent.py</a></p>
+<p>You can have a look at the system prompt here, though the codebase is a bit scrappy right now (a messy folder structure that I am gonna fix along with a slightly outdated readme.md) </p>
+<p>Some tools rely a bit more on the LLM inference (for example the list tools -&gt; get command help -&gt; execute command flow) while some such as the rendering flow has a clear deterministic flow (<a href="http://github.com/rs0125/BRLCAD_MCP/blob/main/src/brlcad_mcp/server/tools/rendering.py">github.com/rs0125/BRLCAD_MCP/blob/main/src/brlcad_mcp/server/tools/rendering.py</a>)</p>
+
+
+
+<a name="611816515"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611816515" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611816515">(Jul 21 2026 at 06:34)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29/near/611811026">said</a>:</p>
+<blockquote>
+<p>few things -- get rid of pix unless you're using a command that requires it.  you can render directly to png.</p>
+</blockquote>
+<p>got it, i'll do that </p>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29/near/611811278">said</a>:</p>
+<blockquote>
+<p>and another reason I want to see the workflow -- it should not be rendering full/final rendering until it confirms all the settings.  for example, it should render a tiny stamp first to make sure layout is optimal and lighting is balanced.  then it renders a stamp with A and ao dialed in.  One then should it render the full image with AO, lights, and such enabled.</p>
+</blockquote>
+<p>Ah sure I can do that. Might have to scaffold the VLM integration a little early then. Would it be better to display the tiny stamp to the user for approval or have a VLM take a call on it?</p>
+
+
+
+<a name="611970987"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611970987" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611970987">(Jul 21 2026 at 19:26)</a>:</h4>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29/near/611811278">said</a>:</p>
+<blockquote>
+<p>for example, it should render a tiny stamp first to make sure layout is optimal and lighting is balanced.  then it renders a stamp with A and ao dialed in.  One then should it render the full image with AO, lights, and such enabled.</p>
+</blockquote>
+<p><a href="https://pastebin.com/tuFS2ENi">https://pastebin.com/tuFS2ENi</a></p>
+<p>Is this a better flow with that into account? (with a preview and manual approval)</p>
+<p>Also should I try improving the LLM client itself with maybe a TUI to preview images (and maybe slash commands with docstring previews) or would that be scope creep?</p>
+
+
+
+<a name="611998641"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/611998641" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#611998641">(Jul 21 2026 at 22:40)</a>:</h4>
+<p>Update: rendering directly to PNG now without pix, also taking media input for the VLM via absolute disk path </p>
+<p>I was just messing around and tried something very cool</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="747x468" data-original-src="/user_uploads/1549/h_iwVRkW3zH-AkAVZ85KMp-u/image.png" src="/user_uploads/thumbnail/1549/h_iwVRkW3zH-AkAVZ85KMp-u/image.png/840x560.webp"></p>
+<p>I found this random lego brick spec with dimensions and thought of seeing if our agent could accurately recreate it just with VLM inference of the spatial context and dimensions </p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1903x698" data-original-src="/user_uploads/1549/HNK60acq3-1iNPpXwFUyBvNH/image.png" src="/user_uploads/thumbnail/1549/HNK60acq3-1iNPpXwFUyBvNH/image.png/840x560.webp"></p>
+<p>and it did end up doing a fairly accurate job on the proportions given to it in the image (though the long brick is rotated the other way, I could possibly explore a method to infer dimensions, then draw, then render it for the VLM via rt, check if the drawing matches and then correct if  it doesn't)</p>
+<p>I could probably go deeper into this workflow after completing the rendering one</p>
+
+
+
+<a name="612000475"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612000475" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612000475">(Jul 21 2026 at 22:59)</a>:</h4>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1200x1600" data-original-src="/user_uploads/1549/gB6j4FvKzXzKbWEqgXqzT-3D/image.png" src="/user_uploads/thumbnail/1549/gB6j4FvKzXzKbWEqgXqzT-3D/image.png/840x560.webp"></p>
+<p>I just decided to experiment with a hand drawn spec of a birthday cake and hand it over to the agent</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1921x1081" data-original-src="/user_uploads/1549/laTmiM_7Jhalg0FlJGAarHnL/image.png" src="/user_uploads/thumbnail/1549/laTmiM_7Jhalg0FlJGAarHnL/image.png/840x560.webp"></p>
+<p>And it came out fairly well <br>
+there was a minor error in the agent's first inference of dimensions. I corrected it in the following prompt (basically 0.5 mm diameter of the candles instead of 2 mm which it misread) and it created the exact same object in CAD</p>
+<p>Could be useful for maybe translating quick sketches into models</p>
+
+
+
+<a name="612012495"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612012495" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612012495">(Jul 22 2026 at 00:37)</a>:</h4>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="735x1039" data-original-src="/user_uploads/1549/S1cdQVm2uEXsQzUjXkK2XH6e/image.png" src="/user_uploads/thumbnail/1549/S1cdQVm2uEXsQzUjXkK2XH6e/image.png/840x560.webp"></p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1921x1081" data-original-src="/user_uploads/1549/jGxP3d3UZ9iOCRoOlDhAcEdp/image.png" src="/user_uploads/thumbnail/1549/jGxP3d3UZ9iOCRoOlDhAcEdp/image.png/840x560.webp"></p>
+<p>Another round of experiment (this time I'm making the agent review 3 stamp views of  the model it has constructed against the original spec sheet)</p>
+<p>this one came out fairly accurate</p>
+
+
+
+<hr><p>Last updated: Jul 22 2026 at 01:43 UTC</p>
 </html>
