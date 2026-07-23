@@ -1004,5 +1004,29 @@ there was a minor error in the agent's first inference of dimensions. I correcte
 
 
 
-<hr><p>Last updated: Jul 22 2026 at 01:43 UTC</p>
+<a name="612253864"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612253864" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612253864">(Jul 23 2026 at 01:10)</a>:</h4>
+<p><a href="/user_uploads/1549/fVFUUbb1mpl7X8FkPOXE9YHf/endtoend.mp4">endtoend.mp4</a></p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/fVFUUbb1mpl7X8FkPOXE9YHf/endtoend.mp4" title="endtoend.mp4"><video preload="metadata" src="/user_uploads/1549/fVFUUbb1mpl7X8FkPOXE9YHf/endtoend.mp4"></video></a></div><p>An end to end modeling + rendering workflow of an L-bracket with a reference image. The full flow involves the model ingesting the reference image and prompt, deriving the dimensions and confirming that with the user. Once user gives a go, it first writes its own temporary spec sheet in json (something inspired from Openscad) and then draws that with MCP commands. </p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="743x981" data-original-src="/user_uploads/1549/Ka9_QlcO3dnzF-T1HJKwe9Ni/image.png" src="/user_uploads/thumbnail/1549/Ka9_QlcO3dnzF-T1HJKwe9Ni/image.png/840x560.webp"></p>
+<p>Once the drawing is done, it checks the model by rendering it from multiple angles and comparing that to the original reference. If there is no change, it stops. Otherwise it makes edits to the spec sheet and then that entire spec sheet is re-rendered (this flow only happens for models which are spec driven, otherwise it uses commands directly).  The spec workflow is easier on the LLM and also allows for backups and transactions at a much simpler level. </p>
+<p>After the model is finalised, the user asks for a render. The agent first generated a small 400x400 stamp for the user to view and confirm lighting, after which the user confirms and the final studio render is completed. </p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="800x800" data-original-src="/user_uploads/1549/D4H6Ow1MpNvdzxzMt6rJ9f5g/image.png" src="/user_uploads/thumbnail/1549/D4H6Ow1MpNvdzxzMt6rJ9f5g/image.png/840x560.webp"></p>
+<p>The modeling part seems to work fairly reliably for small, clearly defined parts like L-brackets, bearing housing, legos and stuff. I got a little too ambitious in the middle and tried to model a MiG-21 directly but it struggled with it (maybe because of its tendencies to go for primitive shapes first) though its quite open to experimentation and tuning in this state</p>
+<p><span class="user-mention silent" data-user-id="102902">Sean</span> <a href="#narrow/channel/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29/near/611811782">said</a>:</p>
+<blockquote>
+<p>you could create a collage of images (there's a pix tool for compositing automatically), but I think just the requested highlight image is adequate.  the workflow can be a "make this look really great automatically" and the skill figures out how best to achieve that along with any other constraints or requests the user specifies (e.g., random colors or specific colors, include a background environment, different lighting setups, ground plane, etc)</p>
+</blockquote>
+<p>I have these left to complete, could possibly extend the current rendering tool with these options directly or incorporate this a different workflow extending the render tool (something like inheritance perhaps?).</p>
+
+
+
+<a name="612254175"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612254175" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612254175">(Jul 23 2026 at 01:15)</a>:</h4>
+<p>Also would there be a clean way to render a wireframe to PNG using some tool? right now we're sending solid renders back to the VLM for reviewing which might hide mistakes in the wireframes and not let the AI observe them properly. Could just be an enhancement for more complex modeling  workflows </p>
+<p>I saw the rtedge renders but those seemed to be outlines without the actual see-through wireframes</p>
+
+
+
+<hr><p>Last updated: Jul 23 2026 at 03:03 UTC</p>
 </html>
