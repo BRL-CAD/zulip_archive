@@ -1517,5 +1517,58 @@ Please let me know if you have any suggestions for improving the UI/UX.</p>
 
 
 
-<hr><p>Last updated: Jul 23 2026 at 03:03 UTC</p>
+<a name="612293265"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612293265" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612293265">(Jul 23 2026 at 07:39)</a>:</h4>
+<p><span class="user-mention" data-user-id="892744">@Kanchan Borole</span> that was more a curiosity -- it doesn't need to resume the progress bar.  I didn't know if you could tell from the demo video.  more important is the remaining two things demonstrated which is the more info window and the mouse binding on an issue and having it update the display.</p>
+
+
+
+<a name="612296303"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612296303" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612296303">(Jul 23 2026 at 07:58)</a>:</h4>
+<p>Thanks for clarifying about progress bar!  I tried working on the visual linking feature and tested on shipping_container.g.  I think it's working, but I'm not completely sure if this is the expected behavior. Here's a demo video:<br>
+<a href="/user_uploads/1549/K_SXDSDgIwk5e4OdTnjhVXJM/Screencast-from-2026-07-23-11-41-33.webm">Screencast from 2026-07-23 11-41-33.webm</a></p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/K_SXDSDgIwk5e4OdTnjhVXJM/Screencast-from-2026-07-23-11-41-33.webm" title="Screencast from 2026-07-23 11-41-33.webm"><video preload="metadata" src="/user_uploads/1549/K_SXDSDgIwk5e4OdTnjhVXJM/Screencast-from-2026-07-23-11-41-33.webm"></video></a></div><p>However, when I tested it with havoc.g, clicking "Visualize Object" highlights the entire Havoc model instead of the specific sub-parts. I'm not sure if that's the expected behavior for Havoc or if I need to refine the logic. Here's the Havoc testing video for reference:<br>
+<a href="/user_uploads/1549/5DhSBYsI-p7ZQ-cftTIDE98d/Screencast-from-2026-07-23-11-39-01.webm">Screencast from 2026-07-23 11-39-01.webm</a><br>
+Please let me know if I'm on the right track or if any changes are needed.</p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/5DhSBYsI-p7ZQ-cftTIDE98d/Screencast-from-2026-07-23-11-39-01.webm" title="Screencast from 2026-07-23 11-39-01.webm"><video preload="metadata" src="/user_uploads/1549/5DhSBYsI-p7ZQ-cftTIDE98d/Screencast-from-2026-07-23-11-39-01.webm"></video></a></div>
+
+
+
+<a name="612363098"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612363098" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612363098">(Jul 23 2026 at 13:51)</a>:</h4>
+<p>That's looking really good -- definitely on the right track.  </p>
+<p>Something isn't right for sure though.  I see no difference between what you're doing in the first vs the second.  Both list out paths that presumably should be what it draws, but clearly showing the subregion for the first and top-level for the second.  </p>
+<p>See if you can figure out what's wrong there -- it should (only) display the region(s) being reported.  Maybe it's drawing the region but also drawing havoc or something.  </p>
+<p>Does it just draw when you click visualize or did you have to rotate/move the view?</p>
+
+
+
+<a name="612397554"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612397554" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612397554">(Jul 23 2026 at 16:13)</a>:</h4>
+<p>Thanks for the feedback! No, it doesn't draw automatically right away—I have to click or slightly rotate the view in the viewport for it to refresh and render the changes.</p>
+<p>I updated the logic to filter out the root/parent containers so it only targets the specific sub-parts instead of the whole model. Here's the updated testing video for havoc.g:<br>
+<a href="/user_uploads/1549/zNoffjFSwSC5qxcWajoiM-5Z/Screencast-from-2026-07-23-21-30-42.webm">Screencast from 2026-07-23 21-30-42.webm</a></p>
+<div class="message_inline_image message_inline_video"><a href="/user_uploads/1549/zNoffjFSwSC5qxcWajoiM-5Z/Screencast-from-2026-07-23-21-30-42.webm" title="Screencast from 2026-07-23 21-30-42.webm"><video preload="metadata" src="/user_uploads/1549/zNoffjFSwSC5qxcWajoiM-5Z/Screencast-from-2026-07-23-21-30-42.webm"></video></a></div><p>Could you please confirm if the logic is correct, or if I'm still missing something?</p>
+
+
+
+<a name="612440740"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612440740" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612440740">(Jul 23 2026 at 20:01)</a>:</h4>
+<p>You need the full paths, you can’t filter them off without manually tracking the full path matrix</p>
+
+
+
+<a name="612441265"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612441265" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612441265">(Jul 23 2026 at 20:04)</a>:</h4>
+<p>What is not explained is why it drew havoc instead of the path</p>
+
+
+
+<a name="612441700"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612441700" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612441700">(Jul 23 2026 at 20:07)</a>:</h4>
+<p>Otherwise your video seems to be doing well.  The test would be drawing some issue where the region has a matrix above its path in some parent comb</p>
+
+
+
+<hr><p>Last updated: Jul 24 2026 at 01:46 UTC</p>
 </html>
