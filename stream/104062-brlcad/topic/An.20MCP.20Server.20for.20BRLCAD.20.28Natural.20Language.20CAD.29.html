@@ -1175,5 +1175,30 @@ I'll iteratively strip this agent into smaller predictable workflows and get bac
 
 
 
-<hr><p>Last updated: Jul 25 2026 at 01:46 UTC</p>
+<a name="612760823"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612760823" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612760823">(Jul 25 2026 at 20:14)</a>:</h4>
+<p>I'm in the process of porting this to a conversation -&gt; planner -&gt; worker -&gt; evaluator -&gt; formatter type workflow</p>
+<p>Building it around dynamically loading components built around yaml files for different workflows inspired by the message above. Will get back on this in detail</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="929x835" data-original-src="/user_uploads/1549/7g-pVIM3fA1j5DNqeQA4SYsw/image.png" src="/user_uploads/thumbnail/1549/7g-pVIM3fA1j5DNqeQA4SYsw/image.png/840x560.webp"></p>
+<p>Also adding explicit logs on every stage so its easier to debug what went wrong at what stage </p>
+<p>Also building some tests for the whole pipeline with eval based on bounding box and nirt  (for things like depth and holes as sometimes those can be harder to rely on a render + VLM on)</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1150x485" data-original-src="/user_uploads/1549/qIFbIpyiO37jVU9kBoB0GUdS/image.png" src="/user_uploads/thumbnail/1549/qIFbIpyiO37jVU9kBoB0GUdS/image.png/840x560.webp"></p>
+
+
+
+<a name="612761628"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612761628" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Raghav Sharma <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612761628">(Jul 25 2026 at 20:29)</a>:</h4>
+<p>would there be any better ways to do this apart from bounding boxes and nirt?<br>
+Thinking of using these in the verification/evaluation stage after the agent builds the first version of the model</p>
+
+
+
+<a name="612771932"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/An%20MCP%20Server%20for%20BRLCAD%20%28Natural%20Language%20CAD%29/near/612771932" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/An.20MCP.20Server.20for.20BRLCAD.20.28Natural.20Language.20CAD.29.html#612771932">(Jul 25 2026 at 23:19)</a>:</h4>
+<p>Well you do have render orthographic checks which is ultimately one of the best ways to confirm but it will not be conclusive (just very good prediction when it’s still wrong). </p>
+<p>For the verify model dimensions phase, that is a prevalidatuin to ensure it’s in the right position, scale, and orientation to a lesser extent.  Bb is great if the orientation is correct.  Nirt and/or spherical sampling to find maximal ortho extents are the best tools for determining the model dimension accuracy.  For first pass we could assume only axis aligned so you don’t need spherical.  So yeah, bb is probably adequate, or maybe even ortho renders directly and doing pixel analysis (not vlm).  If I were scripting the validation that is what I would do.</p>
+
+
+
+<hr><p>Last updated: Jul 26 2026 at 01:49 UTC</p>
 </html>

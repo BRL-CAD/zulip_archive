@@ -730,5 +730,23 @@
         "id": 612634329,
         "sender_full_name": "Raghav Sharma",
         "timestamp": 1784916959
+    },
+    {
+        "content": "<p>I'm in the process of porting this to a conversation -&gt; planner -&gt; worker -&gt; evaluator -&gt; formatter type workflow</p>\n<p>Building it around dynamically loading components built around yaml files for different workflows inspired by the message above. Will get back on this in detail</p>\n<p><img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"929x835\" data-original-src=\"/user_uploads/1549/7g-pVIM3fA1j5DNqeQA4SYsw/image.png\" src=\"/user_uploads/thumbnail/1549/7g-pVIM3fA1j5DNqeQA4SYsw/image.png/840x560.webp\"></p>\n<p>Also adding explicit logs on every stage so its easier to debug what went wrong at what stage </p>\n<p>Also building some tests for the whole pipeline with eval based on bounding box and nirt  (for things like depth and holes as sometimes those can be harder to rely on a render + VLM on)</p>\n<p><img alt=\"image.png\" class=\"inline-image\" data-original-content-type=\"image/png\" data-original-dimensions=\"1150x485\" data-original-src=\"/user_uploads/1549/qIFbIpyiO37jVU9kBoB0GUdS/image.png\" src=\"/user_uploads/thumbnail/1549/qIFbIpyiO37jVU9kBoB0GUdS/image.png/840x560.webp\"></p>",
+        "id": 612760823,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1785010468
+    },
+    {
+        "content": "<p>would there be any better ways to do this apart from bounding boxes and nirt?<br>\nThinking of using these in the verification/evaluation stage after the agent builds the first version of the model</p>",
+        "id": 612761628,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1785011379
+    },
+    {
+        "content": "<p>Well you do have render orthographic checks which is ultimately one of the best ways to confirm but it will not be conclusive (just very good prediction when it’s still wrong). </p>\n<p>For the verify model dimensions phase, that is a prevalidatuin to ensure it’s in the right position, scale, and orientation to a lesser extent.  Bb is great if the orientation is correct.  Nirt and/or spherical sampling to find maximal ortho extents are the best tools for determining the model dimension accuracy.  For first pass we could assume only axis aligned so you don’t need spherical.  So yeah, bb is probably adequate, or maybe even ortho renders directly and doing pixel analysis (not vlm).  If I were scripting the validation that is what I would do.</p>",
+        "id": 612771932,
+        "sender_full_name": "Sean",
+        "timestamp": 1785021566
     }
 ]
