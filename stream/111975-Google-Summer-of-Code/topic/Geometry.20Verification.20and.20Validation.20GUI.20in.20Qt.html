@@ -1570,5 +1570,77 @@ Please let me know if I'm on the right track or if any changes are needed.</p>
 
 
 
-<hr><p>Last updated: Jul 26 2026 at 01:49 UTC</p>
+<a name="612795663"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612795663" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Kanchan Borole <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612795663">(Jul 26 2026 at 05:33)</a>:</h4>
+<p>I think I'm missing something in the visualization logic. Based on what you mentioned earlier,  my understanding was that I should manually track the full path hierarchy. I updated my code to do that, and when I debug it I can see the complete path from the root to the target leaf node. The part I'm confused about is what should actually be drawn. Right now the renderer ends up drawing the whole hierarchy instead of only the target leaf. If I only keep the leaf visible, then it seems like the matrix hierarchy is lost. Am I thinking about this correctly? What's the intended way to preserve the full path while only drawing the target object?</p>
+<p>Also, for the Duplicate ID case, it doesn't seem to provide a full path like the other tests. Should that case be handled differently for visualization?</p>
+
+
+
+<a name="612824647"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612824647" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612824647">(Jul 26 2026 at 14:35)</a>:</h4>
+<p><span class="user-mention" data-user-id="892744">@Kanchan Borole</span> whatever is drawing the whole hierarchy is a bug of some sort.  try this to help understand:  Open up a .g file in mged, e.g., the shipping container model:</p>
+<div class="codehilite"><pre><span></span><code>mged&gt; tree -d2  all
+all/
+    u shipping_container/
+        u container_frame/
+        u container_panels/
+        u container_doors/
+        u container_air.r/R
+    u cargo/
+        u cargo_box1/
+        u cargo_box2/
+        u cargo_box3/
+        u cargo_box4/
+        u cargo_box5/
+        u cargo_box6/
+        u cargo_box7/
+        u cargo_box8/
+mged&gt; tops
+all/                ref/
+</code></pre></div>
+<p>Here's a sequence you can repeat to hopefully help understand path vs object drawing:</p>
+<div class="codehilite"><pre><span></span><code>mged&gt; # this draws the &#39;all&#39; object which is shipping container and the cargo boxes
+mged&gt; draw all
+mged&gt; # this &quot;undraws&quot; the &#39;all&#39; object
+mged&gt; erase all
+mged&gt; # this draws just one of the cargo boxes
+mged&gt; draw /all/cargo/cargo_box3
+mged&gt; # this lists the structure of the &#39;cargo&#39; object
+mged&gt; l cargo
+cargo:  --
+Color 150 255 50
+   u cargo_box1 [0, 0, -1000] scale 1
+   u cargo_box2
+   u cargo_box3
+   u cargo_box4
+   u cargo_box5
+   u cargo_box6
+   u cargo_box7
+   u cargo_box8
+mged&gt; # notice above how cargo_box1 has a matrix but the rest do not
+mged&gt; # notice where it draws cargo_box1 and how it&#39;s different if it&#39;s a path to it or no path
+mged&gt; draw /all/cargo/cargo_box1
+mged&gt; who
+/all/cargo/cargo_box3 /all/cargo/cargo_box1
+mged&gt; erase /all/cargo/cargo_box1
+mged&gt; who
+/all/cargo/cargo_box3
+mged&gt; draw cargo_box1
+mged&gt; who
+/all/cargo/cargo_box3 cargo_box1
+mged&gt; erase cargo_box1
+mged&gt; who
+/all/cargo/cargo_box3
+</code></pre></div>
+
+
+
+<a name="612824734"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/111975-Google%20Summer%20of%20Code/topic/Geometry%20Verification%20and%20Validation%20GUI%20in%20Qt/near/612824734" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/111975-Google-Summer-of-Code/topic/Geometry.20Verification.20and.20Validation.20GUI.20in.20Qt.html#612824734">(Jul 26 2026 at 14:37)</a>:</h4>
+<p>So in your case (with havoc I believe), it SHOULD be just drawing /havoc/path/to/some/OBJECT but for some reason you have a bug somewhere that is drawing "havoc" despite it needing to be "/havoc/path/to/some/OBJECT" where we only see "OBJECT".  Make sense?</p>
+
+
+
+<hr><p>Last updated: Jul 27 2026 at 01:56 UTC</p>
 </html>

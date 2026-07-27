@@ -1144,5 +1144,23 @@
         "id": 612441700,
         "sender_full_name": "Sean",
         "timestamp": 1784837224
+    },
+    {
+        "content": "<p>I think I'm missing something in the visualization logic. Based on what you mentioned earlier,  my understanding was that I should manually track the full path hierarchy. I updated my code to do that, and when I debug it I can see the complete path from the root to the target leaf node. The part I'm confused about is what should actually be drawn. Right now the renderer ends up drawing the whole hierarchy instead of only the target leaf. If I only keep the leaf visible, then it seems like the matrix hierarchy is lost. Am I thinking about this correctly? What's the intended way to preserve the full path while only drawing the target object?</p>\n<p>Also, for the Duplicate ID case, it doesn't seem to provide a full path like the other tests. Should that case be handled differently for visualization?</p>",
+        "id": 612795663,
+        "sender_full_name": "Kanchan Borole",
+        "timestamp": 1785043994
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"892744\">@Kanchan Borole</span> whatever is drawing the whole hierarchy is a bug of some sort.  try this to help understand:  Open up a .g file in mged, e.g., the shipping container model:</p>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; tree -d2  all\nall/\n    u shipping_container/\n        u container_frame/\n        u container_panels/\n        u container_doors/\n        u container_air.r/R\n    u cargo/\n        u cargo_box1/\n        u cargo_box2/\n        u cargo_box3/\n        u cargo_box4/\n        u cargo_box5/\n        u cargo_box6/\n        u cargo_box7/\n        u cargo_box8/\nmged&gt; tops\nall/                ref/\n</code></pre></div>\n<p>Here's a sequence you can repeat to hopefully help understand path vs object drawing:</p>\n<div class=\"codehilite\"><pre><span></span><code>mged&gt; # this draws the &#39;all&#39; object which is shipping container and the cargo boxes\nmged&gt; draw all\nmged&gt; # this &quot;undraws&quot; the &#39;all&#39; object\nmged&gt; erase all\nmged&gt; # this draws just one of the cargo boxes\nmged&gt; draw /all/cargo/cargo_box3\nmged&gt; # this lists the structure of the &#39;cargo&#39; object\nmged&gt; l cargo\ncargo:  --\nColor 150 255 50\n   u cargo_box1 [0, 0, -1000] scale 1\n   u cargo_box2\n   u cargo_box3\n   u cargo_box4\n   u cargo_box5\n   u cargo_box6\n   u cargo_box7\n   u cargo_box8\nmged&gt; # notice above how cargo_box1 has a matrix but the rest do not\nmged&gt; # notice where it draws cargo_box1 and how it&#39;s different if it&#39;s a path to it or no path\nmged&gt; draw /all/cargo/cargo_box1\nmged&gt; who\n/all/cargo/cargo_box3 /all/cargo/cargo_box1\nmged&gt; erase /all/cargo/cargo_box1\nmged&gt; who\n/all/cargo/cargo_box3\nmged&gt; draw cargo_box1\nmged&gt; who\n/all/cargo/cargo_box3 cargo_box1\nmged&gt; erase cargo_box1\nmged&gt; who\n/all/cargo/cargo_box3\n</code></pre></div>",
+        "id": 612824647,
+        "sender_full_name": "Sean",
+        "timestamp": 1785076557
+    },
+    {
+        "content": "<p>So in your case (with havoc I believe), it SHOULD be just drawing /havoc/path/to/some/OBJECT but for some reason you have a bug somewhere that is drawing \"havoc\" despite it needing to be \"/havoc/path/to/some/OBJECT\" where we only see \"OBJECT\".  Make sense?</p>",
+        "id": 612824734,
+        "sender_full_name": "Sean",
+        "timestamp": 1785076658
     }
 ]
