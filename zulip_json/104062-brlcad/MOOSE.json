@@ -562,5 +562,35 @@
         "id": 607257218,
         "sender_full_name": "starseeker",
         "timestamp": 1782776620
+    },
+    {
+        "content": "<p>Hmm, <span class=\"user-mention\" data-user-id=\"112516\">@starseeker</span>, this works for release, but not for debug <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>",
+        "id": 614085132,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1785602015
+    },
+    {
+        "content": "<p>BTW, when starting a MOOSE program, I run into a dead-lock:</p>\n<div class=\"codehilite\"><pre><span></span><code>#0  futex_wait (futex_word=0x7ffff7e24368 &lt;bu_semaphores+8&gt;, expected=2, private=0) at ../sysdeps/nptl/futex-internal.h:146\n#1  __GI___lll_lock_wait (futex=futex@entry=0x7ffff7e24368 &lt;bu_semaphores+8&gt;, private=0) at ./nptl/lowlevellock.c:49\n#2  0x00007fffd46a1f72 in lll_mutex_lock_optimized (mutex=0x7ffff7e24368 &lt;bu_semaphores+8&gt;) at ./nptl/pthread_mutex_lock.c:48\n#3  ___pthread_mutex_lock (mutex=0x7ffff7e24368 &lt;bu_semaphores+8&gt;) at ./nptl/pthread_mutex_lock.c:93\n#4  0x00007fffd5de1b68 in bu_semaphore_acquire (i=0) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/semaphore.c:265\n#5  0x00007fffd5d94d3a in alloc (type=MALLOC, cnt=1, sz=16, str=0x7fffd5fc9d66 &quot;first hook&quot;) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/malloc.c:116\n#6  0x00007fffd5d94eaf in bu_malloc (size=16, str=0x7fffd5fc9d66 &quot;first hook&quot;) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/malloc.c:163\n#7  0x00007fffd5dbf9d6 in bu_hook_add (hlp=0x7fffd6547bb0 &lt;log_hook_list&gt;, func=0x7fffd4f5b36f &lt;NullLogger(void*, void*)&gt;, clientdata=0x0) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/hook.c:55\n#8  0x00007fffd5d93221 in bu_log_add_hook (func=0x7fffd4f5b36f &lt;NullLogger(void*, void*)&gt;, clientdata=0x0) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/log.c:164\n#9  0x00007fffd4f5b5f6 in BrlCadGlobal::BrlCadGlobal() () from /home/rossberg/Devel/BRL-CAD/build/MOOSE.test/Debug/src/libbrlcad.so\n#10 0x00007fffd4f5b551 in __static_initialization_and_destruction_0() () from /home/rossberg/Devel/BRL-CAD/build/MOOSE.test/Debug/src/libbrlcad.so\n#11 0x00007fffd4f5b580 in _GLOBAL__sub_I_globals.cpp () from /home/rossberg/Devel/BRL-CAD/build/MOOSE.test/Debug/src/libbrlcad.so\n#12 0x00007ffff7fccdce in call_init (l=&lt;optimized out&gt;, argc=1, argv=0x7fffffffe2b8, env=0x7fffffffe2c8) at ./elf/dl-init.c:74\n#13 call_init (l=&lt;optimized out&gt;, argc=1, argv=0x7fffffffe2b8, env=0x7fffffffe2c8) at ./elf/dl-init.c:26\n#14 0x00007ffff7fcce9c in _dl_init (main_map=0x7ffff7ffe5f0, argc=1, argv=0x7fffffffe2b8, env=0x7fffffffe2c8) at ./elf/dl-init.c:121\n#15 0x00007ffff7fe42f0 in _dl_start_user () from /lib64/ld-linux-x86-64.so.2\n#16 0x0000000000000001 in ?? ()\n#17 0x00007fffffffe67f in ?? ()\n#18 0x0000000000000000 in ?? ()\n</code></pre></div>\n<p>Any idea?</p>",
+        "id": 614087030,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1785603290
+    },
+    {
+        "content": "<p>Blast it.  Looks like another case where we were depending on shared library initialization order.  On the moose side,  looks like the suggestion is to avoid doing the bu_log_add_hook() from the global constructor - either do it lazily on the first public API call or make an explicit initialize() to call after program startup.  I'll see if I can cook up something on the BRL-CAD side, but that may take longer.</p>",
+        "id": 614089350,
+        "sender_full_name": "starseeker",
+        "timestamp": 1785604323
+    },
+    {
+        "content": "<p>Okay, I'll see if I can change it. BTW, it happens with static linkage only. I case of dynamic linkage, it works smoothly.</p>",
+        "id": 614104953,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1785611170
+    },
+    {
+        "content": "<p>Yeah, that sounds right.  FWIW, GPT 5.6  suggesting making the brlcad setup look like this:</p>\n<div class=\"codehilite\"><pre><span></span><code>option(BRLCAD_STATIC_LINK &quot;Link the BRL-CAD core libraries statically&quot; ON)\n\n  if(BRLCAD_STATIC_LINK)\n      set(BRLCAD_USE_STATIC_LIBS ON)\n  endif()\n\n  find_package(BRLCAD CONFIG REQUIRED COMPONENTS rt wdb static)\n\n  target_link_libraries(brlcad PRIVATE\n      BRLCAD::rt-static\n      BRLCAD::wdb-static\n  )\n\n  if(UNIX AND NOT APPLE)\n      target_link_options(brlcad PRIVATE -Wl,--no-undefined)\n  endif()\n\nChange the BRLCAD_VERSION_FOUND check to BRLCAD_FOUND.\n</code></pre></div>",
+        "id": 614109900,
+        "sender_full_name": "starseeker",
+        "timestamp": 1785616285
     }
 ]

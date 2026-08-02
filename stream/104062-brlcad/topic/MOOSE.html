@@ -763,5 +763,75 @@ Generating done (0.0s)
 
 
 
-<hr><p>Last updated: Aug 01 2026 at 01:52 UTC</p>
+<a name="614085132"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/614085132" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#614085132">(Aug 01 2026 at 16:33)</a>:</h4>
+<p>Hmm, <span class="user-mention" data-user-id="112516">@starseeker</span>, this works for release, but not for debug <span aria-label="thinking" class="emoji emoji-1f914" role="img" title="thinking">:thinking:</span></p>
+
+
+
+<a name="614087030"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/614087030" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#614087030">(Aug 01 2026 at 16:54)</a>:</h4>
+<p>BTW, when starting a MOOSE program, I run into a dead-lock:</p>
+<div class="codehilite"><pre><span></span><code>#0  futex_wait (futex_word=0x7ffff7e24368 &lt;bu_semaphores+8&gt;, expected=2, private=0) at ../sysdeps/nptl/futex-internal.h:146
+#1  __GI___lll_lock_wait (futex=futex@entry=0x7ffff7e24368 &lt;bu_semaphores+8&gt;, private=0) at ./nptl/lowlevellock.c:49
+#2  0x00007fffd46a1f72 in lll_mutex_lock_optimized (mutex=0x7ffff7e24368 &lt;bu_semaphores+8&gt;) at ./nptl/pthread_mutex_lock.c:48
+#3  ___pthread_mutex_lock (mutex=0x7ffff7e24368 &lt;bu_semaphores+8&gt;) at ./nptl/pthread_mutex_lock.c:93
+#4  0x00007fffd5de1b68 in bu_semaphore_acquire (i=0) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/semaphore.c:265
+#5  0x00007fffd5d94d3a in alloc (type=MALLOC, cnt=1, sz=16, str=0x7fffd5fc9d66 &quot;first hook&quot;) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/malloc.c:116
+#6  0x00007fffd5d94eaf in bu_malloc (size=16, str=0x7fffd5fc9d66 &quot;first hook&quot;) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/malloc.c:163
+#7  0x00007fffd5dbf9d6 in bu_hook_add (hlp=0x7fffd6547bb0 &lt;log_hook_list&gt;, func=0x7fffd4f5b36f &lt;NullLogger(void*, void*)&gt;, clientdata=0x0) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/hook.c:55
+#8  0x00007fffd5d93221 in bu_log_add_hook (func=0x7fffd4f5b36f &lt;NullLogger(void*, void*)&gt;, clientdata=0x0) at /home/rossberg/Devel/BRL-CAD/brlcad.test/src/libbu/log.c:164
+#9  0x00007fffd4f5b5f6 in BrlCadGlobal::BrlCadGlobal() () from /home/rossberg/Devel/BRL-CAD/build/MOOSE.test/Debug/src/libbrlcad.so
+#10 0x00007fffd4f5b551 in __static_initialization_and_destruction_0() () from /home/rossberg/Devel/BRL-CAD/build/MOOSE.test/Debug/src/libbrlcad.so
+#11 0x00007fffd4f5b580 in _GLOBAL__sub_I_globals.cpp () from /home/rossberg/Devel/BRL-CAD/build/MOOSE.test/Debug/src/libbrlcad.so
+#12 0x00007ffff7fccdce in call_init (l=&lt;optimized out&gt;, argc=1, argv=0x7fffffffe2b8, env=0x7fffffffe2c8) at ./elf/dl-init.c:74
+#13 call_init (l=&lt;optimized out&gt;, argc=1, argv=0x7fffffffe2b8, env=0x7fffffffe2c8) at ./elf/dl-init.c:26
+#14 0x00007ffff7fcce9c in _dl_init (main_map=0x7ffff7ffe5f0, argc=1, argv=0x7fffffffe2b8, env=0x7fffffffe2c8) at ./elf/dl-init.c:121
+#15 0x00007ffff7fe42f0 in _dl_start_user () from /lib64/ld-linux-x86-64.so.2
+#16 0x0000000000000001 in ?? ()
+#17 0x00007fffffffe67f in ?? ()
+#18 0x0000000000000000 in ?? ()
+</code></pre></div>
+<p>Any idea?</p>
+
+
+
+<a name="614089350"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/614089350" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#614089350">(Aug 01 2026 at 17:12)</a>:</h4>
+<p>Blast it.  Looks like another case where we were depending on shared library initialization order.  On the moose side,  looks like the suggestion is to avoid doing the bu_log_add_hook() from the global constructor - either do it lazily on the first public API call or make an explicit initialize() to call after program startup.  I'll see if I can cook up something on the BRL-CAD side, but that may take longer.</p>
+
+
+
+<a name="614104953"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/614104953" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Daniel Rossberg <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#614104953">(Aug 01 2026 at 19:06)</a>:</h4>
+<p>Okay, I'll see if I can change it. BTW, it happens with static linkage only. I case of dynamic linkage, it works smoothly.</p>
+
+
+
+<a name="614109900"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/MOOSE/near/614109900" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/MOOSE.html#614109900">(Aug 01 2026 at 20:31)</a>:</h4>
+<p>Yeah, that sounds right.  FWIW, GPT 5.6  suggesting making the brlcad setup look like this:</p>
+<div class="codehilite"><pre><span></span><code>option(BRLCAD_STATIC_LINK &quot;Link the BRL-CAD core libraries statically&quot; ON)
+
+  if(BRLCAD_STATIC_LINK)
+      set(BRLCAD_USE_STATIC_LIBS ON)
+  endif()
+
+  find_package(BRLCAD CONFIG REQUIRED COMPONENTS rt wdb static)
+
+  target_link_libraries(brlcad PRIVATE
+      BRLCAD::rt-static
+      BRLCAD::wdb-static
+  )
+
+  if(UNIX AND NOT APPLE)
+      target_link_options(brlcad PRIVATE -Wl,--no-undefined)
+  endif()
+
+Change the BRLCAD_VERSION_FOUND check to BRLCAD_FOUND.
+</code></pre></div>
+
+
+
+<hr><p>Last updated: Aug 02 2026 at 01:48 UTC</p>
 </html>
