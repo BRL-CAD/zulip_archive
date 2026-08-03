@@ -592,5 +592,23 @@
         "id": 614109900,
         "sender_full_name": "starseeker",
         "timestamp": 1785616285
+    },
+    {
+        "content": "<p>This doesn't make as much sense as it should be <span aria-label=\"thinking\" class=\"emoji emoji-1f914\" role=\"img\" title=\"thinking\">:thinking:</span></p>\n<p>However, I was wondering why I don't get a huge bunch of error messages when linking with BRLCAD::rt-static only. I found out that this is caused by the INTERFACE_LINK_LIBRARIES target property of BRLCAD::rt-static. Unfortunately, some of these dependencies seem not to be optimal:</p>\n<ul>\n<li>OPENNURBS::OPENNURBS should be OPENNURBS::OPENNURBS_STATIC, pointing to libopennurbsStatic.a</li>\n<li>REGEX::REGEX should be REGEX::REGEX_STATIC, pointing to libregex_brl.a</li>\n<li>manifold wasn't a dependency for librt (but for libged), has this changed?</li>\n</ul>",
+        "id": 614165299,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1785676610
+    },
+    {
+        "content": "<p>My current dependency list, which was derived from the former one, is so far:</p>\n<div class=\"codehilite\"><pre><span></span><code>    TARGET_LINK_LIBRARIES(brlcad\n        ${COMMANDSTRING_LIBRARIES}\n        BRLCAD::rt-static\n        BRLCAD::nmg-static\n        BRLCAD::wdb-static\n        BRLCAD::bn-static\n        BRLCAD::brep-static\n        BRLCAD::bv-static\n        BRLCAD::bg-static\n        BRLCAD::bu-static\n        #BRLCAD::gdiam-static\n        #LMDB::LMDB_STATIC\n        mmesh::mmesh-static\n        #OPENNURBS::OPENNURBS_STATIC\n        #BRLCAD::poly2tri-static\n        #BRLCAD::vds-static\n        #REGEX::REGEX_STATIC\n        ZLIB::ZLIB_STATIC\n        ${MSVC_LIBRARIES}\n        ${LUA_LIBRARIES}\n        ${CMAKE_DL_LIBS}\n        Threads::Threads\n        #UUID_LIBRARIES\n    )\n</code></pre></div>\n<ul>\n<li>gdiam, poly2tri, vds, and uuid seem to be no dependencies anymore?</li>\n<li>LMDB, OPENNURBS, and REGEX have .a-files but no static CMake variables</li>\n</ul>",
+        "id": 614166355,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1785676961
+    },
+    {
+        "content": "<p>I put my attempt in the <a href=\"https://github.com/BRL-CAD/MOOSE/tree/brlcad-config-test\">brlcad-config-test</a> branch.</p>",
+        "id": 614166804,
+        "sender_full_name": "Daniel Rossberg",
+        "timestamp": 1785677107
     }
 ]
