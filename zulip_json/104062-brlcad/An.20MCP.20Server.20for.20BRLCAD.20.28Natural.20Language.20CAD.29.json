@@ -754,5 +754,35 @@
         "id": 614105095,
         "sender_full_name": "Raghav Sharma",
         "timestamp": 1785611357
+    },
+    {
+        "content": "<p><a href=\"/user_uploads/1549/kDkZvBnkhQd3Eq4N9ko2Xov2/vokoscreenNG-2026-08-03_21-58-08_2.5x.mp4\">vokoscreenNG-2026-08-03_21-58-08_2.5x.mp4</a><br>\nedit: had uploaded the wrong video earier, uploaded the correct one now</p>\n<div class=\"message_inline_image message_inline_video\"><a href=\"/user_uploads/1549/kDkZvBnkhQd3Eq4N9ko2Xov2/vokoscreenNG-2026-08-03_21-58-08_2.5x.mp4\" title=\"vokoscreenNG-2026-08-03_21-58-08_2.5x.mp4\"><video preload=\"metadata\" src=\"/user_uploads/1549/kDkZvBnkhQd3Eq4N9ko2Xov2/vokoscreenNG-2026-08-03_21-58-08_2.5x.mp4\"></video></a></div><p>A video showcase of the new V2 workflow in 2.5x speed (theres a bit of model latency, will be optimising that next)</p>\n<p>the basic flow is a small graph chain that goes:   intake -&gt; planner -&gt; authorize -&gt; worker -&gt; verifier -&gt; visual check  -&gt; formatter</p>\n<p>Only the worker hold the tools, rest work within their thin definitions which are also loaded dynamically (defined here: <a href=\"https://github.com/rs0125/BRLCAD_MCP/tree/main/client_v2/prompts/definitions\">https://github.com/rs0125/BRLCAD_MCP/tree/main/client_v2/prompts/definitions</a>) </p>\n<p>The skills are now defined in yaml files (like the one I sent earlier). The planner picks which skills a request needs and only those get expanded to full definition in the worker's prompt, the rest stay one-line summaries.</p>\n<p>Theres dedicated logging at every stage now with raw information (its a heavy dump on its own but it has everything from time, messages in, reply out, function params etc). sending a pastebin link of a session in a minute</p>\n<p>for the final checks I'm using nirt, bounding box and orthographic images as of now</p>",
+        "id": 614359938,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1785775134
+    },
+    {
+        "content": "<p>right now the planner is just a prompt assembler (chooses a skill and drafts up a plan for the worker agent and also handles halts and rewinds the flow in cases of messy executions but does not execute anything or define anything to be executed deterministically), but I'm thinking of making it more  robust like sort of an orchestrator that can plan deterministic actions to be executed by the worker (and maybe some additional checks on that)</p>\n<p>also I'm also going to add the ortho wireframe fetching as well to improve the visual check a little more</p>\n<p>The thing is a little rough around the edges right now but the error traceability and reliability has improved certainly compared to the large single system prompt</p>",
+        "id": 614360700,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1785775385
+    },
+    {
+        "content": "<p><a href=\"https://pastebin.com/NgxRkDM5\">https://pastebin.com/NgxRkDM5</a></p>\n<p>The log of the flow from the video</p>",
+        "id": 614361368,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1785775613
+    },
+    {
+        "content": "<p><span class=\"user-mention\" data-user-id=\"1032821\">@Raghav Sharma</span> now that's awesome.  was that the same drawing from earlier as an input image?  </p>\n<p>what are the 20 tools and 13 sklils ?  I take it you have it doing renders and feeding that to vlam for validation?  I noticed you have it rendering flat/simple for starters which is great.  There's probably some really great tricks it could use like flat shading, setting a background color, using draw -m1, opencv instead of vlam for some things, and such that would likely double the success rate.  </p>\n<p>Speaking of which, I think you've narrowed down on a solid workflow objective so it's time for some metrics.  I suggest a test corpus of 10-20 varied sketches, some that should be guaranteed to fail, some hand-drawn, some rendered, etc.  Having a pipeline with metrics even if it's at low numbers like &lt;50% success will be a great finish-line for gsoc that we can then build on and refine with awareness how it's progressing.  Thoughts?</p>",
+        "id": 614425565,
+        "sender_full_name": "Sean",
+        "timestamp": 1785800964
+    },
+    {
+        "content": "<p>another side benefit of a test set would be to evaluate different llm settings to see how effective we are at different effort levels and model types, you know gemini-3.6-flash vs gpt-5.6-sol vs some olama local model, etc.</p>",
+        "id": 614425816,
+        "sender_full_name": "Sean",
+        "timestamp": 1785801191
     }
 ]
