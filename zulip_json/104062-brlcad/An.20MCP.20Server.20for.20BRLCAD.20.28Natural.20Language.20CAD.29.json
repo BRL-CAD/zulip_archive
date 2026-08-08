@@ -808,5 +808,17 @@
         "id": 614458509,
         "sender_full_name": "Raghav Sharma",
         "timestamp": 1785820110
+    },
+    {
+        "content": "<p>Update on the eval harness:</p>\n<p>I was just building it and realised the gap that we're expecting human approval right now after the first run of the planner (where it returns the dimensional specs and methodology over to the user and asks for any help in cases of ambiguity) </p>\n<p>There are cases in technical drawings where dimensions are genuinely ambigious. An example would be the L bracket. the drawing did specify a 50x50x50 mm dimension but didnt specify if its taking into account inner radius or outer radius. multiple such cases arise with drawings that the agent is explicitly prompted to ask in case it has to assume some dimension.</p>\n<p>so for those cases, I decided that we could actually benchmark this in 3 ways, each giving its own insights. </p>\n<p>1 would be to give it an auto-select/assumption thinking. Basically telling the agent to select whatever feels right. I'm making the agent throw an \"assumption:\" log everytime it assumes something we can check that too. Can give us insights on the planner with the least amount of human intervention.</p>\n<p>second would be to give a slightly more descriptive prompt along with the image to negate the ambiguity (but easing it slightly on the VLM inference itself). So something like \"assume that the 50x50x50 are all outer radii\" or \"assume the units are mm, and ignore edge radii on the bracket\" </p>\n<p>third would be to give a very detailed spec to it directly derieved from the exact specifications from the image we can pass to the agent via yaml files (that basically have all the dimensions and construction methodology defined)</p>\n<p>So these 3 scenarios could be run in one eval cycle of ~60 runs (circa 3x20 images)</p>\n<p>We could also try a pass^k or pass@k type metric. I've been going through some papers that evaluate performances of agent loops like these and they do these as standard. Perhaps for our usecase we could do 10 runs at each image x 3 and get pass^k for consistency</p>\n<p>A short reference for the methods: </p>\n<p><a href=\"https://www.philschmid.de/agents-pass-at-k-pass-power-k\">https://www.philschmid.de/agents-pass-at-k-pass-power-k</a></p>",
+        "id": 615281937,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1786134200
+    },
+    {
+        "content": "<p>this could be an awfully slow evaluation but could give pretty nice insights over time <br>\n<span class=\"user-mention\" data-user-id=\"102902\">@Sean</span> Could there be any better ways of doing this?</p>",
+        "id": 615282401,
+        "sender_full_name": "Raghav Sharma",
+        "timestamp": 1786134408
     }
 ]
