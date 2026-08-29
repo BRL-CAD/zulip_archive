@@ -256,5 +256,27 @@ Fun with TOR - the previously impossible Y-only scaling operation, both wirefram
 
 
 
-<hr><p>Last updated: Aug 28 2026 at 07:52 UTC</p>
+<a name="619735543"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Example%20Renderings/near/619735543" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Example.20Renderings.html#619735543">(Aug 28 2026 at 08:16)</a>:</h4>
+<p>oh, of course it's possible.  always have known that, issue is really just that there's no clean way to do it without breaking format.  it needs the affine matrix at shot time, but it's only available at export time.  only hack is to hang it off an attribute during export, which is exactly what it did there.  that was one of the motivations for binary attributes a few years back, but still considered it an egregious hack and entirely backwards incompatible.</p>
+<p>looking at the change, rather fugly that it introduced a whole new callback to lookup and apply the affine transformation AND manually injected code all over the place to go through it.  that seems entirely unnecessary to me.  just needed a static helper for prep/tess/plot.  </p>
+<p>interesting to consider the implications in more detail.  with some cleanup and changes, might be something there.</p>
+
+
+
+<a name="619742191"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Example%20Renderings/near/619742191" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> Sean <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Example.20Renderings.html#619742191">(Aug 28 2026 at 08:51)</a>:</h4>
+<p>dynamic secondary render cell plot overlay:</p>
+<p><img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1200x900" data-original-src="/user_uploads/1549/NVmANxW1sGBkhnx1W9ZFXkN9/image.png" src="/user_uploads/thumbnail/1549/NVmANxW1sGBkhnx1W9ZFXkN9/image.png/840x560.webp"><br>
+<img alt="image.png" class="inline-image" data-original-content-type="image/png" data-original-dimensions="1200x900" data-original-src="/user_uploads/1549/qR8Uo3-nFfX45DYEJ0Dl9xvQ/image.png" src="/user_uploads/thumbnail/1549/qR8Uo3-nFfX45DYEJ0Dl9xvQ/image.png/840x560.webp"></p>
+
+
+
+<a name="619923833"></a>
+<h4><a href="https://brlcad.zulipchat.com#narrow/stream/104062-brlcad/topic/Example%20Renderings/near/619923833" class="zl"><img src="https://brl-cad.github.io/zulip_archive/assets/img/zulip.svg" alt="view this post on Zulip" style="width:20px;height:20px;"></a> starseeker <a href="https://brl-cad.github.io/zulip_archive/stream/104062-brlcad/topic/Example.20Renderings.html#619923833">(Aug 29 2026 at 01:59)</a>:</h4>
+<p>How is it backwards incompatible?  Not arguing for merging it in, but in the absence of code to process the attribute it'll handle the shapes in question the same way it currently does, correct?  Just ignore the attribute and raytrace as it would now - no wronger than it's ever been...  The new rendering code would just be more correct than older code.</p>
+
+
+
+<hr><p>Last updated: Aug 29 2026 at 04:46 UTC</p>
 </html>
